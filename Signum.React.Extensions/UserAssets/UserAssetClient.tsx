@@ -33,7 +33,7 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       return undefined;
 
-    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), () => {
+    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), () => {
       API.exportAsset(ctx.lites);
     }, {
         iconColor: "#FCAE25",
@@ -117,7 +117,7 @@ export module Converter {
 
     function toPinnedFilterEmbedded(e: PinnedFilter): PinnedQueryFilterEmbedded {
       return PinnedQueryFilterEmbedded.New({
-        label: e.label,
+        label: typeof e.label == "function" ? e.label() : e.label,
         column: e.column,
         row: e.row,
         active: e.active,

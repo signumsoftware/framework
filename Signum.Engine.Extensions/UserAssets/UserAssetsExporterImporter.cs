@@ -316,6 +316,11 @@ namespace Signum.Engine.UserAssets
             }
         }
 
+        public static void ImportAll(byte[] document)
+        {
+            Import(document, Preview(document));
+        }
+
         public static void Import(byte[] document, UserAssetPreviewModel preview)
         {
             using (Transaction tr = new Transaction())

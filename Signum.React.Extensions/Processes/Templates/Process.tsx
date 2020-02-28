@@ -35,9 +35,9 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
           <ValueLine ctx={ctx4.subCtx(f => f.state)} readOnly={true} />
           <EntityLine ctx={ctx4.subCtx(f => f.algorithm)} />
           <EntityLine ctx={ctx4.subCtx(f => f.user)} />
-          <EntityLine ctx={ctx4.subCtx(f => f.data)} readOnly={true} />
           <ValueLine ctx={ctx4.subCtx(f => f.machineName)} />
           <ValueLine ctx={ctx4.subCtx(f => f.applicationName)} />
+          <EntityLine ctx={ctx4.subCtx(f => f.data)} readOnly={true} />
         </div>
         <div className="col-sm-6">
           <ValueLine ctx={ctx5.subCtx(f => f.creationDate)} />
@@ -58,6 +58,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
       <ProcessProgressBar p={ctx.value}/>
 
       <ValueSearchControlLine ctx={ctx3}
+        badgeColor="danger"
         ref={vscl}
         findOptions={{
           queryName: ProcessExceptionLineEntity,

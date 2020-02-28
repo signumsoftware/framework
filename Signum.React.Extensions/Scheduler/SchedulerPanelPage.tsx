@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import * as Operations from '@framework/Operations'
-import { getTypeInfos } from '@framework/Reflection'
+import { tryGetTypeInfos, getTypeInfos } from '@framework/Reflection'
 import { API, SchedulerState, SchedulerItemState, SchedulerRunningTaskState } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Entities.Scheduler'
 import { Lite } from "@framework/Signum.Entities";

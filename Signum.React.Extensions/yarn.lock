@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/codemirror@0.0.80":
-  version "0.0.80"
-  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.80.tgz#c047bb30462582615c3d51e5be6155315f764427"
-  integrity sha512-oTi/s9PkWo3+/L9UrRpqngc4i6fRFMp3YQS0nv3Wy5vjl9n6GsqI9oNF6rjl/7J16Ipe67F9eatwRMTSB/Bo0w==
+"@types/codemirror@0.0.86":
+  version "0.0.86"
+  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.86.tgz#f6972d60e57024f7d787839a72cec8bdcb98edbb"
+  integrity sha512-BKUn2ojSwB0VMUzIOglC3Ka1+AjZDciak4h0CX1rpnzZ/ceawx0X0RyLMDLVfoeaDABmnYp9SfKY3go0RJKBvQ==
   dependencies:
     "@types/tern" "*"
 
@@ -22,10 +22,10 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.40.tgz#0e6cb9b9bbd098031fa19e4b4e8131bc70e5de13"
   integrity sha512-p3KZgMto/JyxosKGmnLDJ/dG5wf+qTRMUjHJcspC2oQKa4jP7mz+tv0ND56lLBu3ojHlhzY33Ol+khLyNmilkA==
 
-"@types/googlemaps@3.38.1":
-  version "3.38.1"
-  resolved "https://registry.yarnpkg.com/@types/googlemaps/-/googlemaps-3.38.1.tgz#34f0be176f899bab5563103d7103fa7c3a72c02c"
-  integrity sha512-6rVIwaJOKXAMzg+Cz22+fJkgQd8IMK8q9DBSL3Wg9GAffGCy71MdTEf+8T9bIa4mvC0DClEsyzwrOfuf9rM0Zg==
+"@types/googlemaps@3.39.3":
+  version "3.39.3"
+  resolved "https://registry.yarnpkg.com/@types/googlemaps/-/googlemaps-3.39.3.tgz#8664e424f335802c8aa46a94676666b0a0f31d97"
+  integrity sha512-L8O9HAVFZj0TuiS8h5ORthiMsrrhjxTC8XUusp5k47oXCst4VTm+qWKvrAvmYMybZVokbp4Udco1mNwJrTNZPQ==
 
 "@types/prop-types@*":
   version "15.7.3"
@@ -48,10 +48,10 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/react@16.9.15":
-  version "16.9.15"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.15.tgz#aeabb7a50f96c9e31a16079ada20ede9ed602977"
-  integrity sha512-WsmM1b6xQn1tG3X2Hx4F3bZwc2E82pJXt5OPs2YJgg71IzvUoKOSSSYOvLXYCg1ttipM+UuA4Lj3sfvqjVxyZw==
+"@types/react@16.9.23":
+  version "16.9.23"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.23.tgz#1a66c6d468ba11a8943ad958a8cb3e737568271c"
+  integrity sha512-SsGVT4E7L2wLN3tPYLiF20hmZTPGuzaayVunfgXzUn1x4uHVsKH6QDJQ/TdpHqwsTLd4CwrmQ2vOgxN7gE24gw==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"

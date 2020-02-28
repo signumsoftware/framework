@@ -51,9 +51,10 @@ namespace Signum.React.Map
                               key = e.ToString(),
                               niceName = e.NiceToString(),
                               isSpecial = t == typeof(DefaultState),
-                              color = Engine.Chart.ChartColorLogic.ColorFor(EnumEntity.FromEnumUntyped(e)).TryToHtml(),
+                              color = Engine.Chart.ChartColorLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
                               token = tokens.GetOrThrow(e.GetType()),
                           }).ToList(),
+
                 operations = (from o in operations
                               select new MapOperation
                               {

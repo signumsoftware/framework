@@ -235,6 +235,9 @@ namespace Signum.Entities.Chart
         ChooseABasePalette,
         DeletePalette,
         Preview,
+        TypeNotFound,
+        [Description("Type {0} is not in the database")]
+        Type0NotFoundInTheDatabase
     }
 
 }

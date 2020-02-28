@@ -5,7 +5,7 @@ import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthClient'
-import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
+import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthEmailMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
@@ -28,7 +28,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 

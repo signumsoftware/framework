@@ -40,7 +40,8 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
         let content = ((e.target as any).result as string).after("base64,");
         let fileName = f.name;
 
-        setFile({ content, fileName });
+        var file: API.FileUpload = { content, fileName };
+        setFile(file);
         setFileVer(fileVer + 1);
 
         API.importPreview(file!).then(model => { setModel(model); setSuccess(false); }).done();
@@ -51,7 +52,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
     return (
       <div>
         <div className="btn-toolbar">
-          <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
+          <input key={fileVer} type="file" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
         </div>
         <small>{UserAssetMessage.SelectTheXmlFileWithTheUserAssetsThatYouWantToImport.niceToString()}</small>
       </div>

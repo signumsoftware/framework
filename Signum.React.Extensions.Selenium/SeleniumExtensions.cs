@@ -152,17 +152,19 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
+        //[DebuggerHidden]
         public static bool IsStale(this IWebElement element)
         {
-            try
-            {
-                // Calling any method forces a staleness check
-                return element == null || !element.Enabled;
-            }
-            catch (StaleElementReferenceException)
-            {
-                return true;
-            }
+            //try
+            //{
+            //    // Calling any method forces a staleness check
+            //    return element == null || !element.Enabled;
+            //}
+            //catch (StaleElementReferenceException)
+            //{
+            //    return true;
+            //}
+            return SeleniumExtras.WaitHelpers.ExpectedConditions.StalenessOf(element)(element.GetDriver());
         }
 
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)

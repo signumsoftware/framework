@@ -44,7 +44,7 @@ export default function TreePage(p: TreePageProps) {
       <TreeViewer ref={treeViewRef}
         initialShowFilters={true}
         typeName={ti.name}
-        allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
+        allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
         key={ti.name}
         onSearch={() => changeUrl()} />

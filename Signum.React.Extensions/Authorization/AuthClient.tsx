@@ -10,7 +10,7 @@ import * as Finder from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
-import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute } from '@framework/Reflection'
+import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
@@ -48,6 +48,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
   options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccess")} />);
   options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
   options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
 
@@ -106,14 +107,12 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
+    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
       e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red" }));
   }
 
   if (options.operations) {
-    Operations.isOperationInfoAllowedEvent.push(isOperationInfoAllowed);
-
     Navigator.addSettings(new EntitySettings(OperationRulePack, e => import('./Admin/OperationRulePackControl')));
   }
 
@@ -127,7 +126,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
+    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
       e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange" }));
   }
@@ -137,10 +136,6 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     key: "DownloadAuthRules",
     onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
   });
-
-  PropertyRoute.prototype.canRead = function () {
-    return this.member != null && this.member.propertyAllowed != "None"
-  }
 
   PropertyRoute.prototype.canModify = function () {
     return this.member != null && this.member.propertyAllowed == "Write"
@@ -153,16 +148,6 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
   return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
-
-export function isOperationInfoAllowed(oi: OperationInfo) {
-  return oi.operationAllowed;
-}
-
-export function isOperationAllowed(type: PseudoType, operation: OperationSymbol) {
-  var ti = getTypeInfo(type);
-  return isOperationInfoAllowed(ti.operations![operation.key]);
-}
-
 export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
@@ -171,7 +156,7 @@ export function taskAuthorizeProperties(lineBase: LineBaseController<LineBasePro
 
     switch (member!.propertyAllowed) {
       case "None":
-        state.visible = false;
+        //state.visible = false;  //None is just not retuning the member info, LineBaseController.isHidden
         break;
       case "Read":
         state.ctx.readOnly = true;
@@ -182,11 +167,14 @@ export function taskAuthorizeProperties(lineBase: LineBaseController<LineBasePro
   }
 }
 
-export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
-  const ti = getTypeInfo(typeName);
+export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions) {
 
-  if (ti == undefined)
+  if (options?.isEmbedded)
     return false;
+
+  const ti = tryGetTypeInfo(typeName);
+  if (ti == undefined)
+    return true;
 
   if (entityPack?.typeAllowed)
     return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
@@ -194,11 +182,15 @@ export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPac
   return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
 }
 
-export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
-  const ti = getTypeInfo(typeName);
+export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions) {
+
+  if (options?.isEmbedded)
+    return true;
+
+  const ti = tryGetTypeInfo(typeName);
 
   if (ti == undefined)
-    return true;
+    return false;
 
   if (entityPack?.typeAllowed)
     return entityPack.typeAllowed != "None";
@@ -206,10 +198,14 @@ export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPac
   return ti.maxTypeAllowed != "None";
 }
 
-export function navigatorIsCreable(typeName: PseudoType) {
-  const ti = getTypeInfo(typeName);
+export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsCreableOptions) {
 
-  return ti == undefined || ti.maxTypeAllowed == "Write";
+  if (options?.isEmbedded)
+    return true;
+
+  const ti = tryGetTypeInfo(typeName);
+
+  return ti != null && ti.maxTypeAllowed == "Write";
 }
 
 export function currentUser(): UserEntity {
@@ -413,15 +409,15 @@ export namespace Options {
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   var key = (permission as PermissionSymbol).key ?? permission as string;
-  const type = getTypeInfo(key.before("."));
+  const type = tryGetTypeInfo(key.before("."));
   if (!type)
-    throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+    return false;
 
   const member = type.members[key.after(".")];
   if (!member)
-    throw new Error(`Member '${key.after(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+    return false;
 
-  return member.permissionAllowed;
+  return true;
 }
 
 export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
@@ -567,15 +563,9 @@ declare module '@framework/Reflection' {
   export interface MemberInfo {
     propertyAllowed: PropertyAllowed;
     queryAllowed: QueryAllowed;
-    permissionAllowed: boolean;
-  }
-
-  export interface OperationInfo {
-    operationAllowed: boolean;
   }
 
   export interface PropertyRoute {
-    canRead(): boolean;
     canModify(): boolean;
   }
 }

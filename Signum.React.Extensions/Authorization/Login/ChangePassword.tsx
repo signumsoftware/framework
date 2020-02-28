@@ -3,14 +3,13 @@ import { classes, Dic } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { AuthMessage } from '../Signum.Entities.Authorization'
+import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
 export default function ChangePassword() {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
-  const [success, setSuccess] = React.useState(false);
 
   const oldPassword = React.useRef<HTMLInputElement>(null);
   const newPassword = React.useRef<HTMLInputElement>(null);
@@ -35,7 +34,7 @@ export default function ChangePassword() {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           Navigator.resetUI();
-          setSuccess(true);
+          Navigator.history.push(Navigator.toAbsoluteUrl("~/auth/changePasswordSuccess"));
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
@@ -63,7 +62,7 @@ export default function ChangePassword() {
   function validateOldPassword(): ModelState {
 
     return {
-      ["oldPassword"]: oldPassword.current!.value ? [] : [AuthMessage.PasswordMustHaveAValue.niceToString()]
+      ["oldPassword"]: oldPassword.current!.value ? [] : [LoginAuthMessage.PasswordMustHaveAValue.niceToString()]
     };
   }
 
@@ -71,47 +70,38 @@ export default function ChangePassword() {
     return {
       ["newPassword"]:
         !isSecond ? [] :
-          !newPassword.current!.value && !newPassword2.current!.value ? [AuthMessage.PasswordMustHaveAValue.niceToString()] :
-            newPassword2.current!.value != newPassword.current!.value ? [AuthMessage.PasswordsAreDifferent.niceToString()] :
+          !newPassword.current!.value && !newPassword2.current!.value ? [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] :
+            newPassword2.current!.value != newPassword.current!.value ? [LoginAuthMessage.PasswordsAreDifferent.niceToString()] :
               []
     }
-  }
-
-  if (success) {
-    return (
-      <div>
-        <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
-        <p>{AuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
-      </div>
-    );
   }
 
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="w-100">
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <h2 className="sf-entity-title">{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString()}</h2>
-          <p>{AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString()}</p>
+          <h2 className="sf-entity-title">{LoginAuthMessage.ChangePassword.niceToString()}</h2>
+          <p>{LoginAuthMessage.EnterActualPasswordAndNewOne.niceToString()}</p>
         </div>
       </div>
       <div className="row">
       <div className="col-md-6 offset-md-3">
         <div className={classes("form-group", error("oldPassword") && "has-error")}>
-          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString()}</label>
+            <label className="col-form-label">{LoginAuthMessage.CurrentPassword.niceToString()}</label>
           <div>
             <input type="password" className="form-control" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
             {error("oldPassword") && <span className="help-block">{error("oldPassword")}</span>}
           </div>
         </div>
         <div className={classes("form-group", error("newPassword") && "has-error")}>
-          <label className="col-form-label">{AuthMessage.EnterTheNewPassword.niceToString()}</label>
+            <label className="col-form-label">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
           <div>
             <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>
         <div className={classes("form-group", error("newPassword") && "has-error")}>
-          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}</label>
+            <label className="col-form-label">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
           <div>
             <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
@@ -121,7 +111,7 @@ export default function ChangePassword() {
       </div>
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <button type="submit" className="btn btn-primary" id="changePassword">{AuthMessage.ChangePassword.niceToString()}</button>
+          <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
         </div>
       </div>
     </form>

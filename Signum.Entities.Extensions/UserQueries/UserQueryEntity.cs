@@ -95,17 +95,14 @@ namespace Signum.Entities.UserQueries
         {
             var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
 
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
 
-            if (Columns != null)
-                foreach (var c in Columns)
-                    c.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            foreach (var c in Columns)
+                c.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
 
-            if (Orders != null)
-                foreach (var o in Orders)
-                    o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            foreach (var o in Orders)
+                o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
         }
 
         public XElement ToXml(IToXmlContext ctx)

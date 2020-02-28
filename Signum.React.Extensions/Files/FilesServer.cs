@@ -36,7 +36,7 @@ namespace Signum.React.Files
             });
 
             var s = Schema.Current.Settings;
-            ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
+            ReflectionServer.PropertyRouteExtension += (mi, pr) =>
             {
                 var dft = s.FieldAttributes(pr)?.OfType<DefaultFileTypeAttribute>().SingleOrDefaultEx();
                 if (dft != null)
@@ -60,6 +60,7 @@ namespace Signum.React.Files
                         maxSizeInBytes = alg.MaxSizeInBytes,
                     });
                 }
+                return mi;
             };
 
             FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url!.Content(url);

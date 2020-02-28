@@ -4,13 +4,13 @@ using Signum.Utilities;
 using Signum.Entities.Files;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Excel
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportEntity : Entity
     {
-        
         public QueryEntity Query { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 200)]
@@ -51,4 +51,10 @@ namespace Signum.Entities.Excel
         CreateNew
     }
 
+
+    [AutoInit]
+    public static class ExcelPermission
+    {
+        public static PermissionSymbol PlainExcel;
+    }
 }

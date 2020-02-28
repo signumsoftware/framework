@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
-import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
@@ -68,13 +68,13 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         })));
       }
 
-      function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
+      function toPinnedQueryFilterEmbedded(p: PinnedFilter): PinnedQueryFilterEmbedded {
         return PinnedQueryFilterEmbedded.New({
-          label: pinned.label,
-          column: pinned.column,
-          row: pinned.row,
-          active: pinned.active,
-          splitText: pinned.splitText,
+          label: typeof p.label == "function" ? p.label() : p.label,
+          column: p.column,
+          row: p.row,
+          active: p.active,
+          splitText: p.splitText,
         });
       }
     }
@@ -337,7 +337,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   const type = p.type;
 
   if (p.filterType == "Enum") {
-    const ti = getTypeInfos(type).single();
+    const ti = tryGetTypeInfos(type).single();
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);

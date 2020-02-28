@@ -6,6 +6,8 @@ using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Entities.Templating;
+using Signum.Entities.UserQueries;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.Word
 {
@@ -19,8 +21,16 @@ namespace Signum.Entities.Word
         public QueryEntity Query { get; set; }
 
         public WordModelEntity? Model { get; set; }
-        
+
         public CultureInfoEntity Culture { get; set; }
+
+        public bool GroupResults { get; set; }
+
+        [PreserveOrder]
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+
+        [PreserveOrder]
+        public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         [NotifyChildProperty]
         public TemplateApplicableEval? Applicable { get; set; }
@@ -52,6 +62,17 @@ namespace Signum.Entities.Word
             {
                 throw new ApplicationException($"Error evaluating Applicable for WordTemplate '{Name}' with entity '{entity}': " + e.Message, e);
             }
+        }
+
+        internal void ParseData(QueryDescription description)
+        {
+            var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+
+            foreach (var o in Orders)
+                o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
         }
     }
 

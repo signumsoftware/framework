@@ -7,6 +7,7 @@ using Signum.Engine.Templating;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
+using Signum.Entities.UserQueries;
 using Signum.Utilities;
 
 namespace Signum.Engine.Mailing
@@ -304,15 +305,22 @@ namespace Signum.Engine.Mailing
                 var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = model != null ? model.GetFilters(qd) :
-                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) };
+                    entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) } :
+                    throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
+
+                filters.AddRange(template.Filters.ToFilterList());
+
+                var orders = model?.GetOrders(qd) ?? new List<Order>();
+                orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());
 
                 this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
                 {
                     QueryName = queryName,
+                    GroupResults = template.GroupResults,
                     Columns = columns,
                     Pagination = model?.GetPagination() ?? new Pagination.All(),
                     Filters = filters,
-                    Orders = model?.GetOrders(qd) ?? new List<Order>(),
+                    Orders = orders,
                 });
 
                 this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);

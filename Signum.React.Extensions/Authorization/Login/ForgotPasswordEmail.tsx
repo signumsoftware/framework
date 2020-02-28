@@ -3,7 +3,7 @@ import { classes, Dic } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { AuthMessage } from '../Signum.Entities.Authorization'
+import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { RouteComponentProps } from 'react-router'
 import * as QueryString from 'query-string'
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
 
   function validateEmail() {
     return {
-      eMail: !eMail.current!.value ? [AuthMessage.PasswordMustHaveAValue.niceToString()] : []
+      eMail: !eMail.current!.value ? [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] : []
     }
   }
 
@@ -70,8 +70,8 @@ export default function ForgotPassword() {
       <div className="container">
         <div className="row">
           <div className="col-md-6 offset-md-3">
-            <h2 className="sf-entity-title">{AuthMessage.RequestAccepted.niceToString()}</h2>
-            <p>{AuthMessage.WeHaveSentYouAnEmailToResetYourPassword.niceToString()}</p>
+            <h2 className="sf-entity-title">{LoginAuthMessage.RequestAccepted.niceToString()}</h2>
+            <p>{LoginAuthMessage.WeHaveSentYouAnEmailToResetYourPassword.niceToString()}</p>
           </div>
         </div>
       </div>
@@ -85,18 +85,18 @@ export default function ForgotPassword() {
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <form onSubmit={(e) => handleSubmit(e)}>
-            <h2 className="sf-entity-title">{AuthMessage.IForgotMyPassword.niceToString()}</h2>
-            <p>{AuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
+            <h2 className="sf-entity-title">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h2>
+            <p>{LoginAuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
 
             <div className={classes("form-group", error("eMail") && "has-error")}>
               <div>
-                <input type="texbox" className="form-control" id="eMail" ref={eMail} onBlur={handleMailBlur} placeholder={AuthMessage.EnterYourUserEmail.niceToString()} />
+                <input type="texbox" className="form-control" id="eMail" ref={eMail} onBlur={handleMailBlur} placeholder={LoginAuthMessage.EnterYourUserEmail.niceToString()} />
                 {error("eMail") && <span className="help-block">{error("newPassword")}</span>}
               </div>
               <label className="col-form-label col-sm-2" style={success === false ? { display: "inline" } : { display: "none" }}>{message}</label>
             </div>
 
-            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{AuthMessage.SendEmail.niceToString()}</button>
+            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>
           </form>
         </div>
       </div>

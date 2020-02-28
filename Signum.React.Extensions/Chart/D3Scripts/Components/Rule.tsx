@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import { translate, rotate } from './ChartUtils';
 
 
-export class Rule {
+export class Rule<T extends string> {
 
   private sizes: { [key: string]: number } = {};
   private starts: { [key: string]: number } = {};
@@ -11,7 +11,11 @@ export class Rule {
 
   totalSize: number;
 
-  constructor(object: any, totalSize?: number) {
+  static create<O extends { [key: string]: number | string }>(object: O, totalSize?: number): Rule<Extract<keyof O, string>> {
+    return new Rule(object, totalSize)
+  }
+
+  private constructor(object: { [key: string]: number | string }, totalSize?: number) {
 
     let fixed = 0;
     let proportional = 0;
@@ -66,19 +70,19 @@ export class Rule {
   }
 
 
-  size(name: string) {
+  size(name: T) {
     return this.sizes[name];
   }
 
-  start(name: string) {
+  start(name: T) {
     return this.starts[name];
   }
 
-  end(name: string) {
+  end(name: T) {
     return this.ends[name];
   }
 
-  middle(name: string) {
+  middle(name: T) {
     return this.starts[name] + this.sizes[name] / 2;
   }
 

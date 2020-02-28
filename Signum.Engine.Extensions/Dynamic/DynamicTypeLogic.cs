@@ -529,7 +529,7 @@ namespace Signum.Engine.Dynamic
                      
                 }.NotNull().ToString(", ");
 
-                atts.Add($"SqlDbType({props})");
+                atts.Add($"DbType({props})");
             }
 
             if (property.ColumnName.HasText())

@@ -61,6 +61,10 @@ export module AuthAdminMessage {
   export const CanNotBeModified = new MessageKey("AuthAdminMessage", "CanNotBeModified");
   export const CanNotBeModifiedBecauseIsA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsA0");
   export const CanNotBeModifiedBecauseIsNotA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotA0");
+  export const _0RulesFor1 = new MessageKey("AuthAdminMessage", "_0RulesFor1");
+  export const TheUserStateMustBeDisabled = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
+  export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
+  export const Save = new MessageKey("AuthAdminMessage", "Save");
 }
 
 export module AuthEmailMessage {
@@ -74,94 +78,8 @@ export module AuthEmailMessage {
 }
 
 export module AuthMessage {
-  export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
-  export const _0RulesFor1 = new MessageKey("AuthMessage", "_0RulesFor1");
-  export const AuthAdmin_AddCondition = new MessageKey("AuthMessage", "AuthAdmin_AddCondition");
-  export const AuthAdmin_ChooseACondition = new MessageKey("AuthMessage", "AuthAdmin_ChooseACondition");
-  export const AuthAdmin_RemoveCondition = new MessageKey("AuthMessage", "AuthAdmin_RemoveCondition");
-  export const AuthorizationCacheSuccessfullyUpdated = new MessageKey("AuthMessage", "AuthorizationCacheSuccessfullyUpdated");
-  export const ChangePassword = new MessageKey("AuthMessage", "ChangePassword");
-  export const ChangePasswordAspx_ActualPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_ActualPassword");
-  export const ChangePasswordAspx_ChangePassword = new MessageKey("AuthMessage", "ChangePasswordAspx_ChangePassword");
-  export const ChangePasswordAspx_ConfirmNewPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_ConfirmNewPassword");
-  export const ChangePasswordAspx_NewPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_NewPassword");
-  export const ChangePasswordAspx_EnterActualPasswordAndNewOne = new MessageKey("AuthMessage", "ChangePasswordAspx_EnterActualPasswordAndNewOne");
-  export const ConfirmNewPassword = new MessageKey("AuthMessage", "ConfirmNewPassword");
-  export const EmailMustHaveAValue = new MessageKey("AuthMessage", "EmailMustHaveAValue");
-  export const EmailSent = new MessageKey("AuthMessage", "EmailSent");
-  export const Email = new MessageKey("AuthMessage", "Email");
-  export const EnterTheNewPassword = new MessageKey("AuthMessage", "EnterTheNewPassword");
-  export const EntityGroupsAscx_EntityGroup = new MessageKey("AuthMessage", "EntityGroupsAscx_EntityGroup");
-  export const EntityGroupsAscx_Overriden = new MessageKey("AuthMessage", "EntityGroupsAscx_Overriden");
-  export const ExpectedUserLogged = new MessageKey("AuthMessage", "ExpectedUserLogged");
-  export const ExpiredPassword = new MessageKey("AuthMessage", "ExpiredPassword");
-  export const ExpiredPasswordMessage = new MessageKey("AuthMessage", "ExpiredPasswordMessage");
-  export const ForgotYourPasswordEnterYourPasswordBelow = new MessageKey("AuthMessage", "ForgotYourPasswordEnterYourPasswordBelow");
-  export const WeWillSendYouAnEmailWithALinkToResetYourPassword = new MessageKey("AuthMessage", "WeWillSendYouAnEmailWithALinkToResetYourPassword");
-  export const IHaveForgottenMyPassword = new MessageKey("AuthMessage", "IHaveForgottenMyPassword");
-  export const IncorrectPassword = new MessageKey("AuthMessage", "IncorrectPassword");
-  export const EnterYourUserNameAndPassword = new MessageKey("AuthMessage", "EnterYourUserNameAndPassword");
-  export const InvalidUsernameOrPassword = new MessageKey("AuthMessage", "InvalidUsernameOrPassword");
-  export const InvalidUsername = new MessageKey("AuthMessage", "InvalidUsername");
-  export const InvalidPassword = new MessageKey("AuthMessage", "InvalidPassword");
-  export const Login_New = new MessageKey("AuthMessage", "Login_New");
-  export const Login_Password = new MessageKey("AuthMessage", "Login_Password");
-  export const Login_Repeat = new MessageKey("AuthMessage", "Login_Repeat");
-  export const Login_UserName = new MessageKey("AuthMessage", "Login_UserName");
-  export const Login_UserName_Watermark = new MessageKey("AuthMessage", "Login_UserName_Watermark");
-  export const Login = new MessageKey("AuthMessage", "Login");
-  export const Logout = new MessageKey("AuthMessage", "Logout");
-  export const SwitchUser = new MessageKey("AuthMessage", "SwitchUser");
-  export const NewPassword = new MessageKey("AuthMessage", "NewPassword");
-  export const NotAllowedToSaveThis0WhileOffline = new MessageKey("AuthMessage", "NotAllowedToSaveThis0WhileOffline");
   export const NotAuthorizedTo0The1WithId2 = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0 = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
-  export const NotAuthorizedToSave0 = new MessageKey("AuthMessage", "NotAuthorizedToSave0");
-  export const NotAuthorizedToChangeProperty0on1 = new MessageKey("AuthMessage", "NotAuthorizedToChangeProperty0on1");
-  export const NotUserLogged = new MessageKey("AuthMessage", "NotUserLogged");
-  export const Password = new MessageKey("AuthMessage", "Password");
-  export const PasswordChanged = new MessageKey("AuthMessage", "PasswordChanged");
-  export const PasswordDoesNotMatchCurrent = new MessageKey("AuthMessage", "PasswordDoesNotMatchCurrent");
-  export const PasswordHasBeenChangedSuccessfully = new MessageKey("AuthMessage", "PasswordHasBeenChangedSuccessfully");
-  export const PasswordMustHaveAValue = new MessageKey("AuthMessage", "PasswordMustHaveAValue");
-  export const AnErrorOccurredRequestNotProcessed = new MessageKey("AuthMessage", "AnErrorOccurredRequestNotProcessed");
-  export const WeHaveSentYouAnEmailToResetYourPassword = new MessageKey("AuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
-  export const EnterYourUserEmail = new MessageKey("AuthMessage", "EnterYourUserEmail");
-  export const RequestAccepted = new MessageKey("AuthMessage", "RequestAccepted");
-  export const YourPasswordIsNearExpiration = new MessageKey("AuthMessage", "YourPasswordIsNearExpiration");
-  export const PasswordsAreDifferent = new MessageKey("AuthMessage", "PasswordsAreDifferent");
-  export const PasswordsDoNotMatch = new MessageKey("AuthMessage", "PasswordsDoNotMatch");
-  export const Please0IntoYourAccount = new MessageKey("AuthMessage", "Please0IntoYourAccount");
-  export const PleaseEnterYourChosenNewPassword = new MessageKey("AuthMessage", "PleaseEnterYourChosenNewPassword");
-  export const Remember = new MessageKey("AuthMessage", "Remember");
-  export const RememberMe = new MessageKey("AuthMessage", "RememberMe");
-  export const ResetPassword = new MessageKey("AuthMessage", "ResetPassword");
-  export const ResetPasswordCode = new MessageKey("AuthMessage", "ResetPasswordCode");
-  export const ResetPasswordCodeHasBeenSent = new MessageKey("AuthMessage", "ResetPasswordCodeHasBeenSent");
-  export const ResetPasswordSuccess = new MessageKey("AuthMessage", "ResetPasswordSuccess");
-  export const Save = new MessageKey("AuthMessage", "Save");
-  export const TheConfirmationCodeThatYouHaveJustSentIsInvalid = new MessageKey("AuthMessage", "TheConfirmationCodeThatYouHaveJustSentIsInvalid");
-  export const ThePasswordMustHaveAtLeast5Characters = new MessageKey("AuthMessage", "ThePasswordMustHaveAtLeast5Characters");
-  export const ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin = new MessageKey("AuthMessage", "ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin");
-  export const ThereSNotARegisteredUserWithThatEmailAddress = new MessageKey("AuthMessage", "ThereSNotARegisteredUserWithThatEmailAddress");
-  export const TheSpecifiedPasswordsDontMatch = new MessageKey("AuthMessage", "TheSpecifiedPasswordsDontMatch");
-  export const TheUserStateMustBeDisabled = new MessageKey("AuthMessage", "TheUserStateMustBeDisabled");
-  export const Username = new MessageKey("AuthMessage", "Username");
-  export const Username0IsNotValid = new MessageKey("AuthMessage", "Username0IsNotValid");
-  export const UserNameMustHaveAValue = new MessageKey("AuthMessage", "UserNameMustHaveAValue");
-  export const View = new MessageKey("AuthMessage", "View");
-  export const WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow = new MessageKey("AuthMessage", "WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow");
-  export const YouMustRepeatTheNewPassword = new MessageKey("AuthMessage", "YouMustRepeatTheNewPassword");
-  export const User0IsDisabled = new MessageKey("AuthMessage", "User0IsDisabled");
-  export const SendEmail = new MessageKey("AuthMessage", "SendEmail");
-  export const Welcome0 = new MessageKey("AuthMessage", "Welcome0");
-  export const LoginWithAnotherUser = new MessageKey("AuthMessage", "LoginWithAnotherUser");
-  export const TheUserIsNotLongerInTheDatabase = new MessageKey("AuthMessage", "TheUserIsNotLongerInTheDatabase");
-  export const IForgotMyPassword = new MessageKey("AuthMessage", "IForgotMyPassword");
-  export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("AuthMessage", "GiveUsYourUserEmailToResetYourPassword");
-  export const LoginWithWindowsUser = new MessageKey("AuthMessage", "LoginWithWindowsUser");
-  export const NoWindowsUserFound = new MessageKey("AuthMessage", "NoWindowsUserFound");
-  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("AuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
 }
 
 export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");
@@ -188,6 +106,47 @@ export module BasicPermission {
   export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
   export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
   export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
+}
+
+export module LoginAuthMessage {
+  export const ThePasswordMustHaveAtLeast0Characters = new MessageKey("LoginAuthMessage", "ThePasswordMustHaveAtLeast0Characters");
+  export const NotUserLogged = new MessageKey("LoginAuthMessage", "NotUserLogged");
+  export const Username0IsNotValid = new MessageKey("LoginAuthMessage", "Username0IsNotValid");
+  export const User0IsDisabled = new MessageKey("LoginAuthMessage", "User0IsDisabled");
+  export const IncorrectPassword = new MessageKey("LoginAuthMessage", "IncorrectPassword");
+  export const Login = new MessageKey("LoginAuthMessage", "Login");
+  export const Password = new MessageKey("LoginAuthMessage", "Password");
+  export const ChangePassword = new MessageKey("LoginAuthMessage", "ChangePassword");
+  export const SwitchUser = new MessageKey("LoginAuthMessage", "SwitchUser");
+  export const Logout = new MessageKey("LoginAuthMessage", "Logout");
+  export const EnterYourUserNameAndPassword = new MessageKey("LoginAuthMessage", "EnterYourUserNameAndPassword");
+  export const Username = new MessageKey("LoginAuthMessage", "Username");
+  export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
+  export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
+  export const LoginWithWindowsUser = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
+  export const NoWindowsUserFound = new MessageKey("LoginAuthMessage", "NoWindowsUserFound");
+  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("LoginAuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
+  export const IForgotMyPassword = new MessageKey("LoginAuthMessage", "IForgotMyPassword");
+  export const EnterYourUserEmail = new MessageKey("LoginAuthMessage", "EnterYourUserEmail");
+  export const SendEmail = new MessageKey("LoginAuthMessage", "SendEmail");
+  export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("LoginAuthMessage", "GiveUsYourUserEmailToResetYourPassword");
+  export const RequestAccepted = new MessageKey("LoginAuthMessage", "RequestAccepted");
+  export const PasswordMustHaveAValue = new MessageKey("LoginAuthMessage", "PasswordMustHaveAValue");
+  export const PasswordsAreDifferent = new MessageKey("LoginAuthMessage", "PasswordsAreDifferent");
+  export const PasswordChanged = new MessageKey("LoginAuthMessage", "PasswordChanged");
+  export const PasswordHasBeenChangedSuccessfully = new MessageKey("LoginAuthMessage", "PasswordHasBeenChangedSuccessfully");
+  export const NewPassword = new MessageKey("LoginAuthMessage", "NewPassword");
+  export const EnterTheNewPassword = new MessageKey("LoginAuthMessage", "EnterTheNewPassword");
+  export const ConfirmNewPassword = new MessageKey("LoginAuthMessage", "ConfirmNewPassword");
+  export const EnterActualPasswordAndNewOne = new MessageKey("LoginAuthMessage", "EnterActualPasswordAndNewOne");
+  export const CurrentPassword = new MessageKey("LoginAuthMessage", "CurrentPassword");
+  export const WeHaveSentYouAnEmailToResetYourPassword = new MessageKey("LoginAuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
+  export const UserNameMustHaveAValue = new MessageKey("LoginAuthMessage", "UserNameMustHaveAValue");
+  export const InvalidUsernameOrPassword = new MessageKey("LoginAuthMessage", "InvalidUsernameOrPassword");
+  export const InvalidUsername = new MessageKey("LoginAuthMessage", "InvalidUsername");
+  export const InvalidPassword = new MessageKey("LoginAuthMessage", "InvalidPassword");
+  export const AnErrorOccurredRequestNotProcessed = new MessageKey("LoginAuthMessage", "AnErrorOccurredRequestNotProcessed");
+  export const TheUserIsNotLongerInTheDatabase = new MessageKey("LoginAuthMessage", "TheUserIsNotLongerInTheDatabase");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");

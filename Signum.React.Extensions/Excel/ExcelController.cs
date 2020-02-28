@@ -12,6 +12,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Excel;
 using System.Threading.Tasks;
 using Signum.React.Filters;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Excel
 {
@@ -21,6 +22,8 @@ namespace Signum.React.Excel
         [HttpPost("api/excel/plain")]
         public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, CancellationToken token)
         {
+            ExcelPermission.PlainExcel.AssertAuthorized();
+
             var queryRequest = request.ToQueryRequest();
 
             ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);

@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.Utilities;
 using System.ComponentModel;
 

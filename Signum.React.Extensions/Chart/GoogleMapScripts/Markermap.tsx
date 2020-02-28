@@ -49,7 +49,7 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
       mapTypeId: mapType
     } as google.maps.MapOptions;
 
-    var map = new google.maps.Map(divElement.current, mapOptions);
+    var map = new google.maps.Map(divElement.current!, mapOptions);
 
     if (parameters["MapStyle"] != null &&
       parameters["MapStyle"] != "Standard") {

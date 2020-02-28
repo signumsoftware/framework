@@ -68,13 +68,11 @@ namespace Signum.Engine.UserQueries
         {
             var qr = new QueryRequest()
             {
-                QueryName = userQuery.Query.ToQueryName()
+                QueryName = userQuery.Query.ToQueryName(),
+                GroupResults = userQuery.GroupResults,
             };
-            if (!userQuery.AppendFilters)
-            {
-                qr.Filters = userQuery.Filters.ToFilterList();
-            }
 
+            qr.Filters = userQuery.Filters.ToFilterList();
             qr.Columns = MergeColumns(userQuery);
             qr.Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
 

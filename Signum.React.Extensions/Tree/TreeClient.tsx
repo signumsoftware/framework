@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { Type } from '@framework/Reflection'
+import { Type, tryGetTypeInfo } from '@framework/Reflection'
 import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
@@ -51,9 +51,9 @@ export function start(options: { routes: JSX.Element[] }) {
   );
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    var ti = getTypeInfo(ctx.findOptions.queryKey);
+    var ti = tryGetTypeInfo(ctx.findOptions.queryKey);
 
-    if (!ctx.searchControl.props.showBarExtension || ti == null || !isTree(ti))
+    if (!ctx.searchControl.props.showBarExtension || !ti || !isTree(ti))
       return undefined;
 
     return { button: <TreeButton searchControl={ctx.searchControl} /> };

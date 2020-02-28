@@ -276,7 +276,10 @@ namespace Signum.Engine.Mailing
             }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, model).CreateEmailMessageInternal().ToList();
+            {
+                var emailBuilder = new EmailMessageBuilder(template, entity, model);
+                return emailBuilder.CreateEmailMessageInternal().ToList();
+            }
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>

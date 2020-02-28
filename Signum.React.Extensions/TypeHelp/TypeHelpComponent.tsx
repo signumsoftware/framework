@@ -93,31 +93,33 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
   function renderHeader() {
     return (
       <div className="sf-type-help-bar">
-        <div className="input-group input-group-sm">
-          <span className="input-group-prepend">
-            <button className="btn input-group-text" disabled={!canBack()}
-              onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="arrow-circle-left" />
-            </button>
-            <button className="btn input-group-text" disabled={!canForth()}
-              onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="arrow-circle-right" />
-            </button>
-          </span>
+      
           <Typeahead
-            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-            getItems={handleGetItems}
-            value={tempQuery == undefined ? currentType() : tempQuery}
-            onBlur={() => setTempQuery(undefined)}
-            onChange={newValue => setTempQuery(newValue)}
-            onSelect={handleSelect} />
-          <span className="input-group-append">
-            <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>
-              {p.mode == "CSharp" ? "C#" : p.mode}
-            </div>
-          </span>
-        </div>
-
+          inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+          getItems={handleGetItems}
+          value={tempQuery == undefined ? currentType() : tempQuery}
+          onBlur={() => setTempQuery(undefined)}
+          onChange={newValue => setTempQuery(newValue)}
+          onSelect={handleSelect}
+          renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
+            <span className="input-group-prepend">
+              <button className="btn input-group-text" disabled={!canBack()}
+                onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
+                <FontAwesomeIcon icon="arrow-circle-left" />
+              </button>
+              <button className="btn input-group-text" disabled={!canForth()}
+                onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
+                <FontAwesomeIcon icon="arrow-circle-right" />
+              </button>
+            </span>
+            {input}
+            <span className="input-group-append">
+              <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>
+                {p.mode == "CSharp" ? "C#" : p.mode}
+              </div>
+            </span>
+          </div>
+          }/>
       </div>
     );
   }
@@ -230,7 +232,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
       );
 
     var kind = type.firstLower() == type ? "primitive" :
-      type == "DateTime" ? "date" :
+      type == "DateTime" || type == "Date" || type == "TimeSpan"  ? "date" :
         type == "Lite" ? "lite" :
           type == "IEnumerable" || type == "IQueryable" || type == "List" || type == "MList" ? "collection" :
             isTypeEnum(type) ? "enum" : "others";
