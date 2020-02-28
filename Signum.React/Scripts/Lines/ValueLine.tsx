@@ -27,6 +27,7 @@ export interface ValueLineProps extends LineBaseProps {
   incrementWithArrow?: boolean | number;
   columnCount?: number;
   columnWidth?: number;
+  showTimeBox?: boolean;
 }
 
 export interface OptionItem {
@@ -82,10 +83,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   getDefaultProps(state: ValueLineProps) {
     super.getDefaultProps(state);
-    state.valueLineType = ValueLineController.getValueLineType(state.type!);
+    if (state.type) {
+      state.valueLineType = ValueLineController.getValueLineType(state.type);
 
-    if (state.valueLineType == undefined)
-      throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+      if (state.valueLineType == undefined)
+        throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+    }
   }
 
   overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
@@ -578,7 +581,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const momentFormat = toMomentFormat(s.formatText);
 
   const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = momentFormat != "L" && momentFormat != "LL";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
 
   if (s.ctx.readOnly)
     return (

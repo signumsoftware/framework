@@ -46,6 +46,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2020.02.27 Updates package.json](https://github.com/signumsoftware/framework/commit/08f78128326fad5eaf80f184d67f76863f5aa8a9#comments)
 * [2020.02.25 Typescript 3.8 and other changes](https://github.com/signumsoftware/framework/commit/8cdc9ab0ec5488dcfa65b2539bc7e784f0607f47#comments)
 * [2020.02.14 Southwind inside of a Docker Container and running in Azure](https://github.com/signumsoftware/framework/commit/f9cc544a09cf1d80ae52ac659b57af06d8e730c5#comments)
 * [2020.02.10 Rename Southwind.Load to Southwind.Terminal](https://github.com/signumsoftware/framework/commit/e5abacb0e234d9ef37158e911eb905a41ddc3a5a#comments)

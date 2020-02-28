@@ -27,14 +27,16 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
 
-    if (p.showType == undefined)
-      p.showType = p.type!.name.contains(",");
+    if (p.type) {
+      if (p.showType == undefined)
+        p.showType = p.type.name.contains(",");
 
-    if (p.autocomplete === undefined) {
-      p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.ctx, p.create!, p.showType);
+      if (p.autocomplete === undefined) {
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.ctx, p.create!, p.showType);
+      }
+      if (p.iconStart == undefined && p.vertical)
+        p.iconStart = true;
     }
-    if (p.iconStart == undefined && p.vertical)
-      p.iconStart = true;
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -94,6 +96,9 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 export const EntityStrip = React.memo(React.forwardRef(function EntityStrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
+
+  if (c.isHidden)
+    return null;
 
   const readOnly = p.ctx.readOnly;
   return (
