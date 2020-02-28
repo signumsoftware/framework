@@ -97,10 +97,7 @@ export default function ChartTableComponent(p : ChartTableProps){
       resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
     }));
 
-
- 
-
-  var hasEntity = ChartClient.hasAggregates(chartRequest);
+  var hasEntity = !ChartClient.hasAggregates(chartRequest);
 
   return (
     <table className="sf-search-results table table-hover table-sm">
