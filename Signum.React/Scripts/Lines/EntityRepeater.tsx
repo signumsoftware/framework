@@ -82,7 +82,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-              getComponent={() => p.getComponent(mlec, i)}
+              getComponent={() => p.getComponent!(mlec, i)}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
