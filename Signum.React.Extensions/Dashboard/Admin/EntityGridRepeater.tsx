@@ -8,7 +8,7 @@ import { isModifiableEntity } from '@framework/Signum.Entities';
 import { PanelStyle } from '../Signum.Entities.Dashboard';
 import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
 
-interface IGridEntity {
+export interface IGridEntity {
   row: number;
   startColumn: number;
   columns: number
