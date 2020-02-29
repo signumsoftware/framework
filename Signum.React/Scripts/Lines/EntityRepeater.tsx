@@ -14,6 +14,7 @@ export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
   createMessage?: string;
+  getComponent?: (ctx: TypeContext<any /*T*/>, index?: number) => React.ReactElement<any>;
 }
 
 export class EntityRepeaterController extends EntityListBaseController<EntityRepeaterProps> {
@@ -76,12 +77,12 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
     return (
       <div className="sf-repater-elements">
         {
-          c.getMListItemContext(ctx).map(mlec =>
+          c.getMListItemContext(ctx).map((mlec, i) => 
             (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-              getComponent={p.getComponent}
+              getComponent={() => p.getComponent(mlec, i)}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
@@ -102,7 +103,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
 export interface EntityRepeaterElementProps {
   ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-  getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+  getComponent?: (ctx: TypeContext<ModifiableEntity>, index?: number) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   drag?: DragConfig;
