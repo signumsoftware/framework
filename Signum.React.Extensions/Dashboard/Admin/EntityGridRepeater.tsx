@@ -11,7 +11,7 @@ import { PanelStyle } from '../Signum.Entities.Dashboard';
 import { useController } from '@framework/Lines/LineBase';
 
 
-interface IGridEntity {
+export interface IGridEntity {
   row: number;
   startColumn: number;
   columns: number
