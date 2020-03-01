@@ -83,9 +83,9 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
             (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
-              getComponent={() => p.getComponent!(mlec, i)}
               move={c.canMove(mlec.value) && !p.drag && !readOnly ? { canMove: true, renderMoveUp: () => c.renderMoveUp(false, mlec.index!)!, renderMoveDown: () => c.renderMoveDown(false, mlec.index!) } : undefined}
               drag={c.canMove(mlec.value) && p.drag && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+              getComponent={ctx => p.getComponent!(ctx, mlec.index)}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
@@ -106,7 +106,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
 export interface EntityRepeaterElementProps {
   ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-  getComponent?: (ctx: TypeContext<ModifiableEntity>, index?: number) => React.ReactElement<any>;
+  getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;
