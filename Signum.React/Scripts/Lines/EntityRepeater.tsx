@@ -16,6 +16,7 @@ export interface EntityRepeaterProps extends EntityListBaseProps {
   createMessage?: string;
   getComponent?: (ctx: TypeContext<any /*T*/>, index?: number) => React.ReactElement<any>;
   drag?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
+  itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
 }
 
 export class EntityRepeaterController extends EntityListBaseController<EntityRepeaterProps> {
@@ -85,6 +86,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
               ctx={mlec}
               move={c.canMove(mlec.value) && !p.drag && !readOnly ? { canMove: true, renderMoveUp: () => c.renderMoveUp(false, mlec.index!)!, renderMoveDown: () => c.renderMoveDown(false, mlec.index!) } : undefined}
               drag={c.canMove(mlec.value) && p.drag && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+              itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
               getComponent={ctx => p.getComponent!(ctx, mlec.index)}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
@@ -112,9 +114,10 @@ export interface EntityRepeaterElementProps {
   move?: MoveConfig;
   drag?: DragConfig;
   title?: React.ReactElement<any>;
+  itemExtraButtons?: () => React.ReactElement<any>;
 }
 
-export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, title }: EntityRepeaterElementProps)
+export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
 {
 
   return (
@@ -141,6 +144,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
               title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
               {EntityListBaseController.moveIcon}
             </a>}
+            {itemExtraButtons && itemExtraButtons()}
             {title && '\xa0'}
             {title}
           </div>
