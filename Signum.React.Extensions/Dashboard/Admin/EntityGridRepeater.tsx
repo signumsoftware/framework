@@ -1,12 +1,15 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import * as _fontawesome_svg_core from '@fortawesome/fontawesome-svg-core'; //throwaway reference to avoid error the inferred type cannot be named without a reference -> https://github.com/microsoft/TypeScript/issues/5938
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
 import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { PanelStyle } from '../Signum.Entities.Dashboard';
-import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
+//import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { useController } from '@framework/Lines/LineBase';
+
 
 interface IGridEntity {
   row: number;
