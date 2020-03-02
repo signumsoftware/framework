@@ -19,7 +19,7 @@ export default function HtmlEditor(p: HtmlEditorProps) {
 
   React.useEffect(() => {
     return () => { saveHtml() };
-  });
+  }, []);
 
   React.useEffect(() => {
     setEditorValue(RichTextEditor.createValueFromString(p.binding.getValue() ?? "", format));
@@ -27,7 +27,7 @@ export default function HtmlEditor(p: HtmlEditorProps) {
 
   function saveHtml() {
     if (!p.readonly) {
-      var value = editorValue.toString(format) ?? "";
+      var value = editorValue.toString(format);
       if (value ?? "" != p.binding.getValue() ?? "")
         p.binding.setValue(value);
     }
