@@ -595,7 +595,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
     const m = moment(date);
     vl.setValue(!m.isValid() ? null :
-      vl.props.type == "Date" ? m.format("YYYY-MM-DD" /*No Z*/) :
+      vl.props.type!.name == "Date" ? formatAsDate(m):
         !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
           m.format());
   };
@@ -619,6 +619,10 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       )}
     </FormGroup>
   );
+}
+
+export function formatAsDate(m: moment.Moment) {
+  return m.format("YYYY-MM-DD");
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
