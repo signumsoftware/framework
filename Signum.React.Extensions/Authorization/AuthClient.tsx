@@ -252,7 +252,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
       if (e.httpError.exceptionType?.endsWith(".AuthenticationException")) {
         setAuthToken(undefined, undefined);
-        Navigator.history.push("~/auth/login");
+        Navigator.history?.push("~/auth/login");
       }
 
       throw e;
