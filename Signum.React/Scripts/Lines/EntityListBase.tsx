@@ -68,7 +68,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
@@ -94,7 +94,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn btn-light" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
