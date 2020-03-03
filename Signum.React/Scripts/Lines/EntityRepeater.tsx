@@ -14,7 +14,7 @@ export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
   createMessage?: string;
-  getComponent?: (ctx: TypeContext<any /*T*/>, index?: number) => React.ReactElement<any>;
+  getComponentWithIndex?: (ctx: TypeContext<any>, index: number) => React.ReactElement<any>;
   drag?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
 }
@@ -87,7 +87,8 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
               move={c.canMove(mlec.value) && !p.drag && !readOnly ? { canMove: true, renderMoveUp: () => c.renderMoveUp(false, mlec.index!)!, renderMoveDown: () => c.renderMoveDown(false, mlec.index!) } : undefined}
               drag={c.canMove(mlec.value) && p.drag && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
               itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
-              getComponent={ctx => p.getComponent!(ctx, mlec.index)}
+              getComponent={p.getComponent}
+              getComponentWithIndex={p.getComponentWithIndex ? (ctx => p.getComponentWithIndex!(ctx, mlec.index!)) : undefined}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
@@ -109,6 +110,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 export interface EntityRepeaterElementProps {
   ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
   getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+  getComponentWithIndex?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;
@@ -117,7 +119,7 @@ export interface EntityRepeaterElementProps {
   itemExtraButtons?: () => React.ReactElement<any>;
 }
 
-export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
+export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
 {
 
   return (
@@ -150,7 +152,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
           </div>
         </legend>
         <div className="sf-line-entity">
-          <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
+          <RenderEntity ctx={ctx} getComponent={getComponentWithIndex ?? getComponent} getViewPromise={getViewPromise} />
         </div>
       </fieldset>
     </div>
