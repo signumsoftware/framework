@@ -20,8 +20,6 @@ namespace Signum.React.UserQueries
         {
             UserAssetServer.Start(app);
 
-            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(ColumnOptionsMode).Namespace!, () => TypeAuthLogic.GetAllowed(typeof(UserQueryEntity)).MaxUI() > TypeAllowedBasic.None);
-
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             EntityJsonConverter.AfterDeserilization.Register((UserQueryEntity uq) =>
