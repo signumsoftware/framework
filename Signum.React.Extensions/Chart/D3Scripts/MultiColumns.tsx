@@ -95,10 +95,10 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
             fill={s.color || color(s.key)}
             transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(
               x(keyColumn.getKey(r.rowValue))! + xSubscale(s.key)!,
-              - y(r.values[s.key] && r.values[s.key].value)
+              - y(r.values[s.key].value)
             )}
             width={xSubscale.bandwidth()}
-            height={y(r.values[s.key] && r.values[s.key].value)}
+            height={y(r.values[s.key].value)}
             onClick={e => onDrillDown(r.values[s.key].rowClick)}
             cursor="pointer">
             <title>
@@ -108,12 +108,12 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           rowsInOrder
-            .filter(r => r.values[s.key] != undefined && y(r.values[s.key] && r.values[s.key].value) > 10)
+            .filter(r => r.values[s.key] != undefined && y(r.values[s.key].value) > 10)
             .map(r => <text key={keyColumn.getKey(r.rowValue)}
               className="number-label sf-transition"
               transform={translate(
                 x(keyColumn.getKey(r.rowValue))! + xSubscale.bandwidth() / 2 + xSubscale(s.key)!,
-                - y(r.values[s.key] && r.values[s.key].value) / 2
+                - y(r.values[s.key].value) / 2
               )}
               opacity={parameters["NumberOpacity"]}
               fill={parameters["NumberColor"]}

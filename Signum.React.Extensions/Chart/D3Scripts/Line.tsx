@@ -64,7 +64,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
   var line = d3.line<unknown>()
     .defined(key => rowByKey[keyColumn.getKey(key)] != null)
     .x(key => x(keyColumn.getKey(key))!)
-    .y(key => rowByKey[keyColumn.getKey(key)] && -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
+    .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
   var color = parameters["Color"]!;// 'steelblue'
