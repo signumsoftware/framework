@@ -268,20 +268,21 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   })]);
 
   if (options.overrideCaseActivityMixin == true) {
+    if (AuthClient.navigatorIsViewable(SMSMessageEntity))
+      if (SMSMessageEntity.hasMixin(CaseActivityMixin))
+        Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
+          vr.insertAfterLine(a => a.referred, ctx => [
+            <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+          ]);
+        });
 
-    if (SMSMessageEntity.hasMixin(CaseActivityMixin))
-      Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
-        vr.insertAfterLine(a => a.referred, ctx => [
-          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
-        ]);
-      });
-
-    if (EmailMessageEntity.hasMixin(CaseActivityMixin))
-      Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
-        vr.insertAfterLine(a => a.target, ctx => [
-          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
-        ]);
-      });
+    if (AuthClient.navigatorIsViewable(EmailMessageEntity))
+      if (EmailMessageEntity.hasMixin(CaseActivityMixin))
+        Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
+          vr.insertAfterLine(a => a.target, ctx => [
+            <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+          ]);
+        });
   }
 }
 
