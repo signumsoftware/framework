@@ -132,16 +132,18 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     if (p.getImageSrc) {
       if (p.getImageSrc && p.ctx.value) {
-        const le = isLite(p.ctx.value) ? p.ctx.value : newLite(p.ctx.value.Type, p.ctx.value.id);
-
-        p.getImageSrc(le).then(src => {
-          debugger;
-          setIconString(src);
+        const le = isLite(p.ctx.value) ? p.ctx.value : null;
+        if (le) {
+          p.getImageSrc(le).then(src => {
+            debugger;
+            setIconString(src);
+          }
+          ).done();
+        } else {
+          setIconString(undefined);
         }
-        ).done();
-      } else {
-        setIconString(undefined);
-      }
+        }
+       
 
     } 
 
