@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is, isEntity } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -132,20 +132,26 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     if (p.getImageSrc) {
       if (p.getImageSrc && p.ctx.value) {
-        const le = isLite(p.ctx.value) ? p.ctx.value : null;
+
+        const le = isLite(p.ctx.value) ? p.ctx.value :
+          isEntity(p.ctx.value) ? toLite(p.ctx.value) : null;
+
         if (le) {
           p.getImageSrc(le).then(src => {
             debugger;
             setIconString(src);
           }
           ).done();
-        } else {
+        } 
+        else {
           setIconString(undefined);
         }
-        }
-       
+      }
+      else {
+        setIconString(undefined);
+      }
 
-    } 
+    }
 
   }, [p.ctx.value]);
 
@@ -191,7 +197,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
         </div>
         {iconString &&
           <div className="col-auto" >
-          <img style={{ maxHeight: "2rem" }} src={iconString} />
+            <img style={{ maxHeight: "2rem" }} src={iconString} />
           </div>
         }
 
