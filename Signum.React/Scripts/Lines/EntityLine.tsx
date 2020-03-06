@@ -11,6 +11,8 @@ import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TypeaheadHandle } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
 import { useController } from './LineBase'
+import { Alert } from 'react-bootstrap'
+import { newLite } from '../Reflection'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -18,6 +20,7 @@ export interface EntityLineProps extends EntityBaseProps {
   renderItem?: React.ReactNode;
   showType?: boolean;
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  getImageSrc?: (e: Lite<Entity>) => Promise<undefined | null | string>;
 }
 
 interface ItemPair {
@@ -121,8 +124,29 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 export const EntityLine = React.memo(React.forwardRef(function EntityLine(props: EntityLineProps, ref: React.Ref<EntityLineController>) {
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
+  const [iconString, setIconString] = React.useState<string | null | undefined>(undefined);
 
- 
+
+  React.useEffect(() => {
+    debugger;
+
+    if (p.getImageSrc) {
+      if (p.getImageSrc && p.ctx.value) {
+        const le = isLite(p.ctx.value) ? p.ctx.value : newLite(p.ctx.value.Type, p.ctx.value.id);
+
+        p.getImageSrc(le).then(src => {
+          debugger;
+          setIconString(src);
+        }
+        ).done();
+      } else {
+        setIconString(undefined);
+      }
+
+    } 
+
+  }, [p.ctx.value]);
+
 
   if (c.isHidden)
     return null;
@@ -143,21 +167,32 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="sf-entity-line">
-        {
-          !EntityBaseController.hasChildrens(buttons) ?
-            (hasValue ? renderLink() : renderAutoComplete()) :
-            (hasValue ?
-              <div className={p.ctx.inputGroupClass}>
-                {renderLink()}
-                {buttons}
-              </div> :
-              renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
-                {input}
-                {buttons}
-              </div>)
-            )
+      <div className="row">
+
+        <div className="col">
+          <div className="sf-entity-line">
+            {
+              !EntityBaseController.hasChildrens(buttons) ?
+                (hasValue ? renderLink() : renderAutoComplete()) :
+                (hasValue ?
+                  <div className={p.ctx.inputGroupClass}>
+                    {renderLink()}
+                    {buttons}
+                  </div> :
+                  renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+                    {input}
+                    {buttons}
+                  </div>)
+                )
+            }
+          </div>
+        </div>
+        {iconString &&
+          <div className="col-auto" >
+          <img style={{ maxHeight: "2rem" }} src={iconString} />
+          </div>
         }
+
       </div>
     </FormGroup>
   );
