@@ -19,8 +19,10 @@ export class EnumCheckboxListController extends LineBaseController<EnumCheckboxL
   getDefaultProps(p: EnumCheckboxListProps) {
     super.getDefaultProps(p);
     p.columnWidth = 200;
-    const ti = getTypeInfo(p.type!.name);
-    p.data = Dic.getKeys(ti.members);
+    if (p.type) {
+      const ti = getTypeInfo(p.type.name);
+      p.data = Dic.getKeys(ti.members);
+    }
   }
 
   handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: string) => {

@@ -38,6 +38,14 @@ namespace Signum.Engine
             "db_denydatawriter"
         };
 
+        public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
+        {
+            if (Schema.Current.Settings.IsPostgres)
+                return null;
+
+            return new SqlPreCommandSimple("use {0}".FormatWith((databaseName ?? Connector.Current.DatabaseName()).SqlEscape(Schema.Current.Settings.IsPostgres)));
+        }
+
         #region Create Tables
         public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
         {

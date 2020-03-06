@@ -1435,27 +1435,27 @@ export const formatRules: FormatRule[] = [
   {
     name: "Lite",
     isApplicable: col => col.token!.filterType == "Lite",
-    formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+    formatter: col => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
   },
 
   {
     name: "Guid",
     isApplicable: col => col.token!.filterType == "Guid",
-    formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    formatter: col => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
     name: "SystemValidFrom",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1471,7 +1471,7 @@ export const formatRules: FormatRule[] = [
     name: "SystemValidTo",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1488,7 +1488,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
     }
   },
   {
@@ -1496,13 +1496,13 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
     }
   },
   {
     name: "Bool",
     isApplicable: col => col.token!.filterType == "Boolean",
-    formatter: col => new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
+    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
   },
 ];
 
@@ -1519,14 +1519,14 @@ export const entityFormatRules: EntityFormatRule[] = [
     name: "View",
     isApplicable: row => true,
     formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
-      <EntityLink lite={row.entity}
-        inSearch={true}
-        onNavigated={sc?.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
-        <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBaseController.viewIcon}
-        </span>
-      </EntityLink>
+        <EntityLink lite={row.entity}
+          inSearch={true}
+          onNavigated={sc?.handleOnNavigated}
+          getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+          inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+          <span title={EntityControlMessage.View.niceToString()}>
+            {EntityBaseController.viewIcon}
+          </span>
+        </EntityLink>
   },
 ];

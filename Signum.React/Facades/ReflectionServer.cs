@@ -61,7 +61,6 @@ namespace Signum.React.Facades
             var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
 
             EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
-            EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace!);
         }
 
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;

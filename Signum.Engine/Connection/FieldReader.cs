@@ -28,7 +28,8 @@ namespace Signum.Engine
         private const TypeCode tcDateTimeOffset = (TypeCode)22;
         private const TypeCode tcNpgsqlDate = (TypeCode)24;
 
-        public int LastOrdinal;
+        public int? LastOrdinal;
+        public string? LastMethodName;
 
         TypeCode GetTypeCode(int ordinal)
         {
@@ -66,12 +67,14 @@ namespace Signum.Engine
         public bool IsNull(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(IsNull);
             return reader.IsDBNull(ordinal);
         }
 
         public string? GetString(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetString);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -107,6 +110,7 @@ namespace Signum.Engine
         public byte[]? GetByteArray(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetByteArray);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -118,6 +122,7 @@ namespace Signum.Engine
         public bool GetBoolean(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetBoolean);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Boolean:
@@ -140,6 +145,7 @@ namespace Signum.Engine
         public bool? GetNullableBoolean(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableBoolean);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -175,6 +181,7 @@ namespace Signum.Engine
         public Byte? GetNullableByte(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableByte);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -186,6 +193,7 @@ namespace Signum.Engine
         public Char GetChar(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetChar);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -210,6 +218,7 @@ namespace Signum.Engine
         public Char? GetNullableChar(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableChar);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -221,6 +230,7 @@ namespace Signum.Engine
         public Single GetFloat(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetFloat);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -245,6 +255,7 @@ namespace Signum.Engine
         public Single? GetNullableFloat(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableFloat);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -256,6 +267,7 @@ namespace Signum.Engine
         public Double GetDouble(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetDouble);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -280,6 +292,7 @@ namespace Signum.Engine
         public Double? GetNullableDouble(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableDouble);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -291,6 +304,7 @@ namespace Signum.Engine
         public Decimal GetDecimal(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetDecimal);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -315,6 +329,7 @@ namespace Signum.Engine
         public Decimal? GetNullableDecimal(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableDecimal);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -326,6 +341,7 @@ namespace Signum.Engine
         public Int16 GetInt16(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetInt16);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -350,6 +366,7 @@ namespace Signum.Engine
         public Int16? GetNullableInt16(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableInt16);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -361,6 +378,7 @@ namespace Signum.Engine
         public Int32 GetInt32(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetInt32);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -385,6 +403,7 @@ namespace Signum.Engine
         public Int32? GetNullableInt32(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableInt32);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -396,6 +415,7 @@ namespace Signum.Engine
         public Int64 GetInt64(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetInt64);
             switch (typeCodes[ordinal])
             {
                 case TypeCode.Byte:
@@ -420,6 +440,7 @@ namespace Signum.Engine
         public Int64? GetNullableInt64(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableInt64);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -431,6 +452,7 @@ namespace Signum.Engine
         public DateTime GetDateTime(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetDateTime);
             DateTime dt;
             switch (typeCodes[ordinal])
             {
@@ -452,6 +474,7 @@ namespace Signum.Engine
         public DateTime? GetNullableDateTime(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableDateTime);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -461,8 +484,8 @@ namespace Signum.Engine
 
         public Date GetDate(int ordinal)
         {
-
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetDate);
             Date dt;
             switch (typeCodes[ordinal])
             {
@@ -483,6 +506,7 @@ namespace Signum.Engine
         public Date? GetNullableDate(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableDate);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -493,6 +517,7 @@ namespace Signum.Engine
         public DateTimeOffset GetDateTimeOffset(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetDateTimeOffset);
             switch (typeCodes[ordinal])
             {
                 case tcDateTimeOffset:
@@ -508,6 +533,7 @@ namespace Signum.Engine
         public DateTimeOffset? GetNullableDateTimeOffset(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableDateTimeOffset);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -519,6 +545,7 @@ namespace Signum.Engine
         public TimeSpan GetTimeSpan(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetTimeSpan);
             switch (typeCodes[ordinal])
             {
                 case tcTimeSpan:
@@ -534,6 +561,7 @@ namespace Signum.Engine
         public TimeSpan? GetNullableTimeSpan(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableTimeSpan);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -545,6 +573,7 @@ namespace Signum.Engine
         public Guid GetGuid(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetGuid);
             switch (typeCodes[ordinal])
             {
                 case tcGuid:
@@ -557,6 +586,7 @@ namespace Signum.Engine
         public Guid? GetNullableGuid(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableGuid);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
@@ -570,6 +600,7 @@ namespace Signum.Engine
             where T : IBinarySerialize
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (T)(object)null!;
@@ -585,6 +616,7 @@ namespace Signum.Engine
         public T[] GetArray<T>(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (T[])(object)null!;
@@ -597,6 +629,7 @@ namespace Signum.Engine
         public NpgsqlTypes.NpgsqlRange<T>? GetNullableRange<T>(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableRange) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (NpgsqlTypes.NpgsqlRange<T>)(object)null!;
@@ -609,6 +642,7 @@ namespace Signum.Engine
         public NpgsqlTypes.NpgsqlRange<T> GetRange<T>(int ordinal)
         {
             LastOrdinal = ordinal;
+            LastMethodName = nameof(GetRange) + "<" + typeof(T).Name + ">";
             return (NpgsqlTypes.NpgsqlRange<T>)this.reader[ordinal];
         }
 
@@ -659,22 +693,29 @@ namespace Signum.Engine
 
         internal FieldReaderException CreateFieldReaderException(Exception ex)
         {
-            return new FieldReaderException(ex, 
-                ordinal:  LastOrdinal,
-                columnName: reader.GetName(LastOrdinal),
-                columnType: reader.GetFieldType(LastOrdinal)
-            );
+            return new FieldReaderException(ex,
+                ordinal: LastOrdinal,
+                columnName: LastOrdinal != null ? reader.GetName(LastOrdinal.Value) : null,
+                methodName: LastMethodName
+            ) ;
         }
     }
 
     [Serializable]
     public class FieldReaderException : DbException
     {
-        public FieldReaderException(Exception inner, int ordinal, string columnName, Type columnType) : base(null, inner)
+        public int? Ordinal { get; internal set; }
+        public string? ColumnName { get; internal set; }
+        public string? MethodName { get; internal set; }
+        public int Row { get; internal set; }
+        public SqlPreCommand? Command { get; internal set; }
+        public LambdaExpression? Projector { get; internal set; }
+
+        public FieldReaderException(Exception inner, int? ordinal, string? columnName, string? methodName) : base(null, inner)
         {
             this.Ordinal = ordinal;
             this.ColumnName = columnName;
-            this.ColumnType = columnType;
+            this.MethodName = methodName;
         }
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         protected FieldReaderException(
@@ -687,14 +728,13 @@ namespace Signum.Engine
         {
             get
             {
-                string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(
-                    InnerException!.Message, Ordinal, ColumnName, Row);
+                string text = "{0}\r\nOrdinal: {1}\r\nColumnName: {2}\r\nRow: {3}".FormatWith(InnerException!.Message, Ordinal, ColumnName, Row);
+
+                if (Ordinal != null && MethodName != null)
+                    text += "\r\nCalling: row.Reader.{0}({1})".FormatWith(MethodName, Ordinal);
 
                 if (Projector != null)
-                {
-                    text += "\r\nCalling: row.Reader.Get{0}({1})".FormatWith(ColumnType.Name, Ordinal);
                     text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToString().Indent(4));
-                }
 
                 if(Command != null)
                     text += "\r\nCommand:\r\n{0}".FormatWith(Command.PlainSql().Indent(4));
@@ -703,11 +743,6 @@ namespace Signum.Engine
             }
         }
 
-        public int Ordinal { get; internal set; }
-        public string ColumnName { get; internal set; }
-        public Type ColumnType { get; internal set; }
-        public int Row { get; internal set; }
-        public SqlPreCommand? Command { get; internal set; }
-        public LambdaExpression? Projector { get; internal set; }
+       
     }
 }
