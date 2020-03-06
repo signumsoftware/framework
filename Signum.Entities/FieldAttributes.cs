@@ -225,7 +225,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         }
     }
 
-
+    /// <summary>
+    /// Avoids that an Entity field has database representation (column or MList table)
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class IgnoreAttribute : Attribute
     {
