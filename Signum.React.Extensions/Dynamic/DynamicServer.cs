@@ -6,6 +6,9 @@ using Signum.React.TypeHelp;
 using Signum.Utilities;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Signum.React.Facades;
+using Signum.Entities.Dynamic;
+using Signum.Entities.Authorization;
 
 namespace Signum.React.Dynamic
 {
@@ -15,6 +18,7 @@ namespace Signum.React.Dynamic
         {
             TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            ReflectionServer.RegisterLike(typeof(DynamicViewMessage), () => UserEntity.Current != null);
 
             EntityJsonConverter.AfterDeserilization.Register((PropertyRouteEntity wc) =>
             {
