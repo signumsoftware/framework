@@ -487,6 +487,8 @@ export function setTypes(types: TypeInfoDictionary) {
     const m = getMember(s.key);
     if (m)
       s.id = m.id;
+
+    return s.id == null;
   });
 }
 
@@ -1782,9 +1784,16 @@ export class GraphExplorer {
 
     for (const p in obj) {
       if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
-        const propertyPrefix = dot(modelStatePrefix, p);
-        if (this.isModified(obj[p], propertyPrefix))
-          mod.modified = true;
+
+        if (p == "mixins") {
+          const propertyPrefix = dot(modelStatePrefix, p);
+          if (this.isModifiedMixinDictionary(obj[p], propertyPrefix))
+            mod.modified = true;
+        } else {
+          const propertyPrefix = dot(modelStatePrefix, p);
+          if (this.isModified(obj[p], propertyPrefix))
+            mod.modified = true;
+        }
       }
     }
 
@@ -1796,6 +1805,19 @@ export class GraphExplorer {
     }
 
     return mod.modified;
+  }
+
+  isModifiedMixinDictionary(mixins: { [name: string]: MixinEntity }, prefix: string) {
+    if (mixins == undefined)
+      return false;
+
+    var modified = false;
+    for (const p in mixins) {
+      const mixinPrefix = prefix + "[" + p + "]";
+      if (this.isModified(mixins[p], mixinPrefix))
+        modified = true;
+    }
+    return modified;
   }
 
   static TypesLazilyCreated: string[] = [];

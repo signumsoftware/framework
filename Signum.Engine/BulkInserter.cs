@@ -158,7 +158,7 @@ namespace Signum.Engine
                 DataTable dt = new DataTable();
                 var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
                 foreach (var c in columns)
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
                 using (disableIdentityBehaviour ? Administrator.DisableIdentity(t, behaviourOnly: true) : null)
                 {
@@ -183,6 +183,15 @@ namespace Signum.Engine
                     return tr.Commit(list.Count);
                 }
             }
+        }
+
+        private static Type ConvertType(Type type)
+        {
+            var result = type.UnNullify();
+            if (result == typeof(Date))
+                return typeof(DateTime);
+
+            return result;
         }
 
         static void Validate<T>(IEnumerable<T> entities) where T : Entity
@@ -224,10 +233,10 @@ namespace Signum.Engine
             {
                 try
                 {
-                    var func = mListProperty.Compile();
+                    var func = PropertyRoute.Construct(mListProperty).GetLambdaExpression<E, MList<V>>(safeNullAccess: true).Compile();
 
                     var mlistElements = (from e in entities
-                                         from mle in func(e).Select((iw, i) => new MListElement<E, V>
+                                         from mle in func(e).EmptyIfNull().Select((iw, i) => new MListElement<E, V>
                                          {
                                              Order = i,
                                              Element = iw,
@@ -274,7 +283,7 @@ namespace Signum.Engine
                 DataTable dt = new DataTable();
                 var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour).ToList();
                 foreach (var c in columns)
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
                 var list = mlistElements.ToList();
 
@@ -330,7 +339,7 @@ namespace Signum.Engine
                 var columns = t.Columns.Values.ToList();
                 DataTable dt = new DataTable();
                 foreach (var c in columns)
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
                 foreach (var e in entities)
                 {

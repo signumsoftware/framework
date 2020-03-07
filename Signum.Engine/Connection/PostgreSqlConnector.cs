@@ -37,7 +37,7 @@ namespace Signum.Engine
 
                         var version = (string)result.Rows[0]["server_version"]!;
 
-                        return new Version(version);
+                        return new Version(version.TryBefore("(") ?? version);
                     }
                 }
             });
@@ -436,6 +436,7 @@ BEGIN
                 FROM pg_class pc, pg_namespace pns
                 WHERE pns.oid=pc.relnamespace
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relname NOT LIKE 'pg_%'
                     AND pc.relkind IN ('v', 'm')
             ) LOOP
                 EXECUTE format('DROP VIEW %I.%I;',
@@ -499,7 +500,12 @@ END; $$;");
         public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
         {
             if (dbType.IsDate())
-                AssertDateTime((DateTime?)value);
+            {
+                if (value is DateTime dt)
+                    AssertDateTime(dt);
+                else if (value is Date d)
+                    value = new NpgsqlDate((DateTime)d);
+            }
 
             var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
             {
@@ -516,7 +522,12 @@ END; $$;");
 
         public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
         {
-            Expression valueExpr = Expression.Convert(dbType.IsDate() ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
+            Expression valueExpr = Expression.Convert(
+              !dbType.IsDate() ? value :
+              value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+              value.Type.UnNullify() == typeof(Date) ? Expression.Convert(Expression.Convert(value, typeof(Date?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
+              value,
+              typeof(object));
 
             if (nullable)
                 valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),

@@ -668,19 +668,27 @@ namespace Signum.Utilities
         public static string Indent(this string str, int numChars, char indentChar)
         {
             string space = new string(indentChar, numChars);
+
             StringBuilder sb = new StringBuilder();
-            using (StringReader sr = new StringReader(str))
+
+            for (int pos = 0; pos < str.Length; )
             {
-                for (string? line = sr.ReadLine(); line != null; line = sr.ReadLine())
+                var nextPos = str.IndexOf('\n', pos);
+                if(nextPos == -1)
                 {
                     sb.Append(space);
-                    sb.AppendLine(line);
+                    sb.Append(str.Substring(pos));
+                    pos = str.Length + 1;
+                }
+                else
+                {
+                    sb.Append(space);
+                    sb.Append(str.Substring(pos, (nextPos - pos) + 1));
+                    pos = nextPos + 1;
                 }
             }
 
-            string result = sb.ToString(0, str.EndsWith("\r\n") ? sb.Length : Math.Max(sb.Length - 2, 0));
-
-            return result;
+            return sb.ToString();
         }
 
         public static string FirstUpper(this string str)

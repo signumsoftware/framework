@@ -231,17 +231,17 @@ namespace Signum.React.JsonModelValidators
                             }
                         }
                     }
-                }
 
-                if (entity != null && entity.Mixins.Any())
-                {
-                    foreach (var mixin in entity.Mixins)
+                    if (entity != null && entity.Mixins.Any())
                     {
-                        if (this.CurrentPath.Push(mixin))
+                        foreach (var mixin in entity.Mixins)
                         {
-                            using (StateManager.Recurse(this, "mixins[" + mixin.GetType().Name + "].element", null, mixin, null))
+                            if (this.CurrentPath.Push(mixin))
                             {
-                                isValid &= ValidateModifiableEntity(mixin);
+                                using (StateManager.Recurse(this, this.Key + ".mixins[" + mixin.GetType().Name + "]", null, mixin, null))
+                                {
+                                    isValid &= ValidateModifiableEntity(mixin);
+                                }
                             }
                         }
                     }

@@ -575,7 +575,7 @@ namespace Signum.Engine.Linq
         {
             var nominate = DbExpressionNominator.FullNominate(element)!;
 
-            if (nominate is ToDayOfWeekExpression dowe)
+            if (nominate.RemoveUnNullify() is ToDayOfWeekExpression dowe)
             {
                 if (isPostgres)
                 {

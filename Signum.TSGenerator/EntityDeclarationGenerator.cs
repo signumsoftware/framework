@@ -598,7 +598,9 @@ namespace Signum.TSGenerator
             if (type.FullName == typeof(String).FullName)
                 return "string";
 
-            if (type.FullName == typeof(DateTime).FullName)
+            if (type.FullName == typeof(DateTime).FullName ||
+                type.FullName == "Signum.Utilities.Date"
+                )
                 return "string";
 
             if (type.FullName == typeof(DateTimeOffset).FullName)

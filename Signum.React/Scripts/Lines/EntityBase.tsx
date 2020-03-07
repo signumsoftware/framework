@@ -75,18 +75,19 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   }
 
   getDefaultProps(state: P) {
+    if (state.type) {
+      const type = state.type;
 
-    const type = state.type!;
+      const customComponent = Boolean(state.getComponent || state.getViewPromise);
 
-    const customComponent = Boolean(state.getComponent || state.getViewPromise);
+      state.create = EntityBaseController.defaultIsCreable(type, customComponent);
+      state.view = EntityBaseController.defaultIsViewable(type, customComponent);
+      state.find = EntityBaseController.defaultIsFindable(type);
+      state.findOptions = Navigator.defaultFindOptions(type);
 
-    state.create = EntityBaseController.defaultIsCreable(type, customComponent);
-    state.view = EntityBaseController.defaultIsViewable(type, customComponent);
-    state.find = EntityBaseController.defaultIsFindable(type);
-    state.findOptions = Navigator.defaultFindOptions(type);
-
-    state.viewOnCreate = true;
-    state.remove = true;
+      state.viewOnCreate = true;
+      state.remove = true;
+    }
   }
 
   convert(entityOrLite: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | Lite<Entity>> {

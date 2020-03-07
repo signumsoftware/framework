@@ -30,7 +30,7 @@ export class ReactVisitor {
 
     const oldChildren = React.Children.toArray(element.props.children);
 
-    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c));
+    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c as React.ReactChild));
 
     if (newChildren.length != oldChildren.length || newChildren.some((n, i) => n !== oldChildren[i]))
       return React.cloneElement(element, undefined, newChildren);

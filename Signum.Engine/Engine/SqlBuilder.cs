@@ -38,6 +38,14 @@ namespace Signum.Engine
             "db_denydatawriter"
         };
 
+        public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
+        {
+            if (Schema.Current.Settings.IsPostgres)
+                return null;
+
+            return new SqlPreCommandSimple("use {0}".FormatWith((databaseName ?? Connector.Current.DatabaseName()).SqlEscape(Schema.Current.Settings.IsPostgres)));
+        }
+
         #region Create Tables
         public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
         {
@@ -298,7 +306,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             if (objectName.Schema.Database == null)
             {
                 if (IsPostgres)
-                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(new ObjectName(objectName.Schema, indexName, IsPostgres)));
                 else
                     return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
             }

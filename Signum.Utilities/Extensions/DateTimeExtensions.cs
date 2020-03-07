@@ -119,7 +119,16 @@ namespace Signum.Utilities
         public static int YearsTo(this DateTime start, DateTime end)
         {
             int result = end.Year - start.Year;
-            if (end.Month < start.Month || (end.Month == start.Month & end.Day < start.Day))
+            if (end < start.AddYears(result))
+                result--;
+
+            return result;
+        }
+
+        public static int YearsTo(this Date start, Date end)
+        {
+            int result = end.Year - start.Year;
+            if (end < start.AddYears(result))
                 result--;
 
             return result;
@@ -128,7 +137,16 @@ namespace Signum.Utilities
         public static int MonthsTo(this DateTime start, DateTime end)
         {
             int result = end.Month - start.Month + (end.Year - start.Year) * 12;
-            if (end.Day < start.Day)
+            if (end < start.AddMonths(result))
+                result--;
+
+            return result;
+        }
+
+        public static int MonthsTo(this Date start, Date end)
+        {
+            int result = end.Month - start.Month + (end.Year - start.Year) * 12;
+            if (end < start.AddMonths(result))
                 result--;
 
             return result;
@@ -384,6 +402,11 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date YearStart(this Date date)
+        {
+            return new Date(date.Year, 1, 1);
+        }
+
         public static DateTime QuarterStart(this DateTime dateTime)
         {
             var quarterMonthStart = (((dateTime.Month - 1) / 4) * 4) + 1;
@@ -391,9 +414,21 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, quarterMonthStart, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date QuarterStart(this Date date)
+        {
+            var quarterMonthStart = (((date.Month - 1) / 4) * 4) + 1;
+
+            return new Date(date.Year, quarterMonthStart, 1);
+        }
+
         public static int Quarter(this DateTime dateTime)
         {
             return ((dateTime.Month - 1) / 4) + 1;
+        }
+
+        public static int Quarter(this Date date)
+        {
+            return ((date.Month - 1) / 4) + 1;
         }
 
         public static DateTime MonthStart(this DateTime dateTime)
@@ -401,9 +436,19 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date MonthStart(this Date date)
+        {
+            return new Date(date.Year, date.Month, 1);
+        }
+
         public static DateTime WeekStart(this DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind).AddDays(-(int)dateTime.DayOfWeek);
+        }
+
+        public static Date WeekStart(this Date date)
+        {
+            return new Date(date.Year, date.Month, date.Day).AddDays(-(int)date.DayOfWeek);
         }
 
         public static DateTime HourStart(this DateTime dateTime)
@@ -438,6 +483,13 @@ namespace Signum.Utilities
             return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
         }
 
+        public static int WeekNumber(this Date date)
+        {
+            var cc = CultureInfo.CurrentCulture;
+
+            return cc.Calendar.GetWeekOfYear(date, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+        }
+
         /// <summary>
         /// Returns the unix time (also known as POSIX time or epoch time) for the give date time.
         /// </summary>
@@ -456,11 +508,6 @@ namespace Signum.Utilities
         public static long ToUnixTimeMilliseconds(this DateTime dateTime)
         {
             return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
-        }
-
-        public static Date ToDate(this DateTime dt)
-        {
-            return new Date(dt);
         }
     }
 

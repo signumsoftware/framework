@@ -51,7 +51,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     this.recentlyCreated = React.useRef<Lite<Entity> | ModifiableEntity | null>(null);
 
     React.useEffect(() => {
-      this.containerDiv && this.containerDiv.current!.addEventListener("scroll", (e) => {
+      this.containerDiv.current && this.containerDiv.current.addEventListener("scroll", (e) => {
         var translate = "translate(0," + this.containerDiv.current!.scrollTop + "px)";
         this.thead.current!.style.transform = translate;
       });
@@ -68,42 +68,45 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   overrideProps(state: EntityTableProps, overridenProps: EntityTableProps) {
     super.overrideProps(state, overridenProps);
 
-    if (!state.columns) {
-      var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
+    if (state.ctx.propertyRoute) {
 
-      state.columns = Dic.getKeys(elementPr.subMembers())
-        .filter(a => a != "Id")
-        .map(memberName => ({
-          property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
-        }) as EntityTableColumn<ModifiableEntity, any>);
+      if (!state.columns) {
+        var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
+
+        state.columns = Dic.getKeys(elementPr.subMembers())
+          .filter(a => a != "Id")
+          .map(memberName => ({
+            property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
+          }) as EntityTableColumn<ModifiableEntity, any>);
+      }
+
+      var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
+      state.columns.forEach(c => {
+        if (c.template === undefined) {
+          if (c.property == null)
+            throw new Error("Column has no property and no template");
+
+          var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!));
+
+          c.template = (ctx, row, state) => {
+            var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
+            return factory(subCtx);
+          };
+        }
+
+        if (c.mergeCells == true) {
+          if (c.property == null)
+            throw new Error("Column has no property but mergeCells is true");
+
+          c.mergeCells = c.property;
+        }
+
+        if (typeof c.mergeCells == "string") {
+          const prop = c.mergeCells;
+          c.mergeCells = a => (a as any)[prop];
+        }
+      });
     }
-
-    var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
-    state.columns.forEach(c => {
-      if (c.template === undefined) {
-        if (c.property == null)
-          throw new Error("Column has no property and no template");
-
-        var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!));
-
-        c.template = (ctx, row, state) => {
-          var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
-          return factory(subCtx);
-        };
-      }
-
-      if (c.mergeCells == true) {
-        if (c.property == null)
-          throw new Error("Column has no property but mergeCells is true");
-
-        c.mergeCells = c.property;
-      }
-
-      if (typeof c.mergeCells == "string") {
-        const prop = c.mergeCells;
-        c.mergeCells = a => (a as any)[prop];
-      }
-    });
   }
 
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
@@ -206,7 +209,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
   const c = useController(EntityTableController, props, ref);
   const p = c.props;
 
-  if (p.type!.isLite)
+  if (p.type && p.type.isLite)
     throw new Error("Lite not supported");
 
   if (c.isHidden)

@@ -27,6 +27,7 @@ export interface ValueLineProps extends LineBaseProps {
   incrementWithArrow?: boolean | number;
   columnCount?: number;
   columnWidth?: number;
+  showTimeBox?: boolean;
 }
 
 export interface OptionItem {
@@ -82,10 +83,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   getDefaultProps(state: ValueLineProps) {
     super.getDefaultProps(state);
-    state.valueLineType = ValueLineController.getValueLineType(state.type!);
+    if (state.type) {
+      state.valueLineType = ValueLineController.getValueLineType(state.type);
 
-    if (state.valueLineType == undefined)
-      throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+      if (state.valueLineType == undefined)
+        throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+    }
   }
 
   overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
@@ -106,7 +109,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset")
+    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -578,7 +581,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const momentFormat = toMomentFormat(s.formatText);
 
   const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = momentFormat != "L" && momentFormat != "LL";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
 
   if (s.ctx.readOnly)
     return (
@@ -592,8 +595,9 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
     const m = moment(date);
     vl.setValue(!m.isValid() ? null :
-      !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
-        m.format());
+      vl.props.type!.name == "Date" ? formatAsDate(m):
+        !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
+          m.format());
   };
 
   let currentDate = moment();
@@ -615,6 +619,10 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       )}
     </FormGroup>
   );
+}
+
+export function formatAsDate(m: moment.Moment) {
+  return m.format("YYYY-MM-DD");
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
@@ -705,17 +713,44 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     function fixNumber(val: string) {
       var valParts = val.split(":");
       var formatParts = format.split(":");
-      var result = format;
-      for (var i = 0; i < formatParts.length; i++) {
-        var formP = formatParts[i];
-        var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
-        result = result.replace(formP, valP);
-      }
+      if (valParts.length == 1 && formatParts.length > 1) {
+        const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
 
-      return result;
+        var inferedFormat = validFormats.firstOrNull(f => f.length >= val.length);
+        if (inferedFormat == null)
+          return null;
+
+        var fixedVal = val.padStart(inferedFormat.length, '0');
+
+        const getPart = (part: string) => {
+          var index = inferedFormat!.indexOf(part);
+          if (index == -1)
+            return "".padStart(part.length, '0');
+
+          return fixedVal.substr(index, part.length);
+        }
+
+        return format
+          .replace("hh", getPart("hh"))
+          .replace("mm", getPart("mm"))
+          .replace("ss", getPart("ss"));
+
+      } else {
+
+        var result = format;
+        for (var i = 0; i < formatParts.length; i++) {
+          var formP = formatParts[i];
+          var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
+          result = result.replace(formP, valP);
+        }
+        return result;
+      }
     }
 
-    function normalize(val: string) {
+    function normalize(val: string | null) {
+      if (val == null)
+        return null;
+
       if (!"hh:mm:ss".contains(format))
         throw new Error("not implemented");
 

@@ -379,7 +379,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
-      displayName: co.displayName ?? completer.get(co.token.toString()).niceName,
+      displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
@@ -489,7 +489,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualsTo") &&
+      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
@@ -620,7 +620,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
         token: completer.get(co.token.toString()),
-        displayName: co.displayName ?? completer.get(co.token.toString()).niceName
+        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -1153,7 +1153,7 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(p.label ?? "") +
+        query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
@@ -1182,7 +1182,7 @@ export module Encoder {
 
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
     if (columnOptions)
-      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : ""));
   }
 
   export function stringValue(value: any): string {
@@ -1369,7 +1369,7 @@ export interface SimpleFilterBuilderContext {
 
 export interface FormatRule {
   name: string;
-  formatter: (column: ColumnOptionParsed) => CellFormatter;
+  formatter: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => CellFormatter;
   isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
@@ -1383,6 +1383,8 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  row: ResultRow;
+  rowIndex: number;
 }
 
 
@@ -1401,7 +1403,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
 
   const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
-  return rule.formatter(co);
+  return rule.formatter(co, sc);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
@@ -1433,27 +1435,27 @@ export const formatRules: FormatRule[] = [
   {
     name: "Lite",
     isApplicable: col => col.token!.filterType == "Lite",
-    formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+    formatter: col => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
   },
 
   {
     name: "Guid",
     isApplicable: col => col.token!.filterType == "Guid",
-    formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    formatter: col => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
     name: "SystemValidFrom",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1469,7 +1471,7 @@ export const formatRules: FormatRule[] = [
     name: "SystemValidTo",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1486,7 +1488,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
     }
   },
   {
@@ -1494,13 +1496,13 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
     }
   },
   {
     name: "Bool",
     isApplicable: col => col.token!.filterType == "Boolean",
-    formatter: col => new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
+    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
   },
 ];
 
@@ -1517,14 +1519,14 @@ export const entityFormatRules: EntityFormatRule[] = [
     name: "View",
     isApplicable: row => true,
     formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
-      <EntityLink lite={row.entity}
-        inSearch={true}
-        onNavigated={sc?.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
-        <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBaseController.viewIcon}
-        </span>
-      </EntityLink>
+        <EntityLink lite={row.entity}
+          inSearch={true}
+          onNavigated={sc?.handleOnNavigated}
+          getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+          inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+          <span title={EntityControlMessage.View.niceToString()}>
+            {EntityBaseController.viewIcon}
+          </span>
+        </EntityLink>
   },
 ];

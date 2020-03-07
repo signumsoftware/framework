@@ -27,6 +27,8 @@ namespace Signum.Test.Environment
         public Lite<IEntity>? OtherTarget { get; set; }
 
         public DateTime CreationTime { get; set; }
+        
+        public Date CreationDate { get; set; }
 
         public override string ToString()
         {

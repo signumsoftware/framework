@@ -974,14 +974,17 @@ namespace Signum.Engine.DynamicQuery
 
             var task = func();
 
-            return giCastObject.GetInvoker(task.GetType().BaseType!.GetGenericArguments())(task);
+            return CastTask<object?>(task);
         }
-
-        static readonly GenericInvoker<Func<Task, Task<object?>>> giCastObject =
-            new GenericInvoker<Func<Task, Task<object?>>>(task => CastObject<int>((Task<int>)task));
-        static Task<object?> CastObject<T>(Task<T> task)
+        public static async Task<T> CastTask<T>(this Task task)
         {
-            return task.ContinueWith(t => (object?)t.Result);
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            await task.ConfigureAwait(false);
+
+            object? result = task.GetType().GetProperty(nameof(Task<object>.Result))!.GetValue(task);
+            return (T)result!;
         }
 
         #endregion

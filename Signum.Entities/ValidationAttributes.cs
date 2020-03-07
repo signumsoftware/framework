@@ -668,28 +668,6 @@ namespace Signum.Entities
         LessThanOrEqualTo,
     }
 
-    public class DaysPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public DaysPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Days)
-        { }
-    }
-
-    public class SecondsPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public SecondsPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Seconds)
-        { }
-    }
-
-    public class MinutesPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public MinutesPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Minutes)
-        { }
-
-    }
-
     public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
@@ -705,9 +683,9 @@ namespace Signum.Entities
                 return null;
 
 
-            var dto= value as DateTimeOffset?;
+            var dto = ToDateTime(value);
 
-            var prec = dto!=null?dto.Value.Date.GetPrecision():((DateTime)value).GetPrecision();
+            var prec = dto.GetPrecision();
             if (prec > Precision)
                 return ValidationMessage._0HasAPrecisionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
@@ -731,6 +709,14 @@ namespace Signum.Entities
             }
         }
 
+        internal static DateTime ToDateTime(object? value)
+        {
+            return value is DateTime dt ? dt :
+                value is Date d ? (DateTime)d :
+                value is DateTimeOffset dto ? dto.DateTime :
+                throw new UnexpectedValueException(value);
+        }
+
         public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
@@ -741,11 +727,15 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((DateTime)value) > TimeZoneManager.Now)
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+            if (dateTime > TimeZoneManager.Now)
                 return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
             return null;
         }
+
+        
 
         public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
@@ -764,7 +754,10 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((DateTime)value).Year < MinYear)
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+
+            if (dateTime.Year < MinYear)
                 return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
 
             return null;
@@ -1057,6 +1050,8 @@ namespace Signum.Entities
         _0IsNotAllowedOnState1,
         [Description("{0} is not set")]
         _0IsNotSet,
+        [Description("{0} are not set")]
+        _0AreNotSet,
         [Description("{0} is set")]
         _0IsSet,
         [Description("{0} is not a {1}")]

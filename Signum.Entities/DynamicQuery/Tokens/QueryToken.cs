@@ -49,6 +49,9 @@ namespace Signum.Entities.DynamicQuery
 
                             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                             {
+                                if (route.Type == typeof(Date))
+                                    return true;
+
                                 var pp = Validator.TryGetPropertyValidator(route);
                                 if (pp != null)
                                 {
@@ -56,7 +59,6 @@ namespace Signum.Entities.DynamicQuery
 
                                     if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
                                         return true;
-
                                 }
                             }
 
@@ -158,6 +160,9 @@ namespace Signum.Entities.DynamicQuery
             if (ut == typeof(DateTime))
                 return DateTimeProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
+            if (ut == typeof(Date))
+                return DateProperties(this).AndHasValue(this);
+
             if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
                 return StepTokens(this, 4).AndHasValue(this);
 
@@ -244,6 +249,26 @@ namespace Signum.Entities.DynamicQuery
                 precision < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
                 precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
                 precision < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
+            }.NotNull().ToList();
+        }
+
+        public static List<QueryToken> DateProperties(QueryToken parent)
+        {
+            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+
+            return new List<QueryToken?>
+            {
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((Date dt ) => dt.Quarter()), ()=> utc + QueryTokenMessage.Quarter.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.QuarterStart),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.MonthStart),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((Date dt ) => dt.WeekNumber()), ()=> utc + QueryTokenMessage.WeekNumber.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.WeekStart),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Day), () => utc + QueryTokenMessage.Day.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.DayOfYear), () => utc + QueryTokenMessage.DayOfYear.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.DayOfWeek), () => utc + QueryTokenMessage.DayOfWeek.NiceToString()),
+
             }.NotNull().ToList();
         }
 
@@ -390,7 +415,11 @@ namespace Signum.Entities.DynamicQuery
                 case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
                 case FilterType.Decimal: return QueryTokenMessage.DecimalNumber.NiceToString();
                 case FilterType.String: return QueryTokenMessage.Text.NiceToString();
-                case FilterType.DateTime: return QueryTokenMessage.DateTime.NiceToString();
+                case FilterType.DateTime:
+                    if (type.UnNullify() == typeof(Date))
+                        return QueryTokenMessage.Date.NiceToString();
+
+                    return QueryTokenMessage.DateTime.NiceToString();
                 case FilterType.Boolean: return QueryTokenMessage.Check.NiceToString();
                 case FilterType.Guid: return QueryTokenMessage.GlobalUniqueIdentifier.NiceToString();
                 case FilterType.Enum: return type.UnNullify().NiceName();

@@ -324,6 +324,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleColumnChanged = (token: QueryToken | undefined) => {
+    if (this.props.findOptions.groupResults) {
+      var allKeys = this.props.findOptions.columnOptions.filter(a => a.token && a.token.queryTokenType != "Aggregate").map(a => a.token!.fullKey);
+      this.props.findOptions.orderOptions = this.props.findOptions.orderOptions.filter(o => allKeys.contains(o.token.fullKey));
+    }
     this.setState({ lastToken: token });
   }
 
@@ -1167,6 +1171,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         columnOptions: extraColumns,
         columnOptionsMode: "Add",
         systemTime: resFo.systemTime && { ...resFo.systemTime },
+        includeDefaultFilters: false,
       }).then(() => {
         this.doSearch(true);
       }).done();
@@ -1233,11 +1238,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
     }));
 
-    const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done(),
-      systemTime: this.props.findOptions.systemTime,
-    };
-
     const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
     return this.state.resultTable.rows.map((row, i) => {
@@ -1246,6 +1246,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
+      const ctx: Finder.CellFormatterContext = {
+        refresh: () => this.doSearch(true).done(),
+        systemTime: this.props.findOptions.systemTime,
+        row: row,
+        rowIndex : i,
+      };
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
