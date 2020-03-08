@@ -197,7 +197,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
         </div>
         {iconString &&
           <div className="col-auto" >
-            <img style={{ maxHeight: "2rem" }} src={iconString} />
+          <img style={{ maxHeight: "2rem" }} src={iconString} className="rounded" />
           </div>
         }
 
