@@ -901,6 +901,16 @@ export function newLite(type: PseudoType, id: number | string): Lite<Entity> {
   };
 }
 
+
+export function newLiteFromKey(key: string): Lite<Entity> {
+  var splitted = key.split(";", 2); 
+  return {
+    EntityType: getTypeName(splitted[0]),
+    id: splitted[1]
+  };
+}
+
+
 export class Type<T extends ModifiableEntity> implements IType {
 
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
