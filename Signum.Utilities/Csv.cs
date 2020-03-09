@@ -415,6 +415,9 @@ namespace Signum.Utilities
                 else
                     return DateTime.ParseExact(s, format, culture);
 
+            if (type == typeof(Guid))
+                return Guid.Parse(s);
+
             return Convert.ChangeType(s, type, culture);
         }
     }
