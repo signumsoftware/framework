@@ -128,8 +128,6 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
 
   React.useEffect(() => {
-    debugger;
-
     if (p.getImageSrc) {
       if (p.getImageSrc && p.ctx.value) {
 
@@ -138,10 +136,8 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
         if (le) {
           p.getImageSrc(le).then(src => {
-            debugger;
             setIconString(src);
-          }
-          ).done();
+          }).done();
         } 
         else {
           setIconString(undefined);
@@ -150,9 +146,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       else {
         setIconString(undefined);
       }
-
     }
-
   }, [p.ctx.value]);
 
 
