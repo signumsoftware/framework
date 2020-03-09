@@ -396,7 +396,9 @@ namespace Signum.Engine.Linq
                     sb.Append("0");
                 else if (c.Value is string s)
                     sb.Append(s == "" ? "''" : ("'" + s + "'"));
-                else
+                else if (c.Value is TimeSpan ts)
+                    sb.Append(@$"CONVERT(time, '{ts.ToString()}')");
+                else 
                     sb.Append(c.ToString());
             }
 
