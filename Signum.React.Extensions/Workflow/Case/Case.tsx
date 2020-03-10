@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
-import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
+import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
@@ -18,7 +18,7 @@ type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 
 interface CaseComponentProps {
   ctx: TypeContext<CaseEntity>;
-  caseActivity?: CaseActivityEntity;
+  workflowActivity?: IWorkflowNodeEntity;
 }
 
 export default function CaseComponent(p: CaseComponentProps) {
@@ -73,7 +73,7 @@ export default function CaseComponent(p: CaseComponentProps) {
                   entities={model.entities}
                   caseFlow={caseFlow}
                   case={ctx.value}
-                  caseActivity={p.caseActivity}
+                  workflowActivity={p.workflowActivity}
                 /></div> :
               <h3>{JavascriptMessage.loading.niceToString()}</h3>}
           </Tab>
