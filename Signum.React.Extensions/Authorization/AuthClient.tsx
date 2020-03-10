@@ -1,21 +1,43 @@
-import * as React from 'react'
-import { ModifiableEntity, EntityPack, is } from '@framework/Signum.Entities';
+import { ImportRoute } from '@framework/AsyncImport';
+import * as Finder from '@framework/Finder';
 import { ifError } from '@framework/Globals';
-import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
+import { LineBase, LineBaseProps, tasks } from '@framework/Lines/LineBase';
+import * as Navigator from '@framework/Navigator';
+import { EntitySettings } from '@framework/Navigator';
+import * as Operations from '@framework/Operations';
+import { EntityOperationSettings } from '@framework/Operations';
+import * as QuickLinks from '@framework/QuickLinks';
+import {
+  getQueryInfo,
+  getTypeInfo,
+  GraphExplorer,
+  OperationInfo,
+  PropertyRoute,
+  PseudoType
+} from '@framework/Reflection';
 import * as Services from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
-import { tasks, LineBase, LineBaseProps } from '@framework/Lines/LineBase'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
-import * as QuickLinks from '@framework/QuickLinks'
-import { EntityOperationSettings } from '@framework/Operations'
-import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
-import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute } from '@framework/Reflection'
-import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
-import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ajaxGet, ajaxGetRaw, ajaxPost, saveFile, ServiceError } from '@framework/Services';
+import { EntityPack, is, ModifiableEntity } from '@framework/Signum.Entities';
+import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
+import * as React from 'react';
+import * as OmniboxClient from '../Omnibox/OmniboxClient';
+import {
+  AuthAdminMessage,
+  BasicPermission,
+  OperationRulePack,
+  PermissionRulePack,
+  PermissionSymbol,
+  PropertyAllowed,
+  PropertyRulePack,
+  QueryAllowed,
+  QueryRulePack,
+  ResetPasswordRequestEntity,
+  RoleEntity,
+  TypeAllowedBasic,
+  TypeRulePack,
+  UserEntity,
+  UserOperation
+} from './Signum.Entities.Authorization';
 
 export let userTicket: boolean;
 export let resetPassword: boolean;
@@ -38,7 +60,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
   options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
-
+  options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
 
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;
@@ -406,6 +428,12 @@ export module API {
     token: string;
   }
 
+  export interface SetPasswordRequest {
+    code: string;
+    password: string;
+    confirmPassword: string;
+  }
+
   export function login(loginRequest: LoginRequest): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/login" }, loginRequest);
   }
@@ -426,6 +454,18 @@ export module API {
 
   export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
     return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
+  }
+
+  export function fetchResetPasswordMail(username: string): Promise<void> {
+    return ajaxGet<void>({ url: `/api/auth/ResetPasswordMail/${username}` });
+  }
+
+  export function fetchResetPasswordRequest(code: string): Promise<ResetPasswordRequestEntity> {
+    return ajaxGet<ResetPasswordRequestEntity>({ url: `/api/auth/ResetPasswordRequest/${code}` });
+  }
+
+  export function setPassword(request: SetPasswordRequest): Promise<void> {
+    return ajaxPost<void>({ url: '/api/auth/SetPassword' }, request);
   }
 
   export function fetchCurrentUser(): Promise<UserEntity> {

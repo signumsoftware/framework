@@ -58,6 +58,9 @@ export module AuthEmailMessage {
   export const YourUsernameIs = new MessageKey("AuthEmailMessage", "YourUsernameIs");
   export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("AuthEmailMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
   export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
+  export const PasswordChangedSubject = new MessageKey("AuthEmailMessage", "PasswordChangedSubject");
+  export const YourPasswordHasRecentlyBeenChanged = new MessageKey("AuthEmailMessage", "YourPasswordHasRecentlyBeenChanged");
+  export const IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs = new MessageKey("AuthEmailMessage", "IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs");
 }
 
 export module AuthMessage {

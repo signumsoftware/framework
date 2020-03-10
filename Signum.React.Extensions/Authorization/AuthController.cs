@@ -1,16 +1,19 @@
-﻿using Signum.Engine.Authorization;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Signum.Engine;
+using Signum.Engine.Authorization;
+using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.Mailing;
+using Signum.React.Filters;
 using Signum.Services;
 using Signum.Utilities;
-using System;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Signum.React.Filters;
-using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Authorization
 {
@@ -18,7 +21,7 @@ namespace Signum.React.Authorization
     public class AuthController : ControllerBase
     {
         [HttpPost("api/auth/login"), AllowAnonymous]
-        public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
+        public ActionResult<LoginResponse> Login([Required, FromBody] LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
                 return ModelError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
@@ -116,7 +119,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/ChangePassword")]
-        public ActionResult<LoginResponse> ChangePassword([Required, FromBody]ChangePasswordRequest request)
+        public ActionResult<LoginResponse> ChangePassword([Required, FromBody] ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
                 return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
@@ -125,6 +128,9 @@ namespace Signum.React.Authorization
                 return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var user = UserEntity.Current;
+            var error = UserEntity.OnValidatePassword(request.newPassword);
+            if (error != null)
+                return ModelError("newPassword", error);
 
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
                 return ModelError("oldPassword", AuthMessage.InvalidPassword.NiceToString());
@@ -134,6 +140,71 @@ namespace Signum.React.Authorization
                 user.Execute(UserOperation.Save);
 
             return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
+        }
+
+        [HttpGet("api/auth/ResetPasswordMail/{username}"), AllowAnonymous]
+        public ActionResult ResetPasswordMail(string username)
+        {
+            using (UserHolder.UserSession(AuthLogic.SystemUser))
+            {
+                var user = Database.Query<UserEntity>()
+                    .SingleOrDefault(u => u.UserName.ToLower() == username.ToLower());
+
+                if (user == null)
+                    return Ok();
+
+                var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+                var url = $"{Request.Scheme}://{Request.Host}/auth/resetPassword?code={request.Code}";
+
+                var mail = new ResetPasswordRequestMail(request, url);
+                mail.SendMailAsync();
+
+                return Ok();
+            }
+        }
+
+        [HttpGet("api/auth/ResetPasswordRequest/{code}"), AllowAnonymous]
+        public ActionResult GetResetPasswordRequest(string code)
+        {
+            using (UserHolder.UserSession(AuthLogic.SystemUser))
+            {
+                return Ok(Database.Query<ResetPasswordRequestEntity>()
+                    .SingleOrDefault(e => e.Code == code));
+            }
+        }
+
+        [HttpPost("api/auth/SetPassword"), AllowAnonymous]
+        public ActionResult SetPassword([Required] [FromBody] SetPasswordRequest request)
+        {
+            using (UserHolder.UserSession(AuthLogic.SystemUser))
+            {
+                if (string.IsNullOrEmpty(request.Password))
+                    return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+                if (string.IsNullOrEmpty(request.ConfirmPassword))
+                    return ModelError("confirmPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+                var error = UserEntity.OnValidatePassword(request.Password);
+                if (error != null)
+                    return ModelError("password", error);
+                
+                var entity = Database.Query<ResetPasswordRequestEntity>()
+                    .SingleOrDefault(e => e.Code == request.Code);
+
+                if (entity == null)
+                    return BadRequest();
+
+                entity.User.PasswordHash = Security.EncodePassword(request.Password);
+                entity.User.Execute(UserOperation.Save);
+                
+                entity.Lapsed = true;
+                entity.Save();
+                
+                var mail = new PasswordChangedMail(entity);
+                mail.SendMailAsync();
+
+                return Ok();
+            }
         }
 
         private BadRequestObjectResult ModelError(string field, string error)
@@ -161,6 +232,13 @@ namespace Signum.React.Authorization
         {
             public string oldPassword { get; set; }
             public string newPassword { get; set; }
+        }
+
+        public class SetPasswordRequest
+        {
+            public string Code { get; set; }
+            public string Password { get; set; }
+            public string ConfirmPassword { get; set; }
         }
 #pragma warning restore IDE1006 // Naming Styles
     }
