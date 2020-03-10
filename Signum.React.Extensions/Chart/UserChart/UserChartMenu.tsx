@@ -116,7 +116,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
               {uc.toStr}
             </Dropdown.Item>)
         }
-        {userCharts?.length && <Dropdown.Divider />}
+        {Boolean(userCharts?.length) && <Dropdown.Divider />}
         {crView.userChart && <Dropdown.Item onClick={handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
         <Dropdown.Item onClick={() => onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
       </Dropdown.Menu>
