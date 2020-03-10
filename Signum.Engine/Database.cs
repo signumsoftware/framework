@@ -1617,7 +1617,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsertMList(mList, p => p, title != null ? "auto" : null);
         }
 
-        public static List<T> ToListWait<T>(this IQueryable<T> query, string message)
+        public static List<T> ToListWait<T>(this IEnumerable<T> query, string message)
         {
             message = message == "auto" ? typeof(T).TypeName() : message;
 

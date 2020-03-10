@@ -158,7 +158,8 @@ namespace Signum.Utilities.ExpressionTrees
             return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
         }
 
+        /// <param name="collation">database_default</param>
         [return: NotNullIfNotNull("str")]
-        public static string? Collate(this string? str, string collation) => throw new InvalidOperationException("Collate only supported inside queries");
+        public static string? Collate(this string? str, string collation = "database_default") => throw new InvalidOperationException("Collate only supported inside queries");
     }
 }

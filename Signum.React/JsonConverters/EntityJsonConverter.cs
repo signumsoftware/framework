@@ -231,7 +231,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
             return pr;
         }
 
-        public static Func<PropertyRoute, string>? CanReadPropertyRoute;
+        public static Func<PropertyRoute, string?>? CanReadPropertyRoute;
 
         public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
@@ -419,7 +419,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
         }
 
 
-        public static Func<PropertyRoute, string>? CanWritePropertyRoute;
+        public static Func<PropertyRoute, string?>? CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
         {
             string? error = CanWritePropertyRoute?.Invoke(pr);
