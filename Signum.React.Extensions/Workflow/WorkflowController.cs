@@ -69,13 +69,12 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
 
-            (CaseEntity @case, IWorkflowNodeEntity workflowActivity) = 
-                lite.InDB(a => new { a.Case, a.WorkflowActivity }).Let(a => (a.Case, a.WorkflowActivity));
+            var dbValues = lite.InDB(a => new { a.Case, a.WorkflowActivity });
 
             return new EntityPackCaseFlow
             {
-                pack = SignumServer.GetEntityPack(@case),
-                workflowActivity = workflowActivity,
+                pack = SignumServer.GetEntityPack(dbValues.Case),
+                workflowActivity = dbValues.WorkflowActivity,
             };
         }
 
