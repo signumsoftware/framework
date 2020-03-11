@@ -25,6 +25,7 @@
   <Type Name="BasicPermission" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
+  <Type Name="CalendarDayEntity" />
   <Type Name="CaseActivityEntity" />
   <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage" />
@@ -164,6 +165,7 @@
   <Type Name="EvalEmbedded`1" />
   <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
+  <Type Name="ExcelPermission" />
   <Type Name="ExcelReportEntity" />
   <Type Name="ExcelReportOperation" />
   <Type Name="ExchangeWebServiceEmbedded" />
@@ -221,6 +223,7 @@
   <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" />
   <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoginAuthMessage" />
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
@@ -248,6 +251,7 @@
   <Type Name="NoteTypeEntity" />
   <Type Name="NoteTypeOperation" />
   <Type Name="OmniboxMessage" />
+  <Type Name="OmniboxPermission" />
   <Type Name="OperationAllowed" />
   <Type Name="OperationAllowedRule" />
   <Type Name="OperationHelpEmbedded" />
