@@ -104,8 +104,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
-      Navigator.API.fetchAndForget(ctx.lite)
-        .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
+      API.fetchCaseFlowPack(ctx.lite)
+        .then(result => Navigator.navigate(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
     },
@@ -640,6 +640,10 @@ export namespace API {
     return ajaxGet({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
   }
 
+  export function fetchCaseFlowPack(caseActivity: Lite<CaseActivityEntity>): Promise<CaseFlowEntityPack> {
+    return ajaxGet({ url: `~/api/workflow/caseFlowPack/${caseActivity.id}` });
+  }
+  
   export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
     return ajaxGet({ url: `~/api/workflow/tags/${caseLite.id}` });
   }
@@ -820,3 +824,7 @@ export interface WorkflowActivityMonitor {
   activities: WorkflowActivityStats[];
 }
 
+export interface CaseFlowEntityPack {
+  pack: EntityPack<CaseEntity>,
+  workflowActivity: IWorkflowNodeEntity;
+}

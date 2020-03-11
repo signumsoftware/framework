@@ -64,6 +64,26 @@ namespace Signum.React.Workflow
             public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();
         }
 
+        [HttpGet("api/workflow/caseFlowPack/{caseActivityId}")]
+        public EntityPackCaseFlow GetCaseFlowPack(string caseActivityId)
+        {
+            var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
+
+            var dbValues = lite.InDB(a => new { a.Case, a.WorkflowActivity });
+
+            return new EntityPackCaseFlow
+            {
+                pack = SignumServer.GetEntityPack(dbValues.Case),
+                workflowActivity = dbValues.WorkflowActivity,
+            };
+        }
+
+        public class EntityPackCaseFlow
+        {
+            public EntityPackTS pack { get; set; }
+            public IWorkflowNodeEntity workflowActivity { get; set; }
+        }
+
         [HttpGet("api/workflow/starts")]
         public List<WorkflowEntity> Starts()
         {
