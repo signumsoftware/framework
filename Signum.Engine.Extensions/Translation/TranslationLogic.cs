@@ -138,7 +138,7 @@ namespace Signum.Engine.Translation
         {
             var currentDirectory = Directory.GetCurrentDirectory();
 
-            var rootDir = currentDirectory.Before(@".Load\bin");
+            var rootDir = currentDirectory.Before(@".Terminal\bin");
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
