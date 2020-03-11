@@ -10,12 +10,11 @@ interface ResetPasswordProps extends RouteComponentProps<{ queryName: string; }>
 }
 
 interface ResetPasswordState {
-  new?: boolean;
-  emailSent?: boolean;
+  codeSent?: boolean;
   code?: string;
-  codeValid?: boolean;
-  passwordChanged?: boolean;
+  success?: boolean;
   modelState?: ModelState;
+  hasError?: boolean;
 }
 
 export default class ResetPassword extends React.Component<ResetPasswordProps, ResetPasswordState> {
@@ -33,16 +32,19 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
     if (query.code) {
       const code = query.code.toString();
       const req = await AuthClient.API.fetchResetPasswordRequest(code);
-      this.setState({ code, codeValid: req && !req.lapsed });
-    } else {
-      this.setState({ new: true });
+
+      if (req && !req.lapsed) {
+        this.setState({ code, hasError: false });
+      } else {
+        this.setState({ hasError: true });
+      }
     }
   }
 
   async handleSubmit(e: React.FormEvent<any>) {
     e.preventDefault();
     await AuthClient.API.fetchResetPasswordMail(this.username.value);
-    this.setState({ emailSent: true });
+    this.setState({ codeSent: true });
   }
 
   async setPassword(e: React.FormEvent<any>) {
@@ -56,9 +58,13 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
 
     try {
       await AuthClient.API.setPassword(request);
-      this.setState({ passwordChanged: true });
+      this.setState({ code: undefined, success: true });
     } catch (e) {
-      this.setState({ modelState: e.modelState });
+      if (e.modelState) {
+        this.setState({ modelState: e.modelState });
+      } else {
+        this.setState({ code: undefined, hasError: true });
+      }
     }
   }
 
@@ -81,7 +87,42 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
     };
   }
 
-  renderEmailSent() {
+  renderDefault() {
+    return (
+      <>
+        {this.state.hasError && (
+          <div className="alert alert-danger alert-dismissible fade show">
+            {AuthMessage.ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin.niceToString()}
+            <button type="button" className="close" onClick={() => this.setState({ hasError: false })}>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        )}
+        <form onSubmit={(e) => this.handleSubmit(e)}>
+          <div className="row">
+            <div className="offset-sm-2 col-sm-6">
+              <h2 className="sf-entity-title">{AuthMessage.ResetPassword.niceToString()}</h2>
+              <p>{AuthMessage.WeWillSendYouAnEmailWithALinkToResetYourPassword.niceToString()}</p>
+            </div>
+          </div>
+          <div className="form-group row">
+            <label className="col-form-label col-sm-2">{AuthMessage.Username.niceToString()}</label>
+            <div className="col-sm-4">
+              <input type="text" className="form-control" id="username" ref={r => this.username = r!} required />
+            </div>
+          </div>
+          <div className="row">
+            <div className="offset-sm-2 col-sm-6">
+              <button type="submit" className="btn btn-primary"
+                      id="resetPassword">{AuthMessage.ResetPassword.niceToString()}</button>
+            </div>
+          </div>
+        </form>
+      </>
+    );
+  }
+
+  renderCodeSent() {
     return (
       <div className="row">
         <div className="offset-sm-2 col-sm-6">
@@ -92,19 +133,8 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
     );
   }
 
-  renderPasswordChanged() {
-    return (
-      <div className="row">
-        <div className="offset-sm-2 col-sm-6">
-          <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
-          <p>{AuthMessage.ResetPasswordSuccess.niceToString()}</p>
-        </div>
-      </div>
-    );
-  }
-
   renderSetPassword() {
-    return this.state.codeValid ? (
+    return (
       <form onSubmit={(e) => this.setPassword(e)}>
         <div className="row">
           <div className="offset-sm-2 col-sm-6">
@@ -138,47 +168,33 @@ export default class ResetPassword extends React.Component<ResetPasswordProps, R
           </div>
         </div>
       </form>
-    ) : AuthMessage.ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin.niceToString();
+    );
+  }
+
+  renderResetPasswordSuccess() {
+    return (
+      <div className="row">
+        <div className="offset-sm-2 col-sm-6">
+          <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
+          <p>{AuthMessage.ResetPasswordSuccess.niceToString()}</p>
+        </div>
+      </div>
+    );
   }
 
   render() {
-    if (this.state.emailSent) {
-      return this.renderEmailSent();
-    }
-
-    if (this.state.passwordChanged) {
-      return this.renderPasswordChanged();
+    if (this.state.codeSent) {
+      return this.renderCodeSent();
     }
 
     if (this.state.code) {
       return this.renderSetPassword();
     }
 
-    if (this.state.new) {
-      return (
-        <form onSubmit={(e) => this.handleSubmit(e)}>
-          <div className="row">
-            <div className="offset-sm-2 col-sm-6">
-              <h2 className="sf-entity-title">{AuthMessage.ResetPassword.niceToString()}</h2>
-              <p>{AuthMessage.WeWillSendYouAnEmailWithALinkToResetYourPassword.niceToString()}</p>
-            </div>
-          </div>
-          <div className="form-group row">
-            <label className="col-form-label col-sm-2">{AuthMessage.Username.niceToString()}</label>
-            <div className="col-sm-4">
-              <input type="text" className="form-control" id="username" ref={r => this.username = r!} required />
-            </div>
-          </div>
-          <div className="row">
-            <div className="offset-sm-2 col-sm-6">
-              <button type="submit" className="btn btn-primary"
-                      id="resetPassword">{AuthMessage.ResetPassword.niceToString()}</button>
-            </div>
-          </div>
-        </form>
-      );
+    if (this.state.success) {
+      return this.renderResetPasswordSuccess();
     }
 
-    return <></>;
+    return this.renderDefault();
   }
 }

@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
                 (ScheduledTaskContext ctx) =>
                 {
                     Database.Query<ResetPasswordRequestEntity>()
-                        .Where(r => r.RequestDate < TimeZoneManager.Now.AddHours(24))
+                        .Where(r => r.RequestDate.AddHours(24) < TimeZoneManager.Now)
                         .UnsafeUpdate()
                         .Set(e => e.Lapsed, e => true)
                         .Execute();

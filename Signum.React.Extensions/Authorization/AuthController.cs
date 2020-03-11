@@ -187,19 +187,20 @@ namespace Signum.React.Authorization
                 var error = UserEntity.OnValidatePassword(request.Password);
                 if (error != null)
                     return ModelError("password", error);
-                
+
                 var entity = Database.Query<ResetPasswordRequestEntity>()
                     .SingleOrDefault(e => e.Code == request.Code);
 
-                if (entity == null)
+                if (entity == null || entity.Lapsed)
                     return BadRequest();
 
                 entity.User.PasswordHash = Security.EncodePassword(request.Password);
+                entity.User.State = UserState.Saved;
                 entity.User.Execute(UserOperation.Save);
-                
+
                 entity.Lapsed = true;
                 entity.Save();
-                
+
                 var mail = new PasswordChangedMail(entity);
                 mail.SendMailAsync();
 
