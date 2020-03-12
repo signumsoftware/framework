@@ -10,7 +10,6 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Entities.Mailing;
 using Signum.React.Filters;
 using Signum.Services;
 using Signum.Utilities;
@@ -153,8 +152,9 @@ namespace Signum.React.Authorization
                 if (user == null)
                     return Ok();
 
+                var config = EmailLogic.Configuration;
                 var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
-                var url = $"{Request.Scheme}://{Request.Host}/auth/resetPassword?code={request.Code}";
+                var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
 
                 var mail = new ResetPasswordRequestMail(request, url);
                 mail.SendMailAsync();

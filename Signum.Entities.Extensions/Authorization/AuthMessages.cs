@@ -151,7 +151,11 @@ namespace Signum.Entities.Authorization
         [Description("Your password has recently been changed")]
         YourPasswordHasRecentlyBeenChanged,
         [Description("If you have not changed your password, please get in contact with us")]
-        IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs
+        IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs,
+        [Description("Your account has been locked")]
+        AccountLockedSubject,
+        [Description("Your account has been locked due to several failed logins")]
+        YourAccountHasBeenBlockedDueToSeveralFailedLogins
     }
 
     public enum AuthAdminMessage

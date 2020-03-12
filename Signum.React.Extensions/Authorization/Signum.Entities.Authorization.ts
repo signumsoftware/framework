@@ -61,6 +61,8 @@ export module AuthEmailMessage {
   export const PasswordChangedSubject = new MessageKey("AuthEmailMessage", "PasswordChangedSubject");
   export const YourPasswordHasRecentlyBeenChanged = new MessageKey("AuthEmailMessage", "YourPasswordHasRecentlyBeenChanged");
   export const IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs = new MessageKey("AuthEmailMessage", "IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs");
+  export const AccountLockedSubject = new MessageKey("AuthEmailMessage", "AccountLockedSubject");
+  export const YourAccountHasBeenBlockedDueToSeveralFailedLogins = new MessageKey("AuthEmailMessage", "YourAccountHasBeenBlockedDueToSeveralFailedLogins");
 }
 
 export module AuthMessage {
@@ -401,6 +403,7 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   cultureInfo?: Signum.CultureInfoEntity | null;
   anulationDate?: string | null;
   state?: UserState;
+  loginFailedCounter?: number;
 }
 
 export module UserOperation {
