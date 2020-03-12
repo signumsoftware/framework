@@ -291,7 +291,13 @@ namespace Signum.Engine.Authorization
                     throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
                 if (!user.PasswordHash.SequenceEqual(passwordHash))
-                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
+                {
+                    user.LoginFailedCounter++;
+                    using (AuthLogic.Disable())
+                        user.Execute(UserOperation.Save);
+                    
+                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());   
+                }
 
                 return user;
             }

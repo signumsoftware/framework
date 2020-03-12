@@ -95,6 +95,8 @@ namespace Signum.Entities.Authorization
         {
             get { return EmailOwnerDataExpression.Evaluate(this); }
         }
+
+        public int LoginFailedCounter { get; set; }
     }
 
     public enum UserState
