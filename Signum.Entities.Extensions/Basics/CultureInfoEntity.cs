@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master), InTypeScript(Undefined = false)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master), InTypeScript(Undefined = false), AllowUnathenticated]
     public class CultureInfoEntity : Entity
     {
         public CultureInfoEntity() { }
