@@ -5,6 +5,8 @@ using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using System.ComponentModel.DataAnnotations;
+using System;
+using Signum.Utilities;
 
 namespace Signum.React.Chart
 {
@@ -17,13 +19,13 @@ namespace Signum.React.Chart
         }
 
         [HttpGet("api/chart/colorPalette/{typeName}")]
-        public ChartPaletteModel? ColorPelette(string typeName)
+        public ChartPaletteModel? ColorPelette(string typeName, bool allEntities)
         {
             var type = TypeLogic.TryGetType(typeName);
             if (type == null)
                 return null;
 
-            return ChartColorLogic.GetPalette(type);
+            return ChartColorLogic.GetPalette(type, allEntities);
         }
 
         [HttpPost("api/chart/colorPalette/{typeName}/new/{paletteName}")]

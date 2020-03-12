@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export function navigatePalette(type: PseudoType): Promise<void> {
-  return API.fetchColorPalette(getTypeName(type))
+  return API.fetchColorPalette(getTypeName(type), true)
     .then(cp => {
       if (cp == null)
         return MessageModal.showError(ChartMessage.Type0NotFoundInTheDatabase.niceToString(getTypeName(type)), ChartMessage.TypeNotFound.niceToString());
@@ -53,7 +53,7 @@ export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> 
   if (colorPalette[typeName])
     return Promise.resolve(colorPalette[typeName]);
 
-  return API.fetchColorPalette(typeName).then(cs => colorPalette[typeName] = cs && toColorPalete(cs));
+  return API.fetchColorPalette(typeName, false).then(cs => colorPalette[typeName] = cs && toColorPalete(cs));
 }
 
 export function toColorPalete(model: ChartPaletteModel): ColorPalette {
@@ -90,8 +90,8 @@ export module API {
     return ajaxGet({ url: "~/api/chart/colorPalette" });
   }
 
-  export function fetchColorPalette(typeName: string): Promise<ChartPaletteModel | null> {
-    return ajaxGet({ url: `~/api/chart/colorPalette/${typeName}` });
+  export function fetchColorPalette(typeName: string, allEntities: boolean): Promise<ChartPaletteModel | null> {
+    return ajaxGet({ url: `~/api/chart/colorPalette/${typeName}?allEntities=${allEntities}` });
   }
 
   export function saveColorPalette(model: ChartPaletteModel): Promise<void> {
