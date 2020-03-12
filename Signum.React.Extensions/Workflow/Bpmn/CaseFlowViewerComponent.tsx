@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { CaseFlow } from '../WorkflowClient'
@@ -22,7 +22,7 @@ export interface CaseFlowViewerComponentProps {
   entities: WorkflowEntitiesDictionary;
   caseFlow: CaseFlow;
   case: CaseEntity,
-  caseActivity?: CaseActivityEntity;
+  workflowActivity?: IWorkflowNodeEntity;
 }
 
 export interface CaseFlowViewerComponentState {
@@ -52,9 +52,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
       throw new Error('Error rendering the model ' + err);
     else {
       this.resetZoom();
-      if (this.props.caseActivity) {
+      if (this.props.workflowActivity) {
         var selection = this.viewer.get("selection") as any;
-        selection.select((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
+        selection.select((this.props.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
       }
     }
   }

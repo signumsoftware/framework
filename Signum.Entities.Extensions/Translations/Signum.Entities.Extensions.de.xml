@@ -95,9 +95,11 @@
     <Member Name="ViewAsyncEmailSenderPanel" Description="E-Mail-Absender Ansichtsbereich async" />
   </Type>
   <Type Name="AuthAdminMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} Zyklen wurden im Diagramm der Rollen aufgrund der Beziehungen gefunden:" />
     <Member Name="_0InDB" Description="{0} (nur in DB)" />
     <Member Name="_0InUI" Description="{0} (im UI)" />
     <Member Name="_0of1" Description="{0} von {1}" />
+    <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsA0" Description="Kann nicht geändert werden, da es ein {0} ist." />
@@ -111,7 +113,9 @@
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
+    <Member Name="Save" Description="Speichern" />
     <Member Name="SwitchTo" Description="Wechseln Sie zu" />
+    <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="TypeRules" Description="Typregeln" />
   </Type>
   <Type Name="AuthEmailMessage">
@@ -124,94 +128,8 @@
     <Member Name="YourUsernameIs" Description="Ihr Benutzername ist:" />
   </Type>
   <Type Name="AuthMessage">
-    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} Zyklen in dem Rollengraph aufgrund der Beziehung gefunden:" />
-    <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
-    <Member Name="AnErrorOccurredRequestNotProcessed" Description="Es ist ein Fehler aufgetreten, anfrage nicht verarbeitet." />
-    <Member Name="AuthAdmin_AddCondition" Description="Bedingung hinzufügen" />
-    <Member Name="AuthAdmin_ChooseACondition" Description="Wählen Sie eine Bedingung" />
-    <Member Name="AuthAdmin_RemoveCondition" Description="Bedingung entfernen" />
-    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Autorisierungscache erfolgreich aktualisiert" />
-    <Member Name="ChangePassword" Description="Passwort ändern" />
-    <Member Name="ChangePasswordAspx_ActualPassword" Description="Aktuelles Passwort" />
-    <Member Name="ChangePasswordAspx_ChangePassword" Description="Passwort ändern" />
-    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Neues Passwort bestätigen" />
-    <Member Name="ChangePasswordAspx_EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles, sowie das neue Passwort ein" />
-    <Member Name="ChangePasswordAspx_NewPassword" Description="Neues Passwort" />
-    <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
-    <Member Name="Email" Description="E-Mail" />
-    <Member Name="EmailMustHaveAValue" Description="Die E-Mail muss einen Wert haben" />
-    <Member Name="EmailSent" Description="E-Mail gesendet" />
-    <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
-    <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
-    <Member Name="EnterYourUserNameAndPassword" Description="Geben Sie Ihren Benutzernamen und Ihr Passwort ein." />
-    <Member Name="EntityGroupsAscx_EntityGroup" Description="Entitätsgruppe" />
-    <Member Name="EntityGroupsAscx_Overriden" Description="Überschrieben" />
-    <Member Name="ExpectedUserLogged" Description="Es wurde erwartet, dass sich ein Benutzer anmeldet" />
-    <Member Name="ExpiredPassword" Description="Passwort abgelaufen" />
-    <Member Name="ExpiredPasswordMessage" Description="Ihr Passwort ist abgelaufen. Sie sollten es ändern" />
-    <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="Passwort vergessen? Geben Sie Ihre Login-E-Mail-Adresse ein." />
-    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Geben Sie uns die E-Mail Ihres Benutzers und wir senden Ihnen eine E-Mail, damit Sie Ihr Passwort zurücksetzen können." />
-    <Member Name="IForgotMyPassword" Description="Ich habe mein Passwort vergessen" />
-    <Member Name="IHaveForgottenMyPassword" Description="Ich habe mein Passwort vergessen" />
-    <Member Name="IncorrectPassword" Description="Falsches Passwort" />
-    <Member Name="InvalidPassword" Description="Ungültiges Passwort" />
-    <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
-    <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
-    <Member Name="Login" Description="Login" />
-    <Member Name="Login_New" Description="Neu:" />
-    <Member Name="Login_Password" Description="Passwort:" />
-    <Member Name="Login_Repeat" Description="Wiederholen Sie:" />
-    <Member Name="Login_UserName" Description="Benutzername:" />
-    <Member Name="Login_UserName_Watermark" Description="Benutzer" />
-    <Member Name="LoginWithAnotherUser" Description="Loggen Sie sich mit einem anderen Benutzer ein" />
-    <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
-    <Member Name="Logout" Description="Logout" />
-    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
-    <Member Name="NewPassword" Description="Neues Passwort" />
-    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="{0} kann nicht offline gespeichert werden " />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Nicht autorisiert, um die Entität {1} mit der Id {2} zu {0} " />
-    <Member Name="NotAuthorizedToChangeProperty0on1" Description="Nicht autorisiert, um das {0}-Feld zu {1}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="Nicht autorisiert zum Abrufen von '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Nicht autorisiertt '{0}' zu speichern" />
-    <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
-    <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
-    <Member Name="Password" Description="Passwort" />
-    <Member Name="PasswordChanged" Description="Passwort geändert" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="Das eingegebene Passwort stimmt nicht mit dem Aktuellen überein" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
-    <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
-    <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
-    <Member Name="PasswordsDoNotMatch" Description="Die Passwörter stimmen nicht überein" />
-    <Member Name="Please0IntoYourAccount" Description="Bitte, {0} in Ihr Konto" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Bitte geben Sie Ihr neues Passwort ein" />
-    <Member Name="Remember" Description="Denken Sie daran" />
-    <Member Name="RememberMe" Description="Auf diesem Computer merken" />
-    <Member Name="RequestAccepted" Description="Anfrage angenommen" />
-    <Member Name="ResetPassword" Description="Passwort zurücksetzen" />
-    <Member Name="ResetPasswordCode" Description="Code für die Wiederherstellung des Passworts" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an das E-Mail-Konto {0} gesendet" />
-    <Member Name="ResetPasswordSuccess" Description="Ihr Passwort wurde erfolgreich geändert" />
-    <Member Name="Save" Description="Speichern" />
-    <Member Name="SendEmail" Description="E-Mail senden" />
-    <Member Name="SwitchUser" Description="Benutzer wechseln" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Der Bestätigungs-Code, den Sie gerade gesendet haben, ist ungültig" />
-    <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="Das Passwort muss mindestens 5 Zeichen lang sein." />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Es ist ein Fehler beim Senden Ihrer Anfrage zum Zurücksetzen des Passworts aufgetreten. Bitte geben Sie Ihre Login-Daten ein." />
-    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Es gibt kein registrierter Benutzer mit dieser E-Mail-Adresse" />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Die angegebenen Passwörter stimmen nicht überein" />
-    <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
-    <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert sein" />
-    <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
-    <Member Name="Username" Description="Benutzername" />
-    <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
-    <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
-    <Member Name="View" Description="Ansehen" />
-    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
-    <Member Name="Welcome0" Description="Willkommen {0}" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Sie haben die Erstellung eines Kontos beantragt. Um dieses zu bestätigen, klicken Sie bitte unten auf den folgenden Link:" />
-    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Wir senden Ihnen eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts." />
-    <Member Name="YouMustRepeatTheNewPassword" Description="Sie müssen das neue Passwort wiederholen" />
-    <Member Name="YourPasswordIsNearExpiration" Description="Ihr Passwort läuft bald ab" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth-Miniaturansicht">
     <Member Name="All" Description="Alle" />
@@ -241,6 +159,9 @@
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />
+  </Type>
+  <Type Name="CalendarDayEntity" Description="Kalendertag" Gender="m">
+    <Member Name="Date" Description="Datum" />
   </Type>
   <Type Name="CaseActivityEntity" Description="Fall-Aktivität">
     <Member Name="Case" Description="Fall" />
@@ -419,6 +340,8 @@
     <Member Name="NewPalette" Description="Neue Palette" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="SavePalette" Description="Palette speichern" />
+    <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
+    <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
   </Type>
   <Type Name="ChartPaletteModel" Description="Diagrammpalette">
@@ -986,13 +909,16 @@
     <Member Name="Attachments" Description="Anlagen" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
+    <Member Name="Filters" Description="Filter" />
     <Member Name="From" Description="Von" />
+    <Member Name="GroupResults" Description="Ergebnisse gruppieren " />
     <Member Name="Guid" Description="Guid" />
     <Member Name="IsBodyHtml" Description="Ist Körper html" />
     <Member Name="MasterTemplate" Description="Hauptvorlage" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Model" Description="Modell" />
     <Member Name="Name" Description="Name" />
+    <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Recipients" Description="Empfänger" />
     <Member Name="SendDifferentMessages" Description="Verschiedene Nachrichten senden" />
@@ -1056,6 +982,9 @@
     <Member Name="Reports" Description="Berichte" />
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
+  </Type>
+  <Type Name="ExcelPermission">
+    <Member Name="PlainExcel" Description="Einfaches Excel" />
   </Type>
   <Type Name="ExcelReportEntity" Description="Excel Bericht" PluralDescription="Excel Berichte" Gender="m">
     <Member Name="DisplayName" Description="Berichtname" />
@@ -1384,6 +1313,46 @@
     <Member Name="MethodName" Description="Methodenname" />
     <Member Name="Start" Description="Start" />
   </Type>
+  <Type Name="LoginAuthMessage">
+    <Member Name="AnErrorOccurredRequestNotProcessed" Description="Es ist ein Fehler aufgetreten, anfrage nicht verarbeitet." />
+    <Member Name="ChangePassword" Description="Passwort ändern" />
+    <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
+    <Member Name="CurrentPassword" Description="Aktuelles Kennwort" />
+    <Member Name="EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles Passwort und das neue ein" />
+    <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
+    <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Geben Sie Ihren Benutzernamen und Ihr Passwort ein." />
+    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Geben Sie uns die E-Mail Ihres Benutzers und wir senden Ihnen eine E-Mail, damit Sie Ihr Passwort zurücksetzen können." />
+    <Member Name="IForgotMyPassword" Description="Ich habe mein Passwort vergessen" />
+    <Member Name="IHaveForgottenMyPassword" Description="Ich habe mein Passwort vergessen" />
+    <Member Name="IncorrectPassword" Description="Falsches Passwort" />
+    <Member Name="InvalidPassword" Description="Ungültiges Passwort" />
+    <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
+    <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
+    <Member Name="Login" Description="Login" />
+    <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
+    <Member Name="Logout" Description="Logout" />
+    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
+    <Member Name="NewPassword" Description="Neues Passwort" />
+    <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
+    <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
+    <Member Name="Password" Description="Passwort" />
+    <Member Name="PasswordChanged" Description="Passwort geändert" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
+    <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
+    <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
+    <Member Name="RememberMe" Description="Auf diesem Computer merken" />
+    <Member Name="RequestAccepted" Description="Anfrage angenommen" />
+    <Member Name="SendEmail" Description="E-Mail senden" />
+    <Member Name="SwitchUser" Description="Benutzer wechseln" />
+    <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
+    <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
+    <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
+    <Member Name="Username" Description="Benutzername" />
+    <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
+    <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
+    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
+  </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Columns" Description="Spalten" />
@@ -1516,6 +1485,9 @@
     <Member Name="Search" Description="Suche..." />
     <Member Name="Unknown" Description="Unbekannt" />
     <Member Name="Yes" Description="Ja" />
+  </Type>
+  <Type Name="OmniboxPermission">
+    <Member Name="ViewOmnibox" Description="Omnibox anzeigen" />
   </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Erlauben" />
@@ -2533,8 +2505,11 @@
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="FileName" Description="Dateiname" />
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Model" Description="modell" />
     <Member Name="Name" Description="Name" />
+    <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Template" Description="Vorlage" />
     <Member Name="WordConverter" Description="Word-Konverter" />
