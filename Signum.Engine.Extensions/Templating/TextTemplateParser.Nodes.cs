@@ -116,6 +116,7 @@ namespace Signum.Engine.Templating
                 var obj = ValueProvider!.GetValue(p);
 
                 var text = obj is Enum ? ((Enum)obj).NiceToString() :
+                       obj is TimeSpan ts ? ts.ToString((Format ?? ValueProvider.Format)?.Replace(":", @"\:"), p.Culture) :
                        obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
                        obj?.ToString();
 
