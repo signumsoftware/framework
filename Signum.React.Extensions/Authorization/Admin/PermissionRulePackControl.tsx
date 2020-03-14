@@ -8,7 +8,7 @@ import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, Permission
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
 
 export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
 
@@ -31,8 +31,35 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   }
 
   const forceUpdate = useForceUpdate();
+  const [filter, setFilter] = React.useState("");
 
   React.useImperativeHandle(ref, () => ({ renderButtons }), [p.ctx.value])
+
+  function handleSetFilter(e: React.FormEvent<any>) {
+    setFilter((e.currentTarget as HTMLInputElement).value);
+  }
+
+  const parts = filter.match(/(!?\w+)/g);
+
+  function isMatch(rule: PermissionAllowedRule): boolean {
+
+    if (!parts || parts.length == 0)
+      return true;
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+
+      if (p.startsWith("!")) {
+        if ("overriden".startsWith(p.after("!")) && rule.allowed != rule.allowedBase)
+          return true;
+      }
+
+      if (rule.resource.key.toLowerCase().contains(p.toLowerCase()))
+        return true;
+    }
+
+    return false;
+  };
 
   let ctx = p.ctx;
 
@@ -46,7 +73,9 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
         <thead>
           <tr>
             <th>
-              {PermissionSymbol.niceName()}
+              <div style={{ marginBottom: "-2px" }}>
+                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Permission-!overriden" value={filter} onChange={handleSetFilter} />
+              </div>
             </th>
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Allow.niceToString()}
@@ -60,7 +89,9 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
           </tr>
         </thead>
         <tbody>
-          {ctx.mlistItemCtxs(a => a.rules).orderBy(a => a.value.resource.key).map((c, i) =>
+          {ctx.mlistItemCtxs(a => a.rules)
+            .filter(a => isMatch(a.value))
+            .orderBy(a => a.value.resource.key).map((c, i) =>
             <tr key={i}>
               <td>
                 {c.value.resource.key}
