@@ -251,6 +251,8 @@ export module ConnectionMessage {
   export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
   export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+  export const OutdatedClientApplication = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
+  export const ANewVersionHasJustBeenDeployedConsiderReload = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
   export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
 }
 
