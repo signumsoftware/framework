@@ -44,7 +44,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     if (w.isNew) {
       require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
         updateState(WorkflowModel.New({
-          diagramXml: xml,
+          diagramXml: xml.default,
           entities: [],
         }));
         setIssues(undefined);
