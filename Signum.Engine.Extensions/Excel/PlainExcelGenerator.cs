@@ -167,7 +167,7 @@ namespace Signum.Engine.Excel
                 WritePlainExcel(results, fs);
         }
 
-        static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
+        public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
         {
             stream.WriteAllBytes(Template);
 
