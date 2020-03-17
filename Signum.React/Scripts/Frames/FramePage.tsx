@@ -15,6 +15,7 @@ import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
 import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
+import * as Operations from '../Operations'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -93,6 +94,13 @@ export default function FramePage(p: FramePageProps) {
         });
 
     } else {
+
+      const cn = String(QueryString.parse(p.location.search).constructor);
+      if (cn != null) {
+        const oi = Operations.operationInfos(ti).single(a => a.key.toLowerCase().endsWith(cn.toLowerCase()));
+        return Operations.API.construct(ti.name, oi.key);
+      }
+
       return Constructor.constructPack(ti.name)
         .then(pack => {
           return Promise.resolve(pack as EntityPack<Entity>);
