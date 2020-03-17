@@ -3,12 +3,13 @@ import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
 import { Dic } from '../Globals';
 import { ServiceError, ValidationError } from '../Services';
-import { JavascriptMessage, NormalWindowMessage } from '../Signum.Entities'
+import { JavascriptMessage, NormalWindowMessage, ConnectionMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
+import MessageModal from './MessageModal';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps<undefined> {
@@ -120,7 +121,22 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
-ErrorModal.showError = (error: any): Promise<void> => {
+ErrorModal.showAppropriateError = (error: any): Promise<void> => {
+
+  if (new RegExp(/^Loading chunk?/i).test(error.message))
+    return MessageModal.show({
+      title: ConnectionMessage.OutdatedClientApplication.niceToString(),
+      message:
+        <div>
+          {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
+          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(true); }}>
+            <FontAwesomeIcon icon="sync-alt" />
+          </button>
+        </div>,
+      buttons: "cancel",
+      style: "warning"
+    }).then(() => undefined);
+
   return openModal<void>(<ErrorModal error={error} />);
 }
 
