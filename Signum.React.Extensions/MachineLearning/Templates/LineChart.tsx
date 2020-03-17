@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as d3 from "d3";
+import { useSize } from '../../../../Framework/Signum.React/Scripts/Hooks';
 
 export interface Point {
   x: number;
@@ -19,27 +20,14 @@ export interface LineChartSerie {
 
 interface LineChartProps {
   series: LineChartSerie[];
-  width?: number;
   height: number;
 }
 
 export default function LineChart(p: LineChartProps) {
 
+  const { size, setContainer } = useSize(undefined, undefined);
 
-  const [width, setWidth] = React.useState<number | undefined>(undefined);
   const [logMode, setLogMode] = React.useState<boolean>(false);
-
-  const divRef = React.useRef<HTMLDivElement | null>(null)
-
-
-  function handleSetRef(d: HTMLDivElement | null) {
-    if (divRef.current == null && d != null && p.width == null) {
-      divRef.current = d;
-      setTimeout(() => {
-        setWidth(d.getBoundingClientRect().width);
-      }, 100);
-    }
-  }
 
   function renderSvg(width: number) {
     let { height, series } = p;
@@ -87,11 +75,10 @@ export default function LineChart(p: LineChartProps) {
       </g>
     );
   }
-  let w = p.width == null ? width : p.width;
 
   return (
-    <div ref={d => handleSetRef(d)} style={{ width: p.width == null ? "100%" : p.width }} onDoubleClick={() => setLogMode(!logMode)}>
-      {width != null && renderSvg(width)}
+    <div ref={setContainer} onDoubleClick={() => setLogMode(!logMode)}>
+      {size != null && renderSvg(size.width)}
     </div>
   );
 }
