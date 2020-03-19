@@ -24,7 +24,7 @@ namespace Signum.React.Selenium
             return ParentElement.FindElements(this.Locator);
         }
 
-        public IWebElement TryFind()
+        public IWebElement? TryFind()
         {
             return ParentElement.TryFindElement(this.Locator);
         }
