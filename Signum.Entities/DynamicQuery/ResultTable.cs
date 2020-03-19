@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Globalization;
 using System.ComponentModel;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -269,6 +270,56 @@ namespace Signum.Entities.DynamicQuery
             }
             return dt;
         }
+
+
+
+        public DataTable ToDataTablePivot2(DataTableValueConverter? converter = null)
+        {
+            var defConverter = converter ?? new InvariantDataTableValueConverter();
+
+            DataTable dt = new DataTable("Table");
+
+            foreach (var col in Columns.Take(1))
+            {
+                dt.Columns.Add(new DataColumn(col.Column.DisplayName));
+
+                foreach (var rowv in col.Values)
+                {
+                    var colType = rowv!.GetType();
+                    dt.Columns.Add(new DataColumn(rowv!.ToString()));
+                }
+            }
+          
+            foreach (var col in Columns.Skip(1))
+            {
+                List<object?> values = new List<object?>();
+                var dr = dt.NewRow();
+
+                values.Add(col.Column.DisplayName);
+                foreach (var rowv in col.Values)
+                {
+                    // values.Add(Math.Truncate(decimal.Parse(rowv!.ToString()!)));
+
+                    if (rowv == null)
+                    {
+                        values.Add(null);
+                    }
+                    else
+                    {
+                        var value = Math.Truncate(decimal.Parse(rowv.ToString()!));
+                        //var value = defConverter.ConvertValue(rowv, col.Column);
+                        values.Add(value);
+                    }
+       
+                }
+
+                dr.ItemArray = values.ToArray();
+                dt.Rows.Add(dr);
+            }
+
+            return dt;
+        }
+
 
         public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter? converter = null)
         {
