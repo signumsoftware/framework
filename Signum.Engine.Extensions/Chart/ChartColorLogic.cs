@@ -66,11 +66,6 @@ namespace Signum.Engine.Chart
             list.SaveList();
         }
 
-        private static int DivideRoundUp(int number, int divisor)
-        {
-            return ((number - 1) / divisor) + 1;
-        }
-
         public static void AssertFewEntities(Type type)
         {
             int count = giCount.GetInvoker(type)();
@@ -137,15 +132,32 @@ namespace Signum.Engine.Chart
                 if (dic == null)
                     return null;
 
-                return new ChartPaletteModel
+                if (EnumEntity.IsEnumEntity(type))
                 {
-                    Type = type.ToTypeEntity(),
-                    Colors = dic.Select(kvp => new ChartColorEntity
+                    var lites = EnumEntity.GetEntities(EnumEntity.Extract(type)!).ToDictionary(a => a.Id, a => a.ToLite());
+
+                    return new ChartPaletteModel
                     {
-                        Related = Lite.Create(type, kvp.Key),
-                        Color = kvp.Value
-                    }).ToMList()
-                };
+                        Type = type.ToTypeEntity(),
+                        Colors = dic.Select(kvp => new ChartColorEntity
+                        {
+                            Related = lites.GetOrThrow(kvp.Key),
+                            Color = kvp.Value
+                        }).ToMList()
+                    };
+                }
+                else
+                {
+                    return new ChartPaletteModel
+                    {
+                        Type = type.ToTypeEntity(),
+                        Colors = dic.Select(kvp => new ChartColorEntity
+                        {
+                            Related = Lite.Create(type, kvp.Key),
+                            Color = kvp.Value
+                        }).ToMList()
+                    };
+                }
             }
         }
 
