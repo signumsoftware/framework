@@ -206,7 +206,7 @@ export function saveFile(response: Response, overrideFileName?: string) {
 
   var fileName = overrideFileName || getFileName(response);
 
-  response.blob().then(blob => {
+  return response.blob().then(blob => {
     saveFileBlob(blob, fileName);
   });
 }

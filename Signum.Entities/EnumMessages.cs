@@ -247,6 +247,9 @@ Lose changes?")]
         SessionExpired,
         [Description("A new version has just been deployed! Save changes and {0}")]
         ANewVersionHasJustBeenDeployedSaveChangesAnd0,
+        OutdatedClientApplication,
+        [Description("Looks like a new version has just been deployed! If you don't have changes that need to be saved, consider reloading")]
+        ANewVersionHasJustBeenDeployedConsiderReload,
         Refresh,
     }
 
