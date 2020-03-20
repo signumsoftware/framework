@@ -216,7 +216,7 @@ namespace Signum.Entities
             {
                 foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }
@@ -227,7 +227,7 @@ namespace Signum.Entities
             {
                 foreach (var item in Validator.GlobalValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }

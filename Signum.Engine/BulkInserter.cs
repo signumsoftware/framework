@@ -289,7 +289,7 @@ namespace Signum.Engine
 
                 foreach (var e in list)
                 {
-                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
                 }
 
                 using (Transaction tr = new Transaction())

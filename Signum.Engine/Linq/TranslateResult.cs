@@ -337,7 +337,7 @@ namespace Signum.Engine.Linq
                 case UniqueFunction.First:  return enumerable.FirstEx();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
                 case UniqueFunction.Single: return enumerable.SingleEx();
-                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefaultEx();
+                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefaultEx()!;
                 default:
                     throw new InvalidOperationException();
             }
