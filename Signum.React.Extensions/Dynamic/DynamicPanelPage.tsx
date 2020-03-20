@@ -56,11 +56,16 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
   return (
     <div>
       <h2>Dynamic Panel</h2>
-      {startErrors?.length && !restarting &&
-        <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-          <FontAwesomeIcon icon="exclamation-triangle" />
-          {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
-                    </div>
+      {restarting ? undefined :
+        startErrors?.length ?
+          <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
+            <FontAwesomeIcon icon="exclamation-triangle" />
+            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+        </div> :
+          <div role="alert" className="alert alert-success">
+            <FontAwesomeIcon icon="check-circle" />
+            {" "}The server is started successfully.
+        </div>
       }
       <Tabs activeKey={step ?? "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
         <Tab eventKey="search" title="Search">

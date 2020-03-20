@@ -18,7 +18,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
 
   function reload(bc: ButtonsContext) {
     const pal = (bc.pack.entity as ChartPaletteModel);
-    ChartPaletteClient.API.fetchColorPalette(pal.type.cleanName)
+    ChartPaletteClient.API.fetchColorPalette(pal.type.cleanName, true)
       .then(newPack => {
         ChartPaletteClient.setColorPalette(newPack!);
         bc.frame.onReload({ entity: newPack!, canExecute: {} });

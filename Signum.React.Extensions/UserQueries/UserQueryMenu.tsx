@@ -129,6 +129,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       filters: (fo.filterOptions ?? []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
+    const parsedTokens = sc.props.findOptions.columnOptions.map(a => a.token).notNull()
+      .concat(sc.props.findOptions.orderOptions.map(a => a.token).notNull())
+      .toObjectDistinct(a => a.fullKey);
+
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
     const uq = await Navigator.view(UserQueryEntity.New({
@@ -138,13 +142,16 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
-        token: QueryTokenEmbedded.New({ tokenString: c.token.toString() }),
+        token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({
         orderType: c.orderType,
-        token: QueryTokenEmbedded.New({ tokenString: c.token.toString() })
+        token: QueryTokenEmbedded.New({
+          tokenString: c.token.toString(),
+          token: parsedTokens[c.token.toString()]
+        })
       }))),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage
