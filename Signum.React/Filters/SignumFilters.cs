@@ -70,7 +70,7 @@ namespace Signum.React.Filters
 
             context.HttpContext.Items[Signum_User_Key] = result.User;
 
-            return result.User != null ? UserHolder.UserSession(result.User) : null;
+            return UserHolder.UserSession(result.User!);
         }
     }
 
