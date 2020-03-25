@@ -6,7 +6,7 @@ import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
@@ -97,7 +97,7 @@ export default function FramePage(p: FramePageProps) {
 
       const cn = QueryString.parse(p.location.search).constructor;
       if (cn != null) {
-        const oi = Operations.operationInfos(ti).single(a => a.key.toLowerCase().endsWith((cn as string).toLowerCase()));
+        const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor a.key.toLowerCase().endsWith((cn as string).toLowerCase()));
         return Operations.API.construct(ti.name, oi.key);
       }
 
