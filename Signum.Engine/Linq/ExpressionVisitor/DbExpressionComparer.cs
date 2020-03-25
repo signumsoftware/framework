@@ -92,6 +92,8 @@ namespace Signum.Engine.Linq
                     return CompareTableValuedSqlFunction((SqlTableValuedFunctionExpression)a, (SqlTableValuedFunctionExpression)b);
                 case DbExpressionType.SqlConstant:
                     return CompareSqlConstant((SqlConstantExpression)a, (SqlConstantExpression)b);
+                case DbExpressionType.SqlLiteral:
+                    return CompareSqlLiteral((SqlLiteralExpression)a, (SqlLiteralExpression)b);
                 case DbExpressionType.Case:
                     return CompareCase((CaseExpression)a, (CaseExpression)b);
                 case DbExpressionType.RowNumber:
@@ -336,6 +338,11 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareSqlConstant(SqlConstantExpression a, SqlConstantExpression b)
         {
             return object.Equals(a.Value, b.Value);
+        }
+
+        protected virtual bool CompareSqlLiteral(SqlLiteralExpression a, SqlLiteralExpression b)
+        {
+            return a.Value == b.Value;
         }
 
 

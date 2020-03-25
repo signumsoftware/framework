@@ -203,7 +203,7 @@ namespace Signum.Entities.Reflection
             int result = 17;
             foreach (var p in obj)
             {
-                result = result * 31 + this.ElementComparer.GetHashCode(p);
+                result = result * 31 + this.ElementComparer.GetHashCode(p!);
             }
 
             return result;
@@ -232,10 +232,10 @@ namespace Signum.Entities.Reflection
             if (mx!.Count != my!.Count)
                 return false;
 
-            var dic = mx.GroupToDictionary(x => ElementComparer.GetHashCode(x));
+            var dic = mx.GroupToDictionary(x => ElementComparer.GetHashCode(x!));
             foreach (var y in my)
             {
-                var list = dic.TryGetC(ElementComparer.GetHashCode(y));
+                var list = dic.TryGetC(ElementComparer.GetHashCode(y!));
 
                 if (list == null)
                     return false;
@@ -258,7 +258,7 @@ namespace Signum.Entities.Reflection
             int result = 0;
             foreach (var p in obj)
             {
-                result += this.ElementComparer.GetHashCode(p);
+                result += this.ElementComparer.GetHashCode(p!);
             }
 
             return result;

@@ -117,7 +117,7 @@ namespace Signum.Engine.DynamicQuery
 
             DEnumerable<T> mr = await Execute(req, GetQueryDescription(), cancellationToken);
 
-            return (Lite<Entity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
+            return (Lite<Entity>?)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
         }
 
         static readonly Lazy<Func<object, Lite<IEntity>>> entitySelector = new Lazy<Func<object, Lite<IEntity>>>(() =>

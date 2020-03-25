@@ -183,7 +183,7 @@ export namespace ValueLineRenderers {
 
 export function isNumber(e: React.KeyboardEvent<any>) {
   const c = e.keyCode;
-  return ((c >= 48 && c <= 57) /*0-9*/ ||
+  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
     (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
     (c == KeyCodes.enter) ||
     (c == KeyCodes.backspace) ||

@@ -151,12 +151,12 @@ interface OperationButtonProps extends ButtonProps {
   children?: React.ReactNode
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
-  if (props.eoc == null)
+  if (eocOrNull == null)
     return null;
 
-  const eoc = props.eoc;
+  const eoc = eocOrNull;
 
   if (canExecute === undefined)
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;

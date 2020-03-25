@@ -93,10 +93,6 @@ namespace Signum.Test.LinqProvider
             Assert.Null(artists.FirstOrDefault(a => a.Dead && !a.Dead));
             Assert.NotNull(artists.FirstOrDefault(a => a.Dead)); //michael
             Assert.NotNull(artists.FirstOrDefault(a => a.Sex == Sex.Male));
-
-            Assert.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrMany());
-            Assert.NotNull(artists.Where(a => a.Dead).SingleOrMany()); //michael
-            Assert.Null(artists.Where(a => a.Sex == Sex.Male).SingleOrMany());
         }
 
         [Fact]

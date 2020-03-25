@@ -233,10 +233,10 @@ namespace Signum.Engine
             {
                 try
                 {
-                    var func = mListProperty.Compile();
+                    var func = PropertyRoute.Construct(mListProperty).GetLambdaExpression<E, MList<V>>(safeNullAccess: true).Compile();
 
                     var mlistElements = (from e in entities
-                                         from mle in func(e).Select((iw, i) => new MListElement<E, V>
+                                         from mle in func(e).EmptyIfNull().Select((iw, i) => new MListElement<E, V>
                                          {
                                              Order = i,
                                              Element = iw,
@@ -289,7 +289,7 @@ namespace Signum.Engine
 
                 foreach (var e in list)
                 {
-                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
                 }
 
                 using (Transaction tr = new Transaction())

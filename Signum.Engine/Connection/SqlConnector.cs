@@ -324,7 +324,7 @@ namespace Signum.Engine
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
 
                         DataTable result = new DataTable();
-                        da.Fill(result);
+                         da.Fill(result);
                         return result;
                     }
                     catch (Exception ex)
