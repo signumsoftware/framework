@@ -95,9 +95,9 @@ export default function FramePage(p: FramePageProps) {
 
     } else {
 
-      const cn = String(QueryString.parse(p.location.search).constructor);
+      const cn = QueryString.parse(p.location.search).constructor;
       if (cn != null) {
-        const oi = Operations.operationInfos(ti).single(a => a.key.toLowerCase().endsWith(cn.toLowerCase()));
+        const oi = Operations.operationInfos(ti).single(a => a.key.toLowerCase().endsWith((cn as string).toLowerCase()));
         return Operations.API.construct(ti.name, oi.key);
       }
 
