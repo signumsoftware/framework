@@ -13,7 +13,7 @@ namespace Signum.Engine.DynamicQuery
     {
         readonly internal Meta? Meta;
         public Func<string>? OverrideDisplayName { get; set; }
-        public Func<string>? OverrideIsAllowed { get; set; }
+        public Func<string?>? OverrideIsAllowed { get; set; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
