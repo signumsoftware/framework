@@ -57,7 +57,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T entity)
             {
-                Graph<T, S>.AssertEnterState((T)entity, this);
+                Graph<T, S>.AssertEnterState(entity, this);
             }
 
             public override string ToString()
@@ -111,8 +111,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T result)
             {
-                if (result != null)
-                    Graph<T, S>.AssertEnterState(result, this);
+                Graph<T, S>.AssertEnterState(result, this);
             }
 
 
@@ -159,8 +158,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T result)
             {
-                if (result != null)
-                    Graph<T, S>.AssertEnterState(result, this);
+                Graph<T, S>.AssertEnterState(result, this);
             }
 
             public override string ToString()
