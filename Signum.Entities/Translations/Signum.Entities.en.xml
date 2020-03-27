@@ -62,6 +62,7 @@
   <Type Name="OrderType" />
   <Type Name="PaginationMessage" />
   <Type Name="PaginationMode" />
+  <Type Name="PinnedFilterActive" />
   <Type Name="PropertyRouteEntity" />
   <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage" />

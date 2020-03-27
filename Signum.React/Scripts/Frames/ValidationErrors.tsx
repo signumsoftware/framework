@@ -2,29 +2,37 @@ import * as React from 'react'
 import { Dic } from '../Globals'
 import { ModifiableEntity } from '../Signum.Entities'
 import { GraphExplorer } from '../Reflection'
+import { useForceUpdate } from '../Hooks';
 
-export default class ValidationErrors extends React.Component<{ entity: ModifiableEntity, prefix: string }>
-{
-  render() {
-    const modelState = GraphExplorer.collectModelState(this.props.entity, this.props.prefix);
 
-    if (!modelState || Dic.getKeys(modelState).length == 0)
-      return null;
+export interface ValidationErrorHandle {
+  forceUpdate() : void; 
+}
 
-    return (
-      <ul className="validaton-summary alert alert-danger">
-        {Dic.map(modelState, (key, value) => <li
-          key={key}
-          style={{ cursor: "pointer" }}
-          onClick={() => this.handleOnClick(key)}
-          title={key.after(this.props.prefix + ".")}>
-          {value.join("\n")}
-        </li>)}
-      </ul>
-    );
-  }
+export const ValidationErrors = React.forwardRef(function ValidationErrors(p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorHandle>) {
 
-  handleOnClick = (key: string) => {
+  const forceUpdate = useForceUpdate();
+
+  React.useImperativeHandle(ref, () => ({ forceUpdate }), []);
+
+  const modelState = GraphExplorer.collectModelState(p.entity, p.prefix);
+
+  if (!modelState || Dic.getKeys(modelState).length == 0)
+    return null;
+
+  return (
+    <ul className="validaton-summary alert alert-danger">
+      {Dic.map(modelState, (key, value) => <li
+        key={key}
+        style={{ cursor: "pointer" }}
+        onClick={() => handleOnClick(key)}
+        title={key.after(p.prefix + ".")}>
+        {value.join("\n")}
+      </li>)}
+    </ul>
+  );
+
+  function handleOnClick(key: string) {
 
     var result = document.querySelector(`[data-error-path='${key}']`);
     if (result != null) {
@@ -34,4 +42,4 @@ export default class ValidationErrors extends React.Component<{ entity: Modifiab
         (input as HTMLInputElement).focus();
     }
   }
-}
+});

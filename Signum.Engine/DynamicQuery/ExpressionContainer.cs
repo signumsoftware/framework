@@ -73,9 +73,11 @@ namespace Signum.Engine.DynamicQuery
 
         private static void AssertExtensionMethod(MethodInfo mi)
         {
-            if (mi.DeclaringType.Assembly == typeof(Enumerable).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Csv).Assembly ||
-                mi.DeclaringType.Assembly == typeof(Lite).Assembly)
+            var assembly = mi.DeclaringType!.Assembly;
+
+            if (assembly == typeof(Enumerable).Assembly ||
+                assembly == typeof(Csv).Assembly ||
+                assembly == typeof(Lite).Assembly)
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 

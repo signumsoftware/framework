@@ -147,7 +147,7 @@ namespace Signum.Engine.CodeGeneration
                 if (selectedTypes.IsNullOrEmpty())
                     yield break;
 
-                var directories = Directory.GetDirectories(GetProjectFolder(), "App\\").Select(a => Path.GetFileName(a));
+                var directories = Directory.GetDirectories(GetProjectFolder(), "App\\").Select(a => Path.GetFileName(a)!);
 
                 string? moduleName;
                 if (directories.IsEmpty())
@@ -185,7 +185,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual List<Type> CandidateTypes()
         {
-            var assembly = Assembly.Load(Assembly.GetEntryAssembly().GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
+            var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
 
             return assembly.GetTypes().Where(t => t.IsModifiableEntity() && !t.IsAbstract && !typeof(MixinEntity).IsAssignableFrom(t)).ToList();
         }
@@ -308,7 +308,7 @@ namespace Signum.Engine.CodeGeneration
                 "Signum.React",
             };
 
-            result.AddRange(mod.Types.Select(t => t.Namespace).Distinct());
+            result.AddRange(mod.Types.Select(t => t.Namespace!).Distinct());
 
             return result;
         }
@@ -497,7 +497,7 @@ namespace Signum.Engine.CodeGeneration
 
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
-            if (elementType.IsEmbeddedEntity() || (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
+            if (elementType.IsEmbeddedEntity() || (eka!.EntityKind == EntityKind.Part || eka!.EntityKind == EntityKind.SharedPart))
                 if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Length > 1)
                     return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
                 else

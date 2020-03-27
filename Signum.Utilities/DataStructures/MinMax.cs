@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Signum.Utilities.DataStructures
@@ -27,9 +27,9 @@ namespace Signum.Utilities.DataStructures
                 EqualityComparer<T>.Default.Equals(Max, value.Max);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return obj is MinMax<T> && Equals((MinMax<T>)obj);
+            return obj is MinMax<T> mm && Equals(mm);
         }
 
         public override int GetHashCode()

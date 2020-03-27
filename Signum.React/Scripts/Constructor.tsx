@@ -11,14 +11,14 @@ export function construct<T extends ModifiableEntity>(type: Type<T>, props?: Par
 export function construct(type: string, props?: any, pr?: PropertyRoute): Promise<ModifiableEntity | undefined>;
 export function construct(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<ModifiableEntity | undefined> {
   return constructPack(type as string, props, pr)
-    .then(pack => pack && pack.entity);
+    .then(pack => pack?.entity);
 }
 
 export function constructPack<T extends ModifiableEntity>(type: Type<T>, props?: Partial<T>, pr?: PropertyRoute): Promise<EntityPack<T> | undefined>;
 export function constructPack(type: string, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
 export function constructPack(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
-  const typeName = (type as Type<any>).typeName || type as string;
+  const typeName = (type as Type<any>).typeName ?? type as string;
 
   const ti = getTypeInfo(typeName);
   if (ti)
@@ -57,7 +57,7 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
 
           var ctx = new Operations.ConstructorOperationContext(oi, settings, ti);
 
-          if (settings && settings.onConstruct)
+          if (settings?.onConstruct)
             return settings.onConstruct(ctx, props);
 
           return ctx.defaultConstruct().then(p => {
@@ -98,6 +98,13 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | undefined>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | undefined>, options?: { override?: boolean }) {
+  if (customConstructors[type.typeName] && !(options?.override))
+    throw new Error(`Constructor for ${type.typeName} already registered`);
+
   customConstructors[type.typeName] = constructor;
+}
+
+export function clearCustomConstructors() {
+  Dic.clear(customConstructors);
 }

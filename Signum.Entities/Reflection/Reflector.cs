@@ -171,7 +171,7 @@ namespace Signum.Entities.Reflection
         {
             using (HeavyProfiler.LogNoStackTrace("Reflector", () => type.Name))
             {
-                var result = type.For(t => t != typeof(object), t => t.BaseType)
+                var result = type.For(t => t != typeof(object), t => t.BaseType!)
                     .Reverse()
                     .SelectMany(t => t.GetFields(flags | BindingFlags.DeclaredOnly).OrderBy(f => f.MetadataToken)).ToArray();
 
@@ -251,7 +251,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.MemberAccess:
                     {
                         MemberExpression me = (MemberExpression)e;
-                        if (me.Member.DeclaringType.IsLite() && !me.Member.Name.StartsWith("Entity"))
+                        if (me.Member.DeclaringType!.IsLite() && !me.Member.Name.StartsWith("Entity"))
                             throw new InvalidOperationException("Members of Lite not supported");
 
                         return me.Member;
@@ -286,10 +286,10 @@ namespace Signum.Entities.Reflection
         static readonly BindingFlags privateFlags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic;
         public static FieldInfo? TryFindFieldInfo(Type type, PropertyInfo pi)
         {
-            string? prefix = pi.DeclaringType != type && pi.DeclaringType.IsInterface ? pi.DeclaringType.FullName + "." : null;
+            string? prefix = pi.DeclaringType != type && pi.DeclaringType!.IsInterface ? pi.DeclaringType.FullName + "." : null;
 
             FieldInfo? fi = null;
-            for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
+            for (Type? tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
                 fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
                     (prefix != null ? tempType.GetField("<" + prefix + pi.Name + ">k__BackingField", privateFlags) : null);
@@ -306,7 +306,7 @@ namespace Signum.Entities.Reflection
 
         private static void CheckSignumProcessed(FieldInfo fieldInfo)
         {
-            var isProcessed = processedAssemblies.GetOrAdd(fieldInfo.DeclaringType.Assembly,
+            var isProcessed = processedAssemblies.GetOrAdd(fieldInfo.DeclaringType!.Assembly,
                 a => a.GetCustomAttributes<GeneratedCodeAttribute>().Any(gc => gc.Tool == "SignumTask"));
 
             if (!isProcessed)
@@ -340,7 +340,7 @@ namespace Signum.Entities.Reflection
                 else
                     propertyName = fi.Name.FirstUpper();
 
-                var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
+                var result = fi.DeclaringType!.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
                 if (result != null)
                     return result;
@@ -358,7 +358,7 @@ namespace Signum.Entities.Reflection
         }
             catch (Exception e)
             {
-                throw new InvalidOperationException(e.Message + $" (FieldInfo: {fi.FieldName()} DeclaringType: {fi.DeclaringType.TypeName()})", e);
+                throw new InvalidOperationException(e.Message + $" (FieldInfo: {fi.FieldName()} DeclaringType: {fi.DeclaringType!.TypeName()})", e);
             }
         }
 
@@ -401,7 +401,7 @@ namespace Signum.Entities.Reflection
         {
             PropertyRoute simpleRoute = route.SimplifyToProperty();
 
-            FormatAttribute format = simpleRoute.PropertyInfo.GetCustomAttribute<FormatAttribute>();
+            FormatAttribute? format = simpleRoute.PropertyInfo!.GetCustomAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 

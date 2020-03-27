@@ -83,7 +83,7 @@ namespace Signum.Entities
             return "{0} ({1})".FormatWith(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if(obj == this)
                 return true;
@@ -115,83 +115,7 @@ namespace Signum.Entities
         {
             return id == null ?
                 base.GetHashCode() :
-                StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value.GetHashCode();
-        }
-
-        public Entity()
-        {
-            mixin = MixinDeclarations.CreateMixins(this);
-        }
-
-        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        readonly MixinEntity? mixin;
-        public M Mixin<M>() where M : MixinEntity
-        {
-            var result = TryMixin<M>();
-            if (result != null)
-                return result;
-
-            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
-        }
-
-        public M? TryMixin<M>() where M : MixinEntity
-        {
-            var current = mixin;
-            while (current != null)
-            {
-                if (current is M)
-                    return (M)current;
-                current = current.Next;
-            }
-
-            return null;
-        }
-
-        public MixinEntity GetMixin(Type mixinType)
-        {
-            var current = mixin;
-            while (current != null)
-            {
-                if (current.GetType() == mixinType)
-                    return current;
-                current = current.Next;
-            }
-
-            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                .FormatWith(mixinType.TypeName(), GetType().TypeName()));
-        }
-
-        [HiddenProperty]
-        public MixinEntity this[string mixinName]
-        {
-            get
-            {
-                var current = mixin;
-                while (current != null)
-                {
-                    if (current.GetType().Name == mixinName)
-                        return current;
-                    current = current.Next;
-                }
-
-                throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                    .FormatWith(mixinName, GetType().TypeName()));
-            }
-        }
-
-        [HiddenProperty]
-        public IEnumerable<MixinEntity> Mixins
-        {
-            get
-            {
-                var current = mixin;
-                while (current != null)
-                {
-                    yield return current;
-                    current = current.Next;
-                }
-            }
+                StringHashEncoder.GetHashCode32(GetType().FullName!) ^ id.Value.GetHashCode();
         }
 
         public void SetGraphErrors(IntegrityCheckException ex)

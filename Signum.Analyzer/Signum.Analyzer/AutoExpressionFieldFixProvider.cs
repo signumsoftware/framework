@@ -41,10 +41,38 @@ namespace Signum.Analyzer
 
             if (diagnostic.Properties["fixable"] == "True")
             {
-                context.RegisterCodeFix(
-                    CodeAction.Create("Add As.Expression(() => )", c => AddAsExpression(context.Document, declaration, c), "AddAsExpression"),
+                if (diagnostic.Properties.TryGetValue("explicitConvert", out var newType))
+                {
+                    context.RegisterCodeFix(
+                        CodeAction.Create($"Add Explicit Cast to '{newType}'", c => InsertExplicitCast(context.Document, declaration, c), "InsertExplicitCast"),
                     diagnostic);
+                }
+                else
+                {
+                    context.RegisterCodeFix(
+                        CodeAction.Create("Add As.Expression(() => )", c => AddAsExpression(context.Document, declaration, c), "AddAsExpression"),
+                        diagnostic);
+                }
             }
+        }
+
+        private async Task<Document> InsertExplicitCast(Document document, MemberDeclarationSyntax declaration, CancellationToken c)
+        {
+            var bodyExpression = GetSingleBody(declaration);
+
+            var invoke = (InvocationExpressionSyntax)bodyExpression;
+
+            var lambda = (LambdaExpressionSyntax)invoke.ArgumentList.Arguments[0].Expression;
+
+            var docRoot = await document.GetSyntaxRootAsync();
+
+            var type = declaration is MethodDeclarationSyntax ?
+                ((MethodDeclarationSyntax)declaration).ReturnType :
+                ((PropertyDeclarationSyntax)declaration).Type;
+
+            var newRoot = docRoot.ReplaceNode(lambda.Body, SyntaxFactory.CastExpression(type, (ExpressionSyntax)lambda.Body));
+
+            return document.WithSyntaxRoot(newRoot);
         }
 
         private async Task<Document> AddAsExpression(Document document, MemberDeclarationSyntax declaration, CancellationToken c)
@@ -69,9 +97,9 @@ namespace Signum.Analyzer
 
             var docRoot = await document.GetSyntaxRootAsync();
 
-            var newDoc = docRoot.ReplaceNode(bodyExpression, newBody);
+            var newRoot = docRoot.ReplaceNode(bodyExpression, newBody);
 
-            return document.WithSyntaxRoot(newDoc);
+            return document.WithSyntaxRoot(newRoot);
         }
 
         private InvocationExpressionSyntax GetNewBody(ExpressionSyntax bodyExpression)
@@ -86,47 +114,6 @@ namespace Signum.Analyzer
                 SyntaxFactory.ArgumentList().AddArguments(SyntaxFactory.Argument(lambda)))
                 .NormalizeWhitespace();
         }
-
-        //private void MoveInitialTrivia(ref ExpressionSyntax bodyExpression, ref InvocationExpressionSyntax newDeclaration)
-        //{
-        //    var leadingTrivia = newDeclaration.GetLeadingTrivia();
-
-        //    if (!leadingTrivia.Any())
-        //        return;
-
-        //    var last = leadingTrivia.Last();
-
-        //    if (leadingTrivia.Any() && (SyntaxKind)last.RawKind == SyntaxKind.WhitespaceTrivia)
-        //    {
-        //        newField = newField.WithLeadingTrivia(leadingTrivia);
-
-        //        newDeclaration = newDeclaration.WithLeadingTrivia(last);
-        //    }
-        //}
-
-        public static GenericNameSyntax GetExpressionTypeSyntax(List<ParameterSyntax> parameterList, TypeSyntax returnType)
-        {
-            var funcType = SyntaxFactory.GenericName(SyntaxFactory.Identifier("Func"),
-                SyntaxFactory.TypeArgumentList().AddArguments(parameterList.Select(a => a.Type).Concat(new[] { returnType }).ToArray()));
-
-            var expressionType = SyntaxFactory.GenericName(SyntaxFactory.Identifier("Expression"),
-                SyntaxFactory.TypeArgumentList().AddArguments(funcType));
-            return expressionType;
-        }
-
-
-        public static List<ParameterSyntax> GetParameters(MemberDeclarationSyntax declaration, INamedTypeSymbol type, ISymbol symbol)
-        {
-            var parameterList = declaration is MethodDeclarationSyntax ?
-                ((MethodDeclarationSyntax)declaration).ParameterList.Parameters.ToList() :
-                new List<ParameterSyntax>();
-
-            if (!symbol.IsStatic)
-                parameterList.Insert(0, SyntaxFactory.Parameter(SyntaxFactory.Identifier("@this")).WithType(SyntaxFactory.IdentifierName(type.Name)));
-
-            return parameterList;
-        }
-
 
         public static ExpressionSyntax GetSingleBody(MemberDeclarationSyntax member)
         {

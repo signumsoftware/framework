@@ -1460,6 +1460,30 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         #region UnsafeInsert
 
+        public static int UnsafeInsertDisableIdentity<E>(this IQueryable<E> query, string? message = null)
+            where E : Entity
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int result;
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                    result = query.UnsafeInsert(a => a, message);
+                return tr.Commit(result);
+            }
+        }
+
+        public static int UnsafeInsertDisableIdentity<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string? message = null)
+              where E : Entity
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int result;
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                    result = query.UnsafeInsert(constructor, message);
+                return tr.Commit(result);
+            }
+        }
+
         public static int UnsafeInsert<E>(this IQueryable<E> query, string? message = null)
               where E : Entity
         {

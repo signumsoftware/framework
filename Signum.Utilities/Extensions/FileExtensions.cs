@@ -9,8 +9,8 @@ namespace Signum.Utilities
         {
             if (!File.Exists(fileName))
                 return fileName;
-            string path = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
-            string extension = Path.GetExtension(fileName);
+            string path = Path.Combine(Path.GetDirectoryName(fileName)!, Path.GetFileNameWithoutExtension(fileName)!);
+            string extension = Path.GetExtension(fileName)!;
             for (int i = 1; ; i++)
             {
                 string fullPath = "{0}({1}){2}".FormatWith(path, i, extension);
@@ -24,7 +24,7 @@ namespace Signum.Utilities
             if (!filePath.HasText())
                 return;
 
-            string directory = Path.GetDirectoryName(filePath);
+            string? directory = Path.GetDirectoryName(filePath);
             if (!directory.HasText())
                 return;
 

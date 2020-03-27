@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using Signum.Utilities;
 
@@ -11,9 +11,9 @@ namespace Signum.Entities.Basics
         {
         }
 
-        public override bool Equals(object color)
+        public override bool Equals(object? color)
         {
-           return this.Argb == ((ColorEmbedded)color).Argb;
+           return this.Argb == ((ColorEmbedded)color!).Argb;
         }
 
         public override int GetHashCode()

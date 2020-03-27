@@ -611,12 +611,12 @@ namespace Signum.Entities
     public class CountIsValidatorAttribute : ValidatorAttribute
     {
         public ComparisonType ComparisonType;
-        public int number;
+        public int Number;
 
         public CountIsValidatorAttribute(ComparisonType comparison, int number)
         {
             this.ComparisonType = comparison;
-            this.number = number;
+            this.Number = number;
         }
 
         protected override string? OverrideError(object? value)
@@ -625,18 +625,22 @@ namespace Signum.Entities
 
             int val = list == null ? 0 : list.Count;
 
-            if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
-                (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
-                (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(number) > 0) ||
-                (ComparisonType == ComparisonType.GreaterThanOrEqualTo && val.CompareTo(number) >= 0) ||
-                (ComparisonType == ComparisonType.LessThan && val.CompareTo(number) < 0) ||
-                (ComparisonType == ComparisonType.LessThanOrEqualTo && val.CompareTo(number) <= 0))
+            if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(Number) == 0) ||
+                (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(Number) != 0) ||
+                (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(Number) > 0) ||
+                (ComparisonType == ComparisonType.GreaterThanOrEqualTo && val.CompareTo(Number) >= 0) ||
+                (ComparisonType == ComparisonType.LessThan && val.CompareTo(Number) < 0) ||
+                (ComparisonType == ComparisonType.LessThanOrEqualTo && val.CompareTo(Number) <= 0))
                 return null;
 
-            return ValidationMessage.TheNumberOfElementsOf0HasToBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().FirstLower(), number.ToString());
+            return ValidationMessage.TheNumberOfElementsOf0HasToBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().FirstLower(), Number.ToString());
         }
 
-        public override string HelpMessage => ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), number.ToString());
+        public bool IsGreaterThanZero => 
+            ComparisonType == ComparisonType.GreaterThan && Number == 0 ||
+            ComparisonType == ComparisonType.GreaterThanOrEqualTo && Number == 1;
+
+        public override string HelpMessage => ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), Number.ToString());
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
@@ -811,8 +815,11 @@ namespace Signum.Entities
 
             var prec = (TimeSpan)value;
             if (prec.Days > 0)
-                return "Days not allowed in {0}";
+                return ValidationMessage._0ShouldBeLessThan1.NiceToString("{0}", "24h");
 
+            if (prec < TimeSpan.Zero)
+                return ValidationMessage._0ShouldBeGreaterThanOrEqual1.NiceToString("{0}", "0");
+            
             return null;
         }
 

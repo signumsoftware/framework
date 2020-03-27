@@ -188,7 +188,7 @@ namespace Signum.Utilities
                 var line = skipLines;
                 while (true)
                 {
-                    string tsvLine = sr.ReadLine();
+                    string? tsvLine = sr.ReadLine();
 
                     if (tsvLine == null)
                         yield break;
@@ -276,7 +276,7 @@ namespace Signum.Utilities
 
         static object? ConvertTo(string s, Type type, string? format, CultureInfo culture)
         {
-            Type baseType = Nullable.GetUnderlyingType(type);
+            Type? baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
                 if (!s.HasText())
@@ -335,8 +335,8 @@ namespace Signum.Utilities
         public ParseTsvException(Exception inner) : base(inner.Message, inner)
         {
             this.Row = (int?)inner.Data["row"];
-            this.Value = (string)inner.Data["value"];
-            this.Member = (string)inner.Data["member"];
+            this.Value = (string)inner.Data["value"]!;
+            this.Member = (string)inner.Data["member"]!;
 
         }
         protected ParseTsvException(

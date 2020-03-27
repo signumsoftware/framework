@@ -4,8 +4,8 @@ export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRen
 import { PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
 export { Binding, ReadonlyBinding, PropertyRoute };
 
-import { LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
-export { LineBase, LineBaseProps, tasks, ChangeEvent }
+import { tasks, ChangeEvent, LineBaseController, LineBaseProps } from './Lines/LineBase'
+export { tasks, ChangeEvent, LineBaseProps }
 
 import { FormGroup, FormGroupProps } from './Lines/FormGroup'
 export { FormGroup, FormGroupProps }
@@ -13,25 +13,23 @@ export { FormGroup, FormGroupProps }
 import { FormControlReadonly, FormControlReadonlyProps } from './Lines/FormControlReadonly'
 export { FormControlReadonly, FormControlReadonlyProps }
 
-import { ValueLine, ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
+import { ValueLine, ValueLineType, ValueLineProps, OptionItem, ValueLineController } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps, OptionItem }
 
 export { RenderEntity } from './Lines/RenderEntity'
 
-import { EntityBase } from './Lines/EntityBase'
-export { EntityBase }
-
 export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
+
+import { EntityBaseController } from './Lines/EntityBase'
+export { EntityBaseController }
+
+export { FetchInState, FetchAndRemember } from './Lines/Retrieve'
 
 export { EntityLine } from './Lines/EntityLine'
 
 export { EntityCombo } from './Lines/EntityCombo'
 
 export { EntityDetail } from './Lines/EntityDetail'
-
-
-import { EntityListBase, EntityListBaseProps } from './Lines/EntityListBase'
-export { EntityListBase, EntityListBaseProps }
 
 export { EntityList } from './Lines/EntityList'
 
@@ -50,12 +48,13 @@ export { MultiValueLine } from './Lines/MultiValueLine'
 import { EntityTable, EntityTableColumn, EntityTableRow } from './Lines/EntityTable'
 
 import DynamicComponent from './Lines/DynamicComponent';
+import { EntityListBaseController, EntityListBaseProps } from './Lines/EntityListBase';
 export { DynamicComponent }
 
 export { EntityTable, EntityTableColumn, EntityTableRow };
 
 tasks.push(taskSetNiceName);
-export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
+export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBaseProps) {
   if (!state.labelText &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
@@ -64,8 +63,8 @@ export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBasePro
 }
 
 tasks.push(taskSetUnit);
-export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLine) {
+export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
     if (!vProps.unitText &&
@@ -77,8 +76,8 @@ export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) 
 }
 
 tasks.push(taskSetFormat);
-export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLine) {
+export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
     if (!vProps.formatText &&
@@ -90,7 +89,7 @@ export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps
 }
 
 tasks.push(taskSetReadOnly);
-export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBaseProps) {
+export function taskSetReadOnly(lineBase: LineBaseController<any>, state: LineBaseProps) {
   if (!state.ctx.readOnly &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
@@ -100,7 +99,7 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
 }
 
 tasks.push(taskSetMandatory);
-export function taskSetMandatory(lineBase: LineBase<any, any>, state: LineBaseProps) {
+export function taskSetMandatory(lineBase: LineBaseController<any>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.required) {
@@ -110,8 +109,8 @@ export function taskSetMandatory(lineBase: LineBase<any, any>, state: LineBasePr
 
 
 tasks.push(taskSetMove);
-export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {
-  if (lineBase instanceof EntityListBase &&
+export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof EntityListBaseController &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.preserveOrder) {
@@ -122,11 +121,11 @@ export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) 
 export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
-export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
-  const vl = lineBase instanceof ValueLine ? lineBase as ValueLine : undefined;
+export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  const vl = lineBase instanceof ValueLineController ? lineBase : undefined;
   const pr = state.ctx.propertyRoute;
   const s = state as ValueLineProps;
-  if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
+  if (vl && pr?.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
 
     var member = pr.member!;
 

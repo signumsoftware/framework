@@ -23,7 +23,7 @@ namespace Signum.Engine.CodeGeneration
                     {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
                     {"React", React.GenerateReactFromEntities, "React (from entites)"},
-                    {"Hook", Hook.ConvertFilesToHooks, "Hook (from entites)"},
+                    {"Hook", Hook.ConvertFilesToHooks, "Hook (converts tsx files from class to functional components)"},
                 }.Choose();
 
                 if (action == null)
@@ -85,10 +85,10 @@ namespace Signum.Engine.CodeGeneration
             foreach (var item in selected)
             {
                 if (name == null)
-                    name = item.FullName.RemovePrefix(solutionName + ".Entities");
+                    name = item.FullName!.RemovePrefix(solutionName + ".Entities");
                 else
                 {
-                    int length = sd.LongestCommonSubstring(name, item.FullName, out int startName, out int rubbish);
+                    int length = sd.LongestCommonSubstring(name, item.FullName!, out int startName, out int rubbish);
 
                     name = name.Substring(startName, length);
 

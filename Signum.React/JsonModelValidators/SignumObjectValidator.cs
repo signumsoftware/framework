@@ -1,17 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Signum.Entities;
+using Signum.React.Json;
 using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Signum.React.Json
+namespace Signum.React.JsonModelValidators
 {
-    public class SignumObjectModelValidator : IObjectModelValidator
+    //don't make it public! use services.AddSignumValidation(); instead
+    internal class SignumObjectModelValidator : IObjectModelValidator
     {
         private readonly IModelMetadataProvider _modelMetadataProvider;
         private readonly ValidatorCache _validatorCache;
@@ -114,7 +115,7 @@ namespace Signum.React.Json
         }
     }
 
-    public class SignumValidationVisitor : Signum.React.ValidationVisitor
+    internal class SignumValidationVisitor : ValidationVisitor
     {
         public SignumValidationVisitor(
             ActionContext actionContext,
@@ -177,10 +178,9 @@ namespace Signum.React.Json
             Type elementType = mlist.GetType().ElementType()!;
 
             int i = 0;
-            foreach (object element in (IEnumerable)mlist)
+            foreach (object? element in (IEnumerable)mlist)
             {
-
-                if (this.CurrentPath.Push(element))
+                if (element != null && this.CurrentPath.Push(element))
                 {
                     using (StateManager.Recurse(this, this.Key + "[" + (i++) + "].element", null, element, null))
                     {
@@ -220,7 +220,7 @@ namespace Signum.React.Json
                         }
 
                         var val = kvp.Value.GetValue!(mod);
-                        if (this.CurrentPath.Push(val))
+                        if (val != null && this.CurrentPath.Push(val))
                         {
                             using (StateManager.Recurse(this, this.Key + "." + kvp.Key, null, val, null))
                             {

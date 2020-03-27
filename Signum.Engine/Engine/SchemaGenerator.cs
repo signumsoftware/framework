@@ -37,7 +37,7 @@ namespace Signum.Engine
                 var mainIndices = allIndexes.Select(ix => SqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
                 var historyIndices = t.SystemVersioned == null ? null :
-                         allIndexes.Where(a => a.GetType() == typeof(Index)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
+                         allIndexes.Where(a => a.GetType() == typeof(TableIndex)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
 
                 return SqlPreCommand.Combine(Spacing.Double, mainIndices, historyIndices);
 

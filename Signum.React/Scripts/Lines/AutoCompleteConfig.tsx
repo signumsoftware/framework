@@ -4,8 +4,8 @@ import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
-import { Typeahead } from '../Components'
 import { toFilterRequests } from '../Finder';
+import { TypeaheadHandle, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
 
 export interface AutocompleteConfig<T> {
@@ -13,7 +13,7 @@ export interface AutocompleteConfig<T> {
   getItemsDelay?: number;
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
-  renderList?(typeahead: Typeahead): React.ReactNode;
+  renderList?(typeahead: TypeaheadHandle): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
@@ -49,7 +49,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     var toStr = getToString(item);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
     else
@@ -67,7 +67,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   getDataKeyFromItem(item: Lite<T> | AutocompleteConstructor<T>): string | undefined {
 
     if (isAutocompleteConstructor(item))
-      return "create-" + getTypeName(item.type); 
+      return "create-" + getTypeName(item.type);
 
     return liteKey(item);
   }
@@ -130,7 +130,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedFilters)
       return Promise.resolve(this.parsedFilters);
 
-    return Finder.parseFilterOptions(this.findOptions.filterOptions || [], false, qd)
+    return Finder.parseFilterOptions(this.findOptions.filterOptions ?? [], false, qd)
       .then(filters => this.parsedFilters = filters);
   }
 
@@ -139,7 +139,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedOrders)
       return Promise.resolve(this.parsedOrders);
 
-    return  Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd)
+    return Finder.parseOrderOptions(this.findOptions.orderOptions ?? [], false, qd)
       .then(orders => this.parsedOrders = orders);
   }
 
@@ -148,7 +148,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (this.parsedColumns)
       return Promise.resolve(this.parsedColumns);
 
-    return Finder.parseColumnOptions(this.findOptions.columnOptions || [], false, qd)
+    return Finder.parseColumnOptions(this.findOptions.columnOptions ?? [], false, qd)
       .then(columns => this.parsedColumns = columns);
   }
 
@@ -168,11 +168,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
             columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
             filters: toFilterRequests(filters),
             orders: orders.map(o => ({ token: o.token!.fullKey, orderType: o.orderType }) as OrderRequest),
-            count: this.options && this.options.count || 5,
+            count: this.options?.count ?? 5,
             subString: subStr
           }).then(rt => [
             ...rt.rows,
-            ...this.options && this.options.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows) || []
+            ...(this.options?.getAutocompleteConstructor && this.options.getAutocompleteConstructor(subStr, rt.rows)) ?? []
           ])
         )
       );
@@ -185,7 +185,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     var toStr = getToString(item.entity!);
-    var text = Typeahead.highlightedText(toStr, subStr);
+    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.options && this.options.showType)
       return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
     else
@@ -201,7 +201,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   getDataKeyFromItem(item: ResultRow): string | undefined {
     if (isAutocompleteConstructor(item))
-      return "create-" + getTypeName(item.type); 
+      return "create-" + getTypeName(item.type);
 
     return liteKey(item.entity!);
   }

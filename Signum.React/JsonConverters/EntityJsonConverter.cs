@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
@@ -5,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.React.Facades;
+using Signum.React.Filters;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
@@ -124,25 +127,22 @@ namespace Signum.React.Json
 
     public class EntityJsonConverter : JsonConverter
     {
-        public static Dictionary<Type, PropertyRoute> DefaultPropertyRoutes = new Dictionary<Type, PropertyRoute>();
-
         public override bool CanConvert(Type objectType)
         {
             return typeof(ModifiableEntity).IsAssignableFrom(objectType) || typeof(IEntity).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value.GetType().Name))
+            using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value!.GetType().Name))
             {
-                PropertyRoute pr = GetCurrentPropertyRoute(value);
+                PropertyRoute pr = GetCurrentPropertyRoute(value!);
 
-                ModifiableEntity mod = (ModifiableEntity)value;
+                ModifiableEntity mod = (ModifiableEntity)value!;
 
                 writer.WriteStartObject();
 
-                var entity = mod as Entity;
-                if (entity != null)
+                if (mod is Entity entity)
                 {
                     writer.WritePropertyName("Type");
                     writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
@@ -177,17 +177,17 @@ namespace Signum.React.Json
                 writer.WritePropertyName("modified");
                 writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
-                foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
+                foreach (var kvp in PropertyConverter.GetPropertyConverters(value!.GetType()))
                 {
                     WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
                 }
 
-                if (entity != null && entity.Mixins.Any())
+                if (mod.Mixins.Any())
                 {
                     writer.WritePropertyName("mixins");
                     writer.WriteStartObject();
 
-                    foreach (var m in entity.Mixins)
+                    foreach (var m in mod.Mixins)
                     {
                         var prm = pr.Add(m.GetType());
 
@@ -213,9 +213,18 @@ namespace Signum.React.Json
                 pr = PropertyRoute.Root(value.GetType());
             if (pr == null)
             {
+                var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
+
                 var embedded = (EmbeddedEntity)value;
-                pr = DefaultPropertyRoutes.TryGetC(embedded.GetType()) ??
-                    throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider adding a new value to {nameof(EntityJsonConverter)}.{nameof(EntityJsonConverter.DefaultPropertyRoutes)}.");
+                var att =  
+                    controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                    controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                    throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {value.GetType().Name}. 
+Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
+Current action: {controller.MethodInfo.MethodSignature()}
+Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
+
+                pr = att.PropertyRoute;
             }
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item"); //We habe a custom MListConverter but not for other simple collections
@@ -268,7 +277,7 @@ namespace Signum.React.Json
             AfterDeserilization.Register((ModifiableEntity e) => { });
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             using (HeavyProfiler.LogNoStackTrace("ReadJson", () => objectType.Name))
             {
@@ -287,16 +296,15 @@ namespace Signum.React.Json
                     using (JsonSerializerExtensions.SetAllowDirectMListChanges(markedAsModified))
                         while (reader.TokenType == JsonToken.PropertyName)
                         {
-                            if ((string)reader.Value == "mixins")
+                            if ((string)reader.Value! == "mixins")
                             {
-                                var entity = (Entity)mod;
                                 reader.Read();
                                 reader.Assert(JsonToken.StartObject);
 
                                 reader.Read();
                                 while (reader.TokenType == JsonToken.PropertyName)
                                 {
-                                    var mixin = entity[(string)reader.Value];
+                                    var mixin = mod[(string)reader.Value!];
 
                                     reader.Read();
 
@@ -311,7 +319,16 @@ namespace Signum.React.Json
                             }
                             else
                             {
-                                PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+                                var propertyName = (string)reader.Value!;
+                                
+                                PropertyConverter? pc = dic.TryGetC(propertyName);
+                                if(pc == null)
+                                {
+                                    if (specialProps.Contains(propertyName))
+                                        throw new InvalidOperationException($"Property '{propertyName}' is a special property like {specialProps.ToString(a => $"'{a}'", ", ")}, and they can only be at the beginning of the Json object for performance reasons");
+
+                                    throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(propertyName, propertyName.GetType().TypeName(), dic.GetType().TypeName()));
+                                }
 
                                 reader.Read();
                                 ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
@@ -352,7 +369,7 @@ namespace Signum.React.Json
 
                 using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
                 {
-                    object newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
+                    object? newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
 
                     if (!IsEquals(newValue, oldValue))
                     {
@@ -387,16 +404,16 @@ namespace Signum.React.Json
             }
         }
 
-        private bool IsEquals(object newValue, object? oldValue)
+        private bool IsEquals(object? newValue, object? oldValue)
         {
-            if (newValue is byte[] && oldValue is byte[])
-                return MemComparer.Equals((byte[])newValue, (byte[])oldValue);
+            if (newValue is byte[] nba && oldValue is byte[] oba)
+                return MemComparer.Equals(nba, oba);
 
-            if (newValue is DateTime && oldValue is DateTime)
-                return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
+            if (newValue is DateTime ndt && oldValue is DateTime odt)
+                return Math.Abs(ndt.Subtract(odt).TotalMilliseconds) < 10; //Json dates get rounded
 
-            if (newValue is DateTimeOffset && oldValue is DateTimeOffset)
-                return Math.Abs(((DateTimeOffset)newValue).Subtract((DateTimeOffset)oldValue).TotalMilliseconds) < 10; //Json dates get rounded
+            if (newValue is DateTimeOffset ndto && oldValue is DateTimeOffset odto)
+                return Math.Abs(ndto.Subtract(odto).TotalMilliseconds) < 10; //Json dates get rounded
 
             return object.Equals(newValue, oldValue);
         }
@@ -410,7 +427,7 @@ namespace Signum.React.Json
                 throw new UnauthorizedAccessException(error);
         }
 
-        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, out bool isModified)
+        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object? existingValue, out bool isModified)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
             isModified = identityInfo.Modified == true;
@@ -419,14 +436,14 @@ namespace Signum.React.Json
 
             if (typeof(MixinEntity).IsAssignableFrom(objectType))
             {
-                var mixin = (MixinEntity)existingValue;
+                var mixin = (MixinEntity)existingValue!;
 
                 return mixin;
             }
 
             if (identityInfo.IsNew == true)
             {
-                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 if (identityInfo.Id != null)
                     ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
@@ -460,10 +477,10 @@ namespace Signum.React.Json
             }
             else //Embedded
             {
-                var existingMod = (ModifiableEntity)existingValue;
+                var existingMod = (ModifiableEntity?)existingValue;
 
                 if (existingMod == null || existingMod.GetType() != type)
-                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 return existingMod;
             }
@@ -476,14 +493,14 @@ namespace Signum.React.Json
             reader.Read();
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                switch ((string)reader.Value)
+                switch ((string)reader.Value!)
                 {
-                    case "toStr": info.ToStr = reader.ReadAsString(); break;
-                    case "id": info.Id = reader.ReadAsString(); break;
+                    case "toStr": info.ToStr = reader.ReadAsString()!; break;
+                    case "id": info.Id = reader.ReadAsString()!; break;
                     case "isNew": info.IsNew = reader.ReadAsBoolean(); break;
-                    case "Type": info.Type = reader.ReadAsString(); break;
-                    case "ticks": info.Ticks = long.Parse(reader.ReadAsString()); break;
-                    case "modified": info.Modified = bool.Parse(reader.ReadAsString()); break;
+                    case "Type": info.Type = reader.ReadAsString()!; break;
+                    case "ticks": info.Ticks = long.Parse(reader.ReadAsString()!); break;
+                    case "modified": info.Modified = bool.Parse(reader.ReadAsString()!); break;
                     default: return info;
                 }
 
@@ -495,6 +512,8 @@ namespace Signum.React.Json
 
             return info;
         }
+
+        static readonly string[] specialProps = new string[] { "toStr", "id", "isNew", "Type", "ticks", "modified" };
 
         public struct IdentityInfo
         {
@@ -532,5 +551,17 @@ namespace Signum.React.Json
     }
 
 
-   
+    [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public class EmbeddedPropertyRouteAttribute : Attribute
+    {
+
+        public Type EmbeddedType { get; private set; }
+        public PropertyRoute PropertyRoute { get; private set; }
+        // This is a positional argument
+        public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText )
+        {
+            this.EmbeddedType = embeddedType;
+            this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
+        }
+    }
 }

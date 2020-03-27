@@ -85,6 +85,7 @@ namespace Signum.Engine.Linq
         static readonly GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>> giLazyChild =
             new GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>>((proj, scope, token, sql) => LazyChild<int, bool>(proj, scope, token, sql));
         static IChildProjection LazyChild<K, V>(Expression projector, Scope scope, LookupToken token, SqlPreCommandSimple command)
+            where K : notnull
         {
             var proj = ProjectionBuilder.Build<KeyValuePair<K, MList<V>.RowIdElement>>(projector, scope);
             return new LazyChildProjection<K, V>(token, command, proj);
@@ -457,7 +458,7 @@ namespace Signum.Engine.Linq
                 if (toStr != null)
                     return Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), liteConstructor.TryConvert(typeof(LiteImp))).TryConvert(liteConstructor.Type);
                 else
-                    return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
+                    return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)!), liteConstructor);
             }
 
             static readonly MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null!, null, null!, null!));
@@ -628,7 +629,7 @@ namespace Signum.Engine.Linq
             if (cProj.Projection.UniqueFunction != null)
                 throw new InvalidOperationException("Lazy ChildProyection with UniqueFunction '{0}'".FormatWith(cProj.Projection.UniqueFunction));
 
-            MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
+            MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType()!);
 
             return Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey, field);
         }

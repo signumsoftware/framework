@@ -3,6 +3,7 @@ using System.Linq;
 using Signum.Utilities;
 using System.Threading;
 using System.Collections.Specialized;
+using System.Reflection;
 
 namespace Signum.Entities.Basics
 {
@@ -133,7 +134,7 @@ namespace Signum.Entities.Basics
 
         public DateTime? GetDateLimitDelete(TypeEntity type)
         {
-            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.DeleteLogsWithMoreThan;
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.DeleteLogsOlderThan;
 
             if (moreThan == null)
                 return null;
@@ -141,9 +142,9 @@ namespace Signum.Entities.Basics
             return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
         }
 
-        public DateTime? GetDateLimitClean(TypeEntity type)
+        public DateTime? GetDateLimitDeleteWithExceptions(TypeEntity type)
         {
-            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.CleanLogsWithMoreThan;
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.DeleteLogsWithExceptionsOlderThan;
 
             if (moreThan == null)
                 return null;
@@ -166,10 +167,21 @@ namespace Signum.Entities.Basics
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int? DeleteLogsWithMoreThan { get; set; } = 30 * 6;
+        public int? DeleteLogsOlderThan { get; set; } = 30 * 6;
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int? CleanLogsWithMoreThan { get; set; } = 30 * 6;
+        public int? DeleteLogsWithExceptionsOlderThan { get; set; } = 30 * 2;
+
+        protected internal override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(DeleteLogsOlderThan))
+            {
+                if (DeleteLogsOlderThan.HasValue && DeleteLogsWithExceptionsOlderThan.HasValue && DeleteLogsOlderThan.Value <= DeleteLogsWithExceptionsOlderThan.Value)
+                    return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi.NiceName(), NicePropertyName(() => DeleteLogsWithExceptionsOlderThan));
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

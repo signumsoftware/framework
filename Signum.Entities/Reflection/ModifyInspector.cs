@@ -56,10 +56,9 @@ namespace Signum.Entities.Reflection
                 Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
-                    IEnumerable col = (IEnumerable)obj;
-                    foreach (Modifiable item in col)
+                    foreach (var item in (IEnumerable)obj)
                         if (item != null)
-                            yield return item;
+                            yield return (Modifiable)item;
                 }
             }
             else
@@ -94,10 +93,9 @@ namespace Signum.Entities.Reflection
                 Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
                 {
-                    IEnumerable col = (IEnumerable)obj;
-                    foreach (Modifiable item in col!)
+                    foreach (var item in (IEnumerable)obj!)
                         if (item != null)
-                            yield return item;
+                            yield return (Modifiable)item;
                 }
             }
             else
@@ -133,10 +131,9 @@ namespace Signum.Entities.Reflection
 
                 if (t.IsModifiable() && !t.IsEntity())
                 {
-                    IEnumerable col = (IEnumerable)obj;
-                    foreach (Modifiable item in col)
+                    foreach (var item in (IEnumerable)obj)
                         if (item != null)
-                            yield return item;
+                            yield return (Modifiable)item;
                 }
             }
             else

@@ -9,6 +9,7 @@ using Signum.Engine.Basics;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine
 {
@@ -50,9 +51,9 @@ namespace Signum.Engine
         Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>? liteRequests;
         List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
-        bool TryGetRequest((Type type, PrimaryKey id) key, out Entity value)
+        bool TryGetRequest((Type type, PrimaryKey id) key, [NotNullWhen(true)]out Entity? value)
         {
-            if (requests != null && requests.TryGetValue(key.type, out Dictionary<PrimaryKey, Entity> dic) && dic.TryGetValue(key.id, out value))
+            if (requests != null && requests.TryGetValue(key.type, out var dic) && dic.TryGetValue(key.id, out value))
                 return true;
 
             value = null!;
@@ -66,7 +67,7 @@ namespace Signum.Engine
 
             var tuple = (typeof(T), id.Value);
 
-            if (entityCache.TryGetValue(tuple, out Entity result))
+            if (entityCache.TryGetValue(tuple, out var result))
                 return (T)result;
 
             if (retrieved.TryGetValue(tuple, out result))
@@ -312,7 +313,7 @@ namespace Signum.Engine
             else if (token != null)
             {
                 var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
-                   .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToListAsync(token!.Value))
+                   .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())).ToListAsync(token!.Value))
                    .ToList();
 
                 var list = await Task.WhenAll(tasks);
@@ -323,7 +324,7 @@ namespace Signum.Engine
             else
             {
                 var dic = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
-                    .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())))
+                    .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())))
                     .ToDictionaryEx();
 
                 return dic;

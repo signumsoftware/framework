@@ -220,7 +220,7 @@ namespace Signum.Test
 
                 album.Save();
 
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KeyValuePair.Create(mle.Order, mle.Element.Name)),
                     new Dictionary<int, string> { { 0, "Song 0" }, { 1, "Song 1" }, { 2, "Song 2" } });
 
                 var ids = album.MListElements(a => a.Songs).Select(a => a.RowId).ToHashSet();
@@ -234,7 +234,7 @@ namespace Signum.Test
                 AssertSequenceEquals(ids.OrderBy(), ids2.OrderBy());
 
 
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KeyValuePair.Create(mle.Order, mle.Element.Name)),
                     new Dictionary<int, string> { { 0, "Song 2" }, { 1, "Song 1" }, { 2, "Song 0" } });
 
 
@@ -246,7 +246,7 @@ namespace Signum.Test
 
                 album.Save();
 
-                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KVP.Create(mle.Order, mle.Element.Name)),
+                AssertSequenceEquals(album.MListElements(a => a.Songs).OrderBy(a => a.Order).Select(mle => KeyValuePair.Create(mle.Order, mle.Element.Name)),
                     new Dictionary<int, string> { { 0, "Song 1" }, { 1, "Song 2" }, { 2, "Song 0" } });
 
                 AssertSequenceEquals(album.ToLite().RetrieveAndRemember().Songs.Select(a => a.Name), new[] { "Song 1", "Song 2", "Song 0" });

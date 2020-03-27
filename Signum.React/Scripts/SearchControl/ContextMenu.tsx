@@ -1,8 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes, combineFunction, DomUtils } from '../Globals'
 import * as PropTypes from "prop-types";
-import { DropdownItemProps } from '../Components';
+import { DropdownItemProps } from 'react-bootstrap/DropdownItem';
 
 export interface ContextMenuPosition {
   left: number;
@@ -31,7 +31,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
     const op = DomUtils.offsetParent(container);
 
-    const rec = op && op.getBoundingClientRect();
+    const rec = op?.getBoundingClientRect();
 
     var result = ({
       left: e.pageX - (rec ? rec.left : 0),

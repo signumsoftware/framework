@@ -157,7 +157,7 @@ namespace Signum.MSBuildTask
                 {
                     isDup = true;
                     if (!LookaheadClosureAssignment(isDup, ref reader, out var oldParameter, out var fieldReference))
-                        throw new InvalidOperationException("Not expected");
+                        throw new InvalidOperationException($"Not expected (in {method.FullName})");
 
                     captureFieldToParameter.Add(fieldReference.MetadataToken, oldParameter);
                 }
@@ -192,7 +192,7 @@ namespace Signum.MSBuildTask
                 else if (LookaheadArray(ref reader))
                 {
                     if (reader.HasMore())
-                        throw new InvalidOperationException("The method should only call As.Expression with an expression tree");
+                        throw new InvalidOperationException($"The method {method.FullName} should only call As.Expression with an expression tree lambda");
 
                     if (oldParameterToNNewVariable.Count == 0)
                     {
@@ -258,7 +258,7 @@ namespace Signum.MSBuildTask
                 }
             }
 
-            throw new InvalidOperationException("The method should only call As.Expression with an expression tree");
+            throw new InvalidOperationException($"The method {method.FullName} should only call As.Expression with an expression tree lambda");
         }
 
         bool LookaheadClosureAssignment(bool isDup, ref ILReader reader, out ParameterReference parameterReference, out FieldReference fieldReference)

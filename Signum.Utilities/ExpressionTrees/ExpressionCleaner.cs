@@ -69,7 +69,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            MethodExpanderAttribute attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
+            MethodExpanderAttribute? attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
             if (attribute != null)
             {
                 if (attribute.ExpanderType.IsGenericTypeDefinition)
@@ -80,7 +80,7 @@ namespace Signum.Utilities.ExpressionTrees
                     Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
 
                     var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
-                    GenericMethodExpander expander = (GenericMethodExpander)Activator.CreateInstance(type);
+                    GenericMethodExpander expander = (GenericMethodExpander)Activator.CreateInstance(type)!;
                     return Expression.Invoke(expander.GenericLambdaExpression, args);
                 }
                 else
@@ -88,7 +88,7 @@ namespace Signum.Utilities.ExpressionTrees
                     if(!typeof(IMethodExpander).IsAssignableFrom(attribute.ExpanderType))
                         throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
 
-                    IMethodExpander expander = (IMethodExpander)Activator.CreateInstance(attribute.ExpanderType);
+                    IMethodExpander expander = (IMethodExpander)Activator.CreateInstance(attribute.ExpanderType)!;
 
                     Expression exp = expander.Expand(
                         m.Object,
@@ -169,22 +169,22 @@ namespace Signum.Utilities.ExpressionTrees
                 return mti.IsStatic;
 
             if (mi is PropertyInfo pi)
-                return (pi.GetGetMethod() ?? pi.GetSetMethod()).IsStatic;
+                return (pi.GetGetMethod() ?? pi.GetSetMethod())!.IsStatic;
 
             return false;
         }
 
         static LambdaExpression? GetExpansion(MemberInfo mi)
         {
-            ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
+            ExpressionFieldAttribute? efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
             if (efa == null)
                 return null;
 
             if (efa.Name == "auto")
-                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType.Assembly.GetName().Name}?");
+                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType!.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType!.Assembly.GetName().Name}?");
 
-            Type type = mi.DeclaringType;
-            FieldInfo fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Type type = mi.DeclaringType!;
+            FieldInfo? fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (fi == null)
                 throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(efa.Name, type.TypeName()));
 
@@ -212,7 +212,7 @@ namespace Signum.Utilities.ExpressionTrees
                 if (result != null)
                     return result;
 
-                if (mi.DeclaringType.IsInterface)
+                if (mi.DeclaringType!.IsInterface)
                     return decType.GetMethod(mi.DeclaringType.FullName + "." + mi.Name, flags, null, types, null);
 
                 return null;
@@ -226,7 +226,7 @@ namespace Signum.Utilities.ExpressionTrees
                 if (result != null)
                     return result;
 
-                if(mi.DeclaringType.IsInterface)
+                if(mi.DeclaringType!.IsInterface)
                     return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, pi.PropertyType, types, null);
 
                 return null;

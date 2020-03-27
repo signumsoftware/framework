@@ -48,7 +48,7 @@ namespace Signum.Utilities
 
             this.mode = mode;
             this.valueFactory = valueFactory;
-            this.declaringType = declaringType ?? valueFactory.Method.DeclaringType;
+            this.declaringType = declaringType ?? valueFactory.Method.DeclaringType!;
         }
 
         LazyThreadSafetyMode mode; 
@@ -155,7 +155,7 @@ namespace Signum.Utilities
             }
 
             Interlocked.Increment(ref Invalidations);
-            OnReset?.Invoke(this, null);
+            OnReset?.Invoke(this, null!);
         }
 
         ResetLazyStats IResetLazy.Stats()

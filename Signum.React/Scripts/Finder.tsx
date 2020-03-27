@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as moment from "moment"
-import * as numbro from "numbro"
+import numbro from "numbro"
 import * as QueryString from "query-string"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
@@ -14,7 +14,7 @@ import {
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
 import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
@@ -30,11 +30,10 @@ import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
-import ButtonBar from "./Frames/ButtonBar";
 import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EntityBase } from "./Lines";
+import { EntityBaseController } from "./Lines";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -65,14 +64,14 @@ export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: (
       return res;
     })
   };
-} 
+}
 
 export function getSettings(queryName: PseudoType | QueryKey): QuerySettings | undefined {
   return querySettings[getQueryKey(queryName)];
 }
 
 export function getOrAddSettings(queryName: PseudoType | QueryKey): QuerySettings {
-  return querySettings[getQueryKey(queryName)] || (querySettings[getQueryKey(queryName)] = { queryName: queryName });
+  return querySettings[getQueryKey(queryName)] ?? (querySettings[getQueryKey(queryName)] = { queryName: queryName });
 }
 
 export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
@@ -98,15 +97,15 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     throw new Error("Use findRow instead");
 
   var qs = getSettings(fo.queryName);
-  if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
-    .then(rr => rr && rr.entity);
+    .then(rr => rr?.entity);
 
-  if (modalOptions && modalOptions.autoSelectIfOne)
-    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+  if (modalOptions?.autoSelectIfOne)
+    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
         if (data.length == 1)
           return Promise.resolve(data[0]);
@@ -146,14 +145,14 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     throw new Error("Use findManyRows instead");
 
   var qs = getSettings(fo.queryName);
-  if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => FinderFindManager.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
-    .then(rows => rows && rows.map(a => a.entity!));
+    .then(rows => rows?.map(a => a.entity!));
 
-  if (modalOptions && modalOptions.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
         if (data.length == 1)
@@ -184,7 +183,7 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
 export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
 
   var qs = getSettings(findOptions.queryName);
-  if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
+  if (qs?.onExplore && !(modalOptions?.useDefaultBehaviour))
     return qs.onExplore(findOptions, modalOptions);
 
   return FinderFindManager.getSearchModal()
@@ -223,9 +222,9 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 
 export function getTypeNiceName(tr: TypeReference) {
 
-  const niceName = tr.typeNiceName ||
+  const niceName = tr.typeNiceName ??
     getTypeInfos(tr)
-      .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName || ti.name))
+      .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName ?? ti.name))
       .joinComma(External.CollectionMessage.Or.niceToString());
 
   return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
@@ -367,7 +366,7 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
   return completer.finished()
     .then(() => orderOptions.map(oo => ({
       token: completer.get(oo.token.toString()),
-      orderType: oo.orderType || "Ascending",
+      orderType: oo.orderType ?? "Ascending",
     }) as OrderOptionParsed));
 }
 
@@ -380,14 +379,14 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
-      displayName: co.displayName || completer.get(co.token.toString()).niceName,
+      displayName: co.displayName ?? completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
 export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[]): Promise<any> {
 
   function getMemberForToken(ti: TypeInfo, fullKey: string) {
-    var token = fullKey.tryAfter("Entity.") || fullKey;
+    var token = fullKey.tryAfter("Entity.") ?? fullKey;
 
     if (token.contains("."))
       return null;
@@ -424,7 +423,7 @@ export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | unde
     return Promise.resolve(undefined);
 
   return getQueryDescription(fo.queryName)
-    .then(qd => parseFilterOptions(fo!.filterOptions || [], false, qd))
+    .then(qd => parseFilterOptions(fo!.filterOptions ?? [], false, qd))
     .then(filters => getPropsFromFilters(type, filters));
 }
 
@@ -434,7 +433,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
 
   const qs = getSettings(fo.queryKey);
 
-  const defPagination = qs && qs.pagination || defaultPagination;
+  const defPagination = qs?.pagination ?? defaultPagination;
 
   function equalsPagination(p1: Pagination, p2: Pagination) {
     return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
@@ -481,7 +480,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
   if (as == undefined && bs == undefined)
     return true;
-  
+
   if (as == undefined || bs == undefined)
     return true;
 
@@ -490,7 +489,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      ((a as FilterConditionOption).operation || "EqualTo") == ((b as FilterConditionOption).operation || "EqualsTo") &&
+      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualsTo") &&
       (a.value == b.value || is(a.value, b.value)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
@@ -500,7 +499,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 export const defaultOrderColumn: string = "Id";
 
 export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefined): OrderOption | undefined {
-  const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
+  const defaultOrder = qs?.defaultOrderColumn ?? defaultOrderColumn;
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
   if (defaultOrder == defaultOrderColumn && !qd.columns[defaultOrderColumn])
@@ -508,22 +507,22 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefi
 
   return {
     token: defaultOrder,
-    orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
+    orderType: qs?.defaultOrderType ?? (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
   } as OrderOption;
 }
 
 export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
-  if (qs && qs.simpleFilterBuilder)
+  if (qs?.simpleFilterBuilder)
     return undefined;
 
-  if (qs && qs.defaultFilters)
+  if (qs?.defaultFilters)
     return qs.defaultFilters;
 
   if (qd == null || qd.columns["Entity"]) {
     return [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, disableOnNull: true },
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },
@@ -579,7 +578,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
   expandParentColumn(fo);
 
-  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode || "Add", fo.columnOptions || []);
+  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = getTypeInfos(qd.columns["Entity"].type);
@@ -595,7 +594,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
     var defaultFilters = getDefaultFilter(qd, qs);
     if (defaultFilters)
-      fo.filterOptions = [...defaultFilters, ...fo.filterOptions || []];
+      fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
   var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
@@ -616,20 +615,20 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     var result: FindOptionsParsed = {
       queryKey: qd.queryKey,
       groupResults: fo.groupResults == true,
-      pagination: fo.pagination != null ? fo.pagination : qs && qs.pagination || defaultPagination,
+      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? defaultPagination,
       systemTime: fo.systemTime,
 
-      columnOptions: (fo.columnOptions || []).map(co => ({
+      columnOptions: (fo.columnOptions ?? []).map(co => ({
         token: completer.get(co.token.toString()),
-        displayName: co.displayName || completer.get(co.token.toString()).niceName
+        displayName: co.displayName ?? completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
-      orderOptions: (fo.orderOptions || []).map(oo => ({
+      orderOptions: (fo.orderOptions ?? []).map(oo => ({
         token: completer.get(oo.token.toString()),
         orderType: oo.orderType,
       }) as OrderOptionParsed),
 
-      filterOptions: (fo.filterOptions || []).map(fo => completer.toFilterOptionParsed(fo)),
+      filterOptions: (fo.filterOptions ?? []).map(fo => completer.toFilterOptionParsed(fo)),
     };
 
     return parseFilterValues(result.filterOptions)
@@ -644,7 +643,7 @@ export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): Quer
     groupResults: fo.groupResults,
     filters: toFilterRequests(fo.filterOptions),
     columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-      .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+      .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
     systemTime: fo.systemTime,
@@ -660,7 +659,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
     return [fo.value];
   }
 
-  var allValues = [fo.parentValue, ...(fo.filterOptions || []).flatMap(fo => getValues(fo))];
+  var allValues = [fo.parentValue, ...(fo.filterOptions ?? []).flatMap(fo => getValues(fo))];
 
   var allNewTypes = allValues.flatMap(a => getTypeIfNew(a));
 
@@ -689,7 +688,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
-  return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions || [], [], 2).then(list => {
+  return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
       return Navigator.navigate(list[0]);
     else
@@ -717,6 +716,10 @@ interface OverridenValue {
 }
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
+
+  if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+    return undefined;
+
   if (fop.pinned && overridenValue == null) {
     if (fop.pinned.splitText) {
 
@@ -736,7 +739,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroupOptionParsed(fop)) {
 
-      if (fop.pinned!.disableOnNull && fop.value == null) {
+      if (fop.pinned!.active == "WhenHasValue" && fop.value == null) {
         return undefined;
       }
 
@@ -754,9 +757,8 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (fop.token == null || fop.token.filterType == null || fop.operation == null)
       return undefined;
 
-    if (overridenValue == null && fop.pinned && fop.pinned.disableOnNull && (fop.value == null || fop.value === "")) {
+    if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
       return undefined;
-    }
 
     if (overridenValue && fop.token && typeof overridenValue.value == "string") {
       if (fop.token.type.name == "number") {
@@ -825,13 +827,13 @@ export function expandParentColumn(fo: FindOptions): FindOptions {
 
   fo.filterOptions = [
     { token: fo.parentToken, operation: "EqualTo", value: fo.parentValue, frozen: true },
-    ...(fo.filterOptions || [])
+    ...(fo.filterOptions ?? [])
   ];
 
   if (!fo.parentToken.toString().contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
     fo.columnOptions = [
       { token: fo.parentToken },
-      ...(fo.columnOptions || [])
+      ...(fo.columnOptions ?? [])
     ];
 
     fo.columnOptionsMode = "Remove";
@@ -932,7 +934,7 @@ export class TokenCompleter {
     else
       return ({
         token: this.get(fo.token.toString()),
-        operation: fo.operation || "EqualTo",
+        operation: fo.operation ?? "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && { ...fo.pinned },
@@ -1024,21 +1026,18 @@ export function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
 }
 
-let queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
 export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
   const queryKey = getQueryKey(queryName);
 
-  if (queryDescriptionCache[queryKey])
-    return Promise.resolve(queryDescriptionCache[queryKey]);
+  if (!queryDescriptionCache[queryKey]) {
+    queryDescriptionCache[queryKey] = API.fetchQueryDescription(queryKey).then(qd => {
+      return Dic.deepFreeze(qd);
+    });
+  }
 
-  return API.fetchQueryDescription(queryKey).then(qd => {
-    Object.freeze(qd.columns);
-    queryDescriptionCache[queryKey] = Object.freeze(qd);
-    return qd;
-  });
+  return queryDescriptionCache[queryKey];
 }
-
-
 
 export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R> | null> {
 
@@ -1062,39 +1061,39 @@ export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet<QueryDescription>({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "~/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
   }
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request);
+    return ajaxPost({ url: "~/api/query/executeQuery", signal }, request);
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost<any>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
+    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({
+    return ajaxGet({
       url: "~/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
-    return ajaxGet<Lite<TypeEntity>[]>({
+    return ajaxGet({
       url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
+    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1104,11 +1103,11 @@ export module API {
   }
 
   export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", signal }, request);
+    return ajaxPost({ url: "~/api/query/findRowsLike", signal }, request);
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
@@ -1154,19 +1153,20 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(p.label || "") +
+        query["filterPinned" + index + identSuffix] = scapeTilde(p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
-          "~" + ((p.splitText ? 2 : 0) | (p.disableOnNull ? 1 : 0)).toString();
+          "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
+          "~" + (p.splitText ? 1 : 0);
       }
 
 
       if (isFilterGroupOption(fo)) {
-        query["filter" + index + identSuffix] = (fo.token || "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
         fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || Boolean(fo.pinned)));
       } else {
-        query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation || "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
 
     }
@@ -1226,7 +1226,7 @@ export module Decoder {
     return Dic.getKeys(query)
       .map(s => regex.exec(s))
       .filter(r => !!r)
-      .map(m => ({ order: parseInt(m![1]), identation: parseInt(m![3] || "0"), value: query[m![0]] }))
+      .map(m => ({ order: parseInt(m![1]), identation: parseInt(m![3] ?? "0"), value: query[m![0]] }))
       .orderBy(a => a.order);
   }
 
@@ -1234,13 +1234,12 @@ export module Decoder {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
-      var flags = parseInt(parts[3]);
       return ({
         label: unscapeTildes(parts[0]),
         column: parts[1].length ? parseInt(parts[1]) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
-        splitText: Boolean(flags & 2),
-        disableOnNull: Boolean(flags & 1),
+        active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
+        splitText: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
       });
     }
 
@@ -1256,19 +1255,19 @@ export module Decoder {
         var pinned = pinnedText == undefined ? null : parsePinnedFilter(pinnedText);
 
         const parts = gr.key.value.split("~");
-        
+
         if (FilterOperation.isDefined(parts[1])) {
           return ({
             token: parts[0],
             operation: FilterOperation.assertDefined(parts[1]),
             value: ignoreValues ? null :
               parts.length == 3 ? unscapeTildes(parts[2]) :
-              parts.slice(2).map(a => unscapeTildes(a)),
+                parts.slice(2).map(a => unscapeTildes(a)),
             pinned: pinned,
           }) as FilterConditionOption
         } else {
           return ({
-            token: parts[0] || null,
+            token: parts[0] == null || parts[0].length == 0 ? null : parts[0],
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
@@ -1305,7 +1304,7 @@ export module Decoder {
   export function decodeColumns(query: any): ColumnOption[] {
 
     return valuesInOrder(query, "column").map(val => ({
-      token: val.tryBefore("~") || val,
+      token: val.tryBefore("~") ?? val,
       displayName: unscapeTildes(val.tryAfter("~"))
     }) as ColumnOption);
   }
@@ -1350,6 +1349,7 @@ export interface QuerySettings {
   entityFormatter?: EntityFormatter;
   inPlaceNavigation?: boolean;
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
+  allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
@@ -1390,7 +1390,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
   if (!co.token)
     return undefined;
 
-  const result = qs && qs.formatters && qs.formatters[co.token.fullKey];
+  const result = qs?.formatters && qs.formatters[co.token.fullKey];
 
   if (result)
     return result;
@@ -1415,7 +1415,7 @@ export const formatRules: FormatRule[] = [
   {
     name: "Object",
     isApplicable: col => true,
-    formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr || cell.toString()}</span> : undefined)
+    formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
   },
   {
     name: "Enum",
@@ -1509,7 +1509,6 @@ export interface EntityFormatRule {
   isApplicable: (row: ResultRow, sc: SearchControlLoaded | undefined) => boolean;
 }
 
-
 export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
 
 export const entityFormatRules: EntityFormatRule[] = [
@@ -1519,11 +1518,11 @@ export const entityFormatRules: EntityFormatRule[] = [
     formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
-        onNavigated={sc && sc.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise || sc.props.querySettings && sc.props.querySettings.getViewPromise)}
-        inPlaceNavigation={sc && sc.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        onNavigated={sc?.handleOnNavigated}
+        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
         <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBase.viewIcon}
+          {EntityBaseController.viewIcon}
         </span>
       </EntityLink>
   },

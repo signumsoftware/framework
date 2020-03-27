@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
@@ -14,11 +14,11 @@ namespace Signum.React.Json
             return typeof(ResultTable).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             using (HeavyProfiler.LogNoStackTrace("ReadJson", () => typeof(ResultTable).Name))
             {
-                var rt = (ResultTable)value;
+                var rt = (ResultTable)value!;
 
                 writer.WriteStartObject();
 
@@ -68,7 +68,7 @@ namespace Signum.React.Json
             }
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace Signum.Entities
         /// </summary>
         public Symbol(Type declaringType, string fieldName)
         {
-            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)!;
 
             if (this.fieldInfo == null)
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
@@ -71,7 +71,7 @@ namespace Signum.Entities
             return base.Equals(obj);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Symbol &&
                 obj.GetType() == this.GetType() &&

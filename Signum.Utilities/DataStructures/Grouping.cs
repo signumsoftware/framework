@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections;
@@ -30,13 +30,13 @@ namespace Signum.Utilities.DataStructures
 
     internal class Proxy
     {
-        public object Key;
+        public object? Key;
         public ArrayList List;
 
         public Proxy(IList bla)
         {
             List = new ArrayList(bla);
-            PropertyInfo pi = bla.GetType().GetProperty("Key");
+            PropertyInfo pi = bla.GetType().GetProperty("Key")!;
             Key = pi.GetValue(bla, null);
         }
     }

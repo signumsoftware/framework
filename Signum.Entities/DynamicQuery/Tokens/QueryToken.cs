@@ -79,7 +79,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out Expression result))
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out var result))
                 return result;
 
             return BuildExpressionInternal(context);
@@ -183,7 +183,7 @@ namespace Signum.Entities.DynamicQuery
                         IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
                     }
                     .NotNull()
-                    .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
+                    .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
 
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }
@@ -195,7 +195,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (IsCollection(type))
             {
-                return CollectionProperties(this, options);
+                return CollectionProperties(this, options).AndHasValue(this);
             }
 
             return new List<QueryToken>();
@@ -316,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
         }

@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
             return "{0}.{1}".FormatWith(Alias, Name);
         }
 
-        public override bool Equals(object obj) => obj is ColumnExpression ce && Equals(ce);
+        public override bool Equals(object? obj) => obj is ColumnExpression ce && Equals(ce);
         public bool Equals(ColumnExpression other)
         {
             return other != null && other.Alias == Alias && other.Name == Name;

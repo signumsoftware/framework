@@ -95,7 +95,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            Type decType = m.Method.DeclaringType;
+            Type decType = m.Method.DeclaringType!;
             if (m.Method.IsGenericMethod && (decType == typeof(Queryable) || decType == typeof(Enumerable)))
             {
                 bool query = decType == typeof(Queryable);

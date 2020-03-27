@@ -29,13 +29,13 @@ namespace Signum.Entities.Patterns
         {
         }
 
-        protected override bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string? automaticPropertyName = null)
+        protected override bool Set<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
             if (this.locked)
-                throw new ApplicationException(EntityMessage.AttemptToSet0InLockedEntity1.NiceToString(this.GetType().GetProperty(automaticPropertyName, flags).NiceName(), this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToSet0InLockedEntity1.NiceToString(this.GetType().GetProperty(automaticPropertyName!, flags)!.NiceName(), this.ToString()));
 
             return base.Set<T>(ref field, value, automaticPropertyName);
         }

@@ -18,9 +18,9 @@ namespace Signum.React.Json
             return typeof(IMListPrivate).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            giWriteJsonInternal.GetInvoker(value.GetType().ElementType()!)(writer, (IMListPrivate)value, serializer);
+            giWriteJsonInternal.GetInvoker(value!.GetType().ElementType()!)(writer, (IMListPrivate)value, serializer);
         }
 
         static GenericInvoker<Action<JsonWriter, IMListPrivate, JsonSerializer>> giWriteJsonInternal = new GenericInvoker<Action<JsonWriter, IMListPrivate, JsonSerializer>>(
@@ -52,9 +52,9 @@ namespace Signum.React.Json
             writer.WriteEndArray();
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            return giReadJsonInternal.GetInvoker(objectType.ElementType()!)(reader, (IMListPrivate)existingValue, serializer);
+            return giReadJsonInternal.GetInvoker(objectType.ElementType()!)(reader, (IMListPrivate)existingValue!, serializer);
         }
 
         static GenericInvoker<Func<JsonReader, IMListPrivate, JsonSerializer, IMListPrivate>> giReadJsonInternal =
@@ -85,7 +85,7 @@ namespace Signum.React.Json
                 {
                     reader.Read();
                     reader.Assert(JsonToken.PropertyName);
-                    if (((string)reader.Value) != "rowId")
+                    if (((string)reader.Value!) != "rowId")
                         throw new JsonSerializationException($"member 'rowId' expected in {reader.Path}");
 
                     reader.Read();
@@ -93,7 +93,7 @@ namespace Signum.React.Json
 
                     reader.Read();
                     reader.Assert(JsonToken.PropertyName);
-                    if (((string)reader.Value) != "element")
+                    if (((string)reader.Value!) != "element")
                         throw new JsonSerializationException($"member 'element' expected in {reader.Path}");
 
                     reader.Read();
@@ -105,13 +105,13 @@ namespace Signum.React.Json
 
                         if (oldValue == null)
                         {
-                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), null);
+                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), null)!;
 
                             newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
                         }
                         else
                         {
-                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element);
+                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element)!;
 
                             if (oldValue.Value.Element!.Equals(newValue))
                                 newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
@@ -121,7 +121,7 @@ namespace Signum.React.Json
                     }
                     else
                     {
-                        var newValue = (T)serializer.DeserializeValue(reader, typeof(T), null);
+                        var newValue = (T)serializer.DeserializeValue(reader, typeof(T), null)!;
                         newList.Add(new MList<T>.RowIdElement(newValue));
                     }
 

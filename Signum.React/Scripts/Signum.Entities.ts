@@ -11,12 +11,12 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
-  mixins?: { [name: string]: MixinEntity }
 }
 
 export interface EnumEntity<T> extends Entity {
@@ -279,9 +279,9 @@ export module EntityControlMessage {
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
   export const Move = new MessageKey("EntityControlMessage", "Move");
   export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
-  export const NullValueNotAllowed = new MessageKey("EntityControlMessage", "NullValueNotAllowed");
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
+  export const Add = new MessageKey("EntityControlMessage", "Add");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -456,7 +456,6 @@ export module SearchMessage {
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
   export const Row = new MessageKey("SearchMessage", "Row");
-  export const DisableOnNull = new MessageKey("SearchMessage", "DisableOnNull");
   export const SplitText = new MessageKey("SearchMessage", "SplitText");
   export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
   export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
@@ -466,6 +465,7 @@ export module SearchMessage {
   export const PleaseSelectAnEntity = new MessageKey("SearchMessage", "PleaseSelectAnEntity");
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
+  export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
 }
 
 export module SelectorMessage {

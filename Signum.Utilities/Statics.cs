@@ -201,7 +201,7 @@ namespace Signum.Utilities
             public override T Value
             {
                 get { return default(T)!; }
-                set { throw new InvalidOperationException("No session found to set '{0}'".FormatWith(this.Name)); ; }
+                set { throw new InvalidOperationException("No session found to set '{0}'".FormatWith(this.Name)); }
             }
 
             public override void Clean()

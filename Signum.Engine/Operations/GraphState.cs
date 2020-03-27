@@ -328,7 +328,7 @@ namespace Signum.Engine.Operations
 
                             foreach (var f in gOp.FromStates)
                                 foreach (var t in gOp.ToStates)
-                                    Add(f!.ToString(), t!.ToString(), item.OperationSymbol);
+                                    Add(f!.ToString()!, t!.ToString()!, item.OperationSymbol);
 
 
                         } break;
@@ -336,7 +336,7 @@ namespace Signum.Engine.Operations
                         {
                             Delete dOp = (Delete)item;
                             foreach (var f in dOp.FromStates)
-                                Add(f!.ToString(), "[Deleted]", item.OperationSymbol);
+                                Add(f!.ToString()!, "[Deleted]", item.OperationSymbol);
 
 
                         } break;
@@ -350,7 +350,7 @@ namespace Signum.Engine.Operations
 
                             var dtoState = (IGraphToStateOperation)item;
                             foreach (var t in dtoState.ToStates)
-                                Add(from, t!.ToString(), item.OperationSymbol);
+                                Add(from, t!.ToString()!, item.OperationSymbol);
 
                         } break;
                 }

@@ -91,6 +91,18 @@ namespace Signum.Analyzer
                     return;
                 }
 
+                var type = context.SemanticModel.GetTypeInfo(inv);
+
+                if(!type.ConvertedNullability.Equals(type.Nullability) || 
+                  !type.Type.Equals(type.ConvertedType, SymbolEqualityComparer.IncludeNullability))
+                {
+                    var position = member.GetLocation().SourceSpan.Start;
+                    var current = type.Type.ToMinimalDisplayString(context.SemanticModel, type.Nullability.FlowState, position);
+                    var converted = type.ConvertedType.ToMinimalDisplayString(context.SemanticModel, type.ConvertedNullability.FlowState, position);
+
+                    Diagnostic(context, ident, att.GetLocation(), $"the call to As.Expression returns '{current}' but is implicitly converted to '{converted}'", fixable: true, explicitConvert: converted);
+                    return;
+                }
             }
             catch (Exception e)
             {
@@ -176,9 +188,12 @@ namespace Signum.Analyzer
             return ret.Expression;
         }
 
-        private static void Diagnostic(SyntaxNodeAnalysisContext context, string identifier, Location location, string error, bool fixable = false)
+        private static void Diagnostic(SyntaxNodeAnalysisContext context, string identifier, Location location, string error, bool fixable = false, string explicitConvert = null)
         {
             var properties = ImmutableDictionary<string, string>.Empty.Add("fixable", fixable.ToString());
+            if (explicitConvert != null)
+                properties = properties.Add("explicitConvert", explicitConvert);
+
             var diagnostic = Microsoft.CodeAnalysis.Diagnostic.Create(Rule, location, properties, identifier, error);
 
             context.ReportDiagnostic(diagnostic);

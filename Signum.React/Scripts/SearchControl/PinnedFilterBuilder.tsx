@@ -16,66 +16,77 @@ interface PinnedFilterBuilderProps {
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   extraSmall?: boolean;
 }
-export default class PinnedFilterBuilder extends React.Component<PinnedFilterBuilderProps>{
+export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
-  render() {
-    var allPinned = getAllPinned(this.props.filterOptions);
+  const timeoutWriteText = React.useRef<number | null>(null);
 
-    if (allPinned.length == 0)
-      return null;
+  var allPinned = getAllPinned(p.filterOptions);
 
-    return (
-      <div className={classes("row", this.props.extraSmall ? "" : "mt-3 mb-3")}>
-        {
-          allPinned
-            .groupBy(a => (a.pinned!.column || 0).toString())
-            .orderBy(gr => parseInt(gr.key))
-            .map(gr => <div className="col-sm-3" key={gr.key}>
-              {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{this.renderValue(f)}</div>)}
-            </div>)
-        }
-      </div>
-    );
-  }
+  if (allPinned.length == 0)
+    return null;
 
-  renderValue(filter: FilterOptionParsed) {
+  return (
+    <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
+      {
+        allPinned
+          .groupBy(a => (a.pinned!.column ?? 0).toString())
+          .orderBy(gr => parseInt(gr.key))
+          .map(gr => <div className="col-sm-3" key={gr.key}>
+            {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+          </div>)
+      }
+    </div>
+  );
+
+  function renderValue(filter: FilterOptionParsed) {
 
     const f = filter;
     const readOnly = f.frozen;
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: this.props.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
+    var labelText = f.pinned!.label ?? f.token?.niceName;
 
-    var labelText = f.pinned!.label || f.token && f.token.niceName;
+    if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
+      return (
+        <div className="checkbox mt-4">
+          <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onClick={() => {
+            f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
+            p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+          }} />{labelText}</label>
+        </div>
+      );
+    }
+
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
+
 
     if (isFilterGroupOptionParsed(f)) {
-      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => this.handleValueChange(f)} labelText={labelText || SearchMessage.Search.niceToString()} />
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} labelText={labelText || SearchMessage.Search.niceToString()} />
     }
 
     if (isList(f.operation!))
       return (
         <FormGroup ctx={ctx} labelText={labelText}>
-          <MultiValue values={f.value} readOnly={readOnly} onChange={() => this.handleValueChange(f)}
-            onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => this.handleValueChange(f))} />
+          <MultiValue values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
+            onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f))} />
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => this.handleValueChange(f), labelText, f.pinned!.disableOnNull);
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue");
   }
 
-  timeoutWriteText?: number | null;
 
-  handleValueChange = (f: FilterOptionParsed) => {
+  function handleValueChange(f: FilterOptionParsed) {
     if (isFilterGroupOptionParsed(f) || f.token && f.token.filterType == "String") {
 
-      if (this.timeoutWriteText)
-        clearTimeout(this.timeoutWriteText);
+      if (timeoutWriteText.current)
+        clearTimeout(timeoutWriteText.current);
 
-      this.timeoutWriteText = setTimeout(() => {
-        this.props.onFiltersChanged && this.props.onFiltersChanged(this.props.filterOptions);
-        this.timeoutWriteText = null;
+      timeoutWriteText.current = setTimeout(() => {
+        p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+        timeoutWriteText.current = null;
       }, 200);
 
     } else {
-      this.props.onFiltersChanged && this.props.onFiltersChanged(this.props.filterOptions);
+      p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
     }
   }
 }

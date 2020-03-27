@@ -7,7 +7,11 @@ namespace Signum.Entities
     [Serializable]
     public class CorruptMixin : MixinEntity
     {
-        CorruptMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        CorruptMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 
+        {
+            if (!(mainEntity is Entity))
+                throw new InvalidOperationException("mainEntity should be an Entity");
+        }
 
         public bool Corrupt { get; set; }
 
@@ -17,15 +21,15 @@ namespace Signum.Entities
 
             if (Corrupt)
             {
-                var integrity = MainEntity.EntityIntegrityCheckBase(); // So, no corruption allowed
+                var integrity = ((Entity)MainEntity).EntityIntegrityCheckBase(); // So, no corruption allowed
                 if (integrity == null)
                 {
                     this.Corrupt = false;
-                    if (!MainEntity.IsNew)
-                        Corruption.OnCorruptionRemoved(MainEntity);
+                    if (!((Entity)MainEntity).IsNew)
+                        Corruption.OnCorruptionRemoved((Entity)MainEntity);
                 }
-                else if (MainEntity.IsNew)
-                    Corruption.OnSaveCorrupted(MainEntity, integrity);
+                else if (((Entity)MainEntity).IsNew)
+                    Corruption.OnSaveCorrupted((Entity)MainEntity, integrity);
             }
         }
     }

@@ -263,7 +263,7 @@ namespace Signum.Test.LinqProvider
         public void WhereInnerQueryable()
         {
             var females = Database.Query<ArtistEntity>().Where(a => a.Sex == Sex.Female);
-            string f = females.ToString();
+            string f = females.ToString()!;
 
             var female = Database.Query<ArtistEntity>().SingleEx(a => females.Contains(a));
         }

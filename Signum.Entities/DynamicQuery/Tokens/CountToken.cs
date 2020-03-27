@@ -41,7 +41,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var parentResult = parent.BuildExpression(context);
 
-            var result = Expression.Call(miCount.MakeGenericMethod(parentResult.Type.ElementType()), parentResult);
+            var result = Expression.Call(miCount.MakeGenericMethod(parentResult.Type.ElementType()!), parentResult);
 
             return result.Nullify();
         }

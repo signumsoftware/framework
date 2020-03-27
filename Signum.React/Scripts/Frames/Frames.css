@@ -97,6 +97,10 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     pointer-events: initial !important;
 }
 
+.nav-tabs {
+    margin-bottom: 1rem;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;
@@ -169,4 +173,13 @@ a.expand-window:hover {
 .card.card-xs .card-header,
 .card.card-xs .card-body {
     padding: 0.3em 0.5em;
+}
+
+
+.sf-page-container {
+  display: flex;
+}
+
+.sf-page-container > div{
+    flex-grow: 1;
 }

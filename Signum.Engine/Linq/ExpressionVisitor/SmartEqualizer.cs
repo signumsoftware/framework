@@ -167,7 +167,7 @@ namespace Signum.Engine.Linq
 
             var ci = type.GetConstructors().SingleEx();
 
-            return Expression.New(ci, ci.GetParameters().Select(p => Expression.Constant(values.GetOrThrow(p.Name), p.ParameterType)));
+            return Expression.New(ci, ci.GetParameters().Select(p => Expression.Constant(values.GetOrThrow(p.Name!), p.ParameterType)));
         }
 
         public static Expression? PrimaryKeyEquals(Expression exp1, Expression exp2)

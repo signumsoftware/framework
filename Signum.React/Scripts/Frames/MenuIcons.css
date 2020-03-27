@@ -9,7 +9,7 @@ body:not(.rtl) .dropdown-header .arrow-align
 {
     float: right;
     font-size: 11px;
-    margin-top: 3px;
+    margin-top: 6px;
 }
 
 body.rtl .dropdown-item .arrow-align,
@@ -17,7 +17,7 @@ body.rtl .dropdown-header .arrow-align
 {
     float: left;
     font-size: 11px;
-    margin-top: 3px;
+    margin-top: 6px;
 }
 
 .dropdown-menu .icon {

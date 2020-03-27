@@ -30,6 +30,17 @@ namespace Signum.Utilities.ExpressionTrees
             return null;
         }
 
+
+        [DebuggerStepThrough]
+        public static Expression RemoveAllConvert(this Expression expression, Func<Type, bool> isAllowed)
+        {
+            var inner = expression.TryRemoveConvert(isAllowed);
+            if (inner == null)
+                return expression;
+
+            return inner.RemoveAllConvert(isAllowed);
+        }
+
         [DebuggerStepThrough]
         public static Expression Nullify(this Expression expression)
         {

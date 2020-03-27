@@ -78,7 +78,9 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.EntityExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
-        public static Dictionary<K, V>? ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V?> nullableValueSelector) where V : class
+        public static Dictionary<K, V>? ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V?> nullableValueSelector) 
+            where V : class
+            where K : notnull
         {
             Dictionary<K, V>? result = null;
 
@@ -110,11 +112,11 @@ namespace Signum.Entities.Reflection
 
             DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).NotNull().SelectMany(errors => errors.Values);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).NotNull().SelectMany(errors => errors.Values).ToList();
 
             var modErros = graph.Except(identGraph).OfType<ModifiableEntity>()
                             .Select(a => a.IntegrityCheck())
-                            .NotNull();
+                            .NotNull().ToList();
 
             return identErrors.Concat(modErros).ToDictionaryOrNull(a => a.TemporalId, a => a);
         }
@@ -207,7 +209,7 @@ namespace Signum.Entities.Reflection
 
         public static string SuperGraphviz(this DirectedGraph<Modifiable> modifiables)
         {
-            Func<Type, string> color = t => colors[Math.Abs(t.FullName.GetHashCode()) % colors.Length];
+            Func<Type, string> color = t => colors[Math.Abs(t.FullName!.GetHashCode()) % colors.Length];
 
             var listNodes = modifiables.Nodes.Select(n => new
             {
@@ -227,7 +229,7 @@ namespace Signum.Entities.Reflection
                 Style = n is Entity ? ", style=\"diagonals,filled,bold\"" :
                         n is Lite<Entity> ? "style=\"solid,bold\"" : "",
 
-                Label = n.ToString().Etc(30, "..").RemoveDiacritics()
+                Label = n.ToString()!.Etc(30, "..").RemoveDiacritics()
 
             }).ToList();
 
@@ -263,7 +265,7 @@ namespace Signum.Entities.Reflection
                 {
                     new XAttribute("Label", n.ToString() ?? "[null]"),
                     new XAttribute("TypeName", n.GetType().TypeName()),
-                    new XAttribute("Background", ColorExtensions.ToHtmlColor(n.GetType().FullName.GetHashCode()))
+                    new XAttribute("Background", ColorExtensions.ToHtmlColor(n.GetType().FullName!.GetHashCode()))
                 });
         }
 
@@ -273,7 +275,7 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
                new XAttribute("TypeName", ie.GetType().TypeName()),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName!.GetHashCode())),
                new XAttribute("Description", ie.IdOrNull?.ToString() ?? "New")
             };
         }
@@ -289,7 +291,7 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified((Modifiable)lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()),
-               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode())),
+               new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.EntityType.FullName!.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode()).Replace("#", "#44")),
                new XAttribute("Description", lite.IdOrNull?.ToString() ?? "New")
@@ -303,7 +305,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()),
                new XAttribute("NodeRadius", 0),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName!.GetHashCode())),
             };
         }
 
@@ -313,7 +315,7 @@ namespace Signum.Entities.Reflection
             {
                new XAttribute("Label", (ee.ToString() ?? "[null]") +  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName!.GetHashCode())),
             };
         }
 
@@ -324,7 +326,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()),
                new XAttribute("NodeRadius", 2),
-               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType()!.FullName.GetHashCode())),
+               new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType()!.FullName!.GetHashCode())),
             };
         }
 
@@ -360,7 +362,7 @@ namespace Signum.Entities.Reflection
     {
         public Dictionary<Guid, IntegrityCheck> Errors
         {
-            get { return (Dictionary<Guid, IntegrityCheck>)this.Data["integrityErrors"]; }
+            get { return (Dictionary<Guid, IntegrityCheck>)this.Data["integrityErrors"]!; }
             set { this.Data["integrityErrors"] = value; }
         }
 

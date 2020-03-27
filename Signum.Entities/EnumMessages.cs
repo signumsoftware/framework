@@ -113,9 +113,11 @@ Lose changes?")]
         MoveUp,
         Move,
         Navigate,
-        NullValueNotAllowed,
         Remove,
         View,
+        [Description("Add…")]
+        Add,
+
     }
 
     [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -188,7 +190,6 @@ Lose changes?")]
         Label,
         Column,
         Row,
-        DisableOnNull,
         SplitText,
         [Description("When pressed, the filter wil take no effect if the value is null")]
         WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull,
@@ -205,6 +206,7 @@ Lose changes?")]
         PleaseSelectOneOrSeveralEntities,
         [Description("{0} filters collapsed")]
         _0FiltersCollapsed,
+        DisplayName,
     }
 
     public enum SelectorMessage

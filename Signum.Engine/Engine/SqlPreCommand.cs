@@ -188,7 +188,7 @@ namespace Signum.Engine
             if (value is byte[] bytes)
                 return "0x" + BitConverter.ToString(bytes).Replace("-", "");
 
-            return value.ToString();
+            return value.ToString()!;
         }
 
         protected internal override void PlainSql(StringBuilder sb)

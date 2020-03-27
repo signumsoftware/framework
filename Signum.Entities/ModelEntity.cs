@@ -37,8 +37,8 @@ namespace Signum.Entities
             return Implementations.FromAttributes(
                 route.Type.CleanType(),
                 route,
-                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAttribute>(),
-                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAllAttribute>());
+                fieldRoute.FieldInfo!.GetCustomAttribute<ImplementedByAttribute>(),
+                fieldRoute.FieldInfo!.GetCustomAttribute<ImplementedByAllAttribute>());
         }
     }
 }

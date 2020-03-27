@@ -6,6 +6,7 @@ export const KeyCodes = {
   backspace: 8,
   tab: 9,
   clear: 12, /*??*/
+  enter: 13,
   esc: 27,
   space: 32,
   end: 35,

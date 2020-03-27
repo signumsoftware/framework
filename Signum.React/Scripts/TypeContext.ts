@@ -436,12 +436,15 @@ export interface IOperationVisible {
 }
 
 export interface IHasChanges {
-  componentHasChanges?: () => boolean;
+  entityHasChanges?: () => boolean;
 }
 
 export interface EntityFrame {
-  frameComponent: React.Component<any, any>;
-  entityComponent: React.Component<any, any> | null | undefined;
+  frameComponent: {
+    forceUpdate(): void,
+    createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
+  };
+  entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;
   onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;

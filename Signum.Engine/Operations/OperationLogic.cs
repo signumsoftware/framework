@@ -40,7 +40,7 @@ namespace Signum.Engine.Operations
             return (from t in operations.OverridenTypes
                     from d in operations.GetDefinition(t)!.Keys
                     group t by d into g
-                    select KVP.Create(g.Key, g.ToList())).ToDictionary();
+                    select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
         });
 
 
@@ -143,11 +143,14 @@ namespace Signum.Engine.Operations
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(OperationLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
 
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(OperationLogEntity).ToTypeEntity());
             if (dateLimit == null)
                 return;
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()
@@ -324,7 +327,7 @@ Consider the following options:
                 return (from o in TypeOperations(entityType)
                         let eo = o as IEntityOperation
                         where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
-                        select KVP.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+                        select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
             }
             catch(Exception e)
             {
@@ -665,7 +668,7 @@ Consider the following options:
             return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
                     let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                     where invalid.Any()
-                    select KVP.Create(o.OperationSymbol,
+                    select KeyValuePair.Create(o.OperationSymbol,
                         OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();

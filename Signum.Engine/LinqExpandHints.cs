@@ -14,7 +14,7 @@ namespace Signum.Engine
             if (source == null)
                 throw new ArgumentNullException("query");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(liteSelector), Expression.Constant(expandLite) }));
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(liteSelector), Expression.Constant(expandLite) }));
         }
 
         public static IQueryable<T> ExpandEntity<T, L>(this IQueryable<T> source, Expression<Func<T, L?>> entitySelector, ExpandEntity expandEntity)
@@ -23,7 +23,7 @@ namespace Signum.Engine
             if (source == null)
                 throw new ArgumentNullException("query");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(entitySelector), Expression.Constant(expandEntity) }));
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(entitySelector), Expression.Constant(expandEntity) }));
         }
     }
 

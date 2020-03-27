@@ -154,9 +154,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             return "ImplementedBy({0})".FormatWith(Types.ToString(t => t.Name, ", "));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return obj is Implementations || Equals((Implementations)obj);
+            return obj is Implementations imp && Equals(imp);
         }
 
         public bool Equals(Implementations other)
@@ -173,7 +173,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         Implementations(SerializationInfo info, StreamingContext context)
         {
-            string str = info.GetString("arrayOrType");
+            string str = info.GetString("arrayOrType")!;
 
             arrayOrType = str == "ALL" ? null :
                 str.Split('|').Select(Type.GetType).ToArray();

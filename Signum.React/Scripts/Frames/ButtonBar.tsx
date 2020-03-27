@@ -1,22 +1,32 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
+import { namespace } from 'd3';
+import { FunctionalAdapter } from './FrameModal';
 
 export interface ButtonBarProps extends ButtonsContext {
   align?: "left" | "right";
 }
 
-export default class ButtonBar extends React.Component<ButtonBarProps>{
-  static clearButtonBarRenderer() {
-    ButtonBar.onButtonBarRender.clear();
-  }
+export interface ButtonBarHandle {
+  handleKeyDown(e: KeyboardEvent): void;
+}
 
-  static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined> = [];
 
- 
+export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
 
-  hanldleKeyDown = (e: KeyboardEvent) => {
-    var s = this.shortcuts;
+  const ctx: ButtonsContext = p;
+  const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
+
+  const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) ?? [])
+    .concat(rb?.renderButtons ? rb.renderButtons(ctx) : [])
+    .filter(a => a != null)
+    .orderBy(a => a!.order ?? 0);
+
+  var shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
+
+  function handleKeyDown(e: KeyboardEvent) {
+    var s = shortcuts;
     if (s != null) {
       for (var i = 0; i < s.length; i++) {
         if (s[i](e)) {
@@ -26,24 +36,21 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
       }
     }
   }
+  React.useImperativeHandle(ref, () => ({
+    handleKeyDown
+  }));
 
-  shortcuts: ((e: KeyboardEvent) => boolean)[] = [];
+  return React.cloneElement(<div className={classes("btn-toolbar", "sf-button-bar", p.align == "right" ? "justify-content-end" : undefined)} />,
+    undefined,
+    ...buttons.map(a => a!.button)
+  );
+});
 
-  render() {
-    const ctx: ButtonsContext = this.props;
-    const rb = ctx.frame.entityComponent as any as IRenderButtons;
+export namespace ButtonBarManager {
 
-    const buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || [])
-      .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
-      .filter(a => a != null)
-      .orderBy(a => a!.order || 0);
+  export const onButtonBarRender = [] as ((c: ButtonsContext) => Array<ButtonBarElement | undefined> | undefined)[];
 
-    this.shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
-    
-    return React.cloneElement(<div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "justify-content-end" : undefined)} />,
-      undefined,
-      ...buttons.map(a => a!.button)
-    );
+  export function clearButtonBarRenderer(){
+    onButtonBarRender.clear();
   }
 }
-

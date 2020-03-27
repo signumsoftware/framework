@@ -1,0 +1,85 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>Signum Modal Pop-up Class Component</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>reactModal</Shortcut>
+    <Description>Code snippet for adding an Modal Pop-up React class</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import { Modal } from "react-bootstrap";
+          import { openModal, IModalProps } from "@framework/Modals";
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>ComponentName</ID>
+        <ToolTip>Component Class Name</ToolTip>
+        <Default>MyComponent</Default>
+      </Literal>
+      <Literal>
+        <ID>AnswerType</ID>
+        <ToolTip>Type of item returned by popup</ToolTip>
+        <Default>boolean</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+interface $ComponentName$ModalProps extends IModalProps<$AnswerType$ | undefined> {
+  question: string;
+}
+
+export function $ComponentName$Modal(p: $ComponentName$ModalProps) {
+
+  const [show, setShow] = React.useState(true);
+  const answerRef = React.useRef<$AnswerType$ | undefined>(undefined);
+
+  function handleOkClicked() {
+    answerRef.current = true;
+    setShow(false);
+  }
+
+  function handleCancelClicked() {
+    setShow(false);
+  }
+
+  function handleOnExited() {
+    p.onExited!(answerRef.current);
+  }
+
+  return (
+    <Modal onHide={handleCancelClicked} show={show} className="message-modal" onExited={handleOnExited}>
+      <div className="modal-header">
+        <h5 className="modal-title">Important Question</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        {p.question}
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClicked}>
+          {JavascriptMessage.ok.niceToString()}
+        </button>
+        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+          {JavascriptMessage.cancel.niceToString()}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+$ComponentName$Modal.show = (question: string): Promise<$AnswerType$ | undefined> => {
+  return openModal<$AnswerType$ | undefined>(<$ComponentName$Modal question={question} />);
+};
+]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { match, Route, RouterChildContext, matchPath, RouteProps, Switch } from "react-router";
+import { match, Route, RouterChildContext, matchPath, RouteProps, Switch, __RouterContext } from "react-router";
 import * as H from "history";
 import * as Navigator from "./Navigator";
 
@@ -37,27 +37,39 @@ export function useAppRelativeComputeMatch(RouteClass: typeof Route) {
 export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
 
   Switch.prototype.render = function render(this: Switch) {
-    const { route } = this.context.router
-    const { children } = this.props
-    const location = this.props.location || route.location
 
-    let match: match<any> | undefined;
-    let child: React.ReactElement<any> | undefined;
-    React.Children.forEach(children, (c) => {
-      let element = c as React.ReactElement<RouteProps & { from?: string }>;
+    return (
+      <__RouterContext.Consumer>
+        {context => {
+          if (!context)
+            throw new Error("You should not use <Switch> outside a <Router>");
 
-      if (!React.isValidElement(element))
-        return;
+          const location = this.props.location ?? context.location;
 
-      const { path: pathProp, exact, strict, from } = element.props;
-      const path = pathProp || from
+          let element: React.ReactElement<any> | undefined;
+          let match: match<any> | undefined | null;
 
-      if (match == null) {
-        child = element
-        match = path ? matchPath(location.pathname, { path: Navigator.toAbsoluteUrl(path as string), exact, strict }) : route.match
-      }
-    });
+          // We use React.Children.forEach instead of React.Children.toArray().find()
+          // here because toArray adds keys to all child elements and we do not want
+          // to trigger an unmount/remount for two <Route>s that render the same
+          // component at different URLs.
+          React.Children.forEach(this.props.children, child => {
+            if (match == null && React.isValidElement(child)) {
+              element = child;
 
-    return match && child ? React.cloneElement(child, { location, computedMatch: match }) : null
+              const path = child.props.path ?? child.props.from;
+
+              match = path
+                ? matchPath(location.pathname, { ...child.props, path: Navigator.toAbsoluteUrl(path as string) })
+                : context.match;
+            }
+          });
+
+          return match
+            ? React.cloneElement(element!, { location, computedMatch: match })
+            : null;
+        }}
+      </__RouterContext.Consumer>
+    );
   };
 }

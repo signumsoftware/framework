@@ -26,6 +26,12 @@ namespace Signum.Entities
 
     }
 
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class AvoidDumpEntityAttribute : Attribute
+    {
+
+    }
+
     public static class ObjectDumper
     {
         public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionEntity) };
@@ -59,7 +65,7 @@ namespace Signum.Entities
                 this.showByteArrays = showByteArrays;
             }
 
-            public void DumpObject(object o)
+            public void DumpObject(object? o, bool avoidDumpEntity = false)
             {
                 if (o == null)
                 {
@@ -128,18 +134,21 @@ namespace Signum.Entities
 
                     string toString = SafeToString(o);
 
-                    Sb.Append(" /* {0} */".FormatWith(toString));
+                    Sb.Append(" /* {0} {1} */".FormatWith(toString, (avoidDumpEntity ? "[DUMP AS LITE]" : "")));
+
+                    if (avoidDumpEntity)
+                        return;
                 }
 
                 if (o is Lite<Entity> l)
                 {
                     Sb.Append("({0}, \"{1}\")".FormatWith((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
-                    if (((Lite<Entity>)o).EntityOrNull != null)
+                    if (((Lite<Entity>)o).EntityOrNull != null && !avoidDumpEntity)
                     {
                         Sb.AppendLine().AppendLine("{".Indent(level));
                         level += 1;
-                        var prop = o.GetType().GetProperty(nameof(Lite<Entity>.Entity));
-                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
+                        var prop = o.GetType().GetProperty(nameof(Lite<Entity>.Entity))!;
+                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null)!);
                         level -= 1;
                         Sb.Append("}".Indent(level));
                     }
@@ -172,14 +181,14 @@ namespace Signum.Entities
                 }
                 else if (o is IEnumerable)
                 {
-                    if (o is IDictionary)
+                    if (o is IDictionary dic)
                     {
-                        foreach (DictionaryEntry item in (o as IDictionary)!)
+                        foreach (DictionaryEntry? item in dic)
                         {
                             Sb.Append("{".Indent(level));
-                            DumpObject(item.Key);
+                            DumpObject(item!.Value.Key);
                             Sb.Append(", ");
-                            DumpObject(item.Value);
+                            DumpObject(item!.Value.Value);
                             Sb.AppendLine("},");
                         }
                     }
@@ -188,7 +197,7 @@ namespace Signum.Entities
                         foreach (var item in (o as IEnumerable)!)
                         {
                             Sb.Append("".Indent(level));
-                            DumpObject(item);
+                            DumpObject(item, avoidDumpEntity);
                             Sb.AppendLine(",");
                         }
                     }
@@ -196,13 +205,16 @@ namespace Signum.Entities
                 else if (!typeof(ModifiableEntity).IsAssignableFrom(t))
                     foreach (var prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
-                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
+                        var hasAvoidDumpEntityAttr = prop.HasAttribute<AvoidDumpEntityAttribute>();
+                        DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null), hasAvoidDumpEntityAttr);
                     }
-                else
+                else 
                     foreach (var field in Reflector.InstanceFieldsInOrder(t).OrderBy(IsMixinField))
                     {
                         if (IsIdOrTicks(field))
                             continue;
+
+                        var hasAvoidDumpEntityAttr = field.HasAttribute<AvoidDumpEntityAttribute>() || Reflector.TryFindPropertyInfo(field)?.HasAttribute<AvoidDumpEntityAttribute>() == true;
 
                         if (IsMixinField(field))
                         {
@@ -211,7 +223,7 @@ namespace Signum.Entities
                             if (val == null)
                                 continue;
 
-                            DumpPropertyOrField(field.FieldType, GetFieldName(field), val);
+                            DumpPropertyOrField(field.FieldType, GetFieldName(field), val, hasAvoidDumpEntityAttr);
                         }
 
                         var skip = this.showIgnoredFields == ShowIgnoredFields.Yes ? false :
@@ -221,7 +233,7 @@ namespace Signum.Entities
 
                         if (!skip)
                         {
-                            DumpPropertyOrField(field.FieldType, GetFieldName(field), field.GetValue(o));
+                            DumpPropertyOrField(field.FieldType, GetFieldName(field), field.GetValue(o), hasAvoidDumpEntityAttr);
                         }
                     }
 
@@ -249,7 +261,7 @@ namespace Signum.Entities
                 string toString;
                 try
                 {
-                    toString = o.ToString();
+                    toString = o.ToString()!;
                 }
                 catch (Exception e)
                 {
@@ -286,10 +298,10 @@ namespace Signum.Entities
                 return false;
             }
 
-            private void DumpPropertyOrField(Type type, string name, object obj)
+            private void DumpPropertyOrField(Type type, string name, object? obj, bool avoidDumpEntity = false)
             {
                 Sb.AppendFormat("{0} = ".Indent(level), name);
-                DumpObject(obj);
+                DumpObject(obj, avoidDumpEntity);
                 Sb.AppendLine(",");
             }
 

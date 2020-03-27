@@ -14,6 +14,7 @@ using System.Collections;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Signum.Entities
 {
@@ -65,8 +66,8 @@ namespace Signum.Entities
                     colb.CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)colb)
-                        item.SetParentEntity(null);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)colb!)
+                        ((ModifiableEntity)item).SetParentEntity(null);
             }
 
             if (field is ModifiableEntity modb)
@@ -84,8 +85,8 @@ namespace Signum.Entities
                     cola.CollectionChanged += ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)cola)
-                        item.SetParentEntity(this);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)cola!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
             }
 
             if (field is ModifiableEntity moda)
@@ -115,7 +116,7 @@ namespace Signum.Entities
             public string PropertyName;
 
             public bool Equals(PropertyKey other) => other.Type == Type && other.PropertyName == PropertyName;
-            public override bool Equals(object obj) => obj is PropertyKey && Equals((PropertyKey)obj);
+            public override bool Equals(object? obj) => obj is PropertyKey pk && Equals(pk);
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
@@ -128,13 +129,13 @@ namespace Signum.Entities
                  key.Type.GetInterfaces().Select(i => i.GetProperty(key.PropertyName, flags)).NotNull().FirstOrDefault());
         }
 
-        static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
+        static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString()!;
         [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
         public string ToStringProperty
         {
             get
             {
-                string str = ToString();
+                string? str = ToString();
                 return str.HasText() ? str : this.GetType().NiceName();
             }
         }
@@ -165,8 +166,23 @@ namespace Signum.Entities
                     entity.SetParentEntity(this);
                 else
                 {
-                    foreach (ModifiableEntity item in (IEnumerable)field!)
-                        item.SetParentEntity(this);
+                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
+                }
+            }
+
+
+            foreach (object? field in AttributeManager<QueryablePropertyAttribute>.FieldsWithAttribute(this))
+            {
+                if (field == null)
+                    continue;
+
+                if (field is ModifiableEntity entity)
+                    entity.SetParentEntity(this);
+                else
+                {
+                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
+                        ((ModifiableEntity)item).SetParentEntity(this);
                 }
             }
         }
@@ -278,13 +294,9 @@ namespace Signum.Entities
         [Ignore]
         internal Guid temporalId = Guid.NewGuid();
 
-        internal ModifiableEntity()
-        {
-        }
-
         public override int GetHashCode()
         {
-            return GetType().FullName.GetHashCode() ^ temporalId.GetHashCode();
+            return GetType().FullName!.GetHashCode() ^ temporalId.GetHashCode();
         }
         #endregion
 
@@ -446,6 +458,82 @@ namespace Signum.Entities
 
 
                 this.temporalErrors.Add(pi.Name, error);
+            }
+        }
+
+        internal ModifiableEntity()
+        {
+            mixin = MixinDeclarations.CreateMixins(this);
+        }
+
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        readonly MixinEntity? mixin;
+        public M Mixin<M>() where M : MixinEntity
+        {
+            var result = TryMixin<M>();
+            if (result != null)
+                return result;
+
+            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
+        }
+
+        public M? TryMixin<M>() where M : MixinEntity
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current is M)
+                    return (M)current;
+                current = current.Next;
+            }
+
+            return null;
+        }
+
+        public MixinEntity GetMixin(Type mixinType)
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current.GetType() == mixinType)
+                    return current;
+                current = current.Next;
+            }
+
+            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                .FormatWith(mixinType.TypeName(), GetType().TypeName()));
+        }
+
+        [HiddenProperty]
+        public MixinEntity this[string mixinName]
+        {
+            get
+            {
+                var current = mixin;
+                while (current != null)
+                {
+                    if (current.GetType().Name == mixinName)
+                        return current;
+                    current = current.Next;
+                }
+
+                throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                    .FormatWith(mixinName, GetType().TypeName()));
+            }
+        }
+
+        [HiddenProperty]
+        public IEnumerable<MixinEntity> Mixins
+        {
+            get
+            {
+                var current = mixin;
+                while (current != null)
+                {
+                    yield return current;
+                    current = current.Next;
+                }
             }
         }
     }

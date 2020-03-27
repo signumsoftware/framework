@@ -8,6 +8,7 @@ namespace Signum.Utilities
     public static class GroupExtensions
     {
         public static Dictionary<K, T> GroupDistinctToDictionary<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector)
@@ -15,6 +16,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V> GroupDistinctToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector, valueSelector)
@@ -31,6 +33,7 @@ namespace Signum.Utilities
 
 
         public static Dictionary<K, List<V>> GroupToDictionary<V, K>(this IEnumerable<KeyValuePair<K, V>> collection)
+            where K : notnull
         {
             return collection
                 .GroupBy(kvp => kvp.Key)
@@ -38,6 +41,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, List<T>> GroupToDictionary<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector)
@@ -45,6 +49,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, List<T>> GroupToDictionary<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector, IEqualityComparer<K> comparer)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector, comparer)
@@ -52,6 +57,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, List<V>> GroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector, valueSelector)
@@ -60,6 +66,7 @@ namespace Signum.Utilities
 
 
         public static Dictionary<K, List<T>> GroupToDictionaryDescending<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector)
@@ -68,6 +75,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, List<V>> GroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector, valueSelector)
@@ -77,6 +85,7 @@ namespace Signum.Utilities
 
 
         public static Dictionary<T, int> GroupCount<T>(this IEnumerable<T> collection)
+            where T : notnull
         {
             return collection
                 .GroupBy(a=>a)
@@ -84,6 +93,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, int> GroupCount<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(keySelector)
@@ -91,6 +101,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(t => keySelector(t))
@@ -98,6 +109,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
+            where K : notnull
         {
             return collection
                 .GroupBy(t => keySelector(t), comparer)
@@ -105,6 +117,7 @@ namespace Signum.Utilities
         }
 
         public static Dictionary<K, V> AgGroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+            where K : notnull
         {
             return collection
                 .GroupBy(t => keySelector(t))

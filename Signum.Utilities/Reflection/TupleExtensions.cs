@@ -58,14 +58,14 @@ namespace Signum.Utilities.Reflection
         {
             switch (index)
             {
-                case 0: return type.GetProperty("Item1");
-                case 1: return type.GetProperty("Item2");
-                case 2: return type.GetProperty("Item3");
-                case 3: return type.GetProperty("Item4");
-                case 4: return type.GetProperty("Item5");
-                case 5: return type.GetProperty("Item6");
-                case 6: return type.GetProperty("Item7");
-                case 7: return type.GetProperty("Rest");
+                case 0: return type.GetProperty("Item1")!;
+                case 1: return type.GetProperty("Item2")!;
+                case 2: return type.GetProperty("Item3")!;
+                case 3: return type.GetProperty("Item4")!;
+                case 4: return type.GetProperty("Item5")!;
+                case 5: return type.GetProperty("Item6")!;
+                case 6: return type.GetProperty("Item7")!;
+                case 7: return type.GetProperty("Rest")!;
             }
 
             throw new ArgumentException("Property with index {0} not found on {1}".FormatWith(index, type.GetType()));

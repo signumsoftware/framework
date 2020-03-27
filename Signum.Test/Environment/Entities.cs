@@ -37,7 +37,7 @@ namespace Signum.Test.Environment
     [Serializable] // Just a pattern
     public class ColaboratorsMixin : MixinEntity
     {
-        ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        ColaboratorsMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         [NoRepeatValidator]
         public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();
@@ -80,7 +80,7 @@ namespace Signum.Test.Environment
         public AwardEntity? LastAward { get; set; }
 
         [AutoExpressionField]
-        public IEnumerable<Lite<Entity>> FriendsCovariant() => As.Expression(() => Friends);
+        public IEnumerable<Lite<Entity>> FriendsCovariant() => As.Expression(() => (IEnumerable<Lite<Entity>>)Friends);
 
         public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
 

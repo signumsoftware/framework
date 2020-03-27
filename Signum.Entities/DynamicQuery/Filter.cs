@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -59,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
                 Type elementType = collection.Type.ElementType()!;
 
                 var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-                ctx.Replacemens.Add(anyAll, p);
+                ctx.Replacemens.Add(anyAll, p.BuildLite().Nullify());
 
                 var body = this.GroupOperation == FilterGroupOperation.And ?
                     Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
@@ -135,7 +136,7 @@ namespace Signum.Entities.DynamicQuery
                 if (Value == null)
                     return Expression.Constant(false);
 
-                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value);
+                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value)!;
 
                 bool hasNull = false;
                 while (clone.Contains(null))
@@ -246,5 +247,16 @@ namespace Signum.Entities.DynamicQuery
         SingleOrDefault,
         SingleOrMany,
         Only
+    }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum PinnedFilterActive
+    {
+        Always,
+        WhenHasValue,
+        [Description("Checkbox (start checked)")]
+        Checkbox_StartChecked,
+        [Description("Checkbox (start unchecked)")]
+        Checkbox_StartUnchecked,
     }
 }

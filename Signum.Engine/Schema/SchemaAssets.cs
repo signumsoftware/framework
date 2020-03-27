@@ -76,7 +76,7 @@ namespace Signum.Engine.Maps
                     return (from v in Database.View<SysViews>()
                             join s in Database.View<SysSchemas>() on v.schema_id equals s.schema_id
                             join m in Database.View<SysSqlModules>() on v.object_id equals m.object_id
-                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), v.name), m.definition)).ToList();
+                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name), v.name), m.definition)).ToList();
                 }
             }).ToDictionary();
 
@@ -128,7 +128,7 @@ namespace Signum.Engine.Maps
                             join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
                             where p.type == "P" || p.type == "IF" || p.type == "FN"
                             join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
-                            select KVP.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition)).ToList();
+                            select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition)).ToList();
                 }
             }).ToDictionary();
 

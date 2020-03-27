@@ -73,7 +73,7 @@ namespace Signum.Engine
 
                 var rowNum = BulkInsertTable<T>(list, copyOptions, preSaving, validateFirst, false, timeout, message);
 
-                var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
+                var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KeyValuePair.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
 
                 var getKeyFunc = keySelector.Compile();
 
@@ -240,8 +240,6 @@ namespace Signum.Engine
                 catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
                 {
                     throw new InvalidOperationException($"{nameof(BulkInsertMListTable)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
-
-                    throw;
                 }
             }
         }

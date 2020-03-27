@@ -433,7 +433,7 @@ namespace Signum.Engine.Linq
                     if (nex.Members != null)
                     {
                         PropertyInfo pi = (PropertyInfo)member;
-                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
+                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.First, pi)).Second;
                     }
                     break;
             }

@@ -60,7 +60,7 @@ namespace Signum.Engine
 
             if (elementID == null)
             {
-                elementID = e => e!.ToString();
+                elementID = e => e!.ToString()!;
             }
             if (writer == null)
                 writer = GetConsoleWriter();
@@ -150,7 +150,7 @@ namespace Signum.Engine
                     catch (Exception e)
                     {
                         writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        writer(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
                         if (StopOnException != null && StopOnException(elementID(item), e))
                             throw;
@@ -213,7 +213,7 @@ namespace Signum.Engine
                                 catch (Exception e)
                                 {
                                     writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                                    writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                                    writer(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
                                     if (StopOnException != null && StopOnException(elementID(item), e))
                                         stopException = e;

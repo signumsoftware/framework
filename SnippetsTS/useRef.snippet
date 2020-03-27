@@ -1,0 +1,42 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>React useRef Hook</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>useRef</Shortcut>
+    <Description>Code snippet for adding a useRef Hook to an React Function Component</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import * as React from 'react';
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>var</ID>
+        <ToolTip>state variable name</ToolTip>
+        <Default>foo</Default>
+      </Literal>
+      <Literal>
+        <ID>type</ID>
+        <ToolTip>state variable type</ToolTip>
+        <Default>HTMLDivElement</Default>
+      </Literal>
+      <Literal>
+        <ID>init</ID>
+        <ToolTip>state variable init value</ToolTip>
+        <Default>null</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+const $var$ = React.useRef<$type$>($init$)
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

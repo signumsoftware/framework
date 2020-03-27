@@ -45,6 +45,15 @@ namespace Signum.Analyzer.Test
         }
 
         [TestMethod]
+        public void ExpressionExplicitNotCorrectNullable()
+        {
+            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, string?>>'", @"
+        static Expression<Func<Entity, string>> MyExpression;        
+        [ExpressionField(""MyExpression"")]
+        public static string? OperationLogs(this Entity e) => """";");
+        }
+
+        [TestMethod]
         public void ExpressionExplicitCorrectNullable()
         {
             TestDiagnostic(null, @"

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
@@ -15,7 +15,7 @@ namespace Signum.Utilities
             Debug.Write(new String(buffer, index, count));
         }
 
-        public override void Write(string value)
+        public override void Write(string? value)
         {
             Lines++;
             Debug.Write(value);

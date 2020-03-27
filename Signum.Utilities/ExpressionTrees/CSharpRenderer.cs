@@ -58,7 +58,7 @@ namespace Signum.Utilities.ExpressionTrees
         public static string ConstructorSignature(this ConstructorInfo constructor)
         {
             return "{0}({1})".FormatWith(
-                constructor.DeclaringType.TypeName(),
+                constructor.DeclaringType!.TypeName(),
                 constructor.GetParameters().ToString(p => p.ParameterSignature(), ", "));
         }
 
@@ -107,9 +107,9 @@ namespace Signum.Utilities.ExpressionTrees
                 return result;
 
             if (type.IsArray)
-                return "{0}[{1}]".FormatWith(type.GetElementType().TypeName(), new string(',', type.GetArrayRank() - 1));
+                return "{0}[{1}]".FormatWith(type.GetElementType()!.TypeName(), new string(',', type.GetArrayRank() - 1));
 
-            Type ut = Nullable.GetUnderlyingType(type);
+            Type? ut = Nullable.GetUnderlyingType(type);
             if (ut != null)
                 return "{0}?".FormatWith(ut.TypeName());
 
@@ -146,7 +146,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (obj.GetType().IsEnum)
                 return $"{obj.GetType().FullName}.{obj.ToString()}";
 
-            return obj.ToString();
+            return obj.ToString()!;
         }
 
         static string ToSrtringLiteral(string input)

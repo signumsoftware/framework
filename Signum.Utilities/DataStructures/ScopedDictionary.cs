@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Signum.Utilities.DataStructures
 {
     public class ScopedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+        where TKey: notnull
     {
         ScopedDictionary<TKey, TValue>? previous;
         Dictionary<TKey, TValue> map;

@@ -126,6 +126,14 @@ namespace Signum.Analyzer.Test
         }
 
         [TestMethod]
+        public void AutoExpressionImplicitCasting()
+        {
+            TestDiagnostic("the call to As.Expression returns 'PrimaryKey' but is implicitly converted to 'int?'", @"
+        [AutoExpressionField]
+        public static int? OperationLogs(Entity e) => As.Expression(() => e.Id);", assertErrors: false);
+        }
+
+        [TestMethod]
         public void AutoExpressionCorrectWithError()
         {
             TestDiagnostic(null, @"
@@ -193,11 +201,9 @@ namespace ConsoleApplication1
         public void AutoExpressionFixInstanceProperty()
         {
             TestCodeFix(@"
-
         [AutoExpressionField]
         public string IdToStr => this.ToString();",
         @"
-
         [AutoExpressionField]
         public string IdToStr => As.Expression(() => this.ToString());", staticClass: false);
         }
@@ -206,11 +212,9 @@ namespace ConsoleApplication1
         public void AutoExpressionFixInstancePropertyStatement()
         {
             TestCodeFix(@"
-
         [AutoExpressionField]
         public string IdToStr { get { return ToString(); } }",
         @"
-
         [AutoExpressionField]
         public string IdToStr { get { return As.Expression(() => ToString()); } }", staticClass: false);
         }
@@ -220,11 +224,9 @@ namespace ConsoleApplication1
         public void AutoExpressionFixInstanceMethodStatement()
         {
             TestCodeFix(@"
-
         [AutoExpressionField]
         public string GetId() { return ToString(); }",
         @"
-
         [AutoExpressionField]
         public string GetId() { return As.Expression(() => ToString()); }", staticClass: false);
         }
@@ -233,15 +235,24 @@ namespace ConsoleApplication1
         public void AutoExpressionFixInstanceMethodStatementTrivia()
         {
             TestCodeFix(@"
-
         [AutoExpressionField]
         public string GetId() =>
             ToString();",
         @"
-
         [AutoExpressionField]
         public string GetId() =>
             As.Expression(() => ToString());", staticClass: false);
+        }
+
+        [TestMethod]
+        public void AutoExpressionExplicitCast()
+        {
+            TestCodeFix(@"
+        [AutoExpressionField]
+        public int? GetId() => As.Expression(()=>3);",
+        @"
+        [AutoExpressionField]
+        public int? GetId() => As.Expression(()=> (int?)3);", staticClass: false);
         }
 
         private void TestCodeFix(string initial, string final, bool staticClass = true)

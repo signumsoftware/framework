@@ -2,8 +2,9 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
-import { LineBase, LineBaseProps } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { MList, newMListElement } from '../Signum.Entities'
+import { EntityCheckboxList } from './EntityCheckboxList'
 
 export interface EnumCheckboxListProps extends LineBaseProps {
   data?: string[];
@@ -13,19 +14,19 @@ export interface EnumCheckboxListProps extends LineBaseProps {
   avoidFieldSet?: boolean;
 }
 
-export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckboxListProps> {
+export class EnumCheckboxListController extends LineBaseController<EnumCheckboxListProps> {
 
-  calculateDefaultState(state: EnumCheckboxListProps) {
-    super.calculateDefaultState(state);
-    state.columnWidth = 200;
-    const ti = getTypeInfo(state.type!.name);
-    state.data = Dic.getKeys(ti.members);
+  getDefaultProps(p: EnumCheckboxListProps) {
+    super.getDefaultProps(p);
+    p.columnWidth = 200;
+    const ti = getTypeInfo(p.type!.name);
+    p.data = Dic.getKeys(ti.members);
   }
 
   handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: string) => {
     const current = event.currentTarget;
 
-    var list = this.state.ctx.value;
+    var list = this.props.ctx.value;
     var toRemove = list.filter(mle => mle.element == val)
 
     if (toRemove.length) {
@@ -38,81 +39,86 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     }
   }
 
-  getColumnStyle(): React.CSSProperties | undefined {
-    var s = this.state;
+}
 
-    if (s.columnCount && s.columnWidth)
-      return {
-        columns: `${s.columnCount} ${s.columnWidth}px`,
-        MozColumns: `${s.columnCount} ${s.columnWidth}px`,
-        WebkitColumns: `${s.columnCount} ${s.columnWidth}px`,
-      };
+export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props: EnumCheckboxListProps, ref: React.Ref<EnumCheckboxListController>) {
+  const c = useController(EnumCheckboxListController, props, ref);
+  const p = c.props;
 
-    if (s.columnCount)
-      return {
-        columnCount: s.columnCount,
-        MozColumnCount: s.columnCount,
-        WebkitColumnCount: s.columnCount,
-      };
+  if (c.isHidden)
+    return null;
 
-    if (s.columnWidth)
-      return {
-        columnWidth: s.columnWidth,
-        MozColumnWidth: s.columnWidth,
-        WebkitColumnWidth: s.columnWidth,
-      };
-
-    return undefined;
-  }
-
-
-  renderInternal() {
-
-    if (this.props.avoidFieldSet == true)
-      return (
-        <div className={classes("SF-checkbox-list", this.state.ctx.errorClassBorder)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
-          {this.renderContent()}
-        </div>
-      );
-
+  if (p.avoidFieldSet == true)
     return (
-      <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
-        <legend>
-          <div>
-            <span>{this.state.labelText}</span>
-          </div>
-        </legend>
-        {this.renderContent()}
-      </fieldset>
+      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
+        {renderContent()}
+      </div>
     );
-  }
 
-  renderContent() {
-    if (this.state.data == null)
+  return (
+    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
+      <legend>
+        <div>
+          <span>{p.labelText}</span>
+        </div>
+      </legend>
+      {renderContent()}
+    </fieldset>
+  );
+
+
+  function renderContent() {
+    if (p.data == null)
       return null;
 
-    var data = [...this.state.data];
+    var data = [...p.data];
 
-    this.state.ctx.value.forEach(mle => {
+    p.ctx.value.forEach(mle => {
       if (!data.some(d => d == mle.element))
         data.insertAt(0, mle.element)
     });
 
-    const ti = getTypeInfo(this.state.type!.name);
+    const ti = getTypeInfo(p.type!.name);
 
     return (
-      <div className="sf-checkbox-elements" style={this.getColumnStyle()}>
+      <div className="sf-checkbox-elements" style={getColumnStyle()}>
         {data.map((val, i) =>
           <label className="sf-checkbox-element" key={val}>
             <input type="checkbox"
-              checked={this.state.ctx.value.some(mle => mle.element == val)}
-              disabled={this.state.ctx.readOnly}
+              checked={p.ctx.value.some(mle => mle.element == val)}
+              disabled={p.ctx.readOnly}
               name={val}
-              onChange={e => this.handleOnChange(e, val)} />
+              onChange={e => c.handleOnChange(e, val)} />
             &nbsp;
                         <span className="sf-entitStrip-link">{ti.members[val].niceName}</span>
           </label>)}
       </div>
     );
   }
-}
+
+  function getColumnStyle(): React.CSSProperties | undefined {
+
+    if (p.columnCount && p.columnWidth)
+      return {
+        columns: `${p.columnCount} ${p.columnWidth}px`,
+        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
+        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
+      };
+
+    if (p.columnCount)
+      return {
+        columnCount: p.columnCount,
+        MozColumnCount: p.columnCount,
+        WebkitColumnCount: p.columnCount,
+      };
+
+    if (p.columnWidth)
+      return {
+        columnWidth: p.columnWidth,
+        MozColumnWidth: p.columnWidth,
+        WebkitColumnWidth: p.columnWidth,
+      };
+
+    return undefined;
+  }
+});

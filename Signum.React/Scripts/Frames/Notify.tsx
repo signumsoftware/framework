@@ -5,81 +5,85 @@ import { Transition } from 'react-transition-group'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import "./Notify.css"
+import { useForceUpdate } from '../Hooks';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 
 interface NotifyOptions {
   text: React.ReactChild;
   type: NotifyType;
+  priority?: number; 
+  timeoutHandler?: number;
 }
 
-interface NotifyState {
-  text?: React.ReactChild;
-  type?: NotifyType;
+interface NotifyHandle {
+  notify(options: NotifyOptions) : void;
+  notifyTimeout(options: NotifyOptions, timeout?: number): void
+  notifyPendingRequest(pending: number): void;
 }
 
-export default class Notify extends React.Component<{}, NotifyState>{
+export default function Notify() {
 
-  static singleton: Notify;
-  static lockScreenOnNotify: boolean = false;
+  const forceUpdate = useForceUpdate();
 
-  constructor(props: {}) {
-    super(props);
-    this.state = { text: undefined, type: undefined };
+  const optionsStack = React.useRef<NotifyOptions[]>([]);
 
-    Notify.singleton = this;
+  function notify(options: NotifyOptions) {
+
+    if (options.priority == null)
+      options.priority = 10;
+
+    if (options.timeoutHandler)
+      clearTimeout(options.timeoutHandler);
+
+    optionsStack.current.extract(a => a == options);
+    optionsStack.current.push(options);
+    forceUpdate();
   }
 
-  _isMounted: boolean = false;
-  componentDidMount() {
-    this._isMounted = true;
+  function notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
+    notify(options);
+
+    options.timeoutHandler = setTimeout(() => remove(options), timeout);
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+  const loadingRef = React.useRef<NotifyOptions>({ text: JavascriptMessage.loading.niceToString(), type: "loading", priority: 0 });
 
-  handler?: number;
-  notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
-    this.notify(options);
-    this.handler = setTimeout(() => this.clear(), timeout);
-  }
-
-  notify(options: NotifyOptions) {
-    if (!this._isMounted)
-      return;
-    if (this.handler != undefined) {
-      clearTimeout(this.handler);
-      this.handler = undefined;
-    }
-    this.setState(options);
-  }
-
-  clear() {
-    if (!this._isMounted)
-      return;
-    if (this.handler != undefined) {
-      clearTimeout(this.handler);
-      this.handler = undefined;
-    }
-    this.setState({ text: undefined, type: undefined })
-  }
-
-
-  notifyPendingRequest(pending: number) {
+  function notifyPendingRequest(pending: number) {
     if (pending)
-      this.notify({ text: JavascriptMessage.loading.niceToString(), type: "loading" });
+      notify(loadingRef.current);
     else
-      this.clear();
+      remove(loadingRef.current);
   }
 
-  getIcon() {
-    if (!this.state.type) {
+  function remove(options: NotifyOptions) {
+    if (options.timeoutHandler)
+      clearTimeout(options.timeoutHandler);
+
+    optionsStack.current.extract(a => a == options);
+    forceUpdate();
+  }
+
+  React.useEffect(() => {
+
+    Notify.singleton = {
+      notify: notify,
+      notifyTimeout: notifyTimeout,
+      notifyPendingRequest: notifyPendingRequest
+    };
+
+    return () => Notify.singleton = undefined;
+  }, []);
+
+  var opt = optionsStack.current.orderByDescending(a => a.priority).firstOrNull();
+
+  function getIcon() {
+    if (!opt) {
       return undefined;
     }
 
     var icon: IconProp | undefined;
-    switch (this.state.type) {
+    switch (opt.type) {
       case "loading":
         icon = "cog";
         break;
@@ -95,26 +99,27 @@ export default class Notify extends React.Component<{}, NotifyState>{
     }
 
     if (icon) {
-      return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={this.state.type === "loading"} />
+      return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={opt.type === "loading"} />
     }
     else {
       return undefined;
     }
   }
 
-  render() {
-    const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnNotify && this.state.type === "loading") ?
-      { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined;
+  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnLoading && optionsStack.current.some(o => o.type == "loading") ?
+    { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined);
 
-    return (
-      <div style={styleLock}>
-        <div id="sfNotify" >
-          <Transition in={this.state.text != undefined} timeout={200}>
-            {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
-          </Transition>
-        </div>
+  return (
+    <div style={styleLock}>
+      <div id="sfNotify" >
+        <Transition in={opt != undefined} timeout={200}>
+          {(state: string) => <span className={classes(opt?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{opt?.text}</span>}
+        </Transition>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
+
+Notify.singleton = undefined as (NotifyHandle | undefined);
+Notify.lockScreenOnLoading = false;

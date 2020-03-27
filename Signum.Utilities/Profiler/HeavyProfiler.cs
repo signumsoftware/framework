@@ -159,7 +159,7 @@ namespace Signum.Utilities
             return new Tracer { newCurrent = newCurrent };
         }
 
-        public class Tracer : IDisposable
+        public sealed class Tracer : IDisposable
         {
             internal HeavyProfilerEntry? newCurrent;
             
@@ -299,7 +299,6 @@ namespace Signum.Utilities
         }
     }
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    [Serializable]
     public class HeavyProfilerEntry
     {
         public List<HeavyProfilerEntry> Entries;

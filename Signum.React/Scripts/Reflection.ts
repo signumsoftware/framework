@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import * as numbro from 'numbro';
+import numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -50,6 +50,7 @@ export interface MemberInfo {
   required?: boolean;
   maxLength?: number;
   isMultiline?: boolean;
+  isVirtualMList?: boolean;
   preserveOrder?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
@@ -636,7 +637,10 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     return new ReadonlyBinding<any>(parentValue, "");
   var suffix = "";
   let val = parentValue;
-  for (let i = 0; i < lambdaMembers.length - 1; i++) {
+
+  var lastIsIndex = lambdaMembers[lambdaMembers.length - 1].type == "Indexer";
+
+  for (let i = 0; i < lambdaMembers.length - (lastIsIndex ? 2 : 1); i++) {
     const member = lambdaMembers[i];
     switch (member.type) {
 
@@ -646,7 +650,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
         break;
       case "Mixin":
         val = val.mixins[member.name];
-        suffix += ".mixins[" + member.name + "].element";
+        suffix += ".mixins[" + member.name + "]";
+        break;
+      case "Indexer":
+        val = val[parseInt(member.name)];
+        suffix += "[" + member.name + "].element";
         break;
       default: throw new Error("Unexpected " + member.type);
 
@@ -657,7 +665,11 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   switch (lastMember.type) {
 
     case "Member": return new Binding(val, lastMember.name, suffix + "." + lastMember.name);
-    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "].element");
+    case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], suffix + ".mixins[" + lastMember.name + "]");
+    case "Indexer":
+      const preLastMember = lambdaMembers[lambdaMembers.length - 2];
+      var binding = new Binding<MList<any>>(val, preLastMember.name, suffix + "." + preLastMember.name)
+      return new MListElementBinding(binding, parseInt(lastMember.name));
     default: throw new Error("Unexpected " + lastMember.type);
   }
 }
@@ -786,7 +798,7 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
 function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
-    .filter(t => t.memberInfo.type.isCollection)
+    .filter(t => t.memberInfo.type.isCollection && !t.key.startsWith("["))
     .forEach(t => (m as any)[t.key.firstLower()] = []);
 }
 
@@ -844,6 +856,11 @@ function copyProperties(result: any, original: any, pr: PropertyRoute){
 function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MList<T> {
 
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
+
+  if (propertyRoute.member!.isVirtualMList) {
+    
+    return mlist.map(mle => ({ rowId: null, element: clone(mle.element as any as Entity, elemPr) as any as T }));
+  }
 
   return mlist.map(mle => ({ rowId: null, element: cloneIfNeeded(mle.element, elemPr) as T }));
 }
@@ -984,13 +1001,22 @@ export class Type<T extends ModifiableEntity> implements IType {
     return obj && (obj as Lite<Entity>).EntityType == this.typeName;
   }
 
-  /* Constructs a QueryToken compatible string like "Name" from a strongly typed lambda like a => a.name
-   * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc) but this method works in the common simple cases*/
+  /* Constructs a QueryToken able to generate string like "Name" from a strongly typed lambda like a => a.name
+   * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc)*/
   token(): QueryTokenString<T>;
-  token<S>(lambdaToColumn: (v: T) => S) : QueryTokenString<S>;
-  token(lambdaToColumn?: Function): QueryTokenString<any> {
+  /** Shortcut for token().append(lambdaToColumn)
+   * @param lambdaToColumn lambda expression pointing to a property in the anonymous class of the query. For simple columns comming from properties from the entity.
+   */
+  token<S>(lambdaToColumn: (v: T) => S): QueryTokenString<S>;
+  /** Shortcut for token().expression<S>(columnName)
+  * @param columnName property name of some property in the anonymous class of the query. For complex calculated columns that are not a property from the entitiy.
+  */
+  token<S>(columnName: string) : QueryTokenString<S>;
+  token(lambdaToColumn?: ((a: any) => any) | string): QueryTokenString<any> {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
+    else if (typeof lambdaToColumn == "string")
+      return new QueryTokenString(lambdaToColumn);
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn));
   }
@@ -1030,7 +1056,9 @@ export class QueryTokenString<T> {
     return new QueryTokenString(this.token + ".SystemValidTo");
   }
 
-  entity() : QueryTokenString<T>;
+  /** Allows access to the "Entity" property of the anonymous class from the query.*/
+  entity(): QueryTokenString<T>;
+  /** Shortcut for entity().append(lambdaToProperty).*/
   entity<S>(lambdaToProperty: (v: T) => S) : QueryTokenString<S>;
   entity(lambdaToProperty?: Function): QueryTokenString<any> {
     if (this.token != "")
@@ -1046,6 +1074,10 @@ export class QueryTokenString<T> {
     return new QueryTokenString<R>(this.token + ".(" + t.typeName + ")");
   }
 
+  /**
+   * Allows adding some extra property names to a QueryTokenString
+   * @param lambdaToProperty for a typed lambda like a => a.name will append "Name" to the QueryTokenString
+   */
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty));
   }
@@ -1054,6 +1086,10 @@ export class QueryTokenString<T> {
     return new QueryTokenString<M>(this.token);
   }
 
+  /**
+  * Allows to add an extra token to a QueryTokenString given the name and the type. Typically used for registered expressions. Not strongly-typed :(
+  * @param expressionName name of the token to add (typically a registered expression)
+  */
   expression<S>(expressionName: string): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
   }
@@ -1078,8 +1114,8 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
   }
 
-  count(): QueryTokenString<number> {
-    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count");
+  count(option?: "Distinct" | "Null" | "NotNull"): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + (this.token ? "." : "") + "Count" + ((option == undefined) ? "" : option));
   }
 
   min(): QueryTokenString<T> {

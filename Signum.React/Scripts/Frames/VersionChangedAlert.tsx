@@ -1,40 +1,36 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import { VersionFilter } from '../Services'
 import { ConnectionMessage } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
+import { useForceUpdate } from '../Hooks';
 
-export default class VersionChangedAlert extends React.Component<{ blink?: boolean }>{
-  static defaultProps = { blink: true };
+export default function VersionChangedAlert(p: { blink?: boolean }) {
 
-  handleRefresh = (e: React.MouseEvent<any>) => {
+  var forceUpdate = useForceUpdate();
+
+  React.useEffect(() => {
+    VersionChangedAlert.forceUpdateSingletone = forceUpdate;
+    return () => VersionChangedAlert.forceUpdateSingletone = undefined;
+  })
+
+  function handleRefresh(e: React.MouseEvent<any>) {
     e.preventDefault();
     location.reload(true);
   }
 
-  static singleton: VersionChangedAlert | undefined;
+  if (VersionFilter.latestVersion == VersionFilter.initialVersion)
+    return null;
 
-  componentWillMount() {
-    VersionChangedAlert.singleton = this;
-  }
-
-  componentWillUnmount() {
-    if (VersionChangedAlert.singleton == this)
-      VersionChangedAlert.singleton = undefined;
-  }
-
-  render() {
-    if (VersionFilter.latestVersion == VersionFilter.initialVersion)
-      return null;
-
-    return (
-      <div className={classes("alert alert-warning", "version-alert", this.props.blink && "blink")} style={{ textAlign: "center" }}>
-        <FontAwesomeIcon icon="sync-alt" aria-hidden="true" />&nbsp;
+  return (
+    <div className={classes("alert alert-warning", "version-alert", p.blink && "blink")} style={{ textAlign: "center" }}>
+      <FontAwesomeIcon icon="sync-alt" aria-hidden="true" />&nbsp;
                 {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
-          .formatHtml(<a href="#" onClick={this.handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
-      </div>
-    );
-  }
+        .formatHtml(<a href="#" onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
+    </div>
+  );
 }
 
+VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
+VersionChangedAlert.defaultProps = { blink: true };

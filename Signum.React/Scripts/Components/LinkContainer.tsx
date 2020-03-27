@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import * as H from 'history';
-import { Route, match } from 'react-router';
+import { Route, match, __RouterContext as RouterContext, matchPath, RouteComponentProps } from 'react-router';
 
 const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
@@ -16,93 +16,64 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   isActive?: (m: match<any> | null, l: H.Location) => boolean;
 }
 
-export class LinkContainer extends React.Component<LinkContainerProps> {
-  static propTypes = {
-    onClick: PropTypes.func,
-    target: PropTypes.string,
-    replace: PropTypes.bool,
-    to: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.object
-    ]).isRequired,
-    innerRef: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.func
-    ])
-  }
+export function LinkContainer(p: LinkContainerProps) {
 
-  static defaultProps = {
-    replace: false
-  }
 
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        replace: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
-
-  handleClick = (event: React.MouseEvent<any>) => {
-    if (this.props.onClick)
-      this.props.onClick(event)
+  function handleClick(event: React.MouseEvent<any>, context: RouteComponentProps) {
+    if (p.onClick)
+      p.onClick(event)
 
     if (
       !event.defaultPrevented && // onClick prevented default
       event.button === 0 && // ignore everything but left clicks
-      !this.props.target && // let browser handle "target=_blank" etc.
+      !p.target && // let browser handle "target=_blank" etc.
       !isModifiedEvent(event) // ignore clicks with modifier keys
     ) {
       event.preventDefault()
 
-      const { history } = this.context.router
-      const { replace, to } = this.props
+      const history = context.history
+      const { replace, to } = p
 
       if (replace) {
-        history.replace(to)
+        history.replace(to as string)
       } else {
-        history.push(to)
+        history.push(to as string)
       }
     }
   }
 
+  const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = p;// eslint-disable-line no-unused-vars
 
-  render() {
-    const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = this.props;// eslint-disable-line no-unused-vars
+  return (
+    <RouterContext.Consumer>
+      {context => {
+        if (!context)
+          throw new Error('You should not use <LinkContainer> outside a <Router>');
 
-    if (!this.context.router)
-      throw new Error('You should not use <LinkContainer> outside a <Router>');
+        const child = React.Children.only(children) as React.ReactElement<any>;
 
-    const child = React.Children.only(children) as React.ReactElement<any>;
+        if (!child)
+          throw new Error("LinkContainer should contain a child");
 
-    if (!child)
-      throw new Error("LinkContainer should contain a child");
+        const href = context.history.createHref(
+          typeof to === 'string' ? { pathname: to } : to
+        )
 
-    const href = this.context.router.history.createHref(
-      typeof to === 'string' ? { pathname: to } : to
-    )
+        var path = typeof to === 'object' ? to.pathname : to;
 
-    return (
-      <Route
-        path={typeof to === 'object' ? to.pathname : to}
-        exact={exact}
-        strict={strict}
-        children={({ location, match }) => {
-          const isActive = !!(getIsActive ? getIsActive(match, location) : match);
+        const match = path ? matchPath(path, { exact, strict }) : null;
+        const isActive = !!(getIsActive ? getIsActive(match, context.location) : match);
 
-          return React.cloneElement(
-            child,
-            {
-              ...props,
-              active: isActive,
-              href,
-              onClick: this.handleClick,
-            }
-          );
-        }}
-      />
-    );
-  }
+        return React.cloneElement(
+          child,
+          {
+            ...props,
+            active: isActive,
+            href,
+            onClick: (e: React.MouseEvent<any>) => handleClick(e, context),
+          }
+        );
+      }}
+    </RouterContext.Consumer>
+  );
 }
