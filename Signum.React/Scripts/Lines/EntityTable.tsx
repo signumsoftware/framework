@@ -117,6 +117,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
           <div>
             <span>{this.state.labelText}</span>
             {this.renderButtons()}
+            {this.props.extraButtons && this.props.extraButtons(this)}
           </div>
         </legend>
         {this.renderTable(ctx)}
