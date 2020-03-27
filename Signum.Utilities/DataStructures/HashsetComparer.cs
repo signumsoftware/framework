@@ -16,7 +16,7 @@ namespace Signum.Utilities.DataStructures
         public int GetHashCode(HashSet<T> obj)
         {
             var comparer = obj.Comparer;
-            return obj.Aggregate(0, (acum, o) => acum ^ comparer.GetHashCode(o));
+            return obj.Aggregate(0, (acum, o) => acum ^ (o == null ? 0 : comparer.GetHashCode(o)));
         }
 
         bool IEqualityComparer.Equals(object? x, object? y)

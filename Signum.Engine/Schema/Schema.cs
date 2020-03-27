@@ -74,7 +74,7 @@ namespace Signum.Engine.Maps
         {
             foreach (var f in IsAllowedCallback.GetInvocationListTyped())
             {
-                string result = f(type, inUserInterface);
+                string? result = f(type, inUserInterface);
 
                 if (result != null)
                     return result;

@@ -31,7 +31,7 @@ namespace Signum.Utilities.Synchronization
 
         public T Current
         {
-            get { return current.Value; }
+            get { return current.Value!; }
         }
 
         object? IEnumerator.Current

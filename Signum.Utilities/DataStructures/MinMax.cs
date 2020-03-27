@@ -35,8 +35,8 @@ namespace Signum.Utilities.DataStructures
         public override int GetHashCode()
         {
             int num = -722197669;
-            num = (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.Min);
-            return (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.Max);
+            num = (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.Min!);
+            return (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.Max!);
         }
     }
 }
