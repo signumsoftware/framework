@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -28,6 +29,16 @@ namespace Signum.React.Json
 
         static void WriteJsonInternal<T>(JsonWriter writer, MList<T> value, JsonSerializer serializer)
         {
+            var errors = new List<string>();
+            serializer.Error += delegate (object? sender, ErrorEventArgs args)
+            {
+                // only log an error once
+                if (args.CurrentObject == args.ErrorContext.OriginalObject)
+                {
+                    errors.Add(args.ErrorContext.Error.Message);
+                }
+            };
+
             writer.WriteStartArray();
             var pr = JsonSerializerExtensions.CurrentPropertyRoute!;
 
@@ -49,6 +60,9 @@ namespace Signum.React.Json
                 }
             }
 
+            if (errors.Any())
+                throw new JsonSerializationException(errors.ToString("\r\n"));
+
             writer.WriteEndArray();
         }
 
@@ -63,6 +77,16 @@ namespace Signum.React.Json
 
         static MList<T> ReadJsonInternal<T>(JsonReader reader, IMListPrivate<T> existingValue, JsonSerializer serializer)
         {
+            var errors = new List<string>();
+            serializer.Error += delegate (object? sender, ErrorEventArgs args)
+            {
+                // only log an error once
+                if (args.CurrentObject == args.ErrorContext.OriginalObject)
+                {
+                    errors.Add(args.ErrorContext.Error.Message);
+                }
+            };
+
             var dic = existingValue == null ? new Dictionary<PrimaryKey, MList<T>.RowIdElement>() :
                  existingValue.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId!.Value, a => a);
 
@@ -125,8 +149,10 @@ namespace Signum.React.Json
                         newList.Add(new MList<T>.RowIdElement(newValue));
                     }
 
-                    reader.Read();
+                    if (errors.Any())
+                        throw new JsonSerializationException(errors.ToString("\r\n"));
 
+                    reader.Read();
                     reader.Assert(JsonToken.EndObject);
                     reader.Read();
                 }
