@@ -337,27 +337,6 @@ namespace Signum.Utilities
             }
         }
 
-        //Throws exception if 0, returns if one, returns default if many
-        [return: MaybeNull]
-        public static T SingleOrMany<T>(this IEnumerable<T> collection)
-        {
-            if (collection == null)
-                throw new ArgumentNullException(nameof(collection));
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("The collection has no elements");
-
-                T current = enumerator.Current;
-
-                if (enumerator.MoveNext())
-                    return default(T)!;
-
-                return current;
-            }
-        }
-
         //returns default if 0 or many, returns if one
         public static T Only<T>(this IEnumerable<T> collection)
         {
@@ -817,7 +796,7 @@ namespace Signum.Utilities
         }
 
         public static MinMax<T> WithMinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-        where V : IComparable<V>
+            where V : IComparable<V>
         {
             T withMin = default(T)!, withMax = default(T)!;
             bool hasMin = false, hasMax = false;

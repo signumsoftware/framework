@@ -5,7 +5,6 @@
   <Type Name="CalendarMessage" />
   <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType" />
-  <Type Name="ColorEmbedded" />
   <Type Name="ColumnOptionsMode" />
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="distinct to" />

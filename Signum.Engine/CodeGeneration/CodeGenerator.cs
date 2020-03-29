@@ -43,7 +43,7 @@ namespace Signum.Engine.CodeGeneration
 
         internal static void GetSolutionInfo(out string solutionFolder, out string solutionName)
         {
-            var m = Regex.Match(Environment.CurrentDirectory, @"(?<solutionFolder>.*)\\(?<solutionName>.*).Load\\bin\\(Debug|Release)", RegexOptions.ExplicitCapture);
+            var m = Regex.Match(Environment.CurrentDirectory, @"(?<solutionFolder>.*)\\(?<solutionName>.*).Terminal\\bin\\(Debug|Release)", RegexOptions.ExplicitCapture);
 
             if (!m.Success)
                 throw new InvalidOperationException("Unable to GetSolutionInfo from non-standart path " + Environment.CurrentDirectory + ". Override GetSolutionInfo");

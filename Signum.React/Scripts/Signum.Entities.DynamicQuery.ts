@@ -135,7 +135,6 @@ export type UniqueType =
   "FirstOrDefault" |
   "Single" |
   "SingleOrDefault" |
-  "SingleOrMany" |
   "Only";
 
 

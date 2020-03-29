@@ -239,6 +239,7 @@ Lose changes?")]
         PleaseChooseA0ToContinue,
     }
 
+    [AllowUnathenticated]
     public enum ConnectionMessage
     {
         AConnectionWithTheServerIsNecessaryToContinue,

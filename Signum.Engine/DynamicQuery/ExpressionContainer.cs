@@ -203,7 +203,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var info = metas.GetOrAdd(parent, qt =>
             {
-                Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx());
+                Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx()!);
 
                 Expression e = MetadataVisitor.JustVisit(lambda, MetaExpression.FromToken(qt, typeof(T)));
                 
@@ -228,7 +228,7 @@ namespace Signum.Engine.DynamicQuery
                 format: info.Format,
                 implementations: info.Implementations,
                 propertyRoute: info.PropertyRoute,
-                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))!)
             ));
         }
     }
