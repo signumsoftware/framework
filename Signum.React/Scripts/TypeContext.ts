@@ -439,11 +439,14 @@ export interface IHasChanges {
   entityHasChanges?: () => boolean;
 }
 
+export interface FunctionalFrameComponent {
+  forceUpdate(): void;
+  createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
+  type: Function;
+}
+
 export interface EntityFrame {
-  frameComponent: {
-    forceUpdate(): void,
-    createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
-  };
+  frameComponent: FunctionalFrameComponent | React.Component;
   entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;
   onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;

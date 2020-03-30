@@ -196,7 +196,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
-      frameComponent: { forceUpdate, createNew: p.createNew },
+      frameComponent: { forceUpdate, createNew: p.createNew, type: FrameModal as any },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;

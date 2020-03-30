@@ -57,7 +57,7 @@ export function RenderEntity(p: RenderEntityProps) {
   const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
 
   const frame: EntityFrame = {
-    frameComponent: { forceUpdate },
+    frameComponent: { forceUpdate, type: RenderEntity },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),

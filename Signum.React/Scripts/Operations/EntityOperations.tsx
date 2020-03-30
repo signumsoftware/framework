@@ -2,7 +2,7 @@ import * as React from "react"
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
+import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
@@ -125,7 +125,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.createNew;
+        var createNew = (eoc.frame.frameComponent as FunctionalFrameComponent).createNew;
 
         if (createNew)
           (createNew() ?? Promise.resolve(undefined))

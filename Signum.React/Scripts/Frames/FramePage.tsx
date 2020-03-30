@@ -134,7 +134,7 @@ export default function FramePage(p: FramePageProps) {
 
 
   const frame: EntityFrame = {
-    frameComponent: { forceUpdate },
+    frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
     onReload: (pack, reloadComponent, callback) => {
