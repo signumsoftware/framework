@@ -8,7 +8,7 @@ import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } 
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"

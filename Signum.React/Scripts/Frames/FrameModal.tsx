@@ -9,7 +9,7 @@ import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
 import { EntityOperationContext } from '../Operations'
 import { ViewPromise } from "../Navigator";
@@ -56,7 +56,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const okClicked = React.useRef(false);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component>(null);
-  const validationErrors = React.useRef<ValidationErrorHandle>(null);
+  const validationErrors = React.useRef<ValidationErrorsHandle>(null);
 
   const forceUpdate = useForceUpdate();
 
