@@ -204,8 +204,8 @@ namespace Signum.Engine.Operations
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
-                        ((Enum)(object)state!).NiceToString());
+                        FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
+                        ((Enum?)(object?)state)?.NiceToString() ?? "null");
 
                 return base.OnCanExecute(entity);
             }
@@ -251,8 +251,8 @@ namespace Signum.Engine.Operations
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
-                        ((Enum)(object)state!).NiceToString());
+                        FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
+                        ((Enum?)(object?)state)?.NiceToString() ?? "null");
 
                 return base.OnCanDelete(entity);
             }
