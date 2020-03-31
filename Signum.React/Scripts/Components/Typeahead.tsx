@@ -22,18 +22,17 @@ export interface TypeaheadProps {
   renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
 }
 
-export interface TypeaheadState {
-  shown?: boolean;
-  items?: any[];
-  query?: string;
-  selectedIndex?: number;
-}
-
 export interface TypeaheadHandle {
   items: any[] | undefined;
   selectedIndex: number | undefined;
   blur(): void;
   writeInInput(query: string): void;
+  query: string | undefined;
+  props: TypeaheadProps;
+
+  handleMenuMouseUp(e: React.MouseEvent<any>, index: number) : void;
+  handleElementMouseEnter(event: React.MouseEvent<any>, index: number): void;
+  handleElementMouseLeave(event: React.MouseEvent<any>, index: number): void;
 }
 
 export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) {
@@ -55,9 +54,14 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
       items,
       selectedIndex,
       blur: blur,
-      writeInInput: writeInInput
+      writeInInput: writeInInput,
+      query: query,
+      props: p,
+      handleMenuMouseUp,
+      handleElementMouseEnter,
+      handleElementMouseLeave,
     } as TypeaheadHandle);
-  }, [items, selectedIndex]);
+  }, []);
 
 
   React.useEffect(() => {
