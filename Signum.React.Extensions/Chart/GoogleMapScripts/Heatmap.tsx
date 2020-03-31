@@ -49,7 +49,7 @@ export default class HeatmapChart extends React.Component<ChartClient.ChartCompo
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
     var map = new google.maps.Map(this.divElement!, {
-      center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
+      center: data && coords.length > 0 ? new google.maps.LatLng(coords[0].lat, coords[0].lng) : undefined,
       zoom: 2,
       mapTypeControlOptions: {
         mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain", "styled_map"]
