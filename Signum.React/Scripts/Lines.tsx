@@ -92,6 +92,8 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
       state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
       vProps.formatText = state.ctx.propertyRoute.member!.format;
+      if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
+        vProps.valueLineType = "Password";
     }
   }
 }

@@ -866,8 +866,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-
-
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
@@ -876,7 +874,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo?.columnOptions[columnIndex].token;
-      return token && token.filterType != "Embedded" && token.filterType != undefined;
+      return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
     }
 
     const menuItems: React.ReactElement<any>[] = [];
