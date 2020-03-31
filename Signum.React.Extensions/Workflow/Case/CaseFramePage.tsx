@@ -4,7 +4,7 @@ import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyB
 import * as Navigator from '@framework/Navigator'
 import { Entity, JavascriptMessage, entityInfo, getToString, toLite, EntityPack } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
@@ -193,8 +193,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
-  validationErrorsTop?: ValidationErrorHandle | null;
-  validationErrorsBottom?: ValidationErrorHandle | null;
+  validationErrorsTop?: ValidationErrorsHandle | null;
+  validationErrorsBottom?: ValidationErrorsHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);

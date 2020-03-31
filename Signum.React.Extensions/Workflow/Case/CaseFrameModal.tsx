@@ -7,7 +7,7 @@ import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
@@ -228,8 +228,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     );
   }
 
-  validationErrorsTop?: ValidationErrorHandle | null;
-  validationErrorsBottom?: ValidationErrorHandle | null;
+  validationErrorsTop?: ValidationErrorsHandle | null;
+  validationErrorsBottom?: ValidationErrorsHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
