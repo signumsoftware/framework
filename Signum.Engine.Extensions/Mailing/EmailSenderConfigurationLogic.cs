@@ -10,6 +10,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Signum.Engine.Operations;
+using System;
 
 namespace Signum.Engine.Mailing
 {
@@ -17,10 +18,19 @@ namespace Signum.Engine.Mailing
     {
         public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> SmtpConfigCache = null!;
 
-        public static void Start(SchemaBuilder sb)
+        public static Func<string, string> EncryptPassword = s => s;
+        public static Func<string, string> DecryptPassword = s => s;
+
+        public static void Start(SchemaBuilder sb, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (encryptPassword != null)
+                    EncryptPassword = encryptPassword;
+
+                if (decryptPassword != null)
+                    DecryptPassword = decryptPassword;
+
                 sb.Include<EmailSenderConfigurationEntity>()
                     .WithQuery(() => s => new
                     {
@@ -72,7 +82,7 @@ namespace Signum.Engine.Mailing
                 SmtpClient client = EmailLogic.SafeSmtpClient(config.Network!.Host, config.Network.Port);
                 client.DeliveryFormat = config.DeliveryFormat;
                 client.UseDefaultCredentials = config.Network.UseDefaultCredentials;
-                client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, config.Network.Password) : null;
+                client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, DecryptPassword(config.Network.Password!)) : null;
                 client.EnableSsl = config.Network.EnableSSL;
 
                 foreach (var cc in config.Network.ClientCertificationFiles)

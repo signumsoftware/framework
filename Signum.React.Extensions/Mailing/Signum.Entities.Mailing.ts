@@ -18,6 +18,10 @@ export interface Pop3ConfigurationEntity {
     newPassword: string;
 }
 
+export interface SmtpNetworkDeliveryEmbedded {
+    newPassword: string;
+}
+
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
