@@ -109,11 +109,7 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     CanBeNew = true,
                     CanBeModified = true,
-                    Execute = (e, _) =>
-                    {
-                        if (e.IsNew && e.Password.HasText())
-                            e.Password = EncryptPassword(e.Password);
-                    }
+                    Execute = (e, _) => { }
                 }.Register();
 
                 new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)

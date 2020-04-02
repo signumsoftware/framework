@@ -14,7 +14,9 @@ import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-
+export interface Pop3ConfigurationEntity {
+    newPassword: string;
+}
 
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
