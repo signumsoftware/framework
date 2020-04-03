@@ -131,7 +131,7 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnAlternativeRetriving(id);
+            return ee.OnAlternativeRetrieving(id);
         }
 
         internal void OnSaving(Entity entity)
