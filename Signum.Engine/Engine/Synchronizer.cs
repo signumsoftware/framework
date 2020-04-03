@@ -3,6 +3,9 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace Signum.Engine
 {
@@ -335,7 +338,14 @@ namespace Signum.Engine
         }
 
         public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
+        public static Action<string , string , string? >? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
+
+
+
+
+
+        //public static Dictionary<String, Replacements.Selection>? cases ;
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
             if (AutoReplacement != null)
@@ -356,7 +366,7 @@ namespace Signum.Engine
             int startingIndex = 0;
             Console.WriteLine();
             SafeConsole.WriteLineColor(ConsoleColor.White, "   '{0}' has been renamed in {1}?".FormatWith(oldValue, replacementsKey));
-            retry:
+        retry:
             int maxElement = Console.LargestWindowHeight - 7;
 
             int i = 0;
@@ -384,23 +394,42 @@ namespace Signum.Engine
 
             while (true)
             {
-                string answer = Console.ReadLine();
+                //var key = replacementsKey + "." + oldValue;
+                //string? answer = cases!.ContainsKey(key) ? cases[key].NewValue:  Console.ReadLine();
+
+                string answer =  Console.ReadLine();
+
+                if (answer == null)
+                    answer = "n";
 
                 answer = answer.ToLower();
 
+
+                Selection? response = null;
                 if (answer == "+" && remaining > 0)
                 {
                     startingIndex += maxElement;
                     goto retry;
                 }
                 if (answer == "n")
-                    return new Selection(oldValue, null);
+                    response= new Selection(oldValue, null);
 
                 if (answer == "")
-                    return new Selection(oldValue, newValues[0]);
+                    response= new Selection(oldValue, newValues[0]);
 
                 if (int.TryParse(answer, out int option))
-                    return new Selection(oldValue, newValues[option]);
+                    response= new Selection(oldValue, newValues[option]);
+
+
+                if (response != null)
+                {
+
+                    if (ResponseRecorder != null)
+                        ResponseRecorder.Invoke(replacementsKey, response.Value.OldValue, response.Value.NewValue);
+
+                    return response.Value;
+
+                }
 
                 Console.WriteLine("Error");
 
@@ -417,8 +446,12 @@ namespace Signum.Engine
                 this.NewValue = newValue;
             }
 
+            [XmlAttribute]
             public readonly string OldValue;
+            [XmlAttribute]
             public readonly string? NewValue;
+
+   
         }
 
     }
