@@ -75,7 +75,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
         {parameters["DrawingMode"] == "Svg" &&
-          data.rows.map((r, i) => <g key={i} className="shape-serie sf-transition"
+          data.rows.map(r => <g key={colorKeyColumn.getValueKey(r)} className="shape-serie sf-transition"
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
               transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}

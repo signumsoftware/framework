@@ -84,7 +84,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
 
 
       {columnsInOrder.map(s =>
-        <g key={s.key} className="shape-serie sf-transition"
+        <g key={s.key} className="shape-serie-hover sf-transition"
           transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
           <path className="shape sf-transition"
             stroke={s.color || color(s.key)}
@@ -111,9 +111,15 @@ export default function renderMultiLines({ data, width, height, parameters, load
               onClick={e => onDrillDown(r.values[s.key].rowClick)}
               cursor="pointer">
               <title>
-                {r.values[s.key].valueNiceName}
+                {r.values[s.key].valueTitle}
               </title>
             </circle>)}
+        </g>)}
+
+      {columnsInOrder.map(s =>
+        <g key={s.key} className="shape-serie sf-transition"
+          transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+          {/*paint graph - points and texts*/}
           {rowsInOrder
             .filter(r => r.values[s.key] != undefined)
             .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="point sf-transition"
