@@ -154,7 +154,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     var errorMessage = Finder.validateNewEntities(fo);
     if (errorMessage) {
       return (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert" >
           <strong>Error in ValueSearchControl ({getQueryKey(fo.queryName)}): </strong>
           {errorMessage}
         </div>
@@ -183,7 +183,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     );
 
     if (p.formControlClass)
-      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
+      return <div className={className} style={p.customStyle}> {this.renderValue()} </div>
 
     if (p.isLink) {
       return (
