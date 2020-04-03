@@ -18,7 +18,10 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
     isVisible: ctx => couldHaveAlerts(ctx.entity.Type),
-    contextual: { icon: "bell", iconColor: "darkorange", color: "warning", isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
+    icon: "bell",
+    iconColor: "darkorange",
+    color: "warning",
+    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
   }));
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({

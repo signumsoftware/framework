@@ -24,7 +24,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     ChartClient.getChartScript(chartRequest!.chartScript)
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
       .then(result => ({ result }))
-      .catch(error => ({ error })), [chartRequest]);
+      .catch(error => ({ error })), [chartRequest], { avoidReset: true });
 
 
   const [showData, setShowData] = React.useState(p.part.showData);
