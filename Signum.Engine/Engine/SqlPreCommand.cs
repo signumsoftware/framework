@@ -183,18 +183,13 @@ namespace Signum.Engine
                     if(ex.InnerException!=null)
                     {
                         SafeConsole.WriteLineColor(ConsoleColor.Red, ex.InnerException.Message);
-
                         foreach (var item in realParts[pos].Lines())
                         {
                             SafeConsole.WriteLineColor(ConsoleColor.Red, item);
-
                         }
-
-
                     }
 
-                    Console.WriteLine();
-                    
+                    Console.WriteLine();                    
                     throw new ExecuteSqlScriptException(ex.Message, ex);
                 }
             }

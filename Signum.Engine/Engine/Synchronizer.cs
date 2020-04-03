@@ -3,9 +3,6 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
 
 namespace Signum.Engine
 {
@@ -340,11 +337,6 @@ namespace Signum.Engine
         public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
         public static Action<string , string , string? >? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
-
-
-
-
-
         //public static Dictionary<String, Replacements.Selection>? cases ;
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
@@ -446,12 +438,9 @@ namespace Signum.Engine
                 this.NewValue = newValue;
             }
 
-            [XmlAttribute]
             public readonly string OldValue;
-            [XmlAttribute]
-            public readonly string? NewValue;
 
-   
+            public readonly string? NewValue;
         }
 
     }
