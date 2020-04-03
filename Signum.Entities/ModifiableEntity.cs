@@ -170,21 +170,6 @@ namespace Signum.Entities
                         ((ModifiableEntity)item).SetParentEntity(this);
                 }
             }
-
-
-            foreach (object? field in AttributeManager<QueryablePropertyAttribute>.FieldsWithAttribute(this))
-            {
-                if (field == null)
-                    continue;
-
-                if (field is ModifiableEntity entity)
-                    entity.SetParentEntity(this);
-                else
-                {
-                    foreach (var item in (IEnumerable<IModifiableEntity>)field!)
-                        ((ModifiableEntity)item).SetParentEntity(this);
-                }
-            }
         }
 
         //[OnDeserialized]
