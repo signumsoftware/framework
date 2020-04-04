@@ -89,6 +89,15 @@ namespace Signum.Utilities
             return new Date(d);
         }
 
+
+        public DateTime ToDateTime
+        {
+            get
+            {
+                return this._dt;
+            }
+        }
+
         public int Day
         {
             get
