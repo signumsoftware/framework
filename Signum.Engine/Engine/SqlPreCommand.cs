@@ -184,9 +184,16 @@ namespace Signum.Engine
                     Console.WriteLine();
                     SafeConsole.WriteLineColor(ConsoleColor.DarkRed, ex.GetType().Name + " (Number {0}): ".FormatWith(pgE?.SqlState ?? sqlE?.Number.ToString()));
                     SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+                    if(ex.InnerException!=null)
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, ex.InnerException.Message);
+                        foreach (var item in realParts[pos].Lines())
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, item);
+                        }
+                    }
 
-                    Console.WriteLine();
-
+                    Console.WriteLine();                    
                     throw new ExecuteSqlScriptException(ex.Message, ex);
                 }
             }

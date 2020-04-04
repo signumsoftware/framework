@@ -457,7 +457,14 @@ namespace Signum.Engine.Linq
                 if (pi == null)
                     return new MetaExpression(memberType, new DirtyMeta(null, new Meta[0]));
 
+
                 MetaExpression meta = (MetaExpression)source;
+                if(pi.DeclaringType == typeof(MixinEntity) && pi.Name == nameof(MixinEntity.MainEntity))
+                {
+                    var rootType = ((CleanMeta)meta.Meta).PropertyRoutes.Single().RootType;
+
+                    return new MetaExpression(rootType, new CleanMeta(Implementations.By(rootType), PropertyRoute.Root(rootType)));
+                }
 
                 if (meta.Meta.Implementations != null)
                 {
