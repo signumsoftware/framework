@@ -79,6 +79,13 @@ namespace Signum.Entities.Authorization
         NotAuthorizedTo0The1WithId2,
         [Description("Not authorized to Retrieve '{0}'")]
         NotAuthorizedToRetrieve0,
+        PasswordsAreDifferent,
+        NewPassword,
+        ChangePassword,
+        ChangePasswordAspx_NewPassword,
+        ChangePasswordAspx_ConfirmNewPassword,
+        YouMustRepeatTheNewPassword,
+        TheSpecifiedPasswordsDontMatch,
     }
 
     public enum AuthEmailMessage
