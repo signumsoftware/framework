@@ -51,6 +51,7 @@ namespace Signum.Entities.Files
 
         [Ignore]
         byte[] binaryFile;
+        [NotNullValidator(Disabled = true)]
         public byte[] BinaryFile
         {
             get { return binaryFile; }

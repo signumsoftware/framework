@@ -36,19 +36,26 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client = null!;
 
+        public static Func<string, string> EncryptPassword = s => s;
+        public static Func<string, string> DecryptPassword = s => s;
 
         public static Action<Pop3ReceptionEntity>? ReceptionComunication;
 
-        public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
+        public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
 
+                if (encryptPassword != null)
+                    EncryptPassword = encryptPassword;
+
+                if (decryptPassword != null)
+                    DecryptPassword = decryptPassword;
+
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 
                 sb.Include<Pop3ConfigurationEntity>()
-                    .WithSave(Pop3ConfigurationOperation.Save)
                     .WithQuery(() => s => new
                     {
                         Entity = s,
@@ -97,6 +104,13 @@ namespace Signum.Engine.Mailing.Pop3
                 QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
                 QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
                 QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(Pop3ReceptionEntity).NiceName());
+
+                new Graph<Pop3ConfigurationEntity>.Execute(Pop3ConfigurationOperation.Save)
+                {
+                    CanBeNew = true,
+                    CanBeModified = true,
+                    Execute = (e, _) => { }
+                }.Register();
 
                 new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)
                 {

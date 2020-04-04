@@ -44,7 +44,9 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return Title.HasText() ? Title : Content.ToString()!;
+            return Title.HasText() ? Title :
+                Content==null?"":
+                Content.ToString()!;
         }
 
         protected override string? PropertyValidation(PropertyInfo pi)
