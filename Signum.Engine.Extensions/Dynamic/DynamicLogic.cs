@@ -234,7 +234,7 @@ namespace Signum.Engine.Dynamic
             {
                 this.Column = d.Location.GetLineSpan().StartLinePosition.Character;
                 this.Line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
-                this.FileContent = d.Location.SourceTree.ToString();
+                this.FileContent = d.Location.SourceTree!.ToString();
                 this.FileName = d.Location.SourceTree.FilePath;
                 this.ErrorNumber = d.Descriptor.Id;
                 this.ErrorText = d.GetMessage(null);

@@ -147,10 +147,23 @@ namespace Signum.React.Authorization
                     if (allowed == PropertyAllowed.None)
                         return null;
 
-                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed());
+                    mi.Extension.Add("propertyAllowed", allowed);
                     return mi;
                 };
 
+                EntityJsonConverter.CanReadPropertyRoute = pr =>
+                {
+                    var allowed = UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed();
+
+                    return allowed == PropertyAllowed.None ? "Not allowed" : null;
+                };
+
+                EntityJsonConverter.CanWritePropertyRoute = pr =>
+                {
+                    var allowed = UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed();
+
+                    return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
+                };
             }
 
             if (OperationAuthLogic.IsStarted)

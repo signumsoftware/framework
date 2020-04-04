@@ -59,6 +59,7 @@ namespace Signum.Entities.Omnibox
         }
 
         public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
+            where T : notnull
         {
             pattern = pattern.RemoveDiacritics();
 

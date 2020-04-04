@@ -48,7 +48,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator AutoCompleteElement
         {
-            get { return this.Element.WithLocator(By.CssSelector(".sf-typeahead")); }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-entity-autocomplete")); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)

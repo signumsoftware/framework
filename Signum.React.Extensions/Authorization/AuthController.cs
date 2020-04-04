@@ -28,7 +28,7 @@ namespace Signum.React.Authorization
             if (string.IsNullOrEmpty(data.password))
                 return ModelError("password", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-            string authenticationType; 
+            string authenticationType;
             // Attempt to login
             UserEntity user;
             try
@@ -59,23 +59,20 @@ namespace Signum.React.Authorization
                 return ModelError("login", e.Message);
             }
 
-            using (UserHolder.UserSession(user))
+            if (data.rememberMe == true)
             {
-                if (data.rememberMe == true)
-                {
-                    UserTicketServer.SaveCookie(ControllerContext);
-                }
-
-                AuthServer.OnUserPreLogin(ControllerContext, user);
-
-                AuthServer.AddUserSession(ControllerContext, user);
-
-                string? message = AuthLogic.OnLoginMessage();
-
-                var token = AuthTokenServer.CreateToken(user);
-
-                return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
+                UserTicketServer.SaveCookie(ControllerContext);
             }
+
+            AuthServer.OnUserPreLogin(ControllerContext, user);
+
+            AuthServer.AddUserSession(ControllerContext, user);
+
+            string? message = AuthLogic.OnLoginMessage();
+
+            var token = AuthTokenServer.CreateToken(user);
+
+            return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
         }
 
         [HttpGet("api/auth/loginFromApiKey")]
@@ -91,51 +88,42 @@ namespace Signum.React.Authorization
         [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
         public LoginResponse? LoginFromCookie()
         {
-            using (ScopeSessionFactory.OverrideSession())
-            {
-                if (!UserTicketServer.LoginFromCookie(ControllerContext))
-                    return null;
+            if (!UserTicketServer.LoginFromCookie(ControllerContext))
+                return null;
 
-                string? message = AuthLogic.OnLoginMessage();
+            string? message = AuthLogic.OnLoginMessage();
 
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
-            }
+            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
         }
 
         [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
         public LoginResponse? LoginWindowsAuthentication(bool throwError)
         {
-            using (ScopeSessionFactory.OverrideSession())
+            string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
+            if (error != null)
             {
-                string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
-                if(error != null)
-                {
-                    if (throwError)
-                        throw new InvalidOperationException(error);
+                if (throwError)
+                    throw new InvalidOperationException(error);
 
-                    return null;
-                }
-
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
-
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
+                return null;
             }
+
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
         public LoginResponse? LoginWithAzureAD([FromBody, Required]string jwt)
         {
-            using (ScopeSessionFactory.OverrideSession())
-            {   
-                if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
-                    return null;
+            if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
+                return null;
 
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
-            }
+            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
         }
 
         [HttpGet("api/auth/currentUser")]
@@ -208,6 +196,9 @@ namespace Signum.React.Authorization
                 return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
+
+
+
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
