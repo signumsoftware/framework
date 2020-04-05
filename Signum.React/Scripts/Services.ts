@@ -8,6 +8,7 @@ export interface AjaxOptions {
   avoidGraphExplorer?: boolean;
   avoidAuthToken?: boolean;
   avoidVersionCheck?: boolean;
+  avoidContextHeaders?: boolean;
 
   headers?: { [index: string]: string };
   mode?: string;
@@ -90,11 +91,18 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
   });
 }
 
+export const addContextHeaders: ((options: AjaxOptions) => void)[] = [];
 
-
-
+export function clearContextHeaders() {
+  addContextHeaders.clear();
+}
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
+
+  if (!options.avoidContextHeaders && addContextHeaders.length > 0) {
+    addContextHeaders.forEach(f => f(options));
+  }
+
   if (!options.avoidVersionCheck) {
     const call = makeCall;
     makeCall = () => VersionFilter.onVersionFilter(call);
