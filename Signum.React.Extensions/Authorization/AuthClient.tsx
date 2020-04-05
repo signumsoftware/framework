@@ -19,7 +19,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AuthMessage } from './Signum.Entities.Authorization'
+import { AuthMessage, LoginAuthMessage } from './Signum.Entities.Authorization'
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
@@ -439,7 +439,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
     const ctx = p.ctx;
 
     if (newPass.current!.value && newPass2.current!.value && newPass.current!.value != newPass2.current!.value) {
-      ctx.error = AuthMessage.PasswordsAreDifferent.niceToString()
+      ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString()
     }
     else {
       ctx.error = undefined;
@@ -450,19 +450,19 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
   }
 
   if (!withPassword) {
-    return <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
+    return <FormGroup labelText={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
       <a className="btn btn-light btn-sm" onClick={() => setWithPassword(true)}>
-        <FontAwesomeIcon icon="key" /> {AuthMessage.ChangePassword.niceToString()}
+        <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
       </a>
     </FormGroup>
   }
 
   return (
     <div>
-      <FormGroup ctx={p.ctx} labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.NewPassword.niceToString()}>
         <input type="password" ref={newPass} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
-      <FormGroup ctx={p.ctx} labelText={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
         <input type="password" ref={newPass2} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
     </div>
