@@ -1030,6 +1030,8 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="Para" />
   </Type>
+  <Type Name="EmailSenderConfigurationEntity" />
+  <Type Name="EmailSenderConfigurationOperation" />
   <Type Name="EmailTemplateContactEmbedded" Description="Plantilla email">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmailAddress" Description="Dirección email" />
@@ -1120,6 +1122,7 @@
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
+  <Type Name="ExchangeWebServiceEmbedded" />
   <Type Name="FileEmbedded" Description="Archivo incrustado">
     <Member Name="BinaryFile" Description="Archivo binario" />
     <Member Name="FileName" Description="Nombre de archivo" />
@@ -1683,8 +1686,8 @@
   <Type Name="PermissionRulePack" Description="Paquete de la regla de permiso" />
   <Type Name="PermissionSymbol" Description="Símbolo de permiso" />
   <Type Name="PinnedQueryFilterEmbedded" Description="Filtro de consulta fijado">
+    <Member Name="Active" Description="Activo" />
     <Member Name="Column" Description="Columna" />
-    <Member Name="DisableOnNull" Description="Deshabilitar si nulo" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Row" Description="Fila" />
     <Member Name="SplitText" Description="Dividir texto" />
@@ -2363,18 +2366,7 @@
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="SMSUpdatePackageEntity" Description="Paquete de actualización de SMS" />
-  <Type Name="SmtpConfigurationEntity" Description="Configuración Smtp">
-    <Member Name="AdditionalRecipients" Description="Destinatarios adicionales" />
-    <Member Name="DefaultFrom" Description="Desde por defecto" />
-    <Member Name="DeliveryFormat" Description="Formato de entrega" />
-    <Member Name="DeliveryMethod" Description="Delivery method" />
-    <Member Name="Name" Description="Nombre" />
-    <Member Name="Network" Description="Network" />
-    <Member Name="PickupDirectoryLocation" Description="Pickup directory location" />
-  </Type>
-  <Type Name="SmtpConfigurationOperation">
-    <Member Name="Save" Description="Guardar" />
-  </Type>
+  <Type Name="SmtpEmbedded" />
   <Type Name="SmtpNetworkDeliveryEmbedded" Description="Smtp network delivery">
     <Member Name="ClientCertificationFiles" Description="Client certification files" />
     <Member Name="EnableSSL" Description="Habilitar SSL" />
@@ -2450,7 +2442,7 @@
     <Member Name="Side" Description="Lado" />
     <Member Name="Top" Description="Arriba" />
   </Type>
-  <Type Name="ToolbarMenuEntity" Description="Menú barra de herramientas">
+  <Type Name="ToolbarMenuEntity" Description="Menú barra de herramientas" Gender="m">
     <Member Name="Elements" Description="Elementos" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Name" Description="Nombre" />
@@ -2681,6 +2673,7 @@
     <Member Name="GroupResults" Description="Agrupar resultados" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Ocultar quick link" />
+    <Member Name="IncludeDefaultFilters" Description="Incluir filtros predeterminados" />
     <Member Name="Orders" Description="Ordenes" />
     <Member Name="Owner" Description="Propietario" />
     <Member Name="PaginationMode" Description="Modo de paginación" />
@@ -2698,6 +2691,7 @@
     <Member Name="RemoveUserQuery" Description="¿Eliminar consulta personalizada?" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="La operación de filtro {0} no es compatible con {1}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Utilice {0} para filtrar la entidad actual" />
+    <Member Name="UserQueries_BackToDefault" Description="Volver al Default" />
     <Member Name="UserQueries_CreateNew" Description="Crear" />
     <Member Name="UserQueries_Edit" Description="Editar" />
     <Member Name="UserQueries_UserQueries" Description="Consultas de usuario" />
@@ -2753,13 +2747,6 @@
     <Member Name="ViewLogMyLast" Description="Ver mi último log" />
   </Type>
   <Type Name="ViewNamePropEmbedded" />
-  <Type Name="WebDownload" Description="Descargar por web">
-    <Member Name="FileName" Description="Nombre de archivo" />
-    <Member Name="FullWebPath" Description="Ruta web completa" />
-  </Type>
-  <Type Name="WebImage" Description="Imagen web">
-    <Member Name="FullWebPath" Description="Ruta web completa" />
-  </Type>
   <Type Name="WordAttachmentEntity" Description="Archivo adjunto de Word">
     <Member Name="FileName" Description="Nombre de archivo" />
     <Member Name="ModelConverter" Description="Conversor de modelo" />

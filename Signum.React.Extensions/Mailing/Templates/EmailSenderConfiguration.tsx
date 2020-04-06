@@ -2,6 +2,8 @@ import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmbedded, ExchangeWebServiceEmbedded } from '../Signum.Entities.Mailing'
+import { DoublePassword } from '../../Authorization/AuthClient'
+import { Binding } from '@framework/Reflection'
 
 export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {
   const sc = p.ctx;
@@ -22,7 +24,8 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
               <ValueLine ctx={net.subCtx(s => s.host)} />
               <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
               <ValueLine ctx={net.subCtx(s => s.username)} />
-              <ValueLine ctx={net.subCtx(s => s.password)} valueHtmlAttributes={{ type: "password" }} />
+              {!sc.readOnly &&
+                <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} />}
               <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
               <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
                 <div>

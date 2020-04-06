@@ -16,13 +16,6 @@ namespace Signum.Entities.Isolation
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
 
-        public static readonly SessionVariable<Lite<IsolationEntity>> DefaultVariable = Statics.SessionVariable<Lite<IsolationEntity>>("DefaultIsolation");
-        public static Lite<IsolationEntity> Default
-        {
-            get { return DefaultVariable.Value; }
-            set { DefaultVariable.Value = value; }
-        }
-
 
         public static IDisposable? Override(Lite<IsolationEntity>? isolation)
         {
@@ -62,13 +55,12 @@ namespace Signum.Entities.Isolation
         {
             get
             {
-
                 var tuple = CurrentThreadVariable.Value;
 
                 if (tuple != null)
                     return tuple.Item1;
 
-                return Default;
+                return null;
             }
         }
     }
@@ -85,7 +77,9 @@ namespace Signum.Entities.Isolation
         Entity0HasIsolation1ButCurrentIsolationIs2,
         SelectAnIsolation,
         [Description("Entity '{0}' has isolation {1} but entity '{2}' has isolation {3}")]
-        Entity0HasIsolation1ButEntity2HasIsolation3
+        Entity0HasIsolation1ButEntity2HasIsolation3,
+        GlobalMode,
+        GlobalEntity,
     }
 
     [Serializable]
@@ -95,7 +89,7 @@ namespace Signum.Entities.Isolation
         {
         }
 
-        [AttachToUniqueIndexes]
+        [AttachToUniqueIndexes, ForceNotNullable]
         public Lite<IsolationEntity>? Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
 
         protected override void CopyFrom(MixinEntity mixin, object[] args)
@@ -124,6 +118,11 @@ namespace Signum.Entities.Isolation
             where T : IEntity
         {
             return entity.SetMixin((IsolationMixin m) => m.Isolation, isolation);
+        }
+        public static T SetIsolationCurrent<T>(this T entity)
+        where T : IEntity
+        {
+            return entity.SetMixin((IsolationMixin m) => m.Isolation, IsolationEntity.Current);
         }
     }
 }

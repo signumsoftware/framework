@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Utilities;
