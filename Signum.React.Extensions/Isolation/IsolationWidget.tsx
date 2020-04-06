@@ -1,14 +1,9 @@
 
 import * as React from 'react'
-import { getTypeInfo } from '@framework/Reflection'
-import { JavascriptMessage, Lite, is, ModifiableEntity, tryGetMixin } from '@framework/Signum.Entities'
-import { NavDropdown, Dropdown } from 'react-bootstrap'
-import { useAPI } from '@framework/Hooks';
-import { LinkContainer } from '@framework/Components'
-import { IsolationEntity, IsolationMessage, IsolationMixin } from './Signum.Entities.Isolation';
+import { ModifiableEntity, tryGetMixin } from '@framework/Signum.Entities'
+import { IsolationMessage, IsolationMixin } from './Signum.Entities.Isolation';
 import * as IsolationClient from './IsolationClient';
-import { WidgetContext } from '../../../Framework/Signum.React/Scripts/Frames/Widgets';
-
+import { WidgetContext } from '@framework/Frames/Widgets';
 
 export interface IsolationWidgetProps {
   wc: WidgetContext<ModifiableEntity>
@@ -23,8 +18,10 @@ export function IsolationWidget(p: IsolationWidgetProps) {
   if (mixin == null)
     return null;
 
+  const isolation = entity.isNew ? IsolationClient.overridenIsolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString() :
+    mixin.isolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString();
 
   return (
-    <strong className="badge badge-secondary" style={{ display: "flex" }}>{mixin.isolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString()}</strong>
+    <strong className="badge badge-secondary" style={{ display: "flex" }}>{isolation}</strong>
   );
 }
