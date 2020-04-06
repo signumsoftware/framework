@@ -54,25 +54,6 @@ namespace Signum.React.Mailing
                 }
             };
 
-            if (pop3)
-            {
-                var piPassword = ReflectionTools.GetPropertyInfo((Pop3ConfigurationEntity e) => e.Password);
-                var pcs = PropertyConverter.GetPropertyConverters(typeof(Pop3ConfigurationEntity));
-                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
-                pcs.Add("newPassword", new PropertyConverter
-                {
-                    AvoidValidate = true,
-                    CustomWriteJsonProperty = ctx => { },
-                    CustomReadJsonProperty = ctx =>
-                    {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
-
-                        var password = (string)ctx.JsonReader.Value!;
-
-                        ((Pop3ConfigurationEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
-                    }
-                });
-            }
 
             if (smtp)
             {
@@ -90,6 +71,26 @@ namespace Signum.React.Mailing
                         var password = (string)ctx.JsonReader.Value!;
 
                         ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
+                    }
+                });
+            }
+
+            if (pop3)
+            {
+                var piPassword = ReflectionTools.GetPropertyInfo((Pop3ConfigurationEntity e) => e.Password);
+                var pcs = PropertyConverter.GetPropertyConverters(typeof(Pop3ConfigurationEntity));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                pcs.Add("newPassword", new PropertyConverter
+                {
+                    AvoidValidate = true,
+                    CustomWriteJsonProperty = ctx => { },
+                    CustomReadJsonProperty = ctx =>
+                    {
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+
+                        var password = (string)ctx.JsonReader.Value!;
+
+                        ((Pop3ConfigurationEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
                     }
                 });
             }
