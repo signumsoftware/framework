@@ -1574,6 +1574,9 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddYears": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.year);
                 case "DateTime.AddMonths": return TryDateAdd(m.Type, m.Object, m.GetArgument("months"), SqlEnums.month);
                 case "DateTime.AddDays": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.day);
+                case "Date.AddYears": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.year);
+                case "Date.AddMonths": return TryDateAdd(m.Type, m.Object, m.GetArgument("months"), SqlEnums.month);
+                case "Date.AddDays": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.day);
                 case "DateTime.AddHours": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.hour); 
                 case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.minute); 
                 case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object, m.GetArgument("value"), SqlEnums.second); 
