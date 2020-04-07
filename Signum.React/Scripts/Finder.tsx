@@ -1421,6 +1421,11 @@ export const formatRules: FormatRule[] = [
     formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
   },
   {
+    name: "Password",
+    isApplicable: col => col.token?.format == "Password",
+    formatter: col => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
+  },
+  {
     name: "Enum",
     isApplicable: col => col.token!.filterType == "Enum",
     formatter: col => new CellFormatter(cell => {

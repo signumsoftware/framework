@@ -246,6 +246,9 @@ ul.nav-tabs {
     color: #9900E0;
     cursor: move;
 }
+.sf-move.sf-move-step:hover {
+    cursor: pointer;
+}
 
 body.rtl .form-group.row > label {
     text-align: end;
