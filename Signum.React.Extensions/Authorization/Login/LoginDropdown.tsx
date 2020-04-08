@@ -6,7 +6,7 @@ import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
 
 
-export default function LoginDropdown(p: { renderName?: (u: UserEntity) => React.ReactChild, changePasswordVisible?: boolean, switchUserVisible?: boolean }) {
+export default function LoginDropdown(p: { renderName?: (u: UserEntity) => React.ReactChild, changePasswordVisible?: boolean, switchUserVisible?: boolean, extraButons?: (user: UserEntity) => React.ReactNode }) {
 
   const user = AuthClient.currentUser();
 
@@ -25,6 +25,7 @@ export default function LoginDropdown(p: { renderName?: (u: UserEntity) => React
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
       </LinkContainer>}
+      {p.extraButons && p.extraButons(user)}
       {cpv && <NavDropdown.Divider />}
       {suv && <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-plus" /> {LoginAuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>}
       <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth /> {LoginAuthMessage.Logout.niceToString()}</NavDropdown.Item>
