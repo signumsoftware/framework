@@ -22,6 +22,10 @@ export interface SmtpNetworkDeliveryEmbedded {
     newPassword: string;
 }
 
+export interface ExchangeWebServiceEmbedded {
+    newPassword: string;
+}
+
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }

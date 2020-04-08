@@ -37,13 +37,15 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
           } />
         </div>
       } />
-      <EntityDetail ctx={sc.subCtx(s => s.exchange)} getComponent={(smtp: TypeContext<ExchangeWebServiceEmbedded>) =>
+      <EntityDetail ctx={sc.subCtx(s => s.exchange)} getComponent={(ews: TypeContext<ExchangeWebServiceEmbedded>) =>
         <div>
-          <ValueLine ctx={smtp.subCtx(s => s.exchangeVersion)} />
-          <ValueLine ctx={smtp.subCtx(s => s.url)} />
-          <ValueLine ctx={smtp.subCtx(s => s.useDefaultCredentials)} />
-          <ValueLine ctx={smtp.subCtx(s => s.username)} />
-          <ValueLine ctx={smtp.subCtx(s => s.password)} />
+          <ValueLine ctx={ews.subCtx(s => s.exchangeVersion)} />
+          <ValueLine ctx={ews.subCtx(s => s.url)} />
+          <ValueLine ctx={ews.subCtx(s => s.useDefaultCredentials)} />
+          <ValueLine ctx={ews.subCtx(s => s.username)} />
+          {!sc.readOnly &&
+            <DoublePassword ctx={new TypeContext<string>(ews, undefined, undefined as any, Binding.create(ews.value, v => v.newPassword))} isNew={ews.value.isNew} />}
+          <ValueLine ctx={ews.subCtx(s => s.password)} />
         </div>
       } />
     </div>
