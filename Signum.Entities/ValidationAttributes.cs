@@ -1156,6 +1156,8 @@ namespace Signum.Entities
         _0Have1ElementsButAllowedOnly2,
         [Description("{0} is empty")]
         _0IsEmpty,
+        [Description("{0} should be empty")]
+        _0ShouldBeEmpty,
         [Description("At least one value is needed")]
         _AtLeastOneValueIsNeeded,
         PowerOf,
