@@ -115,6 +115,7 @@ namespace Signum.Engine.Mailing
                 EmailModelLogic.Start(sb);
                 EmailMasterTemplateLogic.Start(sb);
                 
+                sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
                 sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += e =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>()
@@ -227,6 +228,23 @@ namespace Signum.Engine.Mailing
 
                 List<QueryToken> list = new List<QueryToken>();
                 return TextTemplateParser.TryParse(text, qd, template.Model?.ToType(), out errorMessage);
+            }
+        }
+
+        static void EmailTemplate_PreSaving(EmailTemplateEntity template, PreSavingContext ctx)
+        {
+            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                var queryName = QueryLogic.ToQueryName(template.Query.Key);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+
+                List<QueryToken> list = new List<QueryToken>();
+
+                foreach (var message in template.Messages)
+                {
+                    message.Text = TextTemplateParser.Parse(message.Text, qd, template.Model?.ToType()).ToString();
+                    message.Subject = TextTemplateParser.Parse(message.Subject, qd, template.Model?.ToType()).ToString();
+                }
             }
         }
 
