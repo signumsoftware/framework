@@ -13,14 +13,13 @@
 	height: auto;
 }
 
-.dropdown-menu button span.process-contextual-icon {
+span.process-contextual-icon {
     float: right;
     font-size: initial;
-    margin-right: -10px;
-    margin-top: 2px;
+    margin-left: 5px;
     color: gray;
 }
 
-.dropdown-menu button span.process-contextual-icon:hover {
+span.process-contextual-icon:hover {
     color: black;
 }

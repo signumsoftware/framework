@@ -1,4 +1,3 @@
-﻿/// <reference path="react-rte.d.ts" />
 import * as React from 'react'
 import RichTextEditor, { EditorValue } from 'react-rte';
 import { IBinding } from '@framework/Reflection';
@@ -6,37 +5,53 @@ import { IBinding } from '@framework/Reflection';
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readonly?: boolean;
+  format?: "html" | "markdown";
   rootStyle?: React.CSSProperties;
   editorStyle?: React.CSSProperties;
+  autoFocus?: boolean;
+  innerRef?: React.Ref<RichTextEditor>;
 }
 
-export default class HtmlEditor extends React.Component<HtmlEditorProps, { editorValue: EditorValue }>{
-  constructor(props: HtmlEditorProps) {
-    super(props);
+export default function HtmlEditor(p: HtmlEditorProps) {
+  const format = p.format || "html";
 
-    this.state = { editorValue: RichTextEditor.createValueFromString(props.binding.getValue() || "", "html") };
+  const [editorValue, setEditorValue] = React.useState<EditorValue>(() => RichTextEditor.createValueFromString(p.binding.getValue() ?? "", format));
+
+  React.useEffect(() => {
+    return () => { saveHtml() };
+  }, []);
+
+  React.useEffect(() => {
+    setEditorValue(RichTextEditor.createValueFromString(p.binding.getValue() ?? "", format));
+  }, [p.binding.getValue()]);
+
+  function saveHtml() {
+    if (!p.readonly) {
+      var value = editorValue.toString(format);
+      if (value ?? "" != p.binding.getValue() ?? "")
+        p.binding.setValue(value);
+    }
   }
 
-  componentWillUnmount() {
-    this.saveHtml();
-  }
-
-  saveHtml() {
-    if (!this.props.readonly)
-      this.props.binding.setValue(this.state.editorValue.toString("html") || "");
-  }
-
-  render() {
-    return (
-      <RichTextEditor
-        value={this.state.editorValue}
-        readOnly={this.props.readonly}
-        onChange={ev => this.setState({ editorValue: ev })}
-        onBlur={() => this.saveHtml()}
-        rootStyle={this.props.rootStyle}
-        editorStyle={this.props.editorStyle}
-      />
-    );
-  }
+  return (
+    <RichTextEditor
+      ref={p.innerRef}
+      value={editorValue}
+      readOnly={p.readonly}
+      autoFocus={p.autoFocus}
+      onChange={ev => setEditorValue(ev)}
+      rootStyle={p.rootStyle}
+      editorStyle={p.editorStyle}
+      {...({ onBlur: () => saveHtml() }) as any}
+    />
+  );
 }
 
+export function MarkdownViewer(p: { markdown: string }) {
+
+  var html = React.useMemo(() => RichTextEditor.createValueFromString(p.markdown, "markdown").toString("html"), [p.markdown]);
+
+  return (
+    <div dangerouslySetInnerHTML={{ __html: html }} />
+  );
+}

@@ -89,7 +89,6 @@ namespace Signum.Engine.Authorization
 
                         var property = routes.GetOrCreate(route, () => new PropertyRouteEntity
                          {
-                             Route = route,
                              RootType = TypeLogic.TypeToEntity[route.RootType],
                              Path = route.PropertyString()
                          }.Save());
@@ -165,6 +164,15 @@ namespace Signum.Engine.Authorization
                 return PropertyAllowed.Write;
 
             return cache.GetAllowed(RoleEntity.Current, route);
+        }
+
+        public static PropertyAllowed GetNoUserPropertyAllowed(this PropertyRoute route)
+        {
+            var hasAttr = route.RootType.HasAttribute<AllowUnathenticatedAttribute>() ||
+                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowUnathenticatedAttribute>()) ||
+                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowUnathenticatedAttribute>());
+
+            return hasAttr ? PropertyAllowed.Write : PropertyAllowed.None;
         }
 
         public static string? GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
@@ -304,7 +312,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
 
@@ -321,7 +329,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
     }

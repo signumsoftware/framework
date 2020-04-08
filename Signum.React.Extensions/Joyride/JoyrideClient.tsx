@@ -1,4 +1,4 @@
-﻿import { EntitySettings } from '@framework/Navigator'
+import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { JoyrideEntity, JoyrideStepEntity, JoyrideStepStyleEntity } from './Signum.Entities.Joyride'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'

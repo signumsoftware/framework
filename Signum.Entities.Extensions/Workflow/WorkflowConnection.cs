@@ -47,6 +47,7 @@ namespace Signum.Entities.Workflow
                 Action = this.Action,
                 Order = this.Order
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -58,6 +59,7 @@ namespace Signum.Entities.Workflow
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
             this.Order = wModel.Order;
+            this.CopyMixinsFrom(wModel);
         }
 
 

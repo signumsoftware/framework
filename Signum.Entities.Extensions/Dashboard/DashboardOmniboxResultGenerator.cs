@@ -27,7 +27,7 @@ namespace Signum.Entities.Dashboard
 
             foreach (var uq in dashboard)
             {
-                var match = OmniboxUtils.Contains(uq, uq.ToString(), ident)!;
+                var match = OmniboxUtils.Contains(uq, uq.ToString()!, ident)!;
 
                 yield return new DashboardOmniboxResult
                 {

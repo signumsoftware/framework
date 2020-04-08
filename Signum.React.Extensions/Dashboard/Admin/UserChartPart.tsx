@@ -9,7 +9,6 @@ export default function UserChartPart(p : { ctx: TypeContext<UserChartPartEntity
   return (
     <div >
       <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false} onChange={() => ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate()} />
-
       <div className="row">
         <div className="col-sm-6">
           <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox={true} />
@@ -18,7 +17,6 @@ export default function UserChartPart(p : { ctx: TypeContext<UserChartPartEntity
           <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox={true} />
         </div>
       </div>
-
     </div>
   );
 }

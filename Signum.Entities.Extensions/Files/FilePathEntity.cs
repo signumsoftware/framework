@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
         public FilePathEntity(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(path);
+            this.FileName = Path.GetFileName(path)!;
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
@@ -51,6 +51,7 @@ namespace Signum.Entities.Files
 
         [Ignore]
         byte[] binaryFile;
+        [NotNullValidator(Disabled = true)]
         public byte[] BinaryFile
         {
             get { return binaryFile; }
@@ -106,16 +107,16 @@ namespace Signum.Entities.Files
         public static Func<string, string> ToAbsolute = str => str;
 
         public string? FullWebPath()
-        {
-            var pp = this.GetPrefixPair();
+            {
+                var pp = this.GetPrefixPair();
 
-            if (string.IsNullOrEmpty(pp.WebPrefix))
-                return null;
+                if (string.IsNullOrEmpty(pp.WebPrefix))
+                    return null;
 
-            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
+                var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
 
-            return result;
-        }
+                return result;
+            }
 
         public override string ToString()
         {
@@ -134,16 +135,31 @@ namespace Signum.Entities.Files
     [Serializable]
     public class PrefixPair
     {
-        public PrefixPair(string physicalPrefix)
+        string? physicalPrefix;
+        public string PhysicalPrefix => physicalPrefix ?? throw new InvalidOperationException("No PhysicalPrefix defined");
+
+        public string WebPrefix { get; set; }
+
+        private PrefixPair()
         {
-            this.PhysicalPrefix = physicalPrefix;
+            this.physicalPrefix = null;
         }
 
-        public string PhysicalPrefix;
-        public string WebPrefix;
+        public PrefixPair(string physicalPrefix)
+        {
+            this.physicalPrefix = physicalPrefix;
+        }
+
+        public static PrefixPair None()
+        {
+            return new PrefixPair();
+        }
+
+        public static PrefixPair WebOnly(string webPrefix)
+        {
+            return new PrefixPair { WebPrefix = webPrefix };
+        }
     }
-
-
 
     [AutoInit]
     public static class FilePathOperation

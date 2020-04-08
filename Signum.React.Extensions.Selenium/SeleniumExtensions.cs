@@ -152,17 +152,19 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
+        //[DebuggerHidden]
         public static bool IsStale(this IWebElement element)
         {
-            try
-            {
-                // Calling any method forces a staleness check
-                return element == null || !element.Enabled;
-            }
-            catch (StaleElementReferenceException)
-            {
-                return true;
-            }
+            //try
+            //{
+            //    // Calling any method forces a staleness check
+            //    return element == null || !element.Enabled;
+            //}
+            //catch (StaleElementReferenceException)
+            //{
+            //    return true;
+            //}
+            return SeleniumExtras.WaitHelpers.ExpectedConditions.StalenessOf(element)(element.GetDriver());
         }
 
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
@@ -250,8 +252,7 @@ namespace Signum.React.Selenium
 
             element.Click();
 
-            if (element.Selected != isChecked)
-                throw new InvalidOperationException();
+            element.GetDriver().Wait(() => element.Selected == isChecked, () => "Set Checkbox to " + isChecked);
         }
 
         //[DebuggerStepThrough]
@@ -332,6 +333,16 @@ namespace Signum.React.Selenium
             return e.FindElement(By.XPath(".."));
         }
 
+        public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstEx(predicate);
+        }
+
+        public static IWebElement TryGetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        {
+            return e.Follow(a => a.GetParent()).FirstOrDefault(predicate);
+        }
+
         public static void SelectByPredicate(this SelectElement element, Func<IWebElement, bool> predicate)
         {
             element.Options.SingleEx(predicate).Click();
@@ -381,6 +392,7 @@ namespace Signum.React.Selenium
 
         public static void SafeSendKeys(this IWebElement element, string? text)
         {
+            new Actions(element.GetDriver()).MoveToElement(element).Perform();
             while(element.GetAttribute("value").Length > 0)
                 element.SendKeys(Keys.Backspace);
             element.SendKeys(text);

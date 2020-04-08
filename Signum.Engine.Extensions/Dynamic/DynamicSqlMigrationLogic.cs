@@ -136,15 +136,14 @@ namespace Signum.Engine.Dynamic
 
                             using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
                             {
-                                SqlMigrationRunner.ExecuteScript(title, e.Script);
+                                SqlPreCommandExtensions.ExecuteScript(title, e.Script);
                                 tr.Commit();
                             }
-
                         }
-                        catch(MigrationException ex)
+                        catch(ExecuteSqlScriptException ex)
                         {
-                            ex.InnerException.PreserveStackTrace();
-                            throw ex.InnerException;
+                            ex.InnerException!.PreserveStackTrace();
+                            throw ex.InnerException!;
                         }
                         finally
                         {
@@ -314,14 +313,11 @@ namespace Signum.Engine.Dynamic
                     base.WriteLine();
             }
 
-            public override void Write(string value)
+            public override void Write(string? value)
             {
                 lock (stringBuilder)
                     base.Write(value);
             }
         }
-
-
-
     }
 }

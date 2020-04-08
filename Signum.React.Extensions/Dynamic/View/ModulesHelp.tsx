@@ -1,8 +1,8 @@
 import * as React from 'react'
+import { DropdownButton, Dropdown } from 'react-bootstrap'
 import { Dic } from '@framework/Globals';
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic';
 import ValueLineModal from '@framework/ValueLineModal';
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
 import { globalModules } from '../../Dynamic/View/GlobalModules';
 
 export function ModulesHelp(p: { cleanName: string; clientCode?: boolean; }) {
@@ -255,16 +255,13 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 `;
   }
   return (
-    <UncontrolledDropdown size="xs">
-      <DropdownToggle color="info" caret>{DynamicViewMessage.ModulesHelp.niceToString()}</DropdownToggle>
-      <DropdownMenu>
-        {Dic.getKeys(globalModules)
-          .orderBy(a => p.clientCode && !clientModules[a])
-          .map((moduleName, i) => <DropdownItem style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>
+    <DropdownButton id="modules" size="xs" variant="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
+      {Dic.getKeys(globalModules)
+        .orderBy(a => p.clientCode && !clientModules[a])
+        .map((moduleName, i) => <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>
           {p.clientCode && !clientModules[moduleName] ? <span className="text-muted">{moduleName}</span> : moduleName}
-        </DropdownItem>)}
-      </DropdownMenu>
-    </UncontrolledDropdown>
+        </Dropdown.Item>)}
+    </DropdownButton>
   );
 
   function handleModulesClick(key: string) {

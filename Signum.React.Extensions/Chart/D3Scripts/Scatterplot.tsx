@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 5,
@@ -24,7 +24,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -59,7 +59,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var color: (val: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey));
-    color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
+    color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
 
   } else {
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, parameters["ColorScale"]);
@@ -75,12 +75,12 @@ export default function renderScatterplot({ data, width, height, parameters, loa
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
         {parameters["DrawingMode"] == "Svg" &&
-          data.rows.map((r, i) => <g key={i} className="shape-serie sf-transition"
+          data.rows.map(r => <g key={colorKeyColumn.getValueKey(r)} className="shape-serie sf-transition"
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
               transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
-              stroke={colorKeyColumn.getValueColor(r) || color(r)}
-              fill={colorKeyColumn.getValueColor(r) || color(r)}
+              stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
+              fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
               r={pointSize}
               onClick={e => onDrillDown(r)}
@@ -119,8 +119,8 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 }
 
 class CanvasScatterplot extends React.Component<{
-  xRule: Rule,
-  yRule: Rule,
+  xRule: Rule<"content">,
+  yRule: Rule<"content">,
   colorKeyColumn: ChartClient.ChartColumn<unknown>,
   horizontalColumn: ChartClient.ChartColumn<number>,
   verticalColumn: ChartClient.ChartColumn<number>,
@@ -147,7 +147,7 @@ class CanvasScatterplot extends React.Component<{
     vctx.clearRect(0, 0, w, h);
     data.rows.forEach((r, i) => {
 
-      var c = colorKeyColumn.getValueColor(r) || color(r);
+      var c = colorKeyColumn.getValueColor(r) ?? color(r);
 
       ctx.fillStyle = c;
       ctx.strokeStyle = c;

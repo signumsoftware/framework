@@ -8,6 +8,9 @@ using Signum.Entities.Migrations;
 using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
+using System.Text;
+using System.Threading;
 
 namespace Signum.Engine.Migrations
 {
@@ -45,7 +48,22 @@ namespace Signum.Engine.Migrations
                         e.MethodName,
                         e.Description,
                     });
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            var dateLimit = parameters.GetDateLimitDelete(typeof(LoadMethodLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(LoadMethodLogEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void EnsureMigrationTable<T>() where T : Entity
@@ -56,15 +74,16 @@ namespace Signum.Engine.Migrations
                     return;
 
                 var table = Schema.Current.Table<T>();
+                var sqlBuilder = Connector.Current.SqlBuilder;
 
                 if (!table.Name.Schema.IsDefault() && !Database.View<SysSchemas>().Any(s => s.name == table.Name.Schema.Name))
-                    SqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
+                    sqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
 
-                SqlBuilder.CreateTableSql(table).ExecuteNonQuery();
+                sqlBuilder.CreateTableSql(table).ExecuteLeaves();
 
-                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryClusteredIndex)))
+                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryKeyIndex)))
                 {
-                    SqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
+                    sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }
 
                 SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");
@@ -81,7 +100,7 @@ namespace Signum.Engine.Migrations
             var log = !Schema.Current.Tables.ContainsKey(typeof(LoadMethodLogEntity)) ? null : new LoadMethodLogEntity
             {
                 Start = TimeZoneManager.Now,
-                ClassName = action.Method.DeclaringType.FullName,
+                ClassName = action.Method.DeclaringType!.FullName,
                 MethodName = action.Method.Name,
                 Description = description,
             }.Save();
@@ -116,17 +135,5 @@ namespace Signum.Engine.Migrations
                 return e;
             }
         }
-    }
-
-   
-    [Serializable]
-    public class MigrationException : Exception
-    {
-        public MigrationException() { }
-        public MigrationException(string message) : base(message) { }
-        public MigrationException(string message, Exception inner) : base(message, inner) { }
-        protected MigrationException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 }

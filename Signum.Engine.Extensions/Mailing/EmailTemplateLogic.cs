@@ -82,9 +82,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, Lite<Entity>?, SmtpConfigurationEntity?>? GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, SmtpConfigurationEntity?>? getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -109,13 +109,12 @@ namespace Signum.Engine.Mailing
                 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KeyValuePair.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
                 EmailModelLogic.Start(sb);
                 EmailMasterTemplateLogic.Start(sb);
                 
-                sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
                 sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += e =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>()
@@ -231,23 +230,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void EmailTemplate_PreSaving(EmailTemplateEntity template, PreSavingContext ctx)
-        {
-            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-            {
-                var queryName = QueryLogic.ToQueryName(template.Query.Key);
-                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
-
-                List<QueryToken> list = new List<QueryToken>();
-
-                foreach (var message in template.Messages)
-                {
-                    message.Text = TextTemplateParser.Parse(message.Text, qd, template.Model?.ToType()).ToString();
-                    message.Subject = TextTemplateParser.Parse(message.Subject, qd, template.Model?.ToType()).ToString();
-                }
-            }
-        }
-
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
@@ -276,7 +258,10 @@ namespace Signum.Engine.Mailing
             }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, model).CreateEmailMessageInternal().ToList();
+            {
+                var emailBuilder = new EmailMessageBuilder(template, entity, model);
+                return emailBuilder.CreateEmailMessageInternal().ToList();
+            }
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>
@@ -527,7 +512,7 @@ namespace Signum.Engine.Mailing
 
         public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity? entity, EmailTemplateVisibleOn visibleOn)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
             return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(a => isAllowed(a) && IsVisible(a, visibleOn))
                 .Where(a => a.IsApplicable(entity))

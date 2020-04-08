@@ -9,7 +9,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class CaseActivityMixin : MixinEntity
     {
-        CaseActivityMixin(Entity mainEntity, MixinEntity next)
+        CaseActivityMixin(ModifiableEntity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
 

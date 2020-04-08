@@ -404,7 +404,7 @@ namespace Signum.Engine.UserAssets
             try
             {
                 if (Console.Out == null)
-                    throw new InvalidOperationException("Impossible to synchronize without interactive Console");
+                    throw new InvalidOperationException("Unable to ask for renames to synchronize query tokens without interactive Console. Please use your Terminal application.");
 
                 var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenByDescending(a=>a.Priority).ThenBy(a => a.Key).ToList();
 

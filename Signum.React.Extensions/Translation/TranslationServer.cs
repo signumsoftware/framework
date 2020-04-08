@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Facades;
 using Signum.Entities.Translation;
 using Microsoft.AspNetCore.Builder;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Translation
 {
@@ -16,7 +17,7 @@ namespace Signum.React.Translation
 
         public static void Start(IApplicationBuilder app, ITranslator translator)
         {
-            ReflectionServer.RegisterLike(typeof(TranslationMessage));
+            ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             Translator = translator;

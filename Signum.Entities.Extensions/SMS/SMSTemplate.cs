@@ -45,11 +45,9 @@ namespace Signum.Entities.SMS
 
         protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-
-            if (pi.Name == nameof(To) && To ==null && (Query !=null || Model !=null))
+            if (pi.Name == nameof(To) && To == null && (Query != null || Model != null))
             {
                 return SMSTemplateMessage.ToMustBeSetInTheTemplate.NiceToString();
-
             }
 
             if (pi.Name == nameof(Messages))
@@ -149,14 +147,10 @@ namespace Signum.Entities.SMS
         public string TelephoneNumber { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
 
+        public override bool Equals(object? obj) => obj is SMSOwnerData sms && Equals(sms);
         public bool Equals(SMSOwnerData other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is SMSOwnerData && Equals((SMSOwnerData)obj);
         }
 
         public override int GetHashCode()

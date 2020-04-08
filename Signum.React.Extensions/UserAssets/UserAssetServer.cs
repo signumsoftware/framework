@@ -7,6 +7,9 @@ using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
+using Signum.React.Authorization;
+using Signum.Engine.Authorization;
+using Signum.Entities.Chart;
 
 namespace Signum.React.UserAssets
 {
@@ -21,9 +24,12 @@ namespace Signum.React.UserAssets
             started = true;
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-            ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded));
-            EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
-            EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
+            ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized() ||
+            TypeAuthLogic.GetAllowed(typeof(UserQueryEntity)).MaxUI() > Entities.Authorization.TypeAllowedBasic.None ||
+            TypeAuthLogic.GetAllowed(typeof(UserChartEntity)).MaxUI() > Entities.Authorization.TypeAllowedBasic.None
+            );
+            //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
+            //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
 
             var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEmbedded));
             pcs.Add("token", new PropertyConverter()

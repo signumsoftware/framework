@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -54,7 +54,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -294,7 +294,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("{");
 
             if (this.BaseType == DynamicBaseType.MixinEntity)
-                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(Entity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
+                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(ModifiableEntity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
 
             foreach (var prop in Def.Properties)
             {
@@ -529,7 +529,7 @@ namespace Signum.Engine.Dynamic
                      
                 }.NotNull().ToString(", ");
 
-                atts.Add($"SqlDbType({props})");
+                atts.Add($"DbType({props})");
             }
 
             if (property.ColumnName.HasText())
@@ -568,7 +568,8 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-            var objName = ObjectName.Parse(value);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            var objName = ObjectName.Parse(value, isPostgres);
 
             return new List<string?>
             {

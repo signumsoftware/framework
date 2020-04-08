@@ -8,13 +8,11 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ScheduledTaskLogEntity : Entity
     {
-        [ImplementedBy(typeof(SimpleTaskSymbol))]
-        
+        [ImplementedBy(typeof(SimpleTaskSymbol))]        
         public ITaskEntity Task { get; set; }
 
         public ScheduledTaskEntity? ScheduledTask { get; set; }
 
-        
         public Lite<IUserEntity> User { get; set; }
 
         [Format("G")]
@@ -65,7 +63,7 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SchedulerTaskExceptionLineEntity : Entity
     {
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? ElementInfo { get; set; }
 
         public Lite<ScheduledTaskLogEntity>? SchedulerTaskLog { get; set; }

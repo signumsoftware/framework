@@ -1,5 +1,5 @@
-﻿import * as React from 'react'
-import CodeMirrorComponent from './CodeMirrorComponent'
+import * as React from 'react'
+import { CodeMirrorComponent, CodeMirrorComponentHandler } from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 import "codemirror/lib/codemirror.css"
@@ -20,41 +20,37 @@ import "codemirror/addon/search/search"
 import "codemirror/addon/search/searchcursor"
 
 interface SqlCodeMirrorProps {
-    script: string;
-    onChange?: (newScript: string) => void;
-    isReadOnly?: boolean;
+  script: string;
+  onChange?: (newScript: string) => void;
+  isReadOnly?: boolean;
+  innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }
 
-export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps> {
+export default function SqlCodeMirror(p: SqlCodeMirrorProps) {
 
-    codeMirrorComponent!: CodeMirrorComponent;
+  const options = {
+    lineNumbers: true,
+    mode: "text/x-mssql",
+    extraKeys: {
+      "Ctrl-Space": "autocomplete",
+      "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
+      "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
+      "Ctrl-I": (cm: any) => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
+      "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
+      "Esc": (cm: any) => {
+        if (cm.getOption("fullScreen"))
+          cm.setOption("fullScreen", false);
+      }
+    },
+    readOnly: p.isReadOnly,
+  } as CodeMirror.EditorConfiguration;
 
-    render() {
+  (options as any).highlightSelectionMatches = true;
+  (options as any).matchBrackets = true;
 
-        const options = {
-            lineNumbers: true,
-            mode: "text/x-mssql",
-            extraKeys: {
-                "Ctrl-Space": "autocomplete",
-                "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-I": (cm: any) => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
-                "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
-                "Esc": (cm: any) => {
-                    if (cm.getOption("fullScreen"))
-                        cm.setOption("fullScreen", false);
-                }
-            },
-            readOnly: this.props.isReadOnly,
-        } as CodeMirror.EditorConfiguration;
-
-        (options as any).highlightSelectionMatches = true;
-        (options as any).matchBrackets = true;
-
-        return (
-            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
-                options={options}
-                onChange={this.props.onChange} />
-        );
-    }
+  return (
+    <CodeMirrorComponent value={p.script} ref={p.innerRef}
+      options={options}
+      onChange={p.onChange} />
+  );
 }

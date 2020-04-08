@@ -31,7 +31,7 @@ namespace Signum.Engine.Word
 
             doc.ReplaceBlipContent(blip, bitmap, newImagePartId, imagePartType);
         }
-
+        
         public static Size GetBlipBitmapSize(this WordprocessingDocument doc, Blip blip)
         {
             var part = doc.MainDocumentPart.GetPartById(blip.Embed);

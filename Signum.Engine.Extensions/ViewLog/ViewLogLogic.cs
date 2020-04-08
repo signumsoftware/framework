@@ -162,7 +162,7 @@ namespace Signum.Engine.ViewLog
             Second.Write(buffer, index, count);
         }
 
-        public override void Write(string value)
+        public override void Write(string? value)
         {
             First.Write(value);
             Second.Write(value);

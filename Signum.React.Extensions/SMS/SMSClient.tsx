@@ -19,7 +19,6 @@ import { ModelEntity } from "@framework/Signum.Entities";
 import { QueryRequest, ColumnOption } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
-import { DropdownItem } from '@framework/Components';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 
@@ -38,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
   API.getAllTypes().then(types => {
     allTypes = types;
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
-      SMSMessageEntity.nicePluralName(),
+      () => SMSMessageEntity.nicePluralName(),
       e => getSMSMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(SMSMessageEntity),
@@ -62,10 +61,10 @@ function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
 export module API {
  
   export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
-    return ajaxPost<number>({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
+    return ajaxPost({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet<string[]>({ url: "~/api/sms/getAllTypes", signal });
+    return ajaxGet({ url: "~/api/sms/getAllTypes", signal });
   }
 }

@@ -16,6 +16,8 @@ export module IsolationMessage {
   export const Entity0HasIsolation1ButCurrentIsolationIs2 = new MessageKey("IsolationMessage", "Entity0HasIsolation1ButCurrentIsolationIs2");
   export const SelectAnIsolation = new MessageKey("IsolationMessage", "SelectAnIsolation");
   export const Entity0HasIsolation1ButEntity2HasIsolation3 = new MessageKey("IsolationMessage", "Entity0HasIsolation1ButEntity2HasIsolation3");
+  export const GlobalMode = new MessageKey("IsolationMessage", "GlobalMode");
+  export const GlobalEntity = new MessageKey("IsolationMessage", "GlobalEntity");
 }
 
 export const IsolationMixin = new Type<IsolationMixin>("IsolationMixin");

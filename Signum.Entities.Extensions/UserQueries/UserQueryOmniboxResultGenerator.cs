@@ -27,7 +27,7 @@ namespace Signum.Entities.UserQueries
 
             foreach (Lite<UserQueryEntity> uq in userQueries)
             {
-                var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
+                var match = OmniboxUtils.Contains(uq, uq.ToString()!, ident);
 
                 yield return new UserQueryOmniboxResult
                 {

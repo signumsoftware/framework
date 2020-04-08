@@ -9,14 +9,15 @@ import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
 import { ImportRoute } from '@framework/AsyncImport';
-import { getTypeInfo } from '@framework/Reflection';
+import { getTypeInfo, getTypeInfos } from '@framework/Reflection';
 import { EntityLink, SearchControl } from '@framework/Search';
 import { liteKey } from '@framework/Signum.Entities';
 import { EntityControlMessage } from '@framework/Signum.Entities';
-import { getTypeInfos } from '@framework/Reflection';
+import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
+import { SearchControlOptions } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
@@ -24,14 +25,14 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
   if (options.timeMachine) {
     QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
       new QuickLinks.QuickLinkLink("TimeMachine",
-        TimeMachineMessage.TimeMachine.niceToString(),
+        () => TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
           icon: "history",
           iconColor: "blue",
           isShy: true,
         }) : undefined);
 
-    SearchControl.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
+    SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
 
@@ -39,7 +40,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
       {
         name: "ViewHistory",
         isApplicable: (row, sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
           <TimeMachineLink lite={row.entity}
             inSearch={true}>
             {EntityControlMessage.View.niceToString()}
@@ -66,15 +67,15 @@ export function timeMachineRoute(lite: Lite<Entity>) {
 export namespace API {
 
   export function diffLog(id: string | number): Promise<DiffLogResult> {
-    return ajaxGet<DiffLogResult>({ url: "~/api/diffLog/" + id });
+    return ajaxGet({ url: "~/api/diffLog/" + id });
   }
 
   export function retrieveVersion(lite: Lite<Entity>, asOf: string, ): Promise<Entity> {
-    return ajaxGet<Entity>({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
+    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
   }
 
   export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
-    return ajaxGet<DiffBlock>({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
+    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
   }
 }
 
@@ -93,38 +94,34 @@ export interface DiffPair<T> {
   value: T;
 }
 
-export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
+export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
   inSearch?: boolean;
 }
 
-export default class TimeMachineLink extends React.Component<TimeMachineLinkProps>{
+export default function TimeMachineLink(p : TimeMachineLinkProps){
 
-  render() {
-    const { lite, inSearch, children, ...htmlAtts } = this.props;
-
-    if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
-      return <span data-entity={liteKey(lite)}>{this.props.children || lite.toStr}</span>;
-
-
-    return (
-      <Link
-        to={timeMachineRoute(lite)}
-        title={lite.toStr}
-        onClick={this.handleClick}
-        data-entity={liteKey(lite)}
-        {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-        {children || lite.toStr}
-      </Link>
-    );
-  }
-
-  handleClick = (event: React.MouseEvent<any>) => {
-
-    const lite = this.props.lite;
+  function handleClick(event: React.MouseEvent<any>) {
+    const lite = p.lite;
 
     event.preventDefault();
 
     window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
   }
+  const { lite, inSearch, children, ...htmlAtts } = p;
+
+  if (!Navigator.isNavigable(lite.EntityType, { isSearch: p.inSearch }))
+    return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
+
+
+  return (
+    <Link
+      to={timeMachineRoute(lite)}
+      title={lite.toStr}
+      onClick={handleClick}
+      data-entity={liteKey(lite)}
+      {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
+      {children ?? lite.toStr}
+    </Link>
+  );
 }

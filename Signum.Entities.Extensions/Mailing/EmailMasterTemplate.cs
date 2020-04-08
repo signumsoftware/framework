@@ -45,7 +45,6 @@ namespace Signum.Entities.Mailing
 
         public XElement ToXml(IToXmlContext ctx)
         {
-
             return new XElement("EmailMasterTemplate",
                 new XAttribute("Name", this.Name ?? ""),
                 new XAttribute("Guid", this.Guid),

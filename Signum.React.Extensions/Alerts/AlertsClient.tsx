@@ -14,12 +14,14 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => import('./Templates/AlertType')));
 
-
-  const couldHaveAlerts = options.couldHaveAlerts || (typeName => true);
+  const couldHaveAlerts = options.couldHaveAlerts ?? (typeName => true);
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
     isVisible: ctx => couldHaveAlerts(ctx.entity.Type),
-    contextual: { icon: "bell", iconColor: "darkorange", color: "warning", isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
+    icon: "bell",
+    iconColor: "darkorange",
+    color: "warning",
+    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
   }));
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({

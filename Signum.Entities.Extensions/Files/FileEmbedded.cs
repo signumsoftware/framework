@@ -13,7 +13,7 @@ namespace Signum.Entities.Files
 
         public FileEmbedded(string readFileFrom)
         {
-            this.FileName = Path.GetFileName(readFileFrom);
+            this.FileName = Path.GetFileName(readFileFrom)!;
             this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 

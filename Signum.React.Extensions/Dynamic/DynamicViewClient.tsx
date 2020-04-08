@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
+import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
@@ -113,7 +114,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewNames(typeName: string): Promise<string[]> {
     const es = Navigator.getSettings(typeName);
-    var staticViewNames = es && es.namedViews && Dic.getKeys(es.namedViews) || [];
+    var staticViewNames = es?.namedViews && Dic.getKeys(es.namedViews) || [];
 
     if (!isTypeEntity(typeName))
       return Promise.resolve(staticViewNames);
@@ -127,7 +128,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewOverrides(typeName: string, viewName?: string): Promise<Navigator.ViewOverride<ModifiableEntity>[]> {
     const es = Navigator.getSettings(typeName);
-    var staticViewOverrides = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || [];
+    var staticViewOverrides = es?.viewOverrides?.filter(a => a.viewName == viewName) || [];
 
     if (!isTypeEntity(typeName))
       return Promise.resolve(staticViewOverrides);
@@ -169,7 +170,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (viewName == "CHOOSE")
           return this.chooseViewName(entity, true);
 
-        return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => dynamicViewComponent(dv)));
+        return this.getViewPromiseWithName(entity, viewName);
       } catch (error) {
         return MessageModal.showError("There was an error executing the DynamicViewSelector. Fallback to default").then(() => this.fallback(entity));
       }
@@ -178,7 +179,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
   getViewPromiseWithName(entity: ModifiableEntity, viewName: string) {
     const es = Navigator.getSettings(entity.Type);
-    var namedView = es && es.namedViews && es.namedViews[viewName];
+    var namedView = es?.namedViews && es.namedViews[viewName];
 
     if (namedView)
       return namedView.getViewPromise(entity).applyViewOverrides(entity.Type, viewName);
@@ -195,7 +196,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
     const settings = Navigator.getSettings(entity.Type);
 
-    if (!settings || !settings.getViewPromise) {
+    if (settings?.getViewPromise == null) {
 
       if (!isTypeEntity(entity.Type))
         return new ViewPromise(import('@framework/Lines/DynamicComponent'));
@@ -262,7 +263,7 @@ export function patchComponent(component: React.ComponentClass<{ ctx: TypeContex
       viewOverride(replacer);
       return replacer.result;
     } catch (error) {
-      return <div className="alert alert-danger">ERROR: {error && error.message}</div>;
+      return <div className="alert alert-danger">ERROR: {error?.message}</div>;
     }
   };
 
@@ -358,7 +359,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var EntityTable = Lines.EntityTable;
   var FormGroup = Lines.FormGroup;
   var FormControlReadonly = Lines.FormControlReadonly;
-  var FileLine = FileLineModule.default;
+  var FileLine = FileLineModule.FileLine;
 
   // Search
   var SearchControl = Search.SearchControl;
@@ -367,21 +368,16 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var ValueSearchControlLine = Search.ValueSearchControlLine;
 
   // Components
-  var Button = Components.Button;
-  var Dropdown = Components.Dropdown;
-  var DropdownItem = Components.DropdownItem;
-  var DropdownMenu = Components.DropdownMenu;
-  var DropdownToggle = Components.DropdownToggle;
-  var Fade = Components.ModalFade;
-  var Modal = Components.Modal;
-  var NavItem = Components.NavItem;
-  var PopperContent = Components.PopperContent;
-  var Tooltip = Components.Tooltip;
-  var UncontrolledDropdown = Components.UncontrolledDropdown;
-  var UncontrolledTooltip = Components.UncontrolledTooltip;
-  var Tab = Components.Tab;
-  var Tabs = Components.Tabs;
-  var UncontrolledTabs = Components.UncontrolledTabs;
+  var Button = ReactBootstrap.Button;
+  var Dropdown = ReactBootstrap.Dropdown;
+  var DropdownItem = ReactBootstrap.DropdownButton;
+  var Modal = ReactBootstrap.Modal;
+  var NavItem = ReactBootstrap.NavItem;
+  var Tooltip = ReactBootstrap.Tooltip;
+  var Overlay = ReactBootstrap.Overlay;
+  var OverlayTrigger = ReactBootstrap.OverlayTrigger;
+  var Tab = ReactBootstrap.Tab;
+  var Tabs = ReactBootstrap.Tabs;
   var LinkContainer = Components.LinkContainer;
 
 
@@ -429,27 +425,27 @@ export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromis
 export namespace API {
 
   export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
-    return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewProps(typeName: string, viewName: string): Promise<DynamicViewProps[]> {
-    return ajaxGet<DynamicViewProps[]>({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
-    return ajaxGet<DynamicViewSelectorEntity>({ url: `~/api/dynamic/selector/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/selector/${typeName}` });
   }
 
   export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity[]> {
-    return ajaxGet<DynamicViewOverrideEntity[]>({ url: `~/api/dynamic/override/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/override/${typeName}` });
   }
 
   export function getDynamicViewNames(typeName: string): Promise<string[]> {
-    return ajaxGet<string[]>({ url: `~/api/dynamic/viewNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/viewNames/${typeName}` });
   }
 
   export function getSuggestedFindOptions(typeName: string): Promise<SuggestedFindOptions[]> {
-    return ajaxGet<SuggestedFindOptions[]>({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
   }
 }
 

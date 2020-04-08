@@ -20,6 +20,7 @@ namespace Signum.Engine.MachineLearning
             var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size.Value;
 
             ctx.ReportProgress($"Saving Codifications");
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type. CSBUG
 
             ctx.Codifications.Select(pc =>
             {
@@ -67,6 +68,7 @@ namespace Signum.Engine.MachineLearning
                 return result;
 
             }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 
         public static List<PredictorCodification> RetrievePredictorCodifications(this PredictorEntity predictor)

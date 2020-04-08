@@ -31,11 +31,11 @@ export function EditableComponent({ ctx, markdown, defaultText, inline, onChange
 }
 
 export function MarkdownText({ text, className }: { text: string | null | undefined, className?: string }) {
-  var markdownText = React.useMemo(() => HelpClient.toHtml(text || ""), [text]);
+  var markdownText = React.useMemo(() => HelpClient.toHtml(text ?? ""), [text]);
 
   function handleOnMouseUp(e: React.MouseEvent) {
     var a = e.target as HTMLAnchorElement;
-    if (a && a.nodeName == "A" && !e.ctrlKey && e.button == 0) {
+    if (a?.nodeName == "A" && !e.ctrlKey && e.button == 0) {
       var href = a.getAttribute("href");
       if (href != null && href.startsWith(Navigator.toAbsoluteUrl("~/"))) {
         e.preventDefault();

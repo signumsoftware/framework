@@ -42,7 +42,6 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   var colorInterpolate = parameters["ColorInterpolate"];
   var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
   var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r)));
-  debugger;
 
   var minDate = d3.min(data.rows, r => new Date(dateColumn.getValue(r)))!;
   var maxDate = d3.max(data.rows, r => new Date(dateColumn.getValue(r)))!;
@@ -58,7 +57,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var cleanDate = (d: Date) => d.toJSON().beforeLast(".");
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
@@ -67,7 +66,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   }, height);
   //yRule.debugY(chart);
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
@@ -80,7 +79,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var rowYByDate = data.rows.toObject(r => {
     var date = dateColumn.getValueKey(r);
-    return date.tryBefore("+") || date;
+    return date.tryBefore("+") ?? date;
   });
 
 

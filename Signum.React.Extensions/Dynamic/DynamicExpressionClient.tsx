@@ -25,7 +25,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
   export function expressionTest(request: DynamicExpressionTestRequest): Promise<DynamicExpressionTestResponse> {
-    return ajaxPost<DynamicExpressionTestResponse>({ url: `~/api/dynamic/expression/test` }, request);
+    return ajaxPost({ url: `~/api/dynamic/expression/test` }, request);
   }
 }
 

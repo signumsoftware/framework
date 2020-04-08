@@ -1,0 +1,35 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+<<<<<<< HEAD
+      "applicationUrl": "http://localhost:57615/",
+=======
+      "applicationUrl": "http://localhost:53267/",
+>>>>>>> 4620215e715c28da287367a73519c94f14117d40
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Signum.React.Extensions": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+<<<<<<< HEAD
+      "applicationUrl": "http://localhost:57617/"
+=======
+      "applicationUrl": "http://localhost:53271/"
+>>>>>>> 4620215e715c28da287367a73519c94f14117d40
+    }
+  }
+}

@@ -230,22 +230,22 @@ namespace Signum.Engine.Word
         {
             MethodInfo mi = GetMethod(ctx.Template, suffix);
 
-            object result;
+            object? result;
             try
             {
                 result = mi.Invoke(ctx.Model, null);
             }
             catch (TargetInvocationException e)
             {
-                e.InnerException.PreserveStackTrace();
+                e.InnerException!.PreserveStackTrace();
 
-                throw e.InnerException;
+                throw e.InnerException!;
             }
 
-            if (!(result is Data.DataTable))
+            if (!(result is Data.DataTable dt))
                 throw new InvalidOperationException($"Method '{suffix}' on '{ctx.Model!.GetType().Name}' did not return a DataTable");
 
-            return (Data.DataTable)result;
+            return dt;
         }
 
         private static MethodInfo GetMethod(WordTemplateEntity template, string method)

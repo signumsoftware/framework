@@ -12,7 +12,7 @@ namespace Signum.Entities.Files
 
         public FileEntity(string path)
         {
-            this.FileName = Path.GetFileName(path);
+            this.FileName = Path.GetFileName(path)!;
             this.BinaryFile = File.ReadAllBytes(path);
         }
 

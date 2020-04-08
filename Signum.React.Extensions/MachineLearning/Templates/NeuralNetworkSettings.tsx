@@ -6,11 +6,13 @@ import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, NeuralNetworkLearner } from '../Signum.Entities.MachineLearning'
 import { API } from '../PredictorClient';
 import { is } from '@framework/Signum.Entities';
-import { Popover } from '@framework/Components';
+import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
-export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
-  handlePredictionTypeChanged = () => {
-    var nn = this.props.ctx.value;
+export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetworkSettingsEntity> }){
+  const forceUpdate = useForceUpdate();
+  function handlePredictionTypeChanged() {
+    var nn = p.ctx.value;
     if (nn.predictionType == "Classification" || nn.predictionType == "MultiClassification") {
       nn.lossFunction = "CrossEntropyWithSoftmax";
       nn.evalErrorFunction = "ClassificationError";
@@ -20,71 +22,8 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
     }
   }
 
-  render() {
-    const ctx = this.props.ctx;
 
-    var p = ctx.findParent(PredictorEntity);
-
-    const ctxb = ctx.subCtx({ formGroupStyle: "Basic" })
-    const ctx6 = ctx.subCtx({ labelColumns: 8 })
-
-    return (
-      <div>
-        <h4>{NeuralNetworkSettingsEntity.niceName()}</h4>
-        {p.algorithm && <DeviceLine ctx={ctx.subCtx(a => a.device)} algorithm={p.algorithm} />}
-        <ValueLine ctx={ctx.subCtx(a => a.predictionType)} onChange={this.handlePredictionTypeChanged} />
-        {this.renderCount(ctx, p, "Input")}
-        <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
-          { property: a => a.size, headerHtmlAttributes: { style: { width: "33%" } } },
-          { property: a => a.activation, headerHtmlAttributes: { style: { width: "33%" } } },
-          { property: a => a.initializer, headerHtmlAttributes: { style: { width: "33%" } } },
-        ])} />
-        <div>
-          <div className="row">
-            <div className="col-sm-4">
-              {this.renderCount(ctxb, p, "Output")}
-            </div>
-            <div className="col-sm-4">
-              <ValueLine ctx={ctxb.subCtx(a => a.outputActivation)} />
-            </div>
-            <div className="col-sm-4">
-              <ValueLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-sm-4">
-            </div>
-            <div className="col-sm-4">
-              <ValueLine ctx={ctxb.subCtx(a => a.lossFunction)} />
-            </div>
-            <div className="col-sm-4">
-              <ValueLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
-            </div>
-
-          </div>
-        </div>
-        <hr />
-        <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={this.handleLearnerChange} helpText={this.getHelpBlock(ctx.value.learner)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.learningMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />
-            {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br />false diverge (Loss >> 1)</p>)}
-            <ValueLine ctx={ctx6.subCtx(a => a.learningVarianceMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD", "MomentumSGD")} />
-          </div>
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.numMinibatches)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.bestResultFromLast)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.saveProgressEvery)} />
-            <ValueLine ctx={ctx6.subCtx(a => a.saveValidationProgressEvery)} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  getHelpBlock = (learner: NeuralNetworkLearner | undefined) => {
+  function getHelpBlock(learner: NeuralNetworkLearner | undefined) {
     switch (learner) {
       case "AdaDelta": return "Did not work :S";
       case "AdaGrad": return "";
@@ -98,8 +37,8 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
   }
 
   //Values found letting a NN work for a night learning y = sin(x * 5), no idea if they work ok for other cases
-  handleLearnerChange = () => {
-    var nns = this.props.ctx.value;
+  function handleLearnerChange() {
+    var nns = p.ctx.value;
     switch (nns.learner) {
       case "Adam":
         nns.learningRate = 1;
@@ -140,10 +79,10 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
       default:
     }
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
+  function renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
     return (
       <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
         {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
@@ -157,6 +96,67 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
       </FormGroup>
     );
   }
+  const ctx = p.ctx;
+
+  var pred = ctx.findParent(PredictorEntity);
+
+  const ctxb = ctx.subCtx({ formGroupStyle: "Basic" })
+  const ctx6 = ctx.subCtx({ labelColumns: 8 })
+
+  return (
+    <div>
+      <h4>{NeuralNetworkSettingsEntity.niceName()}</h4>
+      {pred.algorithm && <DeviceLine ctx={ctx.subCtx(a => a.device)} algorithm={pred.algorithm} />}
+      <ValueLine ctx={ctx.subCtx(a => a.predictionType)} onChange={handlePredictionTypeChanged} />
+      {renderCount(ctx, pred, "Input")}
+      <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
+        { property: a => a.size, headerHtmlAttributes: { style: { width: "33%" } } },
+        { property: a => a.activation, headerHtmlAttributes: { style: { width: "33%" } } },
+        { property: a => a.initializer, headerHtmlAttributes: { style: { width: "33%" } } },
+      ])} />
+      <div>
+        <div className="row">
+          <div className="col-sm-4">
+            {renderCount(ctxb, pred, "Output")}
+          </div>
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxb.subCtx(a => a.outputActivation)} />
+          </div>
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-sm-4">
+          </div>
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxb.subCtx(a => a.lossFunction)} />
+          </div>
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
+          </div>
+
+        </div>
+      </div>
+      <hr />
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={handleLearnerChange} helpText={getHelpBlock(ctx.value.learner)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.learningMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />
+          {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br />false diverge (Loss >> 1)</p>)}
+          <ValueLine ctx={ctx6.subCtx(a => a.learningVarianceMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD", "MomentumSGD")} />
+        </div>
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.numMinibatches)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.bestResultFromLast)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.saveProgressEvery)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.saveValidationProgressEvery)} />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactNode): React.ReactElement<any> {
@@ -167,40 +167,24 @@ function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactN
   return React.cloneElement(element, { labelText: label } as LineBaseProps);
 }
 
-
 interface LabelWithHelpProps {
   ctx: TypeContext<LineBaseProps>;
   text: React.ReactNode;
 }
 
-interface LabelWithHelpState {
-  isOpen?: boolean
-}
+export function LabelWithHelp(p: LabelWithHelpProps) {
 
-export class LabelWithHelp extends React.Component<LabelWithHelpProps, LabelWithHelpState> {
-
-  constructor(props: LabelWithHelpProps) {
-    super(props);
-    this.state = {};
-  }
-
-  toggle = () => {
-    this.setState({ isOpen: !this.state.isOpen });
-  }
-
-  span?: HTMLSpanElement | null;
-  render() {
-    const ctx = this.props.ctx;
-    return [
-      <span ref={r => this.span = r} onClick={this.toggle} key="s">
-        {ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
-      </span>,
-      <Popover placement="auto" target={() => this.span!} toggle={this.toggle} isOpen={this.state.isOpen} key="p">
-        <h3 className="popover-header">{ctx.niceName()}</h3>
-        <div className="popover-body">{this.props.text}</div>
-      </Popover>
-    ];
-  }
+    return (
+      <OverlayTrigger overlay={
+        <Popover id={p.ctx.prefix + "_popper"} placement="auto" key="p">
+          <h3 className="popover-header">{p.ctx.niceName()}</h3>
+          <div className="popover-body">{p.text}</div>
+        </Popover>}>
+        <span key="s">
+          {p.ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
+        </span>
+      </OverlayTrigger>
+    );
 }
 
 function hideFor(ctx: TypeContext<NeuralNetworkSettingsEntity>, ...learners: NeuralNetworkLearner[]): React.HTMLAttributes<any> | undefined {
@@ -212,36 +196,12 @@ interface DeviceLineProps {
   algorithm: PredictorAlgorithmSymbol;
 }
 
-interface DeviceLineState {
-  devices?: string[];
-}
+export function DeviceLine(p: DeviceLineProps) {
 
-export class DeviceLine extends React.Component<DeviceLineProps, DeviceLineState> {
+  const devices = useAPI(() => API.availableDevices(p.algorithm), [p.algorithm]);
 
-  constructor(props: DeviceLineProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    this.loadData();
-  }
-
-  componentWillReceiveProps(newProps: DeviceLineProps) {
-    if (!is(newProps.algorithm, this.props.algorithm))
-      this.loadData();
-  }
-
-  loadData() {
-    API.availableDevices(this.props.algorithm)
-      .then(devices => this.setState({ devices }))
-      .done();
-  }
-
-  render() {
-    const ctx = this.props.ctx;
-    return (
-      <ValueLine ctx={ctx} comboBoxItems={(this.state.devices || []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
-    );
-  }
+  const ctx = p.ctx;
+  return (
+    <ValueLine ctx={ctx} comboBoxItems={(devices ?? []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
+  );
 }

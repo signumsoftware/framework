@@ -19,9 +19,6 @@ namespace Signum.React.Dashboard
         [HttpGet("api/dashboard/home")]
         public Lite<DashboardEntity>? Home()
         {
-            if (TypeAuthLogic.GetAllowed(typeof(DashboardEntity)).MaxUI() == TypeAllowedBasic.None)
-                return null;
-
             var result = DashboardLogic.GetHomePageDashboard();
             return result?.ToLite();
         }

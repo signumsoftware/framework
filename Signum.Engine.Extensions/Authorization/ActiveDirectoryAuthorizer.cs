@@ -13,7 +13,7 @@ namespace Signum.Engine.Authorization
     public interface IAutoCreateUserContext
     {
         public string UserName { get; }
-        public string EmailAddress { get; }
+        public string? EmailAddress { get; }
     }
 
     public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
@@ -21,7 +21,7 @@ namespace Signum.Engine.Authorization
         public readonly PrincipalContext PrincipalContext;
         public string UserName { get; private set; }
         public string DomainName { get; private set; }
-        public string EmailAddress => this.GetUserPrincipal().EmailAddress;
+        public string? EmailAddress => this.GetUserPrincipal().EmailAddress;
 
         UserPrincipal? userPrincipal;
 
@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
         public Guid OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
         public string UserName => GetClaim("preferred_username");
-        public string EmailAddress => GetClaim("preferred_username");
+        public string? EmailAddress => GetClaim("preferred_username");
 
         public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal)
         {
@@ -64,7 +64,23 @@ namespace Signum.Engine.Authorization
             this.GetConfig = getConfig;
         }
 
-        public virtual UserEntity Login(string userName, string password)
+        public virtual UserEntity Login(string userName, string password, out string authenticationType)
+        {
+            var passwordHash = Security.EncodePassword(password);
+            if (AuthLogic.TryRetrieveUser(userName, passwordHash) != null)
+                return AuthLogic.Login(userName, passwordHash, out authenticationType); //Database is faster than Active Directory
+
+            UserEntity? user = LoginWithActiveDirectoryRegistry(userName, password);
+            if (user != null)
+            {
+                authenticationType = "adRegistry";
+                return user;
+            }
+
+            return AuthLogic.Login(userName, Security.EncodePassword(password), out authenticationType);
+        }
+
+        public virtual UserEntity? LoginWithActiveDirectoryRegistry(string userName, string password)
         {
             using (AuthLogic.Disable())
             {
@@ -74,11 +90,6 @@ namespace Signum.Engine.Authorization
 
                 if (domainName != null && config.LoginWithActiveDirectoryRegistry)
                 {
-                    var passwordHash = Security.EncodePassword(password);
-
-                    if (AuthLogic.TryRetrieveUser(userName, passwordHash) != null)
-                        return AuthLogic.Login(userName, passwordHash); //Database is faster than Active Directory
-
                     try
                     {
                         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
@@ -110,10 +121,9 @@ namespace Signum.Engine.Authorization
                     }
                 }
 
-                return AuthLogic.Login(userName, Security.EncodePassword(password));
+                return null;
             }
         }
-
 
         public UserEntity? OnAutoCreateUser(IAutoCreateUserContext ctx)
         {

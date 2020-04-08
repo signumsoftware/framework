@@ -8,7 +8,8 @@
 }
 .sf-profiler-chart .shape-before
 {
-    opacity: 0.7;
+    opacity: 0.3;
+    fill: white;
 }
 .sf-profiler-chart .label
 {

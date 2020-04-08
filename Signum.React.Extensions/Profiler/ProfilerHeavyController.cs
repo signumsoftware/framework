@@ -100,10 +100,10 @@ namespace Signum.React.Profiler
                         select new StackTraceTS
                         {
                             Namespace = t?.Namespace!,
-                            Color = t == null ? null : ColorExtensions.ToHtmlColor(t.Assembly.FullName.GetHashCode()),
+                            Color = t == null ? null : ColorExtensions.ToHtmlColor(t.Assembly.FullName!.GetHashCode()),
                             Type = t?.TypeName()!,
                             Method = mi.Name,
-                            FileName = sf.GetFileName(),
+                            FileName = sf.GetFileName()!,
                             LineNumber = sf.GetFileLineNumber(),
                         }).ToList();
 
@@ -220,10 +220,10 @@ namespace Signum.React.Profiler
         {
             public string? Color;
             public string Namespace;
-            public string Type;
+            public string? Type;
             public string Method;
-            public string FileName;
-            public int LineNumber;
+            public string? FileName;
+            public int? LineNumber;
 
         }
     }

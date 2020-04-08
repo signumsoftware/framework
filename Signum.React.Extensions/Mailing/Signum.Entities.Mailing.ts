@@ -9,12 +9,22 @@ import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
+export interface Pop3ConfigurationEntity {
+    newPassword: string;
+}
 
+export interface SmtpNetworkDeliveryEmbedded {
+    newPassword: string;
+}
+
+export interface ExchangeWebServiceEmbedded {
+    newPassword: string;
+}
 
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
@@ -197,6 +207,20 @@ export type EmailRecipientKind =
   "Cc" |
   "Bcc";
 
+export const EmailSenderConfigurationEntity = new Type<EmailSenderConfigurationEntity>("EmailSenderConfiguration");
+export interface EmailSenderConfigurationEntity extends Entities.Entity {
+  Type: "EmailSenderConfiguration";
+  name: string;
+  defaultFrom: EmailAddressEmbedded | null;
+  additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
+  sMTP: SmtpEmbedded | null;
+  exchange: ExchangeWebServiceEmbedded | null;
+}
+
+export module EmailSenderConfigurationOperation {
+  export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
+}
+
 export const EmailTemplateContactEmbedded = new Type<EmailTemplateContactEmbedded>("EmailTemplateContactEmbedded");
 export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailTemplateContactEmbedded";
@@ -217,6 +241,9 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   sendDifferentMessages: boolean;
   from: EmailTemplateContactEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
+  groupResults: boolean;
+  filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+  orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml: boolean;
@@ -270,6 +297,16 @@ export type EmailTemplateVisibleOn =
   "Single" |
   "Multiple" |
   "Query";
+
+export const ExchangeWebServiceEmbedded = new Type<ExchangeWebServiceEmbedded>("ExchangeWebServiceEmbedded");
+export interface ExchangeWebServiceEmbedded extends Entities.EmbeddedEntity {
+  Type: "ExchangeWebServiceEmbedded";
+  exchangeVersion: External.ExchangeVersion;
+  url: string | null;
+  username: string | null;
+  password: string | null;
+  useDefaultCredentials: boolean;
+}
 
 export interface IAttachmentGeneratorEntity extends Entities.Entity {
 }
@@ -371,7 +408,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   Type: "SendEmailTask";
   name: string;
   emailTemplate: Entities.Lite<EmailTemplateEntity>;
-  uniqueTarget: Entities.Lite<Entities.Entity>;
+  uniqueTarget: Entities.Lite<Entities.Entity> | null;
   targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
   modelConverter: Templating.ModelConverterSymbol | null;
 }
@@ -380,20 +417,13 @@ export module SendEmailTaskOperation {
   export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
 }
 
-export const SmtpConfigurationEntity = new Type<SmtpConfigurationEntity>("SmtpConfiguration");
-export interface SmtpConfigurationEntity extends Entities.Entity {
-  Type: "SmtpConfiguration";
-  name: string;
+export const SmtpEmbedded = new Type<SmtpEmbedded>("SmtpEmbedded");
+export interface SmtpEmbedded extends Entities.EmbeddedEntity {
+  Type: "SmtpEmbedded";
   deliveryFormat: External.SmtpDeliveryFormat;
   deliveryMethod: External.SmtpDeliveryMethod;
   network: SmtpNetworkDeliveryEmbedded | null;
   pickupDirectoryLocation: string | null;
-  defaultFrom: EmailAddressEmbedded | null;
-  additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
-}
-
-export module SmtpConfigurationOperation {
-  export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol("Operation", "SmtpConfigurationOperation.Save");
 }
 
 export const SmtpNetworkDeliveryEmbedded = new Type<SmtpNetworkDeliveryEmbedded>("SmtpNetworkDeliveryEmbedded");
@@ -410,6 +440,18 @@ export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
 
 export namespace External {
 
+  export const ExchangeVersion = new EnumType<ExchangeVersion>("ExchangeVersion");
+  export type ExchangeVersion =
+    "Exchange2007_SP1" |
+    "Exchange2010" |
+    "Exchange2010_SP1" |
+    "Exchange2010_SP2" |
+    "Exchange2013" |
+    "Exchange2013_SP1" |
+    "Exchange2015" |
+    "Exchange2016" |
+    "V2015_10_05";
+  
   export const SmtpDeliveryFormat = new EnumType<SmtpDeliveryFormat>("SmtpDeliveryFormat");
   export type SmtpDeliveryFormat =
     "SevenBit" |

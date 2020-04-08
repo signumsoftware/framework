@@ -29,6 +29,7 @@ namespace Signum.Entities.Workflow
             {
                 Name = this.Name
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -36,6 +37,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowPoolModel)model;
             this.Name = wModel.Name;
+            this.CopyMixinsFrom(wModel);
         }
     }
 

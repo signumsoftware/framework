@@ -16,7 +16,7 @@ export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
   label: string | null;
   column: number | null;
   row: number | null;
-  disableOnNull: boolean;
+  active: DynamicQuery.PinnedFilterActive;
   splitText: boolean;
 }
 

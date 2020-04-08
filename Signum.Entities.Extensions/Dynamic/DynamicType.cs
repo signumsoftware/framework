@@ -21,7 +21,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string TypeName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string typeDefinition;
         [StringLengthValidator(Min = 3)]
         public string TypeDefinition
@@ -330,19 +330,19 @@ namespace Signum.Entities.Dynamic
             return (objectType == typeof(DynamicValidator));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             JObject obj = JObject.Load(reader);
-            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
+            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type")!.Value.Value<string>());
 
-            object target = Activator.CreateInstance(type);
+            object target = Activator.CreateInstance(type)!;
             serializer.Populate(obj.CreateReader(), target);
             return target;
         }
 
         public override bool CanWrite { get { return false; } }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

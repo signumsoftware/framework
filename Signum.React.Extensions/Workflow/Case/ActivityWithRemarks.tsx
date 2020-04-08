@@ -16,7 +16,7 @@ export interface ActivityWithRemarks {
   case: Lite<CaseEntity>;
   caseActivity: Lite<CaseActivityEntity>;
   notification: Lite<CaseNotificationEntity>;
-  remarks: string | undefined;
+  remarks: string | null
   alerts: number;
   tags: Array<CaseTagTypeEntity>;
 }
@@ -25,62 +25,29 @@ export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemark
   data: ActivityWithRemarks;
 }
 
-export interface ActivityWithRemarksState {
-  remarks: string | undefined | null;
-  alerts: number;
-  tags: Array<CaseTagTypeEntity>;
+function useStateFromProps<T>(propsValue: T, deps?: any[]): [T, (newValue: T) => void] {
+  var [val, setVal] = React.useState(propsValue);
+
+  React.useEffect(() => {
+    setVal(propsValue);
+  }, deps ?? [propsValue]);
+
+  return [val, setVal];
 }
 
-export default class ActivityWithRemarksComponent extends React.Component<ActivityWithRemarksProps, ActivityWithRemarksState>{
+export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps) {
 
-  constructor(props: ActivityWithRemarksProps) {
-    super(props);
-    this.state = {
-      remarks: this.props.data.remarks,
-      alerts: this.props.data.alerts,
-      tags: this.props.data.tags,
-    };
-  }
-  componentWillReceiveProps(newProps: ActivityWithRemarksProps) {
-    if ((this.props.data.remarks != newProps.data.remarks) ||
-      (this.props.data.alerts != newProps.data.alerts) ||
-      (this.props.data.tags.map(a => a.id).join(",") != newProps.data.tags.map(a => a.id).join(","))) {
-      this.setState({
-        remarks: newProps.data.remarks,
-        alerts: newProps.data.alerts,
-        tags: newProps.data.tags,
-      });
-    }
-  }
+  const [remarks, setRemarks] = useStateFromProps(p.data.remarks);
+  const [alerts, setAlerts] = useStateFromProps(p.data.alerts);
+  const [tags, setTags] = useStateFromProps(p.data.tags, p.data.tags.map(t => t.id));
 
-  render() {
-    return (
-      <span>
-        {this.props.data.workflowActivity.toStr}
-        &nbsp;
-                <a href="#" onClick={this.handleRemarksClick} className={classes(
-          "case-icon",
-          !this.state.remarks && "case-icon-ghost")}>
-          <FontAwesomeIcon icon={this.state.remarks ? "comment-dots" : ["far", "comment"]} />
-        </a>
-        {this.state.alerts > 0 && " "}
-        {this.state.alerts > 0 && <a href="#" onClick={this.handleAlertsClick} style={{ color: "orange" }}>
-          <FontAwesomeIcon icon={"bell"} />
-        </a>}
-        &nbsp;
-               <InlineCaseTags case={this.props.data.case} defaultTags={this.state.tags} />
-      </span>
-    );
-  }
-
-
-  handleAlertsClick = (e: React.MouseEvent<any>) => {
+  function handleAlertsClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
     var fo: FindOptions = {
       queryName: AlertEntity,
       filterOptions: [
-        { token: AlertEntity.token(a => a.target), value: this.props.data.caseActivity },
+        { token: AlertEntity.token(a => a.target), value: p.data.caseActivity },
         { token: AlertEntity.token().entity(e => e.recipient), value: Navigator.currentUser },
         { token: AlertEntity.token().entity().expression("CurrentState"), value: "Alerted" }
       ],
@@ -90,11 +57,11 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
 
     Finder.exploreOrNavigate(fo)
       .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!))
-      .then(alerts => this.setState({ alerts: alerts }))
+      .then(alerts => setAlerts(alerts))
       .done();
   }
 
-  handleRemarksClick = (e: React.MouseEvent<any>) => {
+  function handleRemarksClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
     ValueLineModal.show({
@@ -103,18 +70,35 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
       title: CaseNotificationEntity.nicePropertyName(a => a.remarks),
       message: CaseActivityMessage.PersonalRemarksForThisNotification.niceToString(),
       labelText: undefined,
-      initialValue: this.state.remarks,
+      initialValue: remarks,
       initiallyFocused: true
     }).then(remarks => {
 
       if (remarks === undefined)
         return;
 
-      Operations.API.executeLite(this.props.data.notification, CaseNotificationOperation.SetRemarks, remarks).then(n => {
-        this.setState({ remarks: n.entity.remarks });
-      }).done();
+      Operations.API.executeLite(p.data.notification, CaseNotificationOperation.SetRemarks, remarks)
+        .then(n => setRemarks(n.entity.remarks))
+        .done();
 
     }).done();
   }
+  return (
+    <span>
+      {p.data.workflowActivity.toStr}
+      &nbsp;
+              <a href="#" onClick={handleRemarksClick} className={classes(
+        "case-icon",
+        !remarks && "case-icon-ghost")}>
+        <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} />
+      </a>
+      {alerts > 0 && " "}
+      {alerts > 0 && <a href="#" onClick={handleAlertsClick} style={{ color: "orange" }}>
+        <FontAwesomeIcon icon={"bell"} />
+      </a>}
+      &nbsp;
+             <InlineCaseTags case={p.data.case} defaultTags={tags} />
+    </span>
+  );
 }
 

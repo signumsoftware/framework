@@ -16,7 +16,7 @@ namespace Signum.Entities.Authorization
             if (p.Length >= 5)
                 return null;
 
-            return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
+            return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(p.Length);
         };
 
         public static string? OnValidatePassword(string password)
@@ -31,7 +31,7 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [SqlDbType(Size = 128)]
+        [DbType(Size = 128)]
         public byte[] PasswordHash { get; set; }
 
         public Lite<RoleEntity> Role { get; set; }
@@ -50,7 +50,7 @@ namespace Signum.Entities.Authorization
             if (pi.Name == nameof(State))
             {
                 if (DisabledOn != null && State != UserState.Disabled)
-                    return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
+                    return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
             return base.PropertyValidation(pi);
@@ -71,7 +71,7 @@ namespace Signum.Entities.Authorization
             Owner = this.ToLite(),
             CultureInfo = CultureInfo,
             DisplayName = UserName,
-            Email = Email!,
+            Email = Email,
         });
     }
 
@@ -121,7 +121,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserOIDMixin : MixinEntity
     {
-        UserOIDMixin(Entity mainEntity, MixinEntity? next)
+        UserOIDMixin(ModifiableEntity mainEntity, MixinEntity? next)
             : base(mainEntity, next)
         {
         }

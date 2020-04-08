@@ -2,15 +2,15 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 
 export namespace API {
   export function typeHelp(typeName: string, mode: TypeHelpMode): Promise<TypeHelp | undefined> {
-    return ajaxGet<TypeHelp | undefined>({ url: `~/api/typeHelp/${typeName}/${mode}` });
+    return ajaxGet({ url: `~/api/typeHelp/${typeName}/${mode}` });
   }
 
   export function autocompleteEntityCleanType(request: AutocompleteEntityCleanType): Promise<string[]> {
-    return ajaxPost<string[]>({ url: "~/api/typeHelp/autocompleteEntityCleanType" }, request);
+    return ajaxPost({ url: "~/api/typeHelp/autocompleteEntityCleanType" }, request);
   }
 
   export function autocompleteType(request: AutocompleteTypeRequest): Promise<string[]> {
-    return ajaxPost<string[]>({ url: "~/api/typeHelp/autocompleteType" }, request);
+    return ajaxPost({ url: "~/api/typeHelp/autocompleteType" }, request);
   }
 }
 

@@ -28,11 +28,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
   export function validationTest(request: DynamicValidationTestRequest): Promise<DynamicValidationTestResponse> {
-    return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validation/test` }, request);
+    return ajaxPost({ url: `~/api/dynamic/validation/test` }, request);
   }
 
   export function routeTypeName(request: PropertyRouteEntity): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/dynamic/validation/routeTypeName` }, request);
+    return ajaxPost({ url: `~/api/dynamic/validation/routeTypeName` }, request);
   }
 }
 

@@ -6,31 +6,16 @@ import { UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import { RouteComponentProps } from "react-router";
+import { useForceUpdate } from '@framework/Hooks'
 
 interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; entity?: string }> {
 
 }
 
-export default class UserChartPage extends React.Component<UserChartPageProps> {
+export default function UserChartPage(p : UserChartPageProps){
 
-  constructor(props: UserChartPageProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    this.load(this.props);
-  }
-
-  componentWillReceiveProps(nextProps: UserChartPageProps) {
-    this.state = {};
-    this.forceUpdate();
-    this.load(nextProps);
-  }
-
-  load(props: UserChartPageProps) {
-
-    const { userChartId, entity } = props.match.params;
+  React.useEffect(() => {
+    const { userChartId, entity } = p.match.params;
 
     const lite = entity == undefined ? undefined : parseLite(entity);
 
@@ -40,11 +25,9 @@ export default class UserChartPage extends React.Component<UserChartPageProps> {
         .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc))))
       .then(path => Navigator.history.replace(path))
       .done();
-  }
+  }, []);
 
-  render() {
-    return <span>{JavascriptMessage.loading.niceToString()}</span>;
-  }
+  return <span>{JavascriptMessage.loading.niceToString()}</span>;
 }
 
 

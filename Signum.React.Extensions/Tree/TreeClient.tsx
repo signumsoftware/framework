@@ -6,8 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
-import { Type } from '@framework/Reflection'
+import { Type, tryGetTypeInfo } from '@framework/Reflection'
 import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
@@ -36,14 +35,14 @@ export function start(options: { routes: JSX.Element[] }) {
     new EntityOperationSettings(TreeOperation.Copy, {
       onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
         if (m) {
-          ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+          ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
           ctx.defaultClick(m);
         }
       }),
       contextual: {
         onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
           if (m) {
-            ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+            ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
             ctx.defaultContextualClick(m);
           }
         })
@@ -52,9 +51,9 @@ export function start(options: { routes: JSX.Element[] }) {
   );
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    var ti = getTypeInfo(ctx.findOptions.queryKey);
+    var ti = tryGetTypeInfo(ctx.findOptions.queryKey);
 
-    if (!ctx.searchControl.props.showBarExtension || ti == null || !isTree(ti))
+    if (!ctx.searchControl.props.showBarExtension || !ti || !isTree(ti))
       return undefined;
 
     return { button: <TreeButton searchControl={ctx.searchControl} /> };
@@ -65,7 +64,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 function moveModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createMoveModel)
+  if (s?.createMoveModel)
     return s.createMoveModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
@@ -77,7 +76,7 @@ function moveModal(lite: Lite<TreeEntity>) {
 
 function copyModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createCopyModel)
+  if (s?.createCopyModel)
     return s.createCopyModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
@@ -135,7 +134,7 @@ export function overrideOnFind(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
   if (!qs.onFind)
-    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo?.title });
 }
 
 export function overrideAutocomplete(ti: TypeInfo) {
@@ -171,7 +170,7 @@ export function openTree(type: Type<TreeEntity> | string, filterOptions?: Filter
   const typeName = type instanceof Type ? type.typeName : type;
 
   return import("./TreeModal")
-    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
+    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions ?? [], options));
 }
 
 export interface TreeModalOptions {
@@ -224,7 +223,7 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 export namespace API {
   export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
-    return ajaxGet<Array<Lite<TreeEntity>>>({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+    return ajaxGet({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
   }
 
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {

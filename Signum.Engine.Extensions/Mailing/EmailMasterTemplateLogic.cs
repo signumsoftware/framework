@@ -54,9 +54,7 @@ namespace Signum.Engine.Mailing
             {
                 new Construct(EmailMasterTemplateOperation.Create)
                 {
-                    Construct = _ => CreateDefaultMasterTemplate == null ?
-                        new EmailMasterTemplateEntity { } :
-                        CreateDefaultMasterTemplate()
+                    Construct = _ => CreateDefaultMasterTemplate == null ? new EmailMasterTemplateEntity { } : CreateDefaultMasterTemplate()
                 }.Register();
 
                 new Execute(EmailMasterTemplateOperation.Save)

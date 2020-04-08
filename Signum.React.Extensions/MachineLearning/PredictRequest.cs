@@ -44,7 +44,7 @@ namespace Signum.React.MachineLearning
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
                 .Where(a => a.col!.Usage == PredictorColumnUsage.Input)
-                .Select(a => KVP.Create(a.col!, a.value))
+                .Select(a => KeyValuePair.Create(a.col!, a.value))
                 .ToDictionaryEx(),
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
@@ -54,9 +54,9 @@ namespace Signum.React.MachineLearning
 
                     return new PredictSubQueryDictionary(sq)
                     {
-                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(
+                        SubQueryGroups = sqt.rows.Select(array => KeyValuePair.Create(
                             array.Slice(0, splitKeys.Count),
-                            values.Select((a, i) => KVP.Create(a, array[splitKeys.Count + i])).ToDictionary()
+                            values.Select((a, i) => KeyValuePair.Create(a, array[splitKeys.Count + i])).ToDictionary()
                         )).ToDictionary(ObjectArrayComparer.Instance)
                     };
                 }).ToDictionaryEx(a => a.SubQuery)

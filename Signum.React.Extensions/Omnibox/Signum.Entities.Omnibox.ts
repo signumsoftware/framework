@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export module OmniboxMessage {
@@ -25,6 +26,10 @@ export module OmniboxMessage {
   export const Yes = new MessageKey("OmniboxMessage", "Yes");
   export const ComplementWordsRegex = new MessageKey("OmniboxMessage", "ComplementWordsRegex");
   export const Search = new MessageKey("OmniboxMessage", "Search");
+}
+
+export module OmniboxPermission {
+  export const ViewOmnibox : Authorization.PermissionSymbol = registerSymbol("Permission", "OmniboxPermission.ViewOmnibox");
 }
 
 

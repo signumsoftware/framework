@@ -54,8 +54,6 @@ namespace Signum.Entities.Dashboard
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        public bool ForNavbar { get; set; }
-
         [StringLengthValidator(Max = 200)]
         public string? Key { get; set; }
 
@@ -134,7 +132,6 @@ namespace Signum.Entities.Dashboard
                 EntityType = this.EntityType,
                 EmbeddedInEntity = this.EmbeddedInEntity,
                 AutoRefreshPeriod = this.AutoRefreshPeriod,
-                ForNavbar = this.ForNavbar,
                 Key = this.Key
             };
         }

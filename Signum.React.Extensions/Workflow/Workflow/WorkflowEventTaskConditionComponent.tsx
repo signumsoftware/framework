@@ -23,7 +23,7 @@ export default function WorkflowEventTaskConditionComponent(p : WorkflowEventTas
     <EntityDetail ctx={ctx} onChange={() => forceUpdate()} remove={false} getComponent={(ctx: TypeContext<WorkflowEventTaskConditionEval>) =>
       <div className="code-container">
         <pre style={{ border: "0px", margin: "0px" }}>{"public bool CustomCondition() \n{"}</pre>
-        <CSharpCodeMirror script={ctx.value.script || ""} onChange={handleCodeChange} />
+        <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
         <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
       </div>} />
   );

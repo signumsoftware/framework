@@ -16,14 +16,6 @@ namespace Signum.Engine.Files
 {
     public static class FilePathLogic
     {
-        [AutoExpressionField]
-        public static WebImage? WebImage(this FilePathEntity fp) => 
-            As.Expression(() => fp == null ? null! : new WebImage { FullWebPath = fp.FullWebPath() });
-
-        [AutoExpressionField]
-        public static WebDownload WebDownload(this FilePathEntity fp) => 
-            As.Expression(() => fp == null ? null! : new WebDownload { FullWebPath = fp.FullWebPath(), FileName = fp.FileName });
-
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null!)));
@@ -48,7 +40,7 @@ namespace Signum.Engine.Files
                 FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-                
+
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
                     CanBeNew = true,
@@ -69,23 +61,13 @@ namespace Signum.Engine.Files
                                     fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
                                     tr.Commit();
                                 }
-                            }  
+                            }
                         }
                     }
                 }.Register();
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
-
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
-        }
-
-
-
-        static void FilePathLogic_Retrieved(FilePathEntity fp)
-        {
-            fp.GetPrefixPair();
         }
 
         static PrefixPair CalculatePrefixPair(FilePathEntity fp)

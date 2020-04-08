@@ -179,7 +179,7 @@ namespace Signum.Engine.Mailing
                         registeredModels.Keys,
                         entity => entity.FullClassName,
                         type => type.FullName,
-                        (entity, type) => KVP.Create(type, entity),
+                        (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(EmailModelEntity))
                         .ToDictionary();
                 }, new InvalidateWith(typeof(EmailModelEntity)));
@@ -220,7 +220,7 @@ namespace Signum.Engine.Mailing
                     });
         }
 
-        public static void RegisterEmailModel<T>(Func<EmailTemplateEntity> defaultTemplateConstructor, object? queryName = null)
+        public static void RegisterEmailModel<T>(Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
           where T : IEmailModel
         {
             RegisterEmailModel(typeof(T), defaultTemplateConstructor, queryName);
@@ -228,9 +228,6 @@ namespace Signum.Engine.Mailing
 
         public static void RegisterEmailModel(Type model, Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
         {
-            if (defaultTemplateConstructor == null)
-                throw new ArgumentNullException(nameof(defaultTemplateConstructor));
-
             registeredModels[model] = new EmailModelInfo(queryName ?? GetEntityType(model))
             { 
                 DefaultTemplateConstructor = defaultTemplateConstructor,
@@ -254,7 +251,7 @@ namespace Signum.Engine.Mailing
             var list = (from type in registeredModels.Keys
                         select new EmailModelEntity
                         {
-                             FullClassName = type.FullName
+                             FullClassName = type.FullName!
                         }).ToList();
             return list;
         }
@@ -302,7 +299,13 @@ namespace Signum.Engine.Mailing
             }
         }
 
-  
+        public static EmailTemplateEntity GetDefaultTemplate<M>() where M : IEmailModel
+        {
+            var emailModelEntity = ToEmailModelEntity(typeof(M));
+
+            return GetDefaultTemplate(emailModelEntity, null);
+        }
+
 
         private static EmailTemplateEntity GetDefaultTemplate(EmailModelEntity emailModelEntity, Entity? entity)
         {

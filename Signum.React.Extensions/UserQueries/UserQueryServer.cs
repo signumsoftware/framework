@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +9,8 @@ using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.Authorization;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.UserQueries
 {

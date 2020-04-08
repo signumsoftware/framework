@@ -21,8 +21,6 @@ namespace Signum.Engine.Translation
         public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
          new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
-
-
         public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -55,7 +53,7 @@ namespace Signum.Engine.Translation
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, MemberInfo mi)
         {
-            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType).Members.GetOrAdd(mi, 0);
+            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType!).Members.GetOrAdd(mi, 0);
         }
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, Type type)
@@ -72,7 +70,7 @@ namespace Signum.Engine.Translation
 
         public static void SynchronizeTypes(Assembly assembly, string directoryName)
         {
-            string assemblyName = assembly.GetName().Name;
+            string assemblyName = assembly.GetName().Name!;
 
             HashSet<string> newNames = (from t in assembly.GetTypes()
                                         let opts = LocalizedAssembly.GetDescriptionOptions(t)
@@ -88,7 +86,7 @@ namespace Signum.Engine.Translation
 
                 HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t => t.Attribute("Name").Value).ToHashSet();
 
-                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)); //cloning
+                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)!); //cloning
 
                 var culture = fileName.After(assemblyName + ".").Before(".xml");
 
@@ -131,7 +129,7 @@ namespace Signum.Engine.Translation
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string?)null)));
+            memory.SetRange(toDelete.Select(n => KeyValuePair.Create(n, (string?)null)));
 
             return result;
         }
@@ -140,11 +138,27 @@ namespace Signum.Engine.Translation
         {
             var currentDirectory = Directory.GetCurrentDirectory();
 
-            var rootDir = currentDirectory.Before(@".Load\bin");
+            var rootDir = currentDirectory.Before(@".Terminal\bin");
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\netcoreapp2.2").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var parentDir = $@"{rootDir}\{appName}.React\bin\";
+
+            var reactDirs = new DirectoryInfo(parentDir).GetDirectories("Translations", SearchOption.AllDirectories).ToList();
+
+            if(reactDirs.Count == 0)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "No Translations directory found in: " + parentDir);
+                return;
+            }
+
+            var reactDir = reactDirs.Only() ??
+                reactDirs.ChooseConsole(
+                    message: $"More than one 'Translations' folder found in '{parentDir}'",
+                    getString: d => $"{d.FullName} ({d.GetFiles("*.xml").Max(a => (DateTime?)a.LastWriteTime)?.ToAgoString() ?? "-No Files-"})");
+
+            if (reactDir == null)
+                return;
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {

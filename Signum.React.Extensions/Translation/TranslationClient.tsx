@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { TranslationPermission } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -24,31 +24,31 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module API {
   export function status(): Promise<TranslationFileStatus[]> {
-    return ajaxGet<TranslationFileStatus[]>({ url: "~/api/translation/state" });
+    return ajaxGet({ url: "~/api/translation/state" });
   }
 
   export function retrieve(assembly: string, culture: string, filter: string): Promise<AssemblyResult> {
-    return ajaxPost<AssemblyResult>({ url: `~/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
+    return ajaxPost({ url: `~/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
   }
 
   export function namespaceStatus(assembly: string, culture: string): Promise<Array<NamespaceSyncStats>> {
-    return ajaxGet<Array<NamespaceSyncStats>>({ url: `~/api/translation/syncStats?assembly=${assembly}&culture=${culture}` });
+    return ajaxGet({ url: `~/api/translation/syncStats?assembly=${assembly}&culture=${culture}` });
   }
 
   export function sync(assembly: string, culture: string, namespace?: string): Promise<AssemblyResult> {
-    return ajaxPost<AssemblyResult>({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}&namespace=${namespace || ""}` }, undefined);
+    return ajaxPost({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}&namespace=${namespace || ""}` }, undefined);
   }
 
   export function save(assembly: string, culture: string, result: AssemblyResult): Promise<void> {
-    return ajaxPost<void>({ url: `~/api/translation/save?assembly=${assembly}&culture=${culture}` }, result);
+    return ajaxPost({ url: `~/api/translation/save?assembly=${assembly}&culture=${culture}` }, result);
   }
 
   export function pluralize(culture: string, singular: string): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/translation/pluralize?culture=${culture}` }, singular);
+    return ajaxPost({ url: `~/api/translation/pluralize?culture=${culture}` }, singular);
   }
 
   export function gender(culture: string, singular: string): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/translation/gender?culture=${culture}` }, singular);
+    return ajaxPost({ url: `~/api/translation/gender?culture=${culture}` }, singular);
   }
 }
 

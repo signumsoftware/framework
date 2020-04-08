@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
+import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -22,7 +22,7 @@ import { QueryRequest } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import MailingMenu from "./MailingMenu";
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
-import { DropdownItem } from '@framework/Components';
+import { Dropdown } from 'react-bootstrap';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 
@@ -30,7 +30,7 @@ import "./Mailing.css";
 export var allTypes: string[] = [];
 
 export function start(options: {
-  routes: JSX.Element[], smtpConfig: boolean,
+  routes: JSX.Element[],
   newsletter: boolean,
   pop3Config: boolean,
   sendEmailTask: boolean,
@@ -79,9 +79,7 @@ export function start(options: {
     contextualFromMany: { isVisible: em => true }
   }));
 
-  if (options.smtpConfig) {
-    Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => import('./Templates/SmtpConfiguration')));
-  }
+  Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
 
   if (options.newsletter) {
     Navigator.addSettings(new EntitySettings(NewsletterEntity, e => import('./Newsletters/Newsletter')));
@@ -112,7 +110,7 @@ export function start(options: {
   API.getAllTypes().then(types => {
     allTypes = types;
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("emailMessages",
-      EmailMessageEntity.nicePluralName(),
+      () => EmailMessageEntity.nicePluralName(),
       e => getEmailMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(EmailMessageEntity),
@@ -163,10 +161,10 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
       return {
         header: EmailTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
-          <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+          <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
             <FontAwesomeIcon icon={["far", "envelope"]} className="icon" />
             {wt.toStr}
-          </DropdownItem>
+          </Dropdown.Item>
         )
       } as MenuItemBlock;
     });
@@ -202,15 +200,15 @@ export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args:
 
 export module API {
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/asyncEmailSender/start" }, undefined);
+    return ajaxPost({ url: "~/api/asyncEmailSender/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, undefined);
+    return ajaxPost({ url: "~/api/asyncEmailSender/stop" }, undefined);
   }
 
   export function view(): Promise<AsyncEmailSenderState> {
-    return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
+    return ajaxGet({ url: "~/api/asyncEmailSender/view" });
   }
 
 
@@ -225,15 +223,15 @@ export module API {
   }
 
   export function getConstructorType(emailModelEntity: EmailModelEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/email/constructorType" }, emailModelEntity);
+    return ajaxPost({ url: "~/api/email/constructorType" }, emailModelEntity);
   }
 
   export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {
-    return ajaxPost<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet<string[]>({ url: "~/api/email/getAllTypes", signal });
+    return ajaxGet({ url: "~/api/email/getAllTypes", signal });
   }
 }
 

@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { Button } from '@framework/Components';
+import { Button } from 'react-bootstrap';
 
 export interface TreeButtonProps {
   searchControl: SearchControlLoaded;
@@ -25,7 +25,7 @@ export default function TreeButton(p : TreeButtonProps){
 
   var label = p.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;
   return (
-    <Button onClick={handleClick} color="light"><FontAwesomeIcon icon="sitemap" />&nbsp; { label }</Button >
+    <Button onClick={handleClick} variant="light"><FontAwesomeIcon icon="sitemap" />&nbsp; { label }</Button >
   );
 }
 

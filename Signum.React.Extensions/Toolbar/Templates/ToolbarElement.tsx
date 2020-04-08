@@ -54,10 +54,10 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
           </div>
           <div className="col-sm-1">
-            {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
+            {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} />}
           </div>
           <div className="col-sm-5">
-            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
+            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content?.toStr ?? undefined }} />
             {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>

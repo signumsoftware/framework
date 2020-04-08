@@ -127,23 +127,28 @@ namespace Signum.Engine.Processes
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            void Remove(ProcessState processState)
+            void Remove(ProcessState processState, DateTime dateLimit, bool withExceptions)
             {
-                var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
-
-                if (dateLimit == null)
-                    return;
-
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit.Value);
-
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit && (!withExceptions || p.Exception != null));
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-
                 query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
-            Remove(ProcessState.Canceled);
-            Remove(ProcessState.Finished);
-            Remove(ProcessState.Error);
+            var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit != null)
+            {
+                Remove(ProcessState.Canceled, dateLimit.Value, false);
+                Remove(ProcessState.Finished, dateLimit.Value, false);
+                Remove(ProcessState.Error, dateLimit.Value, false);
+            }
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Remove(ProcessState.Canceled, dateLimit.Value, true);
+            Remove(ProcessState.Finished, dateLimit.Value, true);
+            Remove(ProcessState.Error, dateLimit.Value, true);
         }
 
         public static IDisposable? OnApplySession(ProcessEntity process)
@@ -410,6 +415,7 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge)
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -473,7 +479,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEach(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
@@ -513,7 +519,7 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);

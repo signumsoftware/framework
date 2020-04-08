@@ -13,7 +13,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -24,7 +24,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
     _4: 5,
   }, width);
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -74,7 +74,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
           transform={translate(0, y(keyColumn.getValueKey(r))!) + (initialLoad ? scale(0, 1) : scale(1,1))}
           width={x(valueColumn.getValue(r))}
           height={y.bandwidth()}
-          fill={keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r))}
+          fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           stroke={y.bandwidth() > 4 ? '#fff' : undefined}
           onClick={e => onDrillDown(r)}
           cursor="pointer">
@@ -92,7 +92,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
               maxWidth={xRule.size('labels')}
               padding={labelMargin}
               className="y-label sf-transition"
-              fill={(keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
+              fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
               dominantBaseline="middle"
               textAnchor="end"
               fontWeight="bold"
@@ -111,7 +111,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                     maxWidth={posx >= size / 2 ? posx : size - posx}
                     padding={labelMargin}
                     className="y-label sf-transition"
-                    fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
+                    fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dominantBaseline="middle"
                     fontWeight="bold"
                     onClick={e => onDrillDown(r)}
@@ -135,7 +135,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                 maxWidth={posx >= size / 2 ? posx : size - posx}
                 padding={labelMargin}
                 className="number-label sf-transition"
-                fill={parameters["NumberColor"] || "#000"}
+                fill={parameters["NumberColor"] ?? "#000"}
                 dominantBaseline="middle"
                 opacity={parameters["NumberOpacity"]}
                 textAnchor="middle"

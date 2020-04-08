@@ -7,10 +7,11 @@
     "jsx": "react",
     "incremental": true,
     "outDir": "./ts_out",
-    //"composite": true,
+    "composite": true,
     //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
+    "declarationMap": true,
     "paths": {
       "*": [
         "../../Framework/Signum.React/node_modules/@types/*",
@@ -24,12 +25,14 @@
       //"esnext",
       "dom"
     ]
-  }//,
-  //"exclude": [
-  //  "../../Framework/Signum.React/ts_out",
-  //  "ts_out"
-  //],
-  //"references": [
-  //  { "path": "../../Framework/Signum.React" }
-  //]
+  },
+  "exclude": [
+    "../../Framework/Signum.React/ts_out",
+    "../../Framework/Signum.React/node_modules",
+    "./node_modules",
+    "./ts_out"
+  ],
+  "references": [
+    { "path": "../../Framework/Signum.React" }
+  ]
 }

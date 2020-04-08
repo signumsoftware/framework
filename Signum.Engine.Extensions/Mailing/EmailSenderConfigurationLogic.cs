@@ -10,32 +10,44 @@ using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Signum.Engine.Operations;
+using System;
 
 namespace Signum.Engine.Mailing
 {
-    public static class SmtpConfigurationLogic
+    public static class EmailSenderConfigurationLogic
     {
-        public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache = null!;
+        public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> SmtpConfigCache = null!;
 
-        public static void Start(SchemaBuilder sb)
+        public static Func<string, string> EncryptPassword = s => s;
+        public static Func<string, string> DecryptPassword = s => s;
+
+        public static void Start(SchemaBuilder sb, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SmtpConfigurationEntity>()
+                if (encryptPassword != null)
+                    EncryptPassword = encryptPassword;
+
+                if (decryptPassword != null)
+                    DecryptPassword = decryptPassword;
+
+                sb.Include<EmailSenderConfigurationEntity>()
                     .WithQuery(() => s => new
                     {
                         Entity = s,
                         s.Id,
-                        s.DeliveryMethod,
-                        s.Network!.Host,
-                        s.Network!.Username,
-                        s.PickupDirectoryLocation
+                        s.Name,
+                        s.SMTP!.DeliveryMethod,
+                        s.SMTP!.Network!.Host,
+                        s.SMTP!.PickupDirectoryLocation,
+                        s.Exchange!.ExchangeVersion,
+                        s.Exchange!.Url,
                     });
                 
-                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationEntity>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(SmtpConfigurationEntity)));
+                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
 
-                new Graph<SmtpConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
+                new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)
                 {
                     CanBeNew = true,
                     CanBeModified = true,
@@ -44,17 +56,17 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static SmtpClient GenerateSmtpClient(this Lite<SmtpConfigurationEntity> config)
+        public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)
         {
-            return config.RetrieveFromCache().GenerateSmtpClient();
+            return config.RetrieveFromCache().SMTP.ThrowIfNull("No SMTP config").GenerateSmtpClient();
         }
 
-        public static SmtpConfigurationEntity RetrieveFromCache(this Lite<SmtpConfigurationEntity> config)
+        public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)
         {
             return SmtpConfigCache.Value.GetOrThrow(config);
         }
 
-        public static SmtpClient GenerateSmtpClient(this SmtpConfigurationEntity config)
+        public static SmtpClient GenerateSmtpClient(this SmtpEmbedded config)
         {
             if (config.DeliveryMethod != SmtpDeliveryMethod.Network)
             {
@@ -70,7 +82,7 @@ namespace Signum.Engine.Mailing
                 SmtpClient client = EmailLogic.SafeSmtpClient(config.Network!.Host, config.Network.Port);
                 client.DeliveryFormat = config.DeliveryFormat;
                 client.UseDefaultCredentials = config.Network.UseDefaultCredentials;
-                client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, config.Network.Password) : null;
+                client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, DecryptPassword(config.Network.Password!)) : null;
                 client.EnableSsl = config.Network.EnableSSL;
 
                 foreach (var cc in config.Network.ClientCertificationFiles)
