@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                 {
                     Construct = (_) => new DynamicViewEntity() {
                         Locals = "{\r\n" +
-                        "  const forceUpdate = modules.Hooks.useForceUpdate(0);\r\n" +
+                        "  const forceUpdate = modules.Hooks.useForceUpdate();\r\n" +
                         "  return { forceUpdate };\r\n" +
                         "}",
                     },
