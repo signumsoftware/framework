@@ -41,7 +41,7 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,  
+            Func<EmailTemplateEntity?, Entity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,  
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -330,9 +330,9 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
+        private Func<EmailTemplateEntity?, EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
 
-        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+        public EmailSenderManager(Func<EmailTemplateEntity?, EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             this.getEmailSenderConfiguration = getEmailSenderConfiguration;
         }
@@ -385,7 +385,7 @@ namespace Signum.Engine.Mailing
         {
             var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
 
-            var config = getEmailSenderConfiguration(template, email.Target);
+            var config = getEmailSenderConfiguration(template, email);
 
             if (config.SMTP != null)
             {

@@ -86,4 +86,6 @@
     <None Remove="Files\ImageModal.tsx" />
     <None Remove="Files\MultiFileImageLine.tsx" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties package_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 </Project>
