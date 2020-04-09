@@ -138,6 +138,7 @@ export module AuthTokenFilter {
 
 export module VersionFilter {
   export let initialVersion: string | undefined;
+  export let initialBuildTime: string | undefined;
   export let latestVersion: string | undefined;
 
   export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
@@ -145,6 +146,7 @@ export module VersionFilter {
   export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
     function changeVersion(response: Response) {
       var ver = response.headers.get("X-App-Version");
+      var buildTime = response.headers.get("X-App-BuildTime");
 
       if (!ver)
         return;
@@ -152,6 +154,7 @@ export module VersionFilter {
       if (initialVersion == undefined) {
         initialVersion = ver;
         latestVersion = ver;
+        initialBuildTime = buildTime!;
       }
 
       if (latestVersion != ver) {

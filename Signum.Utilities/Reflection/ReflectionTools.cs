@@ -841,7 +841,7 @@ namespace Signum.Utilities.Reflection
                   (pi.CanWrite && pi.GetSetMethod()!.IsStatic);
         }
         
-        public static DateTime BuildDateUTC(this Assembly assembly)
+        public static DateTime BuildTimeUTC(this Assembly assembly)
         {
             const int peHeaderOffset = 60;
             const int linkerTimestampOffset = 8;
