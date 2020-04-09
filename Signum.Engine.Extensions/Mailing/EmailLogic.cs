@@ -39,13 +39,13 @@ namespace Signum.Engine.Mailing
         }
 
         public static void Start(
-            SchemaBuilder sb,  
-            Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity?, Entity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,  
+            SchemaBuilder sb,
+            Func<EmailConfigurationEmbedded> getConfiguration,
+            Func<EmailTemplateEntity?, Entity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {   
+            {
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
@@ -71,7 +71,7 @@ namespace Signum.Engine.Mailing
                     });
 
                 PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
-                
+
                 SenderManager = new EmailSenderManager(getEmailSenderConfiguration);
 
                 EmailGraph.Register();
@@ -230,7 +230,7 @@ namespace Signum.Engine.Mailing
         class EmailGraph : Graph<EmailMessageEntity, EmailMessageState>
         {
             public static void Register()
-            {            
+            {
                 GetState = m => m.State;
 
                 new Construct(EmailMessageOperation.CreateMail)
@@ -245,7 +245,7 @@ namespace Signum.Engine.Mailing
                 new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                 {
                     ToStates = { EmailMessageState.Created },
-                    CanConstruct = et => 
+                    CanConstruct = et =>
                     {
                         if (et.Model != null && EmailModelLogic.RequiresExtraParameters(et.Model))
                             return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(EmailModelEntity).NiceName(), et.Model);
@@ -351,6 +351,13 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        email.State = EmailMessageState.Draft;
+                        email.Save();
+                        tr.Commit();
+                    }
+
                     SendInternal(email);
 
                     email.State = EmailMessageState.Sent;
@@ -362,15 +369,17 @@ namespace Signum.Engine.Mailing
                     if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
                         throw;
 
-                    var exLog = ex.LogException().ToLite();
-
                     try
                     {
                         using (Transaction tr = Transaction.ForceNew())
                         {
+                            var exLog = ex.LogException().ToLite();
+
+                            if (email.Sent == null) email.Sent = TimeZoneManager.Now;
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;
                             email.Save();
+
                             tr.Commit();
                         }
                     }
@@ -481,7 +490,7 @@ namespace Signum.Engine.Mailing
 
 
     public static class MimeMapping
-    {        
+    {
         public static string GetMimeType(string fileName)
         {
             var extension = Path.GetExtension(fileName);
