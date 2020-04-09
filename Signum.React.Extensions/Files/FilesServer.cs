@@ -9,11 +9,16 @@ using Signum.Entities.Files;
 using Signum.Engine;
 using Signum.Engine.Files;
 using Signum.React.Filters;
+using System;
 
 namespace Signum.React.Files
 {
     public static class FilesServer
     {
+
+
+        public static Func<string, string> Content = (url) => url;
+
         public static void Start(IApplicationBuilder app)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
@@ -63,7 +68,7 @@ namespace Signum.React.Files
                 return mi;
             };
 
-            FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url!.Content(url);
+            FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url == null ? Content(url) : SignumCurrentContextFilter.Url!.Content(url);
         }
     }
 }
