@@ -41,7 +41,9 @@
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Um fortzufahren ist eine Verbindung mit dem Server ist erforderlich" />
+    <Member Name="ANewVersionHasJustBeenDeployedConsiderReload" Description="Sieht aus, als wäre gerade eine neue Version eingeführt worden! Wenn Sie keine Änderungen haben, die gespeichert werden müssen, erwägen Sie, die Seite neu zu laden" />
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="Eine neue Version wurde bereitgestellt! Speichere deine Änderungen und {0}" />
+    <Member Name="OutdatedClientApplication" Description="Veraltete Clientanwendung" />
     <Member Name="Refresh" Description="Aktualisieren" />
     <Member Name="SessionExpired" Description="Sitzung abgelaufen" />
   </Type>
@@ -469,6 +471,7 @@
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
+    <Member Name="_0ShouldBeEmpty" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />
     <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} sollte größer oder gleich {1} sein" />
     <Member Name="_0ShouldBeLessThan1" Description="{0} sollte kleiner als {1} sein" />
