@@ -19,7 +19,6 @@ namespace Signum.React.Isolation
     {
         public static void Start(IApplicationBuilder app)
         {
-            ReflectionServer.RegisterLike(typeof(MapMessage), () => MapPermission.ViewMap.IsAuthorized());
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             SchemaMap.GetColorProviders += GetMapColors;
