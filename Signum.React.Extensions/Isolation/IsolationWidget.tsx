@@ -18,7 +18,7 @@ export function IsolationWidget(p: IsolationWidgetProps) {
   if (mixin == null)
     return null;
 
-  const isolation = entity.isNew ? IsolationClient.overridenIsolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString() :
+  const isolation = entity.isNew ? IsolationClient.getOverridenIsolation().current?.toStr ?? IsolationMessage.GlobalEntity.niceToString() :
     mixin.isolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString();
 
   return (
