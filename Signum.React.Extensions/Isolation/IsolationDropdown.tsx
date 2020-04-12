@@ -1,10 +1,8 @@
 
 import * as React from 'react'
-import { getTypeInfo } from '@framework/Reflection'
-import { JavascriptMessage, Lite, is } from '@framework/Signum.Entities'
-import { NavDropdown, Dropdown } from 'react-bootstrap'
+import { Lite, is } from '@framework/Signum.Entities'
+import { NavDropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
-import { LinkContainer } from '@framework/Components'
 import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation';
 import * as IsolationClient from './IsolationClient';
 
@@ -19,10 +17,10 @@ export default function IsolationDropdown(props: {}) {
   if (!isolations)
     return null;
 
-  const current = IsolationClient.overridenIsolation;
+  const { current, title } = IsolationClient.getOverridenIsolation();
 
   return (
-    <NavDropdown id="cultureDropdown" data-current-isolation={current?.id} title={current?.toStr ?? IsolationMessage.GlobalMode.niceToString()} className="sf-isolation-dropdown" >
+    <NavDropdown id="cultureDropdown" data-current-isolation={current?.id} title={title} className="sf-isolation-dropdown" >
       <NavDropdown.Item data-isolation={name} disabled={is(undefined, current)} onClick={() => handleSelect(undefined)}>
         {IsolationMessage.GlobalMode.niceToString()}
       </NavDropdown.Item>
