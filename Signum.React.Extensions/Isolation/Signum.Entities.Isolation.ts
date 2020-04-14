@@ -30,4 +30,10 @@ export module IsolationOperation {
   export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol("Operation", "IsolationOperation.Save");
 }
 
+export const IsolationStrategy = new EnumType<IsolationStrategy>("IsolationStrategy");
+export type IsolationStrategy =
+  "Isolated" |
+  "Optional" |
+  "None";
+
 

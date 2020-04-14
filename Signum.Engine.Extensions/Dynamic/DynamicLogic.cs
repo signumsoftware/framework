@@ -168,6 +168,24 @@ namespace Signum.Engine.Dynamic
             }
         }
 
+        public static void RegisterIsolations()
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenIsolationLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
+                mi.Invoke(null, null);
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
         public static void BeforeSchema(SchemaBuilder sb)
         {
             if (CodeGenError != null)
