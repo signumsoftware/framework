@@ -13,12 +13,13 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Engine.Extensions.Mailing.Pop3;
+using System.Threading;
 
 namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
-        public static bool GettingCancel = false;
+        public static CancellationToken CancelationToken;
         public static int MaxReceptionPerTime = 15;
 
         [AutoExpressionField]
@@ -202,7 +203,7 @@ namespace Signum.Engine.Mailing.Pop3
                         string lastSuid = "";
                         foreach (var mi in messagesToSave)
                         {
-                            if (GettingCancel)
+                            if (CancelationToken.IsCancellationRequested)
                                 break;
 
                             var sent = SaveEmail(config, reception, client, mi, ref anomalousReception);
