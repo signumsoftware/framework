@@ -21,24 +21,19 @@ namespace Signum.Engine.Translation
         public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
          new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
-
         public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectory = GetTargetDirectoryDefault;
-        public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectoryDefault = (fi,appName, rootDir) =>
-         {
+        public static string GetTargetDirectoryDefault(System.IO.FileInfo fi, string appName, string rootDir)
+        {
 
-             var targetDirectory =
-                       fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
-                       fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
-                       fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
-                       fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
-                       throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+            var targetDirectory =
+                      fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
+                      fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
+                      fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
+                      fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
+                      throw new InvalidOperationException("Unexpected file with name " + fi.Name);
 
-             return targetDirectory;
-         };
-
-
-
-
+            return targetDirectory;
+        }
 
         public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
