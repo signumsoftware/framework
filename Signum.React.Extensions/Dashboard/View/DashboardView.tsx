@@ -13,19 +13,6 @@ import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scrip
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 
-
-    const [refreshKey, setRefreshKey] = React.useState(p.refreshKey);
-    React.useEffect(() => {
-        debugger;
-        if (refreshKey != p.refreshKey) {
-            //setRefreshKey(p.refreshKey);
-        }
-    })
-
-
-
-
-
   function renderBasic() {
     const db = p.dashboard;
     const ctx = TypeContext.root(db);
@@ -93,20 +80,20 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
   }
 
 
-    function render() {
+  function render() {
 
-        if (p.dashboard.combineSimilarRows)
-            return renderCombinedRows();
-        else
-            return renderBasic();
-
-
-    }
+    if (p.dashboard.combineSimilarRows)
+      return renderCombinedRows();
+    else
+      return renderBasic();
 
 
+  }
 
-  
-    return render();
+
+
+
+  return render();
 
 }
 
@@ -259,6 +246,3 @@ export function PanelPart(p: PanelPartProps) {
     </div>
   );
 }
-
-
-

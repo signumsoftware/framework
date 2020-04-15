@@ -24,7 +24,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
               <ValueLine ctx={net.subCtx(s => s.host)} />
               <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
               <ValueLine ctx={net.subCtx(s => s.username)} />
-              {!sc.readOnly &&
+              {!sc.readOnly && net.subCtx(a => a.password).propertyRoute?.canModify() &&
                 <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} />}
               <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
               <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
