@@ -21,6 +21,25 @@ namespace Signum.Engine.Translation
         public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
          new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
+
+        public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectory = GetTargetDirectoryDefault;
+        public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectoryDefault = (fi,appName, rootDir) =>
+         {
+
+             var targetDirectory =
+                       fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
+                       fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
+                       fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
+                       fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
+                       throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+
+             return targetDirectory;
+         };
+
+
+
+
+
         public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -162,12 +181,7 @@ namespace Signum.Engine.Translation
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {
-                var targetDirectory =
-                    fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
-                    fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
-                    fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
-                    fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
-                    throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+                var targetDirectory = GetTargetDirectory(fi, appName, rootDir);
 
                 if (!Directory.Exists(targetDirectory))
                     Directory.CreateDirectory(targetDirectory);
