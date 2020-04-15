@@ -41,7 +41,7 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,
             Func<EmailConfigurationEmbedded> getConfiguration,
-            Func<EmailTemplateEntity?, Lite<Entity>?, Entity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
+            Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
