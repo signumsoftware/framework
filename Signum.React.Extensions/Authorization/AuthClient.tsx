@@ -13,7 +13,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
@@ -439,7 +439,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
     const ctx = p.ctx;
 
     if (newPass.current!.value && newPass2.current!.value && newPass.current!.value != newPass2.current!.value) {
-      ctx.error = AuthMessage.PasswordsAreDifferent.niceToString()
+      ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString()
     }
     else {
       ctx.error = undefined;

@@ -330,9 +330,9 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
+        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
 
-        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?,EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?,EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             this.getEmailSenderConfiguration = getEmailSenderConfiguration;
         }
@@ -353,7 +353,7 @@ namespace Signum.Engine.Mailing
                 {
                     using (Transaction tr = Transaction.ForceNew())
                     {
-                        email.State = EmailMessageState.Draft;
+                        email.State = EmailMessageState.RecruitedForSending;
                         email.Save();
                         tr.Commit();
                     }
@@ -375,7 +375,7 @@ namespace Signum.Engine.Mailing
                         {
                             var exLog = ex.LogException().ToLite();
 
-                            if (email.Sent == null) email.Sent = TimeZoneManager.Now;
+                            //if (email.Sent == null) email.Sent = TimeZoneManager.Now;
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;
                             email.Save();

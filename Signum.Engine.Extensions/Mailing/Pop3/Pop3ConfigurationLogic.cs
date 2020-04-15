@@ -301,7 +301,6 @@ namespace Signum.Engine.Mailing.Pop3
                     string rawContent = "";
                     try
                     {
-                        anomalousReception = false;
                         var email = client.GetMessage(mi, reception.ToLite());
                         email.Subject = email.Subject == null ? "No Subject" : email.Subject.Replace('\n', ' ').Replace('\r', ' ');
 

@@ -80,7 +80,6 @@ export module AuthEmailMessage {
 export module AuthMessage {
   export const NotAuthorizedTo0The1WithId2 = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0 = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
-  export const PasswordsAreDifferent = new MessageKey("AuthMessage", "PasswordsAreDifferent");
   export const NewPassword = new MessageKey("AuthMessage", "NewPassword");
   export const ChangePassword = new MessageKey("AuthMessage", "ChangePassword");
   export const ChangePasswordAspx_NewPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_NewPassword");
