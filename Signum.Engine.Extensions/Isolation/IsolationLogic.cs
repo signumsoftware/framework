@@ -17,13 +17,6 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Isolation
 {
-    public enum IsolationStrategy
-    {
-        Isolated,
-        Optional,
-        None,
-    }
-
     public static class IsolationLogic
     {
         public static bool IsStarted;

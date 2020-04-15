@@ -13,31 +13,18 @@ using System.Text;
 
 namespace Signum.Engine.Dynamic
 {
-    public static class DynamicMixinConnectionLogic
+    public static class DynamicIsolationLogic
     {
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<DynamicMixinConnectionEntity>()
-                    .WithUniqueIndex(e => new { e.EntityType, e.MixinName })
-                    .WithSave(DynamicMixinConnectionOperation.Save)
-                    .WithDelete(DynamicMixinConnectionOperation.Delete)
-                    .WithQuery(() => e => new {
-                        Entity = e,
-                        e.Id,
-                        e.EntityType,
-                        e.MixinName,
-                    });
-
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
-                DynamicCode.RegisteredDynamicTypes.Add(typeof(DynamicMixinConnectionEntity));
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.Is(type)));
             }
         }
 
-        public static void WriteDynamicStarter(StringBuilder sb, int indent) 
+        public static void WriteDynamicStarter(StringBuilder sb, int indent)
         {
             // Nothing
         }
@@ -45,14 +32,15 @@ namespace Signum.Engine.Dynamic
         public static List<CodeFile> GetCodeFiles()
         {
             var result = new List<CodeFile>();
-             
+
             CacheLogic.GloballyDisabled = true;
             try
             {
-                var mixins = !Administrator.ExistsTable<DynamicMixinConnectionEntity>()?  new List<DynamicMixinConnectionEntity>() : ExecutionMode.Global().Using(a => Database.Query<DynamicMixinConnectionEntity>().ToList());
-                var dlg = new DynamicMixinConnectionLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, mixins, DynamicCode.Namespaces);
+                var entities = !Administrator.ExistsTable<DynamicTypeEntity>() ? new List<DynamicTypeEntity>() :
+                    ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().Where(a => a.BaseType == DynamicBaseType.Entity).ToList());
+                var dlg = new DynamicIsolationLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, entities, DynamicCode.Namespaces);
                 var content = dlg.GetFileCode();
-                result.Add(new CodeFile("CodeGenMixinLogic.cs", content));
+                result.Add(new CodeFile("CodeGenIsolationLogic.cs", content));
             }
             finally
             {
@@ -63,17 +51,17 @@ namespace Signum.Engine.Dynamic
         }
     }
 
-    public class DynamicMixinConnectionLogicGenerator
+    public class DynamicIsolationLogicGenerator
     {
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
-        public List<DynamicMixinConnectionEntity> Mixins { get; private set; }
+        public List<DynamicTypeEntity> Entities { get; private set; }
 
-        public DynamicMixinConnectionLogicGenerator(string @namespace, List<DynamicMixinConnectionEntity> mixins, HashSet<string> usings)
+        public DynamicIsolationLogicGenerator(string @namespace, List<DynamicTypeEntity> entities, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
-            this.Mixins = mixins;
+            this.Entities = entities;
         }
 
         public string GetFileCode()
@@ -85,13 +73,13 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine();
             sb.AppendLine($"namespace {this.Namespace}");
             sb.AppendLine($"{{");
-            sb.AppendLine($"    public static class CodeGenMixinLogic");
+            sb.AppendLine($"    public static class CodeGenIsolationLogic");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        public static void Start()");
             sb.AppendLine($"        {{");
 
-            if (this.Mixins != null && this.Mixins.Count > 0)
-                this.Mixins.ForEach(m => sb.AppendLine($"MixinDeclarations.Register<{m.EntityType}Entity, {m.MixinName}Mixin>();".Indent(12)));
+            if (this.Entities != null && this.Entities.Count > 0)
+                this.Entities.ForEach(m => sb.AppendLine($"IsolationLogic.Register<{m.TypeName}Entity>(IsolationStrategy.{m.Mixin<DynamicIsolationMixin>().IsolationStrategy});".Indent(12)));
 
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");
