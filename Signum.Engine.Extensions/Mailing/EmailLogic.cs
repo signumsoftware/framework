@@ -351,13 +351,6 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
-                    using (Transaction tr = Transaction.ForceNew())
-                    {
-                        email.State = EmailMessageState.RecruitedForSending;
-                        email.Save();
-                        tr.Commit();
-                    }
-
                     SendInternal(email);
 
                     email.State = EmailMessageState.Sent;
@@ -368,14 +361,12 @@ namespace Signum.Engine.Mailing
                 {
                     if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
                         throw;
+                    var exLog = ex.LogException().ToLite();
 
                     try
                     {
                         using (Transaction tr = Transaction.ForceNew())
                         {
-                            var exLog = ex.LogException().ToLite();
-
-                            //if (email.Sent == null) email.Sent = TimeZoneManager.Now;
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;
                             email.Save();
