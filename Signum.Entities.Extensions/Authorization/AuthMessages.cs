@@ -70,9 +70,7 @@ namespace Signum.Entities.Authorization
         [Description("An error occurred, request not processed.")]
         AnErrorOccurredRequestNotProcessed,
 
-        TheUserIsNotLongerInTheDatabase,
-        ChangePasswordAspx_NewPassword,
-        ChangePasswordAspx_ConfirmNewPassword
+        TheUserIsNotLongerInTheDatabase
 
     }
 
