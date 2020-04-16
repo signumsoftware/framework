@@ -19,6 +19,8 @@ export default class HeatmapChart extends React.Component<ChartClient.ChartCompo
   divElement?: HTMLDivElement | null;
 
   render() {
+    this.divElement && this.drawChart(this.props);
+
     return (
       <div className="sf-chart-container" ref={d => this.divElement = d}>
       </div>
