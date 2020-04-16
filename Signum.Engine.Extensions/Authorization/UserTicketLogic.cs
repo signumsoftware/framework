@@ -44,8 +44,11 @@ namespace Signum.Engine.Authorization
 
         static void UserTicketLogic_Saving(UserEntity user)
         {
-            if (!user.IsNew && user.IsGraphModified && user.InDBEntity(u => u.PasswordHash != user.PasswordHash))
-                user.UserTickets().UnsafeDelete();
+            if (!user.IsNew && user.IsGraphModified && !user.InDBEntity(u => u.PasswordHash).SequenceEqual(user.PasswordHash))
+            {
+                using (AuthLogic.Disable())
+                    user.UserTickets().UnsafeDelete();
+            }
         }
 
         [AutoExpressionField]

@@ -47,7 +47,7 @@ export default function HeatmapChart({ data, parameters }: ChartClient.ChartComp
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
     var map = new google.maps.Map(divElement.current!, {
-      center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
+      center: data && coords.length > 0 ? new google.maps.LatLng(coords[0].lat, coords[0].lng) : undefined,
       zoom: 2,
       mapTypeControlOptions: {
         mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain", "styled_map"]

@@ -19,7 +19,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AuthMessage } from './Signum.Entities.Authorization'
+import { AuthMessage, LoginAuthMessage } from './Signum.Entities.Authorization'
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
@@ -459,10 +459,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
 
   return (
     <div>
-      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ChangePasswordAspx_NewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.NewPassword.niceToString()}>
         <input type="password" ref={newPass} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
-      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
         <input type="password" ref={newPass2} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
     </div>

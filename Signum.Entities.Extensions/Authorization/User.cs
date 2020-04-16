@@ -71,7 +71,7 @@ namespace Signum.Entities.Authorization
             Owner = this.ToLite(),
             CultureInfo = CultureInfo,
             DisplayName = UserName,
-            Email = Email!,
+            Email = Email,
         });
     }
 

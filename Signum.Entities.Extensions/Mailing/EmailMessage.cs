@@ -255,7 +255,7 @@ namespace Signum.Entities.Mailing
         public EmailAddressEmbedded(EmailOwnerData data)
         {
             EmailOwner = data.Owner;
-            EmailAddress = data.Email;
+            EmailAddress = data.Email!;
             DisplayName = data.DisplayName;
         }
 
@@ -333,7 +333,7 @@ namespace Signum.Entities.Mailing
     public class EmailOwnerData : IEquatable<EmailOwnerData>
     {
         public Lite<IEmailOwnerEntity>? Owner { get; set; }
-        public string Email { get; set; }
+        public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
 

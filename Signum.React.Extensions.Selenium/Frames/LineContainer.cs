@@ -292,7 +292,7 @@ namespace Signum.React.Selenium
         {
             string queryKey = QueryUtils.GetKey(queryName);
 
-            var element = lineContainer.Element.FindElement(By.CssSelector("div.form-control-sm[data-query-key={0}]".FormatWith(queryKey)));
+            var element = lineContainer.Element.FindElement(By.CssSelector("[data-value-query-key={0}]".FormatWith(queryKey)));
 
             return new ValueSearchControlLineProxy(element);
         }

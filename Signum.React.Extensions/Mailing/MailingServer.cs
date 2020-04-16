@@ -23,7 +23,7 @@ namespace Signum.React.Mailing
 {
     public static class MailingServer
     {
-        public static void Start(IApplicationBuilder app, bool pop3, bool emailSender, bool smtp)
+        public static void Start(IApplicationBuilder app)
         {
             TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
@@ -54,7 +54,48 @@ namespace Signum.React.Mailing
                 }
             };
 
-            if (pop3)
+
+            if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
+            {
+                var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
+                var pcs = PropertyConverter.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                pcs.Add("newPassword", new PropertyConverter
+                {
+                    AvoidValidate = true,
+                    CustomWriteJsonProperty = ctx => { },
+                    CustomReadJsonProperty = ctx =>
+                    {
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+
+                        var password = (string)ctx.JsonReader.Value!;
+
+                        ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
+                    }
+                });
+            }
+
+            if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
+            {
+                var piPassword = ReflectionTools.GetPropertyInfo((ExchangeWebServiceEmbedded e) => e.Password);
+                var pcs = PropertyConverter.GetPropertyConverters(typeof(ExchangeWebServiceEmbedded));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                pcs.Add("newPassword", new PropertyConverter
+                {
+                    AvoidValidate = true,
+                    CustomWriteJsonProperty = ctx => { },
+                    CustomReadJsonProperty = ctx =>
+                    {
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+
+                        var password = (string)ctx.JsonReader.Value!;
+
+                        ((ExchangeWebServiceEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
+                    }
+                });
+            }
+
+            if (Schema.Current.Tables.ContainsKey(typeof(Pop3ConfigurationEntity)))
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3ConfigurationEntity e) => e.Password);
                 var pcs = PropertyConverter.GetPropertyConverters(typeof(Pop3ConfigurationEntity));
@@ -72,29 +113,6 @@ namespace Signum.React.Mailing
                         ((Pop3ConfigurationEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
                     }
                 });
-            }
-
-            if (emailSender)
-            {
-                if (smtp)
-                {
-                    var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
-                    var pcs = PropertyConverter.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
-                    pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
-                    pcs.Add("newPassword", new PropertyConverter
-                    {
-                        AvoidValidate = true,
-                        CustomWriteJsonProperty = ctx => { },
-                        CustomReadJsonProperty = ctx =>
-                        {
-                            EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
-
-                            var password = (string)ctx.JsonReader.Value!;
-
-                            ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
-                        }
-                    });
-                }
             }
         }
     }

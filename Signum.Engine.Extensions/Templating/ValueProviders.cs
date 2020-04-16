@@ -76,13 +76,15 @@ namespace Signum.Engine.Templating
         {
             if (Variable.HasText())
             {
-                if(variables.TryGetValue(Variable, out var value))
+                if (variables.TryGetValue(Variable, out var value))
                 {
                     if (value != null && value.Equals(this))
                         return;
 
-                    variables.Add(Variable, this);
+                    else throw new InvalidOperationException("Redeclaring variable " + Variable + " with another value");
                 }
+
+                variables.Add(Variable, this);
             } 
         }
 

@@ -299,7 +299,7 @@ namespace Signum.Engine.Mailing
                             else
                                 message.From = emailSenderConfig.DefaultFrom!.ToMailAddress();
                             
-                            message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
+                            message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email!));
 
                             message.Subject = ((TextTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
                                 new TextTemplateParameters(null, null!, dicTokenColumn, s.Rows)
