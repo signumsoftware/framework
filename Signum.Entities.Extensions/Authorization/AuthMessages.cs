@@ -71,6 +71,9 @@ namespace Signum.Entities.Authorization
         AnErrorOccurredRequestNotProcessed,
 
         TheUserIsNotLongerInTheDatabase,
+        ChangePasswordAspx_NewPassword,
+        ChangePasswordAspx_ConfirmNewPassword
+
     }
 
     public enum AuthMessage

@@ -147,6 +147,8 @@ export module LoginAuthMessage {
   export const InvalidPassword = new MessageKey("LoginAuthMessage", "InvalidPassword");
   export const AnErrorOccurredRequestNotProcessed = new MessageKey("LoginAuthMessage", "AnErrorOccurredRequestNotProcessed");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("LoginAuthMessage", "TheUserIsNotLongerInTheDatabase");
+  export const ChangePasswordAspx_NewPassword = new MessageKey("LoginAuthMessage", "ChangePasswordAspx_NewPassword");
+  export const ChangePasswordAspx_ConfirmNewPassword = new MessageKey("LoginAuthMessage", "ChangePasswordAspx_ConfirmNewPassword");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
