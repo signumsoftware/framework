@@ -71,6 +71,14 @@ namespace Signum.Entities.Isolation
         public static ExecuteSymbol<IsolationEntity> Save;
     }
 
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum IsolationStrategy
+    {
+        Isolated,
+        Optional,
+        None,
+    }
+
     public enum IsolationMessage
     {
         [Description("Entity {0} has isolation {1} but current isolation is {2}")]
