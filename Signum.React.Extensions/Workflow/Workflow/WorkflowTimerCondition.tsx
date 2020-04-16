@@ -47,7 +47,7 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
       <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
-        autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+        autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac))}
         find={false} />
       {ctx.value.mainEntityType &&
         <div>

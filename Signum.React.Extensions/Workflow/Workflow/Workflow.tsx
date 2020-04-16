@@ -150,7 +150,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
           <div className="col-sm-6">
             <ValueLine ctx={ctx.subCtx(d => d.name)} />
             <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }))}
               find={false}
               onRemove={handleMainEntityTypeChange} />
             <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
