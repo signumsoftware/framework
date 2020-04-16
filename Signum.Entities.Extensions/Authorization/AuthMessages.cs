@@ -71,7 +71,6 @@ namespace Signum.Entities.Authorization
         AnErrorOccurredRequestNotProcessed,
 
         TheUserIsNotLongerInTheDatabase
-
     }
 
     public enum AuthMessage
