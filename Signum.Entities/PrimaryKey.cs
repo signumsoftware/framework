@@ -53,9 +53,9 @@ namespace Signum.Entities
             this.VariableName = variableName;
         }
 
-        public override string? ToString()
+        public override string ToString()
         {
-            return Object.ToString();
+            return Object.ToString()!;
         }
 
         public override bool Equals(object? obj)

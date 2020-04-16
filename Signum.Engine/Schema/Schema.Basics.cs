@@ -1447,7 +1447,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override string? ToString() => ToString(Schema.Current.Settings.IsPostgres);
+        public override string ToString() => ToString(Schema.Current.Settings.IsPostgres);
         public string ToString(bool isPostgres)
         {
             if (!isPostgres)
