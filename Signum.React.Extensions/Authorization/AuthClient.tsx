@@ -19,7 +19,6 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AuthMessage, LoginAuthMessage } from './Signum.Entities.Authorization'
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
