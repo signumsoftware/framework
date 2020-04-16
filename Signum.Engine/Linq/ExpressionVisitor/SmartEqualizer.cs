@@ -103,8 +103,9 @@ namespace Signum.Engine.Linq
 
         private static Expression? EnumEquals(Expression exp1, Expression exp2)
         {
-            var exp1Clean = RemoveConvertChain(exp1);
-            var exp2Clean = RemoveConvertChain(exp2);
+            bool anyEnum = false;
+            var exp1Clean = RemoveConvertChain(exp1, ref anyEnum);
+            var exp2Clean = RemoveConvertChain(exp2, ref anyEnum);
 
             if (exp1Clean.Type.UnNullify() == typeof(DayOfWeek) ||
                exp2Clean.Type.UnNullify() == typeof(DayOfWeek))
@@ -114,7 +115,7 @@ namespace Signum.Engine.Linq
                     ConstantToDayOfWeek(exp2Clean) ?? exp2Clean);
             }
 
-            if (exp1 != exp1Clean || exp2 != exp2Clean)
+            if (anyEnum)
             {
                 var type = exp2.Type.IsNullable() ? exp1.Type.Nullify(): exp1.Type;
 
@@ -137,12 +138,16 @@ namespace Signum.Engine.Linq
             return null;
         }
         
-        private static Expression RemoveConvertChain(Expression exp)
+        private static Expression RemoveConvertChain(Expression exp, ref bool anyEnum)
         {
-
             while (true)
             {
-                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum) ?? exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum);
+                if (newExp != null)
+                    anyEnum = true;
+                else
+                    newExp = exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+
                 if (newExp == null)
                     return exp;
 

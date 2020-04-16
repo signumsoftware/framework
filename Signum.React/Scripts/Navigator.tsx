@@ -703,6 +703,8 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   e.preventDefault();
   if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
     window.open(toAbsoluteUrl(path));
+  else if (path.startsWith("http"))
+    window.location.href = path;
   else
     history.push(path);
 }
