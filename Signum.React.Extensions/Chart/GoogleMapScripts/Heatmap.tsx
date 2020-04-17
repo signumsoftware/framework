@@ -4,10 +4,13 @@ import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from '../D3Scripts/Components/ChartUtils';
 
 
-export default function HeatmapChart({ data, parameters }: ChartClient.ChartComponentProps) {
+export default function HeatmapChart(p: ChartClient.ChartComponentProps) {
+  return <HeatmapChartImp {...p} />
+}
+
+function HeatmapChartImp({ data, parameters }: ChartClient.ChartComponentProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 

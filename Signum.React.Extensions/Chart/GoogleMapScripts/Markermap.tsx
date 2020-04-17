@@ -10,7 +10,11 @@ import { ChartRow } from '../ChartClient';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function MarkermapChart({ data, parameters, onDrillDown }: ChartClient.ChartComponentProps) {
+export default function MarkermapChart(p: ChartClient.ChartComponentProps) {
+  return <MarkermapChartImp {...p} />
+}
+
+export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient.ChartComponentProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
