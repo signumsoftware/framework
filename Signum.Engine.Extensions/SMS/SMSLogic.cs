@@ -20,6 +20,8 @@ using System.Globalization;
 using Signum.Engine.Mailing;
 using Signum.Engine.Templating;
 using Signum.Entities.DynamicQuery;
+using System.Text;
+using System.Threading;
 
 namespace Signum.Engine.SMS
 {
@@ -112,7 +114,7 @@ namespace Signum.Engine.SMS
 
                 SMSTemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KVP.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                    return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 
@@ -131,7 +133,21 @@ namespace Signum.Engine.SMS
                 };
 
                 sb.AddUniqueIndex((SMSTemplateEntity t) => new { t.Model }, where: t => t.Model != null && t.IsActive == true);
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             } 
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            var dateLimit = parameters.GetDateLimitDelete(typeof(SMSMessageEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<SMSMessageEntity>().Where(o => o.SendDate != null && o.SendDate < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(SMSMessageEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Database.Query<SMSMessageEntity>().Where(o => o.SendDate != null && o.SendDate < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static HashSet<Type> GetAllTypes()

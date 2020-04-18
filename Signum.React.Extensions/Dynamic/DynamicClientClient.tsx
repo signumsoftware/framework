@@ -44,6 +44,6 @@ ${c.code}
 
 export namespace API {
   export function getClients(): Promise<DynamicClientEntity[]> {
-    return ajaxGet<DynamicClientEntity[]>({ url: `~/api/dynamic/clients` });
+    return ajaxGet({ url: `~/api/dynamic/clients` });
   }
 }

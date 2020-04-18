@@ -33,7 +33,7 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       return undefined;
 
-    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), () => {
+    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), () => {
       API.exportAsset(ctx.lites);
     }, {
         iconColor: "#FCAE25",
@@ -69,7 +69,7 @@ export module Converter {
     else
       return ({
         token: fr.token,
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         frozen: false,
         pinned: fr.pinned,
@@ -87,7 +87,7 @@ export module Converter {
     else
       return ({
         token: fr.token!.fullKey,
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         pinned: fr.pinned
       } as FilterConditionOption);
@@ -107,7 +107,7 @@ export module Converter {
     else
       return ({
         tokenString: fr.token!.toString(),
-        operation: fr.operation || "EqualTo",
+        operation: fr.operation ?? "EqualTo",
         value: fr.value,
         pinned: fr.pinned,
       });
@@ -117,10 +117,10 @@ export module Converter {
 
     function toPinnedFilterEmbedded(e: PinnedFilter): PinnedQueryFilterEmbedded {
       return PinnedQueryFilterEmbedded.New({
-        label: e.label,
+        label: typeof e.label == "function" ? e.label() : e.label,
         column: e.column,
         row: e.row,
-        disableOnNull: e.disableOnNull,
+        active: e.active,
         splitText: e.splitText
       });
     }
@@ -146,17 +146,17 @@ export module Converter {
         label: e.label == null ? undefined : e.label,
         column: e.column == null ? undefined : e.column,
         row: e.row == null ? undefined : e.row,
-        disableOnNull: e.disableOnNull,
+        active: e.active,
         splitText: e.splitText
       })
     }
 
     return ({
       isGroup: e.isGroup,
-      groupOperation: e.groupOperation || undefined,
+      groupOperation: e.groupOperation ?? undefined,
       tokenString: e.token ? e.token.tokenString! : undefined,
-      operation: e.operation || undefined,
-      valueString: e.valueString || undefined,
+      operation: e.operation ?? undefined,
+      valueString: e.valueString ?? undefined,
       pinned: e.pinned ? toPinnedFilter(e.pinned) : undefined,
       indentation: e.indentation!,
     });
@@ -169,7 +169,7 @@ export module Converter {
 export module API {
 
   export function parseFilters(request: ParseFiltersRequest): Promise<FilterNode[]> {
-    return ajaxPost<FilterNode[]>({ url: "~/api/userAssets/parseFilters/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/parseFilters/" }, request);
   }
 
   export interface ParseFiltersRequest {
@@ -181,7 +181,7 @@ export module API {
 
 
   export function stringifyFilters(request: StringifyFiltersRequest): Promise<QueryFilterItem[]> {
-    return ajaxPost<QueryFilterItem[]>({ url: "~/api/userAssets/stringifyFilters/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/stringifyFilters/" }, request);
   }
   
   export interface StringifyFiltersRequest {
@@ -220,7 +220,7 @@ export module API {
 
 
   export function importPreview(request: FileUpload): Promise<UserAssetPreviewModel> {
-    return ajaxPost<UserAssetPreviewModel>({ url: "~/api/userAssets/importPreview/" }, request);
+    return ajaxPost({ url: "~/api/userAssets/importPreview/" }, request);
   }
 
   export interface FileUpload {
@@ -229,7 +229,7 @@ export module API {
   }
 
   export function importAssets(request: FileUploadWithModel): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/userAssets/import" }, request);
+    return ajaxPost({ url: "~/api/userAssets/import" }, request);
   }
 
   export interface FileUploadWithModel {

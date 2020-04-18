@@ -9,20 +9,18 @@ interface TypeHelpButtonBarComponentProps {
   ctx?: TypeContext<any>;
 }
 
-export default class TypeHelpButtonBarComponent extends React.Component<TypeHelpButtonBarComponentProps> {
-  static getTypeHelpButtons: Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]> = [];
-
-  render() {
-    return (
-      <div className="btn-toolbar">
-        {this.props.extraButtons}
-        {
-          TypeHelpButtonBarComponent.getTypeHelpButtons
-            .flatMap(f => f(this.props))
-            .orderBy(p => p.order)
-            .map((p, i) => React.cloneElement(p.element, { key: i }))
-        }
-      </div>
-    );
-  }
+export default function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps){
+  return (
+    <div className="btn-toolbar">
+      {p.extraButtons}
+      {
+        TypeHelpButtonBarComponent.getTypeHelpButtons
+          .flatMap(f => f(p))
+          .orderBy(p => p.order)
+          .map((p, i) => React.cloneElement(p.element, { key: i }))
+      }
+    </div>
+  );
 }
+
+TypeHelpButtonBarComponent.getTypeHelpButtons = [] as Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]>;

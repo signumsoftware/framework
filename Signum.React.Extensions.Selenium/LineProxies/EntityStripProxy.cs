@@ -48,12 +48,12 @@ namespace Signum.React.Selenium
 
         public WebElementLocator AutoCompleteElement
         {
-            get { return this.Element.WithLocator(By.CssSelector(".sf-typeahead")); }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-entity-autocomplete")); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), Element, lite);
         }
 
         public FrameModalProxy<T> View<T>(int index) where T : ModifiableEntity

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -33,29 +33,29 @@ export function start(options: { routes: JSX.Element[] }) {
     return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numbro(cell).format("0.000")}</span>, "numeric-cell");
   }
 
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.evaluationTraining), numbericCellFormatter("#5DADE2"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.evaluationValidation), numbericCellFormatter("#D98880"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationTraining), numbericCellFormatter("#5DADE2"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationValidation), numbericCellFormatter("#D98880"));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-    PredictorMessage.DownloadCsv.niceToString(),
-    PredictorMessage.DownloadCsv.niceToString(),
+    PredictorMessage.DownloadCsv.name,
+    () => PredictorMessage.DownloadCsv.niceToString(),
     e => API.downloadCsvById(ctx.lite)));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-    PredictorMessage.DownloadTsv.niceToString(),
-    PredictorMessage.DownloadTsv.niceToString(),
+    PredictorMessage.DownloadTsv.name,
+    () => PredictorMessage.DownloadTsv.niceToString(),
     e => API.downloadTsvById(ctx.lite)));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-    PredictorMessage.DownloadTsvMetadata.niceToString(),
-    PredictorMessage.DownloadTsvMetadata.niceToString(),
+    PredictorMessage.DownloadTsvMetadata.name,
+    () => PredictorMessage.DownloadTsvMetadata.niceToString(),
     e => API.downloadTsvMetadataById(ctx.lite)));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-    PredictorMessage.OpenTensorflowProjector.niceToString(),
-    PredictorMessage.OpenTensorflowProjector.niceToString(),
+    PredictorMessage.OpenTensorflowProjector.name,
+    () => PredictorMessage.OpenTensorflowProjector.niceToString(),
     e => window.open("http://projector.tensorflow.org/", "_blank")));
 
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
@@ -153,7 +153,7 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 export namespace API {
 
   export function availableDevices(algorithm: PredictorAlgorithmSymbol): Promise<string[]> {
-    return ajaxGet<string[]>({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
+    return ajaxGet({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
   }
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
@@ -187,15 +187,15 @@ export namespace API {
   }
 
   export function getPredict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<PredictRequest> {
-    return ajaxPost<PredictRequest>({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
+    return ajaxPost({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
   }
 
   export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {
-    return ajaxPost<PredictRequest>({ url: `~/api/predict/update/` }, predict);
+    return ajaxPost({ url: `~/api/predict/update/` }, predict);
   }
 
   export function publications(queryKey: string): Promise<PredictorPublicationSymbol[]> {
-    return ajaxGet<PredictorPublicationSymbol[]>({ url: `~/api/predict/publications/${queryKey}` });
+    return ajaxGet({ url: `~/api/predict/publications/${queryKey}` });
   }
 }
 

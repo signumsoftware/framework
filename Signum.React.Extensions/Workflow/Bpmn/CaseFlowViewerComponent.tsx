@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { CaseFlow } from '../WorkflowClient'
@@ -14,14 +14,15 @@ import "diagram-js-minimap/assets/diagram-js-minimap.css"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
+import { DropdownButton, Dropdown, Button } from 'react-bootstrap';
+
 
 export interface CaseFlowViewerComponentProps {
   diagramXML?: string;
   entities: WorkflowEntitiesDictionary;
   caseFlow: CaseFlow;
   case: CaseEntity,
-  caseActivity?: CaseActivityEntity;
+  workflowActivity?: IWorkflowNodeEntity;
 }
 
 export interface CaseFlowViewerComponentState {
@@ -51,9 +52,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
       throw new Error('Error rendering the model ' + err);
     else {
       this.resetZoom();
-      if (this.props.caseActivity) {
+      if (this.props.workflowActivity) {
         var selection = this.viewer.get("selection") as any;
-        selection.select((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
+        selection.select((this.props.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
       }
     }
   }
@@ -106,18 +107,18 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     var conIcons = this.viewer.get<connectionIcons.ConnectionIcons>('connectionIcons');
     conIcons.hasAction = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.action || undefined;
+      return mod?.action || undefined;
     };
 
     conIcons.hasCondition = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.condition || undefined;
+      return mod?.condition || undefined;
     };
 
     var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
     caseFlowRenderer.getConnectionType = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod && mod.type || undefined;
+      return mod?.type || undefined;
     }
 
     caseFlowRenderer.viewer = this.viewer;
@@ -162,18 +163,13 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     return (
       <div>
         <div className="btn-toolbar">
-          <Button color="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-          <UncontrolledDropdown id="colorMenu">
-            <DropdownToggle color="light" caret>
-              {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
-            </DropdownToggle>
-            <DropdownMenu>
-              {this.menuItem("CaseMaxDuration")}
-              {this.menuItem("AverageDuration")}
-              {this.menuItem("EstimatedDuration")}
-            </DropdownMenu>
-          </UncontrolledDropdown>
-          <Button color="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+          <Button variant="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+          <DropdownButton id="colorMenu" variant="light" title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}>
+            {this.menuItem("CaseMaxDuration")}
+            {this.menuItem("AverageDuration")}
+            {this.menuItem("EstimatedDuration")}
+          </DropdownButton>
+          <Button variant="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
         </div>
         <div ref={de => this.divArea = de!} />
       </div>
@@ -188,9 +184,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
   menuItem(color: CaseFlowColor) {
     return (
-      <DropdownItem onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
+      <Dropdown.Item onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
         {CaseFlowColor.niceToString(color)}
-      </DropdownItem>
+      </Dropdown.Item>
     );
   }
 }

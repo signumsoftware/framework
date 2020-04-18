@@ -3,23 +3,21 @@ import { RouteComponentProps, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
-import { useAPI, useTitle, useForceUpdate } from '@framework/Hooks';
+import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
-import { notifySuccess, confirmInNecessary } from '@framework/Operations/EntityOperations';
+import { notifySuccess } from '@framework/Operations';
 import { getOperationInfo } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
-import ButtonBar from '@framework/Frames/ButtonBar';
 import { classes } from '@framework/Globals';
 
 
 export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
 
-  var [count, setCount] = React.useState(0);
-  var appendix = useAPI(undefined, [count], () => API.appendix(p.match.params.uniqueName));
+  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(p.match.params.uniqueName), []);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)
@@ -37,7 +35,7 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
       <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : setCount(count + 1)} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>
@@ -46,7 +44,9 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
 
-  if (!Operations.isOperationAllowed(AppendixHelpOperation.Save, AppendixHelpEntity))
+  const oi = Operations.tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
+
+  if (!oi)
     return null;
 
   function onClick() {
@@ -58,12 +58,12 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
       .done();
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;
 }
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
-  if (!Operations.isOperationAllowed(AppendixHelpOperation.Delete, AppendixHelpEntity))
+  if (!Operations.tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
     return null;
 
   function onClick() {
@@ -73,7 +73,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
       buttons: "yes_no",
       icon: "warning",
       style: "warning",
-    }).then(result => { 
+    }).then(result => {
       if (result == "yes") {
 
         Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)

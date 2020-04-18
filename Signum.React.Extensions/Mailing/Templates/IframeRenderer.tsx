@@ -1,31 +1,17 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 
 export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElement> {
   html: string | null | undefined;
 }
 
-export default class IFrameRenderer extends React.Component<IFrameRendererProps> {
+export default function IFrameRenderer({ html, ...props }: IFrameRendererProps) {
 
-  componentDidMount() {
-    this.load(this.props.html);
-  }
+  const iframe = React.useRef<HTMLIFrameElement>(null)
 
-  componentWillReceiveProps(newProps: { html: string }) {
-    this.load(newProps.html);
-  }
+  React.useEffect(() => {
+    iframe.current!.contentDocument!.body.innerHTML = html ?? "";
+  }, [html]);
 
-  load(html: string | null | undefined) {
-    const cd = this.iframe.contentDocument!;
-
-    cd.body.innerHTML = html || "";
-  }
-
-  iframe!: HTMLIFrameElement;
-
-  render() {
-    var { html, ...props } = this.props;
-
-    return <iframe {...props} ref={e => this.iframe = e!}></iframe>;
-  }
+  return <iframe {...props} ref={iframe}></iframe>;
 }
 

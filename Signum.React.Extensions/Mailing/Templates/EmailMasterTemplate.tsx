@@ -3,7 +3,7 @@ import { ValueLine, EntityCombo, EntityTabRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
-import IFrameRenderer from './IFrameRenderer'
+import IFrameRenderer from './IframeRenderer'
 import { useForceUpdate } from '@framework/Hooks'
 
 export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }){

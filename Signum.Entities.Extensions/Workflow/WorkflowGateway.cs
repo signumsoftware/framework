@@ -33,6 +33,7 @@ namespace Signum.Entities.Workflow
                 Type = this.Type,
                 Direction = this.Direction
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -42,6 +43,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.Direction = wModel.Direction;
+            this.CopyMixinsFrom(wModel);
         }
     }
 

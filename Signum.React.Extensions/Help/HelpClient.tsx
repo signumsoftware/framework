@@ -40,7 +40,7 @@ export function toHtml(txt: string  | null) {
     switch (letter) {
       case 't': {
         var ti = getTypeInfo(link);
-        return markdownLink(Urls.typeUrl(link), ti && ti.niceName || link);
+        return markdownLink(Urls.typeUrl(link), ti?.niceName ?? link);
       }
       case 'a': return markdownLink(Urls.appendixUrl(link), link);
       case 'n': return markdownLink(Urls.namespaceUrl(link), link);
@@ -69,27 +69,27 @@ export function toHtml(txt: string  | null) {
 export module API {
 
   export function index(): Promise<HelpIndexTS> {
-    return ajaxGet<HelpIndexTS>({ url: "~/api/help/index" });
+    return ajaxGet({ url: "~/api/help/index" });
   }
 
   export function namespace(namespace: string): Promise<NamespaceHelp> {
-    return ajaxGet<NamespaceHelp>({ url: "~/api/help/namespace/" + namespace });
+    return ajaxGet({ url: "~/api/help/namespace/" + namespace });
   }
 
   export function saveNamespace(typeHelp: NamespaceHelpEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/help/saveNamespace" }, typeHelp);
+    return ajaxPost({ url: "~/api/help/saveNamespace" }, typeHelp);
   }
 
   export function type(cleanName: string): Promise<TypeHelpEntity> {
-    return ajaxGet<TypeHelpEntity>({ url: "~/api/help/type/" + cleanName });
+    return ajaxGet({ url: "~/api/help/type/" + cleanName });
   }
 
   export function saveType(typeHelp: TypeHelpEntity): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/help/saveType" }, typeHelp);
+    return ajaxPost({ url: "~/api/help/saveType" }, typeHelp);
   }
 
   export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
-    return ajaxGet<AppendixHelpEntity>({ url: "~/api/help/appendix/" + (uniqueName || "") });
+    return ajaxGet({ url: "~/api/help/appendix/" + (uniqueName ?? "") });
   }
 }
 
@@ -143,7 +143,7 @@ export module Urls {
   }
 
   export function appendixUrl(uniqueName: string | null) {
-    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName || ""));
+    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
   }
 
   export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {
@@ -151,7 +151,7 @@ export module Urls {
   }
 
   export function idOperation(operation: OperationSymbol | string) {
-    return "o-" + ((operation as OperationSymbol).key || operation as string).replaceAll('.', '_');
+    return "o-" + ((operation as OperationSymbol).key ?? operation as string).replaceAll('.', '_');
   }
 
 

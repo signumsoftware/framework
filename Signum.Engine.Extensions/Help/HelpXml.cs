@@ -211,9 +211,11 @@ namespace Signum.Engine.Help
             static readonly XName _Property = "Property";
             static readonly XName _Operations = "Operations";
             static readonly XName _Operation = "Operation";
+#pragma warning disable 414
             static readonly XName _Queries = "Queries";
             static readonly XName _Query = "Query";
             static readonly XName _Language = "Language";
+#pragma warning restore 414
 
             public static XDocument ToXDocument(TypeHelpEntity entity)
             {
@@ -473,9 +475,9 @@ namespace Signum.Engine.Help
 
         public static void ImportAll(string directoryName)
         {
-            var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace).Distinct().ToDictionary(a => a);
+            var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace!).Distinct().ToDictionary(a => a);
 
-            var types = HelpLogic.AllTypes().ToDictionary(a=>a.FullName);
+            var types = HelpLogic.AllTypes().ToDictionary(a => a.FullName!);
 
             foreach (var path in Directory.GetFiles(directoryName, "*.help", SearchOption.AllDirectories))
             {

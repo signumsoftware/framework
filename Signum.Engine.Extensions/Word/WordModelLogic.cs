@@ -187,7 +187,7 @@ namespace Signum.Engine.Word
                         registeredWordModels.Keys, 
                         swr => swr.FullClassName, 
                         type => type.FullName,
-                        (swr, type) => KVP.Create(type, swr), 
+                        (swr, type) => KeyValuePair.Create(type, swr), 
                         "caching " + nameof(WordModelEntity)).ToDictionary();
                 }, new InvalidateWith(typeof(WordModelEntity)));
 
@@ -295,10 +295,7 @@ namespace Signum.Engine.Word
         internal static List<WordModelEntity> GenerateTemplates()
         {
             var list = (from type in registeredWordModels.Keys
-                        select new WordModelEntity
-                        {
-                            FullClassName = type.FullName
-                        }).ToList();
+                        select new WordModelEntity { FullClassName = type.FullName! }).ToList();
             return list;
         }
 

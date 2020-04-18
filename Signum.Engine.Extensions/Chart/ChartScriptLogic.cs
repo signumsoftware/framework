@@ -63,7 +63,7 @@ namespace Signum.Engine.Chart
 
         internal static FileContent LoadIcon(string fileName)
         {
-            return new FileContent(fileName, typeof(ChartScriptLogic).Assembly.GetManifestResourceStream("Signum.Engine.Chart.Icons." + fileName).ReadAllBytes());
+            return new FileContent(fileName, typeof(ChartScriptLogic).Assembly.GetManifestResourceStream("Signum.Engine.Chart.Icons." + fileName)!.ReadAllBytes());
         }
     }
 }

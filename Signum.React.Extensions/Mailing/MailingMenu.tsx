@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
 import * as MailingClient from './MailingClient'
-import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from '@framework/Components';
+import { DropdownButton, Dropdown } from 'react-bootstrap';
 
 export interface MailingMenuProps {
   searchControl: SearchControlLoaded;
@@ -38,18 +38,15 @@ export default function MailingMenu(p : MailingMenuProps){
   const label = <span><FontAwesomeIcon icon={["far", "envelope"]} /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
   return (
-    <UncontrolledDropdown id="mailingDropDown" className="sf-mailing-dropdown">
-      <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
-      <DropdownMenu>
-        {
-          emailTemplates.map((wt, i) =>
-            <DropdownItem key={i}
-              onClick={() => handleClick(wt)}>
-              {wt.toStr}
-            </DropdownItem>)
-        }
-      </DropdownMenu>
-    </UncontrolledDropdown>
+    <DropdownButton id="mailingDropDown" variant="light" className="sf-mailing-dropdown" title={label}>
+      {
+        emailTemplates.map((wt, i) =>
+          <Dropdown.Item key={i}
+            onClick={() => handleClick(wt)}>
+            {wt.toStr}
+          </Dropdown.Item>)
+      }
+    </DropdownButton>
   );
 }
 

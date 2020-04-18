@@ -5,15 +5,15 @@ namespace Signum.Entities.DiffLog
     [Serializable]
     public class DiffLogMixin : MixinEntity
     {
-        protected DiffLogMixin(Entity mainEntity, MixinEntity next)
+        protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? InitialState { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? FinalState { get; set; }
 
         public bool Cleaned { get; set; }

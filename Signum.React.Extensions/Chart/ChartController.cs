@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Chart
 {
@@ -13,12 +14,6 @@ namespace Signum.React.Chart
         public List<ChartScript> ChartScripts()
         {
             return ChartScriptLogic.Scripts.Values.ToList();
-        }
-
-        [HttpGet("api/chart/colorPalettes")]
-        public List<string> ColorPelettes()
-        {
-            return ChartColorLogic.Colors.Value.Keys.Select(t => TypeLogic.GetCleanName(t)).ToList();
         }
     }
 }

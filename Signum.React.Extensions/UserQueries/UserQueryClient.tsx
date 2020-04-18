@@ -41,12 +41,12 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
+      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => uq.toStr ?? "", e => {
         window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
   });
 
-  QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
         if (uq.entityType == undefined)
@@ -90,15 +90,15 @@ export module Converter {
     return convertedFilters.then(filters => {
 
       fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-
+      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
       fo.columnOptionsMode = uq.columnsMode;
 
-      fo.columnOptions = (uq.columns || []).map(f => ({
+      fo.columnOptions = (uq.columns ?? []).map(f => ({
         token: f.element.token!.tokenString,
         displayName: f.element.displayName
       }) as ColumnOption);
 
-      fo.orderOptions = (uq.orders || []).map(f => ({
+      fo.orderOptions = (uq.orders ?? []).map(f => ({
         token: f.element.token!.tokenString,
         orderType: f.element.orderType
       }) as OrderOption);
@@ -106,8 +106,7 @@ export module Converter {
 
       const qs = Finder.querySettings[query.key];
 
-      fo.pagination = uq.paginationMode == undefined ?
-        ((qs && qs.pagination) || Finder.defaultPagination) : {
+      fo.pagination = uq.paginationMode == undefined ? undefined : {
           mode: uq.paginationMode,
           currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
           elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
@@ -135,11 +134,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forEntityType/" + type });
+    return ajaxGet({ url: "~/api/userQueries/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forQuery/" + queryKey });
+    return ajaxGet({ url: "~/api/userQueries/forQuery/" + queryKey });
   }
 }
 

@@ -15,7 +15,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors = null!;
+        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, string>>> Colors = null!;
 
         public static readonly int Limit = 360;
 
@@ -33,8 +33,8 @@ namespace Signum.Engine.Chart
 
                 Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorEntity>()
-                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color!.Argb })
-                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
+                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color })
+                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => a.Color)),
                     new InvalidateWith(typeof(ChartColorEntity)));
             }
         }
@@ -60,15 +60,10 @@ namespace Signum.Engine.Chart
 
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Color = ColorEmbedded.FromRGBHex(cats[i % cats.Length]);
+                list[i].Color = cats[i % cats.Length];
             }
 
             list.SaveList();
-        }
-
-        private static int DivideRoundUp(int number, int divisor)
-        {
-            return ((number - 1) / divisor) + 1;
         }
 
         public static void AssertFewEntities(Type type)
@@ -77,6 +72,13 @@ namespace Signum.Engine.Chart
 
             if (count > Limit)
                 throw new ApplicationException("Too many {0} ({1}), maximum is {2}".FormatWith(type.NicePluralName(), count, Limit));
+        }
+
+        public static bool HasTooManyEntities(Type type, out int count)
+        {
+            count = giCount.GetInvoker(type)();
+
+            return count > Limit;
         }
 
         public static void SavePalette(ChartPaletteModel model)
@@ -92,6 +94,7 @@ namespace Signum.Engine.Chart
             }
         }
 
+     
         static readonly GenericInvoker<Func<int>> giCount = new GenericInvoker<Func<int>>(() => Count<Entity>());
         static int Count<T>() where T : Entity
         {
@@ -106,34 +109,69 @@ namespace Signum.Engine.Chart
                     select cc).UnsafeDelete();
         }
 
-        public static ChartPaletteModel GetPalette(Type type)
+        public static ChartPaletteModel? GetPalette(Type type, bool allEntities)
         {
-            AssertFewEntities(type);
-
             var dic = ChartColorLogic.Colors.Value.TryGetC(type);
 
-            return new ChartPaletteModel
+            if (allEntities)
             {
-                Type = type.ToTypeEntity(),
-                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
+                AssertFewEntities(type);
+
+                return new ChartPaletteModel
                 {
-                    Related = (Lite<Entity>)l,
-                    Color = dic?.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
-                }).ToMList()
-            };
+                    Type = type.ToTypeEntity(),
+                    Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
+                    {
+                        Related = (Lite<Entity>)l,
+                        Color = dic?.TryGetC(l.Id)!
+                    }).ToMList()
+                };
+            } 
+            else
+            {
+                if (dic == null)
+                    return null;
+
+                if (EnumEntity.IsEnumEntity(type))
+                {
+                    var lites = EnumEntity.GetEntities(EnumEntity.Extract(type)!).ToDictionary(a => a.Id, a => a.ToLite());
+
+                    return new ChartPaletteModel
+                    {
+                        Type = type.ToTypeEntity(),
+                        Colors = dic.Select(kvp => new ChartColorEntity
+                        {
+                            Related = lites.GetOrThrow(kvp.Key),
+                            Color = kvp.Value
+                        }).ToMList()
+                    };
+                }
+                else
+                {
+                    return new ChartPaletteModel
+                    {
+                        Type = type.ToTypeEntity(),
+                        Colors = dic.Select(kvp => new ChartColorEntity
+                        {
+                            Related = Lite.Create(type, kvp.Key),
+                            Color = kvp.Value
+                        }).ToMList()
+                    };
+                }
+            }
         }
 
-        public static Color? ColorFor(Type type, PrimaryKey id)
+        public static string? ColorFor(Type type, PrimaryKey id)
         {
-            return Colors.Value.TryGetC(type)?.TryGetS(id);
+            return Colors.Value.TryGetC(type)?.TryGetC(id);
         }
 
-        public static Color? ColorFor(Lite<Entity> lite)
+        public static string? ColorFor(Lite<Entity> lite)
         {
             return ColorFor(lite.EntityType, lite.Id);
         }
 
-        public static Color? ColorFor(Entity ident)
+        public static string? ColorFor(Entity ident)
         {
             return ColorFor(ident.GetType(), ident.Id);
         }

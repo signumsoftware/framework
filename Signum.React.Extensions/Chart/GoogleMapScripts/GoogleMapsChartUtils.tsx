@@ -6,7 +6,7 @@ export function getScript(source: string, onload?: () => void) {
   var prior = document.getElementsByTagName('script')[0];
   script.async = true;
   script.src = source;
-  script.onload = onload || null;
+  script.onload = onload ?? null;
   prior.parentNode!.insertBefore(script, prior);
 }
 

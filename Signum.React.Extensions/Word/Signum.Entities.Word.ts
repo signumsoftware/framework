@@ -8,6 +8,7 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as Signum from '../Basics/Signum.Entities.Basics'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
@@ -39,6 +40,9 @@ export interface WordTemplateEntity extends Entities.Entity {
   query: Basics.QueryEntity;
   model: WordModelEntity | null;
   culture: Signum.CultureInfoEntity;
+  groupResults: boolean;
+  filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+  orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
   template: Entities.Lite<Files.FileEntity> | null;

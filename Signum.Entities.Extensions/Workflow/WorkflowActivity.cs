@@ -14,7 +14,6 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        
         public WorkflowLaneEntity Lane { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -127,6 +126,8 @@ namespace Signum.Entities.Workflow
             model.UserHelp = this.UserHelp;
             model.SubWorkflow = this.SubWorkflow;
             model.Comments = this.Comments;
+            model.CopyMixinsFrom(this);
+
             return model;
         }
 
@@ -145,6 +146,7 @@ namespace Signum.Entities.Workflow
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
+            this.CopyMixinsFrom(wModel);
         }
     }
 

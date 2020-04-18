@@ -51,8 +51,7 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public class HolidayEmbedded : EmbeddedEntity
     {
-        [DaysPrecisionValidator]
-        public DateTime Date { get; set; } = DateTime.Today;
+        public Date Date { get; set; } = Date.Today;
 
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }

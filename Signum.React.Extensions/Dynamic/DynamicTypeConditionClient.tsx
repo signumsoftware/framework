@@ -35,7 +35,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
   export function typeConditionTest(request: DynamicTypeConditionTestRequest): Promise<DynamicTypeConditionTestResponse> {
-    return ajaxPost<DynamicTypeConditionTestResponse>({ url: `~/api/dynamic/typeCondition/test` }, request);
+    return ajaxPost({ url: `~/api/dynamic/typeCondition/test` }, request);
   }
 }
 

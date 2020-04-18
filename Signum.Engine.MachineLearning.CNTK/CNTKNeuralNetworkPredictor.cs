@@ -38,12 +38,12 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             if (!Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
             {
-                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin");
                 if (!Directory.Exists(dir) || !Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
-                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin")}");
+                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin")}");
             }
 
-            var oldPath = Environment.GetEnvironmentVariable("Path");
+            var oldPath = Environment.GetEnvironmentVariable("Path")!;
             if (!oldPath.Contains(dir + ";"))
                 Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }

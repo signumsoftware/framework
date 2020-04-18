@@ -160,8 +160,8 @@ namespace Signum.Engine.Dynamic
             var fieldNames = this.Expressions
                 .GroupBy(a => a.Name)
                 .SelectMany(gr => gr.Count() == 1 ?
-                new[] { KVP.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
-                gr.Select(a => KVP.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
+                new[] { KeyValuePair.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
+                gr.Select(a => KeyValuePair.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
                 ).ToDictionaryEx("DynamicExpressions");
 
             var namesToTranslate = this.Expressions.Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName).Select(a => a.Name).Distinct();

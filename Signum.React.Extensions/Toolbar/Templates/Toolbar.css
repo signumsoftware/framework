@@ -5,17 +5,17 @@
     width: 100%;
 }
 
-.menu-item-0 {
+.menu-item-0:not(.dropdown-item) {
     padding-left: 10px;
     padding-right: 10px;
 }
 
 body:not(.rtl) .menu-item-1{
-    padding-left: 20px;
+    padding-left: 30px;
 }
 
 body.rtl .menu-item-1 {
-    padding-right: 20px;
+    padding-right: 30px;
 }
 
 .menu-item-1 {

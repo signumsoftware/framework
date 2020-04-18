@@ -108,7 +108,7 @@ namespace Signum.Engine.SMS
                 SMSModelToTemplates = sb.GlobalLazy(() => (
                     from et in Database.Query<SMSTemplateEntity>()
                     where et.Model != null
-                    select KVP.Create(et.Model!.ToLite(), et))
+                    select KeyValuePair.Create(et.Model!.ToLite(), et))
                     .GroupToDictionary(),
                     new InvalidateWith(typeof(SMSTemplateEntity), typeof(SMSModelEntity)));
 
@@ -120,7 +120,7 @@ namespace Signum.Engine.SMS
                         registeredModels.Keys,
                         entity => entity.FullClassName,
                         type => type.FullName,
-                        (entity, type) => KVP.Create(type, entity),
+                        (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(SMSModelEntity))
                         .ToDictionary();
                 }, new InvalidateWith(typeof(SMSModelEntity)));
@@ -195,7 +195,7 @@ namespace Signum.Engine.SMS
             var list = (from type in registeredModels.Keys
                         select new SMSModelEntity
                         {
-                            FullClassName = type.FullName
+                            FullClassName = type.FullName!
                         }).ToList();
             return list;
         }

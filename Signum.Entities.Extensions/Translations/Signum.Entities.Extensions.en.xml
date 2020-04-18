@@ -25,6 +25,7 @@
   <Type Name="BasicPermission" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
+  <Type Name="CalendarDayEntity" />
   <Type Name="CaseActivityEntity" />
   <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage" />
@@ -96,6 +97,8 @@
   <Type Name="DynamicApiEval" />
   <Type Name="DynamicApiOperation" />
   <Type Name="DynamicBaseType" />
+  <Type Name="DynamicClientEntity" />
+  <Type Name="DynamicClientOperation" />
   <Type Name="DynamicCSSOverrideEntity" />
   <Type Name="DynamicCSSOverrideOperation" />
   <Type Name="DynamicExpressionEntity" />
@@ -149,6 +152,8 @@
   <Type Name="EmailReceptionMixin" />
   <Type Name="EmailRecipientEmbedded" />
   <Type Name="EmailRecipientKind" />
+  <Type Name="EmailSenderConfigurationEntity" />
+  <Type Name="EmailSenderConfigurationOperation" />
   <Type Name="EmailTemplateContactEmbedded" />
   <Type Name="EmailTemplateEntity" />
   <Type Name="EmailTemplateMessage" />
@@ -157,13 +162,13 @@
   <Type Name="EmailTemplateRecipientEmbedded" />
   <Type Name="EmailTemplateViewMessage" />
   <Type Name="EntityAction" />
-  <Type Name="EntityHelpEntity" />
-  <Type Name="EntityHelpOperation" />
   <Type Name="EvalEmbedded`1" />
   <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
+  <Type Name="ExcelPermission" />
   <Type Name="ExcelReportEntity" />
   <Type Name="ExcelReportOperation" />
+  <Type Name="ExchangeWebServiceEmbedded" />
   <Type Name="FileEmbedded" />
   <Type Name="FileEntity" />
   <Type Name="FileMessage" />
@@ -218,6 +223,7 @@
   <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" />
   <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoginAuthMessage" />
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
@@ -245,6 +251,7 @@
   <Type Name="NoteTypeEntity" />
   <Type Name="NoteTypeOperation" />
   <Type Name="OmniboxMessage" />
+  <Type Name="OmniboxPermission" />
   <Type Name="OperationAllowed" />
   <Type Name="OperationAllowedRule" />
   <Type Name="OperationHelpEmbedded" />
@@ -376,8 +383,7 @@
   <Type Name="SMSTemplateMessageEmbedded" />
   <Type Name="SMSTemplateOperation" />
   <Type Name="SMSUpdatePackageEntity" />
-  <Type Name="SmtpConfigurationEntity" />
-  <Type Name="SmtpConfigurationOperation" />
+  <Type Name="SmtpEmbedded" />
   <Type Name="SmtpNetworkDeliveryEmbedded" />
   <Type Name="SqlMigrationEntity" />
   <Type Name="SubEntitiesEval" />
@@ -412,6 +418,8 @@
   <Type Name="TypeAllowedRule" />
   <Type Name="TypeConditionRuleEmbedded" />
   <Type Name="TypeConditionSymbol" />
+  <Type Name="TypeHelpEntity" />
+  <Type Name="TypeHelpOperation" />
   <Type Name="TypeRulePack" />
   <Type Name="TypeSearchResult" />
   <Type Name="UserAssetMessage" />
@@ -437,8 +445,6 @@
   <Type Name="ViewLogEntity" />
   <Type Name="ViewLogMessage" />
   <Type Name="ViewNamePropEmbedded" />
-  <Type Name="WebDownload" />
-  <Type Name="WebImage" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordModelEntity" />

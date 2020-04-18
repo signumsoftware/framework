@@ -10,6 +10,7 @@ using System.Linq;
 using Signum.Entities.Word;
 using Signum.Engine.Basics;
 using Signum.Engine.Templating;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Word
 {
@@ -37,7 +38,7 @@ namespace Signum.Engine.Word
         ResultTable? table;
         Dictionary<QueryToken, ResultColumn>? dicTokenColumn;
 
-        internal void MakeQuery()
+        internal void ExecuteQuery()
         {
             List<QueryToken> tokens = new List<QueryToken>();
 
@@ -58,13 +59,19 @@ namespace Signum.Engine.Word
                 entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
                 throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
 
+            filters.AddRange(template.Filters.ToFilterList());
+
+            var orders = model?.GetOrders(this.queryDescription) ?? new List<Order>();
+            orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());
+
             this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
             {
                 QueryName = this.queryDescription.QueryName,
+                GroupResults = template.GroupResults,
                 Columns = columns,
                 Pagination = model?.GetPagination() ?? new Pagination.All(),
                 Filters = filters,
-                Orders = model?.GetOrders(this.queryDescription) ?? new List<Order>(),
+                Orders = orders,
             });
 
             var dt = this.table.ToDataTable();

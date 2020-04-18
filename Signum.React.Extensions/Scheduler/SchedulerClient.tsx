@@ -43,15 +43,15 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
   export function start(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/scheduler/start" }, undefined);
+    return ajaxPost({ url: "~/api/scheduler/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost<void>({ url: "~/api/scheduler/stop" }, undefined);
+    return ajaxPost({ url: "~/api/scheduler/stop" }, undefined);
   }
 
   export function view(): Promise<SchedulerState> {
-    return ajaxGet<SchedulerState>({ url: "~/api/scheduler/view" });
+    return ajaxGet({ url: "~/api/scheduler/view" });
   }
 }
 

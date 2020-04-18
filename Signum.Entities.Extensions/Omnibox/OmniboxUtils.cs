@@ -4,6 +4,7 @@ using System.Linq;
 using Signum.Utilities;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Omnibox
 {
@@ -58,6 +59,7 @@ namespace Signum.Entities.Omnibox
         }
 
         public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
+            where T : notnull
         {
             pattern = pattern.RemoveDiacritics();
 
@@ -115,7 +117,7 @@ namespace Signum.Entities.Omnibox
 
         public static string CleanCommas(string str)
         {
-            return str.Trim('\'', '"'); ;
+            return str.Trim('\'', '"');
         }
     }
 
@@ -151,7 +153,6 @@ namespace Signum.Entities.Omnibox
                 .Select(gr => (span: new string(gr.Select(a => a.first).ToArray()), isBold: gr.Key));
         }
     }
-
 
     public enum OmniboxMessage
     {
@@ -190,5 +191,11 @@ namespace Signum.Entities.Omnibox
         ComplementWordsRegex,
         [Description("Search...")]
         Search,
+    }
+
+    [AutoInit]
+    public static class OmniboxPermission
+    {
+        public static PermissionSymbol ViewOmnibox;
     }
 }

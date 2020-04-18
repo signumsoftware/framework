@@ -49,7 +49,7 @@ namespace Signum.Engine.Cache
 
         internal string CreatePartialInnerJoin(IColumn column)
         {
-            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias, column.Name);
+            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias, column.Name.SqlEscape(Schema.Current.Settings.IsPostgres));
         }
 
         internal Type GetColumnType(IColumn column)
@@ -159,7 +159,7 @@ namespace Signum.Engine.Cache
                             NewPrimaryKey(typeId.UnNullify()),
                             id.UnNullify());
 
-                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
+                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)!), liteCreate);
 
                         return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(id), NullId), liteRequest, nullRef);
                     }

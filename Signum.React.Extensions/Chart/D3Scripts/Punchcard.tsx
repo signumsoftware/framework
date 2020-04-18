@@ -13,7 +13,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -25,7 +25,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -85,7 +85,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if ((elements as any).__sum__ !== undefined)
       return (elements as any).__sum__;
 
-    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) || 0, 0);
+    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) ?? 0, 0);
   }
 
   var horizontalKeys = groupAndSort(data.rows, parameters["XSort"]!, horizontalColumn, parameters['CompleteHorizontalValues']);
@@ -188,8 +188,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       className:"punch sf-transition",
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
-      fill: color == null ? (parameters["FillColor"] || 'black') : color(colorColumn!.getValue(r)),
-      stroke: parameters["StrokeColor"] || (color == null ? 'black' : color(colorColumn!.getValue(r))),
+      fill: color == null ? (parameters["FillColor"] ?? 'black') : color(colorColumn!.getValue(r)),
+      stroke: parameters["StrokeColor"] ?? (color == null ? 'black' : color(colorColumn!.getValue(r))),
       strokeWidth: parameters["StrokeWidth"],
       strokeOpacity: (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1)
     }));
@@ -209,7 +209,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         className: "punch-inner sf-transition",
         shapeRendering: "initial",
         fillOpacity: fillOpacity(r),
-        fill: parameters["InnerFillColor"] || 'black'
+        fill: parameters["InnerFillColor"] ?? 'black'
       })
     );
 
@@ -225,8 +225,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
           cursor="pointer"
           onClick={e => onDrillDown(r)}>
-          {mainShape && mainShape.renderer(r)}
-          {innerShape && innerShape.renderer(r)}
+          {mainShape?.renderer(r)}
+          {innerShape?.renderer(r)}
           {
               parseFloat(parameters["NumberOpacity"]) > 0 &&
               <text className="punch-text sf-transition" transform={translate(

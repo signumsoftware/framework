@@ -14,7 +14,7 @@ interface WorkflowConditionComponentProps {
   ctx: TypeContext<WorkflowActionEntity>;
 }
 
-export default function WorkflowConditionComponent(p : WorkflowConditionComponentProps){
+export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps) {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
     p.ctx.value.eval!.script = "";
@@ -49,7 +49,7 @@ export default function WorkflowConditionComponent(p : WorkflowConditionComponen
       <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
-        autocomplete={new LiteAutocompleteConfig<TypeEntity>((signal, str) => API.findMainEntityType({ subString: str, count: 5 }, signal), false, false) as AutocompleteConfig<Lite<TypeEntity>>}
+        autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }, signal))}
         find={false} />
       {ctx.value.mainEntityType &&
         <div>
@@ -61,7 +61,7 @@ export default function WorkflowConditionComponent(p : WorkflowConditionComponen
                   <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
                 </div>
                 <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
             </div>

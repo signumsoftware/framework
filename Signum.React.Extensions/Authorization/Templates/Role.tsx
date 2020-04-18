@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { RoleEntity, AuthAdminMessage } from '../Signum.Entities.Authorization'
+import { RoleEntity, AuthAdminMessage, UserEntity } from '../Signum.Entities.Authorization'
 import { ValueLine, EntityStrip, TypeContext } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks'
+import { ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search';
 
 export default function Role(p : { ctx: TypeContext<RoleEntity> }){
   const forceUpdate = useForceUpdate();
@@ -20,9 +21,16 @@ export default function Role(p : { ctx: TypeContext<RoleEntity> }){
         vertical={true}
         findOptions={{
           queryName: RoleEntity,
-          filterOptions: [{ token: "Entity", operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
+          filterOptions: [{ token: RoleEntity.token().entity(), operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
         }}
         onChange={() => forceUpdate()} />
+
+      {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{
+        queryName: UserEntity,
+        filterOptions: [{ token: UserEntity.token().entity(u => u.role), value: ctx.value }]
+      }} />
+      }
+
     </div>
   );
 }

@@ -82,9 +82,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, Lite<Entity>?, SmtpConfigurationEntity?>? GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, SmtpConfigurationEntity?>? getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -109,7 +109,7 @@ namespace Signum.Engine.Mailing
                 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KeyValuePair.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
                 EmailModelLogic.Start(sb);
@@ -276,7 +276,10 @@ namespace Signum.Engine.Mailing
             }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, model).CreateEmailMessageInternal().ToList();
+            {
+                var emailBuilder = new EmailMessageBuilder(template, entity, model);
+                return emailBuilder.CreateEmailMessageInternal().ToList();
+            }
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>
@@ -527,7 +530,7 @@ namespace Signum.Engine.Mailing
 
         public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity? entity, EmailTemplateVisibleOn visibleOn)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
             return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()
                 .Where(a => isAllowed(a) && IsVisible(a, visibleOn))
                 .Where(a => a.IsApplicable(entity))

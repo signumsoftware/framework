@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +17,7 @@ namespace Signum.React.Cache
         public static void Start(IApplicationBuilder app)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-            ReflectionServer.RegisterLike(typeof(CachePermission));
+            ReflectionServer.RegisterLike(typeof(CachePermission), () => CachePermission.ViewCache.IsAuthorized());
 
             SchemaMap.GetColorProviders += GetMapColors;
         }

@@ -252,7 +252,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
 
         internal static string GetEntityHelp(Type type)
         {
-            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).FormatWith(type.NiceName(), type.BaseType.NiceName());
+            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType!.GetGender()).FormatWith(type.NiceName(), type.BaseType!.NiceName());
 
             string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 

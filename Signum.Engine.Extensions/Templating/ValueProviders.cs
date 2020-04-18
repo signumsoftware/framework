@@ -38,7 +38,7 @@ namespace Signum.Engine.Templating
         
         public abstract Type? Type { get; }
 
-        public abstract override bool Equals(object obj);
+        public abstract override bool Equals(object? obj);
 
         public abstract override int GetHashCode();
 
@@ -76,13 +76,15 @@ namespace Signum.Engine.Templating
         {
             if (Variable.HasText())
             {
-                if(variables.TryGetValue(Variable, out var value))
+                if (variables.TryGetValue(Variable, out var value))
                 {
                     if (value != null && value.Equals(this))
                         return;
 
-                    variables.Add(Variable, this);
+                    else throw new InvalidOperationException("Redeclaring variable " + Variable + " with another value");
                 }
+
+                variables.Add(Variable, this);
             } 
         }
 
@@ -95,7 +97,7 @@ namespace Signum.Engine.Templating
                 using (p.Scope())
                 {
                     if (this.Variable != null)
-                        p.RuntimeVariables.Add(this.Variable, item);
+                        p.RuntimeVariables.Add(this.Variable, item!);
 
                     forEachElement();
                 }
@@ -211,7 +213,7 @@ namespace Signum.Engine.Templating
         public readonly bool IsExplicit;
 
         public override int GetHashCode() => ParsedToken.GetHashCode();
-        public override bool Equals(object obj) => obj is TokenValueProvider tvp && tvp.ParsedToken.Equals(ParsedToken);
+        public override bool Equals(object? obj) => obj is TokenValueProvider tvp && tvp.ParsedToken.Equals(ParsedToken);
 
         public TokenValueProvider (ParsedToken token, bool isExplicit)
         {
@@ -224,16 +226,14 @@ namespace Signum.Engine.Templating
             if (p.Rows.IsEmpty())
                 return null;
 
-            return  p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
+            return p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
         }
 
         public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken!]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
-            if (groups.Count == 1 && groups[0].Key == null)
-                return;
+            var col = p.Columns[ParsedToken.QueryToken!];
 
-            foreach (var group in groups)
+            foreach (var group in p.Rows.GroupByColumn(col))
             {
                 using (p.OverrideRows(group))
                     forEachElement();
@@ -246,7 +246,7 @@ namespace Signum.Engine.Templating
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
-        {
+        {  
             list.Add(ParsedToken.QueryToken!);
         }
 
@@ -364,7 +364,7 @@ namespace Signum.Engine.Templating
         }
 
         public override int GetHashCode() => ParsedToken.GetHashCode();
-        public override bool Equals(object obj) => obj is TranslateInstanceValueProvider tivp &&
+        public override bool Equals(object? obj) => obj is TranslateInstanceValueProvider tivp &&
             Equals(tivp.ParsedToken, ParsedToken) &&
             Equals(tivp.EntityToken, EntityToken) &&
             Equals(tivp.Route, Route) &&
@@ -453,7 +453,7 @@ namespace Signum.Engine.Templating
         }
 
         public override int GetHashCode() => (this.QueryToken?.FullKey() ?? this.String).GetHashCode();
-        public override bool Equals(object obj) => obj is ParsedToken pt && Equals(pt.String, String) && Equals(pt.QueryToken, QueryToken);
+        public override bool Equals(object? obj) => obj is ParsedToken pt && Equals(pt.String, String) && Equals(pt.QueryToken, QueryToken);
     }
 
     public class ModelValueProvider : ValueProviderBase
@@ -475,10 +475,10 @@ namespace Signum.Engine.Templating
 
         public override object? GetValue(TemplateParameters p)
         {
-            object value = p.GetModel();
+            object? value = p.GetModel();
             foreach (var m in Members!)
             {
-                value = Getter(m, value);
+                value = Getter(m, value, p);
                 if (value == null)
                     break;
             }
@@ -486,20 +486,23 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        internal static object Getter(MemberInfo member, object model)
+        internal static object? Getter(MemberInfo member, object model, TemplateParameters p)
         {
             try
             {
                 if (member is PropertyInfo pi)
                     return pi.GetValue(model, null);
 
+                if (member is MethodInfo mi)
+                    return mi.Invoke(model, new object[] { p });
+
                 return ((FieldInfo)member).GetValue(model);
             }
             catch (TargetInvocationException e)
             {
-                e.InnerException.PreserveStackTrace();
+                e.InnerException!.PreserveStackTrace();
 
-                throw e.InnerException;
+                throw e.InnerException!;
             }
         }
 
@@ -537,7 +540,7 @@ namespace Signum.Engine.Templating
         }
 
         public override int GetHashCode() => fieldOrPropertyChain?.GetHashCode() ?? 0;
-        public override bool Equals(object obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
+        public override bool Equals(object? obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
     }
 
     public class GlobalValueProvider : ValueProviderBase
@@ -593,7 +596,7 @@ namespace Signum.Engine.Templating
             {
                 foreach (var m in Members)
                 {
-                    value = ModelValueProvider.Getter(m, value);
+                    value = ModelValueProvider.Getter(m, value, p);
                     if (value == null)
                         break;
                 }
@@ -654,7 +657,7 @@ namespace Signum.Engine.Templating
         }
 
         public override int GetHashCode() => globalKey.GetHashCode() + (remainingFieldsOrProperties?.GetHashCode() ?? 0);
-        public override bool Equals(object obj) => obj is GlobalValueProvider gvp 
+        public override bool Equals(object? obj) => obj is GlobalValueProvider gvp 
             && Equals(gvp.globalKey, globalKey)
             && Equals(gvp.remainingFieldsOrProperties, remainingFieldsOrProperties);
     }
@@ -701,7 +704,7 @@ namespace Signum.Engine.Templating
         public override string? Format => "G";
 
         public override int GetHashCode() => dateTimeExpression?.GetHashCode() ?? 0;
-        public override bool Equals(object obj) => obj is DateValueProvider gvp
+        public override bool Equals(object? obj) => obj is DateValueProvider gvp
             && Equals(gvp.dateTimeExpression, dateTimeExpression);
 
     }
@@ -729,12 +732,12 @@ namespace Signum.Engine.Templating
 
         public override object? GetValue(TemplateParameters p)
         {
-            if (!p.RuntimeVariables.TryGetValue(Parent.Variable!, out object value))
+            if (!p.RuntimeVariables.TryGetValue(Parent.Variable!, out object? value))
                 throw new InvalidOperationException("Variable {0} not found".FormatWith(Parent.Variable));
 
             foreach (var m in Members!)
             {
-                value = Getter(m, value);
+                value = Getter(m, value, p);
                 if (value == null)
                     break;
             }
@@ -742,20 +745,23 @@ namespace Signum.Engine.Templating
             return value;
         }
 
-        internal static object Getter(MemberInfo member, object value)
+        internal static object? Getter(MemberInfo member, object value, TemplateParameters p)
         {
             try
             {
                 if (member is PropertyInfo pi)
                     return pi.GetValue(value, null);
 
+                if (member is MethodInfo mi)
+                    return mi.Invoke(value, new object[] { p });
+
                 return ((FieldInfo)member).GetValue(value);
             }
             catch (TargetInvocationException e)
             {
-                e.InnerException.PreserveStackTrace();
+                e.InnerException!.PreserveStackTrace();
 
-                throw e.InnerException;
+                throw e.InnerException!;
             }
         }
 
@@ -794,7 +800,7 @@ namespace Signum.Engine.Templating
         }
 
         public override int GetHashCode() => (fieldOrPropertyChain?.GetHashCode() ?? 0) ^ this.Parent.GetHashCode();
-        public override bool Equals(object obj) => obj is ContinueValueProvider gvp
+        public override bool Equals(object? obj) => obj is ContinueValueProvider gvp
             && Equals(gvp.fieldOrPropertyChain, fieldOrPropertyChain)
             && Equals(gvp.Parent, Parent);
     }

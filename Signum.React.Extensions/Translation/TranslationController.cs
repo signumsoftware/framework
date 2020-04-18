@@ -26,17 +26,17 @@ namespace Signum.React.Translation
         {
             var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
 
-            var assemblies = AssembliesToLocalize().ToDictionary(a => a.FullName);
+            var assemblies = AssembliesToLocalize().ToDictionary(a => a.FullName!);
 
-            var dg = DirectedGraph<Assembly>.Generate(assemblies.Values, a => a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(an.FullName)).NotNull());
+            var dg = DirectedGraph<Assembly>.Generate(assemblies.Values, a => a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(an.FullName!)).NotNull());
 
             var list = (from a in dg.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.FullName))
                         from ci in cultures
                         select new TranslationFileStatus
                         {
-                            assembly = a.GetName().Name,
+                            assembly = a.GetName().Name!,
                             culture = ci.Name,
-                            isDefault = ci.Name == a.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture,
+                            isDefault = ci.Name == a.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture,
                             status = CalculateStatus(a, ci)
                         }).ToList();
 
@@ -52,7 +52,7 @@ namespace Signum.React.Translation
 
             var target = DescriptionManager.GetLocalizedAssembly(a, ci)!;
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(a.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(a.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
             var master = DescriptionManager.GetLocalizedAssembly(a, defaultCulture)!;
 
             var result = TranslationSynchronizer.GetMergeChanges(target, master, new List<LocalizedAssembly>());
@@ -77,7 +77,7 @@ namespace Signum.React.Translation
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
             CultureInfo? targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
             var cultures = TranslationLogic.CurrentCultureInfos(defaultCulture);
@@ -100,7 +100,7 @@ namespace Signum.React.Translation
                      members = t.Members.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
-                 select KVP.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
+                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
                  {
                      localizedTypes.cultures = g.ToDictionary(a => a.culture);
                      return localizedTypes;
@@ -156,13 +156,13 @@ namespace Signum.React.Translation
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
 
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
 
             var cultures = TranslationLogic.CurrentCultureInfos(defaultCulture);
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
+                                                                    select KeyValuePair.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
@@ -185,7 +185,7 @@ namespace Signum.React.Translation
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
-            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
 
             var targetAssembly = DescriptionManager.GetLocalizedAssembly(ass, targetCulture) ?? LocalizedAssembly.ImportXml(ass, targetCulture, forceCreate: true)!;
             var defaultAssembly = DescriptionManager.GetLocalizedAssembly(ass, defaultCulture) ?? LocalizedAssembly.ImportXml(ass, defaultCulture, forceCreate: true)!;
@@ -313,7 +313,7 @@ namespace Signum.React.Translation
                             lt.PluralDescription = td.pluralDescription;
                         }
 
-                        lt.Members!.SetRange(ts.members.Select(a => KVP.Create(a.Key!, a.Value.description!)));
+                        lt.Members!.SetRange(ts.members.Select(a => KeyValuePair.Create(a.Key!, a.Value.description!)));
                     }
                 }
 

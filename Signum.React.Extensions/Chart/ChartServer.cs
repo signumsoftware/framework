@@ -12,6 +12,7 @@ using Signum.React.Facades;
 using Signum.Engine.Chart;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.Authorization;
 
 namespace Signum.React.Chart
 {
@@ -58,14 +59,13 @@ namespace Signum.React.Chart
 
             EntityPackTS.AddExtension += ep =>
             {
-                if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized())
+                if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(UserChartEntity)).MaxDB() == TypeAllowedBasic.None)
                     return;
 
                 var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
                 if (userCharts.Any())
                     ep.extension.Add("userCharts", userCharts);
             };
-
         }
 
         private static void CustomizeChartRequest()
@@ -78,7 +78,7 @@ namespace Signum.React.Chart
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    ((ChartRequestModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
+                    ((ChartRequestModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value!);
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
@@ -94,7 +94,7 @@ namespace Signum.React.Chart
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>));
+                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>))!;
 
                     var cr = (ChartRequestModel)ctx.Entity;
 

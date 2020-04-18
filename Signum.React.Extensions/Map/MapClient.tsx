@@ -38,10 +38,10 @@ export function clearProviders() {
 
 export namespace API {
   export function types(): Promise<SchemaMapInfo> {
-    return ajaxGet<SchemaMapInfo>({ url: "~/api/map/types" });
+    return ajaxGet({ url: "~/api/map/types" });
   }
 
   export function operations(typeName: string): Promise<OperationMapInfo> {
-    return ajaxGet<OperationMapInfo>({ url: "~/api/map/operations/" + typeName });
+    return ajaxGet({ url: "~/api/map/operations/" + typeName });
   }
 }

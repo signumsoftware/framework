@@ -176,7 +176,7 @@ namespace Signum.React.UserAssets
             public string label;
             public int? row;
             public int? column;
-            public bool? disableOnNull;
+            public PinnedFilterActive? active;
             public bool? splitText;
         }
 

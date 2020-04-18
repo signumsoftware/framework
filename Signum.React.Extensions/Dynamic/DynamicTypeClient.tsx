@@ -10,14 +10,13 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLink from '@framework/QuickLinks'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '@framework/Components/Tabs';
+import { Tab } from 'react-bootstrap';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
@@ -33,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
       (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
 
       Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-        .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
           if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
             MessageModal.show({
@@ -55,7 +54,7 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
-    symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
+    () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
       isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
       icon: "arrows-alt",
       iconColor: "purple",
@@ -64,12 +63,12 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
   DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
-    <Tab eventKey="migrations" title="Migrations" >
+    <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
       <h3>{DynamicRenameEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-    </Tab>;
+    </>;
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
     { token: t.append(p => p.typeName), type: "Text" },
@@ -96,11 +95,11 @@ export function start(options: { routes: JSX.Element[] }) {
 export namespace API {
 
   export function getPropertyType(property: DynamicProperty): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
+    return ajaxPost({ url: `~/api/dynamic/type/propertyType` }, property);
   }
 
   export function expressionNames(typeName: string): Promise<Array<string>> {
-    return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
   }
 }
 

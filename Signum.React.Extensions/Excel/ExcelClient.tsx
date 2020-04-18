@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { QueryRequest } from '@framework/FindOptions'
 import { Lite } from '@framework/Signum.Entities'
-import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelPermission } from './Signum.Entities.Excel'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
@@ -21,11 +21,14 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
     if (!ctx.searchControl.props.showBarExtension ||
-      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false) ||
-      !Navigator.isViewable(ExcelReportEntity))
+      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false))
       return undefined;
 
-    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} /> };
+    if (!(options.plainExcel && AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
+      !(options.excelReport && Navigator.isViewable(ExcelReportEntity)))
+      return undefined;
+
+    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport && Navigator.isViewable(ExcelReportEntity)} /> };
   });
 
   if (options.plainExcel) {
@@ -36,7 +39,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
       return (
         <button
           className="sf-query-button sf-chart-script-edit btn btn-light"
-          onClick={() => { API.generatePlanExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
+          onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
           <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
         </button>
       );
@@ -46,14 +49,14 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
 export namespace API {
 
-  export function generatePlanExcel(request: QueryRequest): void {
+  export function generatePlainExcel(request: QueryRequest, overrideFileName?: string): void {
     ajaxPostRaw({ url: "~/api/excel/plain" }, request)
-      .then(response => saveFile(response))
+      .then(response => saveFile(response, overrideFileName))
       .done();
   }
 
   export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
+    return ajaxGet({ url: "~/api/excel/reportsFor/" + queryKey });
   }
 
 

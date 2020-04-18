@@ -165,22 +165,20 @@ namespace Signum.React.Selenium
 
         protected EntityInfoProxy? EntityInfoInternal(int? index) => EntityInfoProxy.Parse(EntityInfoString(index));
 
-        public void AutoCompleteWaitChanges(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        public void AutoCompleteWaitChanges(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
-                AutoCompleteBasic(autoCompleteElement, lite);
+                AutoCompleteBasic(input, container, lite);
 
             }, "autocomplete selection");
         }
-        public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
+
+        public static void AutoCompleteBasic(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
-            autoCompleteElement.SafeSendKeys("id:" + lite.Id.ToString());
-            //Selenium.FireEvent(autoCompleteLocator, "keyup");
+            input.SafeSendKeys("id:" + lite.Id.ToString());
 
-            var listLocator = By.CssSelector(".typeahead.dropdown-menu");
-
-            var list = autoCompleteElement.GetParent().WaitElementVisible(By.TagName("div")).WaitElementVisible(listLocator);
+            var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
 
             itemElement.Click();

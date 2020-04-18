@@ -5,7 +5,7 @@ import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
-import { getTypeInfo } from "@framework/Reflection";
+import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
 
 
 
@@ -96,7 +96,7 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
 }
 
 export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
-  
+
   if (completeValues == null || completeValues == "No")
     return values;
 
@@ -137,7 +137,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.format("YYYY-MM-DDTHH:mm:ss"));
+      allValues.push(minMoment.format());
       minMoment.add(unit, 1);
     }
 
@@ -152,7 +152,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       return complete(values, [false, true], column, insertPoint);
     }
 
-    var typeInfo = getTypeInfo(column.token!.type.name);
+    var typeInfo = tryGetTypeInfo(column.token!.type.name);
     if (typeInfo == null)
       throw new Error("No Metadata found for " + typeName);
 

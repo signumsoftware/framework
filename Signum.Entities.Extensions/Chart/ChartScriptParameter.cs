@@ -39,11 +39,11 @@ namespace Signum.Entities.Chart
 
             public override bool CanConvert(Type objectType) => typeof(ChartScriptParameterGroup) == objectType;
 
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>throw new NotImplementedException();
+            public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => throw new NotImplementedException();
 
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
             {
-                var group = (ChartScriptParameterGroup)value;
+                var group = (ChartScriptParameterGroup)value!;
                 writer.WriteStartObject();
                 writer.WritePropertyName("name");
                 writer.WriteValue(group.Name);

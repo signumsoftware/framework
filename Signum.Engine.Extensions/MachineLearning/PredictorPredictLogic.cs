@@ -89,7 +89,7 @@ namespace Signum.Engine.MachineLearning
         {
             var result = new PredictDictionary(ctx.Predictor, options, null)
             {
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object?)null)).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, (object?)null)).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
                     SubQueryGroups = new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance)
@@ -127,7 +127,7 @@ namespace Signum.Engine.MachineLearning
 
                 QueryDescription sqd = QueryLogic.Queries.QueryDescription(sqe.Query.ToQueryName());
 
-                Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KVP.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
+                Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KeyValuePair.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
 
                 Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements, sqd)).ToArray();
 
@@ -166,7 +166,7 @@ namespace Signum.Engine.MachineLearning
 
             var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor, options, row.TryEntity)
             {
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
                     SubQueryGroups = subQueryResults.TryGetC(sq)?.TryGetC(row.GetValues(mainKeys)) ?? 
@@ -226,7 +226,7 @@ namespace Signum.Engine.MachineLearning
 
             var result = ctx.MainQuery.ResultTable.Rows.ToDictionaryEx(row => row, row => new PredictDictionary(ctx.Predictor, options, row.TryEntity)
             {
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
                     SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(ctx.MainQuery.GetParentKey(row))) ?? new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance)

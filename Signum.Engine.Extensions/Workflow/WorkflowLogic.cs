@@ -22,7 +22,7 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
-        public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition = null!;
+        public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
         [AutoExpressionField]
         public static bool HasExpired(this WorkflowEntity w) => 
@@ -197,8 +197,6 @@ namespace Signum.Engine.Workflow
                 index = newIndex;
                 line++;
             }
-
-            throw new InvalidOperationException("Line not found");
         }
 
         public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)

@@ -10,37 +10,40 @@ import { ChartRow } from '../ChartClient';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default class MarkermapChart extends React.Component<ChartClient.ChartComponentProps> {
+export default function MarkermapChart(p: ChartClient.ChartComponentProps) {
+  return <MarkermapChartImp {...p} />
+}
 
-  componentDidMount() {
+export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient.ChartComponentProps) {
+
+  const divElement = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
     GoogleMapsChartUtils.loadGoogleMapsScript(() => {
       GoogleMapsChartUtils.loadGoogleMapsMarkerCluster(() => {
-        this.drawChart(this.props);
-      })
+        drawChart()
+      });
     });
-  }
+  })
 
-  divElement?: HTMLDivElement | null;
+  return (
+    <div className="sf-chart-container" ref={divElement}>
+    </div>
+  );
 
-  render() {
-    this.divElement && this.drawChart(this.props);
 
-    return (
-      <div className="sf-chart-container" ref={d => this.divElement = d}>
-      </div>
-    );
-  }
 
-  drawChart({ data, parameters }: ChartClient.ChartComponentProps) {
+
+  function drawChart() {
 
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
-    var latitudeColumn = data && data.columns.c0! as ChartClient.ChartColumn<number> | undefined;
-    var longitudeColumn = data && data.columns.c1! as ChartClient.ChartColumn<number> | undefined;
+    var latitudeColumn = data?.columns.c0! as ChartClient.ChartColumn<number> | undefined;
+    var longitudeColumn = data?.columns.c1! as ChartClient.ChartColumn<number> | undefined;
 
     var centerMap = new google.maps.LatLng(
-      data && data.rows.length > 0 ? latitudeColumn!.getValue(data.rows[0]) : 0,
-      data && data.rows.length > 0 ? longitudeColumn!.getValue(data.rows[0]) : 0);
+      data?.rows.length ? latitudeColumn!.getValue(data.rows[0]) : 0,
+      data?.rows.length ? longitudeColumn!.getValue(data.rows[0]) : 0);
 
     var mapOptions = {
       center: centerMap,
@@ -52,7 +55,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
       mapTypeId: mapType
     } as google.maps.MapOptions;
 
-    var map = new google.maps.Map(this.divElement!, mapOptions);
+    var map = new google.maps.Map(divElement.current!, mapOptions);
 
     if (parameters["MapStyle"] != null &&
       parameters["MapStyle"] != "Standard") {
@@ -98,7 +101,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
       else if (colorSchemeColumn != null) {
         var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"])!;
         var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorSchemeColumn.getValueKey));
-        color = r => colorSchemeColumn!.getValueColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
+        color = r => colorSchemeColumn!.getValueColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
       }
 
       data.rows.forEach(r => {
@@ -107,7 +110,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
           bounds.extend(position);
           var marker = new google.maps.Marker({
             position: position,
-            label: labelColumn && labelColumn.getValueNiceName(r),
+            label: labelColumn?.getValueNiceName(r),
             icon: iconColumn ? iconColumn.getValue(r) : color ?
               {
                 anchor: new google.maps.Point(16, 16),
@@ -116,7 +119,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
     																<circle cx="8" cy="8" r="8" fill="'  + color(r) + '" /> \
     																</svg>'
               } : undefined,
-            title: titleColumn && titleColumn.getValueNiceName(r)
+            title: titleColumn?.getValueNiceName(r)
           });
 
           if (infoColumn) {
@@ -142,7 +145,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
                 "</svg>";
               link.addEventListener("click", (e) => {
                 e.preventDefault();
-                this.props.onDrillDown(r);
+                onDrillDown(r);
               });
 
               d.append(link);
@@ -156,7 +159,7 @@ export default class MarkermapChart extends React.Component<ChartClient.ChartCom
           }
           else {
             marker.addListener("click", () => {
-              this.props.onDrillDown(r);
+              onDrillDown(r);
             });
           }
 
