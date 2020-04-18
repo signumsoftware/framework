@@ -16,7 +16,7 @@ namespace Signum.Engine.Maps
         public event SavingEventHandler<T>? Saving;
         public event SavedEventHandler<T>? Saved;
 
-        public event AlternativeRetriveEventHandler<T>? AlternativeRetrive;
+        public event AlternativeRetrieveEventHandler<T>? AlternativeRetrieve;
         public event RetrievedEventHandler<T>? Retrieved;
 
         public CacheControllerBase<T>? CacheController { get; set; }
@@ -128,14 +128,14 @@ namespace Signum.Engine.Maps
             Retrieved?.Invoke((T)entity);
         }
 
-        public Entity? OnAlternativeRetriving(PrimaryKey id)
+        public Entity? OnAlternativeRetrieving(PrimaryKey id)
         {
-            if (AlternativeRetrive == null)
+            if (AlternativeRetrieve == null)
                 return null;
 
             var args = new AlternativeRetrieveArgs<T>();
 
-            AlternativeRetrive(id, args);
+            AlternativeRetrieve(id, args);
 
             if (args.Entity == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -249,7 +249,7 @@ namespace Signum.Engine.Maps
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
     public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;
-    public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
+    public delegate void AlternativeRetrieveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
     public delegate IDisposable? PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
     public delegate IDisposable? PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
@@ -292,7 +292,7 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        Entity? OnAlternativeRetriving(PrimaryKey id);
+        Entity? OnAlternativeRetrieving(PrimaryKey id);
         void OnPreSaving(Entity entity, PreSavingContext ctx);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);

@@ -135,7 +135,7 @@ namespace Signum.Entities
     {
         PropertyInfo PropertyInfo { get; }
         List<ValidatorAttribute> Validators { get; }
-        bool Required { get; }
+    
 
         string? PropertyCheck(ModifiableEntity modifiableEntity);
         object? GetValueUntyped(ModifiableEntity entity);
@@ -156,7 +156,6 @@ namespace Signum.Entities
 
         public Func<T, PropertyInfo, string?>? StaticPropertyValidation { get; set; }
 
-        public bool Required => throw new NotImplementedException();
 
         internal PropertyValidator(PropertyInfo pi)
         {
@@ -217,7 +216,7 @@ namespace Signum.Entities
             {
                 foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }
@@ -228,7 +227,7 @@ namespace Signum.Entities
             {
                 foreach (var item in Validator.GlobalValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }

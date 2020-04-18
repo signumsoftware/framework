@@ -71,6 +71,14 @@ export interface FilterGroupOption {
   value?: string; /*For search in multiple columns*/
 }
 
+export interface PinnedFilter {
+  label?: string | (() => string);
+  row?: number;
+  column?: number;
+  active?: PinnedFilterActive;
+  splitText?: boolean;
+}
+
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
 
 export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterGroupOptionParsed {
@@ -82,10 +90,10 @@ export interface FilterConditionOptionParsed {
   frozen: boolean;
   operation?: FilterOperation;
   value: any;
-  pinned?: PinnedFilter;
+  pinned?: PinnedFilterParsed;
 }
 
-export interface PinnedFilter {
+export interface PinnedFilterParsed {
   label?: string;
   row?: number;
   column?: number;
@@ -99,7 +107,7 @@ export interface FilterGroupOptionParsed {
   expanded: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
-  pinned?: PinnedFilter;
+  pinned?: PinnedFilterParsed;
   value?: string; /*For search in multiple columns*/
 }
 
@@ -115,7 +123,7 @@ export interface OrderOptionParsed {
 
 export interface ColumnOption {
   token: string | QueryTokenString<any>;
-  displayName?: string;
+  displayName?: string | (() => string);
 }
 
 export interface ColumnOptionParsed {
@@ -181,6 +189,16 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
     return true;
 
   return hasAggregate(token.parent);
+}
+
+export function hasElement(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Element")
+    return true;
+
+  return hasElement(token.parent);
 }
 
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {

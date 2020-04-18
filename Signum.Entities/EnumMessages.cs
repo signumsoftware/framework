@@ -1,10 +1,17 @@
 
 
 using Signum.Utilities;
+using System;
 using System.ComponentModel;
 
 namespace Signum.Entities
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class AllowUnathenticatedAttribute : Attribute
+    {
+
+    }
+
     public enum OperationMessage
     {
         [Description("Create...")]
@@ -232,6 +239,7 @@ Lose changes?")]
         PleaseChooseA0ToContinue,
     }
 
+    [AllowUnathenticated]
     public enum ConnectionMessage
     {
         AConnectionWithTheServerIsNecessaryToContinue,
@@ -239,6 +247,9 @@ Lose changes?")]
         SessionExpired,
         [Description("A new version has just been deployed! Save changes and {0}")]
         ANewVersionHasJustBeenDeployedSaveChangesAnd0,
+        OutdatedClientApplication,
+        [Description("Looks like a new version has just been deployed! If you don't have changes that need to be saved, consider reloading")]
+        ANewVersionHasJustBeenDeployedConsiderReload,
         Refresh,
     }
 
@@ -264,6 +275,7 @@ Lose changes?")]
         Today,
     }
 
+    [AllowUnathenticated]
     public enum JavascriptMessage
     {
         [Description("Choose a type")]

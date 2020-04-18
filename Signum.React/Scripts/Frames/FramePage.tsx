@@ -6,7 +6,7 @@ import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
@@ -15,6 +15,7 @@ import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
 import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
+import * as Operations from '../Operations'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -35,10 +36,9 @@ export default function FramePage(p: FramePageProps) {
   const mounted = useMounted();
   const forceUpdate = useForceUpdate();
 
-  const type = getTypeInfo(p.match.params.type).name;
+  const ti = getTypeInfo(p.match.params.type);
+  const type = ti.name;
   const id = p.match.params.id;
-
-  const ti = getTypeInfo(type);
 
   useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
 
@@ -94,6 +94,13 @@ export default function FramePage(p: FramePageProps) {
         });
 
     } else {
+
+      const cn = QueryString.parse(p.location.search).constructor;
+      if (cn != null) {
+        const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith((cn as string).toLowerCase()));
+        return Operations.API.construct(ti.name, oi.key);
+      }
+
       return Constructor.constructPack(ti.name)
         .then(pack => {
           return Promise.resolve(pack as EntityPack<Entity>);

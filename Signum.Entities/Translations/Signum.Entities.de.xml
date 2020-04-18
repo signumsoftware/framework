@@ -25,9 +25,6 @@
     <Member Name="Element2" Description="Element (2)" />
     <Member Name="Element3" Description="Element (3)" />
   </Type>
-  <Type Name="ColorEmbedded" Description="Farbe">
-    <Member Name="Argb" Description="ARGB" />
-  </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
     <Member Name="InsertStart" Description="Einfügen beim Start" />
@@ -35,16 +32,18 @@
     <Member Name="Replace" Description="Ersetzen" />
   </Type>
   <Type Name="ComparisonType">
-    <Member Name="DistinctTo" Description="anders als" />
+    <Member Name="DistinctTo" Description="ungleich" />
     <Member Name="EqualTo" Description="gleich" />
     <Member Name="GreaterThan" Description="größer als" />
-    <Member Name="GreaterThanOrEqualTo" Description="Größer oder gleich" />
-    <Member Name="LessThan" Description="weniger als" />
-    <Member Name="LessThanOrEqualTo" Description="Kleiner oder gleich" />
+    <Member Name="GreaterThanOrEqualTo" Description="größer oder gleich" />
+    <Member Name="LessThan" Description="kleiner als" />
+    <Member Name="LessThanOrEqualTo" Description="kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Um fortzufahren ist eine Verbindung mit dem Server ist erforderlich" />
+    <Member Name="ANewVersionHasJustBeenDeployedConsiderReload" Description="Sieht aus, als wäre gerade eine neue Version eingeführt worden! Wenn Sie keine Änderungen haben, die gespeichert werden müssen, erwägen Sie, die Seite neu zu laden" />
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="Eine neue Version wurde bereitgestellt! Speichere deine Änderungen und {0}" />
+    <Member Name="OutdatedClientApplication" Description="Veraltete Clientanwendung" />
     <Member Name="Refresh" Description="Aktualisieren" />
     <Member Name="SessionExpired" Description="Sitzung abgelaufen" />
   </Type>
@@ -445,6 +444,7 @@
   <Type Name="ValidationMessage">
     <Member Name="_0And1And2CanNotBeSetAtTheSameTime" Description="{0} und {1} und {2} können nicht zur gleichen Zeit gesetzt werden" />
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} und {1} können nicht gleichzeitig festgelegt werden" />
+    <Member Name="_0AreNotSet" Description="{0} sind nicht festgelegt" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
     <Member Name="_0DoesNotHaveAValid1IdentifierFormat" Description="'{0}' hat kein gültiges {1} Identifikatorformat." />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
@@ -471,6 +471,7 @@
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
+    <Member Name="_0ShouldBeEmpty" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />
     <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} sollte größer oder gleich {1} sein" />
     <Member Name="_0ShouldBeLessThan1" Description="{0} sollte kleiner als {1} sein" />

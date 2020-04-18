@@ -63,7 +63,7 @@ label > input[type=checkbox] {
     overflow: hidden;
 }
 
-.sf-entity-line .input-group .form-control{
+.sf-entity-line .input-group .form-control {
     overflow: hidden;
 }
 
@@ -203,11 +203,6 @@ ul.sf-strip-vertical > li {
     margin-bottom: 7px; /*sf-strip-horizontal*/
 }
 
-    .sf-strip.sf-strip-vertical {
-        margin-top: 7px; /*sf-strip-vertical*/
-    }
-
-
 .sf-strip-element .sf-line-button {
     margin-left: 2px;
 }
@@ -250,6 +245,9 @@ ul.nav-tabs {
 .sf-move:hover {
     color: #9900E0;
     cursor: move;
+}
+.sf-move.sf-move-step:hover {
+    cursor: pointer;
 }
 
 body.rtl .form-group.row > label {
@@ -452,7 +450,7 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
 
-.sf-no-padding{
+.sf-no-padding {
     padding: 1px !important;
 }
 

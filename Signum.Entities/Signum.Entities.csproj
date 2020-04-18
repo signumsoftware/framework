@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -10,17 +9,16 @@
     <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
 
-
-
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
+    <PackageReference Include="Npgsql" Version="4.1.3.1" />
+    <PackageReference Include="Signum.Analyzer" Version="2.6.0" />
+    <PackageReference Include="Signum.MSBuildTask" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="Translations\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

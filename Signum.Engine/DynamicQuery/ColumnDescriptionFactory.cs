@@ -150,6 +150,15 @@ namespace Signum.Engine.DynamicQuery
             if (OverrideIsAllowed != null)
                 return OverrideIsAllowed();
 
+            if (propertyRoutes != null)
+            {
+                var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
+                if (result.IsEmpty())
+                    return null;
+
+                return result.CommaAnd();
+            }
+
             if (Meta != null)
                 return Meta.IsAllowed();
 

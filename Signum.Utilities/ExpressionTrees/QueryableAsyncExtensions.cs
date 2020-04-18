@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -73,10 +74,10 @@ namespace Signum.Utilities.ExpressionTrees
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleEx(predicate));
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleEx(predicate));
 
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx());
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx());
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx(predicate));
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx(predicate));
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx()!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx()!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx(predicate)!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx(predicate)!);
 
 
         public static Task<bool> ContainsAsync<TSource>(this IQueryable<TSource> source, TSource item) => BindAsyncWithoutCancellationToken___(() => source.Contains(item));

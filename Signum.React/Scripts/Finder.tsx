@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -21,8 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -40,8 +40,8 @@ export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function clearQuerySettings() {
   Dic.clear(querySettings);
+  clearQueryDescriptionCache();
 }
-
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => FinderFindManager.getSearchPage()} />);
@@ -223,7 +223,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 export function getTypeNiceName(tr: TypeReference) {
 
   const niceName = tr.typeNiceName ??
-    getTypeInfos(tr)
+    tryGetTypeInfos(tr)
       .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName ?? ti.name))
       .joinComma(External.CollectionMessage.Or.niceToString());
 
@@ -379,7 +379,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
   return completer.finished()
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
-      displayName: co.displayName ?? completer.get(co.token.toString()).niceName,
+      displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
     }) as ColumnOptionParsed));
 }
 
@@ -489,7 +489,7 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
 
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
-      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualsTo") &&
+      ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
@@ -581,7 +581,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
-  const tis = getTypeInfos(qd.columns["Entity"].type);
+  const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
 
   if (!fo.groupResults && (!fo.orderOptions || fo.orderOptions.length == 0)) {
@@ -620,7 +620,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
         token: completer.get(co.token.toString()),
-        displayName: co.displayName ?? completer.get(co.token.toString()).niceName
+        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -855,7 +855,16 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
 }
 
 export class TokenCompleter {
-  constructor(public queryDescription: QueryDescription) { }
+
+  static globalCache: {
+    [queryKey: string]: {
+      [fullKey: string]: QueryToken
+    }
+  } = {};
+
+  queryCache: {
+    [fullKey: string]: QueryToken
+  };
 
   tokensToRequest: {
     [fullKey: string]: (
@@ -864,6 +873,12 @@ export class TokenCompleter {
         token?: QueryToken,
       })
   } = {};
+
+  constructor(public queryDescription: QueryDescription)
+  {
+    this.queryCache = TokenCompleter.globalCache[queryDescription.queryKey] ??
+      (TokenCompleter.globalCache[queryDescription.queryKey] = {});
+  }
 
   requestFilter(fo: FilterOption, options: SubTokensOptions) {
 
@@ -881,6 +896,19 @@ export class TokenCompleter {
 
     if (this.isSimple(fullKey))
       return;
+
+    var token = this.queryCache[fullKey];
+    if (token) {
+      if (hasAggregate(token) && (options && SubTokensOptions.CanAggregate) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (aggregates not allowed)`);
+
+      if (hasAnyOrAll(token) && (options && SubTokensOptions.CanAnyAll) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Any/All not allowed)`);
+
+      if (hasElement(token) && (options && SubTokensOptions.CanElement) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
+      return;
+    }
 
     if (this.tokensToRequest[fullKey])
       return;
@@ -902,7 +930,11 @@ export class TokenCompleter {
       return Promise.resolve(undefined);
 
     return API.parseTokens(this.queryDescription.queryKey, tokens).then(parsedTokens => {
-      parsedTokens.forEach(t => this.tokensToRequest[t.fullKey].token = t);
+      parsedTokens.forEach(t => {
+        this.tokensToRequest[t.fullKey].token = t;
+        if (!this.queryCache[t.fullKey])
+          this.queryCache[t.fullKey] = t;
+      });
     });
   }
 
@@ -915,6 +947,10 @@ export class TokenCompleter {
         throw new Error(`Column '${fullKey}' is not a column of query '${this.queryDescription.queryKey}'. Maybe use 'Entity.${fullKey}' instead?`);
 
       return toQueryToken(cd);
+    }
+
+    if (this.queryCache[fullKey]) {
+      return this.queryCache[fullKey];
     }
 
     return this.tokensToRequest[fullKey].token!;
@@ -1024,6 +1060,7 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
 
 export function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
+  TokenCompleter.globalCache = {};
 }
 
 let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
@@ -1102,10 +1139,6 @@ export module API {
     count: number;
   }
 
-  export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost({ url: "~/api/query/findRowsLike", signal }, request);
-  }
-
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
     return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
   }
@@ -1122,15 +1155,6 @@ export module API {
       }
       return list;
     });
-  }
-
-  export interface AutocompleteQueryRequest {
-    queryKey: string;
-    filters: FilterRequest[];
-    columns: ColumnRequest[];
-    orders: OrderRequest[];
-    subString: string;
-    count: number;
   }
 }
 
@@ -1153,7 +1177,7 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(p.label ?? "") +
+        query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
@@ -1182,7 +1206,7 @@ export module Encoder {
 
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
     if (columnOptions)
-      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : ""));
   }
 
   export function stringValue(value: any): string {
@@ -1369,7 +1393,7 @@ export interface SimpleFilterBuilderContext {
 
 export interface FormatRule {
   name: string;
-  formatter: (column: ColumnOptionParsed) => CellFormatter;
+  formatter: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => CellFormatter;
   isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
@@ -1383,6 +1407,8 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  row: ResultRow;
+  rowIndex: number;
 }
 
 
@@ -1401,21 +1427,27 @@ export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOption
 
   const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
-  return rule.formatter(co);
+  return rule.formatter(co, sc);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | undefined, formater: CellFormatter) {
+  if (pr == null)
+    return;
   registeredPropertyFormatters[pr.toString()] = formater;
 }
-
 
 export const formatRules: FormatRule[] = [
   {
     name: "Object",
     isApplicable: col => true,
     formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
+  },
+  {
+    name: "Password",
+    isApplicable: col => col.token?.format == "Password",
+    formatter: col => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
   },
   {
     name: "Enum",
@@ -1432,27 +1464,27 @@ export const formatRules: FormatRule[] = [
   {
     name: "Lite",
     isApplicable: col => col.token!.filterType == "Lite",
-    formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+    formatter: col => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
   },
 
   {
     name: "Guid",
     isApplicable: col => col.token!.filterType == "Guid",
-    formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    formatter: col => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
     name: "SystemValidFrom",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1468,7 +1500,7 @@ export const formatRules: FormatRule[] = [
     name: "SystemValidTo",
     isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
     formatter: col => {
-      return new CellFormatter((cell: string, ctx) => {
+      return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
 
@@ -1485,7 +1517,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
     }
   },
   {
@@ -1493,13 +1525,13 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
     formatter: col => {
       const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
     }
   },
   {
     name: "Bool",
     isApplicable: col => col.token!.filterType == "Boolean",
-    formatter: col => new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
+    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
   },
 ];
 
@@ -1515,15 +1547,15 @@ export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
     isApplicable: row => true,
-    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-      <EntityLink lite={row.entity}
-        inSearch={true}
-        onNavigated={sc?.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
-        <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBaseController.viewIcon}
-        </span>
-      </EntityLink>
+    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        <EntityLink lite={row.entity}
+          inSearch={true}
+          onNavigated={sc?.handleOnNavigated}
+          getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+          inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+          <span title={EntityControlMessage.View.niceToString()}>
+            {EntityBaseController.viewIcon}
+          </span>
+        </EntityLink>
   },
 ];

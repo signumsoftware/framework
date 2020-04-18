@@ -103,8 +103,9 @@ namespace Signum.Engine.Linq
 
         private static Expression? EnumEquals(Expression exp1, Expression exp2)
         {
-            var exp1Clean = RemoveConvertChain(exp1);
-            var exp2Clean = RemoveConvertChain(exp2);
+            bool anyEnum = false;
+            var exp1Clean = RemoveConvertChain(exp1, ref anyEnum);
+            var exp2Clean = RemoveConvertChain(exp2, ref anyEnum);
 
             if (exp1Clean.Type.UnNullify() == typeof(DayOfWeek) ||
                exp2Clean.Type.UnNullify() == typeof(DayOfWeek))
@@ -114,7 +115,7 @@ namespace Signum.Engine.Linq
                     ConstantToDayOfWeek(exp2Clean) ?? exp2Clean);
             }
 
-            if (exp1 != exp1Clean || exp2 != exp2Clean)
+            if (anyEnum)
             {
                 var type = exp2.Type.IsNullable() ? exp1.Type.Nullify(): exp1.Type;
 
@@ -137,12 +138,16 @@ namespace Signum.Engine.Linq
             return null;
         }
         
-        private static Expression RemoveConvertChain(Expression exp)
+        private static Expression RemoveConvertChain(Expression exp, ref bool anyEnum)
         {
-
             while (true)
             {
-                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum) ?? exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum);
+                if (newExp != null)
+                    anyEnum = true;
+                else
+                    newExp = exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+
                 if (newExp == null)
                     return exp;
 
@@ -571,18 +576,28 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".FormatWith(typeExpr.ToString(), collection.ToString(t=>t.TypeName(), ", ")));
         }
 
-        public static Expression In(Expression element, object[] values)
+        public static Expression In(Expression element, object[] values, bool isPostgres)
         {
             var nominate = DbExpressionNominator.FullNominate(element)!;
 
-            if (nominate is ToDayOfWeekExpression dowe)
+            if (nominate.RemoveUnNullify() is ToDayOfWeekExpression dowe)
             {
-                byte dateFirs = ToDayOfWeekExpression.DateFirst.Value.Item1;
-                var sqlWeekDays = values.Cast<DayOfWeek>()
-                    .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
-                    .ToArray();
+                if (isPostgres)
+                {
+                    var sqlWeekDays = values.Cast<DayOfWeek>()
+                       .Select(a => (object)(int)a)
+                       .ToArray();
+                    return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                }
+                else
+                {
 
-                return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                    byte dateFirs = ((SqlServerConnector)Connector.Current).DateFirst;
+                    var sqlWeekDays = values.Cast<DayOfWeek>()
+                        .Select(a => (object)ToDayOfWeekExpression.ToSqlWeekDay(a, dateFirs))
+                        .ToArray();
+                    return InExpression.FromValues(dowe.Expression, sqlWeekDays);
+                }
             }
             else
                 return InExpression.FromValues(nominate, values);
@@ -597,7 +612,12 @@ namespace Signum.Engine.Linq
             if (cleanElement == NewId)
                 return False;
 
-            return InExpression.FromValues(DbExpressionNominator.FullNominate(cleanElement)!, cleanValues);
+            cleanElement = DbExpressionNominator.FullNominate(cleanElement)!;
+
+            if (cleanElement.Type == typeof(string))
+                return InExpression.FromValues(cleanElement, cleanValues.Select(a => (object)a.ToString()!).ToArray());
+            else
+                return InExpression.FromValues(cleanElement, cleanValues);
         }
 
         private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)

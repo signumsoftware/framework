@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
 import { Lite, Entity } from '../Signum.Entities'
-import { getTypeInfos, getQueryKey } from '../Reflection'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
@@ -185,12 +185,12 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFooter={p.showFooter != null ? p.showFooter : true}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
-        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
-        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
+        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
+        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, { isSearch: true}))}
 
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
-        showContextMenu={p.showContextMenu || qs?.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
+        showContextMenu={p.showContextMenu ?? qs?.showContextMenu ?? ((fo) => fo.groupResults ? "Basic" : true)}
         hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
         hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
         showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}

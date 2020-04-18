@@ -12,7 +12,7 @@ export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
 export type MessageModalIcon = "info" | "question" | "warning" | "error" | "success";
 
-export type MessageModalButtons = "ok" | "ok_cancel" | "yes_no" | "yes_no_cancel";
+export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "yes_no_cancel";
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
@@ -54,6 +54,14 @@ export default function MessageModal(p: MessageModalProps) {
             onClick={() => handleButtonClicked("ok")}
             name="accept">
             {JavascriptMessage.ok.niceToString()}
+          </button>);
+      case "cancel":
+        return (
+          <button
+            className="btn btn-secondary sf-close-button sf-button"
+            onClick={() => handleButtonClicked("cancel")}
+            name="cancel">
+            {JavascriptMessage.cancel.niceToString()}
           </button>);
       case "ok_cancel":
         return (
@@ -184,7 +192,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
   );
 }
 
-MessageModal.showError = (message: string, title?: string): Promise<undefined> => {
+MessageModal.showError = (message: React.ReactChild, title?: string): Promise<undefined> => {
   return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title ?? JavascriptMessage.error.niceToString(), message: message })
     .then(() => undefined);
 }
@@ -229,5 +237,4 @@ function renderText(message: React.ReactChild | null | undefined, style?: Messag
 
   return message;
 }
-
 

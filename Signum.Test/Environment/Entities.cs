@@ -27,6 +27,8 @@ namespace Signum.Test.Environment
         public Lite<IEntity>? OtherTarget { get; set; }
 
         public DateTime CreationTime { get; set; }
+        
+        public Date CreationDate { get; set; }
 
         public override string ToString()
         {
@@ -361,14 +363,14 @@ namespace Signum.Test.Environment
 
     public static class MinimumExtensions
     {
-        [SqlMethod(Name = "dbo.MinimumTableValued")]
+        [SqlMethod(Name = "MinimumTableValued")]
         public static IQueryable<IntValue> MinimumTableValued(int? a, int? b)
         {
             throw new InvalidOperationException("sql only");
         }
 
 
-        [SqlMethod(Name = "dbo.MinimumScalar")]
+        [SqlMethod(Name = "MinimumScalar")]
         public static int? MinimumScalar(int? a, int? b)
         {
             throw new InvalidOperationException("sql only");
@@ -376,19 +378,42 @@ namespace Signum.Test.Environment
 
         internal static void IncludeFunction(SchemaAssets assets)
         {
-            assets.IncludeUserDefinedFunction("MinimumTableValued", @"(@Param1 Integer, @Param2 Integer)
+            if (Schema.Current.Settings.IsPostgres)
+            {
+                assets.IncludeUserDefinedFunction("MinimumTableValued", @"(p1 integer, p2 integer)
+RETURNS TABLE(""MinValue"" integer)
+AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT Case When p1 < p2 Then p1
+           Else COALESCE(p2, p1) End as MinValue;
+                END
+$$ LANGUAGE plpgsql;");
+
+                assets.IncludeUserDefinedFunction("MinimumScalar", @"(p1 integer, p2 integer)
+RETURNS integer
+AS $$
+BEGIN
+	RETURN (Case When p1 < p2 Then p1
+           Else COALESCE(p2, p1) End);
+END
+$$ LANGUAGE plpgsql;");
+            }
+            else
+            {
+                assets.IncludeUserDefinedFunction("MinimumTableValued", @"(@Param1 Integer, @Param2 Integer)
 RETURNS Table As
 RETURN (SELECT Case When @Param1 < @Param2 Then @Param1
                Else COALESCE(@Param2, @Param1) End MinValue)");
 
-
-            assets.IncludeUserDefinedFunction("MinimumScalar", @"(@Param1 Integer, @Param2 Integer)
+                assets.IncludeUserDefinedFunction("MinimumScalar", @"(@Param1 Integer, @Param2 Integer)
 RETURNS Integer
 AS
 BEGIN
    RETURN (Case When @Param1 < @Param2 Then @Param1
            Else COALESCE(@Param2, @Param1) End);
 END");
+            }
         }
     }
 

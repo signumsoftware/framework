@@ -7,13 +7,16 @@ import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getTypeInfos, getTypeInfo } from '../Reflection';
+import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
   createMessage?: string;
+  getComponentWithIndex?: (ctx: TypeContext<any>, index: number) => React.ReactElement<any>;
+  drag?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
+  itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
 }
 
 export class EntityRepeaterController extends EntityListBaseController<EntityRepeaterProps> {
@@ -22,6 +25,7 @@ export class EntityRepeaterController extends EntityListBaseController<EntityRep
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
+    p.drag = true;
   }
 }
 
@@ -72,16 +76,19 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   function renderElements() {
     const readOnly = ctx.readOnly;
-    const showType = getTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
+    const showType = tryGetTypeInfos(ctx.propertyRoute!.typeReference().name).length > 1;
     return (
       <div className="sf-repater-elements">
         {
-          c.getMListItemContext(ctx).map(mlec =>
+          c.getMListItemContext(ctx).map((mlec, i) => 
             (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
-              drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+              move={c.canMove(mlec.value) && !p.drag && !readOnly ? { canMove: true, renderMoveUp: () => c.renderMoveUp(false, mlec.index!)!, renderMoveDown: () => c.renderMoveDown(false, mlec.index!) } : undefined}
+              drag={c.canMove(mlec.value) && p.drag && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+              itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
               getComponent={p.getComponent}
+              getComponentWithIndex={p.getComponentWithIndex ? (ctx => p.getComponentWithIndex!(ctx, mlec.index!)) : undefined}
               getViewPromise={p.getViewPromise}
               title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
         }
@@ -103,13 +110,16 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 export interface EntityRepeaterElementProps {
   ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
   getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+  getComponentWithIndex?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
+  move?: MoveConfig;
   drag?: DragConfig;
   title?: React.ReactElement<any>;
+  itemExtraButtons?: () => React.ReactElement<any>;
 }
 
-export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, drag, title }: EntityRepeaterElementProps)
+export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
 {
 
   return (
@@ -127,6 +137,8 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
               {EntityListBaseController.removeIcon}
             </a>}
             &nbsp;
+            {(move && move!.canMove && !drag) && move!.renderMoveUp()} 
+            {(move && move!.canMove && !drag) && move!.renderMoveDown()}
             {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
               draggable={true}
               onDragStart={drag.onDragStart}
@@ -134,15 +146,21 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
               title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
               {EntityListBaseController.moveIcon}
             </a>}
+            {itemExtraButtons && itemExtraButtons()}
             {title && '\xa0'}
             {title}
           </div>
         </legend>
         <div className="sf-line-entity">
-          <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
+          <RenderEntity ctx={ctx} getComponent={getComponentWithIndex ?? getComponent} getViewPromise={getViewPromise} />
         </div>
       </fieldset>
     </div>
   );
 }
 
+interface MoveConfig {
+  canMove: boolean;
+  renderMoveUp: () => (JSX.Element | undefined);
+  renderMoveDown: () => (JSX.Element | undefined);
+}

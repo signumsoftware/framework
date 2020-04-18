@@ -23,7 +23,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   onExplored?: () => void;
   onTokenLoaded?: () => void;
   initialValue?: any;
-  customClass?: string;
+  customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
   format?: string;
   throwIfNotFindable?: boolean;
@@ -31,6 +31,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
+  htmlAttributes?: React.HTMLAttributes<HTMLElement>,
 }
 
 export interface ValueSearchControlState {
@@ -154,7 +155,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     var errorMessage = Finder.validateNewEntities(fo);
     if (errorMessage) {
       return (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert" >
           <strong>Error in ValueSearchControl ({getQueryKey(fo.queryName)}): </strong>
           {errorMessage}
         </div>
@@ -164,7 +165,6 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (this.props.onRender)
       return this.props.onRender(this.state.value, this);
 
-    const badgeColor = this.props.badgeColor;
 
     let className = classes(
       p.valueToken == undefined && "count-search",
@@ -173,25 +173,32 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
 
-      p.isBadge == false ? "" : "badge badge-pill " +
-        (badgeColor && typeof badgeColor == "function" ? "badge-" + badgeColor(this.state.value) :
-          badgeColor ? "badge-" + badgeColor :
-            p.isBadge == true || this.state.value > 0 ? "badge-secondary" : "badge-light text-muted"),
-      p.customClass
+      p.isBadge == false ? "" :
+        "badge badge-pill " +
+        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? "badge-light text-muted" :
+          p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
+            p.badgeColor ? "badge-" + p.badgeColor :
+              "badge-secondary"),
+
+      p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );
 
     if (p.formControlClass)
-      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
+      return (
+        <div className={className} style={p.customStyle} {...p.htmlAttributes}>
+          {this.renderValue()}
+        </div>
+      );
 
     if (p.isLink) {
       return (
-        <a className={className} onClick={this.handleClick} href="#" style={p.customStyle}>
+        <a className={className} onClick={this.handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
           {this.renderValue()}
         </a>
       );
     }
 
-    return <span className={className} style={p.customStyle}>{this.renderValue()}</span>
+    return <span className={className} style={p.customStyle} {...p.htmlAttributes}>{this.renderValue()}</span>
   }
 
   renderValue() {

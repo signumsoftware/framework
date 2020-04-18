@@ -11,6 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.Internal;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Linq
 {
@@ -200,26 +201,45 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitUnary(UnaryExpression u)
             {
-                if (u.NodeType == ExpressionType.Convert && u.Operand is ColumnExpression && DiffersInNullability(u.Type, u.Operand.Type))
-                {
-                    ColumnExpression column = (ColumnExpression)u.Operand;
-                    return scope.GetColumnExpression(row, column.Alias, column.Name, u.Type);
-                }
+                var col = GetInnerColumn(u);
+
+                if(col != null)
+                    return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type);
 
                 return base.VisitUnary(u);
+            }
+
+            public ColumnExpression? GetInnerColumn(UnaryExpression u)
+            {
+                if(u.NodeType == ExpressionType.Convert && DiffersInNullability(u.Type, u.Operand.Type))
+                {
+                    if (u.Operand is ColumnExpression c)
+                        return c;
+
+                    if (u.Operand is UnaryExpression u2)
+                        return GetInnerColumn(u2);
+                }
+
+                return null;
             }
 
 
             bool DiffersInNullability(Type a, Type b)
             {
-                return
-                    a.IsValueType && a.Nullify() == b ||
-                    b.IsValueType && b.Nullify() == a;
+                if (a.IsValueType && a.Nullify() == b ||
+                    b.IsValueType && b.Nullify() == a)
+                    return true;
+
+                if (a == typeof(Date) && b == typeof(DateTime) ||
+                    a == typeof(DateTime) && b == typeof(Date))
+                    return true;
+
+                return false;
             }
 
             protected internal override Expression VisitColumn(ColumnExpression column)
             {
-                return scope.GetColumnExpression(row, column.Alias, column.Name, column.Type);
+                return scope.GetColumnExpression(row, column.Alias, column.Name!, column.Type);
             }
 
             protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
@@ -546,12 +566,37 @@ namespace Signum.Engine.Linq
             {
                 var result = this.Visit(toDayOfWeek.Expression);
 
-                return Expression.Call(ToDayOfWeekExpression.miToDayOfWeek, result, Expression.Constant(ToDayOfWeekExpression.DateFirst.Value.Item1, typeof(byte)));
+                if (Schema.Current.Settings.IsPostgres)
+                {
+                    return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekPostgres, result);
+                }
+                else
+                {
+                    var dateFirst = ((SqlServerConnector)Connector.Current).DateFirst;
+                    return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekSql, result, Expression.Constant(dateFirst, typeof(byte)));
+                }
+            }
+
+            static MethodInfo miToInterval = ReflectionTools.GetMethodInfo(() => ToInterval<int>(new NpgsqlTypes.NpgsqlRange<int>())).GetGenericMethodDefinition();
+            static Interval<T> ToInterval<T>(NpgsqlTypes.NpgsqlRange<T> range) where T : struct, IComparable<T>, IEquatable<T>
+                => new Interval<T>(range.LowerBound, range.UpperBound);
+
+            protected internal override Expression VisitInterval(IntervalExpression interval)
+            {
+                var intervalType = interval.Type.GetGenericArguments()[0];
+                if (Schema.Current.Settings.IsPostgres)
+                {
+                    return Expression.Call(miToInterval.MakeGenericMethod(intervalType), Visit(interval.PostgresRange));
+                }
+                else
+                {
+                    return Expression.New(typeof(Interval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min), Visit(interval.Max));
+                }
             }
 
             protected override Expression VisitNew(NewExpression node)
             {
-                var expressions =  this.Visit(node.Arguments);
+                var expressions = this.Visit(node.Arguments);
 
                 if (node.Members != null)
                 {
@@ -561,7 +606,7 @@ namespace Signum.Engine.Linq
                         var e = expressions[i];
                         if (m is PropertyInfo pi && !pi.PropertyType.IsAssignableFrom(e.Type))
                         {
-                            throw  new InvalidOperationException(
+                            throw new InvalidOperationException(
                                 $"Impossible to assign a '{e.Type.TypeName()}' to the member '{m.Name}' of type '{pi.PropertyType.TypeName()}'." +
                                 (e.Type.IsInstantiationOf(typeof(IEnumerable<>)) ? "\nConsider adding '.ToList()' at the end of your sub-query" : null)
                             );
@@ -569,7 +614,7 @@ namespace Signum.Engine.Linq
                     }
                 }
 
-                    return (Expression) node.Update(expressions);
+                return (Expression)node.Update(expressions);
             }
         }
     }

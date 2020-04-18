@@ -11,6 +11,8 @@ using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.React.Filters;
 using Signum.React.Json;
@@ -42,6 +44,7 @@ namespace Signum.React.Facades
                 s.Converters.Add(new StringEnumConverter());
                 s.Converters.Add(new ResultTableConverter());
                 s.Converters.Add(new TimeSpanConverter());
+                s.Converters.Add(new DateConverter());
             });
 
             return jsonOptions;
@@ -85,6 +88,10 @@ namespace Signum.React.Facades
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
 
             ReflectionServer.Start();
+            ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
+            ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
+            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
+            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
         }
 
         public static EntityPackTS GetEntityPack(Entity entity)

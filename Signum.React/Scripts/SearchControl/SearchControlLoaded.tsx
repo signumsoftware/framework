@@ -8,7 +8,7 @@ import {
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity } from '../Signum.Entities'
-import { getTypeInfos, TypeInfo, isTypeModel } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
@@ -174,9 +174,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   canFilter() {
     const p = this.props;
-    return p.showHeader && (p.showFilterButton || p.showFilters)
+    return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
-
 
   getQueryRequest(): QueryRequest {
     const fo = this.props.findOptions;
@@ -325,6 +324,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleColumnChanged = (token: QueryToken | undefined) => {
+    if (this.props.findOptions.groupResults) {
+      var allKeys = this.props.findOptions.columnOptions.filter(a => a.token && a.token.queryTokenType != "Aggregate").map(a => a.token!.fullKey);
+      this.props.findOptions.orderOptions = this.props.findOptions.orderOptions.filter(o => allKeys.contains(o.token.fullKey));
+    }
     this.setState({ lastToken: token });
   }
 
@@ -620,7 +623,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   chooseType(): Promise<string | undefined> {
 
     const tis = getTypeInfos(this.props.queryDescription.columns["Entity"].type)
-      .filter(ti => Navigator.isCreable(ti, false, true));
+      .filter(ti => Navigator.isCreable(ti, { isSearch: true }));
 
     return SelectorModal.chooseType(tis)
       .then(ti => ti ? ti.name : undefined);
@@ -724,7 +727,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-
     return Promise.all(filters.map(fs => Finder.fetchEntitiesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
   }
 
@@ -739,7 +741,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   loadMenuItems() {
     var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
-
     if (cm == "Basic")
       this.setState({ currentMenuItems: [] });
     else {
@@ -865,8 +866,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-
-
   renderContextualMenu() {
 
     const cm = this.state.contextualMenu!;
@@ -875,7 +874,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.state.resultFindOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo?.columnOptions[columnIndex].token;
-      return token && token.filterType != "Embedded" && token.filterType != undefined;
+      return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
     }
 
     const menuItems: React.ReactElement<any>[] = [];
@@ -1170,6 +1169,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         columnOptions: extraColumns,
         columnOptionsMode: "Add",
         systemTime: resFo.systemTime && { ...resFo.systemTime },
+        includeDefaultFilters: false,
       }).then(() => {
         this.doSearch(true);
       }).done();
@@ -1180,7 +1180,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.navigate) {
       var lite = row.entity!;
 
-      if (!Navigator.isNavigable(lite.EntityType, undefined, true))
+      if (!Navigator.isNavigable(lite.EntityType, { isSearch: true }))
         return;
 
       e.preventDefault();
@@ -1236,11 +1236,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
     }));
 
-    const ctx: Finder.CellFormatterContext = {
-      refresh: () => this.doSearch(true).done(),
-      systemTime: this.props.findOptions.systemTime,
-    };
-
     const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
     return this.state.resultTable.rows.map((row, i) => {
@@ -1249,6 +1244,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
+      const ctx: Finder.CellFormatterContext = {
+        refresh: () => this.doSearch(true).done(),
+        systemTime: this.props.findOptions.systemTime,
+        row: row,
+        rowIndex : i,
+      };
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}

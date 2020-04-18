@@ -14,6 +14,7 @@ using Signum.Entities.Basics;
 using DQ = Signum.Engine.DynamicQuery;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -606,6 +607,7 @@ namespace Signum.Engine.DynamicQuery
 
         #region Unique
 
+        [return: MaybeNull]
         public static T Unique<T>(this IEnumerable<T> collection, UniqueType uniqueType)
         {
             switch (uniqueType)
@@ -614,22 +616,20 @@ namespace Signum.Engine.DynamicQuery
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
                 case UniqueType.Single: return collection.SingleEx();
                 case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
-                case UniqueType.SingleOrMany: return collection.SingleOrMany();
                 case UniqueType.Only: return collection.Only();
                 default: throw new InvalidOperationException();
             }
         }
 
-
+        //[return: MaybeNull]
         public static Task<T> UniqueAsync<T>(this IQueryable<T> collection, UniqueType uniqueType, CancellationToken token)
         {
             switch (uniqueType)
             {
                 case UniqueType.First: return collection.FirstAsync(token);
-                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token);
+                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token)!;
                 case UniqueType.Single: return collection.SingleAsync(token);
-                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token);
-                case UniqueType.SingleOrMany: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.SingleOrManyEx());
+                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token)!;
                 case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only());
                 default: throw new InvalidOperationException();
             }
@@ -974,14 +974,17 @@ namespace Signum.Engine.DynamicQuery
 
             var task = func();
 
-            return giCastObject.GetInvoker(task.GetType().BaseType!.GetGenericArguments())(task);
+            return CastTask<object?>(task);
         }
-
-        static readonly GenericInvoker<Func<Task, Task<object?>>> giCastObject =
-            new GenericInvoker<Func<Task, Task<object?>>>(task => CastObject<int>((Task<int>)task));
-        static Task<object?> CastObject<T>(Task<T> task)
+        public static async Task<T> CastTask<T>(this Task task)
         {
-            return task.ContinueWith(t => (object?)t.Result);
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            await task.ConfigureAwait(false);
+
+            object? result = task.GetType().GetProperty(nameof(Task<object>.Result))!.GetValue(task);
+            return (T)result!;
         }
 
         #endregion

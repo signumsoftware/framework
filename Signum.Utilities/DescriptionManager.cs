@@ -93,9 +93,12 @@ namespace Signum.Utilities
         }
     }
 
+    //https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class FormatAttribute : Attribute
     {
+        public const string Password = "Password";
+
         public string Format { get; private set; }
         public FormatAttribute(string format)
         {

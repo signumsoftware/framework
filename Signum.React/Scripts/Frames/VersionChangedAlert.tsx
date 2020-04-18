@@ -1,12 +1,14 @@
 import * as React from 'react'
+import * as moment from 'moment'
 import { classes } from '../Globals'
 import { VersionFilter } from '../Services'
 import { ConnectionMessage } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-export default function VersionChangedAlert(p: { blink?: boolean }) {
+export function VersionChangedAlert(p: { blink?: boolean }) {
 
   var forceUpdate = useForceUpdate();
 
@@ -34,3 +36,32 @@ export default function VersionChangedAlert(p: { blink?: boolean }) {
 
 VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
 VersionChangedAlert.defaultProps = { blink: true };
+
+export function VersionInfo() {
+  return (
+    <OverlayTrigger
+      placement={"bottom"}
+      overlay={
+        <Tooltip id={`tooltip-buildId`}>
+          <VersionInfoTooltip />
+        </Tooltip>
+      }
+    >
+      <span className="sf-version-info">v{VersionFilter.initialVersion}</span>
+    </OverlayTrigger>
+  );
+}
+
+function VersionInfoTooltip(p: {}) {
+
+  var bt = moment(VersionFilter.initialBuildTime!);
+
+  return (
+    <div style={{ whiteSpace: "nowrap" }}>
+      {bt.format("llll")}
+      <br />
+      ({bt.fromNow()})
+    </div>
+  );
+}
+

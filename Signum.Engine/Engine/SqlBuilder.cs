@@ -4,12 +4,24 @@ using System.Linq;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine
 {
-    public static class SqlBuilder
+    public class SqlBuilder
     {
-        public static List<string> SystemSchemas = new List<string>()
+        Connector connector;
+        bool isPostgres;
+
+        public bool IsPostgres => isPostgres;
+
+        internal SqlBuilder(Connector connector)
+        {
+            this.connector = connector;
+            this.isPostgres = connector.Schema.Settings.IsPostgres;
+        }
+
+        public List<string> SystemSchemas = new List<string>()
         {
             "dbo",
             "guest",
@@ -26,26 +38,52 @@ namespace Signum.Engine
             "db_denydatawriter"
         };
 
-        #region Create Tables
-        public static SqlPreCommandSimple CreateTableSql(ITable t)
+        public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
         {
-            var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+            if (Schema.Current.Settings.IsPostgres)
+                return null;
 
-            var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
+            return new SqlPreCommandSimple("use {0}".FormatWith((databaseName ?? Connector.Current.DatabaseName()).SqlEscape(Schema.Current.Settings.IsPostgres)));
+        }
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c), isChange: false))
+        #region Create Tables
+        public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
+        {
+            var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null : 
+                isPostgres ? 
+                "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
+                "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
+
+            var systemPeriod = t.SystemVersioned == null || IsPostgres || avoidSystemVersioning ? null : Period(t.SystemVersioned);
+
+            var columns = t.Columns.Values.Select(c => this.ColumnLine(c, GetDefaultConstaint(t, c), isChange: false, forHistoryTable: avoidSystemVersioning))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
                 .ToString(",\r\n");
 
-            var systemVersioning = t.SystemVersioned == null ? null :
-                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
+            var systemVersioning = t.SystemVersioned == null || avoidSystemVersioning || IsPostgres ? null :
+                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName.OnDatabase(null)}))";
 
-            return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
+            var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
+
+            if (!(IsPostgres && t.SystemVersioned != null))
+                return result;
+
+            return new[]
+            {
+                result,
+                new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
+                new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
+BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
+FOR EACH ROW EXECUTE PROCEDURE versioning(
+  'sys_period', '{t.SystemVersioned.TableName}', true
+);")
+            }.Combine(Spacing.Simple)!;
+
         }
 
-        public static SqlPreCommand DropTable(DiffTable diffTable)
+        public SqlPreCommand DropTable(DiffTable diffTable)
         {
             if (diffTable.TemporalTableName == null)
                 return DropTable(diffTable.Name);
@@ -53,21 +91,25 @@ namespace Signum.Engine
             return SqlPreCommandConcat.Combine(Spacing.Simple,
                 AlterTableDisableSystemVersioning(diffTable.Name),
                 DropTable(diffTable.Name)
-                //DropTable(diffTable.TemporalTableName)
             )!;
         }
 
-        public static SqlPreCommandSimple DropTable(ObjectName tableName)
+        public SqlPreCommandSimple DropTable(ObjectName tableName)
         {
-            return new SqlPreCommandSimple("DROP TABLE {0}".FormatWith(tableName));
+            return new SqlPreCommandSimple("DROP TABLE {0};".FormatWith(tableName));
         }
 
-        public static SqlPreCommandSimple DropView(ObjectName viewName)
+        public SqlPreCommandSimple DropView(ObjectName viewName)
         {
-            return new SqlPreCommandSimple("DROP VIEW {0}".FormatWith(viewName));
+            return new SqlPreCommandSimple("DROP VIEW {0};".FormatWith(viewName));
         }
 
-        static SqlPreCommand DropViewIndex(ObjectName viewName, string index)
+        public SqlPreCommandSimple CreateExtensionIfNotExist(string extensionName)
+        {
+            return new SqlPreCommandSimple($"CREATE EXTENSION IF NOT EXISTS \"{ extensionName }\";");
+        }
+
+        SqlPreCommand DropViewIndex(ObjectName viewName, string index)
         {
             return new[]{
                  DropIndex(viewName, index),
@@ -75,99 +117,62 @@ namespace Signum.Engine
             }.Combine(Spacing.Simple)!;
         }
 
-        public static SqlPreCommand AlterTableAddPeriod(ITable table)
+        public SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)};");
         }
 
-        static string Period(SystemVersionedInfo sv) {
+        string? Period(SystemVersionedInfo sv) {
 
             if (!Connector.Current.SupportsTemporalTables)
                 throw new InvalidOperationException($"The current connector '{Connector.Current}' does not support Temporal Tables");
 
-            return $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
+            return $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName!.SqlEscape(isPostgres)}, {sv.EndColumnName!.SqlEscape(isPostgres)})";
         }
 
-        public static SqlPreCommand AlterTableDropPeriod(ITable table)
+        public SqlPreCommand AlterTableDropPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME;");
         }
 
-        public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
+        public SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName.OnDatabase(null)}));");
         }
 
-        public static SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
+        public SqlPreCommandSimple AlterTableDisableSystemVersioning(ObjectName tableName)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF)");
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF);");
         }
 
-        public static SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
+        public SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".FormatWith(table.Name, columnName.SqlEscape()));
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1};".FormatWith(table.Name, columnName.SqlEscape(isPostgres)));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
+        public SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint? tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, ColumnLine(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
         }
 
-        public static SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
+        public SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateOldColumn(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, CreateOldColumn(column)));
         }
 
-        public static bool IsNumber(SqlDbType sqlDbType)
+        public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, DiffColumn diffColumn, ObjectName? forceTableName = null)
         {
-            switch (sqlDbType)
-            {
-                case SqlDbType.BigInt:
-                case SqlDbType.Float:
-                case SqlDbType.Decimal:
-                case SqlDbType.Int:
-                case SqlDbType.Bit:
-                case SqlDbType.Money:
-                case SqlDbType.Real:
-                case SqlDbType.TinyInt:
-                case SqlDbType.SmallInt:
-                case SqlDbType.SmallMoney:
-                    return true;
-            }
+            var tableName = forceTableName ?? table.Name;
 
-            return false;
-        }
-
-        public static bool IsString(SqlDbType sqlDbType)
-        {
-            switch (sqlDbType)
-            {
-                case SqlDbType.NText:
-                case SqlDbType.NVarChar:
-                case SqlDbType.Text:
-                case SqlDbType.VarChar:
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static bool IsDate(SqlDbType sqlDbType)
-        {
-            switch (sqlDbType)
-            {
-                case SqlDbType.DateTime:
-                case SqlDbType.DateTime2:
-                case SqlDbType.DateTimeOffset:
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string? defaultConstraintName = null, ObjectName? forceTableName = null)
-        {
-            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(forceTableName ?? table.Name, CreateColumn(column, null, isChange: true)));
+            var alterColumn = !IsPostgres ?
+                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, this.ColumnLine(column, null, isChange: true))) :
+                 new[] 
+                 {
+                     !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ? 
+                        new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null, 
+                     diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                     !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                 }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
             if (column.Default == null)
                 return alterColumn;
@@ -175,18 +180,18 @@ namespace Signum.Engine
             var defCons = GetDefaultConstaint(table, column)!;
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                AlterTableDropConstraint(table.Name, defaultConstraintName ?? defCons.Name),
+                AlterTableDropConstraint(table.Name, diffColumn.DefaultConstraint?.Name ?? defCons.Name),
                 alterColumn,
                 AlterTableAddDefaultConstraint(table.Name, defCons)
             )!;
         }
 
-        public static DefaultConstraint? GetDefaultConstaint(ITable t, IColumn c)
+        public DefaultConstraint? GetDefaultConstaint(ITable t, IColumn c)
         {
             if (c.Default == null)
                 return null;
 
-            return new DefaultConstraint(c.Name, $"DF_{t.Name.Name}_{c.Name}", Quote(c.SqlDbType, c.Default));
+            return new DefaultConstraint(c.Name, $"DF_{t.Name.Name}_{c.Name}", Quote(c.DbType, c.Default));
         }
 
         public class DefaultConstraint
@@ -203,7 +208,7 @@ namespace Signum.Engine
             }
         }
 
-        public static string CreateOldColumn(DiffColumn c)
+        public string CreateOldColumn(DiffColumn c)
         {
             string fullType = GetColumnType(c);
 
@@ -214,7 +219,7 @@ namespace Signum.Engine
             var defaultConstraint = c.DefaultConstraint!= null ? $"CONSTRAINT {c.DefaultConstraint.Name} DEFAULT " + c.DefaultConstraint.Definition : null;
 
             return $" ".Combine(
-                c.Name.SqlEscape(),
+                c.Name.SqlEscape(isPostgres),
                 fullType,
                 c.Identity ? "IDENTITY " : null,
                 generatedAlways,
@@ -224,20 +229,20 @@ namespace Signum.Engine
                 );
         }
 
-        public static string CreateColumn(IColumn c, DefaultConstraint? constraint, bool isChange)
+        public string ColumnLine(IColumn c, DefaultConstraint? constraint, bool isChange, bool forHistoryTable = false)
         {
             string fullType = GetColumnType(c);
 
-            var generatedAlways = c is SystemVersionedInfo.Column svc ?
+            var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable ?
                 $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
                 null;
 
             var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
 
             return $" ".Combine(
-                c.Name.SqlEscape(),
+                c.Name.SqlEscape(isPostgres),
                 fullType,
-                c.Identity && !isChange ? "IDENTITY " : null, 
+                c.Identity && !isChange && !forHistoryTable ? (isPostgres? "GENERATED ALWAYS AS IDENTITY": "IDENTITY") : null, 
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable.ToBool() ? "NULL" : "NOT NULL",
@@ -245,31 +250,31 @@ namespace Signum.Engine
                 );
         }
 
-        public static string GetColumnType(IColumn c)
+        public string GetColumnType(IColumn c)
         {
-            return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
+            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizeScale(c.Size, c.Scale));
         }
 
-        public static string GetColumnType(DiffColumn c)
+        public string GetColumnType(DiffColumn c)
         {
-            return (c.SqlDbType == SqlDbType.Udt ? c.UserTypeName! : c.SqlDbType.ToString().ToUpper()) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
+            return c.UserTypeName ?? c.DbType.ToString(IsPostgres) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
         }
 
-        public static string Quote(SqlDbType type, string @default)
+        public string Quote(AbstractDbType type, string @default)
         {
-            if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
+            if (type.IsString() && !(@default.StartsWith("'") && @default.StartsWith("'")))
                 return "'" + @default + "'";
 
             return @default;
         }
 
-        public static string GetSizeScale(int? size, int? scale)
+        public string GetSizeScale(int? size, int? scale)
         {
             if (size == null)
                 return "";
 
             if (size == int.MaxValue)
-                return "(MAX)";
+                return IsPostgres ? "" : "(MAX)";
 
             if (scale == null)
                 return "({0})".FormatWith(size);
@@ -277,56 +282,60 @@ namespace Signum.Engine
             return "({0},{1})".FormatWith(size, scale);
         }
 
-        public static SqlPreCommand? AlterTableForeignKeys(ITable t)
+        public SqlPreCommand? AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
+                (c.ReferenceTable == null || c.AvoidForeignKey) ? null : this.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
                 .Combine(Spacing.Simple);
         }
 
 
-        public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
+        public SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
             if (index.IsPrimary)
-                return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName));
+                return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName, isPostgres));
 
             if (index.ViewName == null)
                 return DropIndex(tableName, index.IndexName);
             else
-                return DropViewIndex(new ObjectName(tableName.Schema, index.ViewName), index.IndexName);
+                return DropViewIndex(new ObjectName(tableName.Schema, index.ViewName, isPostgres), index.IndexName);
         }
 
-        public static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
+        public SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
             if (objectName.Schema.Database == null)
-                return new SqlPreCommandSimple("DROP INDEX {0} ON {1}".FormatWith(indexName.SqlEscape(), objectName));
-
+            {
+                if (IsPostgres)
+                    return new SqlPreCommandSimple("DROP INDEX {0};".FormatWith(new ObjectName(objectName.Schema, indexName, IsPostgres)));
+                else
+                    return new SqlPreCommandSimple("DROP INDEX {0} ON {1};".FormatWith(indexName.SqlEscape(isPostgres), objectName));
+            }
             else
-                return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}'"
-                    .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
+                return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}';"
+                    .FormatWith(objectName.Schema.Database.ToString().SqlEscape(isPostgres), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(TableIndex index, Replacements? checkUnique)
+        public SqlPreCommand CreateIndex(TableIndex index, Replacements? checkUnique)
         {
-            if (index is PrimaryClusteredIndex)
+            if (index is PrimaryKeyIndex)
             {
-                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
-                return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
+                return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName.SqlEscape(isPostgres)} PRIMARY KEY CLUSTERED({columns});");
             }
 
             if (index is UniqueTableIndex uIndex)
             {
                 if (uIndex.ViewName != null)
                 {
-                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
+                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName, isPostgres);
 
-                    var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+                    var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
-                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
+                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name} WHERE {uIndex.Where};")
                     { GoBefore = true, GoAfter = true };
 
-                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
+                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName.SqlEscape(isPostgres)} ON {viewName}({columns});");
 
                     return SqlPreCommand.Combine(Spacing.Simple, 
                         checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
@@ -337,7 +346,7 @@ namespace Signum.Engine
                 {
                     return SqlPreCommand.Combine(Spacing.Double,
                         checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
-                        CreateIndexBasic(index, false))!;
+                        CreateIndexBasic(index, forHistoryTable: false))!;
                 }
             }
             else
@@ -346,7 +355,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int DuplicateCount(UniqueTableIndex uniqueIndex, Replacements rep)
+        public int DuplicateCount(UniqueTableIndex uniqueIndex, Replacements rep)
         {
             var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
 
@@ -357,22 +366,22 @@ namespace Signum.Engine
 
             var columnReplacement = rep.TryGetC(Replacements.KeyColumnsForTable(uniqueIndex.Table.Name.ToString()))?.Inverse() ?? new Dictionary<string, string>();
 
-            var oldColumns = uniqueIndex.Columns.ToString(c => (columnReplacement.TryGetC(c.Name) ?? c.Name).SqlEscape(), ", ");
+            var oldColumns = uniqueIndex.Columns.ToString(c => (columnReplacement.TryGetC(c.Name) ?? c.Name).SqlEscape(isPostgres), ", ");
 
             var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
 
-            return (int)Executor.ExecuteScalar(
+            return Convert.ToInt32(Executor.ExecuteScalar(
 $@"SELECT Count(*) FROM {oldTableName}
-WHERE {oldPrimaryKey} NOT IN
+WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
-    SELECT MIN({oldPrimaryKey})
+    SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))}")!;
+){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))};")!);
         }
 
-        public static SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
+        public SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
         {
             try
             {
@@ -387,7 +396,7 @@ WHERE {oldPrimaryKey} NOT IN
                 if (count == 0)
                     return null;
 
-                var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+                var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
                 if (rep.Interactive)
                 {
@@ -403,12 +412,12 @@ WHERE {oldPrimaryKey} NOT IN
             }
             catch (Exception)
             {
-                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
+                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName.SqlEscape(isPostgres)}");
 
             }
         }
 
-        private static SqlPreCommand RemoveDuplicates(UniqueTableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
+        private SqlPreCommand RemoveDuplicates(UniqueTableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
         {
             return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
@@ -417,80 +426,100 @@ WHERE {primaryKey.Name} NOT IN
     FROM {uniqueIndex.Table.Name}
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
     GROUP BY {columns}
-){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)}".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
         }
 
-        public static SqlPreCommand CreateIndexBasic(Maps.TableIndex index, bool forHistoryTable)
+        public SqlPreCommand CreateIndexBasic(Maps.TableIndex index, bool forHistoryTable)
         {
             var indexType = index is UniqueTableIndex ? "UNIQUE INDEX" : "INDEX";
-            var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
-            var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
+            var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
+            var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(isPostgres), ", ")})" : null;
             var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
 
             var tableName = forHistoryTable ? index.Table.SystemVersioned!.TableName : index.Table.Name;
 
-            return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
+            return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where};");
         }
 
-        internal static SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
+        internal SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
         {
-            return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1})".FormatWith(tab.Name, tabCol.Name));;
+            return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1});".FormatWith(tab.Name, tabCol.Name));;
         }
 
-        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName) =>
-            AlterTableDropConstraint(tableName, constraintName.Name);
+        public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName foreignKeyName) =>
+            AlterTableDropConstraint(tableName, foreignKeyName.Name);
 
-        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
+        public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".FormatWith(
+            return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1};".FormatWith(
                 tableName,
-                constraintName.SqlEscape()));
+                constraintName.SqlEscape(isPostgres)));
         }
 
-        public static SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
+        public SqlPreCommand AlterTableDropDefaultConstaint(ObjectName tableName, DiffColumn column)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName}");
+            if (isPostgres)
+                return AlterTableAlterColumnDropDefault(tableName, column.Name);
+            else
+                return AlterTableDropConstraint(tableName, column.DefaultConstraint!.Name!);
         }
 
-        public static SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
+        public SqlPreCommand AlterTableAlterColumnDropDefault(ObjectName tableName, string columnName)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;".FormatWith(
+                tableName,
+                columnName.SqlEscape(isPostgres)));
+        }
+
+        public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
+        {
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName};");
+        }
+
+        public SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
             return AlterTableAddConstraintForeignKey(table.Name, fieldName, foreignTable.Name, foreignTable.PrimaryKey.Name);
         }
 
-        public static SqlPreCommand? AlterTableAddConstraintForeignKey(ObjectName parentTable, string parentColumn, ObjectName targetTable, string targetPrimaryKey)
+        public SqlPreCommand? AlterTableAddConstraintForeignKey(ObjectName parentTable, string parentColumn, ObjectName targetTable, string targetPrimaryKey)
         {
             if (!object.Equals(parentTable.Schema.Database, targetTable.Schema.Database))
                 return null;
 
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".FormatWith(
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4});".FormatWith(
                parentTable,
-               ForeignKeyName(parentTable.Name, parentColumn),
-               parentColumn.SqlEscape(),
+               ForeignKeyName(parentTable.Name, parentColumn).SqlEscape(isPostgres),
+               parentColumn.SqlEscape(isPostgres),
                targetTable,
-               targetPrimaryKey.SqlEscape()));
+               targetPrimaryKey.SqlEscape(isPostgres)));
         }
 
-        public static string ForeignKeyName(string table, string fieldName)
+        public string ForeignKeyName(string table, string fieldName)
         {
-            return "FK_{0}_{1}".FormatWith(table, fieldName).SqlEscape();
+            var result = "FK_{0}_{1}".FormatWith(table, fieldName);
+
+            return StringHashEncoder.ChopHash(result, this.connector.MaxNameLength);
         }
 
-        public static SqlPreCommand RenameForeignKey(ObjectName foreignKeyName, string newName)
+        public SqlPreCommand RenameForeignKey(ObjectName tn, ObjectName foreignKeyName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {tn} RENAME CONSTRAINT {foreignKeyName.Name.SqlEscape(IsPostgres)} TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(foreignKeyName.Schema.Database, foreignKeyName.OnDatabase(null).ToString(), newName, "OBJECT");
         }
 
-        public static SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)
+        public SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)
         {
-            return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3}".FormatWith(
-                database == null ? null: (new SchemaName(database, "dbo").ToString() + "."),
+            return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3};".FormatWith(
+                database == null ? null: SchemaName.Default(isPostgres).OnDatabase(database).ToString() + ".",
                 oldName,
                 newName,
                 objectType == null ? null : ", '{0}'".FormatWith(objectType)
                 ));
         }
 
-        public static SqlPreCommand RenameOrChangeSchema(ObjectName oldTableName, ObjectName newTableName)
+        public SqlPreCommand RenameOrChangeSchema(ObjectName oldTableName, ObjectName newTableName)
         {
             if (!object.Equals(oldTableName.Schema.Database, newTableName.Schema.Database))
                 throw new InvalidOperationException("Different database");
@@ -505,120 +534,135 @@ WHERE {primaryKey.Name} NOT IN
                 oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name))!;
         }
 
-        public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
+        public SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable, ObjectName newTableName)
         {
-            if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
-                return RenameOrChangeSchema(oldTable.Name, newTable.Name);
+            if (object.Equals(oldTable.Name.Schema.Database, newTableName.Schema.Database))
+                return RenameOrChangeSchema(oldTable.Name, newTableName);
             
             return SqlPreCommand.Combine(Spacing.Simple,
-              CreateTableSql(newTable),
-              MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
+              CreateTableSql(newTable, newTableName, avoidSystemVersioning: true),
+              MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, avoidIdentityInsert: newTable.SystemVersioned != null && newTable.SystemVersioned.Equals(newTable)),
               DropTable(oldTable))!;
         }
 
-        public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)
+        public SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool avoidIdentityInsert = false)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(
 @"INSERT INTO {0} ({2})
 SELECT {3}
-FROM {1} as [table]".FormatWith(
+FROM {1} as [table];".FormatWith(
                    newTable,
                    oldTable,
-                   columnNames.ToString(a => a.SqlEscape(), ", "),
-                   columnNames.ToString(a => "[table]." + a.SqlEscape(), ", ")));
+                   columnNames.ToString(a => a.SqlEscape(isPostgres), ", "),
+                   columnNames.ToString(a => "[table]." + a.SqlEscape(isPostgres), ", ")));
+
+            if (avoidIdentityInsert)
+                return command;
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)) { GoBefore = true },
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON;".FormatWith(newTable)) { GoBefore = true },
                 command,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)) { GoAfter = true })!;
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF;".FormatWith(newTable)) { GoAfter = true })!;
         }
 
-        public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
+        public SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {oldName} RENAME TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(oldName.Schema.Database, oldName.OnDatabase(null).ToString(), newName, null);
         }
 
-        public static SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
+        public SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(), oldName));
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {oldName} SET SCHEMA {schemaName.Name.SqlEscape(IsPostgres)};");
+
+            return new SqlPreCommandSimple("ALTER SCHEMA {0} TRANSFER {1};".FormatWith(schemaName.Name.SqlEscape(isPostgres), oldName));
         }
 
-        public static SqlPreCommand RenameColumn(ObjectName tableName, string oldName, string newName)
+        public SqlPreCommand RenameColumn(ObjectName tableName, string oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER TABLE {tableName} RENAME COLUMN {oldName.SqlEscape(IsPostgres)} TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
-        public static SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
+        public SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
         {
+            if (IsPostgres)
+                return new SqlPreCommandSimple($"ALTER INDEX {oldName.SqlEscape(IsPostgres)} RENAME TO {newName.SqlEscape(IsPostgres)};");
+
             return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "INDEX");
         }
         #endregion
 
-        public static SqlPreCommandSimple SetIdentityInsert(ObjectName tableName, bool value)
+        public SqlPreCommandSimple SetIdentityInsert(ObjectName tableName, bool value)
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".FormatWith(
                 tableName, value ? "ON" : "OFF"));
         }
 
-        public static SqlPreCommandSimple SetSingleUser(string databaseName)
+        public SqlPreCommandSimple SetSingleUser(string databaseName)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
         }
 
-        public static SqlPreCommandSimple SetMultiUser(string databaseName)
+        public SqlPreCommandSimple SetMultiUser(string databaseName)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".FormatWith(databaseName));
         }
 
-        public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
+        public SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".FormatWith(databaseName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }
 
-        public static SqlPreCommandSimple MakeSnapshotIsolationDefault(string databaseName, bool value)
+        public SqlPreCommandSimple MakeSnapshotIsolationDefault(string databaseName, bool value)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".FormatWith(databaseName, value ? "ON" : "OFF"));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }
 
-        public static SqlPreCommandSimple SelectRowCount()
+        public SqlPreCommandSimple SelectRowCount()
         {
             return new SqlPreCommandSimple("select @@rowcount;");
         }
 
-        public static SqlPreCommand CreateSchema(SchemaName schemaName)
+        public SqlPreCommand CreateSchema(SchemaName schemaName)
         {
             if (schemaName.Database == null)
-                return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
+                return new SqlPreCommandSimple("CREATE SCHEMA {0};".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
             else
-                return new SqlPreCommandSimple($"EXEC('use {schemaName.Database}; EXEC sp_executesql N''CREATE SCHEMA {schemaName.Name}'' ')");
+                return new SqlPreCommandSimple($"EXEC('use {schemaName.Database}; EXEC sp_executesql N''CREATE SCHEMA {schemaName.Name}'' ');");
         }
 
-        public static SqlPreCommand DropSchema(SchemaName schemaName)
+        public SqlPreCommand DropSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
+            return new SqlPreCommandSimple("DROP SCHEMA {0};".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
-        public static SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
+        public SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} NOCHECK CONSTRAINT {1}".FormatWith(tableName, foreignKey));
+            return new SqlPreCommandSimple("ALTER TABLE {0} NOCHECK CONSTRAINT {1};".FormatWith(tableName, foreignKey));
         }
 
-        public static SqlPreCommandSimple EnableForeignKey(ObjectName tableName, string foreignKey)
+        public SqlPreCommandSimple EnableForeignKey(ObjectName tableName, string foreignKey)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT {1}".FormatWith(tableName, foreignKey));
+            return new SqlPreCommandSimple("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT {1};".FormatWith(tableName, foreignKey));
         }
 
-        public static SqlPreCommandSimple DisableIndex(ObjectName tableName, string indexName)
+        public SqlPreCommandSimple DisableIndex(ObjectName tableName, string indexName)
         {
-            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(indexName, tableName));
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE;".FormatWith(indexName, tableName));
         }
 
-        public static SqlPreCommandSimple RebuildIndex(ObjectName tableName, string indexName)
+        public SqlPreCommandSimple RebuildIndex(ObjectName tableName, string indexName)
         {
-            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".FormatWith(indexName, tableName));
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD;".FormatWith(indexName, tableName));
         }
 
-        public static SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
+        public SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
         {
             DatabaseName? db = tableName.Schema.Database;
 
@@ -640,16 +684,14 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple(command);
         }
 
-
-        internal static SqlPreCommand? DropStatistics(string tn, List<DiffStats> list)
+        internal SqlPreCommand? DropStatistics(string tn, List<DiffStats> list)
         {
             if (list.IsEmpty())
                 return null;
 
-            return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape() + "." + s.StatsName.SqlEscape(), ",\r\n"));
+            return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape(isPostgres) + "." + s.StatsName.SqlEscape(isPostgres), ",\r\n") + ";");
         }
 
-
-        public static SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName}");
+        public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName};");
     }
 }

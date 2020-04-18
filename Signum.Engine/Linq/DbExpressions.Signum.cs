@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly PrimaryKeyExpression ExternalId;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
         //Optional
         public readonly Alias? TableAlias;
@@ -31,15 +31,15 @@ namespace Signum.Engine.Linq
 
         public readonly bool AvoidExpandOnRetrieving;
 
-        public readonly NewExpression? TablePeriod;
+        public readonly IntervalExpression? TablePeriod;
 
 
         public EntityExpression(Type type, PrimaryKeyExpression externalId, 
-            NewExpression? externalPeriod, 
+            IntervalExpression? externalPeriod, 
             Alias? tableAlias, 
             IEnumerable<FieldBinding>? bindings, 
-            IEnumerable<MixinEntityExpression>? mixins, 
-            NewExpression? tablePeriod, bool avoidExpandOnRetrieving)
+            IEnumerable<MixinEntityExpression>? mixins,
+            IntervalExpression? tablePeriod, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
             if (type == null)
@@ -254,10 +254,10 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Id;
         public readonly TypeImplementedByAllExpression TypeId;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
 
-        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, NewExpression? externalPeriod)
+        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             if (id == null)
@@ -430,9 +430,9 @@ namespace Signum.Engine.Linq
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
         public readonly TableMList TableMList;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
-        public MListExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, TableMList tr)
+        public MListExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, TableMList tr)
             : base(DbExpressionType.MList, type)
         {
             this.BackID = backID;
@@ -454,10 +454,10 @@ namespace Signum.Engine.Linq
     internal class AdditionalFieldExpression : DbExpression
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
         public readonly PropertyRoute Route;
 
-        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, PropertyRoute route)
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, PropertyRoute route)
             : base(DbExpressionType.AdditionalField, type)
         {
             this.BackID = backID;
@@ -511,9 +511,9 @@ namespace Signum.Engine.Linq
 
         public readonly Alias Alias;
 
-        public readonly NewExpression? TablePeriod;
+        public readonly IntervalExpression? TablePeriod;
 
-        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, NewExpression? systemPeriod, TableMList table, Alias alias)
+        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, IntervalExpression? systemPeriod, TableMList table, Alias alias)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;
