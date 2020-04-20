@@ -33,7 +33,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
   if (options.plainExcel) {
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel))
         return undefined;
 
       return (
