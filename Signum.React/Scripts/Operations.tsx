@@ -361,10 +361,10 @@ export interface EntityOperationOptions<T extends Entity> {
   contextualFromMany?: ContextualOperationOptions<T>;
 
   text?: () => string;
-  isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (ctx: EntityOperationContext<T>) => void;
+  isVisible?: (eoc: EntityOperationContext<T>) => boolean;
+  overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
@@ -375,7 +375,7 @@ export interface EntityOperationOptions<T extends Entity> {
   iconAlign?: "start" | "end";
   iconColor?: string;
   keyboardShortcut?: KeyboardShortcut | null;
-  alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
+  alternatives?: (eoc: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
 }
 
 export interface KeyboardShortcut{
