@@ -22,6 +22,10 @@ export interface SmtpNetworkDeliveryEmbedded {
     newPassword: string;
 }
 
+export interface ExchangeWebServiceEmbedded {
+    newPassword: string;
+}
+
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
@@ -380,6 +384,7 @@ export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITas
 export module Pop3ConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.Save");
   export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.ReceiveEmails");
+  export const ReceiveLastEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.ReceiveLastEmails");
 }
 
 export const Pop3ReceptionEntity = new Type<Pop3ReceptionEntity>("Pop3Reception");
@@ -389,6 +394,9 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
   startDate: string;
   endDate: string | null;
   newEmails: number;
+  serverEmails: number;
+  lastServerMessageUID: string | null;
+  mailsFromDifferentAccounts: boolean;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;
 }
 

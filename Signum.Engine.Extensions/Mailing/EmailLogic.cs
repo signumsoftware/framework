@@ -41,7 +41,7 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,
             Func<EmailConfigurationEmbedded> getConfiguration,
-            Func<EmailTemplateEntity?, Entity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
+            Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -330,9 +330,9 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        private Func<EmailTemplateEntity?, EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
+        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
 
-        public EmailSenderManager(Func<EmailTemplateEntity?, EmailMessageEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?,EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             this.getEmailSenderConfiguration = getEmailSenderConfiguration;
         }
@@ -351,13 +351,6 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
-                    using (Transaction tr = Transaction.ForceNew())
-                    {
-                        email.State = EmailMessageState.Draft;
-                        email.Save();
-                        tr.Commit();
-                    }
-
                     SendInternal(email);
 
                     email.State = EmailMessageState.Sent;
@@ -368,14 +361,12 @@ namespace Signum.Engine.Mailing
                 {
                     if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
                         throw;
+                    var exLog = ex.LogException().ToLite();
 
                     try
                     {
                         using (Transaction tr = Transaction.ForceNew())
                         {
-                            var exLog = ex.LogException().ToLite();
-
-                            if (email.Sent == null) email.Sent = TimeZoneManager.Now;
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;
                             email.Save();
@@ -394,7 +385,7 @@ namespace Signum.Engine.Mailing
         {
             var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
 
-            var config = getEmailSenderConfiguration(template, email);
+            var config = getEmailSenderConfiguration(template, email.Target, email);
 
             if (config.SMTP != null)
             {

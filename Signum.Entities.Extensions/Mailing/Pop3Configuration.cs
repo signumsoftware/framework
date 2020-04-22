@@ -57,6 +57,8 @@ namespace Signum.Entities.Mailing
     {
         public static ExecuteSymbol<Pop3ConfigurationEntity> Save;
         public static ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveEmails;
+        public static ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveLastEmails;
+
     }
 
     [AutoInit]
@@ -76,7 +78,9 @@ namespace Signum.Entities.Mailing
         public DateTime? EndDate { get; set; }
 
         public int NewEmails { get; set; }
-
+        public int ServerEmails { get; set; }
+        public string? LastServerMessageUID { get; set; }
+        public bool MailsFromDifferentAccounts { get; set; }
         public Lite<ExceptionEntity>? Exception { get; set; }
     }
 
