@@ -99,7 +99,7 @@ namespace Signum.Engine.Toolbar
                 t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
         }
 
-        private static void RegisterDelete<T>(SchemaBuilder sb) where T : Entity
+        public static void RegisterDelete<T>(SchemaBuilder sb) where T : Entity
         {
             if (sb.Settings.ImplementedBy((ToolbarEntity tb) => tb.Elements.First().Content, typeof(T)))
             {
@@ -232,6 +232,14 @@ namespace Signum.Engine.Toolbar
             }
 
             return result;
+        }
+
+        public static void RegisterContentType<T>(Func<Lite<Entity>, bool> isAuthorized, Action? onDelete) where T : Entity
+        {
+            IsAuthorizedDictionary.Add(typeof(T), isAuthorized);
+
+            if (onDelete != null)
+                onDelete();
         }
 
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
