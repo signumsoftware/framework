@@ -632,6 +632,11 @@ export class MListElementBinding<T> implements IBinding<T>{
     return mlist[this.index].element;
   }
 
+  getMListElement(): MListElement<T> {
+    var mlist = this.mListBinding.getValue();
+    return mlist[this.index];
+  }
+
   setValue(val: T) {
     var mlist = this.mListBinding.getValue()
     const mle = mlist[this.index];
