@@ -13,7 +13,7 @@ namespace Signum.Engine.Files
 {
     public static class BlobContainerClientPool
     {
-        static ConcurrentDictionary<(string connectionString, string blobContainerName), BlobContainerClient> Pool = 
+        static ConcurrentDictionary<(string connectionString, string blobContainerName), BlobContainerClient> Pool =
             new ConcurrentDictionary<(string connectionString, string blobContainerName), BlobContainerClient>();
 
         public static BlobContainerClient Get(string connectionString, string blobContainerName)
@@ -24,7 +24,9 @@ namespace Signum.Engine.Files
 
     public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
-        public Func<BlobContainerClient> GetClient { get; private set; }
+        public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
+        public Func<IEnumerable<IFilePath>, IEnumerable< Tuple<BlobContainerClient, IEnumerable<IFilePath>>>> GetClients { get; private set; }
+
         public Func<bool> WebDownload { get; private set; }
 
         public Func<IFilePath, string> CalculateSuffix { get; set; }
@@ -34,9 +36,13 @@ namespace Signum.Engine.Files
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
 
-        public AzureBlobStoragebFileTypeAlgorithm(Func<BlobContainerClient> getClient, Func<bool> webDownload)
+        public AzureBlobStoragebFileTypeAlgorithm(
+            Func<IFilePath, BlobContainerClient> getClient,
+            Func<IEnumerable<IFilePath>, IEnumerable<Tuple<BlobContainerClient, IEnumerable<IFilePath>>>> getClients,
+            Func<bool> webDownload)
         {
             this.GetClient = getClient;
+            this.GetClients = getClients;
             this.WebDownload = webDownload;
 
             CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
@@ -46,7 +52,7 @@ namespace Signum.Engine.Files
 
         public PrefixPair GetPrefixPair(IFilePath efp)
         {
-            var client = GetClient();
+            var client = GetClient(efp);
 
             if (!this.WebDownload())
                 return PrefixPair.None();
@@ -56,13 +62,13 @@ namespace Signum.Engine.Files
 
         public Stream OpenRead(IFilePath fp)
         {
-            var client = GetClient();
+            var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
         }
 
         public byte[] ReadAllBytes(IFilePath fp)
         {
-            var client = GetClient();
+            var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
         }
 
@@ -77,10 +83,10 @@ namespace Signum.Engine.Files
                 if (!suffix.HasText())
                     throw new InvalidOperationException("Suffix not set");
 
-                
+
                 fp.SetPrefixPair(GetPrefixPair(fp));
 
-                var client = GetClient();
+                var client = GetClient(fp);
 
                 int i = 2;
                 fp.Suffix = suffix.Replace("\\", "/");
@@ -117,11 +123,15 @@ namespace Signum.Engine.Files
             if (WeakFileReference)
                 return;
 
-            var client = GetClient();
-            foreach (var f in files)
+            var groups = GetClients(files);
+
+            foreach (var g in groups)
             {
-                client.DeleteBlob(f.Suffix);
-            }
+                foreach (var e in g.Item2)
+                {
+                    g.Item1.DeleteBlob(e.Suffix);
+                }
+            }         
         }
     }
 
