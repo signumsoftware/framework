@@ -201,21 +201,40 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitUnary(UnaryExpression u)
             {
-                if (u.NodeType == ExpressionType.Convert && u.Operand is ColumnExpression && DiffersInNullability(u.Type, u.Operand.Type))
-                {
-                    ColumnExpression column = (ColumnExpression)u.Operand;
-                    return scope.GetColumnExpression(row, column.Alias, column.Name!, u.Type);
-                }
+                var col = GetInnerColumn(u);
+
+                if(col != null)
+                    return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type);
 
                 return base.VisitUnary(u);
+            }
+
+            public ColumnExpression? GetInnerColumn(UnaryExpression u)
+            {
+                if(u.NodeType == ExpressionType.Convert && DiffersInNullability(u.Type, u.Operand.Type))
+                {
+                    if (u.Operand is ColumnExpression c)
+                        return c;
+
+                    if (u.Operand is UnaryExpression u2)
+                        return GetInnerColumn(u2);
+                }
+
+                return null;
             }
 
 
             bool DiffersInNullability(Type a, Type b)
             {
-                return
-                    a.IsValueType && a.Nullify() == b ||
-                    b.IsValueType && b.Nullify() == a;
+                if (a.IsValueType && a.Nullify() == b ||
+                    b.IsValueType && b.Nullify() == a)
+                    return true;
+
+                if (a == typeof(Date) && b == typeof(DateTime) ||
+                    a == typeof(DateTime) && b == typeof(Date))
+                    return true;
+
+                return false;
             }
 
             protected internal override Expression VisitColumn(ColumnExpression column)

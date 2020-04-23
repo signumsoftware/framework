@@ -97,6 +97,8 @@ namespace Signum.Utilities
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class FormatAttribute : Attribute
     {
+        public const string Password = "Password";
+
         public string Format { get; private set; }
         public FormatAttribute(string format)
         {

@@ -2,7 +2,7 @@ import * as React from "react"
 import * as H from "history"
 import { Route, Switch } from "react-router"
 import { Dic, classes, } from './Globals';
-import { ajaxGet, ajaxPost } from './Services';
+import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos } from './Reflection';
@@ -151,6 +151,7 @@ export function createRoute(type: PseudoType, viewName?: string) {
 
 
 export const clearSettingsActions: Array<() => void> = [
+  clearContextHeaders,
   clearEntitySettings,
   Finder.clearQuerySettings,
   Finder.ButtonBarQuery.clearButtonBarElements,
@@ -605,7 +606,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
   if (!config.getItemsDelay) {
@@ -702,6 +703,8 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   e.preventDefault();
   if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
     window.open(toAbsoluteUrl(path));
+  else if (path.startsWith("http"))
+    window.location.href = path;
   else
     history.push(path);
 }

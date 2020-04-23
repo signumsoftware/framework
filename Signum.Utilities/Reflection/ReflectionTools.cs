@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
+using System.IO;
 
 namespace Signum.Utilities.Reflection
 {
@@ -838,6 +839,22 @@ namespace Signum.Utilities.Reflection
         {
             return (pi.CanRead && pi.GetGetMethod()!.IsStatic) ||
                   (pi.CanWrite && pi.GetSetMethod()!.IsStatic);
-        }    
+        }
+        
+        public static DateTime BuildTimeUTC(this Assembly assembly)
+        {
+            const int peHeaderOffset = 60;
+            const int linkerTimestampOffset = 8;
+            byte[] bytes = new byte[2048];
+            using (FileStream file = new FileStream(assembly.Location, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                file.Read(bytes, 0, bytes.Length);
+            }
+            int headerPos = BitConverter.ToInt32(bytes, peHeaderOffset);
+            int secondsSince1970 = BitConverter.ToInt32(bytes, headerPos + linkerTimestampOffset);
+            DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime dateTimeUTC = dt.AddSeconds(secondsSince1970);
+            return dateTimeUTC;
+        }
     }
 }

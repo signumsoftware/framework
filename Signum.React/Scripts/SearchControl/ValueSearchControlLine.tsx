@@ -21,6 +21,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   valueToken?: string | QueryTokenString<any>;
   labelText?: React.ReactChild;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
+  unitText?: React.ReactChild;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initialValue?: any;
   isLink?: boolean;
@@ -106,7 +107,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     const isBadge = (this.props.isBadge ?? this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
     const isFormControl = (this.props.isFormControl ?? this.props.valueToken != undefined);
 
-    const unit = isFormControl && token?.unit && <span className="input-group-text">{token.unit}</span>;
+    const unit = isFormControl && (this.props.unitText ?? (token?.unit && <span className="input-group-text">{token.unit}</span>));
 
     const ctx = this.props.ctx;
 
@@ -138,7 +139,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
       <FormGroup ctx={this.props.ctx}
         labelText={this.props.labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
-        htmlAttributes={this.props.formGroupHtmlAttributes}>
+        htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName)}}}>
         <div className={isFormControl ? ((unit || view || extra || find || create) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>
           <ValueSearchControl
             ref={this.handleValueSearchControlLoaded}

@@ -260,7 +260,6 @@ namespace Signum.Entities.DynamicQuery
         FirstOrDefault,
         Single,
         SingleOrDefault,
-        SingleOrMany,
         Only
     }
 

@@ -39,9 +39,9 @@ namespace Signum.Utilities
             return d1._dt - d2._dt;
         }
 
-        public static Date operator -(Date d, TimeSpan t)
+        public static DateTime operator -(Date d, TimeSpan t)
         {
-            return new Date(d._dt - t);
+            return d._dt - t;
         }
 
         public static bool operator !=(Date d1, Date d2)
@@ -49,9 +49,9 @@ namespace Signum.Utilities
             return d1._dt != d2._dt;
         }
 
-        public static Date operator +(Date d, TimeSpan t)
+        public static DateTime operator +(Date d, TimeSpan t)
         {
-            return new Date(d._dt + t);
+            return d._dt + t;
         }
 
         public static bool operator <(Date d1, Date d2)
@@ -240,12 +240,17 @@ namespace Signum.Utilities
             return new Date(DateTime.ParseExact(s, formats, provider, style));
         }
 
+        public DateTime Add(TimeSpan value)
+        {
+            return this + value;
+        }
+
         public TimeSpan Subtract(Date value)
         {
             return this - value;
         }
 
-        public Date Subtract(TimeSpan value)
+        public DateTime Subtract(TimeSpan value)
         {
             return this - value;
         }

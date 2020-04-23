@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -40,8 +40,8 @@ export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function clearQuerySettings() {
   Dic.clear(querySettings);
+  clearQueryDescriptionCache();
 }
-
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => FinderFindManager.getSearchPage()} />);
@@ -855,7 +855,16 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
 }
 
 export class TokenCompleter {
-  constructor(public queryDescription: QueryDescription) { }
+
+  static globalCache: {
+    [queryKey: string]: {
+      [fullKey: string]: QueryToken
+    }
+  } = {};
+
+  queryCache: {
+    [fullKey: string]: QueryToken
+  };
 
   tokensToRequest: {
     [fullKey: string]: (
@@ -864,6 +873,12 @@ export class TokenCompleter {
         token?: QueryToken,
       })
   } = {};
+
+  constructor(public queryDescription: QueryDescription)
+  {
+    this.queryCache = TokenCompleter.globalCache[queryDescription.queryKey] ??
+      (TokenCompleter.globalCache[queryDescription.queryKey] = {});
+  }
 
   requestFilter(fo: FilterOption, options: SubTokensOptions) {
 
@@ -881,6 +896,19 @@ export class TokenCompleter {
 
     if (this.isSimple(fullKey))
       return;
+
+    var token = this.queryCache[fullKey];
+    if (token) {
+      if (hasAggregate(token) && (options && SubTokensOptions.CanAggregate) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (aggregates not allowed)`);
+
+      if (hasAnyOrAll(token) && (options && SubTokensOptions.CanAnyAll) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Any/All not allowed)`);
+
+      if (hasElement(token) && (options && SubTokensOptions.CanElement) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
+      return;
+    }
 
     if (this.tokensToRequest[fullKey])
       return;
@@ -902,7 +930,11 @@ export class TokenCompleter {
       return Promise.resolve(undefined);
 
     return API.parseTokens(this.queryDescription.queryKey, tokens).then(parsedTokens => {
-      parsedTokens.forEach(t => this.tokensToRequest[t.fullKey].token = t);
+      parsedTokens.forEach(t => {
+        this.tokensToRequest[t.fullKey].token = t;
+        if (!this.queryCache[t.fullKey])
+          this.queryCache[t.fullKey] = t;
+      });
     });
   }
 
@@ -915,6 +947,10 @@ export class TokenCompleter {
         throw new Error(`Column '${fullKey}' is not a column of query '${this.queryDescription.queryKey}'. Maybe use 'Entity.${fullKey}' instead?`);
 
       return toQueryToken(cd);
+    }
+
+    if (this.queryCache[fullKey]) {
+      return this.queryCache[fullKey];
     }
 
     return this.tokensToRequest[fullKey].token!;
@@ -1024,6 +1060,7 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
 
 export function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
+  TokenCompleter.globalCache = {};
 }
 
 let queryDescriptionCache: { [queryKey: string]: Promise<QueryDescription> } = {};
@@ -1102,10 +1139,6 @@ export module API {
     count: number;
   }
 
-  export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost({ url: "~/api/query/findRowsLike", signal }, request);
-  }
-
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
     return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
   }
@@ -1122,15 +1155,6 @@ export module API {
       }
       return list;
     });
-  }
-
-  export interface AutocompleteQueryRequest {
-    queryKey: string;
-    filters: FilterRequest[];
-    columns: ColumnRequest[];
-    orders: OrderRequest[];
-    subString: string;
-    count: number;
   }
 }
 
@@ -1419,6 +1443,11 @@ export const formatRules: FormatRule[] = [
     name: "Object",
     isApplicable: col => true,
     formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
+  },
+  {
+    name: "Password",
+    isApplicable: col => col.token?.format == "Password",
+    formatter: col => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
   },
   {
     name: "Enum",

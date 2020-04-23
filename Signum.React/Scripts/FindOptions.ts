@@ -191,6 +191,16 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
   return hasAggregate(token.parent);
 }
 
+export function hasElement(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Element")
+    return true;
+
+  return hasElement(token.parent);
+}
+
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {
 
   if (hasAggregate(fop.token))

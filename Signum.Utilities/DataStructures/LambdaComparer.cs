@@ -39,12 +39,12 @@ namespace Signum.Utilities.DataStructures
 
         public int GetHashCode(T obj)
         {
-            return equalityComparer.GetHashCode(func(obj));
+            return equalityComparer.GetHashCode(func(obj)!);
         }
 
         public int GetHashCode(object obj)
         {
-            return equalityComparer.GetHashCode(func((T)obj));
+            return equalityComparer.GetHashCode(func((T)obj)!);
         }
 
         public int Compare(object? x, object? y)
@@ -122,7 +122,7 @@ namespace Signum.Utilities.DataStructures
 
             public int GetHashCode(T obj)
             {
-                return comparer1.GetHashCode(obj) ^ comparer2.GetHashCode(obj);
+                return comparer1.GetHashCode(obj!) ^ comparer2.GetHashCode(obj!);
             }
 
             public int GetHashCode(object obj) => this.GetHashCode((T)obj);

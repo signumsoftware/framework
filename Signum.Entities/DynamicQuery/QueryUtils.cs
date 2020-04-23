@@ -520,9 +520,9 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 case FilterOperation.Like: return Expression.Call(miLike, Fix(left, inMemory), right);
-                case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right));
-                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right));
-                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right));
+                case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
+                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
+                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
                 case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, Fix(left, inMemory), right));
                 default:
                     throw new InvalidOperationException("Unknown operation {0}".FormatWith(operation));
