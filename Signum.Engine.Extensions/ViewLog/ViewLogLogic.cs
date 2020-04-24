@@ -66,10 +66,16 @@ namespace Signum.Engine.ViewLog
 
                 QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+                Database.RetrieveExecutedFrom += Database_RetrieveExecutedFrom;
             }
         }
 
+        private static IDisposable? Database_RetrieveExecutedFrom(string arg1, Entity arg2)
+        {
+            return ViewLogLogic.LogView(arg2.ToLite(), arg1);
+        }
 
+  
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<ViewLogEntity>();
@@ -127,8 +133,13 @@ namespace Signum.Engine.ViewLog
             Database.Query<ViewLogEntity>().Where(view => view.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
+        public static IDisposable? LogView(Lite<IEntity> entity, string viewAction)
         {
+
+            if (entity == null || !LogType(entity.EntityType) || UserHolder.Current == null)
+                return null;
+
+
             var viewLog = new ViewLogEntity
             {
                 Target = (Lite<Entity>)entity.Clone(),
