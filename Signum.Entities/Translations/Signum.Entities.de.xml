@@ -308,7 +308,7 @@
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
-    <Member Name="Hour" Description="Zeit" />
+    <Member Name="Hour" Description="Stunde" />
     <Member Name="HourStart" Description="Start Stunde" />
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
