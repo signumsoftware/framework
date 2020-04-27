@@ -143,9 +143,6 @@ namespace Signum.React.ApiControllers
             return result;
         }
 
-      
-
-
         [HttpPost("api/query/entitiesWithFilter"), ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
