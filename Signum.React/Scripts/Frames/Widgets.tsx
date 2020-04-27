@@ -35,15 +35,16 @@ export interface EmbeddedWidget {
   position: EmbeddedWidgetPosition;
 }
 
-export type EmbeddedWidgetPosition = "Top" | "Bottom";
+export type EmbeddedWidgetPosition = "Top" | "Bottom" | "Tab";
 
 export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget | undefined> = [];
 
-export function renderEmbeddedWidgets(wc: WidgetContext<ModifiableEntity>): { top: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
+export function renderEmbeddedWidgets(wc: WidgetContext<ModifiableEntity>): { top: React.ReactElement<any>[]; tab: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
   const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a != undefined).map(a => a!);
-
+  debugger;
   return {
-    top: widgets.filter(ew => ew.position == "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
-    bottom: widgets.filter(ew => ew.position == "Bottom").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }))
+    top: widgets.filter(ew => ew.position === "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
+    tab: widgets.filter(ew => ew.position === "Tab").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
+    bottom: widgets.filter(ew => ew.position === "Bottom").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }))
   };
 }

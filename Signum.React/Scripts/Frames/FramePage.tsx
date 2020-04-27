@@ -16,6 +16,7 @@ import { AutoFocus } from '../Components/AutoFocus';
 import { FunctionalAdapter } from './FrameModal';
 import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
 import * as Operations from '../Operations'
+import WidgetEmbedded from './WidgetEmbedded'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -134,6 +135,7 @@ export default function FramePage(p: FramePageProps) {
 
 
   const frame: EntityFrame = {
+    tabs: undefined,
     frameComponent: { forceUpdate },
     entityComponent: entityComponent.current,
     pack: state.pack,
@@ -182,7 +184,7 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
-  const embeddedWidgets = renderEmbeddedWidgets(wc);
+  //const embeddedWidgets = renderEmbeddedWidgets(wc);
 
   return (
     <div className="normal-control">
@@ -190,13 +192,13 @@ export default function FramePage(p: FramePageProps) {
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
       <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
-        {embeddedWidgets.top}
-      <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-        <ErrorBoundary>
-          {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-        </ErrorBoundary>
-      </div>
-      {embeddedWidgets.bottom}
+      <WidgetEmbedded widgetContext={wc} >
+        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <ErrorBoundary>
+            {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+          </ErrorBoundary>
+        </div>
+      </WidgetEmbedded>
     </div>
   );
 
