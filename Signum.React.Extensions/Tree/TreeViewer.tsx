@@ -33,6 +33,7 @@ interface TreeViewerProps {
   onSearch?: () => void;
   filterOptions: FilterOption[];
   initialShowFilters?: boolean;
+  showToolbar?: boolean;
 }
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
@@ -178,9 +179,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return (
       <div>
         {this.renderSearch()}
-        <br />
-        {this.renderToolbar()}
-        <br />
+        {this.props.showToolbar && <>
+          <br />
+          {this.renderToolbar()}
+          <br />
+        </>}
+        
         <div className="tree-container" ref={(t) => this.treeContainer = t!} >
           <ul>
             {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :

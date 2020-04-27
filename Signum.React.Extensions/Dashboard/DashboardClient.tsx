@@ -13,7 +13,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
@@ -92,6 +92,26 @@ export function start(options: { routes: JSX.Element[] }) {
     defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
     withPanel: p => p.renderMode != "BigValue",
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+      (p, e, ev) => {
+        ev.preventDefault();
+        Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+      },
+    handleTitleClick:
+      (p, e, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
+          .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+          .done()
+      }
+  });
+
+
+  registerRenderer(UserTreePartEntity, {
+    component: () => import('./View/UserTreePart').then((a: any) => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
+    withPanel: p => true,
+    handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
         Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);

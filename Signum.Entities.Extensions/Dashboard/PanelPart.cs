@@ -194,6 +194,41 @@ namespace Signum.Entities.Dashboard
         BigValue,
     }
 
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class UserTreePartEntity : Entity, IPartEntity
+    {
+        public UserQueryEntity UserQuery { get; set; }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserQuery + "");
+
+        public bool RequiresTitle
+        {
+            get { return false; }
+        }
+
+        public IPartEntity Clone()
+        {
+            return new UserTreePartEntity
+            {
+                UserQuery = this.UserQuery,
+            };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserTreePart",
+                new XAttribute("UserQuery", ctx.Include(UserQuery))
+                );
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+        }
+    }
+
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartEntity : Entity, IPartEntity
     {

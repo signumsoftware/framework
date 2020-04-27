@@ -117,6 +117,13 @@ export type UserQueryPartRenderMode =
   "SearchControl" |
   "BigValue";
 
+export const UserTreePartEntity = new Type<UserTreePartEntity>("UserTreePart");
+export interface UserTreePartEntity extends Entities.Entity, IPartEntity {
+  Type: "UserTreePart";
+  userQuery: UserQueries.UserQueryEntity;
+  requiresTitle: boolean;
+}
+
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";

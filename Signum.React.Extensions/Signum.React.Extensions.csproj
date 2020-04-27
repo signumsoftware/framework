@@ -83,6 +83,7 @@
   <ItemGroup>
     <None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
+    <None Remove="Dashboard\View\UserTreePart.tsx" />
     <None Remove="Files\ImageModal.tsx" />
     <None Remove="Files\MultiFileImageLine.tsx" />
   </ItemGroup>
