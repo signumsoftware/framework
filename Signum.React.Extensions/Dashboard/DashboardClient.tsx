@@ -128,7 +128,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   onEmbeddedWidgets.push(wc => wc.frame.pack.embeddedDashboard &&
     {
-      position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
+    position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Tab" | "Bottom",
       embeddedWidget: <DashboardWidget dashboard={wc.frame.pack.embeddedDashboard} pack={wc.frame.pack as EntityPack<Entity>} />
     });
 

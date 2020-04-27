@@ -191,6 +191,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var pack = this.state.pack!;
 
     var activityFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
@@ -242,6 +243,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
     const mainFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },

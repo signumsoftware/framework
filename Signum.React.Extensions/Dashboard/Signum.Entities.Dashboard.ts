@@ -15,7 +15,8 @@ export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntit
 export type DashboardEmbedededInEntity =
   "None" |
   "Top" |
-  "Bottom";
+  "Bottom" |
+  "Tab";
 
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
