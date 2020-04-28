@@ -244,6 +244,14 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return Schema.Current.OnFilterQuery<T>();
         }
 
+        public static event Func<string, Entity, IDisposable?>? RetrieveExecutedFrom;
+
+        public static IDisposable? OnRetrieveExecutedFrom(string from, Entity entity)
+        {
+            return Disposable.Combine(RetrieveExecutedFrom, f => f(from, entity));
+            //return  Database.RetrieveExecutedFrom(from, entity);
+        }
+
         public static Entity Retrieve(Type type, PrimaryKey id)
         {
             return giRetrieve.GetInvoker(type)(id);
@@ -859,7 +867,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
-        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
+        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
             where T : Entity
         {

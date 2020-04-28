@@ -108,7 +108,9 @@ Lose changes?")]
         [Description("New {0}")]
         New0_G,
         [Description("{0} {1}")]
-        Type0Id1
+        Type0Id1,
+        Main
+
     }
 
     public enum EntityControlMessage

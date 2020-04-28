@@ -34,6 +34,7 @@ import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EntityBaseController } from "./Lines";
+import { string } from "prop-types";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1105,8 +1106,15 @@ export module API {
     return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
   }
 
+  interface QueryRequestUrl extends QueryRequest {
+    queryUrl: string;
+  }
+
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-    return ajaxPost({ url: "~/api/query/executeQuery", signal }, request);
+  
+    const queryUrl = Navigator.history.location.pathname + Navigator.history.location.search;
+    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl};
+    return ajaxPost({ url: "~/api/query/executeQuery", signal }, qr);
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
