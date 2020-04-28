@@ -7,7 +7,7 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
+import { renderWidgets,  WidgetContext } from './Widgets'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
@@ -183,8 +183,6 @@ export default function FramePage(p: FramePageProps) {
   const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, "framePage"));
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
-
-  //const embeddedWidgets = renderEmbeddedWidgets(wc);
 
   return (
     <div className="normal-control">

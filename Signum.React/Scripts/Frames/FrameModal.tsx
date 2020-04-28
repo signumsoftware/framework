@@ -10,7 +10,7 @@ import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeCont
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
-import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
+import { renderWidgets, WidgetContext } from './Widgets'
 import { EntityOperationContext } from '../Operations'
 import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
@@ -235,8 +235,6 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     const ctx = new TypeContext(undefined, styleOptions, pr, new ReadonlyBinding(pc.pack.entity, ""), prefix!);
 
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
-
-    //const embeddedWidgets = renderEmbeddedWidgets(wc);
 
     return (
       <div className="modal-body">

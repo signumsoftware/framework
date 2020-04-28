@@ -3,7 +3,7 @@ import { EntityPack, ModifiableEntity, NormalWindowMessage } from '../Signum.Ent
 import { TypeContext, EntityFrame } from '../TypeContext'
 import "./Widgets.css"
 import { ErrorBoundary } from '../Components';
-import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
+import { renderWidgets, WidgetContext, EmbeddedWidget } from './Widgets'
 import { Tabs, Tab } from 'react-bootstrap';
 import * as Navigator from "../Navigator"
 
@@ -26,6 +26,17 @@ export function addAdditionalTabs(frame: EntityFrame | undefined) {
   return frame!.tabs!.map(e => toTab(e)); 
 }
 
+export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget[] | undefined> = [];
+
+export function renderEmbeddedWidgets(wc: WidgetContext<ModifiableEntity>): { top: React.ReactElement<any>[]; tab: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
+  const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a !== undefined).map(a => a!).flatMap(a => a);
+
+  return {
+    top: widgets.filter(ew => ew.position === "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
+    tab: widgets.filter(ew => ew.position === "Tab").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
+    bottom: widgets.filter(ew => ew.position === "Bottom").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }))
+  };
+}
 
 
 export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
