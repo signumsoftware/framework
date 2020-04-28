@@ -20,7 +20,7 @@ export function toTab(e: any) {
 }
 
 export function addAdditionalTabs(frame: EntityFrame | undefined) {
-  if (frame === undefined)
+  if (frame === undefined || frame!.tabs === undefined)
     return undefined;
 
   return frame!.tabs!.map(e => toTab(e)); 
