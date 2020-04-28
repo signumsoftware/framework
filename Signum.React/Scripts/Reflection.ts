@@ -1360,7 +1360,11 @@ export class PropertyRoute {
   }
 
   static parseFull(fullPropertyRoute: string): PropertyRoute {
-    return PropertyRoute.parse(fullPropertyRoute.after("(").before(")."), fullPropertyRoute.after(")."));
+    const endPseudoTypeIndex = fullPropertyRoute.indexOf(")");
+    let propertyString = fullPropertyRoute.substr(endPseudoTypeIndex + 1);
+    if (propertyString.startsWith("."))
+      propertyString = propertyString.substr(1);
+    return PropertyRoute.parse(fullPropertyRoute.substring(1, endPseudoTypeIndex), propertyString);
   }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
