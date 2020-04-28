@@ -1,6 +1,7 @@
 
 using Azure;
 using Azure.Storage.Blobs;
+using DocumentFormat.OpenXml.Office2013.Excel;
 using Signum.Entities.Files;
 using Signum.Utilities;
 using System;
@@ -31,33 +32,22 @@ namespace Signum.Engine.Files
     public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
         public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
-        public Func<IEnumerable<IFilePath>, IEnumerable< Tuple<BlobContainerClient, IEnumerable<IFilePath>>>> GetClients { get; private set; }
 
-        public Func<bool> WebDownload { get; private set; }
+        public Func<bool> WebDownload { get; private set; } = () => true;
 
-        public Func<IFilePath, string> CalculateSuffix { get; set; }
-        public bool RenameOnCollision { get; set; }
+        public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
+        public bool RenameOnCollision { get; set; } = true;
         public bool WeakFileReference { get; set; }
+        public bool CreateIfNecessary { get; set; }
 
-        public Func<string, int, string> RenameAlgorithm { get; set; }
+        public Func<string, int, string> RenameAlgorithm { get; set; } = FileTypeAlgorithm.DefaultRenameAlgorithm;
 
         public Func<IFilePath, BlobAction> BlobAction { get; set; } = (IFilePath ifp) => { return Files.BlobAction.Download; };
 
-        public AzureBlobStoragebFileTypeAlgorithm(
-            Func<IFilePath, BlobContainerClient> getClient,
-            Func<IEnumerable<IFilePath>, IEnumerable<Tuple<BlobContainerClient, IEnumerable<IFilePath>>>> getClients,
-            Func<bool> webDownload, Func<IFilePath, BlobAction>? blobAction = null)
+        public AzureBlobStoragebFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
         {
             this.GetClient = getClient;
-            this.GetClients = getClients;
-            this.WebDownload = webDownload;
 
-            if (blobAction != null)
-                this.BlobAction = blobAction;
-
-            CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
-            RenameOnCollision = true;
-            RenameAlgorithm = FileTypeAlgorithm.DefaultRenameAlgorithm;
         }
 
         public PrefixPair GetPrefixPair(IFilePath efp)
@@ -72,18 +62,25 @@ namespace Signum.Engine.Files
 
         public Stream OpenRead(IFilePath fp)
         {
-            var client = GetClient(fp);
-            return client.GetBlobClient(fp.Suffix).Download().Value.Content;
+            using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content;
+            }
         }
 
         public byte[] ReadAllBytes(IFilePath fp)
         {
-            var client = GetClient(fp);
-            return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            }
         }
 
         public virtual void SaveFile(IFilePath fp)
         {
+            using (HeavyProfiler.Log("AzureBlobStorage SaveFile"))
             using (new EntityCache(EntityCacheType.ForceNew))
             {
                 if (WeakFileReference)
@@ -97,6 +94,14 @@ namespace Signum.Engine.Files
                 fp.SetPrefixPair(GetPrefixPair(fp));
 
                 var client = GetClient(fp);
+
+                if (CreateIfNecessary)
+                {
+                    using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+                    {
+                        client.CreateIfNotExists();
+                    }
+                }
 
                 int i = 2;
                 fp.Suffix = suffix.Replace("\\", "/");
@@ -130,26 +135,27 @@ namespace Signum.Engine.Files
 
         public void MoveFile(IFilePath ofp, IFilePath nfp)
         {
-            if (WeakFileReference)
-                return;
+            using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
+            {
+                if (WeakFileReference)
+                    return;
 
-            throw new NotImplementedException();
+                throw new NotImplementedException();
+            }
         }
 
         public void DeleteFiles(IEnumerable<IFilePath> files)
         {
-            if (WeakFileReference)
-                return;
-
-            var groups = GetClients(files);
-
-            foreach (var g in groups)
+            using (HeavyProfiler.Log("AzureBlobStorage DeleteFiles"))
             {
-                foreach (var e in g.Item2)
+                if (WeakFileReference)
+                    return;
+
+                foreach (var f in files)
                 {
-                    g.Item1.DeleteBlob(e.Suffix);
+                    GetClient(f).DeleteBlob(f.Suffix);
                 }
-            }         
+            }
         }
 
         public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
