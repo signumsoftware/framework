@@ -29,16 +29,6 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
   const ti = getTypeInfo(p.part.userQuery.entityType?.toStr!);
   const filterOptions = fo.filterOptions!;
 
-  function changeUrl() {
-    const newPath = treeViewRef.current!.getCurrentUrl();
-
-    const currentLocation = Navigator.history.location;
-
-    if (currentLocation.pathname + currentLocation.search != newPath)
-      Navigator.history.replace(newPath);
-  }
-
-
   return (
     <TreeViewer ref={treeViewRef}
       initialShowFilters={false}
