@@ -10,9 +10,12 @@ export interface WidgetContext<T extends ModifiableEntity> {
 }
 
 export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any> | undefined> = [];
+export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget[] | undefined> = [];
+
 
 export function clearWidgets() {
   onWidgets.clear();
+  onEmbeddedWidgets.clear();
 }
 
 export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactNode | undefined {
@@ -33,6 +36,8 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactN
 export interface EmbeddedWidget {
   embeddedWidget: React.ReactElement<any>;
   position: EmbeddedWidgetPosition;
+  title?: string;
+  eventKey?: string | number;
 }
 
 export type EmbeddedWidgetPosition = "Top" | "Bottom" | "Tab";
