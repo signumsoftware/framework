@@ -440,6 +440,7 @@ export interface IHasChanges {
 }
 
 export interface EntityFrame {
+  tabs: React.ReactElement<any>[] | undefined;
   frameComponent: {
     forceUpdate(): void,
     createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined

@@ -867,7 +867,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-
+  supportsAdditionalTabs?: boolean;
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];
