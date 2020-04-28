@@ -234,12 +234,9 @@ namespace Signum.Engine.Toolbar
             return result;
         }
 
-        public static void RegisterContentType<T>(Func<Lite<Entity>, bool> isAuthorized, Action? onDelete) where T : Entity
+        public static void RegisterIsAuthorized<T>(Func<Lite<Entity>, bool> isAuthorized) where T : Entity
         {
             IsAuthorizedDictionary.Add(typeof(T), isAuthorized);
-
-            if (onDelete != null)
-                onDelete();
         }
 
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
