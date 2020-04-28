@@ -166,19 +166,25 @@ namespace Signum.Engine.Dashboard
             return result;
         }
 
-        public static DashboardEntity? GetEmbeddedDashboard(Type entityType)
+        public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
 
             var result = DashboardsByType.Value.TryGetC(entityType).EmptyIfNull().Select(lite => Dashboards.Value.GetOrThrow(lite))
                 .Where(d => d.EmbeddedInEntity.Value != DashboardEmbedededInEntity.None && isAllowed(d))
-                .OrderByDescending(a => a.DashboardPriority).FirstOrDefault();
+                .OrderByDescending(a => a.DashboardPriority)
+                .ToList();
 
-            if (result == null)
-                return null;
-
-            using (ViewLogLogic.LogView(result.ToLite(), "GetEmbeddedDashboard"))
+            if (!result.Any())
                 return result;
+
+            foreach (var item in result)
+            {
+                using (ViewLogLogic.LogView(item.ToLite(), "GetEmbeddedDashboards"))
+                {
+                } 
+            }
+            return result;
         }
 
         public static List<Lite<DashboardEntity>> GetDashboards()
