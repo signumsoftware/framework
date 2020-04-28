@@ -10,7 +10,7 @@ import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { RouteComponentProps } from "react-router";
 import "./schemaMap.css"
-import { useExpand, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useExpand, useSize } from '@framework/Hooks'
 
 interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;

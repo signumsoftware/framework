@@ -23,6 +23,7 @@ export interface ChartRendererProps {
   loading: boolean;
   data?: ChartClient.ChartTable;
   lastChartRequest?: ChartRequestModel;
+  onReload?: (e: React.MouseEvent<any>) => void;
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
@@ -81,7 +82,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
   }
 
   return (
-    <FullscreenComponent>
+    <FullscreenComponent onReload={p.onReload}>
       <ErrorBoundary>
         {cs && parameters &&
           (cs.chartComponent.prototype instanceof React.Component ?
@@ -103,7 +104,8 @@ export default function ChartRenderer(p: ChartRendererProps) {
 }
 
 interface FullscreenComponentProps {
-  children: React.ReactNode
+  children: React.ReactNode;
+  onReload?: (e: React.MouseEvent<any>) => void;
 }
 
 export function FullscreenComponent(p: FullscreenComponentProps) {
@@ -114,6 +116,9 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
     e.preventDefault();
     setIsFullScreen(!isFullScreen);
   }
+
+
+
 
   return (
     <div style={!isFullScreen ? { display: "flex" } : ({
@@ -127,12 +132,24 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
       height: "auto",
       zIndex: 9,
     })}>
-      <a onClick={handleExpandToggle} style={{ color: "gray", order: 2, cursor: "pointer" }} >
-        <FontAwesomeIcon icon={isFullScreen ? "compress" : "expand"} />
-      </a>
-      <div key={isFullScreen ? "A" : "B"} style={{ width: "100%", display: "flex" }}> 
+      
+      <div key={isFullScreen ? "A" : "B"} style={{ width: "100%", display: "flex" }}>
         {p.children}
       </div>
+      <div>
+        <a onClick={handleExpandToggle} style={{ color: "gray", order: 2, cursor: "pointer" }} >
+          <FontAwesomeIcon icon={isFullScreen ? "compress" : "expand"} />
+        </a>
+
+        {p.onReload && <>
+          <br />
+          <a onClick={p.onReload} style={{ color: "gray", order: 2, cursor: "pointer" }} >
+            <FontAwesomeIcon icon={"redo"} />
+          </a>
+        </>}
+
+      </div>
+  
     </div>
   );
 }

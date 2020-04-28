@@ -10,7 +10,7 @@ import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition } from './OperationMap'
 import "./operationMap.css"
-import { useExpand, useAPI, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useExpand, useAPI, useSize } from '@framework/Hooks'
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string }> {
 
