@@ -126,11 +126,18 @@ export function start(options: { routes: JSX.Element[] }) {
       }
   });
 
-  onEmbeddedWidgets.push(wc => wc.frame.pack.embeddedDashboard &&
-    {
-    position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Tab" | "Bottom",
-      embeddedWidget: <DashboardWidget dashboard={wc.frame.pack.embeddedDashboard} pack={wc.frame.pack as EntityPack<Entity>} />
+  onEmbeddedWidgets.push(wc => {
+    debugger;
+    if (!wc.frame.pack.embeddedDashboards)
+      return undefined;
+
+    return wc.frame.pack.embeddedDashboards.map(d => {
+      return {
+        position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
+        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} />
+      };
     });
+  });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
     if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
@@ -189,7 +196,7 @@ declare module '@framework/Signum.Entities' {
 
   export interface EntityPack<T extends ModifiableEntity> {
     dashboards?: Array<Lite<DashboardEntity>>;
-    embeddedDashboard?: DashboardEntity;
+    embeddedDashboards?: DashboardEntity[];
   }
 }
 
