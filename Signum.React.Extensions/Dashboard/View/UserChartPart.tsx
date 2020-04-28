@@ -57,6 +57,13 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
+  function handleReload(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    makeQuery();
+  }
+
+
+
   return (
     <div>
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
@@ -68,9 +75,9 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
           <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
-          resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
-        <ChartRenderer chartRequest={chartRequest} lastChartRequest={chartRequest}
-          data={result?.chartTable} loading={result == null} />
+            resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
+        <ChartRenderer onReload={handleReload} chartRequest={chartRequest} lastChartRequest={chartRequest}
+          data={result?.chartTable} loading={result === null} />
       }
     </div>
   );
