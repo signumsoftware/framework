@@ -126,7 +126,7 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
     this.setDrag(undefined);
   };
 
-  handleResizeDragStart = (resizer: "left" | "right", e: React.DragEvent<any>, mlec: ModifiableEntity & IGridEntity) => {
+  handleResizeDragStart: (resizer: "left" | "right", e: React.DragEvent<any>, mlec: ModifiableEntity & IGridEntity) => void = (resizer, e, mlec) => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
     this.setDrag({ currentItem: mlec, dragMode: resizer });
