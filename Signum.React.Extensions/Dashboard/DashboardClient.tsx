@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { Type } from '@framework/Reflection'
-import { onEmbeddedWidgets } from '@framework/Frames/Widgets'
+import { onEmbeddedWidgets } from '@framework/Frames/WidgetEmbedded'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
@@ -127,7 +127,6 @@ export function start(options: { routes: JSX.Element[] }) {
   });
 
   onEmbeddedWidgets.push(wc => {
-    debugger;
     if (!wc.frame.pack.embeddedDashboards)
       return undefined;
 
