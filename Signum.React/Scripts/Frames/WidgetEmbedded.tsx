@@ -44,7 +44,7 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
   const est = Navigator.getSettings(p.widgetContext.frame.pack.entity.Type)!;
  
   debugger;
-  if (embeddedWidgets.tab.length > 0 && est.supportsAdditionalTabs!==true) {
+  if (embeddedWidgets.tab.length > 0 && (!est || est.supportsAdditionalTabs!==true)) {
     return (
       <>
         {embeddedWidgets.top}
