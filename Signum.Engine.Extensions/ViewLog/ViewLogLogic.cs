@@ -66,13 +66,13 @@ namespace Signum.Engine.ViewLog
 
                 QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
-                Database.RetrieveExecutedFrom += Database_RetrieveExecutedFrom;
+                ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
             }
         }
 
-        private static IDisposable? Database_RetrieveExecutedFrom(string arg1, Entity arg2)
+        private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string url)
         {
-            return ViewLogLogic.LogView(arg2.ToLite(), arg1);
+            return ViewLogLogic.LogView(entity.ToLite(), url);
         }
 
   
