@@ -352,7 +352,7 @@ namespace Signum.Engine.Word
         {
             object? obj = ValueProvider.GetValue(p);
             string? text = obj is Enum en ? en.NiceToString() :
-                obj is TimeSpan ts ? ts.ToString((Format ?? ValueProvider.Format)?.Replace(":", @"\:"), p.Culture) :
+                obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
                 obj is IFormattable fo ? fo.ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 

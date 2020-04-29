@@ -5,10 +5,10 @@ import * as Constructor from '@framework/Constructor';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey, toLite, EntityPack } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey, toLite, EntityPack, getToString } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { Type } from '@framework/Reflection'
-import { onEmbeddedWidgets } from '@framework/Frames/WidgetEmbedded'
+import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
@@ -133,8 +133,10 @@ export function start(options: { routes: JSX.Element[] }) {
     return wc.frame.pack.embeddedDashboards.map(d => {
       return {
         position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
-        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} />
-      };
+        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} />,
+        eventKey: liteKey(toLite(d)),
+        title: d.displayName,
+      } as EmbeddedWidget;
     });
   });
 
