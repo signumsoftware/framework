@@ -816,9 +816,14 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  supportsAdditionalTabs?: boolean;
+
   modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
+  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
@@ -846,9 +851,6 @@ export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx:
 export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
-  avoidPopup!: boolean;
-  modalSize?: BsSize;
-
   getViewPromise?: (entity: T) => ViewPromise<T>;
 
   viewOverrides?: Array<ViewOverride<T>>;
@@ -858,16 +860,21 @@ export class EntitySettings<T extends ModifiableEntity> {
   isViewable?: boolean;
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
+  avoidPopup!: boolean;
+  supportsAdditionalTabs?: boolean;
+
+  modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-  supportsAdditionalTabs?: boolean;
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];

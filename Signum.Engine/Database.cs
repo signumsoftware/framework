@@ -244,14 +244,6 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return Schema.Current.OnFilterQuery<T>();
         }
 
-        public static event Func<string, Entity, IDisposable?>? RetrieveExecutedFrom;
-
-        public static IDisposable? OnRetrieveExecutedFrom(string from, Entity entity)
-        {
-            return Disposable.Combine(RetrieveExecutedFrom, f => f(from, entity));
-            //return  Database.RetrieveExecutedFrom(from, entity);
-        }
-
         public static Entity Retrieve(Type type, PrimaryKey id)
         {
             return giRetrieve.GetInvoker(type)(id);
