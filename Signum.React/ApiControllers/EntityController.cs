@@ -21,7 +21,7 @@ namespace Signum.React.ApiControllers
             var primaryKey = PrimaryKey.Parse(id, entityType);
 
             var entity = Database.Retrieve(entityType, primaryKey);
-            using (Database.OnRetrieveExecutedFrom("ApiRetrieve", entity))
+            using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntity"))
             {
                 return entity;
             }
@@ -36,7 +36,7 @@ namespace Signum.React.ApiControllers
             var primaryKey = PrimaryKey.Parse(id, entityType);
 
             var entity = Database.Retrieve(entityType, primaryKey);
-            using (Database.OnRetrieveExecutedFrom("ApiRetrieve", entity))
+            using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntityPack"))
             {
                 return SignumServer.GetEntityPack(entity);
             }
