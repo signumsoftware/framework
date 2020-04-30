@@ -859,7 +859,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
-        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
+        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
             where T : Entity
         {

@@ -157,6 +157,7 @@ namespace Signum.React.ApiControllers
 
     public class QueryRequestTS
     {
+        public string queryUrl;
         public string queryKey;
         public bool groupResults;
         public List<FilterTS> filters;
@@ -172,6 +173,7 @@ namespace Signum.React.ApiControllers
 
             return new QueryRequest
             {
+                QueryUrl = queryUrl,
                 QueryName = qn,
                 GroupResults = groupResults,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),

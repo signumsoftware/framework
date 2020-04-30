@@ -74,8 +74,4 @@
     <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Scripts\Components\ModalHeaderButtons.tsx" />
-    <None Remove="Scripts\Lines\Retrieve.tsx" />
-  </ItemGroup>
 </Project>
