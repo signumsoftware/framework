@@ -606,7 +606,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
   if (!config.getItemsDelay) {
@@ -867,7 +867,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-
+  supportsAdditionalTabs?: boolean;
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];

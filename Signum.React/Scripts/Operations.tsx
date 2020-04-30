@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
@@ -235,7 +235,7 @@ export class EntityOperationContext<T extends Entity> {
 
     const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    result.canExecute = pack?.canExecute && pack.canExecute[operationKey];
+    result.canExecute = (pack?.canExecute && pack.canExecute[operationKey]) ?? (pack.entity.isNew && !oi.canBeNew ? EngineMessage.TheEntity0IsNew.niceToString(getToString(pack.entity)) : undefined);
     result.complete();
     return result;
   }
@@ -259,7 +259,7 @@ export class EntityOperationContext<T extends Entity> {
   constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
     this.frame = frame;
     this.entity = entity;
-    this.operationInfo =  operationInfo;
+    this.operationInfo = operationInfo;
   }
 
   complete() {
