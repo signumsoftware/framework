@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Reflection;
 using Signum.React.UserAssets;
 using Signum.React.Facades;
@@ -26,9 +26,9 @@ namespace Signum.React.Dashboard
                 if (dashboards.Any())
                     ep.extension.Add("dashboards", dashboards);
 
-                var result = DashboardLogic.GetEmbeddedDashboard(ep.entity.GetType());
+                var result = DashboardLogic.GetEmbeddedDashboards(ep.entity.GetType());
                 if (result != null)
-                    ep.extension.Add("embeddedDashboard", result);
+                    ep.extension.Add("embeddedDashboards", result);
             };
         }
     }

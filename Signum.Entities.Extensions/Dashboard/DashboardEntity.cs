@@ -212,6 +212,7 @@ namespace Signum.Entities.Dashboard
     {
         None,
         Top,
-        Bottom
+        Bottom,
+        Tab
     }
 }
