@@ -375,9 +375,15 @@ namespace Signum.Engine.Linq
         {
             using (SetCurrentSource(source))
             {
-                map.Add(lambda.Parameters[0], projector);
+                var oldParam = map.TryGetC(lambda.Parameters[0]);
+
+                map[lambda.Parameters[0]] = projector;
                 Expression result = Visit(lambda.Body);
-                map.Remove(lambda.Parameters[0]);
+                if (oldParam == null)
+                    map.Remove(lambda.Parameters[0]);
+                else
+                    map[lambda.Parameters[0]] = oldParam;
+
                 return result;
             }
         }

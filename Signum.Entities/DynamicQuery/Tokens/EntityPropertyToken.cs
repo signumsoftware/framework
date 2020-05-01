@@ -75,8 +75,9 @@ namespace Signum.Entities.DynamicQuery
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             var type = this.Type;
+            var uType = type.UnNullify();
 
-            if (type.UnNullify() == typeof(DateTime))
+            if (uType == typeof(DateTime) || uType == typeof(DateTimeOffset))
             {
                 PropertyRoute? route = this.GetPropertyRoute();
 
@@ -90,9 +91,23 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            if (type.UnNullify() == typeof(double) ||
-                type.UnNullify() == typeof(float) ||
-                type.UnNullify() == typeof(decimal))
+            if (uType == typeof(TimeSpan))
+            {
+                PropertyRoute? route = this.GetPropertyRoute();
+
+                if (route != null)
+                {
+                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
+                    if (att != null)
+                    {
+                        return TimeSpanProperties(this, att.Precision).AndHasValue(this);
+                    }
+                }
+            }
+
+            if (uType == typeof(double) ||
+                uType == typeof(float) ||
+                uType == typeof(decimal))
             {
                 PropertyRoute? route = this.GetPropertyRoute();
 
