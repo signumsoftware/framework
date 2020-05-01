@@ -15,8 +15,6 @@ namespace Signum.React.Files
 {
     public static class FilesServer
     {
-
-
         public static Func<string, string> Content = (url) => url;
 
         public static void Start(IApplicationBuilder app)
@@ -69,6 +67,8 @@ namespace Signum.React.Files
             };
 
             FilePathEntity.ToAbsolute = FilePathEmbedded.ToAbsolute = url => SignumCurrentContextFilter.Url == null ? Content(url) : SignumCurrentContextFilter.Url!.Content(url);
+
+            ReflectionServer.RegisterLike(typeof(FileMessage), () => true);
         }
     }
 }
