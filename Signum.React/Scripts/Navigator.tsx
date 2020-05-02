@@ -829,7 +829,6 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   namedViews?: NamedViewSettings<T>[];
-  supportsAdditionalTabs?: boolean;
 }
 
 export interface ViewOverride<T extends ModifiableEntity> {
