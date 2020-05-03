@@ -501,12 +501,13 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                     case "Type": info.Type = reader.ReadAsString()!; break;
                     case "ticks": info.Ticks = long.Parse(reader.ReadAsString()!); break;
                     case "modified": info.Modified = bool.Parse(reader.ReadAsString()!); break;
-                    default: return info;
+                    default: goto finish;
                 }
 
                 reader.Read();
             }
 
+            finish:
             if (info.Type == null)
                 throw new JsonSerializationException($"Expected member 'Type' not found in {reader.Path}");
 
