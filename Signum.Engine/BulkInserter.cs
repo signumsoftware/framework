@@ -203,7 +203,8 @@ namespace Signum.Engine
                 if (ic != null)
                 {
 #if DEBUG
-                    throw new IntegrityCheckException(ic.WithEntities(GraphExplorer.FromRoots(entities)));
+                    var withEntites = ic.WithEntities(GraphExplorer.FromRoots(entities));
+                    throw new IntegrityCheckException(withEntites);
 #else
                     throw new IntegrityCheckException(ic);
 #endif
