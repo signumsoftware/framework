@@ -36,8 +36,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.5.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.5.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.5.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.5.1" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.8.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -47,7 +47,7 @@
 
   <ItemGroup>
     <PackageReference Include="Signum.TSGenerator" Version="3.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.5.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -83,6 +83,7 @@
   <ItemGroup>
     <None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
+    <None Remove="Dashboard\View\UserTreePart.tsx" />
     <None Remove="Files\ImageModal.tsx" />
     <None Remove="Files\MultiFileImageLine.tsx" />
   </ItemGroup>

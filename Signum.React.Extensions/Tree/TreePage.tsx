@@ -46,6 +46,7 @@ export default function TreePage(p: TreePageProps) {
         typeName={ti.name}
         allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
+        showToolbar={true}
         key={ti.name}
         onSearch={() => changeUrl()} />
     </div>

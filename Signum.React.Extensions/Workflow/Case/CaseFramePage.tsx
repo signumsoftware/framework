@@ -132,6 +132,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var pack = this.state.pack;
 
     const activityFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
@@ -205,6 +206,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
     const mainFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },

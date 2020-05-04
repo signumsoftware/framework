@@ -5,15 +5,15 @@ import * as Constructor from '@framework/Constructor';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey, toLite, EntityPack } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey, toLite, EntityPack, getToString } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { Type } from '@framework/Reflection'
-import { onEmbeddedWidgets } from '@framework/Frames/Widgets'
+import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
@@ -106,11 +106,39 @@ export function start(options: { routes: JSX.Element[] }) {
       }
   });
 
-  onEmbeddedWidgets.push(wc => wc.frame.pack.embeddedDashboard &&
-    {
-      position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
-      embeddedWidget: <DashboardWidget dashboard={wc.frame.pack.embeddedDashboard} pack={wc.frame.pack as EntityPack<Entity>} />
+
+  registerRenderer(UserTreePartEntity, {
+    component: () => import('./View/UserTreePart').then((a: any) => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
+    withPanel: p => true,
+    handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
+      (p, e, ev) => {
+        ev.preventDefault();
+        Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+      },
+    handleTitleClick:
+      (p, e, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
+          .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+          .done()
+      }
+  });
+
+  onEmbeddedWidgets.push(wc => {
+    if (!wc.frame.pack.embeddedDashboards)
+      return undefined;
+
+    return wc.frame.pack.embeddedDashboards.map(d => {
+      return {
+        position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
+        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} />,
+        eventKey: liteKey(toLite(d)),
+        title: d.displayName,
+      } as EmbeddedWidget;
     });
+  });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
     if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
@@ -169,7 +197,7 @@ declare module '@framework/Signum.Entities' {
 
   export interface EntityPack<T extends ModifiableEntity> {
     dashboards?: Array<Lite<DashboardEntity>>;
-    embeddedDashboard?: DashboardEntity;
+    embeddedDashboards?: DashboardEntity[];
   }
 }
 
