@@ -193,9 +193,11 @@ namespace Signum.React.Authorization
 
                 if (entity == null || entity.Lapsed)
                     return BadRequest();
+                
+                if (entity.User.State == UserState.Disabled)
+                    entity.User.Execute(UserOperation.Enable);
 
                 entity.User.PasswordHash = Security.EncodePassword(request.Password);
-                entity.User.State = UserState.Saved;
                 entity.User.Execute(UserOperation.Save);
 
                 entity.Lapsed = true;
