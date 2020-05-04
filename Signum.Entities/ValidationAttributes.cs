@@ -720,7 +720,7 @@ namespace Signum.Entities
         public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
-    public class DateInPastValidator : ValidatorAttribute
+    public class DateInPastValidatorAttribute : ValidatorAttribute
     {
         protected override string? OverrideError(object? value)
         {
@@ -740,11 +740,11 @@ namespace Signum.Entities
         public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
 
-    public class YearGreaterThanValidator : ValidatorAttribute
+    public class YearGreaterThanValidatorAttribute : ValidatorAttribute
     {
         public int MinYear { get; set; }
 
-        public YearGreaterThanValidator(int minYear)
+        public YearGreaterThanValidatorAttribute(int minYear)
         {
             this.MinYear = minYear;
         }
