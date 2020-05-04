@@ -14,6 +14,7 @@ declare global {
   interface Window {
     __baseUrl: string;
     dataForChildWindow?: any;
+    exploreGraphDebugMode: boolean;
   }
 
   interface RegExpConstructor {

@@ -92,7 +92,7 @@ export function toMomentFormat(format: string | undefined): string | undefined {
     case "m": return "D MMM";
     case "u":
     case "s": return "YYYY-MM-DDTHH:mm:ss";
-    case "o": 
+    case "o":
     case "t": return "LT";
     case "T": return "LTS";
     case "y": return "LTS";
@@ -776,7 +776,7 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   const ti = tryGetTypeInfo(type);
 
   const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
-  
+
   if (ti) {
 
     var e = result as Entity;
@@ -840,11 +840,11 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
       .filter(a => a.startsWith("["))
       .groupBy(a => a.after("[").before("]"))
       .forEach(gr => {
-        
+
         var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
 
         copyProperties(m, (original as Entity).mixins![gr.key], pr.addMember("Mixin", gr.key, true));
-        
+
         if (!e.mixins)
           e.mixins = {};
 
@@ -860,11 +860,11 @@ export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRou
 
     copyProperties(result, original, propertyRoute);
   }
-  
+
   return result;
 }
 
-function copyProperties(result: any, original: any, pr: PropertyRoute){
+function copyProperties(result: any, original: any, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
     .filter(p => p.key != "Id")
     .forEach(t => {
@@ -880,7 +880,7 @@ function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MLis
   var elemPr = PropertyRoute.mlistItem(propertyRoute);
 
   if (propertyRoute.member!.isVirtualMList) {
-    
+
     return mlist.map(mle => ({ rowId: null, element: clone(mle.element as any as Entity, elemPr) as any as T }));
   }
 
@@ -888,7 +888,7 @@ function cloneCollection<T>(mlist: MList<T>, propertyRoute: PropertyRoute): MLis
 }
 
 function cloneIfNeeded(original: any, pr: PropertyRoute) {
-  
+
   var tr = pr.typeReference();
   if (tr.isCollection)
     return cloneCollection(original, pr);
@@ -1060,7 +1060,7 @@ export class Type<T extends ModifiableEntity> implements IType {
   /** Shortcut for token().expression<S>(columnName)
   * @param columnName property name of some property in the anonymous class of the query. For complex calculated columns that are not a property from the entitiy.
   */
-  token<S>(columnName: string) : QueryTokenString<S>;
+  token<S>(columnName: string): QueryTokenString<S>;
   token(lambdaToColumn?: ((a: any) => any) | string): QueryTokenString<any> {
     if (lambdaToColumn == null)
       return new QueryTokenString("");
@@ -1108,7 +1108,7 @@ export class QueryTokenString<T> {
   /** Allows access to the "Entity" property of the anonymous class from the query.*/
   entity(): QueryTokenString<T>;
   /** Shortcut for entity().append(lambdaToProperty).*/
-  entity<S>(lambdaToProperty: (v: T) => S) : QueryTokenString<S>;
+  entity<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S>;
   entity(lambdaToProperty?: Function): QueryTokenString<any> {
     if (this.token != "")
       throw new Error("entity is only meant to be used with an empty token");
@@ -1287,7 +1287,7 @@ function getMember(key: string): MemberInfo | undefined {
   return member;
 }
 
-export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) : string {
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>): string {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
   {
     var m = getMember((symbol as Entity & ISymbol).key);
@@ -1473,9 +1473,9 @@ export class PropertyRoute {
     return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name, false);
   }
 
-    addMember(memberType: MemberType, memberName: string, throwIfNotFound: true): PropertyRoute;
-    addMember(memberType: MemberType, memberName: string, throwIfNotFound: false): PropertyRoute | undefined;
-    addMember(memberType: MemberType, memberName: string, throwIfNotFound: boolean): PropertyRoute | undefined {
+  addMember(memberType: MemberType, memberName: string, throwIfNotFound: true): PropertyRoute;
+  addMember(memberType: MemberType, memberName: string, throwIfNotFound: false): PropertyRoute | undefined;
+  addMember(memberType: MemberType, memberName: string, throwIfNotFound: boolean): PropertyRoute | undefined {
 
     var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
 
@@ -1684,8 +1684,11 @@ export class GraphExplorer {
     if (t != "object")
       return false;
 
-    if (this.modified.contains(obj))
+    if (this.modified.contains(obj)) {
+      if (window.exploreGraphDebugMode)
+        debugger;
       return true;
+    }
 
     if (this.notModified.contains(obj))
       return false;
@@ -1693,6 +1696,8 @@ export class GraphExplorer {
     const result = this.isModifiableObject(obj, modelStatePrefix);
 
     if (result) {
+      if (window.exploreGraphDebugMode)
+        debugger;
       this.modified.push(obj);
       return true;
     } else {
@@ -1712,27 +1717,40 @@ export class GraphExplorer {
     if (obj instanceof Array) {
       let result = false;
       for (let i = 0; i < obj.length; i++) {
-        if (this.isModified(obj[i], modelStatePrefix + "[" + i + "]"))
+        if (this.isModified(obj[i], modelStatePrefix + "[" + i + "]")) {
+          if (window.exploreGraphDebugMode)
+            debugger;
           result = true;
+        }
       }
       return result;
     }
 
     const mle = obj as MListElement<any>;
     if (mle.hasOwnProperty && mle.hasOwnProperty("rowId")) {
-      if (this.isModified(mle.element, dot(modelStatePrefix, "element")))
+      if (this.isModified(mle.element, dot(modelStatePrefix, "element"))) {
+        if (window.exploreGraphDebugMode)
+          debugger;
         return true;
+      }
 
-      if (mle.rowId == undefined)
+
+      if (mle.rowId == undefined) {
+        if (window.exploreGraphDebugMode)
+          debugger;
         return true;
+      }
 
       return false;
     };
 
     const lite = obj as Lite<Entity>
     if (lite.EntityType) {
-      if (lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity")))
+      if (lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity"))) {
+        if (window.exploreGraphDebugMode)
+          debugger;
         return true;
+      }
 
       return false;
     }
@@ -1743,8 +1761,11 @@ export class GraphExplorer {
       for (const p in obj) {
         if (obj.hasOwnProperty == null || obj.hasOwnProperty(p)) {
           const propertyPrefix = dot(modelStatePrefix, p);
-          if (this.isModified(obj[p], propertyPrefix))
+          if (this.isModified(obj[p], propertyPrefix)) {
+            if (window.exploreGraphDebugMode)
+              debugger;
             result = true;
+          }
         }
       }
 
@@ -1792,17 +1813,25 @@ export class GraphExplorer {
 
         if (p == "mixins") {
           const propertyPrefix = dot(modelStatePrefix, p);
-          if (this.isModifiedMixinDictionary(obj[p], propertyPrefix))
+          if (this.isModifiedMixinDictionary(obj[p], propertyPrefix)) {
+            if (window.exploreGraphDebugMode)
+              debugger;
             mod.modified = true;
+          }
         } else {
           const propertyPrefix = dot(modelStatePrefix, p);
-          if (this.isModified(obj[p], propertyPrefix))
+          if (this.isModified(obj[p], propertyPrefix)) {
+            if (window.exploreGraphDebugMode)
+              debugger;
             mod.modified = true;
+          }
         }
       }
     }
 
     if ((mod as Entity).isNew) {
+      if (window.exploreGraphDebugMode)
+        debugger;
       mod.modified = true; //Just in case
 
       if (GraphExplorer.TypesLazilyCreated.push((mod as Entity).Type))
@@ -1819,8 +1848,11 @@ export class GraphExplorer {
     var modified = false;
     for (const p in mixins) {
       const mixinPrefix = prefix + "[" + p + "]";
-      if (this.isModified(mixins[p], mixinPrefix))
+      if (this.isModified(mixins[p], mixinPrefix)) { 
+        if (window.exploreGraphDebugMode)
+          debugger;
         modified = true;
+      }
     }
     return modified;
   }
