@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Basics;
@@ -20,7 +20,12 @@ namespace Signum.React.ApiControllers
 
             var primaryKey = PrimaryKey.Parse(id, entityType);
 
-            return Database.Retrieve(entityType, primaryKey);
+            var entity = Database.Retrieve(entityType, primaryKey);
+            using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntity"))
+            {
+                return entity;
+            }
+
         }
 
         [HttpGet("api/entityPack/{type}/{id}"), ProfilerActionSplitter("type")]
@@ -31,8 +36,10 @@ namespace Signum.React.ApiControllers
             var primaryKey = PrimaryKey.Parse(id, entityType);
 
             var entity = Database.Retrieve(entityType, primaryKey);
-
-            return SignumServer.GetEntityPack(entity);
+            using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntityPack"))
+            {
+                return SignumServer.GetEntityPack(entity);
+            }
         }
 
         [HttpPost("api/entityPackEntity")/*, ValidateModelFilter*/]

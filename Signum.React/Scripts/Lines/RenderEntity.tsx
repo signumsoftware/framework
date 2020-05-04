@@ -57,6 +57,7 @@ export function RenderEntity(p: RenderEntityProps) {
   const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
 
   const frame: EntityFrame = {
+    tabs: undefined,
     frameComponent: { forceUpdate },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },

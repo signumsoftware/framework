@@ -4,6 +4,7 @@ import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } 
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 import { classes } from './Globals';
+import { EmbeddedWidget } from './Frames/Widgets';
 
 export type FormGroupStyle =
   "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
@@ -440,6 +441,7 @@ export interface IHasChanges {
 }
 
 export interface EntityFrame {
+  tabs: EmbeddedWidget[] | undefined;
   frameComponent: {
     forceUpdate(): void,
     createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
