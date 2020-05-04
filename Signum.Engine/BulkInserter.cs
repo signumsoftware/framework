@@ -16,8 +16,10 @@ namespace Signum.Engine
 {
     public static class BulkInserter
     {
+        const SqlBulkCopyOptions SafeDefaults = SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.KeepNulls;
+
         public static int BulkInsert<T>(this IEnumerable<T> entities,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             bool disableIdentity = false,
@@ -52,7 +54,7 @@ namespace Signum.Engine
         public static int BulkInsertQueryIds<T, K>(this IEnumerable<T> entities,
             Expression<Func<T, K>> keySelector,
             Expression<Func<T, bool>>? isNewPredicate = null,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             int? timeout = null,
@@ -119,7 +121,7 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertTable<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             bool disableIdentity = false,
@@ -225,7 +227,7 @@ namespace Signum.Engine
         public static int BulkInsertMListTable<E, V>(
             List<E> entities,
             Expression<Func<E, MList<V>>> mListProperty,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             int? timeout = null,
             string? message = null)
             where E : Entity
@@ -257,7 +259,7 @@ namespace Signum.Engine
         public static int BulkInsertMListTable<E, V>(
             this IEnumerable<MListElement<E, V>> mlistElements,
             Expression<Func<E, MList<V>>> mListProperty,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             int? timeout = null,
             bool? updateParentTicks = null, /*Needed for concurrency and Temporal tables*/
             string? message = null)
@@ -317,7 +319,7 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertView<T>(this IEnumerable<T> entities,
-          SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+          SqlBulkCopyOptions copyOptions = SafeDefaults,
           int? timeout = null,
           string? message = null)
           where T : IView
@@ -357,28 +359,5 @@ namespace Signum.Engine
                 }
             }
         }
-    }
-
-    public class BulkSetterOptions
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public bool ValidateFirst = false;
-        public bool DisableIdentity = false;
-        public int? Timeout = null;
-    }
-
-
-    public class BulkSetterTableOptionsT
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public bool ValidateFirst = false;
-        public bool DisableIdentity = false;
-        public int? Timeout = null;
-    }
-
-    public class BulkSetterMListOptions
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public int? Timeout = null;
     }
 }

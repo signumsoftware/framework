@@ -1,4 +1,5 @@
 using System;
+using Signum.Entities;
 using Signum.Utilities;
 
 namespace Signum.Engine
@@ -44,6 +45,13 @@ namespace Signum.Engine
                 return null;
             cacheTempDisabled.Value = true;
             return new Disposable(() => cacheTempDisabled.Value = false);
+        }
+
+
+        public static event Func<Entity, string, IDisposable?>? OnApiRetrieved;
+        public static IDisposable? ApiRetrievedScope(Entity entity, string url)
+        {
+            return Disposable.Combine(OnApiRetrieved, f => f(entity, url));
         }
     }
 }
