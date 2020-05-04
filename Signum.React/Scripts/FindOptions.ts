@@ -1,7 +1,7 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
-import { SearchControlProps } from "./Search";
+import { SearchControlProps, SearchControlLoaded } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -21,6 +21,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
+  onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
 export interface FindOptions {
