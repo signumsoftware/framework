@@ -454,6 +454,7 @@ export interface EntityFrame {
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowChangeEntity: boolean;
+  prefix: string;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

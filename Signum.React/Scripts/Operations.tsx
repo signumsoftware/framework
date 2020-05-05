@@ -39,7 +39,6 @@ export function start() {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
       icon: "history",
       iconColor: "green",
-      isShy: true,
     }));
 }
 

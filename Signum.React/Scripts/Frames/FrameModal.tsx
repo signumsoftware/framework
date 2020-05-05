@@ -221,6 +221,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       },
       refreshCount: pc.refreshCount,
       allowChangeEntity: p.isNavigate || false,
+      prefix: prefix,
     } ;
 
     const styleOptions: StyleOptions = {

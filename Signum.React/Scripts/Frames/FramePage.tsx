@@ -172,6 +172,7 @@ export default function FramePage(p: FramePageProps) {
     },
     refreshCount: state.refreshCount,
     allowChangeEntity: true,
+    prefix: "framePage"
   };
 
 

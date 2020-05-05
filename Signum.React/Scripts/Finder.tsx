@@ -30,7 +30,6 @@ import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
-import { json, namespace } from "d3";
 import { ButtonBarElement } from "./TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EntityBaseController } from "./Lines";
@@ -45,7 +44,7 @@ export function clearQuerySettings() {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => FinderFindManager.getSearchPage()} />);
+  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => Options.getSearchPage()} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -101,7 +100,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => FinderFindManager.getSearchModal()
+  let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
     .then(rr => rr?.entity);
 
@@ -117,20 +116,22 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   return getPromiseSearchModal();
 }
 
-export namespace FinderFindManager {
+export namespace Options {
   export function getSearchPage() {
     return import("./SearchControl/SearchPage");
   }
   export function getSearchModal() {
     return import("./SearchControl/SearchModal");
   }
+
+  export let entityColumnHeader : () => React.ReactChild = () => "";
 }
 
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
 
   var qs = getSettings(fo.queryName);
 
-  return FinderFindManager.getSearchModal()
+  return Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions));
 }
 
@@ -149,7 +150,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
-  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => FinderFindManager.getSearchModal()
+  let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
     .then(rows => rows?.map(a => a.entity!));
 
@@ -169,7 +170,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): 
 
   var qs = getSettings(fo.queryName);
 
-  return FinderFindManager.getSearchModal()
+  return Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions));
 }
 
@@ -187,7 +188,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
   if (qs?.onExplore && !(modalOptions?.useDefaultBehaviour))
     return qs.onExplore(findOptions, modalOptions);
 
-  return FinderFindManager.getSearchModal()
+  return Options.getSearchModal()
     .then(a => a.default.explore(findOptions, modalOptions));
 }
 
@@ -1546,24 +1547,29 @@ export const formatRules: FormatRule[] = [
 export interface EntityFormatRule {
   name: string;
   formatter: EntityFormatter;
-  isApplicable: (row: ResultRow, sc: SearchControlLoaded | undefined) => boolean;
+  isApplicable: (sc: SearchControlLoaded | undefined) => boolean;
 }
 
-export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
+export class EntityFormatter {
+  constructor(
+    public formatter: (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined,
+    public cellClass?: string) {
+  }
+}
 
 export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
-    isApplicable: row => true,
-    formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
-        <EntityLink lite={row.entity}
-          inSearch={true}
-          onNavigated={sc?.handleOnNavigated}
-          getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-          inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
-          <span title={EntityControlMessage.View.niceToString()}>
-            {EntityBaseController.viewIcon}
-          </span>
-        </EntityLink>
+    isApplicable: sc => true,
+    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+      <EntityLink lite={row.entity}
+        inSearch={true}
+        onNavigated={sc?.handleOnNavigated}
+        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        <span title={EntityControlMessage.View.niceToString()}>
+          {EntityBaseController.viewIcon}
+        </span>
+      </EntityLink>, "centered-cell")
   },
 ];
