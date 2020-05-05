@@ -56,6 +56,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
   const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
 
+  const prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
   const frame: EntityFrame = {
     tabs: undefined,
     frameComponent: { forceUpdate },
@@ -67,6 +68,7 @@ export function RenderEntity(p: RenderEntityProps) {
     setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
     refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
     allowChangeEntity: false,
+    prefix: prefix,
   };
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -76,7 +78,6 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
-  var prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
