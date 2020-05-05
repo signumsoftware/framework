@@ -29,7 +29,6 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         timeMachineRoute(ctx.lite), {
           icon: "history",
           iconColor: "blue",
-          isShy: true,
         }) : undefined);
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
