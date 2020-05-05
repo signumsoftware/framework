@@ -138,7 +138,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.type == "Date" ? formatAsDate(minMoment) : minMoment.format());
+      allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
       minMoment.add(unit, 1);
     }
 
