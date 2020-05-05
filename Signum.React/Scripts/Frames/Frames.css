@@ -159,8 +159,11 @@ a.expand-window:hover {
     line-height: 1.2;
 }
 
-.sf-quicklinks{
+.sf-quicklinks {
     display: flex;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding: 4px;
 }
 
 .sf-guid-id {
