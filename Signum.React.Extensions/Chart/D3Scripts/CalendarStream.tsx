@@ -55,7 +55,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   var cellSizeY = (height - 20) / (horizontal ? numDaysY : numDaysX);
   var cellSize = Math.min(cellSizeX, cellSizeY);
 
-  var cleanDate = (d: Date) => d.toJSON().beforeLast(".");
+  var cleanDate = (d: Date) => d.toJSON().before("T");
 
   var yRule = Rule.create({
     _1: '*',
@@ -79,7 +79,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var rowYByDate = data.rows.toObject(r => {
     var date = dateColumn.getValueKey(r);
-    return date.tryBefore("+") ?? date;
+    return date.tryBefore("T") ?? date;
   });
 
 
