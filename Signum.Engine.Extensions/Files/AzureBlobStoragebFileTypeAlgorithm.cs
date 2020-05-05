@@ -38,7 +38,7 @@ namespace Signum.Engine.Files
         public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
         public bool RenameOnCollision { get; set; } = true;
         public bool WeakFileReference { get; set; }
-        public bool CreateIfNecessary { get; set; }
+        public bool CreateBlobContainerIfNotExists { get; set; }
 
         public Func<string, int, string> RenameAlgorithm { get; set; } = FileTypeAlgorithm.DefaultRenameAlgorithm;
 
@@ -95,7 +95,7 @@ namespace Signum.Engine.Files
 
                 var client = GetClient(fp);
 
-                if (CreateIfNecessary)
+                if (CreateBlobContainerIfNotExists)
                 {
                     using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
                     {

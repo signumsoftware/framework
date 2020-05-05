@@ -38,12 +38,13 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
     Finder.entityFormatRules.push(
       {
         name: "ViewHistory",
-        isApplicable: (row, sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
+        formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
           <TimeMachineLink lite={row.entity}
             inSearch={true}>
             {EntityControlMessage.View.niceToString()}
           </TimeMachineLink>
+        )
       });
 
     Finder.formatRules.push(
