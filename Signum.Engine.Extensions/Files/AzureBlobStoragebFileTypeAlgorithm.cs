@@ -33,7 +33,7 @@ namespace Signum.Engine.Files
     {
         public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
 
-        public Func<bool> WebDownload { get; private set; } = () => true;
+        public Func<bool> WebDownload { get; private set; } = () => false;
 
         public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
         public bool RenameOnCollision { get; set; } = true;

@@ -32,7 +32,6 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
       isVisible: AuthClient.navigatorIsViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType),
       icon: "bell",
       iconColor: "orange",
-      isShy: true
     }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
