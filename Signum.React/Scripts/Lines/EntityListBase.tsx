@@ -38,9 +38,6 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     if (state.onFind)
       throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
-    if (state.ctx.value == undefined)
-      state.ctx.value = [];
-
     super.getDefaultProps(state);
   }
 
