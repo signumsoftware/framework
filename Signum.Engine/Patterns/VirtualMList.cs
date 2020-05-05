@@ -169,7 +169,8 @@ namespace Signum.Engine
                     if (errors != null)
                     {
 #if DEBUG
-                        throw new IntegrityCheckException(errors.WithEntities(graph));
+                        var withEntites = errors.WithEntities(graph);
+                        throw new IntegrityCheckException(withEntites);
 #else
                         throw new IntegrityCheckException(errors);
 #endif

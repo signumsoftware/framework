@@ -533,8 +533,19 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     onBlur={handleOnBlur}
     onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
     onInput={isIE11() ? handleOnChange : undefined}
-    onKeyDown={handleKeyDown} />
+    onKeyDown={handleKeyDown}
+    onFocus={handleOnFocus}/>
 
+
+  function handleOnFocus(e: React.FocusEvent<any>)
+  {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.htmlAttributes && p.htmlAttributes.onFocus)
+      p.htmlAttributes.onFocus(e);
+  };
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {
@@ -701,9 +712,18 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     onBlur={handleOnBlur}
     onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
     onInput={isIE11() ? handleOnChange : undefined}
-    onKeyDown={handleKeyDown} />
+    onKeyDown={handleKeyDown}
+    onFocus={handleOnFocus} />
 
 
+  function handleOnFocus(e: React.FocusEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.htmlAttributes && p.htmlAttributes.onFocus)
+      p.htmlAttributes.onFocus(e);
+  };
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {

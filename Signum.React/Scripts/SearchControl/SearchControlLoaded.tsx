@@ -1032,6 +1032,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
   }
 
+  
+
   renderHeaders(): React.ReactNode {
 
     return (
@@ -1040,7 +1042,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
         </th>
         }
-        {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity"></th>}
+        {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {this.props.findOptions.columnOptions.map((co, i) =>
           <th key={i}
             draggable={true}
@@ -1238,6 +1240,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
+    var entityFormatter = this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
+
     return this.state.resultTable.rows.map((row, i) => {
 
       const mark = row.entity && this.getMarkedRow(row.entity);
@@ -1263,8 +1267,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           }
 
           {this.props.navigate && !this.props.findOptions.groupResults &&
-            <td>
-              {(this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+            <td className={entityFormatter.cellClass}>
+              {entityFormatter.formatter(row, resultTable.columns, this)}
             </td>
           }
 
