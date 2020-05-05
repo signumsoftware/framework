@@ -1,6 +1,7 @@
 
 using Azure;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using DocumentFormat.OpenXml.Office2013.Excel;
 using Signum.Entities.Files;
 using Signum.Utilities;
@@ -57,8 +58,20 @@ namespace Signum.Engine.Files
             if (!this.WebDownload())
                 return PrefixPair.None();
 
-            return PrefixPair.WebOnly($"https://{client.Uri}/{efp.Suffix}");
+            //return PrefixPair.WebOnly($"https://{client.Uri}/{efp.Suffix}");
+            return PrefixPair.WebOnly($"{client.Uri}");
         }
+
+
+        public BlobProperties GetProperties(IFilePath fp)
+        {
+            using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).GetProperties();
+            }
+        }
+
 
         public Stream OpenRead(IFilePath fp)
         {
@@ -94,7 +107,6 @@ namespace Signum.Engine.Files
                 fp.SetPrefixPair(GetPrefixPair(fp));
 
                 var client = GetClient(fp);
-
                 if (CreateIfNecessary)
                 {
                     using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
