@@ -67,6 +67,8 @@ function SearchModal(p: SearchModalProps) {
   function handleDoubleClick(e: React.MouseEvent<any>, row: ResultRow) {
     e.preventDefault();
     selectedRows.current = [row];
+    searchControl.current!.searchControlLoaded!.state.selectedRows!.clear();
+    searchControl.current!.searchControlLoaded!.state.selectedRows!.push(row);
     handleOkClicked();
   }
 
