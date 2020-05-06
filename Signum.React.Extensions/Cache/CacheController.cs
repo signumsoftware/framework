@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +9,7 @@ using Signum.Engine;
 using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Scheduler;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Cache
 {
@@ -56,6 +57,7 @@ namespace Signum.React.Cache
 
             CacheLogic.ForceReset();
             GlobalLazy.ResetAll();
+            Schema.Current.InvalidateMetadata();
             GC.Collect(2);
         }
     }
