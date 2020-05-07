@@ -16,7 +16,7 @@ export interface WidgetEmbeddedProps {
 function toTab(e: EmbeddedWidget, key: number) {
   debugger;
   return (
-    <Tab eventKey={e.eventKey} key={"tab" + key} mountOnEnter="true" title={e.title}>
+    <Tab eventKey={e.eventKey} key={"tab" + key} mountOnEnter={true} title={e.title}>
       {e.embeddedWidget}
     </Tab>
   );
