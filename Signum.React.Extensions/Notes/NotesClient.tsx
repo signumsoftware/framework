@@ -27,6 +27,5 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
       isVisible: AuthClient.navigatorIsViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
       icon: "sticky-note",
       iconColor: "#337ab7",
-      isShy: true
     }));
 }

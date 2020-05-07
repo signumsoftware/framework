@@ -22,10 +22,8 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
 import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 
-
 import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
 export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
@@ -45,8 +43,6 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
   }
 
   React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
-  const forceUpdate = useForceUpdate();
-
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;

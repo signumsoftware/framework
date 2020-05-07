@@ -6,6 +6,7 @@ import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
+import { formatAsDate } from "../../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
 
 
 
@@ -137,7 +138,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.format());
+      allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
       minMoment.add(unit, 1);
     }
 

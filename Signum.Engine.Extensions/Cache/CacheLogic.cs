@@ -876,7 +876,7 @@ Remember that the Start could be called with an empty database!");
             var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value?.TryGetS(typeof(T));
 
             if (asssumeAsInvalidation == null)
-                throw new InvalidOperationException("Impossible to determine if the massive operation will affect the semi-cached instances of {1}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");
+                throw new InvalidOperationException($"Impossible to determine if the massive operation will affect the semi-cached instances of {typeof(T).TypeName()}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");
 
             return asssumeAsInvalidation.Value;
         }

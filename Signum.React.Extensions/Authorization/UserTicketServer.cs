@@ -5,6 +5,8 @@ using Signum.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
+using Signum.React.Filters;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Signum.React.Authorization
 {
@@ -31,6 +33,7 @@ namespace Signum.React.Authorization
                     ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
                     {
                         Domain = ac.HttpContext.Request.Host.Host.ToString(),
+                        Path = new UrlHelper(ac).Content("~/"),
                         Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
                     });
 
@@ -60,7 +63,8 @@ namespace Signum.React.Authorization
 
             ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
             {
-                Domain = ac.HttpContext.Request.Host.Host.ToString(),
+                Domain = ac.HttpContext.Request.Host.Host,
+                Path = new UrlHelper(ac).Content("~/"),
                 Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
             });
         }

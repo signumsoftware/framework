@@ -34,12 +34,12 @@ namespace Signum.Engine.Files
     {
         public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
 
-        public Func<bool> WebDownload { get; private set; } = () => true;
+        public Func<bool> WebDownload { get; private set; } = () => false;
 
         public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
         public bool RenameOnCollision { get; set; } = true;
         public bool WeakFileReference { get; set; }
-        public bool CreateIfNecessary { get; set; }
+        public bool CreateBlobContainerIfNotExists { get; set; }
 
         public Func<string, int, string> RenameAlgorithm { get; set; } = FileTypeAlgorithm.DefaultRenameAlgorithm;
 
@@ -107,7 +107,7 @@ namespace Signum.Engine.Files
                 fp.SetPrefixPair(GetPrefixPair(fp));
 
                 var client = GetClient(fp);
-                if (CreateIfNecessary)
+                if (CreateBlobContainerIfNotExists)
                 {
                     using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
                     {
