@@ -14,7 +14,7 @@ export interface WidgetEmbeddedProps {
 }
 
 function toTab(e: EmbeddedWidget, key: number) {
-  debugger;
+
   return (
     <Tab eventKey={e.eventKey} key={"tab" + key} mountOnEnter={true} title={e.title}>
       {e.embeddedWidget}
@@ -24,7 +24,7 @@ function toTab(e: EmbeddedWidget, key: number) {
 
 export function addAdditionalTabs(frame: EntityFrame | undefined) {
 
-  debugger;
+
   if (frame === undefined || frame!.tabs === undefined)
     return undefined;
 
@@ -33,7 +33,7 @@ export function addAdditionalTabs(frame: EntityFrame | undefined) {
 
 
 export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
-  debugger;
+ 
   const widgets = onEmbeddedWidgets.map(a => a(p.widgetContext)).filter(a => a !== undefined).map(a => a!).flatMap(a => a);
 
   const top = widgets.filter(ew => ew.position === "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }));
