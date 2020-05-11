@@ -125,16 +125,13 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.createNew;
+        var createNew = eoc.frame.frameComponent.createNew ??
+          Navigator.getSettings(pack.entity.Type)?.onCreateNew ??
+          (pack => Constructor.constructPack(pack.entity.Type));
 
-        if (createNew)
-          (createNew() ?? Promise.resolve(undefined))
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
-        else
-          Constructor.constructPack(pack.entity.Type)
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
+        createNew(pack)
+          .then(newPack => newPack && eoc.frame.onReload(newPack, true))
+          .done();
       };
       eoc.defaultClick();
     }
