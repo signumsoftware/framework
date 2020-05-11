@@ -871,9 +871,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const cm = this.state.contextualMenu!;
     const p = this.props;
 
-    var fo = this.state.resultFindOptions;
+    var fo = this.props.findOptions;
     function isColumnFilterable(columnIndex: number) {
-      var token = fo?.columnOptions[columnIndex].token;
+      var token = fo.columnOptions[columnIndex].token;
       return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
     }
 
