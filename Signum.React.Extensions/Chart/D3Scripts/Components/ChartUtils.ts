@@ -139,7 +139,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         return values;
 
       allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
-      minMoment.add(unit, 1);
+      minMoment.add(1, unit);
     }
 
     return complete(values, allValues, column, insertPoint);
