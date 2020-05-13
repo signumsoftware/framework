@@ -66,6 +66,7 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
   fileName: string;
   binaryFile: string;
+  hash: string;
   fileLength: number;
   suffix: string;
   calculatedDirectory: string | null;
