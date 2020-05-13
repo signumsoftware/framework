@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as History from 'history'
 import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
@@ -19,7 +19,7 @@ import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framew
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
-    return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
+    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url));
 
   if (!r.content)
     return false;
@@ -131,8 +131,8 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           return (
             <Nav.Item>
               <Nav.Link
-                onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
-                onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+                onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+                onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 active={res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </Nav.Link>
@@ -219,8 +219,8 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.url) {
           return [
             <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
-              onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+              onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+              onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
               className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </HeaderOrItem>

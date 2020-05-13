@@ -1,9 +1,11 @@
 
 import * as React from 'react'
+import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals';
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
@@ -14,7 +16,6 @@ import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, Pack
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import "./Processes.css"
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
@@ -139,7 +140,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
 
       const es = Navigator.getSettings(pack.entity.Type);
       if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
-        Navigator.history.push('~/create/', pack);
+        AppContext.history.push('~/create/', pack);
         return;
       }
       else {

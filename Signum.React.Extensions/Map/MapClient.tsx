@@ -5,6 +5,7 @@ import { OperationMapInfo } from './Operation/OperationMap'
 import { } from './Signum.Entities.Map'
 import { ImportRoute } from "@framework/AsyncImport";
 import * as Navigator from "@framework/Navigator";
+import * as AppContext from "@framework/AppContext";
 
 export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = [];
 
@@ -19,7 +20,7 @@ export function start(options: { routes: JSX.Element[], auth: boolean; cache: bo
     <ImportRoute path="~/map/:type" onImportModule={() => import("./Operation/OperationMapPage")} />
   );
 
-  Navigator.clearSettingsActions.push(clearProviders);
+  AppContext.clearSettingsActions.push(clearProviders);
 
   getProviders.push(smi => import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
   if (options.auth)

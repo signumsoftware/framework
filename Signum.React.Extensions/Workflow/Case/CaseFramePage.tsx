@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Entity, JavascriptMessage, entityInfo, getToString, toLite, EntityPack } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
@@ -18,8 +19,8 @@ import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { FunctionalAdapter } from '@framework/Frames/FrameModal';
 import * as AuthClient from '../../Authorization/AuthClient'
+import { FunctionalAdapter } from '../../../../Framework/Signum.React/Scripts/Modals'
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -59,7 +60,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   }
 
   componentWillUnmount() {
-    Navigator.setTitle();
+    AppContext.setTitle();
     window.removeEventListener("keydown", this.hanldleKeyDown);
   }
 
@@ -70,7 +71,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
   load(props: CaseFramePageProps) {
     this.loadEntity(props)
-      .then(() => this.state.pack && Navigator.setTitle(this.state.pack!.activity.case.toStr))
+      .then(() => this.state.pack && AppContext.setTitle(this.state.pack!.activity.case.toStr))
       .then(() => this.loadComponent())
       .done();
   }
@@ -87,7 +88,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
         .then(pack => {
           if (!pack)
-            Navigator.history.goBack();
+            AppContext.history.goBack();
           else
             this.setState({ pack, refreshCount: 0 });
         });
@@ -105,7 +106,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   }
 
   onClose() {
-    Navigator.history.push(WorkflowClient.getDefaultInboxUrl());
+    AppContext.history.push(WorkflowClient.getDefaultInboxUrl());
   }
 
   entityComponent?: React.Component<any, any> | null;
@@ -140,7 +141,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         if (newPack) {
           let newActivity = newPack.entity as CaseActivityEntity;
           if (pack.activity.isNew && !newActivity.isNew) {
-            Navigator.history.push("~/workflow/activity/" + newActivity.id);
+            AppContext.history.push("~/workflow/activity/" + newActivity.id);
             return;
           }
           else {

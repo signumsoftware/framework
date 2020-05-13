@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
@@ -21,7 +22,7 @@ import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { FunctionalAdapter } from '@framework/Frames/FrameModal';
+import { FunctionalAdapter } from '@framework/Modals';
 import * as AuthClient from '../../Authorization/AuthClient'
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<CaseActivityEntity | undefined> {
@@ -335,7 +336,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   }
 
   handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-    Navigator.pushOrOpenInTab("~/workflow/activity/" + this.state.pack!.activity.id, e);
+    AppContext.pushOrOpenInTab("~/workflow/activity/" + this.state.pack!.activity.id, e);
   }
 
   static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {

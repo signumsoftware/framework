@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as QueryString from "query-string"
 import { Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { parseLite } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
@@ -40,7 +40,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
 
   function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => Navigator.history.replace(path))
+      .then(path => AppContext.history.replace(path))
       .done();
   }
 

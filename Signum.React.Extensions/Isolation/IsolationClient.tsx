@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation'
 import { Lite, liteKey, ModifiableEntity } from '@framework/Signum.Entities'
 import { ajaxGet, addContextHeaders } from '../../../Framework/Signum.React/Scripts/Services'
@@ -30,7 +30,7 @@ export function changeOverridenIsolation(isolation: Lite<IsolationEntity> | unde
   else 
     sessionStorage.removeItem('Curr_Isolation');
 
-  Navigator.resetUI();
+  AppContext.resetUI();
 }
 
 export function getOverridenIsolation(): { current: Lite<IsolationEntity> | undefined, title: string } {

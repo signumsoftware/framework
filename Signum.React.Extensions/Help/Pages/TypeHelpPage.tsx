@@ -3,10 +3,9 @@ import { RouteComponentProps, Link } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
-import EntityLink from '@framework/SearchControl/EntityLink'
+import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
-import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
+import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, getQueryNiceName } from '@framework/Reflection';
 import { JavascriptMessage } from '@framework/Signum.Entities';
@@ -18,8 +17,9 @@ import * as Operations from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTitle } from '@framework/AppContext'
 
-(window as any).myHistory = Navigator.history;
+(window as any).myHistory = AppContext.history;
 
 export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string }>) {
 

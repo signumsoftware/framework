@@ -5,7 +5,7 @@ import { Lite } from '@framework/Signum.Entities'
 import { CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagTypeEntity, CaseEntity } from '../Signum.Entities.Workflow'
 import { FindOptions } from '@framework/Search'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
 import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity } from '../../Alerts/Signum.Entities.Alerts'
@@ -48,7 +48,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       queryName: AlertEntity,
       filterOptions: [
         { token: AlertEntity.token(a => a.target), value: p.data.caseActivity },
-        { token: AlertEntity.token().entity(e => e.recipient), value: Navigator.currentUser },
+        { token: AlertEntity.token().entity(e => e.recipient), value: AppContext.currentUser },
         { token: AlertEntity.token().entity().expression("CurrentState"), value: "Alerted" }
       ],
       columnOptions: [{ token: AlertEntity.token(e => e.target) }],

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
@@ -42,7 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     return promise.then(uqs =>
       uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => uq.toStr ?? "", e => {
-        window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+        window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
   });
 
@@ -50,7 +51,7 @@ export function start(options: { routes: JSX.Element[] }) {
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
         if (uq.entityType == undefined)
-          window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}`));
+          window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
         else
           Navigator.API.fetchAndForget(uq.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
@@ -58,7 +59,7 @@ export function start(options: { routes: JSX.Element[] }) {
               if (!lite)
                 return;
 
-              window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
             })
             .done();
       }).done();

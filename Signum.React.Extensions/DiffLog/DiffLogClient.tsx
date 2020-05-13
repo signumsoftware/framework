@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
@@ -106,7 +107,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
 
     event.preventDefault();
 
-    window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
+    window.open(AppContext.toAbsoluteUrl(timeMachineRoute(lite)));
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 

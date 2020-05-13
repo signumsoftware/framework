@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Location } from 'history'
 import { getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
@@ -41,7 +41,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   }
 
   isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: any): boolean {
-    return location.pathname == Navigator.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
+    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
 }
 

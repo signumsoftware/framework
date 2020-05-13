@@ -6,7 +6,8 @@ import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
 import { ProcessEntity } from './Signum.Entities.Processes'
 import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
+import { useTitle } from '@framework/AppContext'
 
 export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
   const [state, reloadState] = useAPIWithReload(() => API.view(), []);

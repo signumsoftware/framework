@@ -166,7 +166,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleEntity.Current, route);
         }
 
-        public static PropertyAllowed GetNoUserPropertyAllowed(this PropertyRoute route)
+        public static PropertyAllowed GetAllowUnathenticated(this PropertyRoute route)
         {
             var hasAttr = route.RootType.HasAttribute<AllowUnathenticatedAttribute>() ||
                 (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowUnathenticatedAttribute>()) ||

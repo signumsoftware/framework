@@ -6,7 +6,8 @@ import { RouteComponentProps } from "react-router";
 
 import "./Times.css"
 import { Tab, Tabs } from 'react-bootstrap';
-import { useAPI, useTitle, useAPIWithReload } from '@framework/Hooks';
+import { useAPI, useAPIWithReload } from '@framework/Hooks';
+import { useTitle } from '@framework/AppContext';
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 
