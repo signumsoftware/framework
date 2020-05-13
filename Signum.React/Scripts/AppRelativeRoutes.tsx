@@ -1,6 +1,7 @@
 import * as React from "react";
 import { match, Route, RouterChildContext, matchPath, RouteProps, Switch, __RouterContext } from "react-router";
 import * as H from "history";
+import * as AppContext from './AppContext'
 import * as Navigator from "./Navigator";
 
 //monkey-patching prototypes to make use of  this is implemented: https://github.com/ReactTraining/react-router/issues/5000
@@ -8,9 +9,9 @@ import * as Navigator from "./Navigator";
 function fixBaseName<T>(baseFunction: (location: H.LocationDescriptorObject | string, state?: any) => T): (location: H.LocationDescriptorObject | string, state?: any) => T {
   return (location, state) => {
     if (typeof location === "string") {
-      return baseFunction(Navigator.toAbsoluteUrl(location), state);
+      return baseFunction(AppContext.toAbsoluteUrl(location), state);
     } else {
-      location!.pathname = Navigator.toAbsoluteUrl(location!.pathname!);
+      location!.pathname = AppContext.toAbsoluteUrl(location!.pathname!);
       return baseFunction(location, state);
     }
   };
@@ -28,7 +29,7 @@ export function useAppRelativeComputeMatch(RouteClass: typeof Route) {
   (RouteClass.prototype as any).computeMatch = function computeMatch(this: Route, props: RouteProps, context: RouterChildContext<any>) {
     let { path, ...p } = props;
 
-    const newPath = path && Navigator.toAbsoluteUrl(path as string);
+    const newPath = path && AppContext.toAbsoluteUrl(path as string);
 
     return baseMatch.call(this, { path: newPath, ...p }, context);
   };
@@ -60,7 +61,7 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
               const path = child.props.path ?? child.props.from;
 
               match = path
-                ? matchPath(location.pathname, { ...child.props, path: Navigator.toAbsoluteUrl(path as string) })
+                ? matchPath(location.pathname, { ...child.props, path: AppContext.toAbsoluteUrl(path as string) })
                 : context.match;
             }
           });

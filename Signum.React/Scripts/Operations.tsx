@@ -8,6 +8,7 @@ import {
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
+import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
@@ -29,6 +30,8 @@ export function start() {
   ButtonBarManager.onButtonBarRender.push(getEntityOperationButtons);
   ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
   ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
+
+  AppContext.clearSettingsActions.push(clearOperationSettings);
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,

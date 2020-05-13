@@ -41,5 +41,5 @@ export function ImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
       {(props: RouteChildrenProps<any>) => <ImportComponent onImportModule={onImportModule} componentProps={props} />}
     </Route>
   );
- }
+}
  

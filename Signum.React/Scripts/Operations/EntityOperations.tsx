@@ -13,11 +13,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
-import { func } from "prop-types";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
-import { FunctionalAdapter } from "../Frames/FrameModal";
 import { notifySuccess } from "../Operations";
+import { FunctionalAdapter } from "../Modals";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {

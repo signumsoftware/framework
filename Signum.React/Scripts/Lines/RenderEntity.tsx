@@ -3,10 +3,10 @@ import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
-import { ViewPromise } from "../Navigator";
+import { ViewPromise, useFetchAndRemember } from "../Navigator";
 import { ErrorBoundary } from '../Components';
-import { FunctionalAdapter } from '../Frames/FrameModal';
-import { useFetchAndRemember, useAPI, useForceUpdate } from '../Hooks'
+import { useAPI, useForceUpdate } from '../Hooks'
+import { FunctionalAdapter } from '../Modals'
 
 export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;

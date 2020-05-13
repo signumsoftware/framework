@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as History from 'history'
 import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
-import * as Navigator from './Navigator';
+import * as AppContext from './AppContext';
 import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
 import { Type, QueryTokenString } from './Reflection';
 
@@ -49,15 +49,6 @@ export function usePrevious<T>(value: T): T | undefined {
 
   return ref.current;
 }
-
-export function useExpand() {
-  React.useEffect(() => {
-    const wasExpanded = Navigator.Expander.setExpanded(true);
-    return () => { Navigator.Expander.setExpanded(wasExpanded); }
-  }, []);
-
-}
-
 
 export interface Size {
   width: number;
@@ -118,9 +109,6 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   return { size, setContainer: setContainerMemo };
 }
 
-interface APIHookOptions {
-  avoidReset?: boolean;
-}
 
 export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>] {
   const [state, setState] = React.useState({ value: defaultValue, resolve: (val: T) => { } });
@@ -141,28 +129,14 @@ export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.Se
   ]
 }
 
-export function useTitle(title: string, deps?: readonly any[]) {
-  React.useEffect(() => {
-    Navigator.setTitle(title);
-    return () => Navigator.setTitle();
-  }, deps);
+export interface APIHookOptions {
+  avoidReset?: boolean;
 }
 
 export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): [T | undefined, () => void] {
   const [count, setCount] = React.useState(0);
   const value = useAPI<T>(makeCall, [...(deps || []), count], options);
   return [value, () => setCount(c => c + 1)];
-}
-
-export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
-  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
-  React.useEffect(() => {
-    if (!enabled)
-      return;
-
-    unregisterCallback.current = Navigator.history.listen(locationChanged);
-    return () => { unregisterCallback.current!(); }
-  }, [enabled, ...(extraDeps || [])]);
 }
 
 export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
@@ -249,71 +223,13 @@ export function useThrottle<T>(value: T, limit: number, options?: { enabled?: bo
   return throttledValue;
 };
 
-export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
-  return useAPI(signal =>
-    fo == null ? Promise.resolve<ResultTable | null>(null) :
-      Finder.getQueryDescription(fo.queryName)
-        .then(qd => Finder.parseFindOptions(fo!, qd, false))
-        .then(fop => Finder.API.executeQuery(Finder.getQueryRequest(fop), signal)),
-    [fo && Finder.findOptionsPath(fo), ...(additionalDeps || [])],
-    options);
-}
-
-export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): Finder.AddToLite<R> | null | undefined {
-  var resultTable = useQuery(entity == null ? null : {
-    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
-    filterOptions: [{ token: "Entity", value: entity }],
-    pagination: { mode: "Firsts", elementsPerPage: 1 },
-    columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
-  }, additionalDeps, options);
-
-  if (entity == null)
-    return null;
-
-  if (resultTable == null)
-    return undefined;
-
-  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
-}
-
-export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
-  return useAPI(signal =>
-    lite == null ? Promise.resolve<T | null | undefined>(lite) :
-      Navigator.API.fetchAndForget(lite),
-    [lite && liteKey(lite)]);
-}
-
-export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
-  return useAPIWithReload(signal =>
-    lite == null ? Promise.resolve<T | null | undefined>(lite) :
-      Navigator.API.fetchAndForget(lite),
-    [lite && liteKey(lite)]);
-}
-
-export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
-
-  const forceUpdate = useForceUpdate();
+export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
+  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
   React.useEffect(() => {
-    if (lite && !lite.entity)
-      Navigator.API.fetchAndRemember(lite)
-        .then(() => {
-          onLoaded && onLoaded();
-          forceUpdate();
-        })
-        .done();
-  }, [lite]);
+    if (!enabled)
+      return;
 
-
-  if (lite == null)
-    return null;
-
-  if (lite.entity == null)
-    return undefined;
-
-  return lite.entity;
-}
-
-export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-  return useAPI(signal => Navigator.API.fetchAll(type), []);
+    unregisterCallback.current = AppContext.history.listen(locationChanged);
+    return () => { unregisterCallback.current!(); }
+  }, [enabled, ...(extraDeps || [])]);
 }
