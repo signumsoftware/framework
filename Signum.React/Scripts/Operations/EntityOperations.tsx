@@ -129,7 +129,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
           Navigator.getSettings(pack.entity.Type)?.onCreateNew ??
           (pack => Constructor.constructPack(pack.entity.Type));
 
-        createNew(pack)
+        (createNew(pack) ?? Promise.resolve(undefined))
           .then(newPack => newPack && eoc.frame.onReload(newPack, true))
           .done();
       };

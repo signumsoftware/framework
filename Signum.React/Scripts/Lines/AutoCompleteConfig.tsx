@@ -156,7 +156,8 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     var filters = [...fo.filterOptions ?? []];
 
-    if (fo.includeDefaultFilters ?? true) {
+    /*When overriden in Finder very often uses not seen columns (like Telephone) that are not seen in autocomplete, better to use false by default and you can opt-in by adding includeDefaultFilters if needed */
+    if (fo.includeDefaultFilters ?? false) { 
       var defaultFilters = Finder.getDefaultFilter(qd, qs);
       if (defaultFilters)
         filters = [...defaultFilters, ...filters];
