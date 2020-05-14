@@ -808,6 +808,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   onNavigateRoute?: (typeName: string, id: string | number) => string;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
+
   namedViews?: NamedViewSettings<T>[];
 }
 
@@ -853,6 +855,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
+  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {

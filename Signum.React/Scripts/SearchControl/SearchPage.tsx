@@ -15,10 +15,6 @@ interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
 }
 
-interface SearchPageState {
-  findOptions: FindOptions;
-}
-
 function SearchPage(p: SearchPageProps) {
 
   const fo = Finder.parseFindOptionsPath(p.match.params.queryName, QueryString.parse(p.location.search))

@@ -5,6 +5,7 @@ export interface AjaxOptions {
   url: string;
   avoidNotifyPendingRequests?: boolean;
   avoidThrowError?: boolean;
+  avoidRetry?: boolean;
   avoidGraphExplorer?: boolean;
   avoidAuthToken?: boolean;
   avoidVersionCheck?: boolean;
@@ -103,6 +104,11 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
     addContextHeaders.forEach(f => f(options));
   }
 
+  if (!options.avoidRetry) {
+    const call = makeCall;
+    makeCall = () => RetryFilter.retryFilter(call);
+  }
+
   if (!options.avoidVersionCheck) {
     const call = makeCall;
     makeCall = () => VersionFilter.onVersionFilter(call);
@@ -130,6 +136,12 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 
   return promise;
 
+}
+
+export module RetryFilter {
+  export function retryFilter(makeCall: () => Promise<Response>): Promise<Response>{
+    return makeCall();
+  }
 }
 
 export module AuthTokenFilter {

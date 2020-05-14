@@ -444,7 +444,7 @@ export interface EntityFrame {
   tabs: EmbeddedWidget[] | undefined;
   frameComponent: {
     forceUpdate(): void,
-    createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
+    createNew?(oldEntity: EntityPack<ModifiableEntity>): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
   };
   entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;

@@ -27,9 +27,10 @@ export default function EntityLink(p: EntityLinkProps) {
       innerRef={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
-      onClick={handleClick}
       data-entity={liteKey(lite)}
-      {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
+      {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
+      onClick={handleClick}
+    >
       {children ?? lite.toStr}
     </Link>
   );
@@ -37,6 +38,8 @@ export default function EntityLink(p: EntityLinkProps) {
   function handleClick(event: React.MouseEvent<any>) {
 
     event.preventDefault();
+    p.onClick?.call(event.currentTarget, event);
+
     const lite = p.lite;
     const s = Navigator.getSettings(lite.EntityType)
     const avoidPopup = s != undefined && s.avoidPopup;

@@ -331,13 +331,13 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
     return {
       mode: "Add",
-      columns: current.slice(ideal.length).map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnOption)
+      columns: current.slice(ideal.length).map(c => ({ token: c.token!.fullKey, displayName: c.token!.niceName == c.displayName ? undefined : c.displayName }) as ColumnOption)
     };
   }
 
   return {
     mode: "Replace",
-    columns: current.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnOption),
+    columns: current.map(c => ({ token: c.token!.fullKey, displayName: c.token!.niceName == c.displayName ? undefined : c.displayName }) as ColumnOption),
   };
 }
 
