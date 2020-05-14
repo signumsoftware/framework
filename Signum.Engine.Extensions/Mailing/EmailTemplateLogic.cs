@@ -248,19 +248,19 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
-            return CreateEmailMessage(template, modifiableEntity, ref model);
+            return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
         {
-            return CreateEmailMessage(template, modifiableEntity, ref model);
+            return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
         }
 
-        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model)
+        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model, CultureInfo? cultureInfo = null)
         {
             Entity? entity = null;
             if (template.Model != null)
@@ -277,7 +277,7 @@ namespace Signum.Engine.Mailing
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                var emailBuilder = new EmailMessageBuilder(template, entity, model);
+                var emailBuilder = new EmailMessageBuilder(template, entity, model, cultureInfo);
                 return emailBuilder.CreateEmailMessageInternal().ToList();
             }
         }
