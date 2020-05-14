@@ -21,8 +21,8 @@ import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions } from "./Modals/ErrorModal";
 
-if (!currentUser || currentUser.toStr == "Anonymous")
-  throw new Error("Should not be loaded!");
+if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
+  throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
