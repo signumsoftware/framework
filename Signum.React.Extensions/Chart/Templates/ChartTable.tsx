@@ -110,7 +110,7 @@ export default function ChartTableComponent(p : ChartTableProps){
             <th key={i} data-column-name={col.column.token!.fullKey}
               onClick={e=>handleHeaderClick(e, col.column)}>
               <span className={"sf-header-sort " + orderClassName(col.column)} />
-              <span> {col.column.displayName ?? col.column.token!.niceName}</span>
+              <span> {col.column.displayName || col.column.token!.niceName}</span>
             </th>)}
         </tr>
       </thead>
