@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
-import * as Navigator from '../Navigator';
 import { Dic } from '../Globals';
 import { ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, NormalWindowMessage, ConnectionMessage } from '../Signum.Entities'
@@ -10,6 +9,7 @@ import "./Modals.css"
 import { newLite } from '../Reflection';
 import { Modal } from 'react-bootstrap';
 import MessageModal from './MessageModal';
+import { namespace } from 'd3';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps<undefined> {
@@ -57,7 +57,7 @@ export default function ErrorModal(p: ErrorModalProps) {
             renderMessage(e)}
 
         {
-          se?.httpError.stackTrace && Navigator.isViewable(ExceptionEntity) &&
+          se?.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
           <div>
             <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
             {showDetails && <pre>{se.httpError.stackTrace}</pre>}
@@ -83,8 +83,8 @@ export default function ErrorModal(p: ErrorModalProps) {
       <span>
         <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
         {se.httpError.exceptionId && <span>({
-          Navigator.isViewable(ExceptionEntity) ?
-            <a href={Navigator.navigateRoute(newLite(ExceptionEntity, se.httpError.exceptionId!))}>{se.httpError.exceptionId}</a> :
+          ErrorModalOptions.isExceptionViewable() ?
+            <a href={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
             <strong>{se.httpError.exceptionId}</strong>
         })</span>}
       </span>
@@ -146,4 +146,14 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
     return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);
 
   return message;
+}
+
+export namespace ErrorModalOptions {
+  export function getExceptionUrl(exceptionId: number | string): string | undefined {
+    return undefined;
+  }
+
+  export function isExceptionViewable() {
+    return false;
+  }
 }

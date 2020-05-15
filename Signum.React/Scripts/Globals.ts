@@ -12,6 +12,7 @@ declare global {
   }
 
   interface Window {
+    __allowNavigatorWithoutUser?: boolean;
     __baseUrl: string;
     dataForChildWindow?: any;
     exploreGraphDebugMode: boolean;

@@ -5,10 +5,11 @@ import * as Finder from '../Finder'
 import { FindOptions, FilterOption, isFilterGroupOption } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
+import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
 import * as QueryString from 'query-string'
 import { namespace } from 'd3'
-import { useTitle } from '../Hooks'
+import { useTitle } from '../AppContext'
 
 interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
@@ -44,10 +45,10 @@ function SearchPage(p: SearchPageProps) {
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions, scl.extraParams());
-    const currentLocation = Navigator.history.location;
+    const currentLocation = AppContext.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
-      Navigator.history.replace(newPath);
+      AppContext.history.replace(newPath);
   }
 
   if (!Finder.isFindable(fo.queryName, true))
