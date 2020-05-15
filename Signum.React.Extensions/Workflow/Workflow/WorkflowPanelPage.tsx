@@ -1,6 +1,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
@@ -13,11 +14,11 @@ import { useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hoo
 export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
   function componentWillMount() {
     AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
-    Navigator.setTitle("WorkflowPanel State");
+    AppContext.setTitle("WorkflowPanel State");
   }
 
   function componentWillUnmount() {
-    Navigator.setTitle();
+    AppContext.setTitle();
   }
 
   return (
@@ -29,7 +30,7 @@ export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
           <WorkflowScriptRunnerTab />
         </Tab>
         <Tab title="Timers" eventKey="timers">
-          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(Navigator.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
+          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(AppContext.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
         </Tab>
       </Tabs>
     </div>

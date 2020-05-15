@@ -4,6 +4,7 @@ import { ajaxGet } from '@framework/Services';
 import * as Constructor from '@framework/Constructor';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -47,7 +48,7 @@ export function start(options: { routes: JSX.Element[] }) {
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
 
-  Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: Navigator.currentUser && toLite(Navigator.currentUser) }));
+  Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
 
@@ -74,7 +75,7 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
+        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
       },
     handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (p, e, ev) => {
@@ -82,7 +83,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.persist();
         UserChartClient.Converter.toChartRequest(p.userChart!, e)
           .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(p.userChart!)))
-          .then(path => Navigator.pushOrOpenInTab(path, ev))
+          .then(path => AppContext.pushOrOpenInTab(path, ev))
           .done();
       },
   });
@@ -94,14 +95,14 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
       },
     handleTitleClick:
       (p, e, ev) => {
         ev.preventDefault();
         ev.persist();
         UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-          .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
           .done()
       }
   });
@@ -114,14 +115,14 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
       },
     handleTitleClick:
       (p, e, ev) => {
         ev.preventDefault();
         ev.persist();
         UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-          .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
           .done()
       }
   });
@@ -150,7 +151,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     return promise.then(das =>
       das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => d.toStr ?? "", e => {
-        Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
+        AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
       }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
   });
 
@@ -158,7 +159,7 @@ export function start(options: { routes: JSX.Element[] }) {
     e => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
-          Navigator.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
+          AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
         else
           Navigator.API.fetchAndRemember(db.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
@@ -166,7 +167,7 @@ export function start(options: { routes: JSX.Element[] }) {
               if (!entity)
                 return;
 
-              Navigator.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
+              AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             }).done();
       }).done()));
 }

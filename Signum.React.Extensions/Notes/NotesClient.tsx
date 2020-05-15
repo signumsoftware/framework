@@ -24,8 +24,8 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
     parentToken: NoteEntity.token(e => e.target),
     parentValue: ctx.lite
   }, {
-      isVisible: AuthClient.navigatorIsViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
-      icon: "sticky-note",
-      iconColor: "#337ab7",
-    }));
+    isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
+    icon: "sticky-note",
+    iconColor: "#337ab7",
+  }));
 }

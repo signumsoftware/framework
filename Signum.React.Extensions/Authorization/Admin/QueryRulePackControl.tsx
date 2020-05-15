@@ -3,7 +3,7 @@ import { QueryEntity } from '@framework/Signum.Entities.Basics';
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
-import { API } from '../AuthClient'
+import { API } from '../AuthAdminClient'
 import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, QueryAllowed } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { Button } from 'react-bootstrap'

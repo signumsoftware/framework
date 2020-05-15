@@ -5,6 +5,7 @@ import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos } from '@framework/Reflection'
@@ -443,7 +444,7 @@ export module Encoder {
 
     encodeColumn(query, co.columnOptions);
 
-    return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+    return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
   }
 

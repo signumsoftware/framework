@@ -12,6 +12,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
 import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
@@ -50,7 +51,7 @@ import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { EntityLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
-import { FunctionalAdapter } from '../../../Framework/Signum.React/Scripts/Frames/FrameModal';
+import { FunctionalAdapter } from '@framework/Modals';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -177,7 +178,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Navigator.addSettings(new EntitySettings(CaseTagsModel, w => import('./Case/CaseTagsModel')));
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
-    onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
+    onNavigateRoute: (typeName, id) => AppContext.toAbsoluteUrl("~/workflow/activity/" + id),
     onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
     onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
   }));
@@ -268,7 +269,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   })]);
 
   if (options.overrideCaseActivityMixin == true) {
-    if (AuthClient.navigatorIsViewable(SMSMessageEntity))
+    if (Navigator.isViewable(SMSMessageEntity))
       if (SMSMessageEntity.hasMixin(CaseActivityMixin))
         Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
           vr.insertAfterLine(a => a.referred, ctx => [
@@ -276,7 +277,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
           ]);
         });
 
-    if (AuthClient.navigatorIsViewable(EmailMessageEntity))
+    if (Navigator.isViewable(EmailMessageEntity))
       if (EmailMessageEntity.hasMixin(CaseActivityMixin))
         Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
           vr.insertAfterLine(a => a.target, ctx => [

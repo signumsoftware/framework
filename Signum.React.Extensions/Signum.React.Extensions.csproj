@@ -81,6 +81,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Authorization\AuthClient.tsx" />
+    <None Remove="Authorization\Templates\DoublePassword.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
     <None Remove="Chart\HtmlScripts\PivotTable.tsx" />

@@ -13,7 +13,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 
 import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
 import { OperationSymbol, ModelEntity, newMListElement, NormalControlMessage } from '@framework/Signum.Entities'
-import { API, properties, queries, operations } from '../AuthClient'
+import { API, properties, queries, operations } from '../AuthAdminClient'
 import {
   TypeRulePack, AuthAdminMessage, PermissionSymbol, TypeAllowed, TypeAllowedRule,
   TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity

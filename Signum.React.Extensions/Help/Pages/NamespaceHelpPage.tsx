@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
-import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
+import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetTypeInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
@@ -10,6 +10,7 @@ import * as Operations from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
+import { useTitle } from '@framework/AppContext';
 
 
 export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: string }>) {

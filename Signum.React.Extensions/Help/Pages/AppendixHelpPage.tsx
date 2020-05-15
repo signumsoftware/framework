@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
-import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
+import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Entities.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
@@ -13,6 +14,7 @@ import { notifySuccess } from '@framework/Operations';
 import { getOperationInfo } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
+import { useTitle } from '@framework/AppContext'
 
 
 export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
@@ -35,7 +37,7 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
       <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? Navigator.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>
@@ -78,7 +80,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
         Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
-            Navigator.history.push(Urls.indexUrl());
+            AppContext.history.push(Urls.indexUrl());
             notifySuccess();
           }))
           .done();

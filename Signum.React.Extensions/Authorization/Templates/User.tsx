@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Entities.Authorization'
 import { Binding } from '@framework/Reflection'
 import { ValueLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
-import { DoublePassword } from '../AuthClient'
+import { DoublePassword } from './DoublePassword'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }) {
 

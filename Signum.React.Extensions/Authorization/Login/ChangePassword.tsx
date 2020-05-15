@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
@@ -33,8 +34,8 @@ export default function ChangePassword() {
         .then(lr => {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
-          Navigator.resetUI();
-          Navigator.history.push(Navigator.toAbsoluteUrl("~/auth/changePasswordSuccess"));
+          AppContext.resetUI();
+          AppContext.history.push(AppContext.toAbsoluteUrl("~/auth/changePasswordSuccess"));
         })
         .catch((e: ValidationError) => {
           if (e.modelState)

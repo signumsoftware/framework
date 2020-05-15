@@ -1,7 +1,6 @@
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Lite } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import * as AppContext from '@framework/AppContext'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import { reloadTypes } from '@framework/Reflection'
 import { toLite } from '@framework/Signum.Entities';
@@ -20,9 +19,8 @@ export function loadCurrentCulture(): Promise<void> {
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
   API.setCurrentCulture(newCulture)
     .then(() => reloadTypes())
-    .then(() => Finder.clearQueryDescriptionCache())
     .then(() => loadCurrentCulture())
-    .then(() => Navigator.resetUI())
+    .then(() => AppContext.resetUI())
     .done();
 }
 

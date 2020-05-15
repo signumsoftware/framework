@@ -3,13 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 
 export function start(...params: OmniboxProvider<OmniboxResult>[]) {
   params.forEach(op => registerProvider(op));
 
-  Navigator.clearSettingsActions.push(clearProviders);
-  Navigator.clearSettingsActions.push(clearSpecialActions);
+  AppContext.clearSettingsActions.push(clearProviders);
+  AppContext.clearSettingsActions.push(clearSpecialActions);
 }
 
 export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {};

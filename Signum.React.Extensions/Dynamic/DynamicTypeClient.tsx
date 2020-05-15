@@ -5,6 +5,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, ValueSearchControlLine } from '@framework/Search'
 import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
@@ -43,7 +44,7 @@ export function start(options: { routes: JSX.Element[] }) {
               icon: "success"
             }).then(result => {
               if (result == "yes")
-                window.open(Navigator.toAbsoluteUrl("~/dynamic/panel"));
+                window.open(AppContext.toAbsoluteUrl("~/dynamic/panel"));
             }).done();
           }
         })
