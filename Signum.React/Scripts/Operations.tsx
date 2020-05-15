@@ -8,6 +8,7 @@ import {
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
+import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
@@ -30,6 +31,8 @@ export function start() {
   ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
   ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
 
+  AppContext.clearSettingsActions.push(clearOperationSettings);
+
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
     parentToken: OperationLogEntity.token(e => e.target),
@@ -39,7 +42,6 @@ export function start() {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
       icon: "history",
       iconColor: "green",
-      isShy: true,
     }));
 }
 

@@ -5,6 +5,7 @@ import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTy
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
+import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
 import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
@@ -13,13 +14,14 @@ import { useAPI } from './Hooks';
 import { StyleContext } from './Lines'
 import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
+import { BsColor } from './Components'
 
 export function start() {
 
   onWidgets.push(getQuickLinkWidget);
   onContextualItems.push(getQuickLinkContextMenus);
 
-  Navigator.clearSettingsActions.push(clearQuickLinks);
+  AppContext.clearSettingsActions.push(clearQuickLinks);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -158,40 +160,84 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
       });
   }, [p]);
 
-  if (links != undefined && links.length == 0)
+  if (links == undefined)
+    return <span>…</span>;
+
+  if (links.length == 0)
     return null;
 
   const DDToggle = Dropdown.Toggle as any;
 
   return (
-    <Dropdown id="quickLinksWidget">
-      <DDToggle as={QuickLinkToggle} links={links} />
-      <Dropdown.Menu alignRight>
-        {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
-      </Dropdown.Menu>
-    </Dropdown>
+    <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+      {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
+        .groupBy(a => a.group?.name ?? a.name)
+        .map((gr, i) => {
+          var first = gr.elements[0];
+
+          if (first.group == null)
+            return (
+              <a key={i}
+                className={classes("badge badge-pill sf-quicklinks", "badge-" + first.color)}
+                title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
+                role="button"
+                href="#"
+                data-toggle="dropdown"
+                onClick={e => { e.preventDefault(); first.handleClick(e); }}>
+                {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
+                {first.icon && "\u00A0"}
+                {first.text()}
+              </a>
+            );
+
+          else {
+            var dd = first.group;
+
+            return (
+              <Dropdown id={p.wc.frame.prefix + "_" + dd.name} key={i}>
+                <DDToggle as={QuickLinkToggle}
+                  title={QuickLinkMessage.Quicklinks.niceToString()}
+                  badgeColor={dd.color}
+                  content={<>
+                  {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
+                  {dd.icon && "\u00A0"}
+                  {dd.text(gr.elements)}
+                </>} />
+                <Dropdown.Menu alignRight>
+                  {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
+                </Dropdown.Menu>
+              </Dropdown>
+            );
+          }
+        })}
+    </div>
   );
 }
 
 
-const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick: React.MouseEventHandler, links: any[] | undefined }, ref: React.Ref<HTMLAnchorElement>) {
-
-  const links = p.links;
+const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: string }, ref: React.Ref<HTMLAnchorElement>) {
 
   return (
     <a
       ref={ref}
-      className={classes("badge badge-pill", links?.some(l => !l.isShy) ? "badge-warning" : "badge-light", "sf-quicklinks")}
+      className={classes("badge badge-pill sf-quicklinks", "badge-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       role="button"
       href="#"
       data-toggle="dropdown"
-      onClick={e => { e.preventDefault(); p.onClick(e); }}>
-      {links && <FontAwesomeIcon icon="star" />}
-      {links ? "\u00A0" + links.length : "…"}
+      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
+      {p.content}
     </a>
   );
 });
+
+export interface QuickLinkGroup {
+  name: string;
+  title: (links: QuickLink[]) => string;
+  text: (links: QuickLink[]) => string;
+  icon: IconProp;
+  color: BsColor;
+}
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
@@ -199,7 +245,8 @@ export interface QuickLinkOptions {
   order?: number;
   icon?: IconProp;
   iconColor?: string;
-  isShy?: boolean;
+  color?: BsColor;
+  group?: QuickLinkGroup | null;
   allowsMultiple?: boolean
 }
 
@@ -210,15 +257,35 @@ export abstract class QuickLink {
   name: string;
   icon?: IconProp;
   iconColor?: string;
-  isShy?: string;
+  color?: BsColor;
+  group?: QuickLinkGroup;
+
+  static defaultGroup: QuickLinkGroup = {
+    name: "quickLinks",
+    icon: "star",
+    text: links => links.length.toString(),
+    title: () => QuickLinkMessage.Quicklinks.niceToString(),
+    color: "light"
+  };
 
   constructor(name: string, options?: QuickLinkOptions) {
     this.name = name;
 
     Dic.assign(this, { isVisible: true, text: () => "", order: 0, ...options });
+
+    if (this.group === undefined)
+      this.group = QuickLink.defaultGroup;
   }
 
-  abstract toDropDownItem(): React.ReactElement<any>;
+  toDropDownItem() {
+    return (
+      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
+        {this.renderIcon()}&nbsp;{this.text()}
+      </Dropdown.Item>
+    );
+  }
+
+  abstract handleClick(e: React.MouseEvent<any>): void;
 
   renderIcon() {
     if (this.icon == undefined)
@@ -239,15 +306,6 @@ export class QuickLinkAction extends QuickLink {
     this.action = action;
   }
 
-  toDropDownItem() {
-
-    return (
-      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text()}
-      </Dropdown.Item>
-    );
-  }
-
   handleClick = (e: React.MouseEvent<any>) => {
     e.persist();
     this.action(e);
@@ -263,17 +321,10 @@ export class QuickLinkLink extends QuickLink {
     this.url = url;
   }
 
-  toDropDownItem() {
 
-    return (
-      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
-        {this.renderIcon()}&nbsp;{this.text()}
-      </Dropdown.Item>
-    );
-  }
 
   handleClick = (e: React.MouseEvent<any>) => {
-    Navigator.pushOrOpenInTab(this.url, e);
+    AppContext.pushOrOpenInTab(this.url, e);
   }
 }
 
@@ -290,15 +341,7 @@ export class QuickLinkExplore extends QuickLink {
     this.findOptions = findOptions;
   }
 
-  toDropDownItem() {
-    return (
-      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text()}
-      </Dropdown.Item>
-    );
-  }
-
-  exploreOrPopup = (e: React.MouseEvent<any>) => {
+  handleClick = (e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
 
@@ -325,15 +368,9 @@ export class QuickLinkNavigate extends QuickLink {
     this.viewName = viewName;
   }
 
-  toDropDownItem() {
-    return (
-      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
-        {this.renderIcon()}&nbsp;{this.text()}
-      </Dropdown.Item>
-    );
-  }
 
-  navigateOrPopup = (e: React.MouseEvent<any>) => {
+
+  handleClick = (e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
 

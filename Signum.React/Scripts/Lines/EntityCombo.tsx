@@ -19,6 +19,7 @@ export interface EntityComboProps extends EntityBaseProps {
   refreshKey?: string;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  delayLoadData?: boolean;
 }
 
 export class EntityComboController extends EntityBaseController<EntityComboProps> {
@@ -125,6 +126,7 @@ export interface EntityComboSelectProps {
   refreshKey?: string;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   liteToString?: (e: Entity) => string;
+  delayLoadData?: boolean;
 }
 
 
@@ -137,6 +139,9 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   const [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
   const requestStarted = React.useRef(false);
+
+  const [loadData, setLoadData] = React.useState<boolean>(!p.delayLoadData);
+
   const selectRef = React.useRef<HTMLSelectElement>(null);
   const mounted = useMounted();
 
@@ -158,7 +163,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       if (requestStarted.current)
         console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${p.type!.name}`);
       setData(p.data);
-    } else {
+    } else if (loadData){
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
@@ -173,7 +178,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
           .then(data => setData(data.orderBy(a => a)))
           .done();
     }
-  }, [p.data, p.type.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [p.data, p.type.name, p.refreshKey, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   const lite = getLite();
 
@@ -183,7 +188,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
 
   return (
-    <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+    <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
       disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
       {renderOptions()}
     </select>
@@ -218,12 +223,9 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   function renderOptions() {
 
-    if (data == undefined)
-      return undefined;
-
     const lite = getLite();
 
-    const elements = [undefined, ...data];
+    const elements = [undefined, ...data ?? []];
 
     if (lite) {
       var index = elements.findIndex(a => is(a, lite));

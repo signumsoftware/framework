@@ -223,6 +223,7 @@
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
     <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen diese Änderungen verloren gehen?" />
+    <Member Name="Main" Description="Haupt" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
@@ -308,7 +309,7 @@
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
-    <Member Name="Hour" Description="Zeit" />
+    <Member Name="Hour" Description="Stunde" />
     <Member Name="HourStart" Description="Start Stunde" />
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
@@ -329,6 +330,10 @@
     <Member Name="SecondStart" Description="Start Sekunde" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
+    <Member Name="TotalDays" Description="Tage insgesamt" />
+    <Member Name="TotalHours" Description="Stunden insgesamt" />
+    <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+    <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
     <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="WeekStart" Description="Wochenstart" />
     <Member Name="Year" Description="Jahr" />

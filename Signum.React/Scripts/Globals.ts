@@ -12,8 +12,10 @@ declare global {
   }
 
   interface Window {
+    __allowNavigatorWithoutUser?: boolean;
     __baseUrl: string;
     dataForChildWindow?: any;
+    exploreGraphDebugMode: boolean;
   }
 
   interface RegExpConstructor {
@@ -817,8 +819,6 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
 
 String.prototype.etc = function (this: string, maxLength: number, etcString: string = "(…)") {
   let str = this;
-
-  str = str.tryBefore("\n") || str;
 
   if (str.length > maxLength)
     str = str.substr(0, maxLength - etcString.length) + etcString;

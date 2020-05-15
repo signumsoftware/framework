@@ -796,7 +796,8 @@ END $$;"); ;
             if (error != null)
             {
 #if DEBUG
-                throw new IntegrityCheckException(error.WithEntities(modifiables));
+                var withEntites = error.WithEntities(modifiables);
+                throw new IntegrityCheckException(withEntites);
 #else
                 throw new IntegrityCheckException(error);
 #endif

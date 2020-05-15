@@ -44,12 +44,14 @@ namespace Signum.Entities.DynamicQuery
 
                     case FilterType.DateTime:
                         {
+                            if (this.Type.UnNullify() == typeof(Date))
+                                return true;
 
                             PropertyRoute? route = this.GetPropertyRoute();
 
                             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                             {
-                                if (route.Type == typeof(Date))
+                                if (route.Type.UnNullify() == typeof(Date))
                                     return true;
 
                                 var pp = Validator.TryGetPropertyValidator(route);
