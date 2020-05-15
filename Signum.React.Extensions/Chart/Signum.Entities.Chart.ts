@@ -156,6 +156,10 @@ export module GoogleMapsCharScript {
   export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Markermap");
 }
 
+export module HtmlChartScript {
+  export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
+}
+
 export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";

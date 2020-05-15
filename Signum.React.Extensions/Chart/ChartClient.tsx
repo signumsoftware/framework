@@ -14,7 +14,7 @@ import {
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript, HtmlChartScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
@@ -60,6 +60,8 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScriptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
   registerChartScriptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
   registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/TreeMap"));
+
+  registerChartScriptComponent(HtmlChartScript.PivotTable, () => import("./HtmlScripts/PivotTable"));
 
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;

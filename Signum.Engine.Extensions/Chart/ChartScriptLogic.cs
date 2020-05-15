@@ -53,6 +53,8 @@ namespace Signum.Engine.Chart
 
                 RegisterScript(new HeatmapChartScript());
                 RegisterScript(new MarkermapChartScript());
+
+                RegisterScript(new PivotTableScript());
             }
         }
 

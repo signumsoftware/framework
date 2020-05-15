@@ -52,6 +52,13 @@ namespace Signum.Entities.Chart
     }
 
     [AutoInit]
+    public static class HtmlChartScript
+    {
+        public static readonly ChartScriptSymbol PivotTable;
+
+    }
+
+    [AutoInit]
     public static class GoogleMapsCharScript
     {
         public static readonly ChartScriptSymbol Heatmap;
