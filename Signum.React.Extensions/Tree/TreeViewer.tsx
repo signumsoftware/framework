@@ -2,6 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
@@ -135,7 +136,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (ev.ctrlKey || ev.button == 1)
       window.open(path);
     else
-      Navigator.history.push(path);
+      AppContext.history.push(path);
   };
 
   getCurrentUrl() {
@@ -432,9 +433,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     });
 
     if (this.props.avoidChangeUrl)
-      window.open(Navigator.toAbsoluteUrl(path));
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      Navigator.pushOrOpenInTab(path, e);
+      AppContext.pushOrOpenInTab(path, e);
   }
 
   handleToggleFilters = () => {

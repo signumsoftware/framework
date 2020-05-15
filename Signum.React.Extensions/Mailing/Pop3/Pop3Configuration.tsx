@@ -4,7 +4,7 @@ import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { Binding } from '@framework/Reflection'
 import { Pop3ConfigurationEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'
-import { DoublePassword } from '../../Authorization/AuthClient'
+import { DoublePassword } from '../../Authorization/Templates/DoublePassword'
 
 export default function Pop3Configuration(p: { ctx: TypeContext<Pop3ConfigurationEntity> }) {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });

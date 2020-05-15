@@ -5,10 +5,11 @@ import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'
 import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity } from '../Signum.Entities.Help';
 import { getTypeInfo } from '@framework/Reflection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTitle } from '@framework/AppContext'
 
 
 export default function HelpIndexPage(p: RouteComponentProps<{}>) {

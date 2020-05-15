@@ -5,7 +5,7 @@ import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeCont
 import { EntityLine, ValueLine } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 
-import { API } from '../AuthClient'
+import { API } from '../AuthAdminClient'
 import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, RoleEntity } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 

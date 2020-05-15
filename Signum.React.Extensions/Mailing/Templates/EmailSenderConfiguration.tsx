@@ -2,8 +2,8 @@ import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmbedded, ExchangeWebServiceEmbedded } from '../Signum.Entities.Mailing'
-import { DoublePassword } from '../../Authorization/AuthClient'
 import { Binding } from '@framework/Reflection'
+import { DoublePassword } from '../../Authorization/Templates/DoublePassword'
 
 export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {
   const sc = p.ctx;

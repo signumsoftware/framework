@@ -4,7 +4,7 @@ import * as HelpClient from '../HelpClient';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TypeContext, ValueLine } from '@framework/Lines';
 import { classes } from '@framework/Globals';
-import * as Navigator from '@framework/Navigator';
+import * as AppContext from '@framework/AppContext';
 
 export function EditableComponent({ ctx, markdown, defaultText, inline, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, markdown?: boolean, defaultText?: string, inline?: boolean, onChange?: () => void, defaultEditable?: boolean }) {
 
@@ -37,10 +37,10 @@ export function MarkdownText({ text, className }: { text: string | null | undefi
     var a = e.target as HTMLAnchorElement;
     if (a?.nodeName == "A" && !e.ctrlKey && e.button == 0) {
       var href = a.getAttribute("href");
-      if (href != null && href.startsWith(Navigator.toAbsoluteUrl("~/"))) {
+      if (href != null && href.startsWith(AppContext.toAbsoluteUrl("~/"))) {
         e.preventDefault();
         e.stopPropagation();
-        Navigator.history.push(href);
+        AppContext.history.push(href);
       }
     }
   }

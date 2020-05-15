@@ -9,9 +9,8 @@ import { FileDownloaderConfiguration } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
-import { useFetchInState, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
-import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { FetchAndRemember } from '@framework/Lines'
+import { useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };

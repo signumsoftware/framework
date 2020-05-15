@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[] }) {
       () => SMSMessageEntity.nicePluralName(),
       e => getSMSMessages(ctx.lite),
       {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(SMSMessageEntity),
+        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(SMSMessageEntity),
         icon: "sms",
         iconColor: "green"
       }));

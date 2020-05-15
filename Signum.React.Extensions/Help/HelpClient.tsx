@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
 import { ajaxGet, ajaxPost } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
 import { ImportRoute } from "@framework/AsyncImport";
@@ -61,7 +61,7 @@ export function toHtml(txt: string  | null) {
     }
   });
 
-  var txt3 = txt2.replace(helpAppRelativeUrl, "[" + Navigator.toAbsoluteUrl("~"));
+  var txt3 = txt2.replace(helpAppRelativeUrl, "[" + AppContext.toAbsoluteUrl("~"));
 
   return Options.markdownToHml(txt3);
 }
@@ -127,23 +127,23 @@ export interface NamespaceHelp {
 
 export module Urls {
   export function indexUrl() {
-    return Navigator.toAbsoluteUrl("~/help");
+    return AppContext.toAbsoluteUrl("~/help");
   }
 
   export function searchUrl(query: PseudoType) {
-    return Navigator.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: query }));
+    return AppContext.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: query }));
   }
 
   export function typeUrl(typeName: PseudoType) {
-    return Navigator.toAbsoluteUrl("~/help/type/" + getTypeName(typeName));
+    return AppContext.toAbsoluteUrl("~/help/type/" + getTypeName(typeName));
   }
 
   export function namespaceUrl(namespace: string) {
-    return Navigator.toAbsoluteUrl("~/help/namespace/" + namespace.replaceAll(".", "_"));
+    return AppContext.toAbsoluteUrl("~/help/namespace/" + namespace.replaceAll(".", "_"));
   }
 
   export function appendixUrl(uniqueName: string | null) {
-    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
+    return AppContext.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
   }
 
   export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {

@@ -13,8 +13,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { newMListElement, ModifiableEntity } from '@framework/Signum.Entities';
 import { Button } from 'react-bootstrap';
-import { useFetchInState } from '../../../../Framework/Signum.React/Scripts/Hooks';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Dic } from '@framework/Globals';
 import { isFunctionOrStringOrNull } from '../../Dynamic/View/NodeUtils';
 import { useForceUpdate } from '@framework/Hooks'
 

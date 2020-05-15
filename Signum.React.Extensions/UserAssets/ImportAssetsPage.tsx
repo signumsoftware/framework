@@ -6,7 +6,8 @@ import { TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction } from './Signum.Entities.UserAssets'
-import { useForceUpdate, useTitle } from '@framework/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
+import { useTitle } from '@framework/AppContext'
 
 interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 

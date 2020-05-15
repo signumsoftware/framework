@@ -4,11 +4,11 @@ import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { OperationSymbol } from '@framework/Signum.Entities'
-import { API } from '../AuthClient'
+import { API } from '../AuthAdminClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthEmailMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
 
 export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
 

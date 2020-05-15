@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { AbortableRequest } from '@framework/Services';
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
@@ -30,7 +31,7 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
       promise
         .then(url => {
           if (url)
-            Navigator.pushOrOpenInTab(url, e);
+            AppContext.pushOrOpenInTab(url, e);
         }).done();
     }
     typeahead.current!.blur();
