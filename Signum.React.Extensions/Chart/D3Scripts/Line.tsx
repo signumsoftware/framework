@@ -10,7 +10,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
-export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
   
   var xRule = Rule.create({
     _1: 5,
@@ -51,7 +51,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
 
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

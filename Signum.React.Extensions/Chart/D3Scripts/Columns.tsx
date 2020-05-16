@@ -10,7 +10,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -50,7 +50,7 @@ export default function renderColumns({ data, width, height, parameters, loading
   var keyColumn = data.columns.c0!;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

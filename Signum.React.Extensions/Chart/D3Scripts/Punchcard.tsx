@@ -11,7 +11,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest}: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -60,7 +60,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
     var values = Dic.getValues(dictionary).map(array => column.getValue(array[0]));
 
-    var extendedValues = ChartUtils.completeValues(column, values, completeValues, "After");
+    var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest, "After");
     switch (shortType) {
       case "Ascending": return extendedValues.orderBy(a => a);
       case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));

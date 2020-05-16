@@ -24,8 +24,8 @@ namespace Signum.Engine.Chart.Scripts
             {
                 new ChartScriptParameterGroup("Scale")
                 {
-                    new ChartScriptParameter("CompleteHorizontalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
-                    new ChartScriptParameter("CompleteVerticalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
+                    new ChartScriptParameter("CompleteHorizontalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                    new ChartScriptParameter("CompleteVerticalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
                 },
                 new ChartScriptParameterGroup("Size")
                 {

@@ -71,21 +71,19 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   }
 }
 
-export interface ChartComponentProps {
+export interface ChartScriptProps {
   data?: ChartTable;
   parameters: { [name: string]: string },
   loading: boolean;
   onDrillDown: (e: ChartRow) => void;
-}
-
-export interface ChartScriptProps extends ChartComponentProps {
   width: number;
   height: number;
   initialLoad: boolean;
+  chartRequest: ChartRequestModel;
 }
 
 interface ChartScriptModule {
-  default: (React.ComponentClass<ChartComponentProps>) | ((p: ChartScriptProps) => React.ReactNode);
+  default: ((p: ChartScriptProps) => React.ReactNode);
 }
 
 const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};

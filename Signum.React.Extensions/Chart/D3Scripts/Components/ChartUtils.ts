@@ -6,7 +6,9 @@ import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
-import { formatAsDate } from "../../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
+import { formatAsDate } from "@framework/Lines/ValueLine";
+import { ChartRequestModel } from "../../Signum.Entities.Chart";
+import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed } from "@framework/FindOptions";
 
 
 
@@ -96,26 +98,28 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
   }
 }
 
-export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
+export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, chartRequest: ChartRequestModel, insertPoint: "Middle" | "Before" | "After"): unknown[] {
 
   if (completeValues == null || completeValues == "No")
     return values;
 
+
+  var filters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
+    chartRequest.filterOptions.filter(f => !isFilterGroupOptionParsed(f) && f.token && f.token.fullKey == column.token!.fullKey) as FilterConditionOptionParsed[] :
+    [];
+
+
+  const isAuto = completeValues == "Auto";
+
+  var isInFilter = filters.firstOrNull(a => a.operation == "IsIn");
+
+  if (isInFilter)
+    return complete(values, isInFilter.value as unknown[], column, insertPoint);
+
   if (column.type == "Lite" || column.type == "String")
     return values;
 
-  const isAuto = completeValues == "Auto"
-
   if (column.type == "Date" || column.type == "DateTime") {
-
-    const min = d3.min(values as string[]);
-    const max = d3.max(values as string[]);
-
-    if (min == undefined || max == undefined)
-      return values; 
-
-    const minMoment = moment(min);
-    const maxMoment = moment(max);
 
     const lastPart = column.token!.fullKey.tryAfterLast('.');
 
@@ -127,6 +131,27 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
               lastPart == "WeekStart" ? "w" :
                 lastPart == "MonthStart" ? "M" :
                   null;
+
+    if (unit == null)
+      return values;
+
+    var minFilter = filters.firstOrNull(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual");
+    var min = minFilter == null ? d3.min(values as string[]) :
+      minFilter.operation == "GreaterThan" ? moment(minFilter.value).add(1, unit).format() :
+        minFilter.operation == "GreaterThanOrEqual" ? minFilter.value : undefined; 
+
+    var maxFilter = filters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
+    var max = maxFilter == null ? d3.min(values as string[]) :
+      maxFilter.operation == "LessThan" ? moment(maxFilter.value).add(-1, unit).format() :
+        maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 
+
+
+    if (min == undefined  || max == undefined)
+      return values; 
+
+    const minMoment = moment(min);
+    const maxMoment = moment(max);
+
 
     if (unit == null)
       return values;
@@ -164,18 +189,25 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
 
-    const min = d3.min(values as number[]) as number | undefined;
-    const max = d3.max(values as number[]) as number | undefined;
-
-    if (min == undefined || max == undefined)
-      return values;
-
     const lastPart = column.token!.fullKey.tryAfterLast('.');
-    
-    const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) : 
-        (column.type == "Integer" ? 1 : null);
+
+    const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) :
+      (column.type == "Integer" ? 1 : null);
 
     if (step == null)
+      return values;
+
+    var minFilter = filters.firstOrNull(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual");
+    var min = minFilter == null ? d3.min(values as number[]) :
+      minFilter.operation == "GreaterThan" ? minFilter.value as number + step :
+        minFilter.operation == "GreaterThanOrEqual" ? minFilter.value : undefined;
+
+    var maxFilter = filters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
+    var max = maxFilter == null ? d3.min(values as number[]) :
+      maxFilter.operation == "LessThan" ? maxFilter.value as number - step :
+        maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 
+
+    if (min == undefined || max == undefined)
       return values;
 
     const allValues: number[] = [];

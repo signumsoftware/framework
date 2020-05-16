@@ -85,18 +85,13 @@ export default function ChartRenderer(p: ChartRendererProps) {
     <FullscreenComponent onReload={p.onReload}>
       <ErrorBoundary>
         {cs && parameters &&
-          (cs.chartComponent.prototype instanceof React.Component ?
-            React.createElement(cs.chartComponent as React.ComponentClass<ChartClient.ChartComponentProps>, {
-              data: p.data,
-              loading: p.loading,
-              onDrillDown: handleDrillDown,
-              parameters: parameters
-            }) :
-            <ReactChart data={p.data}
+          <ReactChart
+              chartRequest={p.chartRequest}
+              data={p.data}
               loading={p.loading}
               onDrillDown={handleDrillDown}
               parameters={parameters}
-              onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />)
+              onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
         }
       </ErrorBoundary>
     </FullscreenComponent>

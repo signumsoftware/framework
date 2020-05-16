@@ -19,7 +19,7 @@ namespace Signum.Engine.Chart
     {
         public static Dictionary<ChartScriptSymbol, ChartScript> Scripts = new Dictionary<ChartScriptSymbol, ChartScript>();
 
-        internal static void Start(SchemaBuilder sb)
+        internal static void Start(SchemaBuilder sb, bool googleMapsChartScripts)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -50,11 +50,14 @@ namespace Signum.Engine.Chart
                 RegisterScript(new PunchcardChartScript());
                 RegisterScript(new CalendarStreamChartScript());
                 RegisterScript(new TreeMapChartScript());
-
-                RegisterScript(new HeatmapChartScript());
-                RegisterScript(new MarkermapChartScript());
-
                 RegisterScript(new PivotTableScript());
+
+                if (googleMapsChartScripts)
+                {
+                    RegisterScript(new HeatmapChartScript());
+                    RegisterScript(new MarkermapChartScript());
+                }
+
             }
         }
 

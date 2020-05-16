@@ -10,8 +10,10 @@ import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
 import { useThrottle, useSize, useAPI } from '@framework/Hooks';
+import { ChartRequestModel } from '../../Signum.Entities.Chart';
 
 export interface ReactChartProps {
+  chartRequest: ChartRequestModel,
   data?: ChartClient.ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
@@ -33,6 +35,7 @@ export default function ReactChart(p: ReactChartProps) {
     <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={setContainer} >
       {size &&
         p.onRenderChart({
+          chartRequest: p.chartRequest,
           data: p.data,
           parameters: p.parameters,
           loading: p.loading,
