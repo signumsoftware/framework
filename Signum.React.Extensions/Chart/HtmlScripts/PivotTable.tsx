@@ -8,6 +8,7 @@ import { Dic } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumbroFormat } from '@framework/Reflection';
 import './PivotTable.css'
+import { Color } from '../../Basics/Color';
 
 type GroupOrRows = RowGroup | ChartRow[];
 
@@ -179,8 +180,11 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const link = p.gor == null ? null : <a href="#" onClick={e => handleClick(e)}>{numbro(val).format(numbroFormat)}</a>;
 
+    var color = p.style && p.style.background && p.style.background(val);
+
     const style: React.CSSProperties | undefined = p.style && {
-      backgroundColor: p.style.background && p.style.background(val),
+      backgroundColor: color,
+      color: color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()) : undefined,
       textAlign: p.style.textAlign as TextAlignProperty,
       verticalAlign: p.style.verticalAlign as VerticalAlignProperty<string | number>,
     };
@@ -205,7 +209,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (keys == null)
       return [undefined];
 
-    var keys = orderKeys(keys, style.order!, col, group);
+    keys = orderKeys(keys, style.order!, col, group);
 
     return keys.map(val => ({ value: val, groupOrRows: group && group[col.getKey(val)]?.groupOrRows }));
   }

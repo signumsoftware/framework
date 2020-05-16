@@ -22,7 +22,7 @@ namespace Signum.Engine.Chart.Scripts
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
-                CreateBlock("Complete Axis", "Complete ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes|Consisten|FromFilters"), includeValues: false),
+                CreateBlock("Complete Axis", "Complete ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes|Consistent|FromFilters"), includeValues: false),
                 CreateBlock("Order Axis", "Order ", ChartParameterType.Enum, EnumValueList.Parse("None|Ascending|AscendingKey|AscendingToStr|AscendingSumValues|Descending|DescendingKey|DescendingToStr|DescendingSumValues"), includeValues: false),
                 CreateBlock("Color Gradiends", "Gradient ", ChartParameterType.Enum, EnumValueList.Parse("None|YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn"), includeValues: true),
                 CreateBlock("Color Scale", "Scale ", ChartParameterType.Enum, EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log"), includeValues: true),
