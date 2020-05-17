@@ -16,7 +16,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartLogic
     {
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, bool googleMapsChartScripts)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -25,7 +25,7 @@ namespace Signum.Engine.Chart
                 PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
 
                 ChartColorLogic.Start(sb);
-                ChartScriptLogic.Start(sb);
+                ChartScriptLogic.Start(sb, googleMapsChartScripts);
                 UserChartLogic.Start(sb);
             }
         }

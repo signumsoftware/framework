@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -61,7 +61,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   var x = scaleFor(valueColumn0, allValues, 0, xRule.size('content'), parameters["Scale"]);
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest,  ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var y = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

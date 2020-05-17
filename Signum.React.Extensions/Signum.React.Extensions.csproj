@@ -85,6 +85,7 @@
     <None Remove="Authorization\Templates\DoublePassword.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
     <None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
+    <None Remove="Chart\HtmlScripts\PivotTable.tsx" />
     <None Remove="Dashboard\View\UserTreePart.tsx" />
     <None Remove="Files\ImageModal.tsx" />
     <None Remove="Files\MultiFileImageLine.tsx" />

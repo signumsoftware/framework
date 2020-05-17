@@ -6,11 +6,11 @@ import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function HeatmapChart(p: ChartClient.ChartComponentProps) {
+export default function renderHeatmapChart(p: ChartClient.ChartScriptProps) {
   return <HeatmapChartImp {...p} />
 }
 
-function HeatmapChartImp({ data, parameters }: ChartClient.ChartComponentProps) {
+function HeatmapChartImp({ data, parameters }: ChartClient.ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
