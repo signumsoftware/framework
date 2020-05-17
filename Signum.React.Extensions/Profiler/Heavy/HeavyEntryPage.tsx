@@ -30,12 +30,12 @@ export default function HeavyEntry(p: HeavyEntryProps) {
   useTitle("Heavy Profiler > Entry " + index);
 
   if (entries == undefined)
-    return <h3 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index} (loading...) </h3>;
+    return <h3 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index} (loading...) </h3>;
 
   let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
   return (
     <div>
-      <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+      <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
       <label><input type="checkbox" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}

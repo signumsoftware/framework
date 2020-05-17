@@ -39,22 +39,22 @@ export function toHtml(txt: string  | null) {
   var txt2 = txt.replace(helpLinkRegex, (match: any, letter: string, link: string) => {
     switch (letter) {
       case 't': {
-        var ti = getTypeInfo(link);
+        const ti = getTypeInfo(link);
         return markdownLink(Urls.typeUrl(link), ti?.niceName ?? link);
       }
       case 'a': return markdownLink(Urls.appendixUrl(link), link);
       case 'n': return markdownLink(Urls.namespaceUrl(link), link);
       case 'o': {
-        var ti = getAllTypes().firstOrNull(ti => ti.kind == "Entity" && ti.operations != null && ti.operations[link] != null);
+        const ti = getAllTypes().firstOrNull(ti => ti.kind == "Entity" && ti.operations != null && ti.operations[link] != null);
         return markdownLink(ti && Urls.operationUrl(ti.name, link), link);
       }
       case 'q': {
-        var ti = getTypeInfo(link);
+        const ti = getTypeInfo(link);
         return markdownLink(ti && Urls.queryUrl(ti.name, link), link);
       }
       case 'p': {
-        var type = link.tryBefore(".");
-        var ti = type ? getTypeInfo(type) : null;
+        const type = link.tryBefore(".");
+        const ti = type ? getTypeInfo(type) : null;
         return markdownLink(ti && Urls.propertyUrl(ti.name, link.after(".")), link);
       }
       default: throw new Error("Not expected " + letter);

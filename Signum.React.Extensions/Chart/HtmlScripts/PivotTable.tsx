@@ -184,7 +184,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const style: React.CSSProperties | undefined = p.style && {
       backgroundColor: color,
-      color: color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()) : undefined,
+      color: color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()).toString() : undefined,
       textAlign: p.style.textAlign as TextAlignProperty,
       verticalAlign: p.style.verticalAlign as VerticalAlignProperty<string | number>,
     };

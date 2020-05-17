@@ -254,7 +254,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           </title>
           </g>
         )}
-      </g>>
+      </g>
       <XAxis xRule={xRule} yRule={yRule} />
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>
