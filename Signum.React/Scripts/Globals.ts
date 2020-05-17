@@ -24,7 +24,9 @@ declare global {
 
   interface Array<T> {
     groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
+    groupBy<K extends string | number, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
+    groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
 
@@ -138,9 +140,9 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number): { key: any /*string*/; elements: any[] }[] {
+Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number, elementSelector?: (element: any) => unknown): { key: any /*string*/; elements: any[] }[] {
   const result: { key: string | number; elements: any[] }[] = [];
-  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string));
+  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string), elementSelector!);
   for (const prop in objectGrouped) {
     if (objectGrouped.hasOwnProperty(prop))
       result.push({ key: prop, elements: objectGrouped[prop] });
@@ -148,7 +150,7 @@ Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => 
   return result;
 };
 
-Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): { [key: string]: any[] } {
   const result: { [key: string]: any[] } = {};
 
   for (let i = 0; i < this.length; i++) {
@@ -156,7 +158,7 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
     const key = keySelector(element);
     if (!result[key])
       result[key] = [];
-    result[key].push(element);
+    result[key].push(elementSelector ? elementSelector(element) : element);
   }
   return result;
 };
