@@ -35,7 +35,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
               <span style={{ fontWeight: ctx.value.attachments.length > 0 ? "bold" : undefined }}>
                 {ctx.niceName(a => a.attachments)}
               </span>}>
-              <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} avoidFieldSet onChange={forceUpdate} />
+              <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} avoidFieldSet={true} onChange={() => forceUpdate()} />
             </Tab>
             <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
               {ctx.niceName(a => a.query)}

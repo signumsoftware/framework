@@ -5,6 +5,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
+using Signum.Entities.Isolation;
 using Signum.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +80,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine($"        {{");
 
             if (this.Entities != null && this.Entities.Count > 0)
-                this.Entities.ForEach(m => sb.AppendLine($"IsolationLogic.Register<{m.TypeName}Entity>(IsolationStrategy.{m.Mixin<DynamicIsolationMixin>().IsolationStrategy});".Indent(12)));
+                this.Entities.ForEach(m => sb.AppendLine($"IsolationLogic.Register<{m.TypeName}Entity>(IsolationStrategy.{m.TryMixin<DynamicIsolationMixin>()?.IsolationStrategy ?? IsolationStrategy.None});".Indent(12)));
 
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");
