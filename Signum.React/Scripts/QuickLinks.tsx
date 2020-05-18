@@ -99,7 +99,7 @@ function asPromiseArray<T>(value: Seq<T> | Promise<Seq<T>>): Promise<T[]> {
   if (!value)
     return Promise.resolve([] as T[]);
 
-  if ((value as Promise<Seq<T>>).then)
+  if ((value as Promise<Seq<T>>).then != undefined)
     return (value as Promise<Seq<T>>).then(a => asArray(a));
 
   return Promise.resolve(asArray(value as Seq<T>))
