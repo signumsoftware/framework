@@ -80,7 +80,7 @@ export function toMomentFormat(format: string | undefined): string | undefined {
 
   if (!format)
     return undefined;
-
+  
   switch (format) {
     case "d": return "L"; // or "l"
     case "D": return "LL";
@@ -105,8 +105,8 @@ export function toMomentFormat(format: string | undefined): string | undefined {
       .replaceAll("dddd", "ßßßß")
       .replaceAll("ddd", "ßßß")
       .replaceAll("d", "D") //replace only d -> D and dd -> DD
-      .replaceAll("ßßß", "ddd")
-      .replaceAll("ßßßß", "dddd");
+      .replaceAll("ßßßß", "dddd")
+      .replaceAll("ßßß", "ddd");
   }
 }
 
