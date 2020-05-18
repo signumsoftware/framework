@@ -55,13 +55,13 @@ namespace Signum.Entities.Chart
         {
             return new XElement("Parameter",
                 new XAttribute("Name", this.Name),
-                new XAttribute("Value", this.Value));
+                new XAttribute("Value", this.Value ?? ""));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
             Name = x.Attribute("Name").Value;
-            Value = x.Attribute("Value").Value;
+            Value = x.Attribute("Value").Value?.DefaultText(null);
         }
 
         public override string ToString()
