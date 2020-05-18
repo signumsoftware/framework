@@ -428,8 +428,18 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 
 export function reloadTypes(): Promise<void> {
   return ajaxGet<TypeInfoDictionary>({ url: "~/api/reflection/types" })
-    .then(types => setTypes(types));
+    .then(types => {
+      setTypes(types);
+      onReloadTypes();
+    });
 }
+
+export const onReloadTypesActions: Array<() => void> = [];
+
+export function onReloadTypes() {
+  onReloadTypesActions.forEach(a => a());
+}
+
 
 export function setTypes(types: TypeInfoDictionary) {
 

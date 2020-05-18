@@ -5,6 +5,7 @@ import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTy
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
+import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
 import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
@@ -20,7 +21,7 @@ export function start() {
   onWidgets.push(getQuickLinkWidget);
   onContextualItems.push(getQuickLinkContextMenus);
 
-  Navigator.clearSettingsActions.push(clearQuickLinks);
+  AppContext.clearSettingsActions.push(clearQuickLinks);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -323,7 +324,7 @@ export class QuickLinkLink extends QuickLink {
 
 
   handleClick = (e: React.MouseEvent<any>) => {
-    Navigator.pushOrOpenInTab(this.url, e);
+    AppContext.pushOrOpenInTab(this.url, e);
   }
 }
 

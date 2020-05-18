@@ -373,7 +373,7 @@ namespace Signum.Engine.Linq
         {
             if (a.NodeType != b.NodeType)
                 return false;
-            switch ((DbExpressionType)a.NodeType)
+            switch (a.DbNodeType)
             {
                 case DbExpressionType.Scalar:
                     return CompareScalar((ScalarExpression)a, (ScalarExpression)b);

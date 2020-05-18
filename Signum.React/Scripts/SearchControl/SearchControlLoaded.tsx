@@ -10,6 +10,7 @@ import {
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
+import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
@@ -550,7 +551,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         order: -5,
         button: <button
           className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
-          style={!s.showFilters && p.findOptions.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid black" } : undefined}
+          style={!s.showFilters && p.findOptions.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid #6c757d" } : undefined}
           onClick={this.handleToggleFilters}
           title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
           <FontAwesomeIcon icon="filter" />
@@ -663,7 +664,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           if (this.props.navigate == "InPlace") {
 
             var vp = getViewPromise && getViewPromise(null);
-            Navigator.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+            AppContext.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
 
           } else {
 
@@ -693,7 +694,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
       window.open(path);
     else
-      Navigator.history.push(path);
+      AppContext.history.push(path);
   };
 
   createTitle() {
@@ -1202,7 +1203,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       else {
         if (this.props.navigate == "InPlace") {
           var vp = getViewPromise && getViewPromise(null);
-          Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+          AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
         } else {
           Navigator.navigate(lite, { getViewPromise: getViewPromise })
             .then(() => {

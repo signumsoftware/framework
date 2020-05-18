@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
+import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -13,10 +14,11 @@ import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted } from '../Hooks'
 import * as Operations from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
+import { useTitle } from '../AppContext'
+import { FunctionalAdapter } from '../Modals'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -111,9 +113,9 @@ export default function FramePage(p: FramePageProps) {
 
   function onClose() {
     if (Finder.isFindable(p.match.params.type, true))
-      Navigator.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
+      AppContext.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
     else
-      Navigator.history.push("~/");
+      AppContext.history.push("~/");
   }
 
   function setComponent(c: React.Component | null) {
@@ -144,7 +146,7 @@ export default function FramePage(p: FramePageProps) {
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
       if (packEntity.entity.id != null && entity.id == null)
-        Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
+        AppContext.history.push(Navigator.navigateRoute(packEntity.entity));
       else {
         if (reloadComponent) {
           setState(undefined)

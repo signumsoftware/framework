@@ -1,8 +1,9 @@
 
 import * as React from 'react'
-import { openModal, IModalProps, IHandleKeyboard } from '../Modals'
+import { openModal, IModalProps, IHandleKeyboard, FunctionalAdapter } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
+import * as AppContext from '../AppContext';
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
@@ -343,59 +344,7 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
 
     var entity = pack!.entity;
     var vp = getViewPromise && getViewPromise(entity);
-    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
+    AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
 }
 
-
-
-export class FunctionalAdapter extends React.Component {
-
-  innerRef?: any | null;
-
-  render() {
-    var only = React.Children.only(this.props.children);
-    if (!React.isValidElement(only))
-      throw new Error("Not a valid react element: " + only);
-
-    if (isForwardRef(only.type)) {
-      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } });
-    }
-
-    return this.props.children;
-  }
-
-  static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
-    var type = element.type as React.ComponentClass | React.FunctionComponent | string;
-    if (typeof type == "string" || type.prototype?.render) {
-      return React.cloneElement(element, { ref: ref });
-    } else {
-      return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
-    }
-  }
-
-  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType) {
-
-    if (component instanceof type)
-      return true;
-
-    if (component instanceof FunctionalAdapter) {
-      var only = React.Children.only(component.props.children);
-      return React.isValidElement(only) && only.type == type;
-    }
-
-    return false
-  }
-
-  static innerRef(component: React.Component | null | undefined) {
-
-    if (component instanceof FunctionalAdapter) {
-      return component.innerRef;
-    }
-    return component;
-  }
-}
-
-function isForwardRef(type: any) {
-  return type.$$typeof == Symbol.for("react.forward_ref");
-}

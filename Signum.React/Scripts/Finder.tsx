@@ -2,6 +2,7 @@ import * as React from "react";
 import * as moment from "moment"
 import numbro from "numbro"
 import * as QueryString from "query-string"
+import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
@@ -22,7 +23,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -31,20 +32,25 @@ import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import { ButtonBarElement } from "./TypeContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EntityBaseController } from "./Lines";
-import { string } from "prop-types";
+import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { APIHookOptions, useAPI } from "./Hooks";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function clearQuerySettings() {
   Dic.clear(querySettings);
-  clearQueryDescriptionCache();
 }
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => Options.getSearchPage()} />);
+  AppContext.clearSettingsActions.push(clearContextualItems);
+  AppContext.clearSettingsActions.push(clearQuerySettings);
+  AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
+  AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
+
+  onReloadTypesActions.push(clearQueryDescriptionCache);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -196,7 +202,7 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
 
-  return Navigator.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
+  return AppContext.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -414,7 +420,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
     if (!mi)
       return null;
 
-    const promise = Navigator.tryConvert(fo.value, mi.type);
+    const promise = tryConvert(fo.value, mi.type);
 
     if (promise == null)
       return null;
@@ -423,6 +429,56 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
   }).filter(p => !!p)).then(() => result);
 }
+
+export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
+
+  if (value == null)
+    return Promise.resolve(null);
+
+  if (type.isLite) {
+
+    if (isLite(value))
+      return Promise.resolve(value);
+
+    if (isEntity(value))
+      return Promise.resolve(toLite(value));
+
+    return undefined;
+  }
+
+  const ti = tryGetTypeInfo(type.name);
+
+  if (ti?.kind == "Entity") {
+
+    if (isLite(value))
+      return Navigator.API.fetchAndForget(value);
+
+    if (isEntity(value))
+      return Promise.resolve(value);
+
+    return undefined;
+  }
+
+  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
+    if (typeof value === "string")
+      return Promise.resolve(value);
+
+    return undefined;
+  }
+
+  if (type.name == "boolean") {
+    if (typeof value === "boolean")
+      return Promise.resolve(value);
+  }
+
+  if (type.name == "number") {
+    if (typeof value === "number")
+      return Promise.resolve(value);
+  }
+
+  return undefined;
+}
+
 
 export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | undefined): Promise<any> {
   if (fo == null)
@@ -1064,7 +1120,7 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
   throw new Error(`Impossible to convert ${val} to Lite`);
 }
 
-export function clearQueryDescriptionCache() {
+function clearQueryDescriptionCache() {
   queryDescriptionCache = {};
   TokenCompleter.globalCache = {};
 }
@@ -1098,8 +1154,35 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(rt => rt.rows[0].columns[0]);
 }
 
-
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
+
+export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
+  return useAPI(signal =>
+    fo == null ? Promise.resolve<ResultTable | null>(null) :
+      getQueryDescription(fo.queryName)
+        .then(qd => parseFindOptions(fo!, qd, false))
+        .then(fop => API.executeQuery(getQueryRequest(fop), signal)),
+    [fo && findOptionsPath(fo), ...(additionalDeps || [])],
+    options);
+}
+
+export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R> | null | undefined {
+  var resultTable = useQuery(entity == null ? null : {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "Replace",
+  }, additionalDeps, options);
+
+  if (entity == null)
+    return null;
+
+  if (resultTable == null)
+    return undefined;
+
+  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
+}
 
 export module API {
 
@@ -1117,7 +1200,7 @@ export module API {
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
-    const queryUrl = Navigator.history.location.pathname + Navigator.history.location.search;
+    const queryUrl = AppContext.history.location.pathname + AppContext.history.location.search;
     const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl};
     return ajaxPost({ url: "~/api/query/executeQuery", signal }, qr);
   }

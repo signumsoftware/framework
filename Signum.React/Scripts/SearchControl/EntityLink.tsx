@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Lite, Entity, liteKey, ModifiableEntity, getToString } from '../Signum.Entities';
+import * as AppContext from '../AppContext';
 import * as Navigator from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
@@ -51,7 +52,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
     if (p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      Navigator.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
     } else {
       Navigator.navigate(lite, { getViewPromise: p.getViewPromise }).then(() => {
         p.onNavigated && p.onNavigated(lite);
