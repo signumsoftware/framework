@@ -165,7 +165,7 @@ ${childrenString}
       remove: node.remove,
       onRemove: node.onRemove,
       find: node.find,
-      ...(findMany ? { onFindMany: (node as EntityListBaseNode).onFindMany } : { onFind: node.onFind }),
+      ...(options.findMany ? { onFindMany: (node as EntityListBaseNode).onFindMany } : { onFind: node.onFind }),
       view: node.view,
       onView: node.onView,
       viewOnCreate: node.viewOnCreate,

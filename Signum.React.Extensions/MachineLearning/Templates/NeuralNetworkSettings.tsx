@@ -144,7 +144,7 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
           <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={handleLearnerChange} helpText={getHelpBlock(ctx.value.learner)} />
           <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
           <ValueLine ctx={ctx6.subCtx(a => a.learningMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />
-          {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br />false diverge (Loss >> 1)</p>)}
+          {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br />false diverge (Loss {">>"} 1)</p>)}
           <ValueLine ctx={ctx6.subCtx(a => a.learningVarianceMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD", "MomentumSGD")} />
         </div>
         <div className="col-sm-6">
