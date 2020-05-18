@@ -142,11 +142,14 @@ export function ChartColumn(p: ChartColumnProps) {
         <td colSpan={1}>
           <div>
             <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={ctxBasic.subCtx(a => a.displayName)} valueHtmlAttributes={{ onBlur: p.onRedraw }} />
+              <div className="col-sm-3">
+                <ValueLine ctx={ctxBasic.subCtx(a => a.displayName)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.niceName }} />
+              </div>
+              <div className="col-sm-3">
+                <ValueLine ctx={ctxBasic.subCtx(a => a.format)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.format }} />
               </div>
               {getColorPalettes().map((t, i) =>
-                <div className="col-sm-4" key={i}>
+                <div className="col-sm-3" key={i}>
                   {t && <ChartPaletteLink ctx={ctxBasic} type={t} currentPalettes={p.colorPalettes} refresh={forceUpdate} />}
                 </div>)
               }

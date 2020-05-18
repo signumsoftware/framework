@@ -47,6 +47,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   function handleTokenChange(cc: ChartColumnEmbedded) {
     cc.displayName = null!;
+    cc.format = null!;
     cc.modified = true;
     forceUpdate();
     p.onTokenChange();

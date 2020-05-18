@@ -101,6 +101,7 @@ export module Converter {
           rowId: null,
           element: ChartColumnEmbedded.New({
             displayName: mle.element.displayName,
+            format: mle.element.format,
 
             token: t && QueryTokenEmbedded.New({
               token: UserAssetsClient.getToken(t),
