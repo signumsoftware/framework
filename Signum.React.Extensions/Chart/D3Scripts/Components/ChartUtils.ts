@@ -108,6 +108,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     chartRequest.filterOptions.filter(f => !isFilterGroupOptionParsed(f) && f.token && f.token.fullKey == column.token!.fullKey) as FilterConditionOptionParsed[] :
     [];
 
+  if (completeValues == "FromFilters" && filters.length == 0)
+    return values;
 
   const isAuto = completeValues == "Auto";
 
@@ -130,7 +132,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
             lastPart == "Date" ? "d" :
               lastPart == "WeekStart" ? "w" :
                 lastPart == "MonthStart" ? "M" :
-                  null;
+                  column.type == "Date" ? "d" :
+                    null;
 
     if (unit == null)
       return values;
