@@ -402,7 +402,11 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
   return Promise.all(filterOptionsParsed.map(fo => {
 
-    if (isFilterGroupOptionParsed(fo) || fo.token == null || fo.operation != "EqualTo")
+    if (isFilterGroupOptionParsed(fo) ||
+      fo.token == null ||
+      fo.operation != "EqualTo" ||
+      fo.pinned && fo.pinned.active == "Checkbox_StartUnchecked" ||
+      fo.pinned && fo.pinned.active == "WhenHasValue" && fo.value == null)
       return null;
 
     const mi = getMemberForToken(ti, fo.token!.fullKey);
