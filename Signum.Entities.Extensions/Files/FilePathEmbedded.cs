@@ -63,8 +63,7 @@ namespace Signum.Entities.Files
             }
         }
 
-        [NotNullValidator(DisabledInModelBinder = true)]
-        public string Hash { get; private set; }
+        public string? Hash { get; private set; }
 
         public int FileLength { get; internal set; }
 
