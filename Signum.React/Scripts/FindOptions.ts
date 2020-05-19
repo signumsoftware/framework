@@ -102,6 +102,16 @@ export interface PinnedFilterParsed {
   splitText?: boolean;
 }
 
+export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
+  return {
+    label: typeof pf.label == "function" ? pf.label() : pf.label,
+    row: pf.row,
+    column: pf.column,
+    active: pf.active,
+    splitText: pf.splitText
+  };
+}
+
 export interface FilterGroupOptionParsed {
   groupOperation: FilterGroupOperation;
   frozen: boolean;

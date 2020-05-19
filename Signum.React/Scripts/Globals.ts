@@ -745,6 +745,10 @@ export function isNumber(n: any): boolean {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+export function softCast<T>(val: T): T {
+  return val;
+}
+
 
 String.prototype.replaceAll = function (this: string, from: string, to: string) {
   return this.split(from).join(to)
