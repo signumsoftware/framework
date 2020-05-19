@@ -83,7 +83,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
               fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
               r={pointSize}
-              onClick={e => onDrillDown(r)}
+              onClick={e => onDrillDown(r, e)}
               cursor="pointer">
               <title>
                 {colorKeyColumn.getValueNiceName(r) +
@@ -126,7 +126,7 @@ class CanvasScatterplot extends React.Component<{
   verticalColumn: ChartClient.ChartColumn<number>,
   pointSize: number,
   data: ChartClient.ChartTable,
-  onDrillDown: (e: ChartRow) => void,
+  onDrillDown: (r: ChartRow, e: MouseEvent) => void,
   color: (val: ChartRow) => string,
   x: d3.ScaleContinuousNumeric<number, number>,
   y: d3.ScaleContinuousNumeric<number, number>,
@@ -198,7 +198,7 @@ class CanvasScatterplot extends React.Component<{
       const color = d3.rgb.apply(null, imageData.data).toString();
       const p = colorToData[color];
       if (p) {
-        onDrillDown(p);
+        onDrillDown(p, e);
       }
     });
   }

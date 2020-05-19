@@ -237,7 +237,10 @@ namespace Signum.Entities.Chart
         Preview,
         TypeNotFound,
         [Description("Type {0} is not in the database")]
-        Type0NotFoundInTheDatabase
+        Type0NotFoundInTheDatabase,
+        Reload,
+        Maximize,
+        Minimize,
     }
 
 }

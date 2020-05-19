@@ -92,6 +92,9 @@ export module ChartMessage {
   export const Preview = new MessageKey("ChartMessage", "Preview");
   export const TypeNotFound = new MessageKey("ChartMessage", "TypeNotFound");
   export const Type0NotFoundInTheDatabase = new MessageKey("ChartMessage", "Type0NotFoundInTheDatabase");
+  export const Reload = new MessageKey("ChartMessage", "Reload");
+  export const Maximize = new MessageKey("ChartMessage", "Maximize");
+  export const Minimize = new MessageKey("ChartMessage", "Minimize");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");

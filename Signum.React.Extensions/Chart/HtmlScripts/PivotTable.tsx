@@ -174,7 +174,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       e.preventDefault();
       onDrillDown({
         ...p.filters.toObject(a => a.col.name, a => a.val),
-      });
+      }, e);
     }
 
     const val = sumValue(p.gor);

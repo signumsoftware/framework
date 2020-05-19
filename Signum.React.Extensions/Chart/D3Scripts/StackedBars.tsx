@@ -112,7 +112,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             fill={colorByKey[s.key] ?? color(s.key)}
             height={y.bandwidth()}
             width={x(r[1]) - x(r[0])}
-            onClick={e => onDrillDown(r.data.values[s.key].rowClick)}
+            onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.data.values[s.key].valueTitle}

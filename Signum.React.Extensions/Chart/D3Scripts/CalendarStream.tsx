@@ -130,7 +130,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
               x={(horizontal ? week(d) : day(d)) * cellSize}
               y={(horizontal ? (6 - day(d)) : week(d)) * cellSize}
               cursor="pointer"
-              onClick={e => r == undefined ? null : onDrillDown(r)}>
+              onClick={e => r == undefined ? null : onDrillDown(r, e)}>
               <title>
                 {format(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
               </title>

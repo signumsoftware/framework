@@ -95,7 +95,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
               transform={translate(0, -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
               height={ySubscale.bandwidth()}
               width={x(r.values[s.key] && r.values[s.key].value)}
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
                 {r.values[s.key].valueTitle}
