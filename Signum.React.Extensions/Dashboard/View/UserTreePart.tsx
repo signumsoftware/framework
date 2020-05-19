@@ -26,16 +26,15 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  const ti = getTypeInfo(p.part.userQuery.entityType?.toStr!);
   const filterOptions = fo.filterOptions!;
-
+  const key = p.part.userQuery.query.key;
   return (
     <TreeViewer ref={treeViewRef}
       initialShowFilters={false}
-      typeName={ti.name}
-      allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) !== null}
+      typeName={key}
+      allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, key) !== null}
       filterOptions={filterOptions}
-      key={ti.name}
+      key={key}
       //onSearch={() => changeUrl()}
     />
   );
