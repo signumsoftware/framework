@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { TextAlignProperty, VerticalAlignProperty } from 'csstype'
 import numbro from 'numbro'
+import * as Navigator from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
@@ -9,6 +10,7 @@ import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumbroFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
+import { isLite, Lite, Entity } from '@framework/Signum.Entities';
 
 type GroupOrRows = RowGroup | ChartRow[];
 
@@ -164,13 +166,14 @@ export default function renderPivotTable({ data, width, height, parameters, load
       gor: GroupOrRows | undefined,
       filters: { col: ChartColumn<unknown>, val: unknown }[],
       title?: string,
+      lite: any, 
       style: CellStyle | undefined,
       colSpan?: number;
       rowSpan?: number;
     }
   ) {
 
-    function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    function handleMumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
       e.preventDefault();
       onDrillDown({
         ...p.filters.toObject(a => a.col.name, a => a.val),
@@ -179,7 +182,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleClick(e)}>{numbro(val).format(numbroFormat)}</a>;
+    const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbro(val).format(numbroFormat)}</a>;
 
     var color = p.style && p.style.background && p.style.background(val);
 
@@ -194,11 +197,20 @@ export default function renderPivotTable({ data, width, height, parameters, load
       return <td style={style}>{link}</td>;
     }
 
+    function handleLiteClick(e: React.MouseEvent) {
+      e.preventDefault();
+      Navigator.navigate(p.lite as Lite<Entity>).done();
+    }
+
+    var title = isLite(p.lite) ?
+      <a href="#" onClick={handleLiteClick} title={p.title}>{p.title.etc(100)}</a> : 
+      <span title={p.title}>{p.title.etc(100)}</span>
+
     return (
-      <th style={style} colSpan={p.colSpan} rowSpan={p.rowSpan}>{
-        link ? <span title={p.title}>{p.title} ({link})</span> :
-          <span title={p.title}>{p.title}</span>
-      }</th>
+      <th style={style} colSpan={p.colSpan} rowSpan={p.rowSpan}>
+        {title}
+        {link && <span> ({link})</span>}
+      </th>
     );
   }
 
@@ -236,10 +248,10 @@ export default function renderPivotTable({ data, width, height, parameters, load
         <thead>
           <tr>
             <td scope="col" colSpan={Math.max(1, vertCols.length)} rowSpan={Math.max(1, horCols.length)} style={{ border: "0px" }}></td>
-            {horCols.length == 0 ? <Cell gor={horizontalGroups} filters={[]} title={valueColumn.displayName} style={undefined} /> :
+            {horCols.length == 0 ? <Cell gor={horizontalGroups} filters={[]} title={valueColumn.displayName} lite={undefined} style={undefined} /> :
               getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 =>
                 grh0 && <Cell key={horCols[0].getKey(grh0.value)} colSpan={span(grh0.groupOrRows, horStyles, 0)} style={horStyles[0]}
-                  gor={grh0.groupOrRows} title={horCols[0].getNiceName(grh0.value)} filters={[{ col: horCols[0], val: grh0.value }]} />
+                  gor={grh0.groupOrRows} title={horCols[0].getNiceName(grh0.value)} lite={grh0.value} filters={[{ col: horCols[0], val: grh0.value }]} />
               )
             }
           </tr>
@@ -249,7 +261,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
                 <React.Fragment key={horCols[0].getKey(grh0!.value)} >
                   {getValues(grh0!.groupOrRows as RowGroup, horStyles[1]).map(grh1 =>
                     grh1 && <Cell key={horCols[1].getKey(grh1.value)} colSpan={span(grh1.groupOrRows, horStyles, 1)} style={horStyles[1]}
-                      gor={grh1.groupOrRows} title={horCols[1].getNiceName(grh1.value)} filters={[
+                      gor={grh1.groupOrRows} title={horCols[1].getNiceName(grh1.value)} lite={grh1.value} filters={[
                         { col: horCols[0], val: grh0!.value },
                         { col: horCols[1], val: grh1.value }]} />
                   )}
@@ -265,7 +277,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
                     <React.Fragment key={horCols[1].getKey(grh1?.value)}>
                       {getValues(grh1?.groupOrRows as RowGroup, horStyles[2]).map(grh2 =>
                         <Cell key={horCols[2].getKey(grh2?.value)} colSpan={span(grh2?.groupOrRows, horStyles, 2)} style={horStyles[2]}
-                          gor={grh2?.groupOrRows} title={grh2 == null ? "": horCols[2].getNiceName(grh2.value)} filters={ grh2 == null ? [] : [
+                          gor={grh2?.groupOrRows} title={grh2 == null ? "" : horCols[2].getNiceName(grh2.value)} lite={grh2?.value} filters={ grh2 == null ? [] : [
                             { col: horCols[0], val: grh0!.value },
                             { col: horCols[1], val: grh1!.value },
                             { col: horCols[2], val: grh2!.value }]} />
@@ -282,14 +294,14 @@ export default function renderPivotTable({ data, width, height, parameters, load
           {vertCols.length == 0 ?
             <tr>
               <Cell style={undefined}
-                gor={verticalGroups} title={valueColumn.displayName} filters={[]} />
+                gor={verticalGroups} title={valueColumn.displayName} lite={null} filters={[]} />
               {cells(verticalGroups as ChartRow[], [])}
             </tr> :
             vertCols.length == 1 ?
               getValues(verticalGroups as RowGroup, vertStyles[0]).map((grv0, i) =>
                 <tr key={vertCols[0].getKey(grv0!.value)}>
                   <Cell style={vertStyles[0]}
-                    gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} filters={[{ col: vertCols[0], val: grv0!.value }]} />
+                    gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[{ col: vertCols[0], val: grv0!.value }]} />
                   {cells(grv0!.groupOrRows as ChartRow[], [{ col: vertCols[0], val: grv0!.value }])}
                 </tr>
               ) :
@@ -300,12 +312,12 @@ export default function renderPivotTable({ data, width, height, parameters, load
                       <tr key={vertCols[1].getKey(grv1?.value)}>
                         {j == 0 &&
                           <Cell style={vertStyles[0]} rowSpan={span(grv0!.groupOrRows, vertStyles, 0)}
-                            gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} filters={[
+                          gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
                               { col: vertCols[0], val: grv0!.value }
                             ]} />
                         }
                         <Cell style={vertStyles[1]}
-                          gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} filters={grv1 == null ? [] : [
+                          gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} lite={grv1?.value} filters={grv1 == null ? [] : [
                             { col: vertCols[0], val: grv0!.value },
                             { col: vertCols[1], val: grv1!.value }
                           ]} />
@@ -325,20 +337,20 @@ export default function renderPivotTable({ data, width, height, parameters, load
                             <tr key={vertCols[2].getKey(grv2?.value)}>
                               {j == 0 && k == 0 &&
                                 <Cell style={vertStyles[0]} rowSpan={span(grv0!.groupOrRows, vertStyles, 0)}
-                                  gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} filters={[
+                                gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
                                     { col: vertCols[0], val: grv0!.value }
                                   ]} />
                               }
                               {k == 0 &&
                                 <Cell style={vertStyles[1]} rowSpan={span(grv1?.groupOrRows, vertStyles, 1)}
-                                  gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} filters={grv1 == null ? [] : [
+                                gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} lite={grv1!.value} filters={grv1 == null ? [] : [
                                     { col: vertCols[0], val: grv0!.value },
                                     { col: vertCols[1], val: grv1.value }
                                   ]} />
                               }
                               <th scope="col">
                                 <Cell style={vertStyles[2]}
-                                  gor={grv2?.groupOrRows} title={grv2 == null ? "" : vertCols[2].getNiceName(grv2.value)} filters={grv2 == null ? [] : [
+                                  gor={grv2?.groupOrRows} title={grv2 == null ? "" : vertCols[2].getNiceName(grv2.value)} lite={grv2!.value} filters={grv2 == null ? [] : [
                                     { col: vertCols[0], val: grv0!.value },
                                     { col: vertCols[1], val: grv1!.value },
                                     { col: vertCols[2], val: grv2!.value },
@@ -367,14 +379,14 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     return (
       horCols.length == 0 ?
-        <Cell gor={gor} style={valueStyle} filters={filters} /> :
+        <Cell gor={gor} style={valueStyle} filters={filters} lite={null} /> :
         horCols.length == 1 ?
           getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 => {
             const grh0key = horCols[0].getKey(grh0!.value);
             const gor0 = (gor as RowGroup)[grh0key]?.groupOrRows;
             return (
               <Cell key={grh0key} style={valueStyle}
-                gor={gor0} filters={[...filters, { col: horCols[0], val: grh0!.value }]} />
+                gor={gor0} lite={null} filters={[...filters, { col: horCols[0], val: grh0!.value }]} />
             );
           }) :
           horCols.length == 2 ?
@@ -387,7 +399,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
                     const grh1key = horCols[1].getKey(grh1?.value);
                     const gor1 = gor0 && (gor0 as RowGroup)[grh1key]?.groupOrRows
                     return (
-                      <Cell key={grh1key} style={valueStyle}
+                      <Cell key={grh1key} lite={null} style={valueStyle}
                         gor={gor1} filters={grh1 == null ? [] : [
                           ...filters,
                           { col: horCols[0], val: grh0!.value },
@@ -413,7 +425,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
                             const grh2key = horCols[2].getKey(grh2?.value);
                             const gor2 = gor1 && (gor1 as RowGroup)[grh2key]?.groupOrRows
                             return (
-                              <Cell key={grh2key} style={valueStyle}
+                              <Cell key={grh2key} style={valueStyle} lite={null}
                                 gor={gor2} filters={grh2 == null ? [] : [
                                   ...filters,
                                   { col: horCols[0], val: grh0!.value },
