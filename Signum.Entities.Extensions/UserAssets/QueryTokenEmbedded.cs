@@ -96,8 +96,11 @@ namespace Signum.Entities.UserAssets
         }
 
         public override bool Equals(object? obj) => obj is QueryTokenEmbedded qte && this.Equals(qte);
-        public bool Equals(QueryTokenEmbedded other)
+        public bool Equals(QueryTokenEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return this.GetTokenString() == other.GetTokenString();
         }
 

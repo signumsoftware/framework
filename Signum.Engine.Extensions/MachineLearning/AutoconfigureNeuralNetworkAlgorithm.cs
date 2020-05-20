@@ -49,7 +49,7 @@ namespace Signum.Engine.MachineLearning
                 var point = r.NextDouble() * total;
 
                 double acum = 0;
-                foreach (var kvp in positiveSurvivors)
+                foreach (var kvp in positiveSurvivors!)
                 {
                     acum += kvp.Value;
                     if (point < acum)

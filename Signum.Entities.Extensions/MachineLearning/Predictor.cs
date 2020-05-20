@@ -246,8 +246,11 @@ namespace Signum.Entities.MachineLearning
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
         public override bool Equals(object? obj) => obj is PredictorColumnEmbedded c && Equals(c);
-        public bool Equals(PredictorColumnEmbedded other)
+        public bool Equals(PredictorColumnEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
         }
 
@@ -401,8 +404,11 @@ namespace Signum.Entities.MachineLearning
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
         public override bool Equals(object? obj) => obj is PredictorSubQueryColumnEmbedded c && Equals(c);
-        public bool Equals(PredictorSubQueryColumnEmbedded other)
+        public bool Equals(PredictorSubQueryColumnEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
         }
 
