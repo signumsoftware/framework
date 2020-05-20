@@ -205,8 +205,11 @@ namespace Signum.Entities.Authorization
         public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
 
         public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
-        public bool Equals(TypeAllowedAndConditions other)
+        public bool Equals(TypeAllowedAndConditions? other)
         {
+            if (other == null)
+                return false;
+
             return this.fallback.Equals(other.fallback) &&
                 this.Conditions.SequenceEqual(other.Conditions);
         }
@@ -298,8 +301,11 @@ namespace Signum.Entities.Authorization
 
         public TypeAllowed Allowed { get; set; }
 
-        public bool Equals(TypeConditionRuleEmbedded other)
+        public bool Equals(TypeConditionRuleEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return TypeCondition.Equals(other.TypeCondition) &&
                 Allowed.Equals(other.Allowed);
         }
