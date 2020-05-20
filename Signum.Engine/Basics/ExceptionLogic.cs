@@ -62,17 +62,10 @@ namespace Signum.Engine.Basics
 
             entity.ExceptionType = ex.GetType().Name;
 
-            var agex = ex as AggregateException;
-            var exl = new List<Exception>();
-            if (agex != null)
-                foreach (var ex0 in agex.InnerExceptions)
-                {
-                    exl.AddRange(ex0.Follow(e => e.InnerException));
-                }
-            else
-                exl.AddRange(ex.Follow(e => e.InnerException));
+            var exceptions = ex is AggregateException agex ?
+                agex.InnerExceptions.SelectMany(inner => inner.Follow(e => e.InnerException)).ToList() :
+                ex.Follow(e => e.InnerException).ToList();
 
-            var exceptions = exl.Distinct();
             string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
             string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
 
