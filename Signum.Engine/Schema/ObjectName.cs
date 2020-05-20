@@ -43,8 +43,11 @@ namespace Signum.Engine.Maps
         }
 
         public override bool Equals(object? obj) => obj is ServerName sn && Equals(sn);
-        public bool Equals(ServerName other)
+        public bool Equals(ServerName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name;
         }
 
@@ -93,8 +96,11 @@ namespace Signum.Engine.Maps
 
 
         public override bool Equals(object? obj) => obj is DatabaseName dn && Equals(dn);
-        public bool Equals(DatabaseName other)
+        public bool Equals(DatabaseName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name && object.Equals(Server, other.Server);
         }
 
@@ -163,8 +169,12 @@ namespace Signum.Engine.Maps
         }
 
         public override bool Equals(object? obj) => obj is SchemaName sn && Equals(sn);
-        public bool Equals(SchemaName other)
+        public bool Equals(SchemaName? other)
         {
+
+            if (other == null)
+                return false;
+
             return other.Name == Name &&
                 object.Equals(Database, other.Database);
         }
@@ -218,8 +228,11 @@ namespace Signum.Engine.Maps
         }
 
         public override bool Equals(object? obj) => obj is ObjectName on && Equals(on);
-        public bool Equals(ObjectName other)
+        public bool Equals(ObjectName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name &&
                 object.Equals(Schema, other.Schema);
         }

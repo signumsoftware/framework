@@ -369,7 +369,7 @@ namespace Signum.Entities.DynamicQuery
             return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
         }
 
-        public bool Equals(QueryToken other)
+        public bool Equals(QueryToken? other)
         {
             return other != null && other.QueryName.Equals(this.QueryName) && other.FullKey() == this.FullKey();
         }

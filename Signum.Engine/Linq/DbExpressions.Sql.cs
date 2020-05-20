@@ -254,7 +254,7 @@ namespace Signum.Engine.Linq
         }
 
         public override bool Equals(object? obj) => obj is ColumnExpression ce && Equals(ce);
-        public bool Equals(ColumnExpression other)
+        public bool Equals(ColumnExpression? other)
         {
             return other != null && other.Alias == Alias && other.Name == Name;
         }
