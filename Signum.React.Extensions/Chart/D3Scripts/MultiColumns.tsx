@@ -99,7 +99,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
             )}
             width={xSubscale.bandwidth()}
             height={y(r.values[s.key].value)}
-            onClick={e => onDrillDown(r.values[s.key].rowClick)}
+            onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.values[s.key].valueTitle}

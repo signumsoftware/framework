@@ -99,7 +99,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static void EntityEventsGlobal_Retrieved(Entity ident)
+        static void EntityEventsGlobal_Retrieved(Entity ident, PostRetrievingContext ctx)
         {
             Type type = ident.GetType();
             TypeAllowedBasic access = GetAllowed(type).MaxDB();

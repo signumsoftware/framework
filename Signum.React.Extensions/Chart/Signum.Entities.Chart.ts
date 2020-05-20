@@ -39,6 +39,7 @@ export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
   token: UserAssets.QueryTokenEmbedded | null;
   displayName: string | null;
+  format: string | null;
   orderByIndex: number | null;
   orderByType: DynamicQuery.OrderType | null;
 }
@@ -91,6 +92,9 @@ export module ChartMessage {
   export const Preview = new MessageKey("ChartMessage", "Preview");
   export const TypeNotFound = new MessageKey("ChartMessage", "TypeNotFound");
   export const Type0NotFoundInTheDatabase = new MessageKey("ChartMessage", "Type0NotFoundInTheDatabase");
+  export const Reload = new MessageKey("ChartMessage", "Reload");
+  export const Maximize = new MessageKey("ChartMessage", "Maximize");
+  export const Minimize = new MessageKey("ChartMessage", "Minimize");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");

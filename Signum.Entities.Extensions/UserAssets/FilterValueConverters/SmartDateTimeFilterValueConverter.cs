@@ -9,8 +9,9 @@ namespace Signum.Entities.UserAssets
     {
         public class SmartDateTimeSpan
         {
-            const string part = @"^((\+\d+)|(-\d+)|(\d+))$";
-            static Regex partRegex = new Regex(part);
+            static Regex partRegex = new Regex(@"^((\+\d+)|(-\d+)|(\d+))$");
+            static Regex dayComplexRegex = new Regex(@"^(?<text>sun|mon|tue|wed|thu|fri|sat|max)(?<inc>[+-]\d+)?$", RegexOptions.IgnoreCase);
+
             static Regex regex = new Regex(@"^(?<year>.+)/(?<month>.+)/(?<day>.+) (?<hour>.+):(?<minute>.+):(?<second>.+)$", RegexOptions.IgnoreCase);
 
             public string Year;
@@ -58,7 +59,7 @@ namespace Signum.Entities.UserAssets
 
                 if (partRegex.IsMatch(result))
                 {
-                    if (result.StartsWith("+") || result.StartsWith("-"))
+                    if (result.Contains("+") || result.Contains("-"))
                         return null;
 
                     int val = int.Parse(result);
@@ -68,10 +69,10 @@ namespace Signum.Entities.UserAssets
                     return "{0} must be between {1} and {2}".FormatWith(groupName, minValue, maxValue);
                 }
 
-                if(groupName == "day" && string.Equals(result, "max", StringComparison.InvariantCultureIgnoreCase))
+                if (groupName == "day" && dayComplexRegex.IsMatch(result))
                     return null;
 
-                string options = new[] { defaultValue, "const", "+inc", "-dec", groupName == "day" ? "max" : null }.NotNull().Comma(" or ");
+                string options = new[] { defaultValue, "const", "+inc", "-dec", groupName == "day" ? "(max|sun|mon|tue|wed|fri|sat|)(+inc|-dec)?" : null }.NotNull().Comma(" or ");
 
                 return "'{0}' is not a valid {1}. Try {2} instead".FormatWith(result, groupName, options);
             }
@@ -83,10 +84,41 @@ namespace Signum.Entities.UserAssets
                 int year = Mix(now.Year, Year, "yyyy");
                 int month = Mix(now.Month, Month, "mm");
                 int day;
-                if (Day.ToLower() == "max")
+
+                var m = dayComplexRegex.Match(Day);
+                if (m.Success)
                 {
-                    year += MonthDivMod(ref month);
-                    day = DateTime.DaysInMonth(year, month);
+                    var text = m.Groups["text"].Value.ToLower();
+                    var inc = m.Groups["inc"].Value?.ToLower();
+                    if (text == "max")
+                    {
+                        year += MonthDivMod(ref month);
+                        day = DateTime.DaysInMonth(year, month);
+                    }
+                    else
+                    {
+                        var dayOfWeek =
+                            text == "sun" ? DayOfWeek.Sunday :
+                            text == "mon" ? DayOfWeek.Monday :
+                            text == "tue" ? DayOfWeek.Tuesday :
+                            text == "wed" ? DayOfWeek.Wednesday :
+                            text == "thu" ? DayOfWeek.Thursday :
+                            text == "fri" ? DayOfWeek.Friday :
+                            text == "sat" ? DayOfWeek.Saturday :
+                            throw new InvalidOperationException("Unexpected text: " + text);
+
+                        year += MonthDivMod(ref month);
+
+                        var date = new DateTime(year, month, now.Day).WeekStart().AddDays((int)dayOfWeek);
+                        if(inc.HasText())
+                        {
+                            date = date.AddDays(int.Parse(inc));
+                        }
+
+                        year = date.Year;
+                        month = date.Month;
+                        day = date.Day;
+                    }
                 }
                 else
                 {

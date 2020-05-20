@@ -15,9 +15,9 @@ namespace Signum.Entities.Chart
     [JsonConverter(typeof(ChartScriptParameterGroupJsonConverter))]
     public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
     {
-        public string Name { get; }
+        public string? Name { get; }
 
-        public ChartScriptParameterGroup(string name)
+        public ChartScriptParameterGroup(string? name = null)
         {
             this.Name = name;
         }

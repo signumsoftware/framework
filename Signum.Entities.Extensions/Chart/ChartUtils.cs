@@ -71,7 +71,7 @@ namespace Signum.Entities.Chart
             return false;
         }
         
-        public static bool SynchronizeColumns(this ChartScript chartScript, IChartBase chart)
+        public static bool SynchronizeColumns(this ChartScript chartScript, IChartBase chart, PostRetrievingContext? ctx)
         {
             bool result = false;
 
@@ -108,6 +108,7 @@ namespace Signum.Entities.Chart
 
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
+                        
                         //if (cp.PropertyCheck(() => cp.Value).HasText())
                         //    cp.Value = sp.DefaultValue(cp.GetToken());
                     }
@@ -124,7 +125,7 @@ namespace Signum.Entities.Chart
                         {
                             cp.parentChart = chart;
                             cp.ScriptParameter = sp;
-
+                            ctx?.ForceModifiedState.Add(cp, ModifiedState.SelfModified);
                             //if (cp.PropertyCheck(() => cp.Value).HasText())
                             //    cp.Value = sp.DefaultValue(cp.GetToken());
                         }
@@ -237,7 +238,10 @@ namespace Signum.Entities.Chart
         Preview,
         TypeNotFound,
         [Description("Type {0} is not in the database")]
-        Type0NotFoundInTheDatabase
+        Type0NotFoundInTheDatabase,
+        Reload,
+        Maximize,
+        Minimize,
     }
 
 }

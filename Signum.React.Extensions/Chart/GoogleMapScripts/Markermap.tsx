@@ -145,7 +145,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
                 "</svg>";
               link.addEventListener("click", (e) => {
                 e.preventDefault();
-                onDrillDown(r);
+                onDrillDown(r, e);
               });
 
               d.append(link);
@@ -158,8 +158,8 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
             });
           }
           else {
-            marker.addListener("click", () => {
-              onDrillDown(r);
+            marker.addListener("click", e => {
+              onDrillDown(r, e as any as MouseEvent);
             });
           }
 

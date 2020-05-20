@@ -109,7 +109,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
             fill={colorByKey[s.key] ?? color(s.key)}
             width={x.bandwidth()}
             height={y(r[1]) - y(r[0])}
-            onClick={e => onDrillDown(r.data.values[s.key].rowClick)}
+            onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.data.values[s.key].valueTitle}

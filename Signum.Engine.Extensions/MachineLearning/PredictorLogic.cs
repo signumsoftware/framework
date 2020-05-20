@@ -461,7 +461,7 @@ namespace Signum.Engine.MachineLearning
             mainQuery.ParseData(description);
         }
 
-        static void PredictorEntity_Retrieved(PredictorEntity predictor)
+        static void PredictorEntity_Retrieved(PredictorEntity predictor, PostRetrievingContext ctx)
         {
             predictor.MainQuery.ParseData();
         }
@@ -473,7 +473,7 @@ namespace Signum.Engine.MachineLearning
             subQuery.ParseData(description);
         }
 
-        static void PredictorMultiColumnEntity_Retrieved(PredictorSubQueryEntity subQuery)
+        static void PredictorMultiColumnEntity_Retrieved(PredictorSubQueryEntity subQuery, PostRetrievingContext ctx)
         {
             subQuery.ParseData();
         }
