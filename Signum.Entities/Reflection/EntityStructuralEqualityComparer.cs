@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Entities.Reflection
 {
@@ -42,7 +43,7 @@ namespace Signum.Entities.Reflection
                 MixinDeclarations.GetMixinDeclarations(typeof(T)).ToDictionary(t => t, t => resolver.GetEqualityComparer(t, null));
         }
 
-        public override bool Equals(T x, T y)
+        public override bool Equals(T? x, T? y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -115,7 +116,7 @@ namespace Signum.Entities.Reflection
                   comparer: resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, (PropertyInfo)a.MemberInfo)));
         }
 
-        public override bool Equals(T x, T y)
+        public override bool Equals([AllowNull] T x, [AllowNull] T y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -178,7 +179,7 @@ namespace Signum.Entities.Reflection
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
 
-        public override bool Equals(IList<T> x, IList<T> y)
+        public override bool Equals(IList<T>? x, IList<T>? y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -224,7 +225,7 @@ namespace Signum.Entities.Reflection
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
 
-        public override bool Equals(IList<T> mx, IList<T> my)
+        public override bool Equals(IList<T>? mx, IList<T>? my)
         {
             if ((mx == null) != (my == null))
                 return false;

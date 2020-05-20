@@ -467,8 +467,12 @@ namespace Signum.Entities
         }
 
         public override bool Equals(object? obj) => obj is PropertyRoute pr && Equals(pr);
-        public bool Equals(PropertyRoute other)
+        public bool Equals(PropertyRoute? other)
         {
+
+            if (other==null)
+                return false;
+
             if (other.PropertyRouteType != this.PropertyRouteType)
                 return false;
 
