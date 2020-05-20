@@ -217,9 +217,9 @@ namespace Signum.Entities
                 return "{0};{1};{2}".FormatWith(TypeEntity.GetCleanName(this.EntityType), this.Id, this.ToString());
             }
 
-            public int CompareTo(Lite<Entity> other)
+            public int CompareTo(Lite<Entity>? other)
             {
-                return ToString()!.CompareTo(other.ToString());
+                return ToString()!.CompareTo(other?.ToString());
             }
 
             public int CompareTo(object? obj)
