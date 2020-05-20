@@ -533,7 +533,7 @@ namespace Signum.Engine.Cache
                 {
                     innerList.Add(activator(obj, retriever));
                 }
-                ((IMListPrivate)result).ExecutePostRetrieving();
+                ((IMListPrivate)result).ExecutePostRetrieving(null!);
 
             }
 

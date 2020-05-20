@@ -123,7 +123,7 @@ namespace Signum.Entities.Files
             return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
         }
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             if (CalculatePrefixPair == null)
                 throw new InvalidOperationException("OnCalculatePrefixPair not set");

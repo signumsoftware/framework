@@ -50,7 +50,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    var newQuery = this.GetChartScript().SynchronizeColumns(this);
+                    var newQuery = this.GetChartScript().SynchronizeColumns(this, null);
                     NotifyAllColumns();
                     InvalidateResults(newQuery);
                 }

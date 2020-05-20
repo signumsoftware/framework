@@ -171,7 +171,7 @@ namespace Signum.Engine.Mailing
             return emailTemplate;
         }
 
-        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate)
+        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate, PostRetrievingContext ctx)
         {
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {

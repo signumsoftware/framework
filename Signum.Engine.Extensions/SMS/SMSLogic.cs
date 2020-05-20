@@ -158,7 +158,7 @@ namespace Signum.Engine.SMS
                       .ToHashSet();
         }
 
-        public static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate)
+        public static void SMSTemplateLogic_Retrieved(SMSTemplateEntity smsTemplate, PostRetrievingContext ctx)
         {
             if (smsTemplate.Query == null)
                 return;

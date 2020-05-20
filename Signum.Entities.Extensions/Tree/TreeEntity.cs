@@ -42,7 +42,7 @@ namespace Signum.Entities.Tree
             set { level = value; }
         }
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             this.level = (short)this.Route.GetLevel();
         }

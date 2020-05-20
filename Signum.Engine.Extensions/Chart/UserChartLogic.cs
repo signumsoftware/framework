@@ -80,7 +80,7 @@ namespace Signum.Engine.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartEntity userChart)
+        static void ChartLogic_Retrieved(UserChartEntity userChart, PostRetrievingContext ctx)
         {
             object queryName;
             try
