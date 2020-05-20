@@ -39,6 +39,7 @@ export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
   token: UserAssets.QueryTokenEmbedded | null;
   displayName: string | null;
+  format: string | null;
   orderByIndex: number | null;
   orderByType: DynamicQuery.OrderType | null;
 }

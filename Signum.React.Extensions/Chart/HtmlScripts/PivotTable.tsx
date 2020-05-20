@@ -138,7 +138,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
   }
 
   const horStyles = horColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalGroups as RowGroup, i), cp.params, cp.col));
-  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalGroups as RowGroup, i), cp.params, cp.col));
+  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(verticalGroups as RowGroup, i), cp.params, cp.col));
 
   const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Values"));
 
@@ -171,6 +171,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
   ) {
 
     function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+      e.preventDefault();
       onDrillDown({
         ...p.filters.toObject(a => a.col.name, a => a.val),
       });

@@ -404,6 +404,7 @@ export module Encoder {
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
         displayName: co.element.displayName,
+        format: co.element.format,
         orderByIndex: co.element.orderByIndex,
         orderByType: co.element.orderByType,
       }) as ChartColumnOption),
@@ -613,7 +614,7 @@ export module API {
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, customFormat: string | undefined | null): ((val: unknown) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -635,14 +636,18 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = token.format && toMomentFormat(token.format);
+        var format = customFormat ? toMomentFormat(customFormat) :
+          token.format ? toMomentFormat(token.format) :
+            undefined;
         return date == null ? String(null) : moment(date).format(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = token.format && toNumbroFormat(token.format);
+        var format = customFormat ? toNumbroFormat(customFormat) :
+          token.format ? toNumbroFormat(token.format) :
+            undefined;
         return number == null ? String(null) : numbro(number).format(format);
       };
 
@@ -671,14 +676,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
-      const niceName = getNiceName(token);
+      const niceName = getNiceName(token, mle.element.format);
       const color = getColor(token, palettes);
 
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
+        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -823,6 +829,7 @@ export interface ChartColumn<V> {
   name: string;
   title: string;
   displayName: string;
+  format?: string;
   token?: QueryToken; //Null for QueryToken
   type: ChartColumnType;
   orderByIndex?: number | null;

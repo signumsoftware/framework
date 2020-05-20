@@ -58,6 +58,17 @@ namespace Signum.Entities.Chart
             }
         }
 
+        string? format;
+        public string? Format
+        {
+            get { return format ?? Token?.Let(t => t.TryToken?.Format); }
+            set
+            {
+                var name = value == Token?.Let(t => t.TryToken?.Format) ? null : value;
+                Set(ref format, name);
+            }
+        }
+
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int? OrderByIndex { get; set; }
 
@@ -129,16 +140,18 @@ namespace Signum.Entities.Chart
         {
             return new XElement("Column",
               Token == null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
-              DisplayName == null ? null : new XAttribute("DisplayName", this.DisplayName),
+              !DisplayName.HasText() ? null : new XAttribute("DisplayName", this.DisplayName),
+              !Format.HasText() ? null : new XAttribute("Format", this.Format),
               OrderByIndex == null ? null : new XAttribute("OrderByIndex", this.OrderByIndex),
               OrderByType == null ? null : new XAttribute("OrderByType", this.OrderByType)
-              );
+            );
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
             Token = element.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
             DisplayName = element.Attribute("DisplayName")?.Value;
+            Format = element.Attribute("Format")?.Value;
             OrderByIndex = element.Attribute("OrderByIndex")?.Value.Let(int.Parse);
             OrderByType = element.Attribute("OrderByType")?.Value.Let(EnumExtensions.ToEnum<OrderType>);
         }
