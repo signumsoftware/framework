@@ -142,7 +142,7 @@ namespace Signum.Entities
         
         #region Collection Events
 
-        protected internal override void PostRetrieving()
+        protected internal override void PostRetrieving(PostRetrievingContext ctx)
         {
             RebindEvents();
         }

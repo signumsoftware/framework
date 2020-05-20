@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -60,7 +61,7 @@ namespace Signum.Engine.Extensions.Basics
             }
         }
 
-        static void SymbolLogic_Retrieved(T ident)
+        static void SymbolLogic_Retrieved(T ident, PostRetrievingContext ctx)
         {
             if (!avoidCache && ident.Key.HasText())
                 try
