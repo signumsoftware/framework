@@ -12,7 +12,7 @@ namespace Signum.Entities
 
         }
 
-        protected internal override void PostRetrieving()
+        protected internal override void PostRetrieving(PostRetrievingContext ctx)
         {
             throw new InvalidOperationException("ModelEntities are not meant to be retrieved");
         }

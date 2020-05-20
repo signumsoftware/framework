@@ -159,16 +159,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaved(entity, args);
         }
 
-        internal void OnRetrieved(Entity entity)
+        internal void OnRetrieved(Entity entity, PostRetrievingContext ctx)
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity);
+                ee.OnRetrieved(entity, ctx);
 
-            entityEventsGlobal.OnRetrieved(entity);
+            entityEventsGlobal.OnRetrieved(entity, ctx);
         }
 
         internal IDisposable? OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity

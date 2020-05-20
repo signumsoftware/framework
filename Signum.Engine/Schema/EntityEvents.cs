@@ -123,9 +123,9 @@ namespace Signum.Engine.Maps
 
         }
 
-        void IEntityEvents.OnRetrieved(Entity entity)
+        void IEntityEvents.OnRetrieved(Entity entity, PostRetrievingContext ctx)
         {
-            Retrieved?.Invoke((T)entity);
+            Retrieved?.Invoke((T)entity, ctx);
         }
 
         public Entity? OnAlternativeRetrieving(PrimaryKey id)
@@ -215,7 +215,7 @@ namespace Signum.Engine.Maps
                     if (mlist == null)
                         return;
 
-                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value!);
+                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value!, null!);
 
                     retriever.ModifiablePostRetrieving((Modifiable)(object)mlist);
                 };
@@ -245,7 +245,7 @@ namespace Signum.Engine.Maps
     }
 
     public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) where T : Entity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
+    public delegate void RetrievedEventHandler<T>(T ident, PostRetrievingContext ctx) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
     public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;
@@ -297,7 +297,7 @@ namespace Signum.Engine.Maps
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
 
-        void OnRetrieved(Entity entity);
+        void OnRetrieved(Entity entity, PostRetrievingContext ctx);
 
         IDisposable? OnPreUnsafeDelete(IQueryable entityQuery);
         IDisposable? OnPreUnsafeUpdate(IUpdateable update);
