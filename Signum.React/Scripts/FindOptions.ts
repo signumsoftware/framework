@@ -232,6 +232,23 @@ export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | 
   };
 }
 
+export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed {
+
+  if (isFilterGroupOptionParsed(fop)) {
+    var newFilters = fop.filters.map(f => withoutPinned(f));
+    return ({
+      ...fop,
+      filters: newFilters,
+      pinned: undefined,
+    }) as FilterOptionParsed;
+  };
+
+  return {
+    ...fop,
+    pinned: undefined
+  };
+}
+
 export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
   const result: QueryToken[] = [];
   while (token) {
