@@ -3,7 +3,7 @@ import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption } from '@framework/FindOptions'
+import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -11,6 +11,7 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
+import { softCast } from '../../../Framework/Signum.React/Scripts/Globals';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -58,22 +59,24 @@ export function getToken(token: QueryTokenEmbedded): QueryToken {
 
 export module Converter {
 
-  export function toFilterOptionParsed(fr: API.FilterNode): FilterOptionParsed {
-    if (fr.groupOperation)
-      return ({
-        token: fr.token,
-        groupOperation: fr.groupOperation,
-        filters: fr.filters!.map(f => toFilterOptionParsed(f)),
-        pinned: fr.pinned
-      } as FilterGroupOptionParsed);
-    else
-      return ({
-        token: fr.token,
-        operation: fr.operation ?? "EqualTo",
-        value: fr.value,
+  export function toFilterOptionParsed(fn: API.FilterNode): FilterOptionParsed {
+    if (fn.groupOperation)
+      return softCast<FilterGroupOptionParsed>({
+        token: fn.token,
+        groupOperation: fn.groupOperation,
+        filters: fn.filters!.map(f => toFilterOptionParsed(f)),
+        pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
         frozen: false,
-        pinned: fr.pinned,
-      } as FilterConditionOptionParsed);
+        expanded: false,
+      });
+    else
+      return softCast<FilterConditionOptionParsed>({
+        token: fn.token,
+        operation: fn.operation ?? "EqualTo",
+        value: fn.value,
+        frozen: false,
+        pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
+      });
   }
 
   export function toFilterOption(fr: API.FilterNode): FilterOption {

@@ -147,7 +147,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
             strokeWidth={1}
             stroke={selectedColumn.colorScale(r)}
             shapeRendering="initial"
-            onClick={e => onDrillDown(r)}
+            onClick={e => onDrillDown(r, e)}
             cursor="pointer"
             d={line(cords.map(c => ({ col: c, row: r })))!}>
             <title>

@@ -108,7 +108,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               fill="#fff"
               fillOpacity={0}
               stroke="none"
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
                 {r.values[s.key].valueTitle}
@@ -129,7 +129,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value))}
               r={5}
               shapeRendering="initial"
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
                 {r.values[s.key].valueTitle}
@@ -142,7 +142,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 textAnchor="middle"
                 opacity={parameters["NumberOpacity"]}
                 transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value) - 8)}
-                onClick={e => onDrillDown(r.values[s.key].rowClick)}
+                onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
                 cursor="pointer"
                 shapeRendering="initial">
                 {r.values[s.key].valueNiceName}

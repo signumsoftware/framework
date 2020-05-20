@@ -224,7 +224,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         .map(r =>
           <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
           cursor="pointer"
-          onClick={e => onDrillDown(r)}>
+          onClick={e => onDrillDown(r, e)}>
           {mainShape?.renderer(r)}
           {innerShape?.renderer(r)}
           {

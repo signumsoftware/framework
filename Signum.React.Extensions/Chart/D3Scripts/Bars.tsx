@@ -76,7 +76,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
           height={y.bandwidth()}
           fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           stroke={y.bandwidth() > 4 ? '#fff' : undefined}
-          onClick={e => onDrillDown(r)}
+          onClick={e => onDrillDown(r, e)}
           cursor="pointer">
           <title>
             {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
@@ -96,7 +96,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
               dominantBaseline="middle"
               textAnchor="end"
               fontWeight="bold"
-              onClick={e => onDrillDown(r)}
+              onClick={e => onDrillDown(r, e)}
               cursor="pointer">
               {keyColumn.getValueNiceName(r)}
             </TextEllipsis>)}
@@ -114,7 +114,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                     fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dominantBaseline="middle"
                     fontWeight="bold"
-                    onClick={e => onDrillDown(r)}
+                    onClick={e => onDrillDown(r, e)}
                     cursor="pointer">
                     {keyColumn.getValueNiceName(r)}
                   </TextEllipsis>
@@ -140,7 +140,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
                 opacity={parameters["NumberOpacity"]}
                 textAnchor="middle"
                 fontWeight="bold"
-                onClick={e => onDrillDown(r)}
+                onClick={e => onDrillDown(r, e)}
                 cursor="pointer">
                 {valueColumn.getValueNiceName(r)}
               </TextEllipsis>);

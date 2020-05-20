@@ -17,7 +17,7 @@ export interface ReactChartProps {
   data?: ChartClient.ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
-  onDrillDown: (e: ChartRow) => void;
+  onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
 

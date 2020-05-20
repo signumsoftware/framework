@@ -75,7 +75,7 @@ export interface ChartScriptProps {
   data?: ChartTable;
   parameters: { [name: string]: string },
   loading: boolean;
-  onDrillDown: (e: ChartRow) => void;
+  onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   width: number;
   height: number;
   initialLoad: boolean;
@@ -156,7 +156,7 @@ export interface EnumValue {
 }
 
 export interface StringValue {
-  defaultValue: number;
+  defaultValue: string;
 }
 
 
@@ -327,7 +327,7 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
@@ -404,6 +404,7 @@ export module Encoder {
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
         displayName: co.element.displayName,
+        format: co.element.format,
         orderByIndex: co.element.orderByIndex,
         orderByType: co.element.orderByType,
       }) as ChartColumnOption),
@@ -613,7 +614,7 @@ export module API {
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -635,14 +636,18 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = token.format && toMomentFormat(token.format);
+        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
+          token.format ? toMomentFormat(token.format) :
+            undefined;
         return date == null ? String(null) : moment(date).format(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = token.format && toNumbroFormat(token.format);
+        var format = chartColumn.format ? toNumbroFormat(chartColumn.format) :
+          token.format ? toNumbroFormat(token.format) :
+            undefined;
         return number == null ? String(null) : numbro(number).format(format);
       };
 
@@ -671,14 +676,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
-      const niceName = getNiceName(token);
+      const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
+        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -771,7 +777,6 @@ export module API {
       var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
         .then(list => list.toObject(a => a.type, a => a.palette));
 
-      ChartPaletteClient.getColorPaletteTypes()
       return Finder.API.executeQuery(queryRequest, abortSignal)
         .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
     });

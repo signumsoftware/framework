@@ -138,7 +138,7 @@ namespace Signum.Entities.Files
         }
 
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             if (CalculatePrefixPair == null)
                 throw new InvalidOperationException("OnCalculatePrefixPair not set");

@@ -129,7 +129,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             fill="#fff"
             fillOpacity={.1}
             stroke="none"
-            onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick)}
+            onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}

@@ -202,7 +202,7 @@ namespace Signum.Engine.Cache
 
                 cachedTable.subTables.Add(ctb);
 
-                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
+                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList)), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
             }
 
             throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));

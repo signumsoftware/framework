@@ -55,7 +55,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    this.GetChartScript().SynchronizeColumns(this);
+                    this.GetChartScript().SynchronizeColumns(this, null);
                     NotifyAllColumns();
                 }
             }
@@ -108,11 +108,11 @@ namespace Signum.Entities.Chart
             ToQueryEntity = toQueryEntity;
         }
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             try
             {
-                this.GetChartScript().SynchronizeColumns(this);
+                this.GetChartScript().SynchronizeColumns(this, ctx);
             }
             catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
             {

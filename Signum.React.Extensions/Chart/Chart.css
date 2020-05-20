@@ -97,6 +97,7 @@
 .sf-chart-token-config-trigger
 {
     cursor: pointer;
+    margin-top:4px
 }
 
 body:not(.rtl) .sf-chart-token-config-trigger {
@@ -171,3 +172,14 @@ text.sf-initial-message {
     font-weight: bold;
     fill: #f5f5f5;
 }
+
+.sf-chart-mini-icon {
+    cursor: pointer;
+    color:gray;
+}
+
+.sf-chart-mini-icon:hover{
+    color:dimgray;
+}
+
+
