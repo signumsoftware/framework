@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -30,7 +31,7 @@ namespace Signum.Utilities.DataStructures
             this.map.Add(key, value);
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             for (ScopedDictionary<TKey, TValue>? scope = this; scope != null; scope = scope.previous)
             {

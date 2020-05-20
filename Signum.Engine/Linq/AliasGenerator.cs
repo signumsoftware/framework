@@ -82,8 +82,11 @@ namespace Signum.Engine.Linq
             this.ObjectName = objectName;
         }
 
-        public bool Equals(Alias other)
+        public bool Equals(Alias? other)
         {
+            if (other == null)
+                return false;
+
             return this.Name == other.Name && object.Equals(this.ObjectName, other.ObjectName);
         }
 
