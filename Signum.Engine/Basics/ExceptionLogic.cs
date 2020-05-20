@@ -9,15 +9,16 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Threading;
 using Signum.Utilities.Reflection;
+using System.Collections.Generic;
 
 namespace Signum.Engine.Basics
 {
-	public static class ExceptionLogic
-	{
-		public static void Start(SchemaBuilder sb)
-		{
-			if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-			{
+    public static class ExceptionLogic
+    {
+        public static void Start(SchemaBuilder sb)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
                 sb.Include<ExceptionEntity>()
                     .WithQuery(() => e => new
                     {
@@ -29,31 +30,31 @@ namespace Signum.Engine.Basics
                         e.StackTraceHash,
                     });
 
-				DefaultEnvironment = "Default";
-			}
-		}
+                DefaultEnvironment = "Default";
+            }
+        }
 
-		public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
-		{
-			var entity = GetEntity(ex);
-
-			completeContext(entity);
-
-			return entity.SaveForceNew();
-		}
-
-		public static ExceptionEntity LogException(this Exception ex)
-		{
+        public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
+        {
             var entity = GetEntity(ex);
-			return entity.SaveForceNew();
-		}
 
-		public static ExceptionEntity? GetExceptionEntity(this Exception ex)
-		{
-			var exEntity = ex.Data[ExceptionEntity.ExceptionDataKey] as ExceptionEntity;
+            completeContext(entity);
 
-			return exEntity;
-		}
+            return entity.SaveForceNew();
+        }
+
+        public static ExceptionEntity LogException(this Exception ex)
+        {
+            var entity = GetEntity(ex);
+            return entity.SaveForceNew();
+        }
+
+        public static ExceptionEntity? GetExceptionEntity(this Exception ex)
+        {
+            var exEntity = ex.Data[ExceptionEntity.ExceptionDataKey] as ExceptionEntity;
+
+            return exEntity;
+        }
 
         static ExceptionEntity GetEntity(Exception ex)
         {
@@ -61,7 +62,17 @@ namespace Signum.Engine.Basics
 
             entity.ExceptionType = ex.GetType().Name;
 
-            var exceptions = ex.Follow(e => e.InnerException);
+            var agex = ex as AggregateException;
+            var exl = new List<Exception>();
+            if (agex != null)
+                foreach (var ex0 in agex.InnerExceptions)
+                {
+                    exl.AddRange(ex0.Follow(e => e.InnerException));
+                }
+            else
+                exl.AddRange(ex.Follow(e => e.InnerException));
+
+            var exceptions = exl.Distinct();
             string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
             string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
 
@@ -85,9 +96,7 @@ namespace Signum.Engine.Basics
             }
             catch (Exception e)
             {
-                entity.Data = $@"Error Dumping Data!
-{e.GetType().Name}: {e.Message}
-{e.StackTrace}";
+                entity.Data = $@"Error Dumping Data!{e.GetType().Name}: {e.Message}{e.StackTrace}";
             }
 
             entity.Version = Schema.Current.Version.ToString();
@@ -95,40 +104,40 @@ namespace Signum.Engine.Basics
             return entity;
         }
 
-		static ExceptionEntity SaveForceNew(this ExceptionEntity entity)
-		{
-			if (entity.Modified == ModifiedState.Clean)
-				return entity;
+        static ExceptionEntity SaveForceNew(this ExceptionEntity entity)
+        {
+            if (entity.Modified == ModifiedState.Clean)
+                return entity;
 
-			using (ExecutionMode.Global())
-			using (Transaction tr = Transaction.ForceNew())
-			{
-				entity.Save();
+            using (ExecutionMode.Global())
+            using (Transaction tr = Transaction.ForceNew())
+            {
+                entity.Save();
 
-				return tr.Commit(entity);
-			}
-		}
+                return tr.Commit(entity);
+            }
+        }
 
-		public static string? DefaultEnvironment { get; set; }
+        public static string? DefaultEnvironment { get; set; }
 
-		public static string? CurrentEnvironment { get { return overridenEnvironment.Value ?? DefaultEnvironment; } }
+        public static string? CurrentEnvironment { get { return overridenEnvironment.Value ?? DefaultEnvironment; } }
 
-		static readonly Variable<string?> overridenEnvironment = Statics.ThreadVariable<string?>("exceptionEnviroment");
+        static readonly Variable<string?> overridenEnvironment = Statics.ThreadVariable<string?>("exceptionEnviroment");
 
-		public static IDisposable OverrideEnviroment(string? newEnviroment)
-		{
-			string? oldEnviroment = overridenEnvironment.Value;
-			overridenEnvironment.Value = newEnviroment;
-			return new Disposable(() => overridenEnvironment.Value = oldEnviroment);
-		}
+        public static IDisposable OverrideEnviroment(string? newEnviroment)
+        {
+            string? oldEnviroment = overridenEnvironment.Value;
+            overridenEnvironment.Value = newEnviroment;
+            return new Disposable(() => overridenEnvironment.Value = oldEnviroment);
+        }
 
 
-		public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken>? DeleteLogs;
+        public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken>? DeleteLogs;
 
-		public static int DeleteLogsTimeOut = 10 * 60 * 1000;
+        public static int DeleteLogsTimeOut = 10 * 60 * 1000;
 
-		public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
-		{
+        public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
             using (Connector.CommandTimeoutScope(DeleteLogsTimeOut))
             using (var tr = Transaction.None())
             {
@@ -157,7 +166,7 @@ namespace Signum.Engine.Basics
                     token.ThrowIfCancellationRequested();
 
                     WriteRows(sb, "Updating Exceptions.Referenced from " + p.table.Name.Name, () => p.command.ExecuteNonQuery());
-				}
+                }
 
                 token.ThrowIfCancellationRequested();
 
@@ -172,7 +181,7 @@ namespace Signum.Engine.Basics
 
                 tr.Commit();
             }
-		}
+        }
 
         public static void WriteRows(StringBuilder sb, string text, Func<int> makeQuery)
         {
