@@ -97,6 +97,7 @@
 .sf-chart-token-config-trigger
 {
     cursor: pointer;
+    margin-top:4px
 }
 
 body:not(.rtl) .sf-chart-token-config-trigger {

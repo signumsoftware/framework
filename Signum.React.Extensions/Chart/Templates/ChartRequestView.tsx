@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ifError } from '@framework/Globals'
+import { ifError, Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
@@ -134,6 +134,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   const loading = resultAndLoading?.loading;
   const result = resultAndLoading?.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
+
   return (
     <div>
       <h2>

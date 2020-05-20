@@ -156,7 +156,7 @@ export interface EnumValue {
 }
 
 export interface StringValue {
-  defaultValue: number;
+  defaultValue: string;
 }
 
 
@@ -327,7 +327,7 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
@@ -614,7 +614,7 @@ export module API {
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken, customFormat: string | undefined | null): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -636,7 +636,7 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = customFormat ? toMomentFormat(customFormat) :
+        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
           token.format ? toMomentFormat(token.format) :
             undefined;
         return date == null ? String(null) : moment(date).format(format);
@@ -645,7 +645,7 @@ export module API {
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = customFormat ? toNumbroFormat(customFormat) :
+        var format = chartColumn.format ? toNumbroFormat(chartColumn.format) :
           token.format ? toNumbroFormat(token.format) :
             undefined;
         return number == null ? String(null) : numbro(number).format(format);
@@ -676,7 +676,7 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
-      const niceName = getNiceName(token, mle.element.format);
+      const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
       return {
@@ -777,7 +777,6 @@ export module API {
       var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
         .then(list => list.toObject(a => a.type, a => a.palette));
 
-      ChartPaletteClient.getColorPaletteTypes()
       return Finder.API.executeQuery(queryRequest, abortSignal)
         .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
     });
@@ -829,7 +828,6 @@ export interface ChartColumn<V> {
   name: string;
   title: string;
   displayName: string;
-  format?: string;
   token?: QueryToken; //Null for QueryToken
   type: ChartColumnType;
   orderByIndex?: number | null;
