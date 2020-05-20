@@ -120,7 +120,7 @@ namespace Signum.Engine.Templating
                         {
                             string v = token.TryBefore('.') ?? token;
 
-                            if (!tp.Variables.TryGetValue(v, out ValueProviderBase vp))
+                            if (!tp.Variables.TryGetValue(v, out ValueProviderBase? vp))
                             {
                                 tp.AddError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                                 return null;
@@ -390,7 +390,7 @@ namespace Signum.Engine.Templating
             {
                 string v = tokenString.TryBefore('.') ?? tokenString;
 
-                if (!variables.TryGetValue(v, out ValueProviderBase vp))
+                if (!variables.TryGetValue(v, out ValueProviderBase? vp))
                 {
                     addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                     return result;
