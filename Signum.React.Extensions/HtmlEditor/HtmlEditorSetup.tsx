@@ -1,4 +1,3 @@
-/// <reference path="statictoolbartypings.d.ts" />
 import * as React from 'react'
 import createToolbarPlugin, { ToolbarProps, ToolbarChildrenProps, Separator } from 'draft-js-static-toolbar-plugin';
 
@@ -22,7 +21,7 @@ import './ToolbarStyles.css';
 
 //configuring like in https://www.draft-js-plugins.com/plugin/static-toolbar
 
-export function setupInlineToolbar() {
+export function setupStaticToolbar() {
   const staticToolbarPlugin = createToolbarPlugin({
     theme: {
       buttonStyles: { active: "draft-active", button: "draft-button", buttonWrapper: "draft-buttonWrapper" },

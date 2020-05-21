@@ -1,3 +1,4 @@
+
 declare module "draft-js-static-toolbar-plugin" {
   import { EditorPlugin } from "draft-js-plugins-editor";
   import { ComponentType, ReactNode, HTMLAttributes } from "react";
@@ -41,6 +42,5 @@ declare module "draft-js-static-toolbar-plugin" {
   ) => StaticToolbarPlugin;
 
   export const Separator: ComponentType<HTMLAttributes<HTMLDivElement>>;
-
   export default createStaticToolbarPlugin;
 }

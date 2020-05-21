@@ -22,20 +22,12 @@ interface WorkflowActivityModelComponentProps {
   ctx: TypeContext<WorkflowActivityModel>;
 }
 
-interface WorkflowActivityModelComponentState {
-  viewNames?: string[];
-  viewProps?: DynamicViewClient.DynamicViewProps[];
-}
-
 export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps){
   const forceUpdate = useForceUpdate();
 
   const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);
-
-
   const [viewProps, setViewProps] = React.useState<DynamicViewClient.DynamicViewProps[] | undefined>(undefined);
 
-  
   React.useEffect(() => {
     if (p.ctx.value.mainEntityType) {
 

@@ -4,6 +4,7 @@ import * as draftjs from 'draft-js';
 import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './EditorStyle.css'
+import { useUpdatedRef } from '../../../Framework/Signum.React/Scripts/Hooks';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;
@@ -12,6 +13,7 @@ export interface IContentStateConverter {
 
 export interface HtmlEditorProps extends Partial<PluginEditorProps> {
   binding: IBinding<string | null | undefined>;
+  readOnly?: boolean;
   converter?: IContentStateConverter;
   innerRef?: React.Ref<PluginEditor>;
   beforeEditor?: (editor: React.RefObject<PluginEditor>) => React.ReactNode | null | undefined;
@@ -26,7 +28,7 @@ export default function HtmlEditor({ readOnly, binding, converter, innerRef, bef
   var ref = React.useRef<PluginEditor | null>(null);
 
   React.useEffect(() => {
-    return () => { saveHtml() };
+    return () => { saveHtmlRef.current() };
   }, []);
 
   React.useEffect(() => {
@@ -40,6 +42,8 @@ export default function HtmlEditor({ readOnly, binding, converter, innerRef, bef
         binding.setValue(value);
     }
   }
+
+  const saveHtmlRef = useUpdatedRef(saveHtml);
 
   var setRefs = React.useCallback((editor: PluginEditor | null) => {
     ref.current = editor;
@@ -81,5 +85,3 @@ HtmlEditor.defaultBeforeEditor = (editor: React.RefObject<PluginEditor>) : React
 HtmlEditor.defaultAfterEditor = (editor: React.RefObject<PluginEditor>): React.ReactNode | null | undefined => null;
 HtmlEditor.defaultPlugins = [] as EditorPlugin[];
 HtmlEditor.defaultDecorators = [] as draftjs.DraftDecorator[]; 
-
-
