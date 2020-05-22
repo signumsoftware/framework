@@ -46,7 +46,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
-*[2020.05.22 From react-rte to draft-js-plugins](https://github.com/signumsoftware/framework/commit/0f01c7a7d6a24ff8bab1046f136de36de4a93b4a#commitcomment-39362952)
+* [2020.05.22 From react-rte to draft-js-plugins](https://github.com/signumsoftware/framework/commit/0f01c7a7d6a24ff8bab1046f136de36de4a93b4a#commitcomment-39362952)
 * [2020.05.17 Update to Typescript 3.9.... Is MUCH faster!!!!](https://github.com/signumsoftware/framework/commit/da3afe553537ed18d5e5cb0df32b00f70052223f#comments)
 * [2020.05.16 Pivot Table Chart](https://github.com/signumsoftware/framework/commit/91330aad5405df50cd7cc8fc42de36bbfc759b70#comments)
 * [2020.05.14 Slimming Signum.React](https://github.com/signumsoftware/framework/commit/31c91dad34f251f0c728cad426d5f5db9e496261#comments)
