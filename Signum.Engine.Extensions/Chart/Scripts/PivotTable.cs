@@ -12,7 +12,7 @@ namespace Signum.Engine.Chart.Scripts
             this.Icon = ChartScriptLogic.LoadIcon("pivottable.png");
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Horizontal", ChartColumnType.Groupable) { IsOptional = true },
+                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Horizontal Axis (2)", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Horizontal Axis (3)", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable){ IsOptional = true },
@@ -30,8 +30,10 @@ namespace Signum.Engine.Chart.Scripts
                 CreateBlock("vert-align ", ChartParameterType.Enum, EnumValueList.Parse("top|middle|bottom"), includeValues: true),
                 new ChartScriptParameterGroup()
                 {
-                    new ChartScriptParameter("Placeholder Vertical Axis", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
-                    new ChartScriptParameter("Placeholder Vertical Axis (2)", ChartParameterType.Enum) { ColumnIndex = 4, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
+                    new ChartScriptParameter("SubTotal Horizontal Axis", ChartParameterType.Enum) { ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
+                    new ChartScriptParameter("SubTotal Horizontal Axis (2)", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
+                    new ChartScriptParameter("SubTotal Vertical Axis", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
+                    new ChartScriptParameter("SubTotal Vertical Axis (2)", ChartParameterType.Enum) { ColumnIndex = 4, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
                 }
             };
         }
