@@ -4,7 +4,7 @@ import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
 import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
-import { Type, QueryTokenString } from './Reflection';
+import { Type, QueryTokenString, newLite } from './Reflection';
 
 export function useForceUpdate(): () => void {
   const [count, setCount] = React.useState(0);
@@ -316,4 +316,13 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
 
 export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
   return useAPI(signal => Navigator.API.fetchAll(type), []);
+}
+
+export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+
+  var lite = React.useMemo(() => newLite(type, id), [type, id]);
+
+  useAPI(() => Navigator.API.fillToStrings(lite), [lite]);
+
+  return lite;
 }
