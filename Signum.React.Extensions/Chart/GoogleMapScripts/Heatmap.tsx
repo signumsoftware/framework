@@ -4,10 +4,13 @@ import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from '../D3Scripts/Components/ChartUtils';
 
 
-export default function HeatmapChart({ data, parameters }: ChartClient.ChartComponentProps) {
+export default function renderHeatmapChart(p: ChartClient.ChartScriptProps) {
+  return <HeatmapChartImp {...p} />
+}
+
+function HeatmapChartImp({ data, parameters }: ChartClient.ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
@@ -47,7 +50,7 @@ export default function HeatmapChart({ data, parameters }: ChartClient.ChartComp
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
 
     var map = new google.maps.Map(divElement.current!, {
-      center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
+      center: data && coords.length > 0 ? new google.maps.LatLng(coords[0].lat, coords[0].lng) : undefined,
       zoom: 2,
       mapTypeControlOptions: {
         mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain", "styled_map"]

@@ -10,7 +10,8 @@ import { API, SchedulerState, SchedulerItemState, SchedulerRunningTaskState } fr
 import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Entities.Scheduler'
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
-import { useAPIWithReload, useTitle } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPIWithReload } from '@framework/Hooks'
+import { useTitle } from '@framework/AppContext'
 
 interface SchedulerPanelProps extends RouteComponentProps<{}> {
 

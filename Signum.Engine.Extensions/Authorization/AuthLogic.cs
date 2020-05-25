@@ -505,8 +505,8 @@ namespace Signum.Engine.Authorization
                        roleInsertsDeletes,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
-                    Console.WriteLine("Press [Enter] when executed...");
-                    Console.ReadLine();
+                    if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
+                        return;
                 }
                 else
                 {
@@ -542,8 +542,8 @@ namespace Signum.Engine.Authorization
                        roleRelationships,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
 
-                    Console.WriteLine("Press [Enter] when executed...");
-                    Console.ReadLine();
+                    if (!SafeConsole.Ask("Did you run the previous script (Sync Roles Relationships)?"))
+                        return;
                 }
                 else
                 {

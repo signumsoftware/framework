@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
@@ -163,32 +163,37 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
 
         const pinned = gr.key.pinned;
 
-        return {
+        const filterCondition: FilterConditionOptionParsed = {
           token: completer.get(gr.key.token!.tokenString),
-          operation: gr.key.operation,
+          operation: gr.key.operation ?? "EqualTo",
           value: gr.key.valueString,
           frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilter(pinned),
-        } as FilterConditionOptionParsed;
+          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+        };
+
+        return filterCondition;
       }
       else {
 
         const pinned = gr.key.pinned;
 
-        return {
-          token: gr.key.token ? completer.get(gr.key.token.tokenString) : null,
+        const filterGroup: FilterGroupOptionParsed = {
+          token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
           groupOperation: gr.key.groupOperation!,
           filters: toFilterList(gr.elements, indent + 1),
-          value: gr.key.valueString,
+          value: gr.key.valueString ?? undefined,
           frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilter(pinned),
-        } as FilterGroupOptionParsed;
+          expanded: false,
+          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+        };
+
+        return filterGroup;
       }
     });
 
-    function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
+    function toPinnedFilterParsed(pinned: PinnedQueryFilterEmbedded): PinnedFilterParsed {
       return {
-        label: pinned.label ?? undefined,
+        label: pinned.label ||  undefined,
         column: pinned.column ?? undefined,
         row: pinned.row ?? undefined,
         active: pinned.active || undefined,

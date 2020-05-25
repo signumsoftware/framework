@@ -82,9 +82,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -171,7 +171,7 @@ namespace Signum.Engine.Mailing
             return emailTemplate;
         }
 
-        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate)
+        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate, PostRetrievingContext ctx)
         {
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {

@@ -15,7 +15,8 @@ export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntit
 export type DashboardEmbedededInEntity =
   "None" |
   "Top" |
-  "Bottom";
+  "Bottom" |
+  "Tab";
 
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
@@ -99,6 +100,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   userChart: Chart.UserChartEntity;
   showData: boolean;
   allowChangeShowData: boolean;
+  createNew: boolean;
   requiresTitle: boolean;
 }
 
@@ -116,6 +118,13 @@ export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("Us
 export type UserQueryPartRenderMode =
   "SearchControl" |
   "BigValue";
+
+export const UserTreePartEntity = new Type<UserTreePartEntity>("UserTreePart");
+export interface UserTreePartEntity extends Entities.Entity, IPartEntity {
+  Type: "UserTreePart";
+  userQuery: UserQueries.UserQueryEntity;
+  requiresTitle: boolean;
+}
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {

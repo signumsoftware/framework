@@ -104,6 +104,7 @@
   <Type Name="DynamicExpressionEntity" />
   <Type Name="DynamicExpressionOperation" />
   <Type Name="DynamicExpressionTranslation" />
+  <Type Name="DynamicIsolationMixin" />
   <Type Name="DynamicMixinConnectionEntity" />
   <Type Name="DynamicMixinConnectionOperation" />
   <Type Name="DynamicPanelPermission" />
@@ -204,6 +205,7 @@
   <Type Name="IsolationMessage" />
   <Type Name="IsolationMixin" />
   <Type Name="IsolationOperation" />
+  <Type Name="IsolationStrategy" />
   <Type Name="ITaskEntity" />
   <Type Name="ITaskMessage" />
   <Type Name="ITaskOperation" />
@@ -440,6 +442,7 @@
   <Type Name="UserQueryPermission" />
   <Type Name="UserState" />
   <Type Name="UserTicketEntity" />
+  <Type Name="UserTreePartEntity" />
   <Type Name="ValueUserQueryElementEmbedded" />
   <Type Name="ValueUserQueryListPartEntity" />
   <Type Name="ViewLogEntity" />

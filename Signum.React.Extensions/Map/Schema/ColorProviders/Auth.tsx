@@ -32,7 +32,7 @@ function getDefs(info: SchemaMapInfo): JSX.Element[] {
 
 function gradient(name: string) {
 
-  const list = name.after("auth-").split("-").map(a => a as TypeAllowedBasic);
+  const list = name.after("auth-").split("-").map(a => a as TypeAllowedBasic | "Error");
 
   return (
     <linearGradient id={name} x1="0%" y1="0% " x2="100% " y2="0%">
@@ -45,12 +45,13 @@ function gradient(name: string) {
 }
 
 
-function color(typeAllowedBasic: TypeAllowedBasic): string {
+function color(typeAllowedBasic: TypeAllowedBasic | "Error"): string {
   switch (typeAllowedBasic) {
     case undefined: return "black";
     case "Write": return "green";
     case "Read": return "gold";
     case "None": return "red";
+    case "Error": return "magenta";
     default: throw new Error();
   }
 }

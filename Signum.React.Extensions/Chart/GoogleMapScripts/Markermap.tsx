@@ -10,7 +10,11 @@ import { ChartRow } from '../ChartClient';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function MarkermapChart({ data, parameters, onDrillDown }: ChartClient.ChartComponentProps) {
+export default function renderMarkermapChart(p: ChartClient.ChartScriptProps) {
+  return <MarkermapChartImp {...p} />
+}
+
+export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient.ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
@@ -26,6 +30,8 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
     <div className="sf-chart-container" ref={divElement}>
     </div>
   );
+
+
 
 
   function drawChart() {
@@ -118,36 +124,42 @@ export default function MarkermapChart({ data, parameters, onDrillDown }: ChartC
 
           if (infoColumn) {
 
-            marker.addListener("click", () => {
+            marker.addListener("click", (e: any) => {
+              e.preventDefault;          
 
-              var html = `<div>
-                                ${infoColumn!.getValueNiceName(r)}
-                                ${(parameters["InfoLinkPosition"] == "Below" ? "<br/>" : "")} +
-                                <a ´${(parameters["InfoLinkPosition"] == "Inline" ? " style='margin-left: 10px;'" : "")}>
-                                    <svg aria-hidden='true' data-prefix='fas' data-icon='external-link-alt' class='svg-inline--fa fa-external-link-alt fa-w-18 ' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' style='shape-rendering: auto;'>
-                                        <path fill='currentColor' d='M576 24v127.984c0 21.461-25.96 31.98-40.971 16.971l-35.707-35.709-243.523 243.523c-9.373 9.373-24.568 9.373-33.941 0l-22.627-22.627c-9.373-9.373-9.373-24.569 0-33.941L442.756 76.676l-35.703-35.705C391.982 25.9 402.656 0 424.024 0H552c13.255 0 24 10.745 24 24zM407.029 270.794l-16 16A23.999 23.999 0 0 0 384 303.765V448H64V128h264a24.003 24.003 0 0 0 16.97-7.029l16-16C376.089 89.851 365.381 64 344 64H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V287.764c0-21.382-25.852-32.09-40.971-16.97z'></path>
-                                    </svg>
-                                </a>
-                            </div>`;
+              var html = 
+                infoColumn!.getValueNiceName(r) +
+                (parameters["InfoLinkPosition"] == "Below" ? "<br/>" : "");
 
               var d = document.createElement("div");
               d.innerHTML = html;
-              d.querySelector("a")!.onclick = () => {
-                onDrillDown(r);
-              };
-
-
-              var infow = new google.maps.InfoWindow({
-                content: d!.innerHTML
+              var link = document.createElement("a");
+              link.style.cursor = "pointer";
+              link.style.color = "blue";
+              if (parameters["InfoLinkPosition"] == "Inline") {
+                link.style.marginLeft = "10px";
+                link.style.marginRight = "20px";
+              }
+              link.innerHTML = "<svg aria-hidden='true' data-prefix='fas' data-icon='external-link-alt' class='svg-inline--fa fa-external-link-alt fa-w-18 ' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' style='shape-rendering: auto;'>" +
+                "<path fill='currentColor' d='M576 24v127.984c0 21.461-25.96 31.98-40.971 16.971l-35.707-35.709-243.523 243.523c-9.373 9.373-24.568 9.373-33.941 0l-22.627-22.627c-9.373-9.373-9.373-24.569 0-33.941L442.756 76.676l-35.703-35.705C391.982 25.9 402.656 0 424.024 0H552c13.255 0 24 10.745 24 24zM407.029 270.794l-16 16A23.999 23.999 0 0 0 384 303.765V448H64V128h264a24.003 24.003 0 0 0 16.97-7.029l16-16C376.089 89.851 365.381 64 344 64H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V287.764c0-21.382-25.852-32.09-40.971-16.97z'></path>" +
+                "</svg>";
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                onDrillDown(r, e);
               });
 
+              d.append(link);
+
+              var infow = new google.maps.InfoWindow({
+                content: d
+              });
 
               infow.open(map, marker);
             });
           }
           else {
-            marker.addListener("click", () => {
-              onDrillDown(r);
+            marker.addListener("click", e => {
+              onDrillDown(r, e as any as MouseEvent);
             });
           }
 

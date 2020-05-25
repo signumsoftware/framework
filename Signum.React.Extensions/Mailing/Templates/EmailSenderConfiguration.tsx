@@ -2,6 +2,8 @@ import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmbedded, ExchangeWebServiceEmbedded } from '../Signum.Entities.Mailing'
+import { Binding } from '@framework/Reflection'
+import { DoublePassword } from '../../Authorization/Templates/DoublePassword'
 
 export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {
   const sc = p.ctx;
@@ -22,7 +24,8 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
               <ValueLine ctx={net.subCtx(s => s.host)} />
               <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
               <ValueLine ctx={net.subCtx(s => s.username)} />
-              <ValueLine ctx={net.subCtx(s => s.password)} valueHtmlAttributes={{ type: "password" }} />
+              {!sc.readOnly && net.subCtx(a => a.password).propertyRoute?.canModify() &&
+                <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} />}
               <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
               <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
                 <div>
@@ -34,13 +37,15 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
           } />
         </div>
       } />
-      <EntityDetail ctx={sc.subCtx(s => s.exchange)} getComponent={(smtp: TypeContext<ExchangeWebServiceEmbedded>) =>
+      <EntityDetail ctx={sc.subCtx(s => s.exchange)} getComponent={(ews: TypeContext<ExchangeWebServiceEmbedded>) =>
         <div>
-          <ValueLine ctx={smtp.subCtx(s => s.exchangeVersion)} />
-          <ValueLine ctx={smtp.subCtx(s => s.url)} />
-          <ValueLine ctx={smtp.subCtx(s => s.useDefaultCredentials)} />
-          <ValueLine ctx={smtp.subCtx(s => s.username)} />
-          <ValueLine ctx={smtp.subCtx(s => s.password)} />
+          <ValueLine ctx={ews.subCtx(s => s.exchangeVersion)} />
+          <ValueLine ctx={ews.subCtx(s => s.url)} />
+          <ValueLine ctx={ews.subCtx(s => s.useDefaultCredentials)} />
+          <ValueLine ctx={ews.subCtx(s => s.username)} />
+          {!sc.readOnly &&
+            <DoublePassword ctx={new TypeContext<string>(ews, undefined, undefined as any, Binding.create(ews.value, v => v.newPassword))} isNew={ews.value.isNew} />}
+          <ValueLine ctx={ews.subCtx(s => s.password)} />
         </div>
       } />
     </div>

@@ -13,7 +13,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -59,7 +59,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -109,7 +109,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
             fill={colorByKey[s.key] ?? color(s.key)}
             width={x.bandwidth()}
             height={y(r[1]) - y(r[0])}
-            onClick={e => onDrillDown(r.data.values[s.key].rowClick)}
+            onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.data.values[s.key].valueTitle}

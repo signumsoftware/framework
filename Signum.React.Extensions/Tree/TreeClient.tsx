@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as QueryString from 'query-string'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
@@ -93,7 +94,7 @@ export function treePath(typeName: string, filterOptions?: FilterOption[]): stri
   if (filterOptions)
     Finder.Encoder.encodeFilters(query, filterOptions);
 
-  return Navigator.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
+  return AppContext.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
 }
 
 export function hideSiblingsAndIsDisabled(ti: TypeInfo) {
@@ -141,7 +142,7 @@ export function overrideAutocomplete(ti: TypeInfo) {
   var es = getEntitySetting(ti.name);
 
   if (!es.autocomplete)
-    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac), false, false);
+    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac));
 
   if (!es.autocompleteDelay)
     es.autocompleteDelay = 750;

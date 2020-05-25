@@ -31,8 +31,7 @@ export function FileImage(p: FileImageProps) {
   }, [p.file]);
 
   var src = file == null ? undefined :
-    (file as IFilePath).fullWebPath || file.binaryFile != null ? "data:image/jpeg;base64," + file.binaryFile :
-      objectUrl;
+    (file as IFilePath).fullWebPath || (file.binaryFile != null ? "data:image/jpeg;base64," + file.binaryFile : objectUrl);
   return (
     <img {...rest} src={src} />
   );

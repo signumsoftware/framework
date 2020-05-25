@@ -118,7 +118,7 @@ namespace Signum.Engine.UserQueries
         }
 
 
-        static void UserQueryLogic_Retrieved(UserQueryEntity userQuery)
+        static void UserQueryLogic_Retrieved(UserQueryEntity userQuery, PostRetrievingContext ctx)
         {
             object queryName;
             try

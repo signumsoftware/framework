@@ -39,7 +39,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
       <div className="row">
         <div className="col-sm-6">
           <ValueLine ctx={ctx4.subCtx(f => f.name)} />
-          <EntityLine ctx={ctx4.subCtx(f => f.query)} />
+          <EntityLine ctx={ctx4.subCtx(f => f.query)} onChange={forceUpdate} />
           <EntityCombo ctx={ctx4.subCtx(f => f.model)} />
 
         </div>

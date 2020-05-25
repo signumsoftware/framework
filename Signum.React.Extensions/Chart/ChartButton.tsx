@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed } from '@framework/FindOptions'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
@@ -29,9 +30,9 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
       })
 
       if (sc.props.avoidChangeUrl)
-        window.open(Navigator.toAbsoluteUrl(path));
+        window.open(AppContext.toAbsoluteUrl(path));
       else
-        Navigator.pushOrOpenInTab(path, e);
+        AppContext.pushOrOpenInTab(path, e);
     }).done();
   }
 

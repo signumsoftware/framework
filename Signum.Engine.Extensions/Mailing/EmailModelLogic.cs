@@ -299,7 +299,13 @@ namespace Signum.Engine.Mailing
             }
         }
 
-  
+        public static EmailTemplateEntity GetDefaultTemplate<M>() where M : IEmailModel
+        {
+            var emailModelEntity = ToEmailModelEntity(typeof(M));
+
+            return GetDefaultTemplate(emailModelEntity, null);
+        }
+
 
         private static EmailTemplateEntity GetDefaultTemplate(EmailModelEntity emailModelEntity, Entity? entity)
         {

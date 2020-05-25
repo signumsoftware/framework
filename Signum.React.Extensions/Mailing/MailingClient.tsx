@@ -113,7 +113,7 @@ export function start(options: {
       () => EmailMessageEntity.nicePluralName(),
       e => getEmailMessages(ctx.lite),
       {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(EmailMessageEntity),
+        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),
         icon: "envelope",
         iconColor: "orange"
       }));

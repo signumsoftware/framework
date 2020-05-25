@@ -9,9 +9,9 @@ import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { parseIcon } from '../Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 
   function renderBasic() {
     const db = p.dashboard;
@@ -79,10 +79,22 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
     );
   }
 
-  if (p.dashboard.combineSimilarRows)
-    return renderCombinedRows();
-  else
-    return renderBasic();
+
+  function render() {
+
+    if (p.dashboard.combineSimilarRows)
+      return renderCombinedRows();
+    else
+      return renderBasic();
+
+
+  }
+
+
+
+
+  return render();
+
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {
@@ -234,6 +246,3 @@ export function PanelPart(p: PanelPartProps) {
     </div>
   );
 }
-
-
-

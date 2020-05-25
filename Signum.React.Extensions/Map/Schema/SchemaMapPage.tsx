@@ -3,14 +3,15 @@ import * as History from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as QueryString from 'query-string'
 import { Dic } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { RouteComponentProps } from "react-router";
 import "./schemaMap.css"
-import { useExpand, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useSize } from '@framework/Hooks'
+import { useExpand } from '@framework/AppContext'
 
 interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;
@@ -108,7 +109,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
       ...tables, filter: filter, color: color
     };
 
-    const url = Navigator.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
+    const url = AppContext.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
 
     window.open(url);
   }
@@ -141,7 +142,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
       </div>
     );
   }
-  if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
+  if (AppContext.Expander.onGetExpanded && !AppContext.Expander.onGetExpanded())
     return null;
 
   return (

@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Entities.Workflow'
-import { useFetchInState } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useFetchInState } from '@framework/Navigator'
 
 interface CaseFromSenderInfoProps {
   current: CaseActivityEntity;

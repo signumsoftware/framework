@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
@@ -29,7 +30,6 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         timeMachineRoute(ctx.lite), {
           icon: "history",
           iconColor: "blue",
-          isShy: true,
         }) : undefined);
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
@@ -39,12 +39,13 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
     Finder.entityFormatRules.push(
       {
         name: "ViewHistory",
-        isApplicable: (row, sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
+        formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
           <TimeMachineLink lite={row.entity}
             inSearch={true}>
             {EntityControlMessage.View.niceToString()}
           </TimeMachineLink>
+        )
       });
 
     Finder.formatRules.push(
@@ -106,7 +107,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
 
     event.preventDefault();
 
-    window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
+    window.open(AppContext.toAbsoluteUrl(timeMachineRoute(lite)));
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 

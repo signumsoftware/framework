@@ -1,6 +1,9 @@
 
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
@@ -11,6 +14,8 @@ import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
+import { getTypeInfos } from '@framework/Reflection'
+import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 
 interface ResultOrError {
 
@@ -18,13 +23,14 @@ interface ResultOrError {
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
+  const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
 
   const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
     ChartClient.getChartScript(chartRequest!.chartScript)
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
       .then(result => ({ result }))
-      .catch(error => ({ error })), [chartRequest]);
+      .catch(error => ({ error })), [chartRequest], { avoidReset: true });
 
 
   const [showData, setShowData] = React.useState(p.part.showData);
@@ -57,6 +63,24 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
+  function handleReload(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    makeQuery();
+  }
+
+  const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+
+  function handleCreateNew(e: React.MouseEvent<any>) {
+    e.preventDefault();
+
+    return SelectorModal.chooseType(typeInfos!)
+      .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
+        .then(props => Constructor.constructPack(ti.name, props)))
+      .then(pack => pack && Navigator.navigate(pack))
+      .then(() => makeQuery())
+      .done();
+  }
+
   return (
     <div>
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
@@ -68,9 +92,16 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
           <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
-          resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
-        <ChartRenderer chartRequest={chartRequest} lastChartRequest={chartRequest}
-          data={result?.chartTable} loading={result == null} />
+            resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
+        <ChartRenderer
+          chartRequest={chartRequest}
+          lastChartRequest={chartRequest}
+          data={result?.chartTable}
+          loading={result === null}
+          onReload={handleReload}
+          typeInfos={typeInfos}
+          onCreateNew={p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined}
+        />
       }
     </div>
   );

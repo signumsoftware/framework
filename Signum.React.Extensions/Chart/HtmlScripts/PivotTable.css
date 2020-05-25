@@ -1,0 +1,11 @@
+﻿table.pivot-table th {
+    background: #f8f8f8;
+}
+
+.pivot-table a {
+    color: inherit;
+}
+
+.pivot-table a:hover {
+    color: dodgerblue;
+}

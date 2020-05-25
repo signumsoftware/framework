@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
   
   var xRule = Rule.create({
     _1: 5,
@@ -60,7 +60,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -84,7 +84,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
 
 
       {columnsInOrder.map(s =>
-        <g key={s.key} className="shape-serie sf-transition"
+        <g key={s.key} className="shape-serie-hover sf-transition"
           transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
           <path className="shape sf-transition"
             stroke={s.color || color(s.key)}
@@ -108,12 +108,18 @@ export default function renderMultiLines({ data, width, height, parameters, load
               fill="#fff"
               fillOpacity={0}
               stroke="none"
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
-                {r.values[s.key].valueNiceName}
+                {r.values[s.key].valueTitle}
               </title>
             </circle>)}
+        </g>)}
+
+      {columnsInOrder.map(s =>
+        <g key={s.key} className="shape-serie sf-transition"
+          transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+          {/*paint graph - points and texts*/}
           {rowsInOrder
             .filter(r => r.values[s.key] != undefined)
             .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="point sf-transition"
@@ -123,7 +129,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value))}
               r={5}
               shapeRendering="initial"
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
                 {r.values[s.key].valueTitle}
@@ -136,7 +142,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 textAnchor="middle"
                 opacity={parameters["NumberOpacity"]}
                 transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value) - 8)}
-                onClick={e => onDrillDown(r.values[s.key].rowClick)}
+                onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
                 cursor="pointer"
                 shapeRendering="initial">
                 {r.values[s.key].valueNiceName}

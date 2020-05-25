@@ -13,8 +13,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { newMListElement, ModifiableEntity } from '@framework/Signum.Entities';
 import { Button } from 'react-bootstrap';
-import { useFetchInState } from '../../../../Framework/Signum.React/Scripts/Hooks';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Dic } from '@framework/Globals';
 import { isFunctionOrStringOrNull } from '../../Dynamic/View/NodeUtils';
 import { useForceUpdate } from '@framework/Hooks'
 
@@ -23,20 +22,12 @@ interface WorkflowActivityModelComponentProps {
   ctx: TypeContext<WorkflowActivityModel>;
 }
 
-interface WorkflowActivityModelComponentState {
-  viewNames?: string[];
-  viewProps?: DynamicViewClient.DynamicViewProps[];
-}
-
 export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps){
   const forceUpdate = useForceUpdate();
 
   const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);
-
-
   const [viewProps, setViewProps] = React.useState<DynamicViewClient.DynamicViewProps[] | undefined>(undefined);
 
-  
   React.useEffect(() => {
     if (p.ctx.value.mainEntityType) {
 

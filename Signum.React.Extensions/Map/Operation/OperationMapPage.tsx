@@ -4,13 +4,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as QueryString from "query-string"
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition } from './OperationMap'
 import "./operationMap.css"
-import { useExpand, useAPI, useSize } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useSize } from '@framework/Hooks'
+import { useExpand } from '@framework/AppContext'
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string }> {
 
@@ -84,7 +86,7 @@ export default function OperationMapPage(p: OperationMapPageProps) {
 
     var query = { ...tables, color: color };
 
-    const url = Navigator.history.createHref({
+    const url = AppContext.history.createHref({
       pathname: "~/map/" + p.match.params.type,
       search: QueryString.stringify(query)
     });
@@ -113,7 +115,7 @@ export default function OperationMapPage(p: OperationMapPageProps) {
       </div>
     );
   }
-  if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
+  if (AppContext.Expander.onGetExpanded && !AppContext.Expander.onGetExpanded())
     return null;
 
   return (

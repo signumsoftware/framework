@@ -29,7 +29,7 @@ namespace Signum.React.Chart
             EntityJsonConverter.AfterDeserilization.Register((ChartRequestModel cr) =>
             {
                 if (cr.ChartScript != null)
-                    cr.GetChartScript().SynchronizeColumns(cr);
+                    cr.GetChartScript().SynchronizeColumns(cr, null);
 
                 if (cr.QueryName != null)
                 {
@@ -44,7 +44,7 @@ namespace Signum.React.Chart
             EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
                 if (uc.ChartScript != null)
-                    uc.GetChartScript().SynchronizeColumns(uc);
+                    uc.GetChartScript().SynchronizeColumns(uc, null);
 
                 if (uc.Query != null)
                 {

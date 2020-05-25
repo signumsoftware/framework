@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
@@ -40,7 +40,7 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
           setSuccess(true);
           //Navigator.resetUI();
-          Navigator.history.push("~/auth/ResetPassword?code=OK");
+          AppContext.history.push("~/auth/ResetPassword?code=OK");
         })
         .catch((e: ValidationError) => {
           if (e.modelState)

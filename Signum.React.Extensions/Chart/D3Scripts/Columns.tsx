@@ -10,7 +10,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -50,7 +50,7 @@ export default function renderColumns({ data, width, height, parameters, loading
   var keyColumn = data.columns.c0!;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -80,7 +80,7 @@ export default function renderColumns({ data, width, height, parameters, loading
           fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           cursor="pointer"
           stroke={x.bandwidth() > 4 ? '#fff' : undefined}
-          onClick={e => onDrillDown(r)}>
+          onClick={e => onDrillDown(r, e)}>
           <title>
             {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
           </title>
@@ -97,7 +97,7 @@ export default function renderColumns({ data, width, height, parameters, loading
               fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
               textAnchor="end"
               cursor="pointer"
-              onClick={de => onDrillDown(r)}>
+              onClick={e => onDrillDown(r, e)}>
               {keyColumn.getValueNiceName(r)}
             </TextEllipsis>)}
           </g> :
@@ -113,7 +113,7 @@ export default function renderColumns({ data, width, height, parameters, loading
                     fill={y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dx={y(valueColumn.getValue(r)) >= size / 2 ? -labelMargin : labelMargin}
                     textAnchor={y(valueColumn.getValue(r)) >= size / 2 ? 'end' : 'start'}
-                    onClick={e => onDrillDown(r)}
+                    onClick={e => onDrillDown(r, e)}
                     cursor="pointer">
                     {keyColumn.getValueNiceName(r)}
                   </TextEllipsis>);
@@ -133,7 +133,7 @@ export default function renderColumns({ data, width, height, parameters, loading
               textAnchor="middle"
               fontWeight="bold"
               cursor="pointer"
-              onClick={e => onDrillDown(r)}>
+              onClick={e => onDrillDown(r, e)}>
               {valueColumn.getValueNiceName(r)}
             </text>)}
         </g>}

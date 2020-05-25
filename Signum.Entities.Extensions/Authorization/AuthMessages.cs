@@ -70,7 +70,7 @@ namespace Signum.Entities.Authorization
         [Description("An error occurred, request not processed.")]
         AnErrorOccurredRequestNotProcessed,
 
-        TheUserIsNotLongerInTheDatabase,
+        TheUserIsNotLongerInTheDatabase
     }
 
     public enum AuthMessage
@@ -78,7 +78,7 @@ namespace Signum.Entities.Authorization
         [Description("Not authorized to {0} the {1} with Id {2}")]
         NotAuthorizedTo0The1WithId2,
         [Description("Not authorized to Retrieve '{0}'")]
-        NotAuthorizedToRetrieve0,
+        NotAuthorizedToRetrieve0
     }
 
     public enum AuthEmailMessage

@@ -56,7 +56,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
             transform={initialLoad ? scale(0,0) : scale(1,1)}
             fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
             shapeRendering="initial"
-            onClick={e => onDrillDown(slice.data)} cursor="pointer">
+            onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
             <title>
               {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
             </title>
@@ -76,7 +76,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 -Math.cos(m) * outerRadious * legendRadius)}
               textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
               fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
-              onClick={e => onDrillDown(slice.data)} cursor="pointer">
+              onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
               {((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : ''}
             </text>
           </g>;

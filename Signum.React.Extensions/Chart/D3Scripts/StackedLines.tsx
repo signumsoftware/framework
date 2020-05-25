@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -59,7 +59,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
-  var keyValues: unknown[] = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues: unknown[] = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -129,7 +129,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             fill="#fff"
             fillOpacity={.1}
             stroke="none"
-            onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick)}
+            onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}

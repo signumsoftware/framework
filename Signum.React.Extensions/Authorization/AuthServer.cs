@@ -25,7 +25,7 @@ namespace Signum.React.Authorization
 
         public static Action<ActionContext, UserEntity> UserPreLogin;
         public static Action<ActionContext, UserEntity> UserLogged;
-        public static Action<UserEntity> UserLoggingOut;
+        public static Action<ActionContext, UserEntity> UserLoggingOut;
 
         
         public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -143,7 +143,7 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.PropertyRouteExtension += (mi, pr) =>
                 {
-                    var allowed = UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed();
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
                     if (allowed == PropertyAllowed.None)
                         return null;
 
@@ -153,14 +153,14 @@ namespace Signum.React.Authorization
 
                 EntityJsonConverter.CanReadPropertyRoute = pr =>
                 {
-                    var allowed = UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed();
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
                     return allowed == PropertyAllowed.None ? "Not allowed" : null;
                 };
 
                 EntityJsonConverter.CanWritePropertyRoute = pr =>
                 {
-                    var allowed = UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed();
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
                     return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
                 };

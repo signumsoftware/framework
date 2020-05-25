@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Isolation from '../Isolation/Signum.Entities.Isolation'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
@@ -84,6 +85,12 @@ export type DynamicExpressionTranslation =
   "TranslateExpressionName" |
   "ReuseTranslationOfReturnType" |
   "NoTranslation";
+
+export const DynamicIsolationMixin = new Type<DynamicIsolationMixin>("DynamicIsolationMixin");
+export interface DynamicIsolationMixin extends Entities.MixinEntity {
+  Type: "DynamicIsolationMixin";
+  isolationStrategy: Isolation.IsolationStrategy;
+}
 
 export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
 export interface DynamicMixinConnectionEntity extends Entities.Entity {

@@ -6,6 +6,9 @@ import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
+import { formatAsDate } from "@framework/Lines/ValueLine";
+import { ChartRequestModel } from "../../Signum.Entities.Chart";
+import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 
 
 
@@ -95,37 +98,126 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
   }
 }
 
-export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
+
+export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, filterOptions: FilterOptionParsed[], insertPoint: "Middle" | "Before" | "After"): unknown[] {
 
   if (completeValues == null || completeValues == "No")
     return values;
 
+  function normalizeToken(qt: QueryToken): { normalized: QueryToken, lastPart?: QueryToken } {
+    if ((qt.type.name == "Date" || qt.type.name == "DateTime") &&
+      qt.parent && (qt.parent.type.name == "Date" || qt.parent.type.name == "DateTime"))
+      switch (qt.key) {
+        case "SecondStart":
+        case "MinuteStart":
+        case "HourStart":
+        case "Date":
+        case "WeekStart":
+        case "MonthStart":
+        case "MonthStart":
+          return {
+            normalized: qt.parent,
+            lastPart : qt,
+          };
+      }
+
+    return {
+      normalized: qt,
+      lastPart: undefined
+    };
+  }
+
+  function momentUnit(lastPart: string): moment.unitOfTime.Base {
+    switch (lastPart) {
+      case "SecondStart": return "s";
+      case "MinuteStart": return "m";
+      case "HourStart": return "h";
+      case "Date": return "d";
+      case "WeekStart": return "w";
+      case "MonthStart": return "M";
+      default: throw new Error("Unexpected " + lastPart);
+    }
+  }
+
+  const columnNomalized = normalizeToken(column.token!);  
+
+  const machingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
+    (filterOptions.filter(f => !isFilterGroupOptionParsed(f)) as FilterConditionOptionParsed[])
+      .filter(f => f.token && normalizeToken(f.token).normalized.fullKey == columnNomalized.normalized.fullKey) :
+    [];
+
+  if (completeValues == "FromFilters" && machingFilters.length == 0)
+    return values;
+
+  const isAuto = completeValues == "Auto";
+
+  const isInFilter = machingFilters.firstOrNull(a => a.operation == "IsIn");
+
+  if (isInFilter)
+    return complete(values, isInFilter.value as unknown[], column, insertPoint);
+
   if (column.type == "Lite" || column.type == "String")
     return values;
 
-  const isAuto = completeValues == "Auto"
-
   if (column.type == "Date" || column.type == "DateTime") {
 
-    const min = d3.min(values as string[]);
-    const max = d3.max(values as string[]);
+    const unit: moment.unitOfTime.Base | null = columnNomalized.lastPart != null ? momentUnit(columnNomalized.lastPart.key) :
+      columnNomalized.normalized.type.name == "Date" ? "d" : null;
 
-    if (min == undefined || max == undefined)
+    if (unit == null)
+      return values;
+
+    const min = d3.max(machingFilters.filter(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual" || a.operation == "EqualTo")
+      .map(f => {
+        const pair = normalizeToken(f.token!);
+
+        const value = moment(f.value);
+
+        //Date.MonthStart >  1.4.2000
+        //             Min-> 1.5.2000
+        //Date.MonthStart >= 1.4.2000
+        //             Min-> 1.4.2000
+        //Date.MonthStart == 1.4.2000
+        //             Min-> 1.4.2000
+        if (f.operation == "GreaterThan" && pair.lastPart != null) {
+          value.add(1, momentUnit(pair.lastPart.key));
+        }
+
+        return value.startOf(unit).format();
+      })) ?? d3.min(values as string[]);
+
+    const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
+      .map(a => {
+        const pair = normalizeToken(a.token!);
+        let value = moment(a.value);
+
+        //Date.MonthStart <  1.4.2000
+        //             Max   1.4.2000
+        //Date.MonthStart <= 1.4.2000
+        //                   1.5.2000
+        //Date.MonthStart == 1.4.2000
+        //             Max   1.5.2000
+        if ((a.operation == "LessThanOrEqual" || a.operation == "EqualTo"))
+          value.startOf(unit).add(1, pair.lastPart ? momentUnit(pair.lastPart.key) : unit);
+
+        var aligned = value.startOf(unit);
+
+        if (value != aligned)
+          value = aligned;
+        else
+          value.add(-1, unit);
+
+        return value.format();
+      }
+      )) ?? d3.min(values as string[]);
+
+
+    if (min == undefined  || max == undefined)
       return values; 
 
-    const minMoment = moment(min);
-    const maxMoment = moment(max);
+    const minMoment = moment(min).startOf(unit);
+    const maxMoment = moment(max).endOf(unit);
 
-    const lastPart = column.token!.fullKey.tryAfterLast('.');
-
-    const unit: moment.unitOfTime.Base | null =
-      lastPart == "SecondStart" ? "s" :
-        lastPart == "MinuteStart" ? "m" :
-          lastPart == "HourStart" ? "h" :
-            lastPart == "Date" ? "d" :
-              lastPart == "WeekStart" ? "w" :
-                lastPart == "MonthStart" ? "M" :
-                  null;
 
     if (unit == null)
       return values;
@@ -137,8 +229,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.format());
-      minMoment.add(unit, 1);
+      allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
+      minMoment.add(1, unit);
     }
 
     return complete(values, allValues, column, insertPoint);
@@ -146,42 +238,49 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Enum") {
 
-    var typeName = column.token!.type.name; 
+    const typeName = column.token!.type.name; 
     
     if (typeName == "boolean") {
       return complete(values, [false, true], column, insertPoint);
     }
 
-    var typeInfo = tryGetTypeInfo(column.token!.type.name);
+    const typeInfo = tryGetTypeInfo(column.token!.type.name);
     if (typeInfo == null)
       throw new Error("No Metadata found for " + typeName);
 
-    var allValues = Dic.getValues(typeInfo.members).filter(a => !a.isIgnoredEnum).map(a => a.name);
+    const allValues = Dic.getValues(typeInfo.members).filter(a => !a.isIgnoredEnum).map(a => a.name);
 
     return complete(values, allValues, column, insertPoint);
   }
 
   if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
 
-    const min = d3.min(values as number[]) as number | undefined;
-    const max = d3.max(values as number[]) as number | undefined;
-
-    if (min == undefined || max == undefined)
-      return values;
-
     const lastPart = column.token!.fullKey.tryAfterLast('.');
-    
-    const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) : 
-        (column.type == "Integer" ? 1 : null);
+
+    const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) :
+      (column.type == "Integer" ? 1 : null);
 
     if (step == null)
+      return values;
+
+    const minFilter = machingFilters.firstOrNull(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual");
+    const min = minFilter == null ? d3.min(values as number[]) :
+      minFilter.operation == "GreaterThan" ? minFilter.value as number + step :
+        minFilter.operation == "GreaterThanOrEqual" ? minFilter.value : undefined;
+
+    const maxFilter = machingFilters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
+    const max = maxFilter == null ? d3.min(values as number[]) :
+      maxFilter.operation == "LessThan" ? maxFilter.value as number - step :
+        maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 
+
+    if (min == undefined || max == undefined)
       return values;
 
     const allValues: number[] = [];
     const limit = isAuto ? values.length * 2 : null;
     if (step < 1) {
-      var inv = 1 / step;
-      var v = min;
+      const inv = 1 / step;
+      let v = min;
       while (v <= max) {
 
         if (limit != null && allValues.length > limit)
@@ -191,7 +290,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         v = Math.round((v + step) * inv) / inv;
       }
     } else {
-      var v = min;
+      let v = min;
       while (v <= max) {
         if (limit != null && allValues.length > limit)
           return values;
@@ -212,14 +311,14 @@ function complete(values: unknown[], allValues: unknown[], column: ChartColumn<u
 
     const allValuesDic = allValues.toObject(column.getKey);
     
-    var oldValues = values.filter(a => !allValuesDic.hasOwnProperty(column.getKey(a)));
+    const oldValues = values.filter(a => !allValuesDic.hasOwnProperty(column.getKey(a)));
 
     return [...column.orderByType == "Descending" ? allValues.reverse() : allValues, ...oldValues];
   }
   else {
     const valuesDic = values.toObject(column.getKey);
     
-    var newValues = allValues.filter(a => !valuesDic.hasOwnProperty(column.getKey(a)));
+    const newValues = allValues.filter(a => !valuesDic.hasOwnProperty(column.getKey(a)));
 
     if (insertPoint == "Before")
       return [...newValues, ...values];

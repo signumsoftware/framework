@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { getTypeInfo } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
@@ -24,10 +24,10 @@ export default function TreePage(p: TreePageProps) {
   function changeUrl() {
     var newPath = treeViewRef.current!.getCurrentUrl();
 
-    var currentLocation = Navigator.history.location;
+    var currentLocation = AppContext.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
-      Navigator.history.replace(newPath);
+      AppContext.history.replace(newPath);
   }
 
   var ti = getTypeInfo(p.match.params.typeName);
@@ -46,6 +46,7 @@ export default function TreePage(p: TreePageProps) {
         typeName={ti.name}
         allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
+        showToolbar={true}
         key={ti.name}
         onSearch={() => changeUrl()} />
     </div>

@@ -25,15 +25,12 @@ namespace Signum.Engine.Chart.Scripts
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
 
-                new ChartScriptParameterGroup("Scales 1-4")
+                new ChartScriptParameterGroup()
                 {
                     new ChartScriptParameter("Scale1", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
                     new ChartScriptParameter("Scale2", ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
                     new ChartScriptParameter("Scale3", ChartParameterType.Enum) { ColumnIndex = 3,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
                     new ChartScriptParameter("Scale4", ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
-                },
-                new ChartScriptParameterGroup("Scales 5-8")
-                {
                     new ChartScriptParameter("Scale5", ChartParameterType.Enum) { ColumnIndex = 5,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
                     new ChartScriptParameter("Scale6", ChartParameterType.Enum) { ColumnIndex = 6,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },
                     new ChartScriptParameter("Scale7", ChartParameterType.Enum) { ColumnIndex = 7,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)|Sqrt (M)") },

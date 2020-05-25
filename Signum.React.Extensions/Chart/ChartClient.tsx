@@ -5,6 +5,7 @@ import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos } from '@framework/Reflection'
@@ -14,7 +15,7 @@ import {
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript, HtmlChartScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
@@ -61,6 +62,8 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScriptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
   registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/TreeMap"));
 
+  registerChartScriptComponent(HtmlChartScript.PivotTable, () => import("./HtmlScripts/PivotTable"));
+
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;
     registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
@@ -68,21 +71,19 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   }
 }
 
-export interface ChartComponentProps {
+export interface ChartScriptProps {
   data?: ChartTable;
   parameters: { [name: string]: string },
   loading: boolean;
-  onDrillDown: (e: ChartRow) => void;
-}
-
-export interface ChartScriptProps extends ChartComponentProps {
+  onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   width: number;
   height: number;
   initialLoad: boolean;
+  chartRequest: ChartRequestModel;
 }
 
 interface ChartScriptModule {
-  default: (React.ComponentClass<ChartComponentProps>) | ((p: ChartScriptProps) => React.ReactNode);
+  default: ((p: ChartScriptProps) => React.ReactNode);
 }
 
 const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};
@@ -155,7 +156,7 @@ export interface EnumValue {
 }
 
 export interface StringValue {
-  defaultValue: number;
+  defaultValue: string;
 }
 
 
@@ -326,7 +327,7 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
@@ -403,6 +404,7 @@ export module Encoder {
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
         displayName: co.element.displayName,
+        format: co.element.format,
         orderByIndex: co.element.orderByIndex,
         orderByType: co.element.orderByType,
       }) as ChartColumnOption),
@@ -441,7 +443,7 @@ export module Encoder {
 
     encodeColumn(query, co.columnOptions);
 
-    return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+    return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
   }
 
@@ -612,7 +614,7 @@ export module API {
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -634,14 +636,18 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = token.format && toMomentFormat(token.format);
+        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
+          token.format ? toMomentFormat(token.format) :
+            undefined;
         return date == null ? String(null) : moment(date).format(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = token.format && toNumbroFormat(token.format);
+        var format = chartColumn.format ? toNumbroFormat(chartColumn.format) :
+          token.format ? toNumbroFormat(token.format) :
+            undefined;
         return number == null ? String(null) : numbro(number).format(format);
       };
 
@@ -670,14 +676,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
-      const niceName = getNiceName(token);
+      const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
+        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -770,7 +777,6 @@ export module API {
       var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
         .then(list => list.toObject(a => a.type, a => a.palette));
 
-      ChartPaletteClient.getColorPaletteTypes()
       return Finder.API.executeQuery(queryRequest, abortSignal)
         .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
     });

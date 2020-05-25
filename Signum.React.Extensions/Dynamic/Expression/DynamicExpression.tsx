@@ -159,7 +159,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
           {exampleEntity && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px", display: "flex", overflow: "visible" }}>
-              {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))}&nbsp;{renderInput(ctx.subCtx(dt => dt.name))}&nbsp;({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
+              {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))}&nbsp;{renderInput(ctx.subCtx(dt => dt.name))}&nbsp;({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) {"=>"}
             </pre>
             <CSharpCodeMirror script={ctx.value.body ?? ""} onChange={handleCodeChange} />
           </div>

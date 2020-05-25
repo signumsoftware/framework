@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { WebApiHttpError } from '@framework/Services'
 import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
@@ -40,7 +41,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
 
 
   function handleSelect(key: any /*string*/) {
-    Navigator.history.push("~/dynamic/panel?step=" + key);
+    AppContext.history.push("~/dynamic/panel?step=" + key);
   }
 
   function handleErrorClick(e: React.MouseEvent<any>) {

@@ -94,7 +94,7 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.ReadyToSend,         false,         false,         false,                    null },
 {EmailMessageState.RecruitedForSending, false,         false,         false,                    null },
 {EmailMessageState.Sent,                false,         true,          false,                    null },
-{EmailMessageState.SentException,       true,          true,          false,                    null },
+{EmailMessageState.SentException,       true,          null,          false,                    null },
 {EmailMessageState.ReceptionNotified,   true,          true,          true,                     null },
 {EmailMessageState.Received,            false,         false,         false,                    false },
 {EmailMessageState.Outdated,            false,         false,         false,                    null },
@@ -219,8 +219,11 @@ namespace Signum.Entities.Mailing
         }
 
         public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailRecipientEmbedded other)
+        public bool Equals(EmailRecipientEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
         }
 
@@ -299,8 +302,11 @@ namespace Signum.Entities.Mailing
         }
 
         public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailAddressEmbedded other)
+        public bool Equals(EmailAddressEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
@@ -338,7 +344,7 @@ namespace Signum.Entities.Mailing
         public CultureInfoEntity? CultureInfo { get; set; }
 
         public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
-        public bool Equals(EmailOwnerData other)
+        public bool Equals(EmailOwnerData? other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }

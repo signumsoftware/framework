@@ -3,14 +3,29 @@ import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
-import { API } from '../AuthClient'
-import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol } from '../Signum.Entities.Authorization'
+import * as Finder from '@framework/Finder'
+
+import { API } from '../AuthAdminClient'
+import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, RoleEntity } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
-import { useForceUpdate } from '@framework/Hooks'
+import { GraphExplorer } from '@framework/Reflection'
 
 export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
+
+  function renderButtons(bc: ButtonsContext) {
+
+    GraphExplorer.propagateAll(bc.pack.entity);
+
+    const hasChanges = bc.pack.entity.modified;
+
+    return [
+      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+    ];
+  }
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = p.ctx.value;
@@ -24,16 +39,33 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
       .done();
   }
 
-  function renderButtons(bc: ButtonsContext) {
-    return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
-    ];
+  function handleResetChangesClick(bc: ButtonsContext) {
+    let pack = ctx.value;
+
+    API.fetchPermissionRulePack(pack.role.id!)
+      .then(newPack => { bc.frame.onReload({ entity: newPack, canExecute: {} }); })
+      .done();
   }
 
-  const forceUpdate = useForceUpdate();
+  function handleSwitchToClick(bc: ButtonsContext) {
+
+    Finder.find(RoleEntity).then(r => {
+      if (!r)
+        return;
+
+      API.fetchPermissionRulePack(r.id!)
+        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
+        .done();
+    });
+  }
+
   const [filter, setFilter] = React.useState("");
 
   React.useImperativeHandle(ref, () => ({ renderButtons }), [p.ctx.value])
+
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
+  }
 
   function handleSetFilter(e: React.FormEvent<any>) {
     setFilter((e.currentTarget as HTMLInputElement).value);
@@ -106,7 +138,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
                 <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
-                  forceUpdate();
+                  updateFrame();
                 }} />
               </td>
             </tr>
@@ -118,6 +150,6 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   );
 
   function renderRadio(c: PermissionAllowedRule, allowed: boolean, color: string) {
-    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
+    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; updateFrame() }} />;
   }
 });

@@ -99,6 +99,8 @@ export default function ChartTableComponent(p : ChartTableProps){
 
   var hasEntity = !ChartClient.hasAggregates(chartRequest);
 
+  var entityFormatter = qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(undefined)).last("EntityFormatRules").formatter;
+
   return (
     <table className="sf-search-results table table-hover table-sm">
       <thead>
@@ -108,7 +110,7 @@ export default function ChartTableComponent(p : ChartTableProps){
             <th key={i} data-column-name={col.column.token!.fullKey}
               onClick={e=>handleHeaderClick(e, col.column)}>
               <span className={"sf-header-sort " + orderClassName(col.column)} />
-              <span> {col.column.displayName ?? col.column.token!.niceName}</span>
+              <span> {col.column.displayName || col.column.token!.niceName}</span>
             </th>)}
         </tr>
       </thead>
@@ -122,7 +124,11 @@ export default function ChartTableComponent(p : ChartTableProps){
             }
             return (
               <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
-                {hasEntity && <td>{(qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
+                {hasEntity &&
+                  <td className={entityFormatter.cellClass}>
+                    {entityFormatter.formatter(row, resultTable.columns, undefined)}
+                  </td>
+                }
                 {columns.map((c, j) =>
                   <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                     {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}

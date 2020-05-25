@@ -5,6 +5,7 @@ using Signum.Utilities;
 using System.ComponentModel;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Entities.Processes
 {
@@ -213,5 +214,9 @@ namespace Signum.Entities.Processes
         public Lite<ProcessEntity> Process { get; set; }
         
         public Lite<ExceptionEntity> Exception { get; set; }
+
+        static Expression<Func<ProcessExceptionLineEntity, string>> ToStringExpression = pel => "ProcessExceptionLine (" + pel.Id + ")";
+        [ExpressionField("ToStringExpression")]
+        public override string ToString() => "ProcessExceptionLine (" + (this.IdOrNull == null ? "New" : this.Id.ToString()) + ")";
     }
 }

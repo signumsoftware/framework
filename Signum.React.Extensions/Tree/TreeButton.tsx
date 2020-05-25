@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
@@ -18,9 +18,9 @@ export default function TreeButton(p : TreeButtonProps){
     const path = TreeClient.treePath(fo.queryKey, Finder.toFilterOptions(fo.filterOptions));
 
     if (p.searchControl.props.avoidChangeUrl)
-      window.open(Navigator.toAbsoluteUrl(path));
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      Navigator.pushOrOpenInTab(path, e);
+      AppContext.pushOrOpenInTab(path, e);
   }
 
   var label = p.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;

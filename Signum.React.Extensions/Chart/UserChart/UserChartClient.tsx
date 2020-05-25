@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { OrderOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -14,8 +14,6 @@ import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { OrderRequest } from '@framework/FindOptions';
-import { toFilterRequests } from '@framework/Finder';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -42,7 +40,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     return promise.then(uqs =>
       uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => uc.toStr ?? "", e => {
-        window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
+        window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
   });
 
@@ -50,7 +48,7 @@ export function start(options: { routes: JSX.Element[] }) {
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
         if (uc.entityType == undefined)
-          window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}`));
+          window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}`));
         else
           Navigator.API.fetchAndForget(uc.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
@@ -58,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
               if (!lite)
                 return;
 
-              window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
+              window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
             })
             .done();
       }).done();
@@ -103,6 +101,7 @@ export module Converter {
           rowId: null,
           element: ChartColumnEmbedded.New({
             displayName: mle.element.displayName,
+            format: mle.element.format,
 
             token: t && QueryTokenEmbedded.New({
               token: UserAssetsClient.getToken(t),

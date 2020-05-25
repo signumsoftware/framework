@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
@@ -33,8 +34,8 @@ export default function ChangePassword() {
         .then(lr => {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
-          Navigator.resetUI();
-          Navigator.history.push(Navigator.toAbsoluteUrl("~/auth/changePasswordSuccess"));
+          AppContext.resetUI();
+          AppContext.history.push(AppContext.toAbsoluteUrl("~/auth/changePasswordSuccess"));
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
@@ -86,24 +87,24 @@ export default function ChangePassword() {
       </div>
       <div className="row">
       <div className="col-md-6 offset-md-3">
-        <div className={classes("form-group", error("oldPassword") && "has-error")}>
-            <label className="col-form-label">{LoginAuthMessage.CurrentPassword.niceToString()}</label>
+        <div className={classes("form-group form-group-sm", error("oldPassword") && "has-error")}>
+            <label className="col-form-label col-form-label-sm">{LoginAuthMessage.CurrentPassword.niceToString()}</label>
           <div>
-            <input type="password" className="form-control" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
+            <input type="password" className="form-control form-control-sm" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
             {error("oldPassword") && <span className="help-block">{error("oldPassword")}</span>}
           </div>
         </div>
-        <div className={classes("form-group", error("newPassword") && "has-error")}>
-            <label className="col-form-label">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
+          <div className={classes("form-group form-group-sm", error("newPassword") && "has-error")}>
+            <label className="col-form-label col-form-label-sm">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
           <div>
-            <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
+              <input type="password" className="form-control form-control-sm" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>
-        <div className={classes("form-group", error("newPassword") && "has-error")}>
-            <label className="col-form-label">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
+          <div className={classes("form-group form-group-sm", error("newPassword") && "has-error")}>
+            <label className="col-form-label col-form-label-sm">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
           <div>
-            <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
+              <input type="password" className="form-control form-control-sm" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>

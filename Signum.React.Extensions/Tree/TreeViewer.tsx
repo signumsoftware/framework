@@ -2,6 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
@@ -33,6 +34,7 @@ interface TreeViewerProps {
   onSearch?: () => void;
   filterOptions: FilterOption[];
   initialShowFilters?: boolean;
+  showToolbar?: boolean;
 }
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
@@ -134,7 +136,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (ev.ctrlKey || ev.button == 1)
       window.open(path);
     else
-      Navigator.history.push(path);
+      AppContext.history.push(path);
   };
 
   getCurrentUrl() {
@@ -178,9 +180,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return (
       <div>
         {this.renderSearch()}
-        <br />
-        {this.renderToolbar()}
-        <br />
+        {this.props.showToolbar && <>
+          <br />
+          {this.renderToolbar()}
+          <br />
+        </>}
+        
         <div className="tree-container" ref={(t) => this.treeContainer = t!} >
           <ul>
             {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
@@ -428,9 +433,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     });
 
     if (this.props.avoidChangeUrl)
-      window.open(Navigator.toAbsoluteUrl(path));
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      Navigator.pushOrOpenInTab(path, e);
+      AppContext.pushOrOpenInTab(path, e);
   }
 
   handleToggleFilters = () => {

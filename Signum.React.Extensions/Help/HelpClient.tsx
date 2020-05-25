@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
 import { ajaxGet, ajaxPost } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
 import { ImportRoute } from "@framework/AsyncImport";
@@ -39,29 +39,29 @@ export function toHtml(txt: string  | null) {
   var txt2 = txt.replace(helpLinkRegex, (match: any, letter: string, link: string) => {
     switch (letter) {
       case 't': {
-        var ti = getTypeInfo(link);
+        const ti = getTypeInfo(link);
         return markdownLink(Urls.typeUrl(link), ti?.niceName ?? link);
       }
       case 'a': return markdownLink(Urls.appendixUrl(link), link);
       case 'n': return markdownLink(Urls.namespaceUrl(link), link);
       case 'o': {
-        var ti = getAllTypes().firstOrNull(ti => ti.kind == "Entity" && ti.operations != null && ti.operations[link] != null);
+        const ti = getAllTypes().firstOrNull(ti => ti.kind == "Entity" && ti.operations != null && ti.operations[link] != null);
         return markdownLink(ti && Urls.operationUrl(ti.name, link), link);
       }
       case 'q': {
-        var ti = getTypeInfo(link);
+        const ti = getTypeInfo(link);
         return markdownLink(ti && Urls.queryUrl(ti.name, link), link);
       }
       case 'p': {
-        var type = link.tryBefore(".");
-        var ti = type ? getTypeInfo(type) : null;
+        const type = link.tryBefore(".");
+        const ti = type ? getTypeInfo(type) : null;
         return markdownLink(ti && Urls.propertyUrl(ti.name, link.after(".")), link);
       }
       default: throw new Error("Not expected " + letter);
     }
   });
 
-  var txt3 = txt2.replace(helpAppRelativeUrl, "[" + Navigator.toAbsoluteUrl("~"));
+  var txt3 = txt2.replace(helpAppRelativeUrl, "[" + AppContext.toAbsoluteUrl("~"));
 
   return Options.markdownToHml(txt3);
 }
@@ -127,23 +127,23 @@ export interface NamespaceHelp {
 
 export module Urls {
   export function indexUrl() {
-    return Navigator.toAbsoluteUrl("~/help");
+    return AppContext.toAbsoluteUrl("~/help");
   }
 
   export function searchUrl(query: PseudoType) {
-    return Navigator.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: query }));
+    return AppContext.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: query }));
   }
 
   export function typeUrl(typeName: PseudoType) {
-    return Navigator.toAbsoluteUrl("~/help/type/" + getTypeName(typeName));
+    return AppContext.toAbsoluteUrl("~/help/type/" + getTypeName(typeName));
   }
 
   export function namespaceUrl(namespace: string) {
-    return Navigator.toAbsoluteUrl("~/help/namespace/" + namespace.replaceAll(".", "_"));
+    return AppContext.toAbsoluteUrl("~/help/namespace/" + namespace.replaceAll(".", "_"));
   }
 
   export function appendixUrl(uniqueName: string | null) {
-    return Navigator.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
+    return AppContext.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
   }
 
   export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {

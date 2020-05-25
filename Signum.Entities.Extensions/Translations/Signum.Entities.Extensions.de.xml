@@ -408,6 +408,7 @@
   <Type Name="DashboardEmbedededInEntity" Description="Dashboard eingebettet in">
     <Member Name="Bottom" Description="Nach unten" />
     <Member Name="None" Description="Keine" />
+    <Member Name="Tab" Description="Tab" />
     <Member Name="Top" Description="Nach oben" />
   </Type>
   <Type Name="DashboardEntity" Description="Dashboard" PluralDescription="Dashboards" Gender="n">
@@ -619,6 +620,7 @@
     <Member Name="ReuseTranslationOfReturnType" Description="Übersetzung des Rückgabetyps wiederverwenden" />
     <Member Name="TranslateExpressionName" Description="Ausdrucksnamen übersetzen" />
   </Type>
+  <Type Name="DynamicIsolationMixin" />
   <Type Name="DynamicMixinConnectionEntity" Description="Dynamische mixinverbindung" PluralDescription="Dynamischen mixinverbindungen">
     <Member Name="EntityType" Description="Entitätstyp" />
   </Type>
@@ -1202,6 +1204,8 @@
   <Type Name="IsolationMessage">
     <Member Name="Entity0HasIsolation1ButCurrentIsolationIs2" Description="Entität {0} hat Isolierung {1} aber aktuelle Isolierung ist {2}" />
     <Member Name="Entity0HasIsolation1ButEntity2HasIsolation3" Description="Entität &quot;{0}&quot; hat Isolierung {1} aber Entität &quot;{2}&quot; Isolierung {3}" />
+    <Member Name="GlobalEntity" Description="Globale Entität" />
+    <Member Name="GlobalMode" Description="Globaler Modus" />
     <Member Name="SelectAnIsolation" Description="Wählen Sie eine Isolation" />
   </Type>
   <Type Name="IsolationMixin">
@@ -1209,6 +1213,11 @@
   </Type>
   <Type Name="IsolationOperation">
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="IsolationStrategy" Description="Isolationsstrategie">
+    <Member Name="Isolated" Description="Isoliert" />
+    <Member Name="None" Description="Nichts" />
+    <Member Name="Optional" Description="Optional" />
   </Type>
   <Type Name="ITaskEntity" />
   <Type Name="ITaskMessage">
@@ -1583,13 +1592,17 @@
   </Type>
   <Type Name="Pop3ConfigurationOperation">
     <Member Name="ReceiveEmails" Description="E-Mails empfangen" />
+    <Member Name="ReceiveLastEmails" Description="Letzte E-Mails erhalten" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="Pop3ReceptionEntity" Description="POP3-Empfang" PluralDescription="POP3-Empfänge" Gender="m">
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="LastServerMessageUID" Description="Letzte Servernachricht UID" />
+    <Member Name="MailsFromDifferentAccounts" Description="E-Mails von verschiedenen Konten" />
     <Member Name="NewEmails" Description="Neue E-Mails" />
     <Member Name="Pop3Configuration" Description="POP3-Konfiguration" />
+    <Member Name="ServerEmails" Description="Server-E-Mails" />
     <Member Name="StartDate" Description="Startdatum" />
   </Type>
   <Type Name="Pop3ReceptionExceptionEntity" Description="POP3-Empfang-Ausnahme">
@@ -2467,6 +2480,10 @@
     <Member Name="Device" Description="Gerät" />
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="UserTreePartEntity" Description="Benutzerbaumteil" PluralDescription="Benutzerbaumteile" Gender="m">
+    <Member Name="RequiresTitle" Description="Titel erforderlich" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />
