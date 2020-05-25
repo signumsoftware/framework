@@ -51,7 +51,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
 
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest, ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

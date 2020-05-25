@@ -59,7 +59,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest, ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
