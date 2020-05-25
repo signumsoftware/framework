@@ -43,11 +43,11 @@ namespace Signum.Entities
             if (validators.GetDefinition(typeof(T)) != null)
                 return;
 
-            if(typeof(T) != typeof(ModifiableEntity))
+            if (typeof(T) != typeof(ModifiableEntity))
                 GenerateType(typeof(T).BaseType!);
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                       where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 
+                       where !(pi.HasAttribute<HiddenPropertyAttribute>() || (pi.CanWrite == false && pi.HasAttribute<ExpressionFieldAttribute>()))
                        select KeyValuePair.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
 
             validators.SetDefinition(typeof(T), dic);
