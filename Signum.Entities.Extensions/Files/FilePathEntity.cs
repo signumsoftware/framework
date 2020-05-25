@@ -3,6 +3,7 @@ using System.IO;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Entities.Patterns;
+using Signum.Services;
 
 namespace Signum.Entities.Files
 {
@@ -58,9 +59,14 @@ namespace Signum.Entities.Files
             set
             {
                 if (Set(ref binaryFile, value) && binaryFile != null)
+                {
                     FileLength = binaryFile.Length;
+                    Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
+                }
             }
         }
+
+        public string? Hash { get; private set; }
 
         public int FileLength { get; internal set; }
 
