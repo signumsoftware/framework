@@ -3,11 +3,12 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
+import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
@@ -30,6 +31,8 @@ export function start() {
   ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
   ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
 
+  AppContext.clearSettingsActions.push(clearOperationSettings);
+
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
     parentToken: OperationLogEntity.token(e => e.target),
@@ -39,7 +42,6 @@ export function start() {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
       icon: "history",
       iconColor: "green",
-      isShy: true,
     }));
 }
 
@@ -235,7 +237,7 @@ export class EntityOperationContext<T extends Entity> {
 
     const result = new EntityOperationContext<T>(frame, pack.entity, oi);
     result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
-    result.canExecute = pack?.canExecute && pack.canExecute[operationKey];
+    result.canExecute = (pack?.canExecute && pack.canExecute[operationKey]) ?? (pack.entity.isNew && !oi.canBeNew ? EngineMessage.TheEntity0IsNew.niceToString(getToString(pack.entity)) : undefined);
     result.complete();
     return result;
   }
@@ -259,7 +261,7 @@ export class EntityOperationContext<T extends Entity> {
   constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
     this.frame = frame;
     this.entity = entity;
-    this.operationInfo =  operationInfo;
+    this.operationInfo = operationInfo;
   }
 
   complete() {
@@ -361,10 +363,10 @@ export interface EntityOperationOptions<T extends Entity> {
   contextualFromMany?: ContextualOperationOptions<T>;
 
   text?: () => string;
-  isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-  overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (ctx: EntityOperationContext<T>) => void;
+  isVisible?: (eoc: EntityOperationContext<T>) => boolean;
+  overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  onClick?: (eoc: EntityOperationContext<T>) => void;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
@@ -375,7 +377,7 @@ export interface EntityOperationOptions<T extends Entity> {
   iconAlign?: "start" | "end";
   iconColor?: string;
   keyboardShortcut?: KeyboardShortcut | null;
-  alternatives?: (ctx: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
+  alternatives?: (eoc: EntityOperationContext<T>) => AlternativeOperationSetting<T>[];
 }
 
 export interface KeyboardShortcut{

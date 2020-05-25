@@ -49,9 +49,12 @@ namespace Signum.Entities
             return Enum.IsDefined(typeof(T), en) ? en.ToString() : (this.toStr ?? en.ToString());  //for aux sync
         }
 
-        public bool Equals(EnumEntity<T> other)
+        public bool Equals(EnumEntity<T>? other)
         {
-            return EqualityComparer<T>.Default.Equals(ToEnum(), other.ToEnum());
+            if (other == null)
+                return false;
+
+            return EqualityComparer<T>.Default.Equals(ToEnum(), other!.ToEnum());
         }
 
         public static implicit operator EnumEntity<T>(T enumerable)

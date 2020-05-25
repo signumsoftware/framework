@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Signum.Entities
 {
@@ -47,7 +48,7 @@ namespace Signum.Entities
         {
         }
 
-        protected internal virtual void PostRetrieving()
+        protected internal virtual void PostRetrieving(PostRetrievingContext ctx)
         {
         }
     }
@@ -65,6 +66,11 @@ namespace Signum.Entities
         {
             this.IsGraphInvalidated = true;
         }
+    }
+
+    public class PostRetrievingContext
+    {
+        public Dictionary<Modifiable, ModifiedState> ForceModifiedState = new Dictionary<Modifiable, ModifiedState>();
     }
 
     public enum ModifiedState

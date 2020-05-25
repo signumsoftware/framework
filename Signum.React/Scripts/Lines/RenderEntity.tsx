@@ -3,10 +3,10 @@ import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
-import { ViewPromise } from "../Navigator";
+import { ViewPromise, useFetchAndRemember } from "../Navigator";
 import { ErrorBoundary } from '../Components';
-import { FunctionalAdapter } from '../Frames/FrameModal';
-import { useFetchAndRemember, useAPI, useForceUpdate } from '../Hooks'
+import { useAPI, useForceUpdate } from '../Hooks'
+import { FunctionalAdapter } from '../Modals'
 
 export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -56,7 +56,9 @@ export function RenderEntity(p: RenderEntityProps) {
 
   const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
 
+  const prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
   const frame: EntityFrame = {
+    tabs: undefined,
     frameComponent: { forceUpdate, type: RenderEntity },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },
@@ -66,6 +68,7 @@ export function RenderEntity(p: RenderEntityProps) {
     setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
     refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
     allowChangeEntity: false,
+    prefix: prefix,
   };
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -75,7 +78,6 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
-  var prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 

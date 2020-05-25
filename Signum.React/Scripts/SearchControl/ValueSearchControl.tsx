@@ -31,6 +31,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   refreshKey?: string | number;
   searchControlProps?: Partial<SearchControlProps>;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
+  htmlAttributes?: React.HTMLAttributes<HTMLElement>,
 }
 
 export interface ValueSearchControlState {
@@ -154,7 +155,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     var errorMessage = Finder.validateNewEntities(fo);
     if (errorMessage) {
       return (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger" role="alert" >
           <strong>Error in ValueSearchControl ({getQueryKey(fo.queryName)}): </strong>
           {errorMessage}
         </div>
@@ -183,17 +184,21 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     );
 
     if (p.formControlClass)
-      return <div className={className} style={p.customStyle}>{this.renderValue()}</div>
+      return (
+        <div className={className} style={p.customStyle} {...p.htmlAttributes}>
+          {this.renderValue()}
+        </div>
+      );
 
     if (p.isLink) {
       return (
-        <a className={className} onClick={this.handleClick} href="#" style={p.customStyle}>
+        <a className={className} onClick={this.handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
           {this.renderValue()}
         </a>
       );
     }
 
-    return <span className={className} style={p.customStyle}>{this.renderValue()}</span>
+    return <span className={className} style={p.customStyle} {...p.htmlAttributes}>{this.renderValue()}</span>
   }
 
   renderValue() {

@@ -1,70 +1,40 @@
 import * as React from "react"
-import * as H from "history"
-import { Route, Switch } from "react-router"
 import { Dic, classes, } from './Globals';
-import { ajaxGet, ajaxPost } from './Services';
+import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
-import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos } from './Reflection';
+import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite } from './Reflection';
 import { TypeContext } from './TypeContext';
+import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
-import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
-import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { clearCustomConstructors } from "./Constructor";
+import { toAbsoluteUrl, currentUser } from "./AppContext";
+import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
+import { ErrorModalOptions } from "./Modals/ErrorModal";
 
-Dic.skipClasses.push(React.Component);
+if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
+  throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 
-export let currentUser: IUserEntity | undefined;
-export function setCurrentUser(user: IUserEntity | undefined) {
-  currentUser = user;
-}
+export function start(options: { routes: JSX.Element[] }) {
+  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
+  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage()} />);
 
-export let history: H.History;
-export function setCurrentHistory(h: H.History) {
-  history = h;
-}
+  AppContext.clearSettingsActions.push(clearEntitySettings);
+  AppContext.clearSettingsActions.push(clearWidgets)
+  AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
+  AppContext.clearSettingsActions.push(clearCustomConstructors);
 
-export let setTitle: (pageTitle?: string) => void;
-export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
-  setTitle = titleFunction;
-}
-
-export function createAppRelativeHistory(): H.History {
-  var h = H.createBrowserHistory({});
-  AppRelativeRoutes.useAppRelativeBasename(h);
-  AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-  AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-  AppRelativeRoutes.useAppRelativeSwitch(Switch);
-  setCurrentHistory(h);
-  return h;
-
-}
-
-export let resetUI: () => void = () => { };
-export function setResetUI(reset: () => void) {
-  resetUI = reset;
-}
-
-export namespace Expander {
-  export let onGetExpanded: () => boolean;
-  export let onSetExpanded: (isExpanded: boolean) => void;
-
-  export function setExpanded(expanded: boolean): boolean {
-    let wasExpanded = onGetExpanded != null && onGetExpanded();;
-    if (onSetExpanded)
-      onSetExpanded(expanded);
-
-    return wasExpanded;
-  }
+  ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
+  ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
 
 export namespace NavigatorManager {
@@ -75,11 +45,6 @@ export namespace NavigatorManager {
   export function getFrameModal() {
     return import("./Frames/FrameModal");
   }
-}
-
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
-  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage() } />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -102,7 +67,6 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
   } else {
 
     return pr!.typeReference().typeNiceName;
-
   }
 }
 
@@ -150,20 +114,7 @@ export function createRoute(type: PseudoType, viewName?: string) {
 }
 
 
-export const clearSettingsActions: Array<() => void> = [
-  clearEntitySettings,
-  Finder.clearQuerySettings,
-  Finder.ButtonBarQuery.clearButtonBarElements,
-  ButtonBarManager.clearButtonBarRenderer,
-  Operations.clearOperationSettings,
-  clearWidgets,
-  clearContextualItems,
-  clearCustomConstructors
-];
 
-export function clearAllSettings() {
-  clearSettingsActions.forEach(a => a());
-}
 
 export function clearEntitySettings() {
   Dic.clear(entitySettings);
@@ -605,7 +556,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
   if (!config.getItemsDelay) {
@@ -695,17 +646,6 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
   }
 }
 
-export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
-  if ((e as React.MouseEvent<any>).button == 2)
-    return;
-
-  e.preventDefault();
-  if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
-    window.open(toAbsoluteUrl(path));
-  else
-    history.push(path);
-}
-
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
   if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
@@ -727,6 +667,48 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
 
 function cloneEntity(obj: any) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+
+export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
+  return useAPI(signal =>
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
+      API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
+}
+
+export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
+  return useAPIWithReload(signal =>
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
+      API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
+}
+
+export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
+
+  const forceUpdate = useForceUpdate();
+  React.useEffect(() => {
+    if (lite && !lite.entity)
+      API.fetchAndRemember(lite)
+        .then(() => {
+          onLoaded && onLoaded();
+          forceUpdate();
+        })
+        .done();
+  }, [lite]);
+
+
+  if (lite == null)
+    return null;
+
+  if (lite.entity == null)
+    return undefined;
+
+  return lite.entity;
+}
+
+export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
+  return useAPI(signal => API.fetchAll(type), []);
 }
 
 export module API {
@@ -806,6 +788,7 @@ export module API {
   }
 }
 
+
 export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
@@ -813,13 +796,20 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  supportsAdditionalTabs?: boolean;
+
   modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
+  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
+
   namedViews?: NamedViewSettings<T>[];
 }
 
@@ -843,9 +833,6 @@ export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx:
 export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
-  avoidPopup!: boolean;
-  modalSize?: BsSize;
-
   getViewPromise?: (entity: T) => ViewPromise<T>;
 
   viewOverrides?: Array<ViewOverride<T>>;
@@ -855,16 +842,22 @@ export class EntitySettings<T extends ModifiableEntity> {
   isViewable?: boolean;
   isNavigable?: EntityWhen;
   isReadOnly?: boolean;
+  avoidPopup!: boolean;
+  supportsAdditionalTabs?: boolean;
+
+  modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   findOptions?: FindOptions;
   onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
+  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];
@@ -1028,113 +1021,3 @@ export function checkFlag(entityWhen: EntityWhen, isSearch: boolean | undefined)
 
 export type EntityWhen = "Always" | "IsSearch" | "IsLine" | "Never";
 
-declare global {
-  interface String {
-    formatHtml(...parameters: any[]): React.ReactElement<any>;
-  }
-
-  interface Array<T> {
-    joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement<any>;
-  }
-}
-
-String.prototype.formatHtml = function (this: string) {
-  const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-  const args = arguments;
-
-  const parts = this.split(regex);
-
-  const result: (string | React.ReactElement<any>)[] = [];
-  for (let i = 0; i < parts.length - 4; i += 4) {
-    result.push(parts[i]);
-    result.push(args[parseInt(parts[i + 1])]);
-  }
-  result.push(parts[parts.length - 1]);
-
-  return React.createElement("span", undefined, ...result);
-};
-
-Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
-  const args = arguments;
-
-  const result: (string | React.ReactElement<any>)[] = [];
-  for (let i = 0; i < this.length - 2; i++) {
-    result.push(this[i]);
-    result.push(", ");
-  }
-
-  if (this.length >= 2) {
-    result.push(this[this.length - 2]);
-    result.push(lastSeparator)
-  }
-
-  if (this.length >= 1) {
-    result.push(this[this.length - 1]);
-  }
-
-  return React.createElement("span", undefined, ...result);
-}
-
-export function toAbsoluteUrl(appRelativeUrl: string): string {
-  if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseUrl + appRelativeUrl.after("~/");
-
-  var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
-    return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
-
-  if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
-    return appRelativeUrl;
-
-  return appRelativeUrl;
-}
-
-export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
-
-  if (value == null)
-    return Promise.resolve(null);
-
-  if (type.isLite) {
-
-    if (isLite(value))
-      return Promise.resolve(value);
-
-    if (isEntity(value))
-      return Promise.resolve(toLite(value));
-
-    return undefined;
-  }
-
-  const ti = tryGetTypeInfo(type.name);
-
-  if (ti?.kind == "Entity") {
-
-    if (isLite(value))
-      return API.fetchAndForget(value);
-
-    if (isEntity(value))
-      return Promise.resolve(value);
-
-    return undefined;
-  }
-
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
-    if (typeof value === "string")
-      return Promise.resolve(value);
-
-    return undefined;
-  }
-
-  if (type.name == "boolean") {
-    if (typeof value === "boolean")
-      return Promise.resolve(value);
-  }
-
-  if (type.name == "number") {
-    if (typeof value === "number")
-      return Promise.resolve(value);
-  }
-
-  return undefined;
-}

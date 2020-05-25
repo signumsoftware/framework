@@ -17,9 +17,10 @@ interface NotifyOptions {
 }
 
 interface NotifyHandle {
-  notify(options: NotifyOptions) : void;
-  notifyTimeout(options: NotifyOptions, timeout?: number): void
+  notify(options: NotifyOptions): NotifyOptions;
+  notifyTimeout(options: NotifyOptions, timeout?: number): NotifyOptions
   notifyPendingRequest(pending: number): void;
+  remove(options: NotifyOptions): void;
 }
 
 export default function Notify() {
@@ -39,12 +40,14 @@ export default function Notify() {
     optionsStack.current.extract(a => a == options);
     optionsStack.current.push(options);
     forceUpdate();
+    return options;
   }
 
-  function notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
+  function notifyTimeout(options: NotifyOptions, timeout: number = 2000): NotifyOptions {
     notify(options);
 
     options.timeoutHandler = setTimeout(() => remove(options), timeout);
+    return options;
   }
 
   const loadingRef = React.useRef<NotifyOptions>({ text: JavascriptMessage.loading.niceToString(), type: "loading", priority: 0 });
@@ -69,7 +72,8 @@ export default function Notify() {
     Notify.singleton = {
       notify: notify,
       notifyTimeout: notifyTimeout,
-      notifyPendingRequest: notifyPendingRequest
+      notifyPendingRequest: notifyPendingRequest,
+      remove: remove,
     };
 
     return () => Notify.singleton = undefined;

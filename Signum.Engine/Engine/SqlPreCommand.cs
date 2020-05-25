@@ -87,7 +87,7 @@ namespace Signum.Engine
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
-            var fileName = "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".FormatWith(DateTime.Now);
+            var fileName = "Sync {0:dd-MM-yyyy HH_mm_ss}.sql".FormatWith(DateTime.Now);
 
             Save(command, fileName);
             SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
@@ -184,9 +184,16 @@ namespace Signum.Engine
                     Console.WriteLine();
                     SafeConsole.WriteLineColor(ConsoleColor.DarkRed, ex.GetType().Name + " (Number {0}): ".FormatWith(pgE?.SqlState ?? sqlE?.Number.ToString()));
                     SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+                    if(ex.InnerException!=null)
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, ex.InnerException.Message);
+                        foreach (var item in realParts[pos].Lines())
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, item);
+                        }
+                    }
 
-                    Console.WriteLine();
-
+                    Console.WriteLine();                    
                     throw new ExecuteSqlScriptException(ex.Message, ex);
                 }
             }

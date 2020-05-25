@@ -149,7 +149,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (parameterScope != null)
             {
-                if (parameterScope.TryGetValue(a, out ParameterExpression mapped))
+                if (parameterScope.TryGetValue(a, out ParameterExpression? mapped))
                     return mapped == b;
             }
             return a == b;
@@ -322,7 +322,7 @@ namespace Signum.Utilities.ExpressionTrees
                 this.checkParameterNames = checkParameterNames;
             }
 
-            public bool Equals(E x, E y)
+            public bool Equals(E? x, E? y)
             {
                 return ExpressionComparer.AreEqual(x, y, parameterScope: null, checkParameterNames: checkParameterNames);
             }

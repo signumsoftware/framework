@@ -142,7 +142,7 @@ namespace Signum.Entities
         
         #region Collection Events
 
-        protected internal override void PostRetrieving()
+        protected internal override void PostRetrieving(PostRetrievingContext ctx)
         {
             RebindEvents();
         }
@@ -235,7 +235,7 @@ namespace Signum.Entities
         protected virtual void SetParentEntity(ModifiableEntity p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
-                throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
+                throw new InvalidOperationException($"'{nameof(parentEntity)}' of '{this}'({this.GetType().TypeName()}) is still connected to '{parentEntity}'({parentEntity.GetType().TypeName()}), then can not be set to '{p}'({p.GetType().TypeName()})");
 
             this.parentEntity = p;
         }

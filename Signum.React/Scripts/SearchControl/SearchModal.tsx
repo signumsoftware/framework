@@ -10,6 +10,7 @@ import { ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { namespace } from 'd3';
 import { useForceUpdate } from '../Hooks';
+import SearchControlLoaded from './SearchControlLoaded';
 
 interface SearchModalProps extends IModalProps<ResultRow[] | undefined> {
   findOptions: FindOptions;
@@ -18,6 +19,7 @@ interface SearchModalProps extends IModalProps<ResultRow[] | undefined> {
   title?: React.ReactNode;
   message?: React.ReactNode;
   searchControlProps?: Partial<SearchControlProps>;
+  onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
 function SearchModal(p: SearchModalProps) {
@@ -40,8 +42,17 @@ function SearchModal(p: SearchModalProps) {
   }
 
   function handleOkClicked() {
-    okPressed.current = true;
-    setShow(false);
+    if (!p.onOKClicked) {
+      okPressed.current = true;
+      setShow(false);
+    }
+    else
+      p.onOKClicked(searchControl.current!.searchControlLoaded!).then(result => {
+        if (result) {
+          okPressed.current = true;
+          setShow(false);
+        };
+      }).done();
   }
 
   function handleCancelClicked() {
@@ -56,10 +67,10 @@ function SearchModal(p: SearchModalProps) {
   function handleDoubleClick(e: React.MouseEvent<any>, row: ResultRow) {
     e.preventDefault();
     selectedRows.current = [row];
-    okPressed.current = true;
-    setShow(false);
+    searchControl.current!.searchControlLoaded!.state.selectedRows!.clear();
+    searchControl.current!.searchControlLoaded!.state.selectedRows!.push(row);
+    handleOkClicked();
   }
-
 
   function onResize() {
     var sc = searchControl.current;
@@ -73,46 +84,46 @@ function SearchModal(p: SearchModalProps) {
 
   const okEnabled = p.isMany ? selectedRows.current.length > 0 : selectedRows.current.length == 1;
 
-    return (
+  return (
     <Modal size="lg" show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
-        <ModalHeaderButtons
+      <ModalHeaderButtons
         onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}
         onOk={p.findMode == "Find" ? handleOkClicked : undefined}
         onCancel={p.findMode == "Find" ? handleCancelClicked : undefined}
-          okDisabled={!okEnabled}>
-          <span className="sf-entity-title">
+        okDisabled={!okEnabled}>
+        <span className="sf-entity-title">
           {p.title}
           &nbsp;
           </span>
         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
-            <FontAwesomeIcon icon="external-link-alt" />
-          </a>
+          <FontAwesomeIcon icon="external-link-alt" />
+        </a>
         {p.message && <>
-            <br />
+          <br />
           <small className="sf-type-nice-name text-muted"> {p.message}</small>
-          </>
-          }
-        </ModalHeaderButtons>
-        <div className="modal-body">
-          <SearchControl
+        </>
+        }
+      </ModalHeaderButtons>
+      <div className="modal-body">
+        <SearchControl
           ref={searchControl}
-            hideFullScreenButton={true}
-            throwIfNotFindable={true}
+          hideFullScreenButton={true}
+          throwIfNotFindable={true}
           findOptions={p.findOptions}
-			defaultIncludeDefaultFilters={true}
+          defaultIncludeDefaultFilters={true}
           onSelectionChanged={handleSelectionChanged}
           showGroupButton={p.findMode == "Explore"}
-            largeToolbarButtons={true}
-            maxResultsHeight={"none"}
-            enableAutoFocus={true}
+          largeToolbarButtons={true}
+          maxResultsHeight={"none"}
+          enableAutoFocus={true}
           onHeighChanged={onResize}
           onDoubleClick={p.findMode == "Find" ? handleDoubleClick : undefined}
           {...p.searchControlProps}
-          />
-        </div>
-      </Modal>
-    );
-  }
+        />
+      </div>
+    </Modal>
+  );
+}
 
 
 namespace SearchModal {
@@ -128,6 +139,7 @@ namespace SearchModal {
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false)}
       searchControlProps={modalOptions?.searchControlProps}
+      onOKClicked={modalOptions?.onOKClicked}
     />)
       .then(a => a ? a[0] : undefined);
   }
@@ -140,6 +152,7 @@ namespace SearchModal {
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true)}
       searchControlProps={modalOptions?.searchControlProps}
+      onOKClicked={modalOptions?.onOKClicked}
     />);
   }
 

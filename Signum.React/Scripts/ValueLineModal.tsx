@@ -63,7 +63,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         <p>
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
-        <ValueLine ctx={ctx}
+        <ValueLine
           formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
       </div>
       <div className="modal-footer">

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
 import { namespace } from 'd3';
-import { FunctionalAdapter } from './FrameModal';
+import { FunctionalAdapter } from '../Modals';
 
 export interface ButtonBarProps extends ButtonsContext {
   align?: "left" | "right";

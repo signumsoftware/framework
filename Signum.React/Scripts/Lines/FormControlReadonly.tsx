@@ -30,13 +30,13 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
   else {
     if (ctx.readonlyAsPlainText) {
       return (
-        <div {...attrs} className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
+        <div {...attrs} className={classes(ctx.formControlPlainTextClass, "readonly", attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
           {children ?? <span>&nbsp;</span>}
         </div>
       );
     } else {
       return (
-        <div {...attrs} className={classes(ctx.formControlClass, attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
+        <div {...attrs} className={classes(ctx.formControlClass, "readonly", attrs?.className, className)} ref={innerRef as React.RefObject<HTMLDivElement>}>
           {children ?? <span>&nbsp;</span>}
         </div>
       );

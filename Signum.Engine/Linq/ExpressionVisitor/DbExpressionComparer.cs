@@ -30,7 +30,7 @@ namespace Signum.Engine.Linq
             this.aliasMap = aliasScope;
         }
 
-        public static bool AreEqual(Expression a, Expression b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, ScopedDictionary<Alias, Alias>? aliasScope = null, bool checkParameterNames = false)
+        public static bool AreEqual(Expression? a, Expression? b, ScopedDictionary<ParameterExpression, ParameterExpression>? parameterScope = null, ScopedDictionary<Alias, Alias>? aliasScope = null, bool checkParameterNames = false)
         {
             return new DbExpressionComparer(parameterScope, aliasScope, checkParameterNames ).Compare(a, b);
         }
@@ -169,7 +169,7 @@ namespace Signum.Engine.Linq
 
             if (aliasMap != null)
             {
-                if (aliasMap.TryGetValue(a, out Alias mapped))
+                if (aliasMap.TryGetValue(a, out Alias? mapped))
                     return mapped == b;
             }
             return a == b;
@@ -373,7 +373,7 @@ namespace Signum.Engine.Linq
         {
             if (a.NodeType != b.NodeType)
                 return false;
-            switch ((DbExpressionType)a.NodeType)
+            switch (a.DbNodeType)
             {
                 case DbExpressionType.Scalar:
                     return CompareScalar((ScalarExpression)a, (ScalarExpression)b);
@@ -566,7 +566,7 @@ namespace Signum.Engine.Linq
                 this.checkParameterNames = checkParameterNames;
             }
 
-            public bool Equals(E x, E y)
+            public bool Equals(E? x, E? y)
             {
                 return DbExpressionComparer.AreEqual(x, y, checkParameterNames: this.checkParameterNames);
             }

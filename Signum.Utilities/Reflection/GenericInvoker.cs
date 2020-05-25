@@ -36,8 +36,14 @@ namespace Signum.Utilities.Reflection
     class TypeArrayEqualityComparer : IEqualityComparer<Type[]>
     {
         public static readonly TypeArrayEqualityComparer Instance = new TypeArrayEqualityComparer(); 
-        public bool Equals(Type[] x, Type[] y)
+        public bool Equals(Type[]? x, Type[]? y)
         {
+            if (x == null && y == null)
+                return true;
+
+            if (x == null || y == null)
+                return false;
+
             for (int i = 0; i < x.Length; i++)
             {
                 if (!x[i].Equals(y[i]))

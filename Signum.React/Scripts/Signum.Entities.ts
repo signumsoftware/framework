@@ -26,7 +26,7 @@ export interface EnumEntity<T> extends Entity {
 export interface MixinEntity extends ModifiableEntity {
 }
 
-export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M {
+export function getMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M {
 
   var mixin = tryGetMixin(entity, type);
   if (!mixin)
@@ -34,7 +34,7 @@ export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): 
   return mixin;
 }
 
-export function tryGetMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M | undefined {
+export function tryGetMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M | undefined {
   return entity.mixins && entity.mixins[type.typeName] as M;
 }
 
@@ -378,6 +378,7 @@ export module NormalWindowMessage {
   export const Message = new MessageKey("NormalWindowMessage", "Message");
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
   export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
+  export const Main = new MessageKey("NormalWindowMessage", "Main");
 }
 
 export module OperationMessage {
@@ -567,6 +568,7 @@ export module ValidationMessage {
   export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
   export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
+  export const _0ShouldBeEmpty = new MessageKey("ValidationMessage", "_0ShouldBeEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
