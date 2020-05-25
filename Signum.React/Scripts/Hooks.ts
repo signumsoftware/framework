@@ -233,12 +233,3 @@ export function useHistoryListen(locationChanged: (location: History.Location, a
     return () => { unregisterCallback.current!(); }
   }, [enabled, ...(extraDeps || [])]);
 }
-
-export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
-
-  var lite = React.useMemo(() => newLite(type, id), [type, id]);
-
-  useAPI(() => Navigator.API.fillToStrings(lite), [lite]);
-
-  return lite;
-}
