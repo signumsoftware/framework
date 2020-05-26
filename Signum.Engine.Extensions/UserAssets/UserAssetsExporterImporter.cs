@@ -25,6 +25,10 @@ namespace Signum.Engine.UserAssets
 {
     public static class UserAssetsExporter
     {
+
+        public static Func<XDocument, XDocument>? PreExport = null;
+
+
         class ToXmlContext : IToXmlContext
         {
             public Dictionary<Guid, XElement> elements = new Dictionary<Guid, XElement>();
@@ -68,6 +72,10 @@ namespace Signum.Engine.UserAssets
                 new XElement("Entities",
                     ctx.elements.Values));
 
+
+           if(PreExport!=null)
+                doc=PreExport(doc);
+
             return new MemoryStream().Using(s => { doc.Save(s); return s.ToArray(); });
         }
     }
@@ -76,6 +84,7 @@ namespace Signum.Engine.UserAssets
     {
         public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
         public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
+        public static Func<XDocument, XDocument>? PreImport = null;
 
         class PreviewContext : IFromXmlContext
         {
@@ -182,6 +191,8 @@ namespace Signum.Engine.UserAssets
         public static UserAssetPreviewModel Preview(byte[] doc)
         {
             XDocument document = new MemoryStream(doc).Using(XDocument.Load);
+            if (PreImport != null)
+                document = PreImport(document);
 
             PreviewContext ctx = new PreviewContext(document);
 
