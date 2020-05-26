@@ -7,6 +7,7 @@ import { TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
+import { normalizeEmptyArray } from './EntityCombo'
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
@@ -126,7 +127,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-checkbox-elements" style={getColumnStyle()}>
