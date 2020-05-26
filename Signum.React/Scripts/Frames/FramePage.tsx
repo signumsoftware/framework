@@ -9,7 +9,7 @@ import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } 
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
@@ -138,7 +138,7 @@ export default function FramePage(p: FramePageProps) {
 
   const frame: EntityFrame = {
     tabs: undefined,
-    frameComponent: { forceUpdate },
+    frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
     onReload: (pack, reloadComponent, callback) => {

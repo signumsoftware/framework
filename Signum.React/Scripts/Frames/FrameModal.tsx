@@ -10,7 +10,7 @@ import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { EntityOperationContext } from '../Operations'
 import { ViewPromise } from "../Navigator";
@@ -58,7 +58,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const okClicked = React.useRef(false);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component>(null);
-  const validationErrors = React.useRef<ValidationErrorHandle>(null);
+  const validationErrors = React.useRef<ValidationErrorsHandle>(null);
 
   const forceUpdate = useForceUpdate();
 
@@ -182,24 +182,24 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
-  return (
+    return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
-      <ModalHeaderButtons
+        <ModalHeaderButtons
         onClose={p.isNavigate ? handleCancelClicked : undefined}
         onOk={!p.isNavigate ? handleOkClicked : undefined}
         onCancel={!p.isNavigate ? handleCancelClicked : undefined}
         okDisabled={!packComponent}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
-      </ModalHeaderButtons>
+        </ModalHeaderButtons>
       {packComponent && renderBody(packComponent)}
-    </Modal>
-  );
+      </Modal>
+    );
 
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
       tabs: undefined,
-      frameComponent: { forceUpdate, createNew: p.createNew },
+      frameComponent: { forceUpdate, createNew: p.createNew, type: FrameModal as any },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;
@@ -223,7 +223,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       refreshCount: pc.refreshCount,
       allowChangeEntity: p.isNavigate || false,
       prefix: prefix,
-    } ;
+    };
 
     const styleOptions: StyleOptions = {
       readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack, { isEmbedded: p.propertyRoute?.member?.type.isEmbedded }),
@@ -242,13 +242,13 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       <div className="modal-body">
         {renderWidgets(wc)}
         <WidgetEmbedded widgetContext={wc} >
-          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
-          <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
-          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-            <ErrorBoundary>
-              {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-            </ErrorBoundary>
-          </div>
+        {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
+        <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
+        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <ErrorBoundary>
+            {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+          </ErrorBoundary>
+        </div>
         </WidgetEmbedded>
       </div>
     );
@@ -308,18 +308,18 @@ export namespace FrameModalManager {
 export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
 
   if (!pack)
-    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
   const entity = pack.entity;
 
-  return (
-    <span>
+    return (
+      <span>
       <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
-      {renderExpandLink(pack.entity)}
-      <br />
-      <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-    </span>
-  );
+        {renderExpandLink(pack.entity)}
+        <br />
+        <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+      </span>
+    );
 
   function renderExpandLink(entity: ModifiableEntity) {
 
@@ -345,6 +345,6 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
     var entity = pack!.entity;
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
+    }
   }
-}
 

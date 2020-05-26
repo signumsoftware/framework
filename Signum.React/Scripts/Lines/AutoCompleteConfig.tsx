@@ -5,17 +5,16 @@ import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, Resul
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
-import { TypeaheadHandle, TypeaheadOptions } from '../Components/Typeahead'
+import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
 import { Dic } from '../Globals'
-import SearchControl from '../SearchControl/SearchControl'
 
 export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
   getItemsDelay?: number;
   minLength?: number;
   renderItem(item: T, subStr?: string): React.ReactNode;
-  renderList?(typeahead: TypeaheadHandle): React.ReactNode;
+  renderList?(typeahead: TypeaheadController): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;

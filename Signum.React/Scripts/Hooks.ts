@@ -4,7 +4,7 @@ import { FindOptions, ResultTable } from './Search';
 import * as Finder from './Finder';
 import * as AppContext from './AppContext';
 import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
-import { Type, QueryTokenString } from './Reflection';
+import { Type, QueryTokenString, newLite } from './Reflection';
 
 export function useForceUpdate(): () => void {
   const [count, setCount] = React.useState(0);

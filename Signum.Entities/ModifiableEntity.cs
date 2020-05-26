@@ -569,7 +569,7 @@ namespace Signum.Entities
             return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
                   + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
                       kvp.Key,
-                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity), 
+                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity) ?? "null", 
                       kvp.Value), 
                       "\r\n");
         }
