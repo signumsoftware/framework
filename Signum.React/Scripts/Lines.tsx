@@ -110,7 +110,7 @@ export function taskSetReadOnly(lineBase: LineBaseController<any>, state: LineBa
 
 tasks.push(taskSetMandatory);
 export function taskSetMandatory(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (state.ctx.propertyRoute &&
+  if (state.ctx.propertyRoute && state.mandatory == undefined &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.required) {
     state.mandatory = true;
@@ -120,7 +120,7 @@ export function taskSetMandatory(lineBase: LineBaseController<any>, state: LineB
 
 tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof EntityListBaseController &&
+  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.preserveOrder) {
@@ -144,9 +144,11 @@ export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: 
       if (!s.valueHtmlAttributes)
         s.valueHtmlAttributes = {};
 
-      s.valueHtmlAttributes.maxLength = member.maxLength;
+      if (s.valueHtmlAttributes.maxLength == undefined)
+        s.valueHtmlAttributes.maxLength = member.maxLength;
 
-      s.valueHtmlAttributes.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
+      if (s.valueHtmlAttributes.size == undefined)
+        s.valueHtmlAttributes.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
     }
 
     if (member.isMultiline)
