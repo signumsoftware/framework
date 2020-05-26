@@ -16,7 +16,7 @@ namespace Signum.React.Selenium
         public SearchPageProxy(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
-            this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector("#divSearchPage .sf-search-control")));
+            this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector("#stagesSearchPage .sf-search-control")));
         }
 
         public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
