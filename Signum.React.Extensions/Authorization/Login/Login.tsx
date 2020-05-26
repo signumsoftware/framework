@@ -7,6 +7,7 @@ import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import MessageModal from '@framework/Modals/MessageModal'
+import "./Login.css"
 
 export default function Login() {
 
@@ -89,8 +90,8 @@ export default function Login() {
         {AuthClient.Options.userTicket &&
           <div className="row">
             <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
-              <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-                <label>
+            <div className="form-check mb-2 mr-sm-2 mb-sm-0">
+              <label className="sf-remember-me">
                   <input ref={rememberMe} name="remember" type="checkbox" /> {LoginAuthMessage.RememberMe.niceToString()}
                 </label>
               </div>

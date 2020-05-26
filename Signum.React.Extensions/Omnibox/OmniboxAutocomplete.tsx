@@ -6,7 +6,7 @@ import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import '@framework/Frames/MenuIcons.css'
-import { TypeaheadHandle } from '../../../Framework/Signum.React/Scripts/Components/Typeahead';
+import { TypeaheadController } from '../../../Framework/Signum.React/Scripts/Components/Typeahead';
 
 export interface OmniboxAutocompleteProps {
   inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
@@ -14,7 +14,7 @@ export interface OmniboxAutocompleteProps {
 
 export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
 
-  const typeahead = React.useRef<TypeaheadHandle>(null);
+  const typeahead = React.useRef<TypeaheadController>(null);
   const abortRequest = React.useMemo(() => new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac)), []);
 
   function handleOnSelect(result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) {

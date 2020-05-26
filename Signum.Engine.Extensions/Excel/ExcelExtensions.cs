@@ -142,12 +142,12 @@ namespace Signum.Engine.Excel
             return value;
         }
 
-        public static void SetCellValue(this Cell cell, object value, Type type)
+        public static void SetCellValue(this Cell cell, object? value, Type type)
         {
             if(type == typeof(string))
             {
                 cell.RemoveAllChildren();
-                cell.Append(new InlineString(new Text((string)value)));
+                cell.Append(new InlineString(new Text((string?)value)));
                 cell.DataType = CellValues.InlineString;
             }
             else
