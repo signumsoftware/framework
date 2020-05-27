@@ -470,10 +470,14 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
-            else
-                return (T)Convert.ChangeType(value, utype)!;
+
+            if (utype == typeof(Date))
+                return (T)(object)Date.Parse(value);
+
+            return (T)Convert.ChangeType(value, utype)!;
         }
 
         public static object? Parse(string value, Type type)
@@ -490,6 +494,9 @@ namespace Signum.Utilities.Reflection
 
             if (utype == typeof(Guid))
                 return Guid.Parse(value);
+
+            if (utype == typeof(Date))
+                return Date.Parse(value);
 
             if (CustomParsers.TryGetValue(utype, out var func))
                 return func(value); //Delay reference
@@ -516,10 +523,11 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
-            else
-                return (T)Convert.ChangeType(value, utype, culture)!;
+
+            return (T)Convert.ChangeType(value, utype, culture)!;
         }
 
         public static object? Parse(string value, Type type, CultureInfo culture)
@@ -533,10 +541,11 @@ namespace Signum.Utilities.Reflection
             Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return Guid.Parse(value);
-            else
-                return Convert.ChangeType(value, utype, culture);
+
+            return Convert.ChangeType(value, utype, culture);
         }
 
         public static bool TryParse<T>(string value, out T result)
@@ -727,6 +736,15 @@ namespace Signum.Utilities.Reflection
                 }
                 else return false;
             }
+            else if (utype == typeof(Date))
+            {
+                if (Date.TryParse(value, ci, DateTimeStyles.None, out Date _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false;
+            }
             else if (utype == typeof(Guid))
             {
                 if (Guid.TryParse(value, out Guid _result))
@@ -775,14 +793,18 @@ namespace Signum.Utilities.Reflection
                 {
                     if (value is string)
                         return (T)Enum.Parse(utype, (string)value);
-                    else
-                        return (T)Enum.ToObject(utype, value);
+
+
+                    return (T)Enum.ToObject(utype, value);
                 }
 
-                else if (utype == typeof(Guid) && value is string)
+                if (utype == typeof(Guid) && value is string)
                     return (T)(object)Guid.Parse((string)value);
-                else
-                    return (T)Convert.ChangeType(value, utype)!;
+
+                if (utype == typeof(Date) && value is string)
+                    return (T)(object)Date.Parse((string)value);
+
+                return (T)Convert.ChangeType(value, utype)!;
             }
         }
 
@@ -801,37 +823,40 @@ namespace Signum.Utilities.Reflection
                 {
                     if (value is string)
                         return Enum.Parse(utype, (string)value);
-                    else
-                        return Enum.ToObject(utype, value);
+
+                    return Enum.ToObject(utype, value);
                 }
-                else if (utype == typeof(Guid) && value is string)
+
+                if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
-                else
+
+                if (utype == typeof(Date) && value is string)
+                    return Date.Parse((string)value);
+
+                var conv = TypeDescriptor.GetConverter(type);
+                if (conv != null && conv.CanConvertFrom(value.GetType()))
+                    return conv.ConvertFrom(value);
+
+                conv = TypeDescriptor.GetConverter(value.GetType());
+                if (conv != null && conv.CanConvertTo(type))
+                    return conv.ConvertTo(value, type);
+
+                if (type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
                 {
-                    var conv = TypeDescriptor.GetConverter(type);
-                    if(conv != null && conv.CanConvertFrom(value.GetType()))
-                        return conv.ConvertFrom(value);
-
-                    conv = TypeDescriptor.GetConverter(value.GetType());
-                    if (conv != null && conv.CanConvertTo(type))
-                        return conv.ConvertTo(value, type);
-
-                    if(type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
+                    var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
+                    IList col = (IList)Activator.CreateInstance(colType)!;
+                    foreach (var item in (IEnumerable)value)
                     {
-                        var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
-                        IList col = (IList)Activator.CreateInstance(colType)!;
-                        foreach (var item in (IEnumerable)value)
-                        {
-                            col.Add(item);
-                        }
-                        return col;
+                        col.Add(item);
                     }
+                    return col;
+                }
 
-                    if (value is IConvertible c)
-                        return Convert.ChangeType(c, utype);
+                if (value is IConvertible c)
+                    return Convert.ChangeType(c, utype);
 
-                    throw new InvalidOperationException($"Unable to convert '{value}' (of type {value.GetType().TypeName()}) to type {utype.TypeName()}");
-                } 
+                throw new InvalidOperationException($"Unable to convert '{value}' (of type {value.GetType().TypeName()}) to type {utype.TypeName()}");
+
             }
         }
 

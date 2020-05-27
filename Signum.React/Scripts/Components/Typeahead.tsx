@@ -42,15 +42,16 @@ export class TypeaheadController {
   focused!: boolean;
   props!: TypeaheadProps;
 
+  constructor() {
+    this.focused = false;
+    this.rtl = document.body.classList.contains("rtl");
+  }
+
   init(props: TypeaheadProps) {
     [this.query, this.setQuery] = React.useState<string | undefined>(undefined);
     [this.shown, this.setShown] = React.useState<boolean>(false);
     [this.items, this.setItem] = React.useState<any[] | undefined>(undefined);
     [this.selectedIndex, this.setSelectedIndex] = useStateWithPromise<number | undefined>(undefined);
-
-    this.focused = false;
-
-    this.rtl = document.body.classList.contains("rtl");
 
     React.useEffect(() => {
       return () => {
