@@ -28,12 +28,8 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
     .filter(oi => oi.operationType == OperationType.ConstructorFromMany)
     .map(oi => {
       const os = getSettings(oi.key) as ContextualOperationSettings<Entity>;
-      const coc = {
-        context: ctx,
-        operationInfo: oi,
-        settings: os,
-      } as ContextualOperationContext<Entity>;
-
+      const coc = new ContextualOperationContext<Entity>(oi, ctx);
+      coc.settings = os;
       if (os == undefined || os.isVisible == undefined || os.isVisible(coc))
         return coc;
 
@@ -265,6 +261,20 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
       return;
 
     switch (coc.operationInfo.operationType) {
+      case OperationType.ConstructorFromMany:
+        {
+
+          API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
+            .then(coc.onConstructFromSuccess ?? (pack => {
+              notifySuccess();
+              Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}))
+                .done();
+            }))
+            .done();
+
+          break;
+        }
       case OperationType.ConstructorFrom:
         if (coc.context.lites.length == 1) {
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)

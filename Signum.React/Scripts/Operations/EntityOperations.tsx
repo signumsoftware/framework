@@ -2,7 +2,7 @@ import * as React from "react"
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
+import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
@@ -13,11 +13,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
-import { func } from "prop-types";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
-import { FunctionalAdapter } from "../Frames/FrameModal";
 import { notifySuccess } from "../Operations";
+import { FunctionalAdapter } from "../Modals";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -125,16 +124,13 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.createNew;
+        var createNew = (eoc.frame.frameComponent as FunctionalFrameComponent).createNew ??
+          Navigator.getSettings(pack.entity.Type)?.onCreateNew ??
+          (pack => Constructor.constructPack(pack.entity.Type));
 
-        if (createNew)
-          (createNew() ?? Promise.resolve(undefined))
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
-        else
-          Constructor.constructPack(pack.entity.Type)
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
+        (createNew(pack) ?? Promise.resolve(undefined))
+          .then(newPack => newPack && eoc.frame.onReload(newPack, true))
+          .done();
       };
       eoc.defaultClick();
     }

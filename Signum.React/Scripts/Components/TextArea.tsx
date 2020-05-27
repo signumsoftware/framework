@@ -23,12 +23,17 @@ export default function TextArea(p: TextAreaProps) {
   }, [innerRef, minHeight]);
 
   return (
-    <textarea onInput={autoResize ? (e => handleResize(e.currentTarget)) : undefined} style={
+    <textarea {...props} onInput={e => {
+      if (p.autoResize)
+        handleResize(e.currentTarget);
+      if (p.onInput)
+        p.onInput(e);
+    }} style={
       {
         ...(autoResize ? { display: "block", overflow: "hidden", resize: "none" } : {}),
         ...props.style
       }
-    } {...props} ref={handleRef} />
+    } ref={handleRef} />
   );
 }
 

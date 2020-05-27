@@ -109,7 +109,7 @@ namespace Signum.Engine
 
             if (defLazyRetrieve)
             {
-                sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
+                sb.Schema.EntityEvents<T>().Retrieved += (T e, PostRetrievingContext ctx) =>
                 {
                     if (ShouldAvoidMListType(typeof(L)))
                         return;
@@ -126,7 +126,7 @@ namespace Signum.Engine
                         query.ToVirtualMListWithOrder() :
                         query.ToVirtualMList();
 
-                    mlist.AssignAndPostRetrieving(newList);
+                    mlist.AssignAndPostRetrieving(newList, ctx);
                 };
             }
 
@@ -169,7 +169,8 @@ namespace Signum.Engine
                     if (errors != null)
                     {
 #if DEBUG
-                        throw new IntegrityCheckException(errors.WithEntities(graph));
+                        var withEntites = errors.WithEntities(graph);
+                        throw new IntegrityCheckException(withEntites);
 #else
                         throw new IntegrityCheckException(errors);
 #endif

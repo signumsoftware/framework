@@ -4,6 +4,7 @@ import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } 
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 import { classes } from './Globals';
+import { EmbeddedWidget } from './Frames/Widgets';
 
 export type FormGroupStyle =
   "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
@@ -439,11 +440,15 @@ export interface IHasChanges {
   entityHasChanges?: () => boolean;
 }
 
+export interface FunctionalFrameComponent {
+  forceUpdate(): void;
+  createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
+  type: Function;
+}
+
 export interface EntityFrame {
-  frameComponent: {
-    forceUpdate(): void,
-    createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined
-  };
+  frameComponent: FunctionalFrameComponent | React.Component;
+  tabs: EmbeddedWidget[] | undefined;
   entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;
   onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
@@ -452,6 +457,7 @@ export interface EntityFrame {
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowChangeEntity: boolean;
+  prefix: string;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

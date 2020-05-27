@@ -36,33 +36,6 @@ namespace Signum.React.ApiControllers
             return await AutocompleteUtils.FindLiteLikeAsync(implementations, subString, count, token);
         }
 
-        [HttpPost("api/query/findRowsLike"), ProfilerActionSplitter("types")]
-        public async Task<ResultTable> FindRowsLike([Required, FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
-        {
-            var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = QueryLogic.Queries.QueryDescription(qn);
-
-            var dqRequest = new DQueryableRequest
-            {
-                QueryName = qn,
-                Columns = request.columns.EmptyIfNull().Select(a => a.ToColumn(qd, false)).ToList(),
-                Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
-                Orders = request.orders.EmptyIfNull().Select(a => a.ToOrder(qd, false)).ToList()
-            };
-
-            var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
-            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations!.Value.Types.SingleEx();
-
-            var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
-
-            var columnAccessors = dqRequest.Columns.Select(c => (
-                column: c,
-                lambda: Expression.Lambda(c.Token.BuildExpression(dqueryable.Context), dqueryable.Context.Parameter)
-            )).ToList();
-
-            return DQueryable.ToResultTable(result.ToArray(), columnAccessors, null, new Pagination.Firsts(request.count));
-        }
-
         [HttpGet("api/query/allLites"), ProfilerActionSplitter("types")]
         public async Task<List<Lite<Entity>>> FetchAllLites(string types, CancellationToken token)
         {
@@ -182,19 +155,9 @@ namespace Signum.React.ApiControllers
         public override string ToString() => querykey;
     }
 
-    public class AutocompleteQueryRequestTS
-    {
-        public string queryKey;
-        public List<FilterTS> filters;
-        public List<ColumnTS> columns;
-        public List<OrderTS> orders;
-        public string subString;
-        public int count;
-    }
-
-
     public class QueryRequestTS
     {
+        public string queryUrl;
         public string queryKey;
         public bool groupResults;
         public List<FilterTS> filters;
@@ -210,6 +173,7 @@ namespace Signum.React.ApiControllers
 
             return new QueryRequest
             {
+                QueryUrl = queryUrl,
                 QueryName = qn,
                 GroupResults = groupResults,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),

@@ -29,7 +29,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionExplicitWrongType()
         {
-            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, int>>'", @"
+            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, int>>' instead of 'Expression<Func<Entity, long, int>>'", @"
         static Expression<Func<Entity, long, int>> MyExpression;        
         [ExpressionField(""MyExpression"")]
         public static int OperationLogs(this Entity e) => 0;");
@@ -47,7 +47,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionExplicitNotCorrectNullable()
         {
-            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, string?>>'", @"
+            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Entity, string?>>' instead of 'Expression<Func<Entity, string>>'", @"
         static Expression<Func<Entity, string>> MyExpression;        
         [ExpressionField(""MyExpression"")]
         public static string? OperationLogs(this Entity e) => """";");

@@ -64,7 +64,7 @@ namespace Signum.Entities
         ThereAre0ThatReferThisEntity,
         [Description("There are records in '{0}' referring to this table by column '{1}'")]
         ThereAreRecordsIn0PointingToThisTableByColumn1,
-        [Description("Unautorized access to {0} because {1}")]
+        [Description("Unauthorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
         [Description("There's already a {0} with {1} equals to '{2}'")]
         TheresAlreadyA0With1EqualsTo2_G
@@ -108,7 +108,9 @@ Lose changes?")]
         [Description("New {0}")]
         New0_G,
         [Description("{0} {1}")]
-        Type0Id1
+        Type0Id1,
+        Main
+
     }
 
     public enum EntityControlMessage

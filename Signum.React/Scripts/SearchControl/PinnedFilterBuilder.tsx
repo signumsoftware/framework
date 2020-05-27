@@ -42,7 +42,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
-    var labelText = f.pinned!.label ?? f.token?.niceName;
+    var labelText = f.pinned!.label || f.token?.niceName;
 
     if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
       return (

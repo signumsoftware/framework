@@ -203,7 +203,7 @@ namespace Signum.Engine
 
                             cc.Complete(ident, this);
 
-                            retrieved.Add((type: ident.GetType(), id : ident.Id), ident);
+                            retrieved.Add((type: ident.GetType(), id: ident.Id), ident);
                             dic.Remove(ident.Id);
                         }
                     }
@@ -267,25 +267,26 @@ namespace Signum.Engine
 
             var currentlyRetrieved = retrieved.Values.ToHashSet();
             var currentlyModifiableRetrieved = modifiablePostRetrieving.ToHashSet(Signum.Utilities.DataStructures.ReferenceEqualityComparer<Modifiable>.Default);
+            var ctx = new PostRetrievingContext();
             foreach (var entity in currentlyRetrieved)
             {
-                entity.PostRetrieving();
-                Schema.Current.OnRetrieved(entity);
+                entity.PostRetrieving(ctx);
+                Schema.Current.OnRetrieved(entity, ctx);
                 entityCache.Add(entity);
             }
 
             foreach (var embedded in currentlyModifiableRetrieved)
-                embedded.PostRetrieving();
+                embedded.PostRetrieving(ctx);
 
             ModifiedState ms = ModifiedState;
             foreach (var entity in currentlyRetrieved)
             {
-                entity.Modified = ms;
+                entity.Modified = ctx.ForceModifiedState.TryGetS(entity) ?? ms;
                 entity.IsNew = false;
             }
 
             foreach (var embedded in currentlyModifiableRetrieved)
-                embedded.Modified = ms;
+                embedded.Modified = ctx.ForceModifiedState.TryGetS(embedded) ?? ms;
 
             if (liteRequests != null && liteRequests.Count > 0 ||
                 requests != null && requests.Count > 0 ||
@@ -351,7 +352,7 @@ namespace Signum.Engine
         public IRetriever? Parent => parent;
         public ChildRetriever(IRetriever parent, EntityCache.RealEntityCache entityCache)
         {
-            this.parent= parent;
+            this.parent = parent;
             this.entityCache = entityCache;
         }
 
@@ -399,4 +400,6 @@ namespace Signum.Engine
             get { return this.entityCache.IsSealed ? ModifiedState.Sealed : ModifiedState.Clean; }
         }
     }
+
+
 }

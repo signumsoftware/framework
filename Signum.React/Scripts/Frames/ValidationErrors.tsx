@@ -5,11 +5,11 @@ import { GraphExplorer } from '../Reflection'
 import { useForceUpdate } from '../Hooks';
 
 
-export interface ValidationErrorHandle {
+export interface ValidationErrorsHandle {
   forceUpdate() : void; 
 }
 
-export const ValidationErrors = React.forwardRef(function ValidationErrors(p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorHandle>) {
+export const ValidationErrors = React.forwardRef(function ValidationErrors(p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorsHandle>) {
 
   const forceUpdate = useForceUpdate();
 

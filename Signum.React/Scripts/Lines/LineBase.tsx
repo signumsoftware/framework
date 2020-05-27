@@ -88,9 +88,9 @@ export class LineBaseController<P extends LineBaseProps> {
     const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute?.typeReference()) } as LineBaseProps as P;
 
     this.getDefaultProps(p);
+    this.overrideProps(p, otherProps as P);
     runTasks(this as any as LineBaseController<LineBaseProps>, p);
 
-    this.overrideProps(p, otherProps as P);
     return p;
   }
 

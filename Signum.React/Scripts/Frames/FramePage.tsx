@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
+import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -7,15 +8,17 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
+import { renderWidgets,  WidgetContext } from './Widgets'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted } from '../Hooks'
 import * as Operations from '../Operations'
+import WidgetEmbedded from './WidgetEmbedded'
+import { useTitle } from '../AppContext'
+import { FunctionalAdapter } from '../Modals'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -110,9 +113,9 @@ export default function FramePage(p: FramePageProps) {
 
   function onClose() {
     if (Finder.isFindable(p.match.params.type, true))
-      Navigator.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
+      AppContext.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
     else
-      Navigator.history.push("~/");
+      AppContext.history.push("~/");
   }
 
   function setComponent(c: React.Component | null) {
@@ -134,7 +137,8 @@ export default function FramePage(p: FramePageProps) {
 
 
   const frame: EntityFrame = {
-    frameComponent: { forceUpdate },
+    tabs: undefined,
+    frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
     onReload: (pack, reloadComponent, callback) => {
@@ -142,7 +146,7 @@ export default function FramePage(p: FramePageProps) {
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
       if (packEntity.entity.id != null && entity.id == null)
-        Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
+        AppContext.history.push(Navigator.navigateRoute(packEntity.entity));
       else {
         if (reloadComponent) {
           setState(undefined)
@@ -170,6 +174,7 @@ export default function FramePage(p: FramePageProps) {
     },
     refreshCount: state.refreshCount,
     allowChangeEntity: true,
+    prefix: "framePage"
   };
 
 
@@ -182,21 +187,19 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
-  const embeddedWidgets = renderEmbeddedWidgets(wc);
-
   return (
     <div className="normal-control">
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
       <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
-        {embeddedWidgets.top}
-      <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-        <ErrorBoundary>
-          {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-        </ErrorBoundary>
-      </div>
-      {embeddedWidgets.bottom}
+      <WidgetEmbedded widgetContext={wc} >
+        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <ErrorBoundary>
+            {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+          </ErrorBoundary>
+        </div>
+      </WidgetEmbedded>
     </div>
   );
 

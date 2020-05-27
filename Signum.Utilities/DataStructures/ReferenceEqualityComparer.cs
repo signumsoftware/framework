@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -23,7 +24,7 @@ namespace Signum.Utilities.DataStructures
             return RuntimeHelpers.GetHashCode(item);
         }
 
-        public bool Equals(T x, T y)
+        public bool Equals([AllowNull] T x, [AllowNull] T y)
         {
             return object.ReferenceEquals(x, y);
         }

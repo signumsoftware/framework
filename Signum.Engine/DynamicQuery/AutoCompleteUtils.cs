@@ -229,67 +229,6 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public static List<T> AutocompleteUntyped<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type)
-        {
-            using (ExecutionMode.UserInterface())
-            {
-                List<T> results = new List<T>();
-
-                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
-                {
-                    T entity = query.SingleOrDefaultEx(r => entitySelector.Evaluate(r).Id == id);
-
-                    if (entity != null)
-                        results.Add(entity);
-
-                    if (results.Count >= count)
-                        return results;
-                }
-
-                var parts = subString.SplitParts();
-
-                var list = query
-                    .Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAllParts(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
-                    .Take(count - results.Count)
-                    .ToList();
-
-                results.AddRange(list);
-
-                return results;
-            }
-        }
-
-        public static async Task<List<T>> AutocompleteUntypedAsync<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type, CancellationToken token)
-        {
-            using (ExecutionMode.UserInterface())
-            {
-                List<T> results = new List<T>();
-
-                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
-                {
-                    T entity = await query.SingleOrDefaultAsync(r => entitySelector.Evaluate(r).Id == id);
-
-                    if (entity != null)
-                        results.Add(entity);
-
-                    if (results.Count >= count)
-                        return results;
-                }
-
-                var parts = subString.SplitParts();
-
-                var list = await query.Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAllParts(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
-                    .Take(count - results.Count)
-                    .ToListAsync();
-
-                results.AddRange(list);
-
-                return results;
-            }
-        }
-
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : Entity
         {
