@@ -63,7 +63,7 @@ function SearchPage(p: SearchPageProps) {
 
   var qs = Finder.getSettings(fo.queryName);
   return (
-    <div id="divSearchPage">
+    <div id="divSearchPage" className="sf-search-page">
       <h3 className="display-6 sf-query-title">
         <span>{getQueryNiceName(fo.queryName)}</span>
         &nbsp;
