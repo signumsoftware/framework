@@ -337,6 +337,8 @@ namespace Signum.Engine.UserAssets
             using (Transaction tr = new Transaction())
             {
                 var doc = new MemoryStream(document).Using(XDocument.Load);
+                if (PreImport != null)
+                    doc = PreImport(doc);
 
                 ImporterContext importer = new ImporterContext(doc,
                     preview.Lines
