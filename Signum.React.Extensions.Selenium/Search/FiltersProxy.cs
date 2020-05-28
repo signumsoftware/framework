@@ -52,7 +52,7 @@ namespace Signum.React.Selenium
             return (FilterGroupProxy)GetNewFilter(() => this.AddGroupButton.Find().Click());
         }
 
-        public void AddFilter(string token, FilterOperation operation, object value)
+        public void AddFilter(string token, FilterOperation operation, object? value)
         {
             var fo = this.AddFilter();
             fo.QueryToken.SelectToken(token);
