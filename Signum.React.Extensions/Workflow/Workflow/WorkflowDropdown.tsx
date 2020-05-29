@@ -6,9 +6,18 @@ import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '.
 import * as WorkflowClient from '../WorkflowClient'
 import { NavDropdown, Dropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
-import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
+import { LinkContainer } from '@framework/Components'
+import * as Navigator from '@framework/Navigator'
 
 export default function WorkflowDropdown(props: {}) {
+  
+  if (!Navigator.isViewable(WorkflowEntity))
+    return null;
+
+  return <WorkflowDropdownImp />;
+}
+
+function WorkflowDropdownImp(props: {}) {
   var starts = useAPI(signal => WorkflowClient.API.starts(), []);
 
   function getStarts(starts: WorkflowEntity[]) {
