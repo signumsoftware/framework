@@ -158,6 +158,20 @@ namespace Signum.Engine.Files
             }
         }
 
+        public void DeleteFilesIfExist(IEnumerable<IFilePath> files)
+        {
+            using (HeavyProfiler.Log("AzureBlobStorage DeleteFiles"))
+            {
+                if (WeakFileReference)
+                    return;
+
+                foreach (var f in files)
+                {
+                    GetClient(f).DeleteBlobIfExists(f.Suffix);
+                }
+            }
+        }
+
         public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
         {
             {".x3d", "application/vnd.hzn-3d-crossword"},
