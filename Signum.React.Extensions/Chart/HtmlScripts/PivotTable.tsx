@@ -10,9 +10,10 @@ import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumbroFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
-import { isLite, Lite, Entity } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption } from '@framework/FindOptions';
+import { ChartColumnType } from '../Signum.Entities.Chart';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -45,13 +46,19 @@ class RowGroup {
   }
 
   getNiceName() {
+    if (this.column.token?.type.name == "boolean")
+      return this.column.title + " = " +
+        (this.value == true ? BooleanEnum.niceToString("True") :
+          this.value == false ? BooleanEnum.niceToString("False") :
+            "null");
+
     return this.column.getNiceName(this.value);
   }
 
   span(): number {
 
     var summary = this.nextStyle && this.nextStyle.subTotal == "yes" ||
-      this.style.placeholder == "empty" || this.style.placeholder == "filled" ? 1 : 0;
+      (this.style.placeholder == "empty" || this.style.placeholder == "filled") && this.nextStyle ? 1 : 0;
 
     var result = this.subGroups ? this.subGroups.sum(a => a.span()) :
       this.rows ? 1 :
@@ -231,7 +238,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     return keys.map(val => {
 
-      const gr = styles.length == level + 1 ? undefined : getRowGroups(gor && (gor as RowDictionary)[col.getKey(val)]?.dicOrRows, styles, level + 1, [
+      const gr = styles.length < level + 1 ? undefined : getRowGroups(gor && (gor as RowDictionary)[col.getKey(val)]?.dicOrRows, styles, level + 1, [
         ...filters,
         { token: col.token!, operation: "EqualTo", value: val, frozen: false }
       ]);

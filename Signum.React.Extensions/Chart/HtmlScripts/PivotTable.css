@@ -9,3 +9,8 @@
 .pivot-table a:hover {
     color: dodgerblue;
 }
+
+.pivot-table tr:hover td, 
+.pivot-table tr:hover th:not([rowspan]) {
+    border-bottom: 1px solid black;
+}

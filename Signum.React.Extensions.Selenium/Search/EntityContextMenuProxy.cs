@@ -30,11 +30,12 @@ namespace Signum.React.Selenium
             return new SearchModalProxy(popup);
         }
 
-        public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false, bool shouldDisapear = false)
+        public void ExecuteClick<T>(ExecuteSymbol<T> executeSymbol, bool consumeConfirmation = false, bool shouldDisapear = false)
+            where T : Entity
         {
             var lites = ResultTable.SelectedEntities();
 
-            Operation(symbolContainer).WaitVisible().Click();
+            Operation(executeSymbol).WaitVisible().Click();
             if (consumeConfirmation)
                 this.ResultTable.Selenium.ConsumeAlert();
 
@@ -42,6 +43,26 @@ namespace Signum.React.Selenium
                 ResultTable.WaitNoVisible(lites);
             else
                 ResultTable.WaitSuccess(lites);
+        }
+
+        public FrameModalProxy<T> ConstructFrom<F, T>(ConstructSymbol<T>.From<F> constructSymbol, bool shouldDisapear = false)
+            where F : Entity
+            where T : Entity
+        {
+            var lites = ResultTable.SelectedEntities();
+
+            var modal = Operation(constructSymbol).WaitVisible().CaptureOnClick();
+
+            var result = new FrameModalProxy<T>(modal);
+            result.Disposing += okPressed =>
+            {
+                if (shouldDisapear)
+                    ResultTable.WaitNoVisible(lites);
+                else
+                    ResultTable.WaitSuccess(lites);
+            };
+
+            return result;
         }
 
         public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true)

@@ -24,8 +24,17 @@ namespace Signum.React.Selenium
             return (Lite<T>)container.EntityInfo().ToLite();
         }
 
-        public static WebElementLocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static WebElementLocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
         {
+            if(groupId != null)
+            {
+                var groupButton = container.Element.WaitElementVisible(By.Id(groupId));
+                if (groupButton.GetAttribute("aria-expanded") != "true")
+                    groupButton.Click();
+
+                return container.ContainerElement().WithLocator(By.CssSelector($"a[data-operation='{symbol.Key}']"));
+            }
+
             return container.ContainerElement().WithLocator(By.CssSelector($"button[data-operation='{symbol.Key}']"));
         }
 
@@ -57,7 +66,7 @@ namespace Signum.React.Selenium
             return container.OperationDisabled(symbol.Symbol);
         }
 
-        public static void OperationClick(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static void OperationClick(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
         {
             container.OperationButton(symbol).Find().ButtonClick();
         }
@@ -68,15 +77,15 @@ namespace Signum.React.Selenium
             container.OperationClick(symbol.Symbol);
         }
 
-        public static IWebElement OperationClickCapture(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static IWebElement OperationClickCapture(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
         {
-            return container.OperationButton(symbol).Find().CaptureOnClick();
+            return container.OperationButton(symbol, groupId).Find().CaptureOnClick();
         }
 
-        public static IWebElement OperationClickCapture<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+        public static IWebElement OperationClickCapture<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)
               where T : Entity
         {
-            return container.OperationClickCapture(symbol.Symbol);
+            return container.OperationClickCapture(symbol.Symbol, groupId);
         }
 
         public static void Execute<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true)
