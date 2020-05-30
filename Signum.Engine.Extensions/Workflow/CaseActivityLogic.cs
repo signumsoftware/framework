@@ -20,6 +20,7 @@ using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
 using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Workflow
 {
@@ -690,9 +691,9 @@ namespace Signum.Engine.Workflow
                         switch (timer.Type)
                         {
                             case WorkflowEventType.BoundaryForkTimer:
-                                ExecuteTimerFork(ca, timer);
-                                break;
                             case WorkflowEventType.BoundaryInterruptingTimer:
+                                ExecuteBoundaryTimer(ca, timer);
+                                break;
                             case WorkflowEventType.IntermediateTimer:
                                 ExecuteStep(ca, DoneType.Timeout, timer.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
                                 break;
@@ -922,8 +923,9 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void ExecuteTimerFork(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
+            private static void ExecuteBoundaryTimer(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
             {
+                var type = boundaryEvent.Type;
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
@@ -934,16 +936,30 @@ namespace Signum.Engine.Workflow
                 };
 
                 ctx.ExecuteConnection(connection);
-                if (!FindNext(connection.To, ctx))
-                    return;
 
-                CreateNextActivities(@case, ctx, ca);
-
-                new CaseActivityExecutedTimerEntity
+                if (type == WorkflowEventType.BoundaryInterruptingTimer)
                 {
-                    BoundaryEvent = boundaryEvent.ToLite(),
-                    CaseActivity = ca.ToLite(),
-                }.Save();
+                    ExecuteStep(ca, DoneType.Timeout, connection);
+                    return;
+                }
+
+                if (type == WorkflowEventType.BoundaryForkTimer)
+                {
+                    if (!FindNext(connection.To, ctx))
+                        return;
+
+                    CreateNextActivities(@case, ctx, ca);
+
+                    new CaseActivityExecutedTimerEntity
+                    {
+                        BoundaryEvent = boundaryEvent.ToLite(),
+                        CaseActivity = ca.ToLite(),
+                    }.Save();
+
+                    return;
+                }
+
+                throw new InvalidOperationException("Unexpected Timer Type " + type);
             }
 
             private static void ExecuteInitialStep(CaseEntity @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
