@@ -1157,13 +1157,16 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 
 export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
-  return useAPI(signal =>
-    fo == null ? Promise.resolve<ResultTable | null>(null) :
-      getQueryDescription(fo.queryName)
-        .then(qd => parseFindOptions(fo!, qd, false))
-        .then(fop => API.executeQuery(getQueryRequest(fop), signal)),
+  return useAPI(
+    signal => fo == null ? Promise.resolve<ResultTable | null>(null) : getResultTable(fo, signal),
     [fo && findOptionsPath(fo), ...(additionalDeps || [])],
     options);
+}
+
+export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop), signal));
 }
 
 export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R> | null | undefined {
