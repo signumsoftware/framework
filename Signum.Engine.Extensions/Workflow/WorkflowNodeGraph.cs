@@ -258,24 +258,41 @@ namespace Signum.Engine.Workflow
                 IWorkflowNodeEntity node = queue.Dequeue();
 
                 var nextConns = NextConnections(node).ToList(); //Clone;
-                if (node is WorkflowActivityEntity wa && wa.BoundaryTimers.Any())
+                if (node is WorkflowActivityEntity wa)
                 {
-                    foreach (var bt in wa.BoundaryTimers)
+                    foreach (var bt in wa.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer))
                     {
-                        nextConns.AddRange(NextConnections(bt));
+                        TrackId[bt] = TrackId[wa];
+                        queue.Enqueue(bt);
+                    }
+
+                    foreach (var bt in wa.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryForkTimer))
+                    {
+                        var newTrackId = TrackCreatedBy.Count + 1;
+                        TrackCreatedBy.Add(newTrackId, bt);
+                        TrackId[bt] = TrackId[wa];
+                        queue.Enqueue(bt);
                     }
                 }
 
                 foreach (var con in nextConns)
                 {
-                    if (ContinueExplore(node, con, con.To))
+                    if (ContinueExplore(con))
                         queue.Enqueue(con.To);
                 }
             }
 
-
-            bool ContinueExplore(IWorkflowNodeEntity prev, WorkflowConnectionEntity conn, IWorkflowNodeEntity next)
+            bool IsSplitActivity(WorkflowActivityEntity wa)
             {
+                return wa.BoundaryTimers.Any(bt => bt.Type == WorkflowEventType.BoundaryForkTimer);
+            }
+
+
+            bool ContinueExplore(WorkflowConnectionEntity conn)
+            {
+                IWorkflowNodeEntity prev = conn.From;
+                IWorkflowNodeEntity next = conn.To;
+
                 var prevTrackId = TrackId.GetOrThrow(prev);
                 int newTrackId;
 
@@ -289,38 +306,40 @@ namespace Signum.Engine.Workflow
                         TrackCreatedBy.Add(newTrackId, (WorkflowGatewayEntity)prev);
                     }
                 }
-                else if (prev is WorkflowActivityEntity act && act.BoundaryTimers.Any(bt => bt.Type == WorkflowEventType.BoundaryForkTimer))
+                else if (prev is WorkflowActivityEntity act && IsSplitActivity(act) ||
+                    prev is WorkflowEventEntity we && we.Type == WorkflowEventType.BoundaryInterruptingTimer &&
+                    IsSplitActivity( this.Activities.GetOrThrow(we.BoundaryOf!)))
                 {
                     if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
                         newTrackId = prevTrackId;
                     else
                     {
-                        if (conn.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.BoundaryForkTimer)
+                        var activity = (prev as WorkflowActivityEntity) ??
+                            this.Activities.GetOrThrow(((WorkflowEventEntity)prev).BoundaryOf!);
+
+                        var mainTrackId = NextConnections(activity)
+                            .Concat(activity.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
+                            .Select(c => TrackId.TryGetS(c.To))
+                            .Where(c => c != null)
+                            .Distinct()  
+                            .SingleOrDefaultEx();
+
+                        if (mainTrackId.HasValue)
                         {
-                            newTrackId = TrackCreatedBy.Count + 1;
-                            TrackCreatedBy.Add(newTrackId, act);
+                            newTrackId = mainTrackId.Value;
                         }
                         else
                         {
-                            var mainTrackId = NextConnections(act)
-                                .Concat(act.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
-                                .Select(c => TrackId.TryGetS(c.To))
-                                .Where(c => c != null)
-                                .Distinct()
-                                .SingleOrDefaultEx();
-
-                            if (mainTrackId.HasValue)
-                            {
-                                newTrackId = mainTrackId.Value;
-                            }
-                            else
-                            {
-                                newTrackId = TrackCreatedBy.Count + 1;
-                                TrackCreatedBy.Add(newTrackId, act);
-                            }
+                            newTrackId = TrackCreatedBy.Count + 1;
+                            TrackCreatedBy.Add(newTrackId, activity);
                         }
-
                     }
+                }
+
+                else if (conn.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.BoundaryForkTimer) //Obiously SplitActivity
+                {
+                    newTrackId = TrackCreatedBy.Count + 1;
+                    TrackCreatedBy.Add(newTrackId, ev);
                 }
                 else if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
                 {

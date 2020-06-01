@@ -1192,7 +1192,10 @@ namespace Signum.Engine.Workflow
                     if (caseActivity != null)
                     {
                         if (node.Is(ctx.CaseActivity!.WorkflowActivity))
-                            caseActivity = ctx.CaseActivity;
+                        {
+                            //caseActivity = ctx.CaseActivity;
+                            throw new InvalidOperationException("Unexpected BoundaryTimer with WorkflowEvent in CaseActivity");
+                        }
 
                         if (caseActivity.DoneDate.HasValue)
                             return BoolBox.True(caseActivity);
@@ -1274,7 +1277,13 @@ namespace Signum.Engine.Workflow
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
 
-                                if (connections.All(wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)))
+                                var graph = WorkflowLogic.GetWorkflowNodeGraph(node.Lane.Pool.Workflow.ToLite());
+
+                                var trackGroups = connections.AgGroupToDictionary(
+                                    wc => graph.TrackId.GetOrThrow(wc.From), 
+                                    wcs => wcs.ToDictionaryEx(wc => wc, wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)));
+
+                                if (trackGroups.All(kvp => kvp.Value.Values.Any(a => a))) // Every Parallel gets implicit Exclusive Join behaviour for each Track ID group. 
                                     return BoolBox.True(null);
                                 else
                                     return BoolBox.False;
