@@ -26,8 +26,8 @@ export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
           <div className="alert alert-info case-alert">
             {prev == null ? JavascriptMessage.loading.niceToString() :
               CaseActivityMessage.From0On1.niceToString().formatHtml(
-                <strong>{prev!.doneBy!.toStr}</strong>,
-                <strong>{moment(prev!.doneDate!).format("L LT")} ({moment(prev!.doneDate!).fromNow()})</strong>)
+                <strong>{prev.doneBy!.toStr}</strong>,
+                <strong>{moment(prev.doneDate!).format("L LT")} ({moment(prev.doneDate!).fromNow()})</strong>)
             }
           </div>
       }
