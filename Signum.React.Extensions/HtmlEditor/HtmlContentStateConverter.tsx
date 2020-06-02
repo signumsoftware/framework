@@ -5,6 +5,9 @@ import { IContentStateConverter } from "./HtmlEditor"
 
 
 export class HtmlContentStateConverter implements IContentStateConverter {
+
+  static default = new HtmlContentStateConverter();
+
   constructor(
     public exportOptions?: ExportOptions,
     public importOptions?: ImportOptions) { }
