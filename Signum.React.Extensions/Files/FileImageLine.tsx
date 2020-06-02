@@ -90,9 +90,13 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
 
     const val = ctx.value!;
 
+    function handleClick(e: React.MouseEvent) {
+      ImageModal.show(val as IFile & ModifiableEntity, ctx.propertyRoute)
+    }
+
     var content = ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />;
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} propertyRoute={ctx.propertyRoute} style={{ maxWidth: "100px" }} onClick={handleClick} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} propertyRoute={ctx.propertyRoute} style={{ maxWidth: "100px" }} onClick={handleClick} {...p.imageHtmlAttributes} />;
 
     const removeButton = c.renderRemoveButton(true, val);
 

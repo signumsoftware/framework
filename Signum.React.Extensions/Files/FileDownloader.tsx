@@ -5,13 +5,14 @@ import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, isEntity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
 import * as QueryString from 'query-string'
-import { Type } from '@framework/Reflection';
+import { Type, PropertyRoute, getTypeName } from '@framework/Reflection';
 import "./Files.css"
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
 
 export interface FileDownloaderProps {
   entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
+  propertyRoute: PropertyRoute | undefined;
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -36,12 +37,12 @@ export function FileDownloader(p: FileDownloaderProps) {
         if (entity.binaryFile)
           downloadBase64(e, entity.binaryFile, entity.fileName!);
         else
-          configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
+          configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity, p.propertyRoute));
       } else {
         if (entity.binaryFile)
           viewBase64(e, entity.binaryFile, entity.fileName!);
         else
-          configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
+          configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity, p.propertyRoute));
       }
 
     }).done();
@@ -77,7 +78,7 @@ export function registerConfiguration<T extends IFile & ModifiableEntity>(type: 
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-  fileUrl?: (file: T) => string;
+  fileUrl?: (file: T, properyRoute: PropertyRoute | undefined) => string;
   downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
   viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
@@ -97,7 +98,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
+  fileUrl: (file, pr) => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${pr!.findRootType().name}/${file.entityId.Object}?` + QueryString.stringify({ route: pr!.propertyPath(), rowId: file.mListRowId?.Object }))
 });
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {

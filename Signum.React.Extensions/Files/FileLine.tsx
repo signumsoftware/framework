@@ -98,6 +98,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
         configuration={p.configuration}
         download={p.download}
         entityOrLite={val}
+        propertyRoute={ctx.propertyRoute}
         htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
     const removeButton = c.renderRemoveButton(true, val);

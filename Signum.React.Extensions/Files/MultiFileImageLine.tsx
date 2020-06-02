@@ -126,8 +126,8 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
     const val = ctx.value!;
 
     return ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} />;
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} propertyRoute={ctx.propertyRoute} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} propertyRoute={ctx.propertyRoute}  {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, ctx.propertyRoute)} />;
   }
 
 });
