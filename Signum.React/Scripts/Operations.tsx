@@ -39,7 +39,7 @@ export function start() {
     parentValue: ctx.lite
   },
     {
-      isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
+      isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).operations && Finder.isFindable(OperationLogEntity, false),
       icon: "history",
       iconColor: "green",
     }));

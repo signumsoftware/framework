@@ -8,8 +8,14 @@ namespace Signum.Utilities.DataStructures
     [Serializable]
     public class HashSetComparer<T> : IEqualityComparer<HashSet<T>>, IEqualityComparer
     {
-        public bool Equals(HashSet<T> x, HashSet<T> y)
+        public bool Equals(HashSet<T>? x, HashSet<T>? y)
         {
+            if (x == null && y == null)
+                return true;
+
+            if (x == null || y == null)
+                return false;
+
             return x.SetEquals(y);
         }
 

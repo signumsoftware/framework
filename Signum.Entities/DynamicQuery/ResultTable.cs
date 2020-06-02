@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Globalization;
 using System.ComponentModel;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -269,6 +270,7 @@ namespace Signum.Entities.DynamicQuery
             }
             return dt;
         }
+
 
         public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter? converter = null)
         {

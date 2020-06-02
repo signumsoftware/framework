@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 interface ErrorBoundaryProps {
+  refreshKey?: unknown
 }
 
 interface ErrorBoundaryState {
@@ -16,6 +17,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     this.setState({ error, info });
+  }
+
+  componentWillReceiveProps(newProps: ErrorBoundaryProps) {
+    if (newProps.refreshKey != this.props.refreshKey && (this.state.error || this.state.info))
+      this.setState({ error: undefined, info: undefined });
   }
 
   render() {

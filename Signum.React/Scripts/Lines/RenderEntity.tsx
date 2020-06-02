@@ -59,7 +59,7 @@ export function RenderEntity(p: RenderEntityProps) {
   const prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
   const frame: EntityFrame = {
     tabs: undefined,
-    frameComponent: { forceUpdate },
+    frameComponent: { forceUpdate, type: RenderEntity },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),

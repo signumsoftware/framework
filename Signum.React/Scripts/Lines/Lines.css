@@ -336,7 +336,7 @@ input[type=checkbox].form-control-xs {
     height: 24px;
     line-height: 10px;
     margin-top: -2px;
-    border: #ccc 0.5px solid;
+    border: #ccc 1px solid;
 }
 
 .rw-widget-xs .rw-select {

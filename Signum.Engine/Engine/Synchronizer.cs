@@ -27,15 +27,15 @@ namespace Signum.Engine
 
                 if (!oldExists)
                 {
-                    createNew?.Invoke(key, newVal);
+                    createNew?.Invoke(key, newVal!);
                 }
                 else if (!newExists)
                 {
-                    removeOld?.Invoke(key, oldVal);
+                    removeOld?.Invoke(key, oldVal!);
                 }
                 else
                 {
-                    merge?.Invoke(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal!, oldVal!);
                 }
             }
         }

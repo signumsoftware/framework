@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -27,13 +28,30 @@ namespace Signum.Utilities.DataStructures
             this.comparer = comparer ?? Comparer<S>.Default;
         }
 
-        public int Compare(T x, T y)
+        public int Compare([AllowNull] T x, [AllowNull] T y)
         {
+            if (x == null && y == null)
+                return 0;
+
+            if (x == null )
+                return -1;
+
+            if (y == null)
+                return 1;
+
+
             return comparer.Compare(func(x), func(y));
         }
 
-        public bool Equals(T x, T y)
+        public bool Equals([AllowNull] T x, [AllowNull] T y)
         {
+            if (x == null && y == null)
+                return true;
+
+            if (x == null || y == null)
+                return false;
+
+
             return equalityComparer.Equals(func(x), func(y));
         }
 
@@ -86,8 +104,17 @@ namespace Signum.Utilities.DataStructures
                 this.comparer2 = comparer2;
             }
 
-            public int Compare(T x, T y)
+            public int Compare([AllowNull] T x, [AllowNull] T y)
             {
+                if (x == null && y == null)
+                    return 0;
+
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return comparer1.Compare(x, y).DefaultToNull() ?? comparer2.Compare(x, y);
             }
 
@@ -113,8 +140,15 @@ namespace Signum.Utilities.DataStructures
                 this.comparer2 = comparer2;
             }
 
-            public bool Equals(T x, T y)
+            public bool Equals([AllowNull] T x, [AllowNull] T y)
             {
+
+                if (x == null && y == null)
+                    return true;
+
+                if (x == null || y == null)
+                    return false;
+
                 return comparer1.Equals(x, y) && comparer2.Equals(x,y);
             }
 
