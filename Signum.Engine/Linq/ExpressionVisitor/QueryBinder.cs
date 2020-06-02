@@ -205,6 +205,36 @@ namespace Signum.Engine.Linq
 
                 return GetEntityType(expression) ?? Expression.Constant(expression.Type, typeof(Type));
             }
+            else if (m.Method.DeclaringType == typeof(EntityContext))
+            {
+                var obj = m.Arguments[0];
+
+                if(!typeof(ModifiableEntity).IsAssignableFrom(obj.Type))
+                {
+                    if(obj is MemberExpression me)
+                    {
+                        obj = me.Expression;
+                    }
+                }
+
+                if (!typeof(ModifiableEntity).IsAssignableFrom(obj.Type))
+                    throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
+
+                var expression = Visit(obj);
+
+                var entityContext = 
+                    expression is EntityExpression ee ? new EntityContextInfo(ee.ExternalId, null) :
+                    expression is EmbeddedEntityExpression eee ? eee.EntityContext :
+                    expression is MixinEntityExpression mee ? mee.EntityContext :
+                   throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
+
+                if(entityContext == null)
+                    throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
+
+                return m.Method.Name == nameof(EntityContext.EntityId) ? entityContext.EntityId :
+                    m.Method.Name == nameof(EntityContext.MListRowId) ? entityContext.MListRowId ?? new PrimaryKeyExpression(Expression.Constant(null, typeof(IComparable))) :
+                     throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
+            }
 
             MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
             return BindMethodCall(result);
@@ -1971,7 +2001,10 @@ namespace Signum.Engine.Linq
 
                 var hasValue = CombineImplementations(strategy, expressions.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
 
-                return new EmbeddedEntityExpression(returnType, hasValue, bindings, null, null);
+
+                var entityContext = expressions.Select(a => ((EmbeddedEntityExpression)a.Value).EntityContext).Only(); //For now
+
+                return new EmbeddedEntityExpression(returnType, hasValue, bindings, null, null, entityContext);
             }
 
             if (expressions.All(e => e.Value is MixinEntityExpression))
@@ -1982,7 +2015,9 @@ namespace Signum.Engine.Linq
                                 select new FieldBinding(g.Key,
                                   CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 
-                return new MixinEntityExpression(returnType, bindings, null, null);
+                var entityContext = expressions.Select(a => ((MixinEntityExpression)a.Value).EntityContext).Only(); //For now
+
+                return new MixinEntityExpression(returnType, bindings, null, null, entityContext);
             }
 
             if (expressions.Any(e => e.Value is MListExpression))
@@ -2749,8 +2784,9 @@ namespace Signum.Engine.Linq
                 var newAlias = NextTableAlias(table.Name);
                 var id = table.GetIdExpression(newAlias)!;
                 var period = table.GenerateSystemPeriod(newAlias, this);
-                var bindings = table.GenerateBindings(newAlias, this, id, period);
-                var mixins = table.GenerateMixins(newAlias, this, id, period);
+                var entityContext = new EntityContextInfo(entity.ExternalId, null);
+                var bindings = table.GenerateBindings(newAlias, this, id, period, entityContext);
+                var mixins = table.GenerateMixins(newAlias, this, id, period, entityContext);
 
                 var result = new EntityExpression(entity.Type, entity.ExternalId, entity.ExternalPeriod, newAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
@@ -2964,7 +3000,14 @@ namespace Signum.Engine.Linq
 
             var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
-            var expression = this.MapVisitExpand(cleanLambda, parentEntity, null!);
+            Expression expression;
+            {
+                map[lambda.Parameters[0]] = parentEntity;
+                map[lambda.Parameters[1]] = af.MListRowId ?? NullId(typeof(int?));
+                expression = Visit(lambda.Body);
+                map.Remove(lambda.Parameters[1]);
+                map.Remove(lambda.Parameters[0]);
+            }
 
             if(expression is MethodCallExpression mce)
             {
@@ -3470,7 +3513,8 @@ namespace Signum.Engine.Linq
                        Expression.Condition(test, t.HasValue, f.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded,
-                       col.ViewTable));
+                       col.ViewTable,
+                       null));
 
             return null;
         }
@@ -3579,7 +3623,8 @@ namespace Signum.Engine.Linq
                            l.GetBinding(bin.FieldInfo).Nullify(),
                            r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded,
-                       col.ViewTable));
+                       col.ViewTable,
+                       null));
 
             return null;
         }
@@ -3757,7 +3802,7 @@ namespace Signum.Engine.Linq
                             Expression.Constant(null, fi.FieldType.Nullify()) :
                             Expression.Constant(kvp.Value.Getter(value), fi.FieldType), bind)).ToReadOnly();
 
-            return new EmbeddedEntityExpression(contant.Type, Expression.Constant(value != null), bindings, embedded.FieldEmbedded, embedded.ViewTable);
+            return new EmbeddedEntityExpression(contant.Type, Expression.Constant(value != null), bindings, embedded.FieldEmbedded, embedded.ViewTable, embedded.EntityContext);
         }
 
         internal FieldBinding GetBinding(FieldInfo fi, Expression value, Expression binding)
@@ -3779,7 +3824,7 @@ namespace Signum.Engine.Linq
                                 (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                             ).ToReadOnly();
 
-            return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, embedded.FieldEmbedded, embedded.ViewTable);
+            return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, embedded.FieldEmbedded, embedded.ViewTable, embedded.EntityContext);
         }
 
         IDisposable OverrideColExpression(Expression newColExpression)

@@ -224,4 +224,16 @@ namespace Signum.Entities
         }
     }
 
+    public static class EntityContext
+    {
+        public static PrimaryKey EntityId(object obj)
+        {
+            throw new InvalidOperationException("EntityContext.EntityId can only be called inside LINQ queries");
+        }
+
+        public static PrimaryKey? MListRowId(object obj)
+        {
+            throw new NotImplementedException("EntityContext.MListRowId can only be called inside LINQ queries");
+        }
+    }
 }

@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using System.Diagnostics;
-
+using Signum.Entities;
 
 namespace Signum.Engine.Linq
 {
@@ -171,9 +171,10 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitAdditionalField(AdditionalFieldExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
+            var mlistRowId = (PrimaryKeyExpression?)Visit(ml.MListRowId);
             var externalPeriod = (IntervalExpression)Visit(ml.ExternalPeriod);
-            if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
-                return new AdditionalFieldExpression(ml.Type, newBackID, externalPeriod, ml.Route);
+            if (newBackID != ml.BackID || mlistRowId != ml.MListRowId || externalPeriod != ml.ExternalPeriod)
+                return new AdditionalFieldExpression(ml.Type, newBackID, mlistRowId, externalPeriod, ml.Route);
             return ml;
         }
 
@@ -236,14 +237,26 @@ namespace Signum.Engine.Linq
             return ee;
         }
 
+        protected internal virtual EntityContextInfo VisitEntityContextInfo(EntityContextInfo entityContext)
+        {
+            var entityId = (PrimaryKeyExpression)Visit(entityContext.EntityId);
+            var rowId = (PrimaryKeyExpression?)Visit(entityContext.MListRowId);
+
+            if(entityId != entityContext.EntityId || rowId != entityContext.MListRowId)
+                return new EntityContextInfo(entityId, rowId);
+
+            return entityContext;
+        }
+
         protected internal virtual Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
             var bindings = Visit(eee.Bindings, VisitFieldBinding);
             var hasValue = Visit(eee.HasValue);
+            var entityContext = eee.EntityContext == null ? null : VisitEntityContextInfo(eee.EntityContext);
 
-            if (eee.Bindings != bindings || eee.HasValue != hasValue)
+            if (eee.Bindings != bindings || eee.HasValue != hasValue || eee.EntityContext != entityContext)
             {
-                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable);
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable, entityContext);
             }
             return eee;
         }
@@ -251,10 +264,11 @@ namespace Signum.Engine.Linq
         protected internal virtual MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
         {
             var bindings = Visit(me.Bindings, VisitFieldBinding);
+            var entityContext = me.EntityContext == null ? null : VisitEntityContextInfo(me.EntityContext);
 
-            if (me.Bindings != bindings)
+            if (me.Bindings != bindings || me.EntityContext != entityContext)
             {
-                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin);
+                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin, entityContext);
             }
             return me;
         }
