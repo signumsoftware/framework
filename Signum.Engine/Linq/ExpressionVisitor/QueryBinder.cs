@@ -3001,12 +3001,13 @@ namespace Signum.Engine.Linq
             var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
             Expression expression;
+            using (SetCurrentSource(null!))
             {
-                map[lambda.Parameters[0]] = parentEntity;
-                map[lambda.Parameters[1]] = af.MListRowId ?? NullId(typeof(int?));
-                expression = Visit(lambda.Body);
-                map.Remove(lambda.Parameters[1]);
-                map.Remove(lambda.Parameters[0]);
+                map[cleanLambda.Parameters[0]] = parentEntity;
+                map[cleanLambda.Parameters[1]] = af.MListRowId ?? NullId(typeof(int?));
+                expression = Visit(cleanLambda.Body);
+                map.Remove(cleanLambda.Parameters[1]);
+                map.Remove(cleanLambda.Parameters[0]);
             }
 
             if(expression is MethodCallExpression mce)
