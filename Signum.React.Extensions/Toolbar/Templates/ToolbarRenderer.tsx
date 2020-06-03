@@ -44,14 +44,6 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
 }
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-
-  if (!Navigator.isViewable(ToolbarEntity))
-    return null;
-
-  return <ToolbarRendererImp location={p.location} />;
-}
-
-function ToolbarRendererImp(p: { location?: ToolbarLocation; }): React.ReactElement | null {
   const forceUpdate = useForceUpdate();
   const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
   const responseRef = useUpdatedRef(response);
