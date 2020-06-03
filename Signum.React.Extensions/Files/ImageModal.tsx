@@ -10,7 +10,6 @@ import { PropertyRoute } from '@framework/Lines';
 interface ImageModalProps extends IModalProps<undefined> {
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   file: IFile & ModifiableEntity;
-  propertyRoute: PropertyRoute | undefined;
   title?: string;
 }
 
@@ -37,15 +36,15 @@ export function ImageModal(p: ImageModalProps) {
         </button>
       </div>
       <div className="modal-body">
-        <FileImage propertyRoute={p.propertyRoute} file={p.file} style={{ maxWidth: "100%", marginLeft: "auto", marginRight: "auto", display: "block" }} {...p.imageHtmlAttributes} />
+        <FileImage file={p.file} style={{ maxWidth: "100%", marginLeft: "auto", marginRight: "auto", display: "block" }} {...p.imageHtmlAttributes} />
       </div>
     </Modal>
   );
 }
 
 
-ImageModal.show = (file: IFile & ModifiableEntity, pr: PropertyRoute | undefined, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>) => {
-  openModal(<ImageModal file={file} propertyRoute={pr} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
+ImageModal.show = (file: IFile & ModifiableEntity, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  openModal(<ImageModal file={file} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
 } 
 
 

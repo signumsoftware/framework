@@ -45,31 +45,24 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   Finder.formatRules.push({
     name: type.typeName + "_Download",
     isApplicable: c => c.token!.type.name == type.typeName && !isImage(c.token!.propertyRoute),
-    formatter: c => {
-      var pr = PropertyRoute.parseFull(c.token!.propertyRoute!);
-      return new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} propertyRoute={pr} /> : undefined);
-    }
+    formatter: c => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} /> : undefined)
   });
 
   Finder.formatRules.push({
     name: type.typeName + "_Image",
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
-    formatter: c => {
-      var pr = PropertyRoute.parseFull(c.token!.propertyRoute!);
-      return new CellFormatter(cell => !cell ? undefined :
-        isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
-          <FileThumbnail file={cell as IFile & ModifiableEntity} />)
-    }
+    formatter: c => new CellFormatter(cell => !cell ? undefined :
+      isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
+        <FileThumbnail file={cell as IFile & ModifiableEntity} />)
   });
 }
 
 interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file: IFile & ModifiableEntity;
-  propertyRoute: PropertyRoute | undefined;
 }
 
-function FileThumbnail({ file, propertyRoute, ...attrs }: FileThumbnailProps) {
-  return <FileImage file={file} propertyRoute={propertyRoute} onClick={() => ImageModal.show(file, propertyRoute)} {...attrs} />
+function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
+  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs} />
 }
 
 FileThumbnail.defaultProps = {

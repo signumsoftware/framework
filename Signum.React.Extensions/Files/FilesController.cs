@@ -89,7 +89,7 @@ namespace Signum.React.Files
         static Func<PrimaryKey, string?, FilePathEmbedded?> GetMListQuery<T, M>(PropertyRoute route, PropertyRoute mlistRoute)
             where T : Entity
         {
-            var mlistExpression = mlistRoute.GetLambdaExpression<T, MList<M>>(false);
+            var mlistExpression = mlistRoute.Parent!.GetLambdaExpression<T, MList<M>>(false);
             var elementExpression = route.GetLambdaExpression<M, FilePathEmbedded>(false, mlistRoute);
             var mlistPkType = Schema.Current.TableMList(mlistExpression).PrimaryKey.Type;
 

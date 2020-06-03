@@ -95,7 +95,6 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                     p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
                       <FileDownloader
                         configuration={p.configuration}
-                        propertyRoute={p.ctx.propertyRoute}
                         download={p.download}
                         entityOrLite={mlec.value}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />

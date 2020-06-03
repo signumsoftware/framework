@@ -7,7 +7,6 @@ import { PropertyRoute } from '@framework/Lines';
 
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | null;
-  propertyRoute: PropertyRoute | undefined;
 }
 
 interface FileImageState {
@@ -21,8 +20,7 @@ export function FileImage(p: FileImageProps) {
 
   React.useEffect(() => {
     if (file && !file.fullWebPath && !file.binaryFile) {
-      var url = configurtions[file.Type].fileUrl!(file, p.propertyRoute);
-      var oldFile = file;
+      var url = configurtions[file.Type].fileUrl!(file);
 
       Services.ajaxGetRaw({ url: url })
         .then(resp => resp.blob())

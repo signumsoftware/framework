@@ -49,10 +49,36 @@ namespace Signum.Entities.Files
         }
 
         [Ignore]
-        public PrimaryKey EntityId { get; set; }
+        PrimaryKey entityId;
+        public PrimaryKey EntityId
+        {
+            get { return entityId; }
+            set { entityId = value; }
+        }
 
         [Ignore]
-        public PrimaryKey? MListRowId { get; set; }
+        PrimaryKey? mListRowId;
+        public PrimaryKey? MListRowId
+        {
+            get { return mListRowId; }
+            set { mListRowId = value; }
+        }
+
+        [Ignore]
+        string propertyRoute;
+        public string PropertyRoute
+        {
+            get { return propertyRoute; }
+            set { propertyRoute = value; }
+        }
+
+        [Ignore]
+        string rootType;
+        public string RootType
+        {
+            get { return rootType; }
+            set { rootType = value; }
+        }
 
         [Ignore]
         byte[] binaryFile;

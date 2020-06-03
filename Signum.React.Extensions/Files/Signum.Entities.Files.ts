@@ -7,10 +7,10 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export interface IFile
 {
-	__isFile__ : true; //only for type-checking
-    binaryFile?: string | null;
-    fileName?: string | null;
-    fullWebPath?: string | null;
+  __isFile__ : true; //only for type-checking
+  binaryFile?: string | null;
+  fileName?: string | null;
+  fullWebPath?: string | null;
 }
 
 export interface FileEntity extends IFile { }
@@ -18,8 +18,8 @@ export interface FileEmbedded extends IFile { }
 
 export interface IFilePath extends IFile
 {
-   fileType?: FileTypeSymbol | null;
-   suffix?: string | null;
+  fileType?: FileTypeSymbol | null;
+  suffix?: string | null;
 }
 
 export interface FilePathEntity extends IFilePath { }
@@ -66,6 +66,8 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   fileName: string;
   entityId: Entities.PrimaryKey;
   mListRowId: Entities.PrimaryKey | null;
+  propertyRoute: string;
+  rootType: string;
   binaryFile: string;
   hash: string | null;
   fileLength: number;

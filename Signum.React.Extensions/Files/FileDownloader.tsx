@@ -12,7 +12,6 @@ export type DownloadBehaviour = "SaveAs" | "View" | "None";
 
 export interface FileDownloaderProps {
   entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
-  propertyRoute: PropertyRoute | undefined;
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -37,12 +36,12 @@ export function FileDownloader(p: FileDownloaderProps) {
         if (entity.binaryFile)
           downloadBase64(e, entity.binaryFile, entity.fileName!);
         else
-          configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity, p.propertyRoute));
+          configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
       } else {
         if (entity.binaryFile)
           viewBase64(e, entity.binaryFile, entity.fileName!);
         else
-          configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity, p.propertyRoute));
+          configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
       }
 
     }).done();
@@ -78,7 +77,7 @@ export function registerConfiguration<T extends IFile & ModifiableEntity>(type: 
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-  fileUrl?: (file: T, properyRoute: PropertyRoute | undefined) => string;
+  fileUrl?: (file: T) => string;
   downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
   viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
@@ -98,7 +97,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: (file, pr) => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${pr!.findRootType().name}/${file.entityId.Object}?` + QueryString.stringify({ route: pr!.propertyPath(), rowId: file.mListRowId?.Object }))
+  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId.Object}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId?.Object })}`)
 });
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
