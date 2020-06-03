@@ -2,12 +2,12 @@ using System;
 using System.IO;
 using Signum.Utilities;
 using System.Linq.Expressions;
-using Signum.Entities.Patterns;
+using Signum.Services;
 
 namespace Signum.Entities.Files
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
-    public class FilePathEntity : LockableEntity, IFile, IFilePath
+    public class FilePathEntity : Entity, IFile, IFilePath
     {
         public static string? ForceExtensionIfEmpty = ".dat";
 
@@ -58,9 +58,14 @@ namespace Signum.Entities.Files
             set
             {
                 if (Set(ref binaryFile, value) && binaryFile != null)
+                {
                     FileLength = binaryFile.Length;
+                    Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
+                }
             }
         }
+
+        public string? Hash { get; private set; }
 
         public int FileLength { get; internal set; }
 
@@ -138,7 +143,7 @@ namespace Signum.Entities.Files
         string? physicalPrefix;
         public string PhysicalPrefix => physicalPrefix ?? throw new InvalidOperationException("No PhysicalPrefix defined");
 
-        public string WebPrefix { get; set; }
+        public string? WebPrefix { get; set; }
 
         private PrefixPair()
         {

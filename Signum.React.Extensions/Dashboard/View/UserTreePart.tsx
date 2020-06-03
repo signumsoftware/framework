@@ -1,7 +1,8 @@
 
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import * as Finder from '@framework/Finder'
+import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
@@ -22,20 +23,21 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
 
   const treeViewRef = React.useRef<TreeViewer>(null);
   const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+  const qd = useAPI(() => Finder.getQueryDescription(p.part.userQuery.query.key), [p.part.userQuery.query.key]);
 
-  if (!fo)
+
+  if (!fo || !qd)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  const filterOptions = fo.filterOptions!;
-  const key = p.part.userQuery.query.key;
+  const ti = getTypeInfos(qd.columns["Entity"].type).single();
+
   return (
     <TreeViewer ref={treeViewRef}
       initialShowFilters={false}
-      typeName={key}
-      allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, key) !== null}
-      filterOptions={filterOptions}
-      key={key}
-      //onSearch={() => changeUrl()}
+      typeName={ti.name}
+      allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti) !== null}
+      filterOptions={fo.filterOptions ?? []}
+      key={ti.name}
     />
   );
 }

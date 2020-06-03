@@ -273,7 +273,7 @@ namespace Signum.React.Selenium
 
         public static void SelectTab(this ILineContainer lineContainer, string eventKey)
         {
-            var element = lineContainer.Element.WaitElementVisible(By.CssSelector($"li.nav-item[data-eventkey={eventKey}] a"));
+            var element = lineContainer.Element.WaitElementVisible(By.CssSelector($"a.nav-item[data-rb-event-key={eventKey}]"));
 
             element.ScrollTo();
             element.Click();

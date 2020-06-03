@@ -5,21 +5,77 @@ import * as Navigator from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
-import { Dic } from '@framework/Globals';
+import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumbroFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
-import { isLite, Lite, Entity } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
+import { FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search';
+import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption } from '@framework/FindOptions';
+import { ChartColumnType } from '../Signum.Entities.Chart';
 
-type GroupOrRows = RowGroup | ChartRow[];
-
-interface RowGroup {
-  [key: string]: { value: unknown, groupOrRows: GroupOrRows };
+interface RowDictionary {
+  [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
 }
 
+class RowGroup {
+  column: ChartColumn<unknown>;
+  style: CellStyle;
+  nextStyle?: CellStyle;
+  value: unknown;
 
-function multiGroups(rows: ChartRow[], columns: ChartColumn<unknown>[]): GroupOrRows {
+  subGroups?: RowGroup[];
+  rows?: ChartRow[];
+
+  parent?: RowGroup;
+
+  constructor(style: CellStyle, nextStyle: CellStyle,  value: unknown, subGroups?: RowGroup[], rows?: ChartRow[]) {
+    this.column = style.column!;
+    this.style = style;
+    this.nextStyle = nextStyle;
+    this.value = value;
+    this.subGroups = subGroups;
+    if (this.subGroups)
+      this.subGroups.forEach(a => a.parent = this);
+    this.rows = rows;
+  }
+
+  getKey() {
+    return this.column.getKey(this.value);
+  }
+
+  getNiceName() {
+    if (this.column.token?.type.name == "boolean")
+      return this.column.title + " = " +
+        (this.value == true ? BooleanEnum.niceToString("True") :
+          this.value == false ? BooleanEnum.niceToString("False") :
+            "null");
+
+    return this.column.getNiceName(this.value);
+  }
+
+  span(): number {
+
+    var summary = this.nextStyle && this.nextStyle.subTotal == "yes" ||
+      (this.style.placeholder == "empty" || this.style.placeholder == "filled") && this.nextStyle ? 1 : 0;
+
+    var result = this.subGroups ? this.subGroups.sum(a => a.span()) :
+      this.rows ? 1 :
+        1;
+
+    return result + summary;
+  }
+
+  getFilters(): { col: ChartColumn<unknown>, val: unknown }[] {
+    return [
+      ...(this.parent?.getFilters() ?? []),
+      { col: this.column, val: this.value },
+    ];
+  }
+}
+
+function multiDictionary(rows: ChartRow[], columns: ChartColumn<unknown>[]): RowDictionary | ChartRow[] {
   if (columns.length == 0)
     return rows;
 
@@ -28,35 +84,38 @@ function multiGroups(rows: ChartRow[], columns: ChartColumn<unknown>[]): GroupOr
   return rows.groupBy(r => firstCol.getValueKey(r))
     .toObject(gr => gr.key, gr => ({
       value: firstCol.getValue(gr.elements[0]),
-      groupOrRows: multiGroups(gr.elements, otherCols)
+      dicOrRows: multiDictionary(gr.elements, otherCols)
     }));
 }
 
 
 interface CellStyle {
-  textAlign: string;
-  verticalAlign: string;
-  placeholder?: "no" | "empty" | "filled"
+  cssStyle: React.CSSProperties | undefined;
+  subTotal?: "no" | "yes";
+  placeholder?: "no" | "empty" | "filled";
   background?: (number: number) => string;
-  keys?: unknown[];
   order?: string;
+  _keys?: unknown[];
+  _complete?: "No" | "Yes" | "FromFilters",
   column?: ChartColumn<unknown>;
+  maxTextLength?: number;
 }
 
 interface DimParameters {
-  complete?: string,
+  complete?: "No" | "Yes" | "Consistent" | "FromFilters",
   order?: string,
-  placeholder?: "no" | "empty" | "filled"
   gradient: string,
   scale: string,
-  textAlign: TextAlignProperty,
-  verticalAlign: VerticalAlignProperty<string>
+  subTotal?: "no" | "yes"
+  placeholder?: "no" | "empty" | "filled"
+  cssStyle: string,
+  maxTextLength?: number,
 }
 
 
 export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  if (data == null || data.rows.length == 0)
+  if (data == null)
     return (
       <svg direction="ltr" width={width} height={height}>
         <InitialMessage data={data} x={width / 2} y={height / 2} loading={loading} />
@@ -65,13 +124,14 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function getDimParameters(columnName: string): DimParameters {
     return ({
-      complete: parameters["Complete " + columnName],
+      complete: parameters["Complete " + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
       order: parameters["Order " + columnName],
       gradient: parameters["Gradient " + columnName],
       scale: parameters["Scale " + columnName],
-      textAlign: parameters["text-align " + columnName] as TextAlignProperty,
-      verticalAlign: parameters["vert-align " + columnName] as VerticalAlignProperty<string>,
       placeholder: parameters["Placeholder " + columnName] as "no" | "empty" | "filled",
+      subTotal: parameters["SubTotal " + columnName] as "no" | "yes",
+      cssStyle: parameters["CSS Style " + columnName],
+      maxTextLength: parseInt(parameters["Max Text Length " + columnName]) || undefined,
     });
   }
 
@@ -92,27 +152,31 @@ export default function renderPivotTable({ data, width, height, parameters, load
   const horCols = horColsWitParams.map(a => a.col);
   const vertCols = vertColsWitParams.map(a => a.col);
 
-  const horizontalGroups = multiGroups(data.rows, horCols);
-  const verticalGroups = multiGroups(data.rows, vertCols);
+  const horizontalDic = multiDictionary(data.rows, horCols);
+  const verticalDic = multiDictionary(data.rows, vertCols);
 
-  function sumValue(gor: GroupOrRows | undefined): number {
+  function sumValue(dor: RowDictionary | RowGroup | ChartRow[] | undefined): number {
 
-    if (gor == undefined)
+    if (dor == undefined)
       return 0;
 
-    if (Array.isArray(gor))
-      return gor.sum(a => valueColumn.getValue(a));
+    if (Array.isArray(dor))
+      return dor.sum(a => valueColumn.getValue(a));
 
-    return Dic.getValues(gor).sum(group2 => sumValue(group2.groupOrRows));
+    if (dor instanceof RowGroup)
+      return dor.subGroups ? dor.subGroups.sum(a => sumValue(a)) :
+        dor.rows ? sumValue(dor.rows) :
+          0;
+
+    return Dic.getValues(dor).sum(group2 => sumValue(group2.dicOrRows));
   }
 
-  function getLevelValues(gor: RowGroup, level: number): number[] {
+  function getLevelValues(dor: RowDictionary, level: number): number[] {
     if (level == 0)
-      return Dic.getValues(gor).map(a => sumValue(a.groupOrRows));
+      return Dic.getValues(dor).map(a => sumValue(a.dicOrRows));
     else
-      return Dic.getValues(gor).flatMap(a => getLevelValues(a.groupOrRows as RowGroup, level - 1));
+      return Dic.getValues(dor).flatMap(a => getLevelValues(a.dicOrRows as RowDictionary, level - 1));
   }
-
 
   function getCellStyle(values: number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
 
@@ -123,134 +187,174 @@ export default function renderPivotTable({ data, width, height, parameters, load
       color = (num: number) => gradient(scaleFunc(num));
     }
 
-    let keys: unknown[] | undefined = undefined;
-    if (column && params.complete != "No") {
-      keys = data!.rows.map(row => column.getValue(row)).distinctBy(val => column.getKey(val));
-
-      if (params.complete != "Consistent")
-        keys = ChartUtils.completeValues(column, keys, params.complete, chartRequest, ChartUtils.insertPoint(column, valueColumn));
-    }
-
     return ({
-      textAlign: params.textAlign,
-      verticalAlign: params.verticalAlign,
+      cssStyle: parseCssStyle(params.cssStyle),
       placeholder: params.placeholder,
+      subTotal: params.subTotal,
       background: color,
-
+      maxTextLength: params.maxTextLength,
       column: column,
       order: params.order,
-      keys: keys,
+      _keys: column && params.complete == "Consistent" ? data!.rows.map(row => column.getValue(row)).distinctBy(val => column.getKey(val)) : undefined,
+      _complete: params.complete == "Consistent" ? undefined : params.complete,
     });
   }
 
-  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalGroups as RowGroup, i), cp.params, cp.col));
-  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(verticalGroups as RowGroup, i), cp.params, cp.col));
+  function parseCssStyle(cssStyle: string | undefined): React.CSSProperties | undefined  {
+    if (!cssStyle)
+      return undefined;
+    try {
+
+      return cssStyle.split(";").filter(a => Boolean(a)).toObject(a => {
+        var name = a.before(":");
+        var camelCased = name.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+        return camelCased;
+      }, a => a.after(":"));
+    } catch (e) {
+      throw new Error(`Invalid CSS Style "${cssStyle}": ${(e as Error).message ?? e}`);
+    }
+  }
+
+  function getRowGroups(gor: RowDictionary | ChartRow[] | undefined, styles: CellStyle[], level: number, filters: FilterConditionOptionParsed[]): RowGroup[] | ChartRow[] {
+    if (Array.isArray(gor)) {
+      if (styles.length == level)
+        return gor;
+
+      throw new Error("Unexpected Array in variable 'gor' at this level");
+    }
+
+    const style = styles[level];
+
+    const col = style.column!;
+
+    let keys = style._keys;
+    if (!keys) {
+      const currentValues = gor ? Dic.getValues(gor).map(a => a.value) : [];
+      const allFilters = [...baseFilters, ...filters];
+      const insertPoint = ChartUtils.insertPoint(col, valueColumn);
+      keys = ChartUtils.completeValues(col, currentValues, style._complete!, allFilters, insertPoint);
+      keys = orderKeys(keys, style.order!, col, gor);
+    }
+
+    return keys.map(val => {
+
+      const gr = styles.length < level + 1 ? undefined : getRowGroups(gor && (gor as RowDictionary)[col.getKey(val)]?.dicOrRows, styles, level + 1, [
+        ...filters,
+        { token: col.token!, operation: "EqualTo", value: val, frozen: false }
+      ]);
+
+      return new RowGroup(style, styles[level + 1], val,
+        level < styles.length - 1 ? gr as RowGroup[] : undefined,
+        level == styles.length - 1 ? gr as ChartRow[] : undefined);
+    });
+  }
+
+  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalDic as RowDictionary, i), cp.params, cp.col));
+  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(verticalDic as RowDictionary, i), cp.params, cp.col));
+
+
+  const baseFilters = chartRequest.filterOptions.filter(fo => !isFilterGroupOptionParsed(fo)) as FilterConditionOptionParsed[];
+  const horizontalGroups = getRowGroups(horizontalDic, horStyles, 0, []);
+  const verticalGroups = getRowGroups(verticalDic, vertStyles, 0, []);
 
   const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Values"));
 
   const numbroFormat = toNumbroFormat(valueColumn.token?.format);
 
-  function span(gor: GroupOrRows | undefined, styles: CellStyle[], index: number): number {
-    var st = styles[index + 1];
-    if (st == null)
-      return 1;
-
-    if (st.keys)
-      return st.keys.sum(k => span(gor && (gor as RowGroup)[st.column!.getKey(k)]?.groupOrRows, styles, index + 1));
-
-    if (gor == null)
-      return 1;
-
-    return Dic.getValues(gor as RowGroup).sum(a => span(a.groupOrRows, styles, index + 1));
-  }
-
-
   function Cell(p:
     {
-      gor: GroupOrRows | undefined,
-      filters: { col: ChartColumn<unknown>, val: unknown }[],
+      gor: RowDictionary | RowGroup | ChartRow[] | undefined,
+      filters?: { col: ChartColumn<unknown>, val: unknown }[],
       title?: string,
-      lite: any, 
-      style: CellStyle | undefined,
-      colSpan?: number;
-      rowSpan?: number;
-      indent?: number;
-      isSummary?: number;
+      style?: CellStyle,
+      colSpan?: number,
+      rowSpan?: number,
+      indent?: number,
+      isSummary?: number,
     }
   ) {
 
+    var gr = p.gor instanceof RowGroup ? p.gor : undefined;
+    var style = p.style ?? gr?.style;
+
     function handleMumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
       e.preventDefault();
+      var filters = p.filters ?? gr?.getFilters();
+
+      if (filters == null)
+        throw new Error("Unexpected no filters");
+
       onDrillDown({
-        ...p.filters.toObject(a => a.col.name, a => a.val),
+        ...filters.toObject(a => a.col.name, a => a.val),
       }, e);
     }
+
+    var lite = gr && isLite(gr.value) ? gr.value : undefined;
 
     const val = sumValue(p.gor);
 
     const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbro(val).format(numbroFormat)}</a>;
 
-    var color = p.isSummary ? "#f8f8f8" : p.style && p.style.background && p.style.background(val);
+    var color =
+      p.isSummary == 4 ? "rgb(228, 228, 228)" :
+        p.isSummary == 3 ? "rgb(236, 236, 236)" :
+          p.isSummary == 2 ? "rgb(241, 241, 241)" :
+            p.isSummary == 1 ? "#f8f8f8" :
+              style && style.background && style.background(val);
 
-    const style: React.CSSProperties | undefined = p.style && {
+    const cssStyle: React.CSSProperties | undefined = style && {
       backgroundColor: color,
-      color: p.isSummary == 2 ? "rgb(115, 115, 115)" :
-        p.isSummary == 1 ? "rgb(191, 191, 191)" :
-        color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()).toString() : undefined,
-      textAlign: p.style.textAlign as TextAlignProperty,
-      verticalAlign: p.style.verticalAlign as VerticalAlignProperty<string | number>,
+      color:
+        p.isSummary == 4 ? "rgb(66, 66, 66)" :
+          p.isSummary == 3 ? "rgb(97, 97, 97)" :
+            p.isSummary == 2 ? "rgb(115, 115, 115)" :
+              p.isSummary == 1 ? "rgb(191, 191, 191)" :
+                color != null ? Color.parse(color).lerp(0.5, Color.parse(color).opositePole()).toString() : undefined,
       paddingLeft: p.indent ? (p.indent * 30) + "px" : undefined,
-      fontWeight: p.isSummary ? "bold" : undefined
+      textAlign: p.indent != undefined ? "left" : "center",
+      fontWeight: p.isSummary ? "bold" : undefined,
+      ...style?.cssStyle
     };
 
-    if (p.title == null) {
-      return <td style={style}>{link}</td>;
+    var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
+
+    if (title == null) {
+      return <td style={cssStyle}>{link}</td>;
     }
 
     function handleLiteClick(e: React.MouseEvent) {
       e.preventDefault();
-      Navigator.navigate(p.lite as Lite<Entity>).done();
+      Navigator.navigate(lite as Lite<Entity>).done();
     }
 
-    var title = isLite(p.lite) ?
-      <a href="#" onClick={handleLiteClick} title={p.title}>{p.title.etc(100)}</a> : 
-      <span title={p.title}>{p.title.etc(100)}</span>
+    var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;
+
+    var titleElement = isLite(lite) ?
+      <a href="#" onClick={handleLiteClick} title={title}>{etcTitle}</a> :
+      <span title={title}>{etcTitle}</span>
 
     return (
-      <th style={style} colSpan={p.colSpan} rowSpan={p.rowSpan}>
-        {title}
+      <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
+        {titleElement}
         {link && <span> ({link})</span>}
       </th>
     );
   }
 
-  function getValues(group: RowGroup | undefined, style: CellStyle): ({ value: unknown, groupOrRows?: GroupOrRows } | undefined)[] {
-
-    const col = style.column!;
-    let keys = style.keys ?? (group == null ? null : Dic.getValues(group).map(a => a.value));
-
-    if (keys == null)
-      return [undefined];
-
-    keys = orderKeys(keys, style.order!, col, group);
-
-    return keys.map(val => ({ value: val, groupOrRows: group && group[col.getKey(val)]?.groupOrRows }));
-  }
-
-  function orderKeys(keys: unknown[], order: string, col: ChartColumn<unknown>, group: RowGroup | undefined) {
+  function orderKeys(keys: unknown[], order: string, col: ChartColumn<unknown>, group: RowDictionary | undefined) {
     switch (order) {
       case "Ascending": return keys.orderBy(a => a);
       case "AscendingToStr": return keys.orderBy(a => col.getNiceName(a));
       case "AscendingKey": return keys.orderBy(a => col.getKey(a));
-      case "AscendingSumValues": return keys.orderBy(a => group && sumValue(group[col.getKey(a)]?.groupOrRows));
+      case "AscendingSumValues": return keys.orderBy(a => group && sumValue(group[col.getKey(a)]?.dicOrRows));
       case "Descending": return keys.orderByDescending(a => a);
       case "DescendingToStr": return keys.orderByDescending(a => col.getNiceName(a));
       case "DescendingKey": return keys.orderByDescending(a => col.getKey(a));
-      case "DescendingSumValues": return keys.orderByDescending(a => group && sumValue(group[col.getKey(a)]?.groupOrRows));
+      case "DescendingSumValues": return keys.orderByDescending(a => group && sumValue(group[col.getKey(a)]?.dicOrRows));
       case "None": return keys;
       default: return keys;
     }
-  } 
+  }
 
   function verColSpan(minCol: number) {
     return vertStyles.filter((a, i) => i >= minCol && a.column && a.placeholder == "no" && vertStyles[i + 1]?.column).length + 1;
@@ -258,14 +362,21 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function allCells(group: RowGroup | ChartRow[] | undefined): ChartRow[] {
     if (group == undefined)
-      return []; 
+      return [];
 
     if (Array.isArray(group))
       return group;
 
-    return Dic.getValues(group).flatMap(a => allCells(a.groupOrRows));
+    if (group.rows)
+      return group.rows;
+
+    if (group.subGroups)
+      return group.subGroups.flatMap(gr => allCells(gr));
+
+    return [];
   }
 
+  const empty: (RowGroup | undefined)[] = [undefined];
 
   return (
     <div className="table-responsive" style={{ maxWidth: width }}>
@@ -273,40 +384,33 @@ export default function renderPivotTable({ data, width, height, parameters, load
         <thead>
           <tr>
             <td scope="col" colSpan={verColSpan(0)} rowSpan={Math.max(1, horCols.length)} style={{ border: "0px" }}></td>
-            {horCols.length == 0 ? <Cell gor={horizontalGroups} filters={[]} title={valueColumn.displayName} lite={undefined} style={undefined} /> :
-              getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 =>
-                grh0 && <Cell key={horCols[0].getKey(grh0.value)} colSpan={span(grh0.groupOrRows, horStyles, 0)} style={horStyles[0]}
-                  gor={grh0.groupOrRows} title={horCols[0].getNiceName(grh0.value)} lite={grh0.value} filters={[{ col: horCols[0], val: grh0.value }]} />
-              )
+            {horCols.length == 0 ? <Cell gor={horizontalGroups as ChartRow[]} title={valueColumn.displayName} /> :
+              (horizontalGroups as RowGroup[]).map(grh0 => grh0 && <Cell key={grh0.getKey()} colSpan={grh0.span()} gor={grh0} />)
             }
           </tr>
           {horCols.length >= 2 &&
             <tr>
-              {getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 =>
-                <React.Fragment key={horCols[0].getKey(grh0!.value)} >
-                  {getValues(grh0!.groupOrRows as RowGroup, horStyles[1]).map(grh1 =>
-                    grh1 && <Cell key={horCols[1].getKey(grh1.value)} colSpan={span(grh1.groupOrRows, horStyles, 1)} style={horStyles[1]}
-                      gor={grh1.groupOrRows} title={horCols[1].getNiceName(grh1.value)} lite={grh1.value} filters={[
-                        { col: horCols[0], val: grh0!.value },
-                        { col: horCols[1], val: grh1.value }]} />
-                  )}
+              {(horizontalGroups as RowGroup[]).map(grh0 =>
+                <React.Fragment key={grh0.getKey()} >
+                  {(grh0.subGroups ?? empty).map(grh1 =>
+                    <Cell key={grh1?.getKey()} colSpan={grh1?.span() ?? 1} gor={grh1} />)}
+                  {horStyles[1].subTotal == "yes" && <Cell style={horStyles[1]}
+                    gor={undefined} title="Σ" isSummary={horStyles[2]?.subTotal == "yes" ? 2 : 1} rowSpan={2} />}
                 </React.Fragment>
               )}
             </tr>
           }
           {horCols.length >= 3 &&
             <tr>
-              {getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 =>
-                <React.Fragment key={horCols[0].getKey(grh0!.value)} >
-                  {getValues(grh0!.groupOrRows as RowGroup, horStyles[1]).map(grh1 =>
-                    <React.Fragment key={horCols[1].getKey(grh1?.value)}>
-                      {getValues(grh1?.groupOrRows as RowGroup, horStyles[2]).map(grh2 =>
-                        <Cell key={horCols[2].getKey(grh2?.value)} colSpan={span(grh2?.groupOrRows, horStyles, 2)} style={horStyles[2]}
-                          gor={grh2?.groupOrRows} title={grh2 == null ? "" : horCols[2].getNiceName(grh2.value)} lite={grh2?.value} filters={ grh2 == null ? [] : [
-                            { col: horCols[0], val: grh0!.value },
-                            { col: horCols[1], val: grh1!.value },
-                            { col: horCols[2], val: grh2!.value }]} />
+              {(horizontalGroups as RowGroup[]).map(grh0 =>
+                <React.Fragment key={grh0.getKey()} >
+                  {(grh0.subGroups ?? empty).map(grh1 =>
+                    <React.Fragment key={grh1?.getKey()}>
+                      {(grh1?.subGroups ?? empty).map(grh2 =>
+                        <Cell key={grh2?.getKey()} colSpan={grh2?.span() ?? 1} gor={grh2} />
                       )}
+                      {horStyles[2].subTotal == "yes" && <Cell style={horStyles[2]}
+                        gor={undefined} title="Σ" isSummary={1} />}
                     </React.Fragment>
                   )}
                 </React.Fragment>
@@ -318,110 +422,59 @@ export default function renderPivotTable({ data, width, height, parameters, load
         <tbody>
           {vertCols.length == 0 ?
             <tr>
-              <Cell style={undefined}
-                gor={verticalGroups} title={valueColumn.displayName} lite={null} filters={[]} />
+              <Cell style={undefined} gor={verticalGroups as ChartRow[]} title={valueColumn.displayName} />
               {cells(verticalGroups as ChartRow[], [])}
             </tr> :
             vertCols.length == 1 ?
-              getValues(verticalGroups as RowGroup, vertStyles[0]).map((grv0, i) =>
-                <tr key={vertCols[0].getKey(grv0!.value)}>
-                  <Cell style={vertStyles[0]}
-                    gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[{ col: vertCols[0], val: grv0!.value }]} />
-                  {cells(grv0!.groupOrRows as ChartRow[], [{ col: vertCols[0], val: grv0!.value }])}
+              (verticalGroups as RowGroup[]).map((grv0) =>
+                <tr key={grv0.getKey()}>
+                  <Cell gor={grv0} indent={0} />
+                  {cells(grv0.rows!, grv0.getFilters())}
                 </tr>
               ) :
               vertCols.length == 2 ?
-                getValues(verticalGroups as RowGroup, vertStyles[0]).map((grv0, i) =>
-                  <React.Fragment key={vertCols[0].getKey(grv0!.value)}>
+                (verticalGroups as RowGroup[]).map((grv0, i) =>
+                  <React.Fragment key={grv0.getKey()}>
                     {vertStyles[0].placeholder != "no" && <tr>
-                      <Cell style={vertStyles[0]} gor={grv0?.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
-                        { col: vertCols[0], val: grv0!.value }
-                      ]} />
-                      {vertStyles[0].placeholder == "filled" && cells(allCells(grv0?.groupOrRows), [
-                        { col: vertCols[0], val: grv0!.value }
-                      ], 1)}
+                      <Cell gor={grv0} indent={0}/>
+                      {vertStyles[0].placeholder == "filled" && cells(allCells(grv0), grv0.getFilters(), 1)}
                     </tr>}
-                    {getValues(grv0!.groupOrRows as RowGroup, vertStyles[1]).map((grv1, j) =>
-                      <tr key={vertCols[1].getKey(grv1?.value)}>
+                    {(grv0.subGroups ?? empty).map((grv1, j) =>
+                      <tr key={grv1?.getKey()}>
                         {j == 0 && vertStyles[0].placeholder == "no" &&
-                          <Cell style={vertStyles[0]} rowSpan={span(grv0!.groupOrRows, vertStyles, 0)}
-                          gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
-                              { col: vertCols[0], val: grv0!.value }
-                            ]} />
+                          <Cell gor={grv0} indent={0} rowSpan={grv0.span()} />
                         }
-                        <Cell style={vertStyles[1]}
-                          indent={vertStyles[0].placeholder != "no" ? 1 : 0}
-                          gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} lite={grv1?.value} filters={grv1 == null ? [] : [
-                            { col: vertCols[0], val: grv0!.value },
-                            { col: vertCols[1], val: grv1!.value }
-                          ]} />
-                        {cells(grv1?.groupOrRows as ChartRow[] ?? [], grv1 == null ? [] : [
-                          { col: vertCols[0], val: grv0!.value },
-                          { col: vertCols[1], val: grv1!.value }
-                        ])}
+                        <Cell gor={grv1} indent={vertStyles[0].placeholder != "no" ? 1 : 0} />
+                        {cells(grv1?.rows ?? [], grv1?.getFilters() ?? [])}
                       </tr>
                     )}
                   </React.Fragment>) :
                 vertCols.length == 3 ?
-                  getValues(verticalGroups as RowGroup, vertStyles[0]).map((grv0, i) =>
-                    <React.Fragment key={vertCols[0].getKey(grv0!.value)}>
+                  (verticalGroups as RowGroup[]).map((grv0, i) =>
+                    <React.Fragment key={grv0.getKey()}>
                       {vertStyles[0].placeholder != "no" && <tr>
-                        <Cell style={vertStyles[0]} colSpan={verColSpan(0)} gor={grv0?.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
-                          { col: vertCols[0], val: grv0!.value }
-                        ]} />
-                        {vertStyles[0].placeholder == "filled" && cells(allCells(grv0?.groupOrRows), [
-                          { col: vertCols[0], val: grv0!.value }
-                        ], 2)}
+                        <Cell gor={grv0} indent={0} colSpan={verColSpan(0)} />
+                        {vertStyles[0].placeholder == "filled" && cells(allCells(grv0), grv0.getFilters(), 2)}
                       </tr>}
-                      {getValues(grv0!.groupOrRows as RowGroup, vertStyles[1]).map((grv1, j) =>
-                        <React.Fragment key={vertCols[1].getKey(grv1?.value)}>
+                      {(grv0.subGroups ?? empty).map((grv1, j) =>
+                        <React.Fragment key={grv1?.getKey()}>
                           {vertStyles[1].placeholder != "no" && <tr>
                             {j == 0 && vertStyles[0].placeholder == "no" &&
-                              <Cell style={vertStyles[0]} rowSpan={span(grv0!.groupOrRows, vertStyles, 0) + Dic.getKeys(grv0!.groupOrRows as RowGroup).length}
-                                gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
-                                  { col: vertCols[0], val: grv0!.value }
-                                ]} />
+                              <Cell gor={grv0} indent={0} rowSpan={grv0.span()} />
                             }
-                            <Cell style={vertStyles[1]}
-                              indent={vertStyles[0].placeholder != "no" ? 1 : 0}
-                              colSpan={verColSpan(1)} gor={grv1?.groupOrRows} title={vertCols[1].getNiceName(grv1!.value)} lite={grv1?.value} filters={grv1 == null ? [] : [
-                              { col: vertCols[0], val: grv0!.value },
-                              { col: vertCols[1], val: grv1!.value },
-                              ]} />
-                            {vertStyles[1].placeholder == "filled" && cells(allCells(grv1?.groupOrRows), [
-                              { col: vertCols[0], val: grv0!.value },
-                              { col: vertCols[1], val: grv1!.value },
-                            ], 1)}
+                            <Cell gor={grv1} indent={vertStyles[0].placeholder != "no" ? 1 : 0} />
+                            {vertStyles[1].placeholder == "filled" && cells(allCells(grv1), grv1?.getFilters() ?? [], 1)}
                           </tr>}
-                          {getValues(grv1?.groupOrRows as RowGroup, vertStyles[2]).map((grv2, k) =>
-                            <tr key={vertCols[2].getKey(grv2?.value)}>
+                          {(grv1?.subGroups ?? empty).map((grv2, k) =>
+                            <tr key={grv2?.getKey()}>
                               {j == 0 && k == 0 && vertStyles[0].placeholder == "no" && vertStyles[1].placeholder == "no" &&
-                                <Cell style={vertStyles[0]} rowSpan={span(grv0!.groupOrRows, vertStyles, 0)}
-                                gor={grv0!.groupOrRows} title={vertCols[0].getNiceName(grv0!.value)} lite={grv0!.value} filters={[
-                                    { col: vertCols[0], val: grv0!.value }
-                                  ]} />
+                                <Cell gor={grv0} indent={0} rowSpan={grv0.span()} />
                               }
                               {k == 0 && vertStyles[1].placeholder == "no" &&
-                                <Cell style={vertStyles[1]}
-                                indent={(vertStyles[0].placeholder != "no" ? 1 : 0)}
-                                rowSpan={span(grv1?.groupOrRows, vertStyles, 1)}
-                                gor={grv1?.groupOrRows} title={grv1 == null ? "" : vertCols[1].getNiceName(grv1.value)} lite={grv1!.value} filters={grv1 == null ? [] : [
-                                    { col: vertCols[0], val: grv0!.value },
-                                    { col: vertCols[1], val: grv1.value }
-                                  ]} />
+                                <Cell gor={grv1} indent={(vertStyles[0].placeholder != "no" ? 1 : 0)} rowSpan={grv1?.span() ?? 1} />
                               }
-                              <Cell style={vertStyles[2]}
-                                indent={(vertStyles[1].placeholder != "no" ? (vertStyles[0].placeholder != "no" ? 2 : 1) : 0)}
-                                  gor={grv2?.groupOrRows} title={grv2 == null ? "" : vertCols[2].getNiceName(grv2.value)} lite={grv2!.value} filters={grv2 == null ? [] : [
-                                    { col: vertCols[0], val: grv0!.value },
-                                    { col: vertCols[1], val: grv1!.value },
-                                    { col: vertCols[2], val: grv2!.value },
-                                  ]} />
-                              {cells(grv2?.groupOrRows as ChartRow[] ?? [], grv2 == null ? [] : [
-                                { col: vertCols[0], val: grv0!.value },
-                                { col: vertCols[1], val: grv1!.value },
-                                { col: vertCols[2], val: grv2!.value },
-                              ])}
+                              <Cell gor={grv2} indent={(vertStyles[1].placeholder != "no" ? (vertStyles[0].placeholder != "no" ? 2 : 1) : 0)} />
+                              {cells(grv2?.rows ?? [], grv2?.getFilters() ?? [])}
                             </tr>
                           )}
                         </React.Fragment>
@@ -436,68 +489,75 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function cells(rows: ChartRow[], filters: { col: ChartColumn<unknown>, val: unknown }[], isSummary?: number) {
 
-    const gor = multiGroups(rows, horCols);
+    const gor = multiDictionary(rows, horCols);
 
     return (
       horCols.length == 0 ?
-        <Cell gor={gor} style={valueStyle} filters={filters} lite={null} isSummary={isSummary} /> :
+        <Cell gor={gor as ChartRow[]} style={valueStyle} filters={filters} isSummary={isSummary} /> :
         horCols.length == 1 ?
-          getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 => {
-            const grh0key = horCols[0].getKey(grh0!.value);
-            const gor0 = (gor as RowGroup)[grh0key]?.groupOrRows;
+          (horizontalGroups as RowGroup[]).map(grh0 => {
+            const gor0 = (gor as RowDictionary)[grh0.getKey()]?.dicOrRows;
             return (
-              <Cell key={grh0key} style={valueStyle} isSummary={isSummary}
-                gor={gor0} lite={null} filters={[...filters, { col: horCols[0], val: grh0!.value }]} />
+              <Cell key={grh0.getKey()} style={valueStyle} isSummary={isSummary}
+                gor={gor0} filters={[...filters, ...grh0.getFilters()]} />
             );
           }) :
           horCols.length == 2 ?
-            getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 => {
-              const grh0key = horCols[0].getKey(grh0!.value);
-              const gor0 = (gor as RowGroup)[grh0key]?.groupOrRows;
+            (horizontalGroups as RowGroup[]).map(grh0 => {
+              const gor0 = (gor as RowDictionary)[grh0.getKey()]?.dicOrRows;
               return (
-                <React.Fragment key={grh0key}>
-                  {getValues(grh0!.groupOrRows as RowGroup, horStyles[1]).map(grh1 => {
-                    const grh1key = horCols[1].getKey(grh1?.value);
-                    const gor1 = gor0 && (gor0 as RowGroup)[grh1key]?.groupOrRows
+                <React.Fragment key={grh0.getKey()}>
+                  {(grh0.subGroups ?? empty).map(grh1 => {
+                    const gor1 = gor0 && grh1 && (gor0 as RowDictionary)[grh1.getKey()]?.dicOrRows
                     return (
-                      <Cell key={grh1key} lite={null} style={valueStyle} isSummary={isSummary}
-                        gor={gor1} filters={grh1 == null ? [] : [
+                      <Cell key={grh1?.getKey()} style={valueStyle} isSummary={isSummary}
+                        gor={gor1} filters={[
                           ...filters,
-                          { col: horCols[0], val: grh0!.value },
-                          { col: horCols[1], val: grh1.value },
+                          ...(grh1?.getFilters() ?? [])
                         ]} />
                     );
                   })}
+                  {horStyles[1].subTotal == "yes" && <Cell isSummary={(isSummary ?? 0) + 1} style={valueStyle}
+                    gor={gor0} filters={[
+                      ...filters,
+                      ...grh0.getFilters()
+                    ]} />}
                 </React.Fragment>
               );
             }) :
             horCols.length == 3 ?
-              getValues(horizontalGroups as RowGroup, horStyles[0]).map(grh0 => {
-                const grh0key = horCols[0].getKey(grh0!.value);
-                const gor0 = (gor as RowGroup)[grh0key]?.groupOrRows;
+              (horizontalGroups as RowGroup[]).map(grh0 => {
+                const gor0 = (gor as RowDictionary)[grh0.getKey()]?.dicOrRows;
                 return (
-                  <React.Fragment key={grh0key}>
-                    {getValues(grh0!.groupOrRows as RowGroup, horStyles[1]).map(grh1 => {
-                      const grh1key = horCols[1].getKey(grh1?.value);
-                      const gor1 = gor0 && (gor0 as RowGroup)[grh1key]?.groupOrRows
+                  <React.Fragment key={grh0.getKey()}>
+                    {(grh0.subGroups ?? empty).map(grh1 => {
+                      const gor1 = gor0 && grh1 && (gor0 as RowDictionary)[grh1.getKey()]?.dicOrRows
                       return (
-                        <React.Fragment key={grh1key}>
-                          {getValues(grh1?.groupOrRows as RowGroup, horStyles[2]).map(grh2 => {
+                        <React.Fragment key={grh1?.getKey()}>
+                          {(grh1?.subGroups ?? empty).map(grh2 => {
                             const grh2key = horCols[2].getKey(grh2?.value);
-                            const gor2 = gor1 && (gor1 as RowGroup)[grh2key]?.groupOrRows
+                            const gor2 = gor1 && (gor1 as RowDictionary)[grh2key]?.dicOrRows
                             return (
-                              <Cell key={grh2key} style={valueStyle} isSummary={isSummary} lite={null}
-                                gor={gor2} filters={grh2 == null ? [] : [
+                              <Cell key={grh2key} style={valueStyle} isSummary={isSummary}
+                                gor={gor2} filters={[
                                   ...filters,
-                                  { col: horCols[0], val: grh0!.value },
-                                  { col: horCols[1], val: grh1!.value },
-                                  { col: horCols[2], val: grh2.value },
+                                  ...grh2?.getFilters() ?? []
                                 ]} />
                             );
                           })}
+                          {horStyles[2].subTotal == "yes" && <Cell isSummary={(isSummary ?? 0) + 1} style={valueStyle}
+                            gor={gor1} filters={[
+                              ...filters,
+                              ...grh1?.getFilters() ?? []
+                            ]} />}
                         </React.Fragment>
                       );
                     })}
+                    {horStyles[1].subTotal == "yes" && <Cell isSummary={(isSummary ?? 0) + (horStyles[2]?.subTotal == "yes" ? 2 : 1)} style={valueStyle}
+                      gor={gor0} filters={[
+                        ...filters,
+                        ...grh0?.getFilters() ?? []
+                      ]} />}
                   </React.Fragment>
                 );
               }) :

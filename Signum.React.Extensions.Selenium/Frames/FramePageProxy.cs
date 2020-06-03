@@ -19,6 +19,7 @@ namespace Signum.React.Selenium
             this.Selenium = selenium;
             this.Element = selenium.WaitElementPresent(By.CssSelector(".normal-control"));
             this.Route = PropertyRoute.Root(typeof(T));
+            this.WaitLoaded();
         }
 
         public IWebElement ContainerElement()

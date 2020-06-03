@@ -146,6 +146,7 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type { get; set; }
 
         FilePathEmbedded file;
+        [DefaultFileType(nameof(EmailFileType.Attachment), nameof(EmailFileType))]
         public FilePathEmbedded File
         {
             get { return file; }
@@ -346,8 +347,6 @@ namespace Signum.Entities.Mailing
         public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
         public bool Equals(EmailOwnerData? other)
         {
-
-
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }
 

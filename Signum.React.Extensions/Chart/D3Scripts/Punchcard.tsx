@@ -60,7 +60,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
     var values = Dic.getValues(dictionary).map(array => column.getValue(array[0]));
 
-    var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest, "After");
+    var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest.filterOptions, "After");
     switch (shortType) {
       case "Ascending": return extendedValues.orderBy(a => a);
       case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));

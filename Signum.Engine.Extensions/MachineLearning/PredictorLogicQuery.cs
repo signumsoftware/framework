@@ -288,7 +288,6 @@ namespace Signum.Engine.MachineLearning
 
         public int Compare(object?[]? x, object?[]? y)
         {
-
             if (x == null && y == null)
                 return 0;
 
@@ -297,8 +296,6 @@ namespace Signum.Engine.MachineLearning
 
             if (y == null)
                 return 1;
-
-
 
             if (x.Length != y.Length)
                 return x.Length.CompareTo(y.Length);
@@ -324,7 +321,6 @@ namespace Signum.Engine.MachineLearning
                 return 1;
 
             return ((IComparable)v1).CompareTo(v2);
-
         }
 
         public bool Equals(object?[]? x, object?[]? y)

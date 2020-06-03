@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System.IO;
 using System.Linq.Expressions;
 using Signum.Services;
+using Signum.Entities;
 
 namespace Signum.Entities.Files
 {
@@ -45,6 +46,38 @@ namespace Signum.Entities.Files
 
                 Set(ref fileName, value);
             }
+        }
+
+        [Ignore]
+        PrimaryKey entityId;
+        public PrimaryKey EntityId
+        {
+            get { return entityId; }
+            set { entityId = value; }
+        }
+
+        [Ignore]
+        PrimaryKey? mListRowId;
+        public PrimaryKey? MListRowId
+        {
+            get { return mListRowId; }
+            set { mListRowId = value; }
+        }
+
+        [Ignore]
+        string propertyRoute;
+        public string PropertyRoute
+        {
+            get { return propertyRoute; }
+            set { propertyRoute = value; }
+        }
+
+        [Ignore]
+        string rootType;
+        public string RootType
+        {
+            get { return rootType; }
+            set { rootType = value; }
         }
 
         [Ignore]

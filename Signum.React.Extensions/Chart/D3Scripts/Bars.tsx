@@ -50,7 +50,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
 
   var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content'), parameters['Scale']);
 
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest, ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var y = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

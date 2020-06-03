@@ -151,6 +151,7 @@ export function Parameters(props: {
 
     if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
       vl.valueLineType = "TextBox";
+      vl.valueHtmlAttributes= { onBlur: props.onRedraw };
     }
     else if (scriptParameter.type == "Enum") {
       vl.valueLineType = "ComboBox";
@@ -167,8 +168,8 @@ export function Parameters(props: {
       } as OptionItem));
 
       vl.valueHtmlAttributes = { size: null as any };
+      vl.onChange = props.onRedraw;
     }
-    vl.onChange = props.onRedraw;
 
     if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
       vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };

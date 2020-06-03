@@ -574,7 +574,7 @@ namespace Signum.Engine.Word
             return result;
         }
 
-        public static void GenerateWordTemplates()
+        public static void GenerateDefaultTemplates()
         {
             var wordModels = Database.Query<WordModelEntity>().Where(se => !se.WordTemplates().Any()).ToList();
 

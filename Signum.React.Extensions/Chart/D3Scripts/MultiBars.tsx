@@ -61,7 +61,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   var x = scaleFor(valueColumn0, allValues, 0, xRule.size('content'), parameters["Scale"]);
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest,  ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions,  ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var y = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))

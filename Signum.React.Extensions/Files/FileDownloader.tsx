@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, isEntity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
 import * as QueryString from 'query-string'
-import { Type } from '@framework/Reflection';
+import { Type, PropertyRoute, getTypeName } from '@framework/Reflection';
 import "./Files.css"
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
@@ -97,7 +97,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
+  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId.Object}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId?.Object })}`)
 });
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
