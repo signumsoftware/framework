@@ -90,7 +90,7 @@ namespace Signum.Engine.Files
     {
         public Action<IFilePath>? OnValidateFile { get; set; }
         public int? MaxSizeInBytes { get; set; }
-        public bool OnlyImages { get; set; }
+        public virtual bool OnlyImages { get; set; }
 
         public void ValidateFile(IFilePath fp)
         {
