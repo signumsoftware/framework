@@ -51,7 +51,6 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
 
   var x = scaleFor(horizontalColumn, data.rows.map(horizontalColumn.getValue), 0, xRule.size('content'), parameters["HorizontalScale"]);
-
   var y = scaleFor(verticalColumn, data.rows.map(verticalColumn.getValue), 0, yRule.size('content'), parameters["VerticalScale"]);
 
   var pointSize = parseInt(parameters["PointSize"]);
@@ -68,6 +67,9 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
   }
 
+  var keyColumns: ChartClient.ChartColumn<any>[]= data.columns.entity ? [data.columns.entity] :
+    [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token  && a.token.queryTokenType != "Aggregate")
+
   return (
     <>
       <svg direction="ltr" width={width} height={height}>
@@ -75,7 +77,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
         {parameters["DrawingMode"] == "Svg" &&
-          data.rows.map(r => <g key={colorKeyColumn.getValueKey(r)} className="shape-serie sf-transition"
+          data.rows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
               transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
