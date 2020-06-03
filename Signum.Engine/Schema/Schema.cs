@@ -243,7 +243,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, PrimaryKeyExpression? mlistRowId, IntervalExpression? period)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, EntityContextInfo entityContext, IntervalExpression? period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
@@ -253,7 +253,7 @@ namespace Signum.Engine.Maps
 
             return ee.AdditionalBindings
                 .Where(kvp => kvp.Key.Parent!.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, id, mlistRowId, period, kvp.Key)))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, entityContext.EntityId, entityContext.MListRowId, period, kvp.Key)))
                 .ToList();
         }
 

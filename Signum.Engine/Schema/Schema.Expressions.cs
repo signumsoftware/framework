@@ -72,8 +72,8 @@ namespace Signum.Engine.Maps
                     result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id, period, entityContext)));
             }
 
-            if (this.Type.IsEntity())
-                result.AddRange(Schema.Current.GetAdditionalQueryBindings(PropertyRoute.Root(this.Type), (PrimaryKeyExpression)id, null, period));
+            if (this.Type.IsEntity() && entityContext != null)
+                result.AddRange(Schema.Current.GetAdditionalQueryBindings(PropertyRoute.Root(this.Type), entityContext, period));
 
             return result.ToReadOnly();
         }
@@ -277,7 +277,7 @@ namespace Signum.Engine.Maps
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period, entityContext)))
-                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id, entityContext?.MListRowId, period))
+                            .Concat(entityContext == null ? Enumerable.Empty<FieldBinding>() : Schema.Current.GetAdditionalQueryBindings(this.Route, entityContext, period))
                             .ToReadOnly();
 
             Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id,
@@ -295,7 +295,7 @@ namespace Signum.Engine.Maps
             var bindings = (from kvp in Fields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period, entityContext)))
-                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id, entityContext?.MListRowId, period))
+                            .Concat(entityContext == null ? Enumerable.Empty<FieldBinding>() : Schema.Current.GetAdditionalQueryBindings(this.Route, entityContext, period))
                             .ToReadOnly();
 
             return new MixinEntityExpression(this.FieldType, bindings, tableAlias, this, entityContext);
