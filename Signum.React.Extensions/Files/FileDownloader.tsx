@@ -16,6 +16,7 @@ export interface FileDownloaderProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   children?: React.ReactNode;
+  valueHtmlAttributes?: React.AllHTMLAttributes<any>;
 }
 
 export function FileDownloader(p: FileDownloaderProps) {
@@ -60,7 +61,9 @@ export function FileDownloader(p: FileDownloaderProps) {
       download={p.download == "View" ? undefined : fileName}
       title={toStr ?? undefined}
       target="_blank"
-      {...p.htmlAttributes}>
+      {...p.htmlAttributes}
+      {...p.valueHtmlAttributes}
+    >
       {p.children ?? toStr}
     </a>
   );
