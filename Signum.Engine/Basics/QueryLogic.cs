@@ -100,6 +100,20 @@ namespace Signum.Engine.Basics
             return QueryNames.GetOrThrow(query.Key, "QueryName with key {0} not found");
         }
 
+        public static object? ToQueryNameCatch(this QueryEntity query)
+        {
+            try
+            {
+                return query.ToQueryName();
+            }
+            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
+
+                return null;
+            }
+        }
+
         public static object ToQueryName(string queryKey)
         {
             return QueryNames.GetOrThrow(queryKey, "QueryName with unique name {0} not found");
