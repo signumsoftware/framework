@@ -23,7 +23,12 @@ export interface IFilePath extends IFile
 }
 
 export interface FilePathEntity extends IFilePath { }
-export interface FilePathEmbedded extends IFilePath { }
+export interface FilePathEmbedded extends IFilePath {
+  entityId: Entities.PrimaryKey;
+  mListRowId: Entities.PrimaryKey | null;
+  propertyRoute: string;
+  rootType: string;
+}
 
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
@@ -64,10 +69,6 @@ export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
 export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
   fileName: string;
-  entityId: Entities.PrimaryKey;
-  mListRowId: Entities.PrimaryKey | null;
-  propertyRoute: string;
-  rootType: string;
   binaryFile: string;
   hash: string | null;
   fileLength: number;

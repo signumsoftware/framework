@@ -55,7 +55,7 @@ namespace Signum.React.Files
                 if (mlistRoute == null)
                     return giGetSimpleQuery.GetInvoker(type)(propertyRoute);
                 else
-                    return giGetMListQuery.GetInvoker(type, mlistRoute.Type.ElementType()!)(propertyRoute, mlistRoute);
+                    return giGetMListQuery.GetInvoker(type, mlistRoute.Type)(propertyRoute, mlistRoute);
             });
 
             var fpe = makeQuery(primaryKey, rowId);
