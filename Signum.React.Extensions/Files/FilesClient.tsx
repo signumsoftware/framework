@@ -53,7 +53,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
       isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
-        <FileThumbnail file={cell as IFile & ModifiableEntity } />)
+        <FileThumbnail file={cell as IFile & ModifiableEntity} />)
   });
 }
 
@@ -62,7 +62,7 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
-  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs}/>
+  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs} />
 }
 
 FileThumbnail.defaultProps = {

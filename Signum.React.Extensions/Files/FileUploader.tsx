@@ -5,7 +5,8 @@ import { ModifiableEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol } from './Signum.Entities.Files'
 
 import "./Files.css"
-import { New } from '@framework/Reflection';
+import { New, PseudoType } from '@framework/Reflection';
+import { TranslatedInstanceEntity } from '../Translation/Signum.Entities.Translation'
 
 export { FileTypeSymbol };
 
@@ -69,8 +70,10 @@ export function FileUploader(p: FileUploaderProps) {
     setIsLodaing(true);
 
     var promises: Promise<void>[] = [];
-    for (var i = 0; i < files!.length; i++) {
-      promises.push(uploadFile(files![i], i + 1, files!.length));
+    for (let i = 0; i < files!.length; i++) {
+      promises.push(toFileEntity(files![i], { accept: p.accept, type: p.typeName, fileType: p.fileType, maxSizeInBytes: p.maxSizeInBytes })
+        .then(fileEntity => p.onFileLoaded(fileEntity, i, files!.length, files[i]))
+        .catch(error => setNewError((error as Error).message)));
     }
 
     Promise.all(promises).then(() => { setIsLodaing(false); setIsOver(false); }).done();
@@ -78,46 +81,6 @@ export function FileUploader(p: FileUploaderProps) {
 
   function setNewError(newError: string) {
     setErrors([...errors, newError]);
-  }
-
-  function uploadFile(file: File, index: number, count: number): Promise<void> {
-
-    return new Promise((resolve) => {
-      if (file.type && p.accept) {
-
-
-        if (!p.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
-          setNewError(FileMessage.TheFile0IsNotA1.niceToString(file.name, p.accept));
-          return resolve();
-        }
-      }
-
-      if (p.maxSizeInBytes != null && p.maxSizeInBytes < file.size) {
-        setNewError(FileMessage.File0IsTooBigTheMaximumSizeIs1.niceToString(file.name, bytesToSize(p.maxSizeInBytes)));
-        return resolve();
-      }
-
-      if (file.name.contains("%")) {
-        setNewError(FileMessage.TheNameOfTheFileMustNotContainPercentSymbol.niceToString());
-        return resolve();
-      }
-
-      const fileReader = new FileReader();
-      fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
-      fileReader.onload = e => {
-        const fileEntity = New(p.typeName) as ModifiableEntity & IFile;
-        fileEntity.fileName = file.name;
-        fileEntity.binaryFile = ((e.target as any).result as string).after("base64,");
-
-        if (p.fileType)
-          (fileEntity as any as IFilePath).fileType = p.fileType;
-
-
-        p.onFileLoaded(fileEntity, index, count, file);
-        resolve();
-      };
-      fileReader.readAsDataURL(file);
-    });
   }
 
   return (
@@ -151,3 +114,39 @@ export function FileUploader(p: FileUploaderProps) {
 FileUploader.defaultProps = {
   dragAndDrop: true
 };
+
+export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: number, fileType?: FileTypeSymbol, type: PseudoType }): Promise<ModifiableEntity & IFile> {
+
+  return new Promise((resolve, reject) => {
+    if (file.type && o.accept) {
+      if (!o.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
+        reject(new Error(FileMessage.TheFile0IsNotA1.niceToString(file.name, o.accept)));
+        return;
+      }
+    }
+
+    if (o.maxSizeInBytes != null && o.maxSizeInBytes < file.size) {
+      reject(new Error(FileMessage.File0IsTooBigTheMaximumSizeIs1.niceToString(file.name, bytesToSize(o.maxSizeInBytes))));
+      return;
+    }
+
+    if (file.name.contains("%")) {
+      reject(new Error(FileMessage.TheNameOfTheFileMustNotContainPercentSymbol.niceToString()));
+      return;
+    }
+
+    const fileReader = new FileReader();
+    fileReader.onerror = e => { reject(e); };
+    fileReader.onload = e => {
+      const fileEntity = New(o.type) as ModifiableEntity & IFile;
+      fileEntity.fileName = file.name;
+      fileEntity.binaryFile = ((e.target as any).result as string).after("base64,");
+
+      if (o.fileType)
+        (fileEntity as any as IFilePath).fileType = o.fileType;
+
+      resolve(fileEntity);
+    };
+    fileReader.readAsDataURL(file);
+  });
+}
