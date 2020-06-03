@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System.IO;
 using System.Linq.Expressions;
 using Signum.Services;
+using Signum.Entities;
 
 namespace Signum.Entities.Files
 {
@@ -46,6 +47,15 @@ namespace Signum.Entities.Files
                 Set(ref fileName, value);
             }
         }
+
+        [Ignore]
+        public PrimaryKey EntityId;
+        [Ignore]
+        public PrimaryKey? MListRowId;
+        [Ignore]
+        public string PropertyRoute;
+        [Ignore]
+        public string RootType;
 
         [Ignore]
         byte[] binaryFile;
