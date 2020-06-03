@@ -16,4 +16,9 @@ export interface IFilePath extends IFile
 }
 
 export interface FilePathEntity extends IFilePath { }
-export interface FilePathEmbedded extends IFilePath { }
+export interface FilePathEmbedded extends IFilePath {
+  entityId: Entities.PrimaryKey;
+  mListRowId: Entities.PrimaryKey | null;
+  propertyRoute: string;
+  rootType: string;
+}
