@@ -20,6 +20,7 @@ using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
 using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Workflow
 {
@@ -690,9 +691,9 @@ namespace Signum.Engine.Workflow
                         switch (timer.Type)
                         {
                             case WorkflowEventType.BoundaryForkTimer:
-                                ExecuteTimerFork(ca, timer);
-                                break;
                             case WorkflowEventType.BoundaryInterruptingTimer:
+                                ExecuteBoundaryTimer(ca, timer);
+                                break;
                             case WorkflowEventType.IntermediateTimer:
                                 ExecuteStep(ca, DoneType.Timeout, timer.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
                                 break;
@@ -922,8 +923,9 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void ExecuteTimerFork(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
+            private static void ExecuteBoundaryTimer(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
             {
+                var type = boundaryEvent.Type;
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
@@ -934,16 +936,30 @@ namespace Signum.Engine.Workflow
                 };
 
                 ctx.ExecuteConnection(connection);
-                if (!FindNext(connection.To, ctx))
-                    return;
 
-                CreateNextActivities(@case, ctx, ca);
-
-                new CaseActivityExecutedTimerEntity
+                if (type == WorkflowEventType.BoundaryInterruptingTimer)
                 {
-                    BoundaryEvent = boundaryEvent.ToLite(),
-                    CaseActivity = ca.ToLite(),
-                }.Save();
+                    ExecuteStep(ca, DoneType.Timeout, connection);
+                    return;
+                }
+
+                if (type == WorkflowEventType.BoundaryForkTimer)
+                {
+                    if (!FindNext(connection.To, ctx))
+                        return;
+
+                    CreateNextActivities(@case, ctx, ca);
+
+                    new CaseActivityExecutedTimerEntity
+                    {
+                        BoundaryEvent = boundaryEvent.ToLite(),
+                        CaseActivity = ca.ToLite(),
+                    }.Save();
+
+                    return;
+                }
+
+                throw new InvalidOperationException("Unexpected Timer Type " + type);
             }
 
             private static void ExecuteInitialStep(CaseEntity @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
@@ -1176,7 +1192,10 @@ namespace Signum.Engine.Workflow
                     if (caseActivity != null)
                     {
                         if (node.Is(ctx.CaseActivity!.WorkflowActivity))
-                            caseActivity = ctx.CaseActivity;
+                        {
+                            //caseActivity = ctx.CaseActivity;
+                            throw new InvalidOperationException("Unexpected BoundaryTimer with WorkflowEvent in CaseActivity");
+                        }
 
                         if (caseActivity.DoneDate.HasValue)
                             return BoolBox.True(caseActivity);
@@ -1258,7 +1277,13 @@ namespace Signum.Engine.Workflow
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
 
-                                if (connections.All(wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)))
+                                var graph = WorkflowLogic.GetWorkflowNodeGraph(node.Lane.Pool.Workflow.ToLite());
+
+                                var trackGroups = connections.AgGroupToDictionary(
+                                    wc => graph.TrackId.GetOrThrow(wc.From), 
+                                    wcs => wcs.ToDictionaryEx(wc => wc, wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)));
+
+                                if (trackGroups.All(kvp => kvp.Value.Values.Any(a => a))) // Every Parallel gets implicit Exclusive Join behaviour for each Track ID group. 
                                     return BoolBox.True(null);
                                 else
                                     return BoolBox.False;
