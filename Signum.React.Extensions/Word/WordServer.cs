@@ -54,6 +54,15 @@ namespace Signum.React.Word
                         qd.Extension.Add("wordTemplates", templates);
                 }
             };
+
+            EntityJsonConverter.AfterDeserilization.Register((WordTemplateEntity uq) =>
+            {
+                if (uq.Query != null)
+                {
+                    var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
+                    uq.ParseData(qd);
+                }
+            });
         }
 
         private static void CustomizeFiltersModel()
