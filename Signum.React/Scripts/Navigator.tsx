@@ -711,6 +711,15 @@ export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
   return useAPI(signal => API.fetchAll(type), []);
 }
 
+export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+
+  var lite = React.useMemo(() => newLite(type, id), [type, id]);
+
+  useAPI(() => API.fillToStrings(lite), [lite]);
+
+  return lite;
+}
+
 export module API {
 
   export function fillToStrings(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {

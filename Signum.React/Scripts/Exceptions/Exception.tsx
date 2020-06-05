@@ -3,6 +3,8 @@ import * as moment from 'moment'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, EntityLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { classes } from '../Globals';
 
 export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   const ctx = p.ctx;
@@ -35,13 +37,13 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
         {codeTab(0, a => a.stackTrace)}
         {codeTab(1, a => a.data)}
         {codeTab(2, a => a.queryString)}
-        {codeTab(3, a => a.form)}
+        {codeTab(3, a => a.form, true)}
         {codeTab(4, a => a.session)}
       </Tabs>
     </div>
   );
 
-  function codeTab(tabId: number, property: (ex: ExceptionEntity) => any) {
+  function codeTab(tabId: number, property: (ex: ExceptionEntity) => any, formatJson?: boolean) {
     const tc = p.ctx.subCtx(property);
 
     if (tc.propertyRoute == null || !tc.value || tc.value == "")
@@ -49,10 +51,40 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
 
     return (
       <Tab title={tc.propertyRoute.member!.niceName} eventKey={tabId}>
-        <pre>
-          <code>{tc.value}</code>
-        </pre>
+        {formatJson ?
+          <FormatJson code={tc.value} /> :
+          <pre>
+            <code>{tc.value}</code>
+          </pre>
+        }
       </Tab>
     );
   }
+}
+
+function FormatJson(p: { code: string | undefined }) {
+
+  const [formatJson, setFormatJson] = React.useState<boolean>(false);
+
+  const formattedJson = React.useMemo(() => {
+    if (formatJson == false || p.code == undefined)
+      return null;
+
+    try {
+      return JSON.stringify(JSON.parse(p.code), undefined, 2);
+    } catch{
+      return "Invalid Json"
+    }
+  }, [formatJson, p.code])
+
+  return (
+    <div>
+      <button className={classes("btn btn-sm btn-light", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
+        <FontAwesomeIcon icon="code" /> Format JSON 
+      </button>
+      <pre>
+        <code>{formatJson ? formattedJson : p.code}</code>
+      </pre>
+    </div>
+  );
 }

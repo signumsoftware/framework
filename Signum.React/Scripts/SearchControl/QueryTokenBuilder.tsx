@@ -66,11 +66,13 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
           fullKey: p.queryToken.fullKey,
           queryKey: p.queryKey
         } : undefined;
+        e.preventDefault();
       }
       else if (e.key == "v" && copiedToken?.queryKey == p.queryKey) {
         Finder.parseSingleToken(p.queryKey, copiedToken.fullKey, p.subTokenOptions)
           .then(a => p.onTokenChange(a))
           .done();
+        e.preventDefault();
       }
 
     }

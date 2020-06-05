@@ -1000,6 +1000,17 @@ export module Dic {
     return result;
   }
 
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
+    let index = 0;
+    const result: { [key: string]: R } = {};
+    for (const name in obj) {
+      if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
+        result[name] = selector(name, obj[name], index++);
+      }
+    }
+    return result;
+  }
+
   export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
 
     for (const name in obj) {

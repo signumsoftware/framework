@@ -130,6 +130,17 @@ export interface EntityComboSelectProps {
 }
 
 
+const __normalized: Lite<Entity>[] = [];
+export function normalizeEmptyArray(data: Lite<Entity>[] | undefined) {
+  if (data == undefined)
+    return undefined;
+
+  if (data.length == 0)
+    return __normalized;
+
+  return data;
+}
+
 export interface  EntityComboHandle {
   getSelect(): HTMLSelectElement | null;
   getData(): Lite<Entity>[] | undefined;
@@ -178,7 +189,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
           .then(data => setData(data.orderBy(a => a)))
           .done();
     }
-  }, [p.data, p.type.name, p.refreshKey, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type.name, p.refreshKey, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   const lite = getLite();
 

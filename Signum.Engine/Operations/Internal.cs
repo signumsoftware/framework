@@ -35,7 +35,7 @@ namespace Signum.Engine.Operations.Internal
     public class _Construct<T>
         where T : class, IEntity
     {
-        public Func<object?[]?, T> Construct { get; set; } = null!;
+        public Func<object?[]?, T?> Construct { get; set; } = null!;
     }
 
     public class _Execute<T>

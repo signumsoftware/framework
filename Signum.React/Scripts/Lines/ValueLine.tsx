@@ -611,7 +611,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
           m.format());
   };
 
-  let currentDate = moment();
+  let currentDate = moment(s.ctx.value || undefined);
   if (!showTime)
     currentDate = currentDate.startOf("day");
 

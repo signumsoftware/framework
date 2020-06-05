@@ -52,7 +52,7 @@ namespace Signum.Engine.Maps
 
         protected static int MaxNameLength()
         {
-            return Connector.Current.MaxNameLength - StringHashEncoder.HashSize - 1;
+            return Connector.Current.MaxNameLength - StringHashEncoder.HashSize - 2;
         }
 
         public string IndexName => GetIndexName(Table.Name);
@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
             return Columns.ToString(c => c.Name, "_");
         }
 
-        protected string? WhereSignature()
+        public string? WhereSignature()
         {
             var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
 

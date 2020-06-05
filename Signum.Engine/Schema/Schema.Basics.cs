@@ -12,6 +12,7 @@ using System.Collections;
 using Signum.Engine.Linq;
 using System.Globalization;
 using NpgsqlTypes;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Maps
 {
@@ -19,6 +20,7 @@ namespace Signum.Engine.Maps
     {
         Field GetField(MemberInfo value);
         Field? TryGetField(MemberInfo value);
+        IEnumerable<Field> FindFields(Func<Field, bool> predicate);
     }
 
     public interface ITable
@@ -256,6 +258,24 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
+
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            var fields =
+                Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+           
+            if(Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
+        }
+
         public List<TableIndex> GeneratAllIndexes()
         {
             IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
@@ -321,7 +341,7 @@ namespace Signum.Engine.Maps
             get { return PrimaryKey; }
         }
 
-        internal IEnumerable<EntityField> AllFields()
+        public IEnumerable<EntityField> AllFields()
         {
             return this.Fields.Values.Concat(
                 this.Mixins == null ? Enumerable.Empty<EntityField>() :
@@ -492,7 +512,7 @@ namespace Signum.Engine.Maps
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
-        int? IColumn.Size { get { return null; } }
+        public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
         public string? Collation { get; set; }
         Table? IColumn.ReferenceTable { get { return null; } }
@@ -670,6 +690,16 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            return EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -756,6 +786,16 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            return Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -800,7 +840,7 @@ namespace Signum.Engine.Maps
         public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
-        int? IColumn.Size { get { return null; } }
+        int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
@@ -1115,6 +1155,15 @@ namespace Signum.Engine.Maps
             return null;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            return TableMList.FindFields(predicate);
+            
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             return new IColumn[0];
@@ -1253,6 +1302,25 @@ namespace Signum.Engine.Maps
                 return this.Field;
 
             return null;
+        }
+
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this.BackReference))
+                yield return this.BackReference;
+
+            if (this.Order != null && predicate(this.Order))
+                yield return this.Order;
+
+            if (predicate(this.Field))
+                yield return this.Field;
+            else if (this.Field is IFieldFinder ff)
+            {
+                foreach (var f in ff.FindFields(predicate))
+                {
+                    yield return f;
+                }
+            }
         }
 
         public void ToDatabase(DatabaseName databaseName)

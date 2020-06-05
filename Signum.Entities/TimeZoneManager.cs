@@ -49,6 +49,8 @@ namespace Signum.Entities
             }
         }
 
+        public static Date Today => (Date)Now.Date;
+
         public static DateTime ToUserInterface(this DateTime dbDateTime)
         {
             if (Mode == TimeZoneMode.Local || dbDateTime.Kind == DateTimeKind.Local)
