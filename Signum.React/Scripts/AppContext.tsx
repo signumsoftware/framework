@@ -11,6 +11,8 @@ import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 
 Dic.skipClasses.push(React.Component);
 
+
+
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
@@ -43,6 +45,14 @@ export function createAppRelativeHistory(): H.History {
   return h;
 }
 
+let rtl = false;
+export function isRtl() {
+  return rtl;
+}
+
+export function setRtl(isRtl: boolean) {
+  rtl = isRtl;
+}
 
 export const clearSettingsActions: Array<() => void> = [
   clearContextHeaders,
