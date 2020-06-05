@@ -171,7 +171,7 @@
     <Member Name="RememberMe" Description="Auf diesem Computer merken" />
     <Member Name="ResetPassword" Description="Passwort zurücksetzen" />
     <Member Name="ResetPasswordCode" Description="Code für die Wiederherstellung des Passworts" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an das E-Mail-Konto {0} gesendet" />
+    <Member Name="ResetPasswordCodeHasBeenSent" Description="Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an Ihr E-Mail-Konto gesendet" />
     <Member Name="ResetPasswordSuccess" Description="Ihr Passwort wurde erfolgreich geändert" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="SendEmail" Description="E-Mail senden" />
