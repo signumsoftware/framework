@@ -105,11 +105,12 @@ namespace Signum.Engine.Linq
         public readonly Expression HasValue;
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+        public readonly EntityContextInfo? EntityContext; 
 
         public readonly FieldEmbedded? FieldEmbedded; //used for updates
         public readonly Table? ViewTable; //used for updates
 
-        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded? fieldEmbedded, Table? viewTable)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded? fieldEmbedded, Table? viewTable, EntityContextInfo? entityContext)
             : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
@@ -123,6 +124,7 @@ namespace Signum.Engine.Linq
             Bindings = bindings.ToReadOnly();
 
             FieldEmbedded = fieldEmbedded;
+            EntityContext = entityContext;
             ViewTable = viewTable;
         }
 
@@ -155,15 +157,29 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal class EntityContextInfo
+    {
+        public readonly PrimaryKeyExpression EntityId;
+        public readonly PrimaryKeyExpression? MListRowId;
+
+        public EntityContextInfo(PrimaryKeyExpression entityId, PrimaryKeyExpression? mlistRowId)
+        {
+            EntityId = entityId;
+            MListRowId = mlistRowId;
+        }
+    }
+
     internal class MixinEntityExpression : DbExpression
     {
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+
+        public readonly EntityContextInfo? EntityContext;
 
         public readonly FieldMixin? FieldMixin; //used for updates
 
         public readonly Alias? MainEntityAlias;
 
-        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias? mainEntityAlias, FieldMixin? fieldMixin)
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias? mainEntityAlias, FieldMixin? fieldMixin, EntityContextInfo? info)
             : base(DbExpressionType.MixinInit, type)
         {
             if (bindings == null)
@@ -172,6 +188,8 @@ namespace Signum.Engine.Linq
             Bindings = bindings.ToReadOnly();
 
             FieldMixin = fieldMixin;
+
+            EntityContext = info;
 
             MainEntityAlias = mainEntityAlias;
         }
@@ -454,13 +472,15 @@ namespace Signum.Engine.Linq
     internal class AdditionalFieldExpression : DbExpression
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
+        public readonly PrimaryKeyExpression? MListRowId; // not readonly
         public readonly IntervalExpression? ExternalPeriod;
         public readonly PropertyRoute Route;
 
-        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, PropertyRoute route)
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, PrimaryKeyExpression? mlistRowId, IntervalExpression? externalPeriod, PropertyRoute route)
             : base(DbExpressionType.AdditionalField, type)
         {
             this.BackID = backID;
+            this.MListRowId = mlistRowId;
             this.Route = route;
             this.ExternalPeriod = externalPeriod;
         }

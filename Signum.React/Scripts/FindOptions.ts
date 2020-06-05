@@ -232,10 +232,19 @@ export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | 
   };
 }
 
-export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed {
+export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | undefined {
+
+  if (fop.pinned) {
+    if (fop.pinned.active == "Checkbox_StartUnchecked" ||
+      fop.pinned.active == "WhenHasValue" && fop.value == null)
+      return undefined;
+  }
 
   if (isFilterGroupOptionParsed(fop)) {
-    var newFilters = fop.filters.map(f => withoutPinned(f));
+    var newFilters = fop.filters.map(f => withoutPinned(f)).filter(Boolean);
+    if (newFilters.length == 0)
+      return undefined;
+
     return ({
       ...fop,
       filters: newFilters,
