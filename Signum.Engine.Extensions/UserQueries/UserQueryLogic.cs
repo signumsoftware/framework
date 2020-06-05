@@ -120,17 +120,9 @@ namespace Signum.Engine.UserQueries
 
         static void UserQueryLogic_Retrieved(UserQueryEntity userQuery, PostRetrievingContext ctx)
         {
-            object queryName;
-            try
-            {
-                queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
-            }
-            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
-            {
-                StartParameters.IgnoredCodeErrors.Add(ex);
-
+            object? queryName = userQuery.Query.ToQueryNameCatch();
+            if(queryName == null)
                 return;
-            }
 
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 

@@ -219,6 +219,7 @@ namespace Signum.Engine.Word
 
             template.Model = wordModel;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
+            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
 
             return template;
         }

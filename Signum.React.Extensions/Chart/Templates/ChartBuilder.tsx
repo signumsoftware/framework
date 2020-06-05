@@ -139,43 +139,6 @@ export function Parameters(props: {
   columnIndex: number | null
 }) {
 
-  function getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, j: number) {
-
-
-    const token = scriptParameter.columnIndex == undefined ? undefined : props.chart.columns[scriptParameter.columnIndex].element.token?.token;
-
-    const vl: ValueLineProps = {
-      ctx: ctx.subCtx(a => a.value),
-      labelText: scriptParameter.name!,
-    };
-
-    if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
-      vl.valueLineType = "TextBox";
-      vl.valueHtmlAttributes= { onBlur: props.onRedraw };
-    }
-    else if (scriptParameter.type == "Enum") {
-      vl.valueLineType = "ComboBox";
-      vl.type = { name: "string", isNotNullable: true };
-
-      const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
-
-      if (compatible.length <= 1)
-        vl.ctx.styleOptions.readOnly = true;
-
-      vl.comboBoxItems = compatible.map(ev => ({
-        value: ev.name,
-        label: ev.name
-      } as OptionItem));
-
-      vl.valueHtmlAttributes = { size: null as any };
-      vl.onChange = props.onRedraw;
-    }
-
-    if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
-      vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-
-    return <ValueLine key={j} {...vl} />;
-  }
 
   var groups = props.chartScript.parameterGroups
     .filter(gr => gr.parameters.some(param => param.columnIndex == props.columnIndex))
@@ -183,10 +146,12 @@ export function Parameters(props: {
       <div className={props.columnIndex == null ? "col-sm-2" : "col-sm-3"} key={i} >
         {gr.name && < span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>}
         {gr.parameters
-          .filter(param => param.columnIndex == props.columnIndex)
-          .map((param, j) => props.parameterDic[param.name] ? getParameterValueLine(props.parameterDic[param.name], param, j) : <p key={param.name} className="text-danger">{param.name}</p>)}
+          .filter(sp => sp.columnIndex == props.columnIndex)
+          .map((sp, j) => props.parameterDic[sp.name] ?
+            <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
+            <p key={sp.name} className="text-danger">{sp.name}</p>)}
       </div>
-  );
+    );
 
   if (groups.length == 0)
     return null;
@@ -207,5 +172,61 @@ export function Parameters(props: {
         </div>
       </div>
     );
+}
+
+function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
+
+  const forceUpdate = useForceUpdate();
+  const token = scriptParameter.columnIndex == undefined ? undefined :
+    chart.columns[scriptParameter.columnIndex].element.token?.token;
+
+  let resetValue: string | undefined = undefined;
+
+  const vl: ValueLineProps = {
+    ctx: ctx.subCtx(a => a.value),
+    labelText: scriptParameter.name!,
+  };
+
+  if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
+    vl.valueLineType = "TextBox";
+    vl.valueHtmlAttributes = { onBlur: onRedraw };
+  }
+  else if (scriptParameter.type == "Enum") {
+    vl.valueLineType = "ComboBox";
+    vl.type = { name: "string", isNotNullable: true };
+
+    const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
+
+    if (compatible.length <= 1)
+      vl.ctx.styleOptions.readOnly = true;
+
+    if (!compatible.some(c => c.name == ctx.value.value)) {
+      resetValue = compatible.firstOrNull()?.name;
+    }
+
+    vl.comboBoxItems = compatible.map(ev => ({
+      value: ev.name,
+      label: ev.name
+    } as OptionItem));
+
+    vl.valueHtmlAttributes = { size: null as any };
+    vl.onChange = onRedraw;
+  }
+
+  if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
+    vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
+
+  React.useEffect(() => {
+    if (resetValue !== undefined) {
+      ctx.value.value = resetValue;
+      forceUpdate();
+      if (onRedraw) {
+        onRedraw();
+      }
+    }
+
+  }, [resetValue])
+
+  return <ValueLine {...vl} />;
 }
 

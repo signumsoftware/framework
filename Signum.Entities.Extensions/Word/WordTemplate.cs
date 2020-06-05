@@ -64,7 +64,7 @@ namespace Signum.Entities.Word
             }
         }
 
-        internal void ParseData(QueryDescription description)
+        public void ParseData(QueryDescription description)
         {
             var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
 

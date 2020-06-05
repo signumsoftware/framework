@@ -54,7 +54,12 @@ export default function ChartRenderer(p: ChartRendererProps) {
       else
         Navigator.navigate(r.entity).done();
     } else {
-      const filters = cr.filterOptions.map(f => withoutAggregate(withoutPinned(f))!).filter(Boolean);
+      const filters = cr.filterOptions.map(f => {
+        let f2 = withoutPinned(f);
+        if (f2 == null)
+          return null;
+        return withoutAggregate(f2);
+      }).notNull();
 
       const columns: ColumnOption[] = [];
 

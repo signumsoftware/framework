@@ -78,13 +78,16 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var sizeScale = scaleFor(sizeColumn, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3), parameters["SizeScale"]);
 
+  var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+    [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
+
   return (
     <svg direction="ltr" width={width} height={height}>
       <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
       <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
-        {orderRows.map(r => <g key={colorKeyColumn.getValueKey(r)}
+        {orderRows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
           className="shape-serie sf-transition"
           transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r))) + (initialLoad ? scale(0, 0) : scale(1, 1))}
           cursor="pointer"

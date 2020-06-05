@@ -3,9 +3,11 @@ import * as History from 'history'
 import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
+import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
+import { ToolbarEntity } from "../Signum.Entities.Toolbar";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
@@ -40,7 +42,6 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
 
   return null;
 }
-
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
   const forceUpdate = useForceUpdate();
