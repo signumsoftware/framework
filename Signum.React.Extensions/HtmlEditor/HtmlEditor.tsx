@@ -4,7 +4,7 @@ import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './HtmlEditor.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
-import { imagePlugin, ImageConverter } from './imagePlugin';
+import { imagePlugin, ImageConverter, configureImportExportImages } from './imagePlugin';
 import { basicCommandsPlugin } from './basicCommandPlugin';
 
 export interface IContentStateConverter {
@@ -52,7 +52,10 @@ export class HtmlEditorController {
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
-      this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
+      if (this.binding.getValue() ?? "" == this.lastSave ?? "")
+        this.lastSave = undefined;
+      else
+        this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
     }, [this.binding.getValue()]);
 
     React.useEffect(() => {
@@ -73,10 +76,14 @@ export class HtmlEditorController {
   saveHtml() {
     if (!this.readOnly) {
       var value = this.converter.contentStateToText(this.editorState.getCurrentContent());
-      if (value ?? "" != this.binding.getValue() ?? "")
+      if (value ?? "" != this.binding.getValue() ?? "") {
+        this.lastSave = value;
         this.binding.setValue(value);
+      }
     }
   }
+
+  lastSave: string | undefined;
 
   setRefs!: (editor: draftjs.Editor | null) => void;
 }
@@ -85,12 +92,17 @@ export class HtmlEditorController {
 
 export default React.forwardRef(function HtmlEditor({ readOnly, binding, converter, innerRef, toolbarButtons, imageConverter, basicCommands, ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
+  converter = converter ?? new HtmlContentStateConverter({}, {});
+
+  if (imageConverter != null)
+    configureImportExportImages(converter, imageConverter);
+
   var c = React.useMemo(() => new HtmlEditorController(), []);
   React.useImperativeHandle(ref, () => c, []);
   c.init({
     binding,
     readOnly,
-    converter: converter ?? new HtmlContentStateConverter({}, {}),
+    converter,
     innerRef,
   });
 

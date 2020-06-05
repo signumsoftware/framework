@@ -1,7 +1,5 @@
 import * as React from 'react';
 import * as draftjs from 'draft-js';
-import { stateToHTML, Options as ExportOptions } from 'draft-js-export-html';
-import { stateFromHTML, Options as ImportOptions } from 'draft-js-import-html';
 import { IContentStateConverter, HtmlEditorController } from "./HtmlEditor"
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 
@@ -9,7 +7,7 @@ import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 export interface ImageConverter<T extends object> {
   uploadData(blob: Blob): Promise<T>;
   renderImage(val: T): React.ReactElement;
-  toHtml(val: T): string;
+  toHtml(val: T): string | undefined;
   fromElement(val: HTMLElement): T | undefined;
 }
 
@@ -93,45 +91,6 @@ export function imagePlugin(props: draftjs.EditorProps, controller: HtmlEditorCo
     return "handled"
   }
 
-
-  if (controller.converter instanceof HtmlContentStateConverter) {
-    const { importOptions, exportOptions } = controller.converter;
-
-    //@ts-ignore
-    var { atomic: oldAtomic, ...otherBlockRenderers } = exportOptions.blockRenderers ?? {};
-    exportOptions.blockRenderers = {
-      atomic: block => {
-        if (oldAtomic) {
-          var result = oldAtomic(block);
-          if (result)
-            return result;
-        }
-
-        var entityKey = block.getEntityAt(0);
-        var entity = controller.editorState.getCurrentContent().getEntity(entityKey);
-        return imageConverter.toHtml(entity.getData());
-      },
-      ...otherBlockRenderers
-    };
-
-    var oldCustomInlinekFn = importOptions.customInlineFn;
-    importOptions.customInlineFn = (element, factory) => {
-      if (oldCustomInlinekFn) {
-        var result = oldCustomInlinekFn(element, factory);
-        if (result != null)
-          return result;
-      }
-
-      var data = imageConverter.fromElement(element as HTMLElement);
-      if (data != null) {
-        //@ts-ignore
-        return factory.Entity("IMAGE", data, "IMMUTABLE");
-      }
-      return undefined;
-    }
-
-  }
-
   return { addImage };
 }
 
@@ -140,3 +99,41 @@ export function ImageComponent(p: { contentState: draftjs.ContentState, block: d
   return p.blockProps.imageConverter!.renderImage(data);
 }
 
+
+export function configureImportExportImages(converter: IContentStateConverter, imageConverter: ImageConverter<any>) {
+  if (converter instanceof HtmlContentStateConverter) {
+    const { draftToHtmlOptions, htmlToDraftOptions } = converter;
+
+    //@ts-ignore
+    var oldCustomEntityTransformer = draftToHtmlOptions.customEntityTransform;
+    draftToHtmlOptions.customEntityTransform = (entity, text) => {
+      debugger;
+      if (oldCustomEntityTransformer) {
+        var result = oldCustomEntityTransformer(entity, text);
+        if (result)
+          return result;
+      }
+      return imageConverter.toHtml(entity.data);
+    };
+
+    var oldCustomChunkRenderer = htmlToDraftOptions.customChunkRenderer;
+    htmlToDraftOptions.customChunkRenderer = (nodeName, node) => {
+      if (oldCustomChunkRenderer) {
+        var result = oldCustomChunkRenderer(nodeName, node);
+        if (result != null)
+          return result;
+      }
+
+      var data = imageConverter.fromElement(node);
+      if (data != null) {
+        return {
+          type: "IMAGE",
+          data: data,
+          mutability: "IMMUTABLE"
+        };
+      }
+      return undefined;
+    }
+
+  }
+}
