@@ -22,7 +22,7 @@
 
     "@types/draft-js": "0.10.40",
     "draft-js": "0.11.5",
-    "draft-js-import-html": "1.4.1",
-    "draft-js-export-html": "1.4.1"
+    "html-to-draftjs": "1.5.0",
+    "draftjs-to-html": "0.9.1"
   }
 }

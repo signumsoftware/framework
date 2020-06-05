@@ -1,21 +1,40 @@
 import * as draftjs from 'draft-js';
-import { stateToHTML, Options as ExportOptions } from 'draft-js-export-html';
-import { stateFromHTML, Options as ImportOptions } from 'draft-js-import-html';
-import { IContentStateConverter } from "./HtmlEditor"
+import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+import { IContentStateConverter, HtmlEditorController } from "./HtmlEditor"
 
+interface DraftToHtmlOptions {
+  hashConfig?: { trigger: "#", separator: " " },
+  directional?: boolean,
+  customEntityTransform?: (entity: draftjs.RawDraftEntity, text: string) => string | undefined
+}
+
+interface HtmlToDraftOptions {
+  customChunkRenderer?: (nodeName: string, node: HTMLElement) => draftjs.RawDraftEntity | null | undefined
+}
 
 export class HtmlContentStateConverter implements IContentStateConverter {
 
-  static default = new HtmlContentStateConverter();
-
   constructor(
-    public exportOptions?: ExportOptions,
-    public importOptions?: ImportOptions) { }
+    public draftToHtmlOptions: DraftToHtmlOptions,
+    public htmlToDraftOptions: HtmlToDraftOptions)
+  {
+  }
 
   contentStateToText(content: draftjs.ContentState): string {
-    return stateToHTML(content, this.exportOptions);
-    }
+
+    const rawContentState = draftjs.convertToRaw(content);
+    const { hashConfig, directional, customEntityTransform } = this.draftToHtmlOptions;
+    return draftToHtml(rawContentState, hashConfig, directional, customEntityTransform);
+  }
+
   textToContentState(html: string): draftjs.ContentState {
-    return stateFromHTML(html, this.importOptions)
+    debugger;
+    console.log("Parsing: " + html);
+    const { customChunkRenderer } = this.htmlToDraftOptions;
+    const { contentBlocks, entityMap } = htmlToDraft(html, customChunkRenderer);
+    const result = draftjs.ContentState.createFromBlockArray(contentBlocks, entityMap);
+    console.log("Parsed: " + JSON.stringify(draftjs.convertToRaw(result), undefined, 2));
+    return result;
   }
 }
