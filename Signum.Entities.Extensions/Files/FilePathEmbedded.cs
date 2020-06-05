@@ -133,10 +133,8 @@ namespace Signum.Entities.Files
             return result;
         }
 
-        public override string ToString()
-        {
-            return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize(true)}");
 
         public static Action<FilePathEmbedded> OnPreSaving;
         protected override void PreSaving(PreSavingContext ctx)
