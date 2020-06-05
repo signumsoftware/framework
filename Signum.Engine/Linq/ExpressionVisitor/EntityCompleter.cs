@@ -42,9 +42,9 @@ namespace Signum.Engine.Linq
 
             var typeId = binder.GetEntityType(lite.Reference);
             var toStr = LiteToString(lite, typeId);
-            var toStr2 = Visit(toStr); //AdditionalBinding in embedded
+            //var toStr2 = Visit(toStr); //AdditionalBinding in embedded requires it, but makes problems in many other lites in Nominator
 
-            return new LiteValueExpression(lite.Type, typeId, id, toStr2);
+            return new LiteValueExpression(lite.Type, typeId, id, toStr);
         }
 
         private Expression? LiteToString(LiteReferenceExpression lite, Expression typeId)
