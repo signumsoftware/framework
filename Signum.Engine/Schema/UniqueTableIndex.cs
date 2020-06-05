@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
             return Columns.ToString(c => c.Name, "_");
         }
 
-        protected string? WhereSignature()
+        public string? WhereSignature()
         {
             var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
 
