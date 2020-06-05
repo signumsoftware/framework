@@ -545,6 +545,7 @@ namespace Signum.Engine.Maps
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Default = attr.GetDefault(Settings.IsPostgres),
                 Identity = attr.Identity,
+                Size = attr.HasSize ? attr.Size : (int?)null,
             };
         }
 
