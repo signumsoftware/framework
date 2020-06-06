@@ -110,17 +110,18 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
     );
   }
   return (<div className="design-main">
-    <div className={classes("design-left", isDesignerOpen && "open")}>
-      {!isDesignerOpen ?
-        <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
-        <DynamicViewDesigner
-          rootNode={desRootNode}
-          dynamicView={dynamicView}
-          onReload={handleReload}
-          onLoseChanges={handleLoseChanges}
-          typeName={ctx.value.Type} />
-      }
-    </div>
+    {Navigator.isReadOnly(DynamicViewEntity) ? undefined :
+      <div className={classes("design-left", isDesignerOpen && "open")}>
+        {!isDesignerOpen ?
+          <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
+          <DynamicViewDesigner
+            rootNode={desRootNode}
+            dynamicView={dynamicView}
+            onReload={handleReload}
+            onLoseChanges={handleLoseChanges}
+            typeName={ctx.value.Type} />
+        }
+      </div>}
     <div className={classes("design-content", isDesignerOpen && "open")}>
         <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
     </div>
