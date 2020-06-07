@@ -19,7 +19,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.setState({ error, info });
   }
 
-  componentWillReceiveProps(newProps: ErrorBoundaryProps) {
+  UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps) {
     if (newProps.refreshKey != this.props.refreshKey && (this.state.error || this.state.info))
       this.setState({ error: undefined, info: undefined });
   }
