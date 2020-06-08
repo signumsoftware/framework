@@ -39,6 +39,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
+  Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {
+    order: 6,
+    button: <button className="btn btn-info"
+      onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
+      <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+      </button>
+  } : undefined)
+
   if (options.properties) {
     tasks.push(taskAuthorizeProperties);
     GraphExplorer.TypesLazilyCreated.push(PropertyRouteEntity.typeName);
@@ -235,5 +243,4 @@ declare module '@framework/Signum.Entities' {
     typeAllowed?: TypeAllowedBasic;
   }
 }
-
 
