@@ -23,8 +23,9 @@ declare global {
   }
 
   interface Array<T> {
-    groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
-    groupBy<K extends string | number, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
+    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
+    groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
+    groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
@@ -140,12 +141,23 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number, elementSelector?: (element: any) => unknown): { key: any /*string*/; elements: any[] }[] {
-  const result: { key: string | number; elements: any[] }[] = [];
-  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string), elementSelector!);
+Array.prototype.groupBy = function (this: any[],
+  keySelector: (element: any) => string,
+  keyStringifier?: (element: any) => string,
+  elementSelector?: (element: any) => unknown):
+  { key: any /*string*/; elements: any[] }[] {
+
+  const result: { key: string; elements: any[] }[] = [];
+ 
+  const objectGrouped = this.groupToObject(
+    keyStringifier ? e => keyStringifier(keySelector(e)) : keySelector,
+    elementSelector!);
+
   for (const prop in objectGrouped) {
-    if (objectGrouped.hasOwnProperty(prop))
-      result.push({ key: prop, elements: objectGrouped[prop] });
+    if (objectGrouped.hasOwnProperty(prop)) {
+      var elements = objectGrouped[prop]
+      result.push({ key: keySelector(elements[0]), elements: elements });
+    }
   }
   return result;
 };
