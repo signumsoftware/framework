@@ -23,14 +23,11 @@ function toTab(e: EmbeddedWidget, key: number) {
 }
 
 export function addAdditionalTabs(frame: EntityFrame | undefined) {
-
-
-  if (frame === undefined || frame!.tabs === undefined)
+  if (frame === undefined || frame.tabs === undefined)
     return undefined;
 
-  return frame!.tabs!.map((e, i) => toTab(e, i)); 
+  return frame.tabs.map((e, i) => toTab(e, i)); 
 }
-
 
 export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
  
