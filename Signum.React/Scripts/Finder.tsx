@@ -1187,6 +1187,10 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
 }
 
+export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
+  return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
+}
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
