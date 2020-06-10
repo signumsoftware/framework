@@ -188,6 +188,7 @@
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
   <Type Name="HolidayEmbedded" />
+  <Type Name="HtmlChartScript" />
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity" />

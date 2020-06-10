@@ -292,6 +292,7 @@
   </Type>
   <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="Format" Description="Format" />
     <Member Name="OrderByIndex" Description="Sortieren nach index" />
     <Member Name="OrderByType" Description="Sortieren nach typ" />
     <Member Name="Token" Description="Token" />
@@ -336,9 +337,12 @@
     <Member Name="DeletePalette" Description="Palette löschen" />
     <Member Name="DrawChart" Description="Diagramm chart" />
     <Member Name="EditUserChart" Description="Benutzerdiagramm bearbeiten" />
+    <Member Name="Maximize" Description="Maximieren" />
+    <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
     <Member Name="NewPalette" Description="Neue Palette" />
     <Member Name="Preview" Description="Vorschau" />
+    <Member Name="Reload" Description="Neu laden" />
     <Member Name="SavePalette" Description="Palette speichern" />
     <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
@@ -1035,10 +1039,15 @@
   <Type Name="FilePathEmbedded" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
+    <Member Name="EntityId" Description="EntityId" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße string" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="MListRowId" Description="MListRowId" />
+    <Member Name="PropertyRoute" Description="PropertyRoute" />
+    <Member Name="RootType" Description="RootType" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathEntity" Description="Dateipfad" PluralDescription="Dateipfade" Gender="m">
@@ -1049,6 +1058,7 @@
     <Member Name="FileLengthString" Description="Dateigröße" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
+    <Member Name="Hash" Description="Hash" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
@@ -1159,6 +1169,9 @@
   <Type Name="HolidayEmbedded" Description="Feiertag">
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Pivot-Tabelle" />
   </Type>
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
@@ -2394,6 +2407,7 @@
   </Type>
   <Type Name="UserChartPartEntity" Description="Benutzerdiagramm Teil" PluralDescription="Benutzerdiagramm Teilen" Gender="n">
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
