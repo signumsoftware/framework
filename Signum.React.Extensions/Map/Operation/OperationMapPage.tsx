@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as QueryString from "query-string"
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
@@ -13,6 +12,7 @@ import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition } fr
 import "./operationMap.css"
 import { useAPI, useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
+import { QueryString } from '@framework/QueryString'
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string }> {
 

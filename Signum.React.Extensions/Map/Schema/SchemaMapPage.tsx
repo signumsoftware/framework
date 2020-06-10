@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as History from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as QueryString from 'query-string'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -12,6 +11,7 @@ import { RouteComponentProps } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
+import { QueryString } from '@framework/QueryString'
 
 interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;
