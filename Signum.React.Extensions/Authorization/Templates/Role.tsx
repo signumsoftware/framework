@@ -30,6 +30,11 @@ export default function Role(p : { ctx: TypeContext<RoleEntity> }){
         filterOptions: [{ token: UserEntity.token().entity(u => u.role), value: ctx.value }]
       }} />
       }
+      {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{
+        queryName: RoleEntity,
+        filterOptions: [{ token: RoleEntity.token().entity().append(u => u.roles).any(), value: ctx.value }]
+      }} />
+      }
 
     </div>
   );
