@@ -8,7 +8,7 @@ import { API } from '../AuthAdminClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, AuthEmailMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useForceUpdate } from '@framework/Hooks';
 
 export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx: TypeContext<PropertyRulePack> }, ref: React.Ref<IRenderButtons>) {
 

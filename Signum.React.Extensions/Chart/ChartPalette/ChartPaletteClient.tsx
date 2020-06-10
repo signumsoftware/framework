@@ -17,7 +17,7 @@ import { OrderRequest } from '@framework/FindOptions';
 import { toFilterRequests } from '@framework/Finder';
 import { PseudoType, getTypeName, getTypeInfo, tryGetTypeInfo } from '@framework/Reflection';
 import { asFieldFunction } from '../../Dynamic/View/NodeUtils';
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal';
+import MessageModal from '@framework/Modals/MessageModal';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(ChartPaletteModel, e => import('./ChartPaletteControl')));

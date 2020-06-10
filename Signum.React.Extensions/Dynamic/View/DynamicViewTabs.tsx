@@ -7,7 +7,7 @@ import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
 import { Tabs, Tab } from 'react-bootstrap';
-import { TypeContext, EntityTable, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
+import { TypeContext, EntityTable, ValueLine } from '@framework/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
 import { DynamicViewInspector, PropsHelp } from './Designer';
 import { ModulesHelp } from "./ModulesHelp";

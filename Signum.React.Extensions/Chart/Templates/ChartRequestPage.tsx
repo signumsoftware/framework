@@ -7,7 +7,7 @@ import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from 'react-router'
-import { useStateWithPromise } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useStateWithPromise } from '@framework/Hooks'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 

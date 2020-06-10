@@ -12,10 +12,10 @@ import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import SelectorModal from '@framework/SelectorModal'
 
 interface ResultOrError {
 

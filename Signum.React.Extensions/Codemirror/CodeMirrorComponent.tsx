@@ -3,7 +3,7 @@ import * as CodeMirror from 'codemirror'
 import { classes } from '@framework/Globals'
 
 import "codemirror/lib/codemirror.css"
-import { useUpdatedRef } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { useUpdatedRef } from '@framework/Hooks';
 
 export interface CodeMirrorProps {
   onChange?: (value: string) => void,

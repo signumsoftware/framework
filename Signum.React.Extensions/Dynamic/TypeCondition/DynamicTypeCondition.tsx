@@ -9,7 +9,7 @@ import { DynamicTypeConditionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
 
 interface DynamicTypeConditionComponentProps {
   ctx: TypeContext<DynamicTypeConditionEntity>;

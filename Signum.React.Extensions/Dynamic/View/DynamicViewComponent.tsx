@@ -18,7 +18,7 @@ import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicVie
 import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { useAPI, useUpdatedRef } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useUpdatedRef } from '@framework/Hooks'
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
