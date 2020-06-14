@@ -81,6 +81,9 @@ namespace Signum.Engine.Workflow
                 )
               ))
 
+
+            //TODO: Complete code
+
             );
         }
 
@@ -127,9 +130,6 @@ namespace Signum.Engine.Workflow
 
             ctx.SaveMaybe(this.workflow);
 
-
-
-
             using (Sync(this.pools, element.Elements("Pool"), ctx, (pool, xml) =>
              {
                  pool.BpmnElementId = xml.Attribute("bpmnElementId").Value;
@@ -138,77 +138,19 @@ namespace Signum.Engine.Workflow
                  SetXmlDiagram(pool, xml);
              }))
             {
-
-
                 using (Sync(this.lanes, element.Elements("Lane"), ctx, (lane, xml) =>
                 {
                     lane.BpmnElementId = xml.Attribute("bpmnElementId").Value;
                     lane.Name = xml.Attribute("Name").Value;
                     lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value);
                     lane.Actors = (xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList();
-                lane.ActorsEval = xml.Element("ActorsEval")?.Let(ae => (lane.ActorsEval ?? new WorkflowLaneActorsEval()).Do(wal => wal.Script = ae.Value;);
+                    lane.ActorsEval = xml.Element("ActorsEval")?.Let(ae => (lane.ActorsEval ?? new WorkflowLaneActorsEval()).Do(wal => wal.Script = ae.Value));
                     SetXmlDiagram(lane, xml);
                 }))
                 {
-
-
-
-
+                    //TODO: Complete code
                 }
-
-
-
-
             }
-
-            Synchronizer.Synchronize(
-                element.Elements("Pool").ToDictionaryEx(a => a.Attribute("BpmnElementId").Value),
-                this.pools,
-                createNew: (bpmnId, xml) => this.pools.Add(bpmnId, ctx.SaveMaybe(SetXml(new WorkflowPoolEntity(), xml))),
-                removeOld: null,
-                merge: null);
-
-            Synchronizer.Synchronize(
-            element.Elements("Lane").ToDictionaryEx(a => a.Attribute("BpmnElementId").Value),
-            this.lanes,
-            createNew: (bpmnId, xml) => this.lanes.Add(bpmnId, ctx.SaveMaybe(new WorkflowLaneEntity
-            {
-                BpmnElementId = bpmnId,
-                Name = xml.Attribute("Name").Value,
-                Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value),
-                Xml = new WorkflowXmlEmbedded { DiagramXml = GetCData(xml) },
-                Actors = (xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList(),
-                ActorsEval = xml.Element("ActorsEval")?.Let(ae => new WorkflowLaneActorsEval { Script = ae.Value}),
-            })),
-            removeOld: null,
-            merge: null);
-
-
-            Synchronizer.Synchronize(
-                element.Elements("Lane").ToDictionaryEx(a => a.Attribute("BpmnElementId").Value),
-                this.lanes,
-                createNew: (bpmnId, xml) => this.lanes.Add(bpmnId, ctx.SaveMaybe(new WorkflowLaneEntity
-                {
-                    BpmnElementId = bpmnId,
-                    Name = xml.Attribute("Name").Value,
-                    Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value),
-                    Xml = new WorkflowXmlEmbedded { DiagramXml = GetCData(xml) },
-                    Actors = (xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList(),
-                    ActorsEval = xml.Element("ActorsEval")?.Let(ae => new WorkflowLaneActorsEval { Script = ae.Value }),
-                })),
-                removeOld: null,
-                merge: null);
-
-            Synchronizer.Synchronize(
-                element.Elements("Pool").ToDictionaryEx(a => a.Attribute("BpmnElementId").Value),
-                this.pools,
-                createNew: null,
-                removeOld: (bpmnId, entity) => ctx.DeleteMaybe(entity),
-                merge: (bpmnId, xml, entity) =>
-                {
-                    SetXml(entity, xml);
-                    ctx.SaveMaybe(entity);
-                });
         }
 
         void SetXmlDiagram(IWorkflowObjectEntity entity, XElement xml)
@@ -217,7 +159,6 @@ namespace Signum.Engine.Workflow
                 entity.Xml = new WorkflowXmlEmbedded();
 
             entity.Xml.DiagramXml = xml.Descendants().OfType<XCData>().Single().Value;
-
         }
     }
 }

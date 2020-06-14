@@ -20,14 +20,14 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
+using Signum.Entities.Workflow;
+using Signum.Engine.Workflow;
 
 namespace Signum.Engine.UserAssets
 {
     public static class UserAssetsExporter
     {
-
         public static Func<XDocument, XDocument>? PreExport = null;
-
 
         class ToXmlContext : IToXmlContext
         {
@@ -57,6 +57,12 @@ namespace Signum.Engine.UserAssets
             public string PermissionToName(Lite<PermissionSymbol> symbol)
             {
                 return symbol.RetrieveAndRemember().Key;
+            }
+
+            public XElement GetFullWorkflowElement(WorkflowEntity workflow)
+            {
+                var wie = new WorkflowImportExport(workflow);
+                return wie.ToXml(this);
             }
         }
 
@@ -186,6 +192,16 @@ namespace Signum.Engine.UserAssets
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
+
+            public T SaveMaybe<T>(T entity) where T : Entity
+            {
+                return entity;
+            }
+
+            public void DeleteMaybe<T>(T entity) where T : Entity
+            {
+                return;
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -300,6 +316,16 @@ namespace Signum.Engine.UserAssets
             public CultureInfoEntity GetCultureInfoEntity(string cultureName)
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
+            }
+
+            public T SaveMaybe<T>(T entity) where T : Entity
+            {
+                return entity.Save();
+            }
+
+            public void DeleteMaybe<T>(T entity) where T : Entity
+            {
+                entity.Delete();
             }
         }
 
