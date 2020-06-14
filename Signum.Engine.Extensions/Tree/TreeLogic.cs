@@ -279,6 +279,7 @@ namespace Signum.Engine.Tree
                     }
 
                     TreeLogic.FixName(t);
+                    t.UpdateLevel();
                 }
             }.Register();
 
