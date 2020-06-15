@@ -29,7 +29,6 @@ export class HtmlContentStateConverter implements IContentStateConverter {
   }
 
   textToContentState(html: string): draftjs.ContentState {
-    debugger;
     console.log("Parsing: " + html);
     const { customChunkRenderer } = this.htmlToDraftOptions;
     const { contentBlocks, entityMap } = htmlToDraft(html, customChunkRenderer);
