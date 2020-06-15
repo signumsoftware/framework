@@ -6,8 +6,8 @@ import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { RouteComponentProps } from 'react-router'
-import * as QueryString from 'query-string'
-import { useStateWithPromise } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useStateWithPromise } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 export default function ResetPassword(p: RouteComponentProps<{}>) {
 

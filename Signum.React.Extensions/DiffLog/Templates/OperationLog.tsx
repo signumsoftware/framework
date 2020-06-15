@@ -11,7 +11,7 @@ import { DiffDocument } from './DiffDocument'
 import { Tabs, Tab } from 'react-bootstrap';
 import { LinkContainer } from '@framework/Components';
 import "./DiffLog.css"
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }){
   const ctx = p.ctx;

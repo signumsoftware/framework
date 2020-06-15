@@ -16,7 +16,7 @@ import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
-import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals';
+import { IModalProps, openModal } from '@framework/Modals';
 
 export interface ToolbarMainRendererProps {
 }

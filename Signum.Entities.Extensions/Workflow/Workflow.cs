@@ -1,14 +1,16 @@
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class WorkflowEntity : Entity
+    public class WorkflowEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -26,8 +28,23 @@ namespace Signum.Entities.Workflow
         [InTypeScript(false), AvoidDump]
         public WorkflowXmlEmbedded? FullDiagramXml { get; set; }
 
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return ctx.GetFullWorkflowElement(this);
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            throw new NotImplementedException();
+        }
+
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
+
+   
     }
 
     [AutoInit]
@@ -123,6 +140,11 @@ namespace Signum.Entities.Workflow
     {
         [StringLengthValidator(Min = 3, Max = int.MaxValue, MultiLine = true)]
         public string DiagramXml { get; set; }
+
+        public XCData ToXCData()
+        {
+            return new XCData(this.DiagramXml);
+        }
     }
 
     public interface IWorkflowObjectEntity : IEntity

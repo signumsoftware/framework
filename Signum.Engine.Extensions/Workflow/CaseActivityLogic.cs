@@ -836,16 +836,7 @@ namespace Signum.Engine.Workflow
                     SaveEntity(ca.Case.MainEntity);
                 }
 
-                ca.DoneBy = UserEntity.Current.ToLite();
-                ca.DoneDate = TimeZoneManager.Now;
-                ca.DoneType = doneType;
-                ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
-                ca.Save();
-
-                ca.Notifications()
-                   .UnsafeUpdate()
-                   .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
-                   .Execute();
+                ca.MakeDone(doneType);
 
                 var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
 
@@ -925,7 +916,22 @@ namespace Signum.Engine.Workflow
 
             private static void ExecuteBoundaryTimer(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
             {
-                var type = boundaryEvent.Type;
+                switch (boundaryEvent.Type)
+                {
+                    case WorkflowEventType.BoundaryForkTimer:
+                        new CaseActivityExecutedTimerEntity
+                        {
+                            BoundaryEvent = boundaryEvent.ToLite(),
+                            CaseActivity = ca.ToLite(),
+                        }.Save();
+                        break;
+                    case WorkflowEventType.BoundaryInterruptingTimer:
+                        ca.MakeDone(DoneType.Timeout);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected Boundary Timer Type " + boundaryEvent.Type);
+                }
+
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
@@ -937,29 +943,10 @@ namespace Signum.Engine.Workflow
 
                 ctx.ExecuteConnection(connection);
 
-                if (type == WorkflowEventType.BoundaryInterruptingTimer)
-                {
-                    ExecuteStep(ca, DoneType.Timeout, connection);
+                if (!FindNext(connection.To, ctx))
                     return;
-                }
 
-                if (type == WorkflowEventType.BoundaryForkTimer)
-                {
-                    if (!FindNext(connection.To, ctx))
-                        return;
-
-                    CreateNextActivities(@case, ctx, ca);
-
-                    new CaseActivityExecutedTimerEntity
-                    {
-                        BoundaryEvent = boundaryEvent.ToLite(),
-                        CaseActivity = ca.ToLite(),
-                    }.Save();
-
-                    return;
-                }
-
-                throw new InvalidOperationException("Unexpected Timer Type " + type);
+                FinishStep(ca.Case, ctx, ca);
             }
 
             private static void ExecuteInitialStep(CaseEntity @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
@@ -1357,6 +1344,20 @@ namespace Signum.Engine.Workflow
                     return true;
                 }
             }
+        }
+
+        private static void MakeDone(this CaseActivityEntity ca, DoneType doneType) 
+        {
+            ca.DoneBy = UserEntity.Current.ToLite();
+            ca.DoneDate = TimeZoneManager.Now;
+            ca.DoneType = doneType;
+            ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
+            ca.Save();
+
+            ca.Notifications()
+               .UnsafeUpdate()
+               .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+               .Execute();
         }
 
         private static void OverrideCaseActivityMixin(SchemaBuilder sb)

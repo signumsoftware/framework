@@ -10,8 +10,8 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from '
 import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
-import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
+import { useController } from '@framework/Lines/LineBase'
 
 export { FileTypeSymbol };
 

@@ -7,7 +7,6 @@ import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entiti
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { PanelStyle } from '../Signum.Entities.Dashboard';
-//import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { useController } from '@framework/Lines/LineBase';
 
 

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as QueryString from 'query-string'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Entities'
@@ -7,6 +6,7 @@ import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeI
 import { ImportRoute } from "@framework/AsyncImport";
 import "./Help.css"
 import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Entities.Help';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], markdownToHtml: (txt: string) => string }) {
 
@@ -131,7 +131,7 @@ export module Urls {
   }
 
   export function searchUrl(query: PseudoType) {
-    return AppContext.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: query }));
+    return AppContext.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: getQueryKey(query) }));
   }
 
   export function typeUrl(typeName: PseudoType) {
