@@ -25,6 +25,10 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> EmailMessages(this EmailPackageEntity e) =>
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(e)));
+
         static Func<EmailConfigurationEmbedded> getConfiguration = null!;
         public static EmailConfigurationEmbedded Configuration
         {
@@ -76,8 +80,17 @@ namespace Signum.Engine.Mailing
 
                 EmailGraph.Register();
 
+                QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
             }
+        }
+
+        public static void ExceptionLogic_DeletePackages(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            Database.Query<EmailPackageEntity>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack) && !pack.EmailMessages().Any())
+                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
