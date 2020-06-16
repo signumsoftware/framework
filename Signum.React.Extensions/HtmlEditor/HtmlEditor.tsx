@@ -4,8 +4,7 @@ import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './HtmlEditor.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
-import { imagePlugin, ImageConverter, configureImportExportImages } from './imagePlugin';
-import { basicCommandsPlugin } from './basicCommandPlugin';
+import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;
@@ -15,10 +14,10 @@ export interface IContentStateConverter {
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
-  basicCommands?: boolean;
-  imageConverter?: ImageConverter<Object>
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
+  decorators?: draftjs.DraftDecorator[],
+  plugins?: HtmlEditorPlugin[]
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
 }
 
@@ -26,6 +25,8 @@ export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
   converter: IContentStateConverter,
+  decorators?: draftjs.DraftDecorator[],
+  plugins?: HtmlEditorPlugin[];
   innerRef?: React.Ref<draftjs.Editor>;
 }
 
@@ -39,6 +40,8 @@ export class HtmlEditorController {
   setOverrideToolbar!: (newState: React.ReactFragment | React.ReactElement | undefined) => void;
 
   converter!: IContentStateConverter;
+  decorators!: draftjs.DraftDecorator[];
+  plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
 
@@ -47,8 +50,13 @@ export class HtmlEditorController {
     this.binding = p.binding;
     this.readOnly = p.readOnly;
     this.converter = p.converter;
+    this.plugins = p.plugins ?? [];
+    this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
 
-    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(p.converter!.textToContentState(this.binding.getValue() ?? "")));
+    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(
+      p.converter!.textToContentState(this.binding.getValue() ?? ""),
+      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators)));
+
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
@@ -83,6 +91,16 @@ export class HtmlEditorController {
     }
   }
 
+  extraButtons(): React.ReactFragment | null {
+
+    var buttons = this.plugins.map(p => p.getToolbarButtons && p.getToolbarButtons(this)).notNull();
+
+    if (buttons.length == 0)
+      return null;
+
+    return React.createElement(React.Fragment, undefined, <Separator />, ...buttons);
+  }
+
   lastSave: string | undefined;
 
   setRefs!: (editor: draftjs.Editor | null) => void;
@@ -90,29 +108,39 @@ export class HtmlEditorController {
 
 
 
-export default React.forwardRef(function HtmlEditor({ readOnly, binding, converter, innerRef, toolbarButtons, imageConverter, basicCommands, ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
+export default React.forwardRef(function HtmlEditor({
+  readOnly,
+  binding,
+  converter,
+  innerRef,
+  toolbarButtons,
+  decorators,
+  plugins,
+  ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
-  converter = converter ?? new HtmlContentStateConverter({}, {});
+  const textConverter = converter ?? new HtmlContentStateConverter({}, {});
 
-  if (imageConverter != null)
-    configureImportExportImages(converter, imageConverter);
+  plugins = plugins ?? [new BasicCommandsPlugin()];
+
+  plugins.forEach(p => p.expandConverter && p.expandConverter(textConverter));
 
   var c = React.useMemo(() => new HtmlEditorController(), []);
   React.useImperativeHandle(ref, () => c, []);
   c.init({
     binding,
     readOnly,
-    converter,
+    converter: textConverter,
     innerRef,
+    decorators,
+    plugins,
   });
 
   const editorProps = props as draftjs.EditorProps;
 
-  if (basicCommands != false)
-    basicCommandsPlugin(editorProps, c);
+  if (editorProps.keyBindingFn == undefined)
+    editorProps.keyBindingFn = draftjs.getDefaultKeyBinding;
 
-  if (imageConverter != null)
-    imagePlugin(editorProps, c, imageConverter);
+  plugins.forEach(p => p.expandEditorProps && p.expandEditorProps(editorProps, c));
 
   console.log("Rendering: " + JSON.stringify(draftjs.convertToRaw(c.editorState.getCurrentContent()), undefined, 2));
 
@@ -147,4 +175,13 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
   <BlockStyleButton controller={c} blockType="ordered-list-item" icon="list-ol" title="Ordered list" />
   <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" />
   <BlockStyleButton controller={c} blockType="code-block" icon={["far", "file-code"]} title="Quote" />
+  {c.extraButtons()}
 </div>;
+
+
+export interface HtmlEditorPlugin {
+  getDecorators?(controller: HtmlEditorController): [draftjs.DraftDecorator];
+  getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
+  expandConverter?(converter: IContentStateConverter): void;
+  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): void;
+}
