@@ -512,7 +512,7 @@ namespace Signum.Engine.Maps
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
-        int? IColumn.Size { get { return null; } }
+        public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
         public string? Collation { get; set; }
         Table? IColumn.ReferenceTable { get { return null; } }
@@ -840,7 +840,7 @@ namespace Signum.Engine.Maps
         public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
-        int? IColumn.Size { get { return null; } }
+        int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
