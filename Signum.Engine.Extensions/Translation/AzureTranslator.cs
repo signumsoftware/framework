@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,20 +13,20 @@ namespace Signum.Engine.Translation
     public class AzureTranslator : ITranslator
     {
         public string AzureKey;
+        public string? Proxy { get; }
 
-        public AzureTranslator(string azureKey, string proxy = null)
+        public AzureTranslator(string azureKey, string? proxy = null)
         {
             this.AzureKey = azureKey;
             this.Proxy = proxy;
         }
 
-        public string Proxy { get; }
 
         static readonly XNamespace Ns = XNamespace.Get("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2");
         static readonly XNamespace ArrayNs = XNamespace.Get("http://schemas.microsoft.com/2003/10/Serialization/Arrays");
         
 
-        public async Task<List<string>> TranslateBatchAsync(List<string> list, string from, string to)
+        public async Task<List<string?>> TranslateBatchAsync(List<string> list, string from, string to)
         {
             string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy);
             
@@ -56,14 +56,14 @@ namespace Signum.Engine.Translation
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 XDocument doc = XDocument.Parse(responseBody);
-                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => r.Element(Ns + "TranslatedText").Value).ToList();
+                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => (string?)r.Element(Ns + "TranslatedText").Value).ToList();
                 return result;
             }
         }
 
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
-            var result = Task.Run<List<string>>(async () =>
+            var result = Task.Run<List<string?>>(async () =>
             {
                 return await this.TranslateBatchAsync(list, from, to);
             }).Result;
@@ -76,12 +76,8 @@ namespace Signum.Engine.Translation
 
     public static class AzureAccessToken
     {
-        
-
-        public static async Task<string> GetAccessTokenAsync(string subscriptionKey, string proxy)
+        public static async Task<string> GetAccessTokenAsync(string subscriptionKey, string? proxy)
         {
-            
-
             using (var client = ExtendedHttpClient.GetClientWithProxy(proxy))
             using (var request = new HttpRequestMessage())
             {
@@ -96,13 +92,11 @@ namespace Signum.Engine.Translation
                 return "Bearer " + token;
             }
         }
-
-        
     }
 
     public static class ExtendedHttpClient
     {
-        public static HttpClient GetClientWithProxy(string proxy)
+        public static HttpClient GetClientWithProxy(string? proxy)
         {
             HttpClient client;
             if (!String.IsNullOrEmpty(proxy))

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Signum.Utilities;
 using System.Linq.Expressions;
@@ -9,7 +9,7 @@ namespace Signum.Entities.Files
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
     public class FilePathEntity : LockableEntity, IFile, IFilePath
     {
-        public static string ForceExtensionIfEmpty = ".dat";
+        public static string? ForceExtensionIfEmpty = ".dat";
 
         public FilePathEntity() { }
 
@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
         public FilePathEntity(FileTypeSymbol fileType, string path)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(path);
+            this.FileName = Path.GetFileName(path)!;
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
@@ -35,7 +35,7 @@ namespace Signum.Entities.Files
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
+        [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -63,21 +63,15 @@ namespace Signum.Entities.Files
 
         public int FileLength { get; internal set; }
 
-        static Expression<Func<FilePathEntity, string>> FileLengthStringExpression =
-          @this => ((long)@this.FileLength).ToComputerSize(true);
-        [ExpressionField]
-        public string FileLengthString
-        {
-            get { return FileLengthStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
+        [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]
-        public string CalculatedDirectory { get; set; }
+        public string? CalculatedDirectory { get; set; }
 
-        [NotNullValidator]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
@@ -111,17 +105,17 @@ namespace Signum.Entities.Files
 
         public static Func<string, string> ToAbsolute = str => str;
 
-        public string FullWebPath()
-        {
-            var pp = this.GetPrefixPair();
+        public string? FullWebPath()
+            {
+                var pp = this.GetPrefixPair();
 
-            if (string.IsNullOrEmpty(pp.WebPrefix))
-                return null;
+                if (string.IsNullOrEmpty(pp.WebPrefix))
+                    return null;
 
-            var result = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+                var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
 
-            return result;
-        }
+                return result;
+            }
 
         public override string ToString()
         {
@@ -140,16 +134,31 @@ namespace Signum.Entities.Files
     [Serializable]
     public class PrefixPair
     {
-        public PrefixPair(string physicalPrefix)
+        string? physicalPrefix;
+        public string PhysicalPrefix => physicalPrefix ?? throw new InvalidOperationException("No PhysicalPrefix defined");
+
+        public string WebPrefix { get; set; }
+
+        private PrefixPair()
         {
-            this.PhysicalPrefix = physicalPrefix;
+            this.physicalPrefix = null;
         }
 
-        public string PhysicalPrefix;
-        public string WebPrefix;
+        public PrefixPair(string physicalPrefix)
+        {
+            this.physicalPrefix = physicalPrefix;
+        }
+
+        public static PrefixPair None()
+        {
+            return new PrefixPair();
+        }
+
+        public static PrefixPair WebOnly(string webPrefix)
+        {
+            return new PrefixPair { WebPrefix = webPrefix };
+        }
     }
-
-
 
     [AutoInit]
     public static class FilePathOperation

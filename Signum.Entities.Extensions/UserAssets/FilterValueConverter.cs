@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.DynamicQuery;
@@ -21,7 +21,7 @@ namespace Signum.Entities.UserAssets
             { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter() } },
         };
 
-        public static string ToString(object value, Type type)
+        public static string? ToString(object? value, Type type)
         {
             if (value is IList)
                 return ((IList)value).Cast<object>().ToString(o => ToStringElement(o, type), "|");
@@ -29,17 +29,17 @@ namespace Signum.Entities.UserAssets
             return ToStringElement(value, type);
         }
 
-        static string ToStringElement(object value, Type type)
+        static string? ToStringElement(object? value, Type type)
         {
             var result = TryToStringElement(value, type);
 
-            if (result is Result<string>.Success s)
+            if (result is Result<string?>.Success s)
                 return s.Value;
 
-            throw new InvalidOperationException((result as Result<string>.Error).ErrorText);
+            throw new InvalidOperationException(((Result<string?>.Error)result).ErrorText);
         }
 
-        static Result<string> TryToStringElement(object value, Type type)
+        static Result<string?> TryToStringElement(object? value, Type type)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
@@ -55,37 +55,37 @@ namespace Signum.Entities.UserAssets
                 }
             }
 
-            string result =
+            string? result =
                 value == null ? null :
                 value is IFormattable f ? f.ToString(null, CultureInfo.InvariantCulture) :
                 value.ToString();
 
-            return new Result<string>.Success(result);
+            return new Result<string?>.Success(result);
         }
 
-        public static object Parse(string stringValue, Type type, bool isList)
+        public static object? Parse(string? stringValue, Type type, bool isList)
         {
             var result = TryParse(stringValue, type, isList);
-            if (result is Result<object>.Error e)
+            if (result is Result<object?>.Error e)
                 throw new FormatException(e.ErrorText);
 
-            return ((Result<object>.Success)result).Value;
+            return ((Result<object?>.Success)result).Value;
         }
 
-        public static Result<object> TryParse(string stringValue, Type type, bool isList)
+        public static Result<object?> TryParse(string? stringValue, Type type, bool isList)
         {
             if (isList && stringValue != null && stringValue.Contains('|'))
             {
-                IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type));
+                IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type))!;
                 foreach (var item in stringValue.Split('|'))
                 {
                     var result = TryParseInternal(item.Trim(), type);
-                    if (result is Result<object>.Error e)
-                        return new Result<object>.Error(e.ErrorText);
+                    if (result is Result<object?>.Error e)
+                        return new Result<object?>.Error(e.ErrorText);
 
-                    list.Add(((Result<object>.Success)result).Value);
+                    list.Add(((Result<object?>.Success)result).Value);
                 }
-                return new Result<object>.Success(list);
+                return new Result<object?>.Success(list);
             }
             else
             {
@@ -93,11 +93,11 @@ namespace Signum.Entities.UserAssets
             }
         }
 
-        private static Result<object> TryParseInternal(string stringValue, Type type)
+        private static Result<object?> TryParseInternal(string? stringValue, Type type)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
-            List<IFilterValueConverter> converters = SpecificConverters.TryGetC(filterType);
+            List<IFilterValueConverter>? converters = SpecificConverters.TryGetC(filterType);
 
             if (converters != null)
             {
@@ -110,9 +110,9 @@ namespace Signum.Entities.UserAssets
             }
 
             if (ReflectionTools.TryParse(stringValue, type, CultureInfo.InvariantCulture, out var result))
-                return new Result<object>.Success(result);
+                return new Result<object?>.Success(result);
             else
-                return new Result<object>.Error("Invalid format");
+                return new Result<object?>.Error("Invalid format");
         }
 
         public static FilterOperation ParseOperation(string operationString)
@@ -168,8 +168,8 @@ namespace Signum.Entities.UserAssets
 
     public interface IFilterValueConverter
     {
-        Result<string> TryToStringValue(object value, Type type);
-        Result<object> TryParseValue(string value, Type type);
+        Result<string?>? TryToStringValue(object? value, Type type);
+        Result<object?>? TryParseValue(string? value, Type type);
     }
 
     public abstract class Result<T>
@@ -208,7 +208,7 @@ namespace Signum.Entities.UserAssets
             public string Minute;
             public string Second;
 
-            public static Result<SmartDateTimeSpan> TryParse(string str)
+            public static Result<SmartDateTimeSpan>? TryParse(string? str)
             {
                 if (string.IsNullOrEmpty(str))
                 {
@@ -221,7 +221,7 @@ namespace Signum.Entities.UserAssets
 
                 var span = new SmartDateTimeSpan();
 
-                string error =
+                string? error =
                     Assert(match, "year", "yyyy", 0, int.MaxValue, out span.Year) ??
                     Assert(match, "month", "mm", 1, 12, out span.Month) ??
                     Assert(match, "day", "dd", 1, 31,  out span.Day) ??
@@ -235,7 +235,7 @@ namespace Signum.Entities.UserAssets
                 return new Result<SmartDateTimeSpan>.Success(span);
             }
 
-            static string Assert(Match m, string groupName, string defaultValue, int minValue, int maxValue, out string result)
+            static string? Assert(Match m, string groupName, string defaultValue, int minValue, int maxValue, out string result)
             {
                 result = m.Groups[groupName].Value;
                 if (string.IsNullOrEmpty(result))
@@ -383,7 +383,7 @@ namespace Signum.Entities.UserAssets
                 };
             }
 
-            static string Diference(int diference, string pattern)
+            static string? Diference(int diference, string pattern)
             {
                 if (diference == 0)
                     return pattern;
@@ -402,7 +402,7 @@ namespace Signum.Entities.UserAssets
 
         }
 
-        public Result<string> TryToStringValue(object value, Type type)
+        public Result<string?>? TryToStringValue(object? value, Type type)
         {
             if (value == null)
                 return null;
@@ -411,45 +411,44 @@ namespace Signum.Entities.UserAssets
 
             SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
 
-            return new Result<string>.Success(ss.ToString());
+            return new Result<string?>.Success(ss.ToString());
         }
 
-        public Result<object> TryParseValue(string value, Type type)
+        public Result<object?>? TryParseValue(string? value, Type type)
         {
             var res = SmartDateTimeSpan.TryParse(value);
             if (res == null)
                 return null;
 
             if (res is Result<SmartDateTimeSpan>.Error e)
-                return new Result<object>.Error(e.ErrorText);
+                return new Result<object?>.Error(e.ErrorText);
 
-            return new Result<object>.Success(((Result<SmartDateTimeSpan>.Success)res).Value.ToDateTime());
+            return new Result<object?>.Success(((Result<SmartDateTimeSpan>.Success)res).Value.ToDateTime());
         }
     }
 
     public class LiteFilterValueConverter : IFilterValueConverter
     {
-        public Result<string> TryToStringValue(object value, Type type)
+        public Result<string?>? TryToStringValue(object? value, Type type)
         {
             if (!(value is Lite<Entity> lite))
             {
                 return null;
             }
 
-            return new Result<string>.Success(lite.Key());
+            return new Result<string?>.Success(lite.Key());
         }
 
-        public Result<object> TryParseValue(string value, Type type)
+        public Result<object?>? TryParseValue(string? value, Type type)
         {
-            if (string.IsNullOrEmpty(value))
+            if (!value.HasText())
                 return null;
 
-            string error = Lite.TryParseLite(value, out Lite<Entity> lite);
-
+            string? error = Lite.TryParseLite(value, out Lite<Entity>? lite);
             if (error == null)
-                return new Result<object>.Success(lite);
+                return new Result<object?>.Success(lite);
             else
-                return new Result<object>.Error(error);
+                return new Result<object?>.Error(error);
         }
     }
 
@@ -457,9 +456,9 @@ namespace Signum.Entities.UserAssets
     {
         public static string CurrentEntityKey = "[CurrentEntity]";
 
-        static readonly ThreadVariable<Entity> currentEntityVariable = Statics.ThreadVariable<Entity>("currentFilterValueEntity");
+        static readonly ThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
 
-        public static IDisposable SetCurrentEntity(Entity currentEntity)
+        public static IDisposable SetCurrentEntity(Entity? currentEntity)
         {
             if (currentEntity == null)
                 throw new InvalidOperationException("currentEntity is null");
@@ -471,17 +470,17 @@ namespace Signum.Entities.UserAssets
             return new Disposable(() => currentEntityVariable.Value = old);
         }
 
-        public Result<string> TryToStringValue(object value, Type type)
+        public Result<string?>? TryToStringValue(object? value, Type type)
         {
             if (value is Lite<Entity> lite && lite.Is(currentEntityVariable.Value))
             {
-                return new Result<string>.Success(CurrentEntityKey);
+                return new Result<string?>.Success(CurrentEntityKey);
             }
 
             return null;
         }
 
-        public Result<object> TryParseValue(string value, Type type)
+        public Result<object?>? TryParseValue(string? value, Type type)
         {
             if (value.HasText() && value.StartsWith(CurrentEntityKey))
             {
@@ -489,28 +488,28 @@ namespace Signum.Entities.UserAssets
 
                 string[] parts = after.SplitNoEmpty('.' );
 
-                object result = currentEntityVariable.Value;
+                object? result = currentEntityVariable.Value;
 
                 if (result == null)
-                    return new Result<object>.Success(null);
+                    return new Result<object?>.Success(null);
 
                 foreach (var part in parts)
                 {
                     var prop = result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
 
                     if (prop == null)
-                        return new Result<object>.Error("Property {0} not found on {1}".FormatWith(part, type.FullName));
+                        return new Result<object?>.Error("Property {0} not found on {1}".FormatWith(part, type.FullName));
 
                     result = prop.GetValue(result, null);
 
                     if (result == null)
-                        return new Result<object>.Success(null);
+                        return new Result<object?>.Success(null);
                 }
 
                 if (result is Entity e)
                     result = e.ToLite();
 
-                return new Result<object>.Success(result);
+                return new Result<object?>.Success(result);
             }
 
             return null;
@@ -521,22 +520,22 @@ namespace Signum.Entities.UserAssets
     {
         static string CurrentUserKey = "[CurrentUser]";
 
-        public Result<string> TryToStringValue(object value, Type type)
+        public Result<string?>? TryToStringValue(object? value, Type type)
         {
             if (value is Lite<UserEntity> lu && lu.EntityType == typeof(UserEntity) && lu.IdOrNull == UserEntity.Current.Id)
             {
-                return new Result<string>.Success(CurrentUserKey);
+                return new Result<string?>.Success(CurrentUserKey);
             }
 
             return null;
 
         }
 
-        public Result<object> TryParseValue(string value, Type type)
+        public Result<object?>? TryParseValue(string? value, Type type)
         {
             if (value == CurrentUserKey)
             {
-                return new Result<object>.Success(UserEntity.Current?.ToLite());
+                return new Result<object?>.Success(UserEntity.Current?.ToLite());
             }
 
             return null;

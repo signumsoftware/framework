@@ -3,28 +3,75 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Entities.Dynamic
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ViewName { get; set; } = "Default";
 
-        [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [PreserveOrder]
+        public MList<DynamicViewPropEmbedded> Props { get; set; } = new MList<DynamicViewPropEmbedded>();
+
+        [StringLengthValidator(Max = int.MaxValue, MultiLine = true)]
+        public string? Locals { get; set; }
+
+        [StringLengthValidator(Min = 3)]
         public string ViewContent { get; set; }
 
 
-        static Expression<Func<DynamicViewEntity, string>> ToStringExpression = @this => @this.ViewName + ": " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ViewName + ": " + EntityType);
+
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
-            return ToStringExpression.Evaluate(this);
+            if (pi.Name == nameof(Props))
+                return NoRepeatValidatorAttribute.ByKey(Props, a => a.Name);
+
+            return base.PropertyValidation(pi);
+        }
+
+        public static Func<Type, string, DynamicViewEntity?> TryGetDynamicView = (type, name) => throw new NotImplementedException();
+    }
+
+    [Serializable]
+    public class DynamicViewPropEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
+        public string Name { get; set; }
+
+        [StringLengthValidator(Max = 100)]
+        public string Type { get; set; }
+
+        static string[] ForbiddenNames = new string[]
+        {
+            "ctx",
+            "initialDynamicView",
+            "ref",
+            "key",
+            "children"
+        };
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+
+            if(pi.Name == nameof(Name) && Name.HasText())
+            {
+                if(Name != Name.FirstLower())
+                    return DynamicViewValidationMessage._0ShouldStartByLowercase.NiceToString(pi.NiceName());
+
+                if (ForbiddenNames.Contains(Name))
+                    return DynamicViewValidationMessage._0CanNotBe1.NiceToString(pi.NiceName(), Name);
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 
@@ -41,18 +88,14 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewSelectorEntity : Entity
     {
-        [NotNullValidator, UniqueIndex]
+        [UniqueIndex]
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => "ViewSelector " + EntityType);
     }
 
     [AutoInit]
@@ -67,21 +110,17 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewOverrideEntity : Entity
     {
-        [NotNullValidator]
+        
         public TypeEntity EntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? ViewName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "DynamicViewOverride " + @this.EntityType;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => "DynamicViewOverride " + EntityType);
     }
 
     [AutoInit]
@@ -110,7 +149,11 @@ namespace Signum.Entities.Dynamic
         SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually,
         ExampleEntity,
         ShowHelp,
-        HideHelp
+        HideHelp,
+        [Description("modules")]
+        ModulesHelp,
+        [Description("props")]
+        PropsHelp,
     }
 
     public enum DynamicViewValidationMessage
@@ -144,5 +187,7 @@ namespace Signum.Entities.Dynamic
         ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity,
 
         ViewNameIsNotAllowedWhileHavingChildren,
+        _0ShouldStartByLowercase,
+        _0CanNotBe1,
     }
 }

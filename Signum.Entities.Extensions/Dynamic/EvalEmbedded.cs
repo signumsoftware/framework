@@ -22,7 +22,7 @@ namespace Signum.Entities.Dynamic
         }
 
         [Ignore, NonSerialized]
-        CompilationResult compilationResult;
+        CompilationResult? compilationResult;
 
         [HiddenProperty]
         public T Algorithm
@@ -30,11 +30,8 @@ namespace Signum.Entities.Dynamic
             get
             {
                 CompileIfNecessary();
-
-                if (compilationResult == null)
-                    return null;
-
-                if (compilationResult.CompilationErrors != null)
+                
+                if (compilationResult!.CompilationErrors != null)
                     throw new InvalidOperationException(compilationResult.CompilationErrors);
 
                 return compilationResult.Algorithm;
@@ -76,10 +73,10 @@ namespace Signum.Entities.Dynamic
                 {
                     try
                     {
-                        var tree = SyntaxFactory.ParseSyntaxTree(code);
+                        var tree = SyntaxFactory.ParseSyntaxTree(code, options: new CSharpParseOptions(LanguageVersion.CSharp8));
                         
                         var compilation = CSharpCompilation.Create($"{Guid.NewGuid()}.dll")
-                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
                          .AddReferences(references)
                          .AddSyntaxTrees(tree);
 
@@ -123,7 +120,7 @@ namespace Signum.Entities.Dynamic
 
                             Type type = assembly.GetTypes().Where(a => typeof(T).IsAssignableFrom(a)).SingleEx();
 
-                            T algorithm = (T)assembly.CreateInstance(type.FullName);
+                            T algorithm = (T)assembly.CreateInstance(type.FullName!)!;
 
                             return new CompilationResult { Algorithm = algorithm };
                         }
@@ -142,7 +139,7 @@ namespace Signum.Entities.Dynamic
             get { return compilationResult != null; }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Script) && compilationResult != null)
                 return compilationResult.CompilationErrors;

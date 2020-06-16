@@ -26,7 +26,7 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
         <div className="col-sm-7">
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px" }}>{"IEnumerable<Lite<Entity>> GetActors(" + mainEntityName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
-            <CSharpCodeMirror script={ectx.value.script || ""} onChange={handleCodeChange} />
+            <CSharpCodeMirror script={ectx.value.script ?? ""} onChange={handleCodeChange} />
             <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
           </div>
         </div>

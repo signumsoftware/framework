@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Security.Authentication;
@@ -11,7 +11,7 @@ namespace Signum.Entities.Authorization
     public class RoleEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(Min = 2, Max = 100)]
         public string Name { get; set; }
 
         MergeStrategy mergeStrategy;
@@ -25,7 +25,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        [NotNullValidator, NotifyCollectionChanged]
+        [NotifyCollectionChanged]
         public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -34,7 +34,7 @@ namespace Signum.Entities.Authorization
         }
 
         [HiddenProperty]
-        public string StrategyHint
+        public string? StrategyHint
         {
             get
             {
@@ -45,12 +45,8 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        public static Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public static Lite<RoleEntity> Current
         {

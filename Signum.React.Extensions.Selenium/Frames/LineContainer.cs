@@ -27,6 +27,12 @@ namespace Signum.React.Selenium
 
     public  class LineLocator<T>
     {
+        public LineLocator(WebElementLocator elementLocator, PropertyRoute route)
+        {
+            ElementLocator = elementLocator;
+            Route = route;
+        }
+
         public WebElementLocator ElementLocator { get; set; }
 
         public PropertyRoute Route { get; set; }
@@ -62,11 +68,10 @@ namespace Signum.React.Selenium
                 }
             }
 
-            return new LineLocator<S>
-            {
-                Route = route,
-                ElementLocator = element.WithLocator(By.CssSelector("[data-property-path='" + route.PropertyString() + "']"))
-            };
+            return new LineLocator<S>(
+                elementLocator : element.WithLocator(By.CssSelector("[data-property-path='" + route.PropertyString() + "']")),
+                route : route
+            );
         }
 
 
@@ -148,7 +153,7 @@ namespace Signum.React.Selenium
         public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
             where T : IModifiableEntity
         {
-            return (V)lineContainer.ValueLine(property).GetValue();
+            return (V)lineContainer.ValueLine(property).GetValue()!;
         }
 
         public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -160,17 +165,17 @@ namespace Signum.React.Selenium
         }
 
         public static V EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : IModifiableEntity
+            where T : IModifiableEntity
         {
             var lite = lineContainer.EntityLine(property).GetLite();
 
-            return lite is V ? (V)lite : (V)(object)lite.Retrieve();
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : IModifiableEntity
         {
-            lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity)value)?.ToLite());
+            lineContainer.EntityLine(property).SetLite(value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite());
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -182,11 +187,11 @@ namespace Signum.React.Selenium
         }
 
         public static V EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : IModifiableEntity
+            where T : IModifiableEntity
         {
             var lite = lineContainer.EntityCombo(property).LiteValue;
-
-            return lite is V ? (V)lite : (V)(object)lite.Retrieve();
+            
+            return lite is V ? (V)lite : (V)(object)lite?.RetrieveAndRemember()!;
         }
 
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
@@ -194,7 +199,7 @@ namespace Signum.React.Selenium
         {
             var combo = lineContainer.EntityCombo(property);
 
-            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity)value)?.ToLite();
+            combo.LiteValue = value as Lite<IEntity> ?? ((IEntity?)value)?.ToLite();
 
             if (loseFocus)
                 combo.ComboElement.WrappedElement.LoseFocus();
@@ -289,7 +294,7 @@ namespace Signum.React.Selenium
 
         public PropertyRoute Route { get; private set; }
 
-        public LineContainer(IWebElement element, PropertyRoute route = null)
+        public LineContainer(IWebElement element, PropertyRoute? route = null)
         {
             this.Element = element;
             this.Route = route ?? PropertyRoute.Root(typeof(T));

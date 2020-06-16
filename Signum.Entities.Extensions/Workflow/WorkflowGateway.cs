@@ -6,28 +6,25 @@ namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowGatewayEntity : Entity, IWorkflowNodeEntity, IWithModel
-    {
-        [NotNullValidator]
-        public WorkflowLaneEntity Lane{ get; set; }
+    {   
+        public WorkflowLaneEntity Lane { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
+        
+        public string? GetName() => Name;
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
         public WorkflowGatewayType Type { get; set; }
         public WorkflowGatewayDirection Direction { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        static Expression<Func<WorkflowGatewayEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
         public ModelEntity GetModel()
         {
             var model = new WorkflowGatewayModel()
@@ -36,6 +33,7 @@ namespace Signum.Entities.Workflow
                 Type = this.Type,
                 Direction = this.Direction
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -45,6 +43,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.Direction = wModel.Direction;
+            this.CopyMixinsFrom(wModel);
         }
     }
 
@@ -71,8 +70,8 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowGatewayModel : ModelEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public WorkflowGatewayType Type { get; set; }
         public WorkflowGatewayDirection Direction { get; set; }

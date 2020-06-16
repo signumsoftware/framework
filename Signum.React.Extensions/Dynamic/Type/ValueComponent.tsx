@@ -22,7 +22,7 @@ export interface ValueComponentProps {
 export default function ValueComponent(p : ValueComponentProps){
   function updateValue(value: string | boolean | undefined) {
 
-    var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
+    var parsedValue = p.type != "number" ? value : (isNaN(parseFloat(value as string)) ? null : parseFloat(value as string));
 
     if (parsedValue === "")
       parsedValue = null;

@@ -1,98 +1,93 @@
 import * as React from 'react'
-import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
-import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { openModal, IModalProps } from '@framework/Modals';
+import { Lite } from '@framework/Signum.Entities'
+import { getTypeInfo } from '@framework/Reflection'
 import { TreeEntity } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { TreeNode } from './TreeClient'
 import { TreeViewer } from './TreeViewer'
-import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import { Modal } from '../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../Framework/Signum.React/Scripts/Components/Modal';
+import { FilterOption } from "@framework/FindOptions";
+import { Modal } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
+import { useForceUpdate } from '@framework/Hooks'
 
-interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
+interface TreeModalProps extends  IModalProps<TreeNode | undefined> {
   typeName: string;
   filterOptions: FilterOption[];
-  title?: string;
+  title?: React.ReactNode;
 }
 
-export default class TreeModal extends React.Component<TreeModalProps, { show: boolean; }>  {
+export default function TreeModal(p : TreeModalProps){
+  const forceUpdate = useForceUpdate();
 
-  constructor(props: any) {
-    super(props);
+  const [show, setShow] = React.useState(true);
 
-    this.state = {
-      show: true
-    };
+  const selectedNodeRef = React.useRef<TreeNode | undefined>(undefined);
+
+  const okPressedRef = React.useRef<boolean>(false);
+
+  const treeViewRef = React.useRef<TreeViewer>(null);
+
+  function handleSelectedNode(selected: TreeNode | undefined) {
+    selectedNodeRef.current = selected;
+    forceUpdate();
   }
 
-  selectedNode?: TreeNode;
-  okPressed: boolean = false;
-
-  handleSelectedNode = (selected: TreeNode | undefined) => {
-    this.selectedNode = selected;
-    this.forceUpdate();
+  function handleOkClicked() {
+    okPressedRef.current = true;
+    setShow(false);
   }
 
-  handleOkClicked = () => {
-    this.okPressed = true;
-    this.setState({ show: false });
+  function handleCancelClicked() {
+    okPressedRef.current = false;
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.okPressed = false;
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(okPressedRef.current ? selectedNodeRef.current : undefined);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.okPressed ? this.selectedNode : null);
-  }
-
-  handleDoubleClick = (selectedNode: TreeNode, e: React.MouseEvent<any>) => {
+  function handleDoubleClick(selectedNode: TreeNode, e: React.MouseEvent<any>) {
     e.preventDefault();
-    this.selectedNode = selectedNode;
-    this.okPressed = true;
-    this.setState({ show: false });
+    selectedNodeRef.current = selectedNode;
+    okPressedRef.current = true;
+    setShow(false);
   }
 
-  treeView?: TreeViewer;
+  const okEnabled = selectedNodeRef.current != null;
 
-  render() {
+  return (
+    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited}>
+      <ModalHeaderButtons onClose={handleCancelClicked}>
+        <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.typeName).nicePluralName}</span>
+        &nbsp;
+                      <a className="sf-popup-fullscreen" href="#" onClick={(e) => treeViewRef.current
+          && treeViewRef.current.handleFullScreenClick(e)}>
+          <span className="fa fa-external-link"></span>
+        </a>
+      </ModalHeaderButtons>
 
-    const okEnabled = this.selectedNode != null;
+      <div className="modal-body">
+        <TreeViewer
+          filterOptions={p.filterOptions}
+          avoidChangeUrl={true}
+          typeName={p.typeName}
+          onSelectedNode={handleSelectedNode}
+          onDoubleClick={handleDoubleClick}
+          ref={treeViewRef}
+        />
+      </div>
+    </Modal>
+  );
+}
 
-    return (
-      <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-        <ModalHeaderButtons onClose={this.handleCancelClicked}>
-          <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>
-          &nbsp;
-                        <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView && this.treeView.handleFullScreenClick(e)}>
-            <span className="fa fa-external-link"></span>
-          </a>
-        </ModalHeaderButtons>
-
-        <div className="modal-body">
-          <TreeViewer
-            filterOptions={this.props.filterOptions}
-            avoidChangeUrl={true}
-            typeName={this.props.typeName}
-            onSelectedNode={this.handleSelectedNode}
-            onDoubleClick={this.handleDoubleClick}
-            ref={tv => this.treeView = tv!}
-          />
-        </div>
-      </Modal>
-    );
-  }
-
-  static open(typeName: string, filterOptions: FilterOption[], options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
-    return openModal<TreeNode>(<TreeModal
-      filterOptions={filterOptions}
-      typeName={typeName}
-      title={options && options.title}
-    />)
-      .then(tn => tn && tn.lite);
-  }
+TreeModal.open = (typeName: string, filterOptions: FilterOption[], options ?: TreeClient.TreeModalOptions): Promise < Lite<TreeEntity> | undefined > => {
+  return openModal<TreeNode>(<TreeModal
+    filterOptions={filterOptions}
+    typeName={typeName}
+    title={options?.title}
+  />)
+    .then(tn => tn?.lite);
 }
 
 

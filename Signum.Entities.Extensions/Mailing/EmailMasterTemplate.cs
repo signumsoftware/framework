@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,10 +14,10 @@ namespace Signum.Entities.Mailing
     public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyCollectionChanged, NotNullValidator, NotifyChildProperty]
+        [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         [UniqueIndex]
@@ -26,14 +26,10 @@ namespace Signum.Entities.Mailing
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
-        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(Messages))
             {
@@ -91,19 +87,17 @@ namespace Signum.Entities.Mailing
             this.CultureInfo = culture;
         }
 
-
-        [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Text { get; set; }
 
         public override string ToString()
         {
-            return CultureInfo?.ToString();
+            return CultureInfo?.ToString()!;
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {

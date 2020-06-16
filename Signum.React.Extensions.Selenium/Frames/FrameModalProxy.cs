@@ -10,7 +10,7 @@ namespace Signum.React.Selenium
     {
         public PropertyRoute Route { get; private set; }
 
-        public FrameModalProxy(IWebElement element, PropertyRoute route = null)
+        public FrameModalProxy(IWebElement element, PropertyRoute? route = null)
             : base(element)
         {
             this.Route = route?? PropertyRoute.Root(typeof(T)) ;
@@ -34,7 +34,7 @@ namespace Signum.React.Selenium
         {
             if (!AvoidClose)
             {
-                string confirmationMessage = null;
+                string? confirmationMessage = null;
                 Selenium.Wait(() =>
                 {
                     if (this.Element.IsStale())
@@ -45,7 +45,7 @@ namespace Signum.React.Selenium
 
                     if (MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
                     {
-                        var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium);
+                        var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium)!;
                         alert.Click(MessageModalButton.Yes);
                     }
 
@@ -81,7 +81,7 @@ namespace Signum.React.Selenium
 
         public EntityInfoProxy EntityInfo()
         {
-            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"));
+            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"))!;
         }
 
         public FrameModalProxy<T> WaitLoaded()

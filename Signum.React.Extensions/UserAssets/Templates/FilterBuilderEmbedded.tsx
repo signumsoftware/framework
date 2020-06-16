@@ -11,10 +11,11 @@ import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQuerie
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
-import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent } from '@framework/SearchControl/FilterBuilder';
+import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
@@ -22,121 +23,17 @@ interface FilterBuilderEmbeddedProps {
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
   showUserFilters: boolean
-
 }
 
-interface FilterBuilderEmbeddedState {
-  filterOptions?: FilterOptionParsed[];
-  queryDescription?: QueryDescription;
-}
+export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
-export default class FilterBuilderEmbedded extends React.Component<FilterBuilderEmbeddedProps, FilterBuilderEmbeddedState> {
+  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
+  const filterOptions = useAPI(() => qd == null ? Promise.resolve(null) : FilterBuilderEmbedded.toFilterOptionParsed(qd, p.ctx.value, p.subTokenOptions), [qd, p.ctx.value, p.subTokenOptions]);
 
-  constructor(props: FilterBuilderEmbeddedProps) {
-    super(props);
-    this.state = {
-      filterOptions: undefined,
-      queryDescription: undefined
-    };
-  }
-
-  componentWillMount() {
-    this.loadData(this.props).done()
-  }
-
-  componentWillReceiveProps(newProps: FilterBuilderEmbeddedProps) {
-    if (newProps.ctx.value != this.props.ctx.value || newProps.queryKey != this.props.queryKey)
-      this.setState({ queryDescription: undefined, filterOptions: undefined }, () => {
-        this.loadData(newProps).done();
-      });
-  }
-
-  async loadData(props: FilterBuilderEmbeddedProps): Promise<void> {
-
-    var qd = await Finder.getQueryDescription(props.queryKey);
-
-    var filterOptions = await FilterBuilderEmbedded.toFilterOptionParsed(qd, props.ctx.value, props.subTokenOptions);
-
-    this.setState({ queryDescription: qd, filterOptions: filterOptions });
-  }
-
-  static async toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
-    const completer = new TokenCompleter(qd);
-
-    allFilters.forEach(mle => {
-      if (mle.element.token && mle.element.token.tokenString)
-        completer.request(mle.element.token.tokenString, subTokenOptions);
-    });
-
-    await completer.finished();
-
-    function toFilterList(filters: QueryFilterEmbedded[], indent: number): FilterOptionParsed[] {
-      return filters.groupWhen(f => f.indentation == indent).map(gr => {
-        if (!gr.key.isGroup) {
-          if (gr.elements.length != 0)
-            throw new Error("Unexpected childrens of condition");
-
-          const pinned = gr.key.pinned;
-
-          return {
-            token: completer.get(gr.key.token!.tokenString),
-            operation: gr.key.operation,
-            value: gr.key.valueString,
-            frozen: false,
-            pinned: !pinned ? undefined : toPinnedFilter(pinned),
-          } as FilterConditionOptionParsed;
-        }
-        else {
-
-          const pinned = gr.key.pinned;
-
-          return {
-            token: gr.key.token ? completer.get(gr.key.token.tokenString) : null,
-            groupOperation: gr.key.groupOperation!,
-            filters: toFilterList(gr.elements, indent + 1),
-            value: gr.key.valueString,
-            frozen: false,
-            pinned: !pinned ? undefined : toPinnedFilter(pinned),
-          } as FilterGroupOptionParsed;
-        }
-      });
-
-      function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
-        return {
-          label: pinned.label || undefined,
-          column: pinned.column || undefined,
-          row: pinned.row || undefined,
-          disableOnNull: pinned.disableOnNull || undefined,
-          splitText: pinned.splitText || undefined,
-        };
-      }
-    }
-
-    return toFilterList(allFilters.map(a => a.element), 0);
-  }
-
-  render() {
-    return (
-      <div>
-        {
-          this.state.queryDescription != null &&
-          <FilterBuilder
-            title={this.props.ctx.niceName()}
-            queryDescription={this.state.queryDescription}
-            filterOptions={this.state.filterOptions || []}
-            subTokensOptions={this.props.subTokenOptions}
-            readOnly={this.props.ctx.readOnly}
-            onFiltersChanged={this.handleFiltersChanged}
-            renderValue={this.handleRenderValue}
-            showPinnedFilters={this.props.showUserFilters} />
-        }
-      </div>
-    );
-  }
-
-  handleFiltersChanged = () => {
-
-    var ctx = this.props.ctx;
+  const forceUpdate = useForceUpdate();
+  
+  function handleFiltersChanged() {
+    var ctx = p.ctx;
 
     ctx.value.clear();
 
@@ -160,7 +57,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
             fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKey(v) :
               toStringValue(v, fo.token!.filterType))
             .join("|");
-        } 
+        }
 
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
@@ -172,33 +69,32 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
       }
 
       function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
-            return PinnedQueryFilterEmbedded.New({
-                label: pinned.label,
-                column: pinned.column,
-                row: pinned.row,
-                disableOnNull: pinned.disableOnNull,
-                splitText: pinned.splitText,
-            });
-        }
+        return PinnedQueryFilterEmbedded.New({
+          label: pinned.label,
+          column: pinned.column,
+          row: pinned.row,
+          active: pinned.active,
+          splitText: pinned.splitText,
+        });
+      }
     }
 
-    this.state.filterOptions!.forEach(fo => pushFilter(fo, 0))
+    filterOptions!.forEach(fo => pushFilter(fo, 0))
 
     ctx.binding.setValue(ctx.value); //force change
 
-    if (this.props.onChanged)
-      this.props.onChanged();
+    if (p.onChanged)
+      p.onChanged();
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  handleRenderValue = (fc: FilterConditionComponent | FilterGroupComponent) => {
+  function handleRenderValue(fc: RenderValueContext) {
+    if (isFilterGroupOptionParsed(fc.filter)) {
 
-    if (fc instanceof FilterGroupComponent) {
+      const f = fc.filter;
 
-      const f = fc.props.filterGroup;
-
-      const readOnly = fc.props.readOnly || f.frozen;
+      const readOnly = fc.readonly || f.frozen;
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
@@ -206,22 +102,21 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
     } else {
 
-      const f = fc.props.filter;
+      const f = fc.filter
 
-      const readOnly = fc.props.readOnly || f.frozen;
+      const readOnly = fc.readonly || f.frozen;
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
       if (isList(f.operation!))
-        return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => this.handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
+        return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
 
-      return this.handleCreateAppropiateControl(ctx, fc, () => { });
+      return handleCreateAppropiateControl(ctx, fc, () => { });
     }
   }
 
-  handleCreateAppropiateControl = (ctx: TypeContext<any>, fc: FilterConditionComponent, onChange: () => void): React.ReactElement<any> => {
-
-    const token = fc.props.filter.token!;
+  function handleCreateAppropiateControl(ctx: TypeContext<any>, fc: RenderValueContext, onChange: () => void) : React.ReactElement<any> {
+    const token = fc.filter.token!;
 
     switch (token.filterType) {
       case "Lite":
@@ -232,8 +127,78 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
     }
   }
+  return (
+    <div>
+      {
+        qd != null &&
+        <FilterBuilder
+          title={p.ctx.niceName()}
+          queryDescription={qd}
+          filterOptions={filterOptions ?? []}
+          subTokensOptions={p.subTokenOptions}
+          readOnly={p.ctx.readOnly}
+          onFiltersChanged={handleFiltersChanged}
+          renderValue={handleRenderValue}
+          showPinnedFilters={p.showUserFilters} />
+      }
+    </div>
+  );
 }
 
+FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
+  const completer = new TokenCompleter(qd);
+
+  allFilters.forEach(mle => {
+    if (mle.element.token && mle.element.token.tokenString)
+      completer.request(mle.element.token.tokenString, subTokenOptions);
+  });
+
+  await completer.finished();
+
+  function toFilterList(filters: QueryFilterEmbedded[], indent: number): FilterOptionParsed[] {
+    return filters.groupWhen(f => f.indentation == indent).map(gr => {
+      if (!gr.key.isGroup) {
+        if (gr.elements.length != 0)
+          throw new Error("Unexpected childrens of condition");
+
+        const pinned = gr.key.pinned;
+
+        return {
+          token: completer.get(gr.key.token!.tokenString),
+          operation: gr.key.operation,
+          value: gr.key.valueString,
+          frozen: false,
+          pinned: !pinned ? undefined : toPinnedFilter(pinned),
+        } as FilterConditionOptionParsed;
+      }
+      else {
+
+        const pinned = gr.key.pinned;
+
+        return {
+          token: gr.key.token ? completer.get(gr.key.token.tokenString) : null,
+          groupOperation: gr.key.groupOperation!,
+          filters: toFilterList(gr.elements, indent + 1),
+          value: gr.key.valueString,
+          frozen: false,
+          pinned: !pinned ? undefined : toPinnedFilter(pinned),
+        } as FilterGroupOptionParsed;
+      }
+    });
+
+    function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
+      return {
+        label: pinned.label ?? undefined,
+        column: pinned.column ?? undefined,
+        row: pinned.row ?? undefined,
+        active: pinned.active || undefined,
+        splitText: pinned.splitText || undefined,
+      };
+    }
+  }
+
+  return toFilterList(allFilters.map(a => a.element), 0);
+}
 
 interface MultiLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
@@ -241,31 +206,21 @@ interface MultiLineOrExpressionProps {
   onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
 }
 
-export class MultiLineOrExpression extends React.Component<MultiLineOrExpressionProps, { values: string[] }> {
+export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
 
-  constructor(props: MultiLineOrExpressionProps) {
-    super(props);
-    this.state = {
-      values: (props.ctx.value || "").split("|")
-    }
+  const [values, setValues] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    setValues((p.ctx.value ?? "").split("|"));
+  }, [p.ctx.value]);
+
+  const handleChangeValue = () => {
+    p.ctx.value = values.join("|");
+    if (p.onChange)
+      p.onChange();
   }
 
-  componentWillReceiveProps(newProps: MultiLineOrExpressionProps) {
-    if (this.props.ctx.value != newProps.ctx.value)
-      this.setState({ values: (newProps.ctx.value || "").split("|") });
-  }
-
-
-  render() {
-
-    const handleChangeValue = () => {
-      this.props.ctx.value = this.state.values.join("|");
-      if (this.props.onChange)
-        this.props.onChange();
-    }
-
-    return <MultiValue values={this.state.values} onChange={handleChangeValue} readOnly={this.props.ctx.readOnly} onRenderItem={ctx => this.props.onRenderItem(ctx, handleChangeValue)} />;
-  }
+  return <MultiValue values={values} onChange={handleChangeValue} readOnly={p.ctx.readOnly} onRenderItem={ctx => p.onRenderItem(ctx, handleChangeValue)} />;
 }
 
 interface EntityLineOrExpressionProps {
@@ -275,75 +230,58 @@ interface EntityLineOrExpressionProps {
   filterType: FilterType;
 }
 
-export class EntityLineOrExpression extends React.Component<EntityLineOrExpressionProps, { lite: Lite<Entity> | null | undefined }> {
+export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
-  constructor(props: EntityLineOrExpressionProps) {
-    super(props);
-    this.state = {
-      lite: undefined
-    }
-  }
+  const forceUpdate = useForceUpdate();
 
-  componentWillMount() {
-    this.load(this.props);
-  }
+  const liteRef = React.useRef<Lite<Entity> | null | undefined>(undefined);
 
-  componentWillReceiveProps(newProps: EntityLineOrExpressionProps) {
-    if (this.props.ctx.value != newProps.ctx.value)
-      this.load(newProps);
-  }
-
-  load(props: EntityLineOrExpressionProps) {
-
-    var lite = props.ctx.value == null ? null :
-      props.ctx.value.contains(";") ? parseLite(props.ctx.value) :
+  React.useEffect(() => {
+    var lite = p.ctx.value == null ? null :
+      p.ctx.value.contains(";") ? parseLite(p.ctx.value) :
         undefined;
 
-    this.setState({ lite: lite });
+    liteRef.current = lite;
 
     if (lite != null) {
       Navigator.API.fillToStrings(lite)
-        .then(() => this.forceUpdate())
+        .then(() => forceUpdate())
         .done();
     }
-  }
+  }, [p.ctx.value]);
 
-  render() {
-
-    if (this.state.lite === undefined)
-      return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={() => this.getSwitchModelButton(false)} />;
-
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: this.props.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(this.state, a => a.lite));
-
-    const handleChangeValue = () => {
-      this.props.ctx.value = ctx.value ? liteKey(ctx.value) : null;
-      if (this.props.onChange)
-        this.props.onChange();
-
-    }
-
-    const type = this.props.type;
-
-    if (this.props.filterType == "Lite") {
-      if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
-      else
-        return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
-    }
-    else if (this.props.filterType == "Embedded") {
-      return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
-    }
-    else
-      throw new Error("Unexpected Filter Type");
-  }
-
-  getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
+  function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
-      onClick={e => { e.preventDefault(); this.setState({ lite: isValue ? undefined : null }); }}
+      onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
       <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
     </a>)
   }
+
+  if (liteRef.current === undefined)
+    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
+
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(liteRef, a => a.current));
+
+  const handleChangeValue = () => {
+    p.ctx.value = ctx.value ? liteKey(ctx.value) : null;
+    if (p.onChange)
+      p.onChange();
+  }
+
+  const type = p.type;
+
+  if (p.filterType == "Lite") {
+    if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    else
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+  }
+  else if (p.filterType == "Embedded") {
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+  }
+  else
+    throw new Error("Unexpected Filter Type");
 }
 
 
@@ -356,74 +294,56 @@ interface ValueLineOrExpressionProps {
   filterType?: FilterType;
 }
 
-export class ValueLineOrExpression extends React.Component<ValueLineOrExpressionProps, { value: string | number | boolean | null | undefined }> {
+export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
 
-  constructor(props: ValueLineOrExpressionProps) {
-    super(props);
-    this.state = {
-      value: undefined
-    };
-  }
+  const foceUpdate = useForceUpdate();
+  const valueRef = React.useRef<string | number | boolean | null | undefined>(undefined);
 
-  componentWillMount() {
-    this.load(this.props);
-  }
+  React.useEffect(() => {
+    valueRef.current = parseValue(p.ctx.value, p.filterType)
+  }, [p.ctx.value, p.filterType]);
 
-  componentWillReceiveProps(newProps: ValueLineOrExpressionProps) {
-    if (this.props.ctx.value != newProps.ctx.value)
-      this.load(newProps);
-  }
 
-  load(props: ValueLineOrExpressionProps) {
-
-    var value = parseValue(props.ctx.value, props.filterType);
-
-    this.setState({ value: value });
-  }
-
-  render() {
-
-    if (this.state.value === undefined)
-      return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={() => this.getSwitchModelButton(false)} />;
-
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: this.props.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(this.state, a => a.value));
-
-    const handleChangeValue = () => {
-      this.props.ctx.value = toStringValue(ctx.value, this.props.filterType);
-      if (this.props.onChange)
-        this.props.onChange();
-    }
-
-    const type = this.props.type;
-
-    if (this.props.filterType == "Enum") {
-      const ti = getTypeInfos(type).single();
-      if (!ti)
-        throw new Error(`EnumType ${type.name} not found`);
-      const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={type} formatText={this.props.formatText} unitText={this.props.unitText} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} comboBoxItems={members} />;
-    } else {
-      return <ValueLine ctx={ctx} type={type} formatText={this.props.formatText} unitText={this.props.unitText} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
-    }
-  }
-
-  getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
+  function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
     return (
       <a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
         onClick={e => {
           e.preventDefault();
-          if (this.props.filterType == "DateTime")
-            this.props.ctx.value = "yyyy/mm/dd hh:mm:ss";
+          if (p.filterType == "DateTime")
+            p.ctx.value = "yyyy/mm/dd hh:mm:ss";
 
-          if (this.props.filterType == "Lite")
-            this.props.ctx.value = "[CurrentEntity]";
+          if (p.filterType == "Lite")
+            p.ctx.value = "[CurrentEntity]";
 
-          this.setState({ value: isValue ? undefined : null });
+          valueRef.current = isValue ? undefined : null;
+          foceUpdate();
         }}
         title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
         <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
       </a>
     );
+  }
+  if (valueRef.current === undefined)
+    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
+
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(valueRef, a => a.current));
+
+  const handleChangeValue = () => {
+    p.ctx.value = toStringValue(ctx.value, p.filterType);
+    if (p.onChange)
+      p.onChange();
+  }
+
+  const type = p.type;
+
+  if (p.filterType == "Enum") {
+    const ti = getTypeInfos(type).single();
+    if (!ti)
+      throw new Error(`EnumType ${type.name} not found`);
+    const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
+    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} comboBoxItems={members} />;
+  } else {
+    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
   }
 }
 

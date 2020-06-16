@@ -45,7 +45,7 @@ namespace Signum.React.Selenium
 
             string changes = GetChanges();
 
-            var popup = this.CreateButton.Find().CaptureOnClick();
+            var popup = this.CreateButton.WaitVisible().CaptureOnClick();
 
             popup = ChooseTypeCapture(typeof(T), popup);
 
@@ -88,7 +88,7 @@ namespace Signum.React.Selenium
             WaitChanges(() => this.RemoveButton.Find().Click(), "removing");
         }
 
-        public SearchModalProxy Find(Type selectType = null)
+        public SearchModalProxy Find(Type? selectType = null)
         {
             string changes = GetChanges();
             var popup = FindButton.Find().CaptureOnClick();
@@ -112,7 +112,7 @@ namespace Signum.React.Selenium
             SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType));
         }
 
-        private IWebElement ChooseTypeCapture(Type selectType, IWebElement element)
+        private IWebElement ChooseTypeCapture(Type? selectType, IWebElement element)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return element;
@@ -121,7 +121,7 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("No type to choose from selected");
 
             var newElement = element.GetDriver().CapturePopup(() =>
-                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType)));
+                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType!)));
 
             return newElement;
         }
@@ -145,30 +145,40 @@ namespace Signum.React.Selenium
             return this.Element.GetAttribute("data-changes");
         }
 
-        protected EntityInfoProxy EntityInfoInternal(int? index)
+        public void WaitEntityInfoChanges(Action action, string actionDescription, int? index = null)
+        {
+            var entityInfo = EntityInfoString(index);
+
+            action();
+
+            Element.GetDriver().Wait(() => entityInfo != EntityInfoString(index), 
+                () => "Waiting for entity info changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
+        }
+
+        protected string EntityInfoString(int? index)
         {
             var element = index == null ? Element :
                 this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
-            return EntityInfoProxy.Parse(element.GetAttribute("data-entity"));
+            return element.GetAttribute("data-entity");
         }
 
-        public void AutoCompleteWaitChanges(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        protected EntityInfoProxy? EntityInfoInternal(int? index) => EntityInfoProxy.Parse(EntityInfoString(index));
+
+        public void AutoCompleteWaitChanges(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
-                AutoCompleteBasic(autoCompleteElement, lite);
+                AutoCompleteBasic(input, container, lite);
 
             }, "autocomplete selection");
         }
-        public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
+
+        public static void AutoCompleteBasic(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
-            autoCompleteElement.SafeSendKeys("id:" + lite.Id.ToString());
-            //Selenium.FireEvent(autoCompleteLocator, "keyup");
+            input.SafeSendKeys("id:" + lite.Id.ToString());
 
-            var listLocator = By.CssSelector(".typeahead.dropdown-menu");
-
-            var list = autoCompleteElement.GetParent().WaitElementVisible(By.TagName("div")).WaitElementVisible(listLocator);
+            var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
 
             itemElement.Click();
@@ -184,32 +194,34 @@ namespace Signum.React.Selenium
         public Type EntityType;
         public PrimaryKey? IdOrNull { get; set; }
 
-
-        public Lite<Entity> ToLite(string toString = null)
+        public EntityInfoProxy(string dataEntity)
         {
-            return Lite.Create(this.EntityType, this.IdOrNull.Value, toString);
-        }
-
-        public static EntityInfoProxy Parse(string dataEntity)
-        {
-            if (dataEntity == "null" || dataEntity == "undefined")
-                return null;
-
             var parts = dataEntity.Split(';');
 
             var typeName = parts[0];
             var id = parts[1];
             var isNew = parts[2];
 
-            var type = TypeLogic.TryGetType(typeName);
+            var type = TypeLogic.GetType(typeName);
 
-            return new EntityInfoProxy
-            {
-                TypeName = typeName,
-                EntityType = type,
-                IdOrNull = id.HasText() ? PrimaryKey.Parse(id, type) : (PrimaryKey?)null,
-                IsNew = isNew.HasText() && bool.Parse(isNew)
-            };
+            this.TypeName = typeName;
+            this.EntityType = type;
+            this.IdOrNull = id.HasText() ? PrimaryKey.Parse(id, type) : (PrimaryKey?)null;
+            this.IsNew = isNew.HasText() && bool.Parse(isNew);
+        }
+
+
+        public Lite<Entity> ToLite(string? toString = null)
+        {
+            return Lite.Create(this.EntityType, this.IdOrNull!.Value, toString);
+        }
+
+        public static EntityInfoProxy? Parse(string dataEntity)
+        {
+            if (dataEntity == "null" || dataEntity == "undefined")
+                return null;
+
+            return new EntityInfoProxy(dataEntity);
         }
     }
 }

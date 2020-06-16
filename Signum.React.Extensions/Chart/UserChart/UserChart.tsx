@@ -10,47 +10,46 @@ import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
+import { useForceUpdate } from '@framework/Hooks'
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }> {
+export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
+  const forceUpdate = useForceUpdate();
+  const ctx = p.ctx;
+  const entity = ctx.value;
+  const queryKey = entity.query!.key;
 
-  render() {
-    const ctx = this.props.ctx;
-    const entity = ctx.value;
-    const queryKey = entity.query!.key;
-
-    return (
-      <div>
-        <EntityLine ctx={ctx.subCtx(e => e.owner)} />
-        <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
-        <FormGroup ctx={ctx.subCtx(e => e.query)}>
-          {
-            Finder.isFindable(queryKey, true) ?
-              <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
-              <span>{getQueryNiceName(queryKey)}</span>
-          }
-        </FormGroup>
-        <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => this.forceUpdate()} />
+  return (
+    <div>
+      <EntityLine ctx={ctx.subCtx(e => e.owner)} />
+      <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
+      <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {
-          entity.entityType &&
-          <div>
-            <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
-            <p className="messageEntity col-sm-offset-2">
-              {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-            </p>
-          </div>
+          Finder.isFindable(queryKey, true) ?
+            <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
+            <span>{getQueryNiceName(queryKey)}</span>
         }
-        <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={this.props.ctx.value.query.key}
-          subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
-          showUserFilters={true}
-        />
-        <ChartBuilder queryKey={queryKey} ctx={this.props.ctx}
-            onInvalidate={() => this.forceUpdate()} 
-            onTokenChange={() =>  this.forceUpdate()} 
-            onRedraw={() => this.forceUpdate()} 
-            onOrderChanged={() => this.forceUpdate()} />
-      </div>
-    );
-  }
+      </FormGroup>
+      <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()} />
+      {
+        entity.entityType &&
+        <div>
+          <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
+          <p className="messageEntity col-sm-offset-2">
+            {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
+          </p>
+        </div>
+      }
+      <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
+        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+        showUserFilters={true}
+      />
+      <ChartBuilder queryKey={queryKey} ctx={p.ctx}
+          onInvalidate={() => forceUpdate()} 
+          onTokenChange={() =>  forceUpdate()} 
+          onRedraw={() => forceUpdate()} 
+          onOrderChanged={() => forceUpdate()} />
+    </div>
+  );
 }
 

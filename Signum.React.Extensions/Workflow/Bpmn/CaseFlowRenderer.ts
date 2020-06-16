@@ -1,13 +1,12 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as moment from 'moment'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
-import { CaseFlow, CaseActivityStats } from '../WorkflowClient'
+import { CaseFlow, CaseActivityStats, durationFormat } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
-import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
@@ -161,13 +160,13 @@ export class CaseFlowRenderer extends CustomRenderer {
 
 function getDoneColor(doneType: DoneType) {
   switch (doneType) {
-    case "Jump": return "#ff7504";
+    case "Jump": return "blue";
     case "Timeout": return "gold";
     case "ScriptSuccess": return "green";
     case "ScriptFailure": return "violet";
     case "Approve": return "darkgreen";
     case "Decline": return "darkred";
-    case "Next": return "blue";
+    case "Next": return "#ff7504";
     default: return "magenta";
   }
 }
@@ -195,7 +194,7 @@ function formatDuration(minutes: number | undefined) {
   if (minutes == undefined)
     return "";
 
-  return moment.duration(minutes, "minutes").format("d[d] h[h] m[m] s[s]");
+  return durationFormat(moment.duration(minutes, "minutes"));
 }
 
 export const __init__ = ['caseFlowRenderer'];

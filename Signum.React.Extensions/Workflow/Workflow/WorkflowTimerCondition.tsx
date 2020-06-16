@@ -56,7 +56,7 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
             <div className="col-sm-7">
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(CaseActivityEntity ca, " + ctx.value.mainEntityType.cleanName + "Entity e, DateTime now)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
             </div>

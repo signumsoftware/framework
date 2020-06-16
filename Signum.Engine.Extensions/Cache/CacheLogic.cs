@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.IO;
 using System.Data;
 using Signum.Engine.Scheduler;
+using System.Runtime.InteropServices;
 
 namespace Signum.Engine.Cache
 {
@@ -33,7 +34,7 @@ namespace Signum.Engine.Cache
 
     public static class CacheLogic
     {
-        public static ICacheMultiServerInvalidator CacheInvalidator;
+        public static ICacheMultiServerInvalidator? CacheInvalidator;
 
         public static bool WithSqlDependency { get; internal set; }
 
@@ -48,7 +49,7 @@ namespace Signum.Engine.Cache
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null, null)));
         }
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace Signum.Engine.Cache
         ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
         ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
         /// </summary>
-        public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, ICacheMultiServerInvalidator cacheInvalidator = null)
+        public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, ICacheMultiServerInvalidator? cacheInvalidator = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -77,7 +78,7 @@ namespace Signum.Engine.Cache
                 CacheInvalidator = cacheInvalidator;
                 if(CacheInvalidator != null)
                 {
-                    CacheInvalidator.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
+                    CacheInvalidator!.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
                 }
 
                 sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
@@ -114,16 +115,16 @@ namespace Signum.Engine.Cache
 
         static void CacheInvalidator_ReceiveInvalidation(string tableName)
         {
-            Type type = TypeEntity.TryGetType(tableName);
+            Type type = TypeEntity.TryGetType(tableName)!;
 
-            var c = controllers.GetOrThrow(type);
+            var c = controllers.GetOrThrow(type)!;
 
             c.CachedTable.ResetAll(forceReset: false);
 
             c.NotifyInvalidated();
         }
 
-        public static TextWriter LogWriter;
+        public static TextWriter? LogWriter;
         public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, Type type, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
         {
             if (!WithSqlDependency)
@@ -156,7 +157,7 @@ namespace Signum.Engine.Cache
                 }
             };
 
-            SimpleReader reader = null;
+            SimpleReader? reader = null;
 
             Expression<Func<IProjectionRow, T>> projectorExpression = (Expression<Func<IProjectionRow, T>>)tr.GetMainProjector();
             Func<IProjectionRow, T> projector = projectorExpression.Compile();
@@ -166,7 +167,7 @@ namespace Signum.Engine.Cache
             CacheLogic.AssertSqlDependencyStarted();
 
             Table table = Schema.Current.Table(type);
-            DatabaseName db = table.Name.Schema?.Database;
+            DatabaseName? db = table.Name.Schema?.Database;
 
             SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
 
@@ -234,6 +235,7 @@ namespace Signum.Engine.Cache
             }
 
             public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
+                where K : notnull
             {
                 throw new InvalidOperationException("Subqueries can not be used on simple queries");
             }
@@ -401,11 +403,14 @@ namespace Signum.Engine.Cache
             if (registered)
                 return;
 
-            SafeConsole.SetConsoleCtrlHandler(ct =>
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Shutdown();
-                return true;
-            }, true);
+                SafeConsole.SetConsoleCtrlHandler(ct =>
+                {
+                    Shutdown();
+                    return true;
+                }, true);
+            }
 
             AppDomain.CurrentDomain.DomainUnload += (o, a) => Shutdown();
 
@@ -435,7 +440,7 @@ namespace Signum.Engine.Cache
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
                 where T : Entity
         {
-            public CachedTable<T> cachedTable;
+            public CachedTable<T> cachedTable = null!;
             public CachedTableBase CachedTable { get { return cachedTable; } }
 
             public CacheController(Schema schema)
@@ -492,7 +497,7 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("Cache for {0} is not enabled".FormatWith(typeof(T).TypeName()));
             }
 
-            public event EventHandler<CacheEventArgs> Invalidated;
+            public event EventHandler<CacheEventArgs>? Invalidated;
 
             public void OnChange(object sender, SqlNotificationEventArgs args)
             {
@@ -525,11 +530,11 @@ namespace Signum.Engine.Cache
                 return cachedTable.GetToString(id);
             }
 
-            public override string TryGetToString(PrimaryKey id)
+            public override string? TryGetToString(PrimaryKey?/*CSBUG*/ id)
             {
                 AssertEnabled();
 
-                return cachedTable.TryGetToString(id);
+                return cachedTable.TryGetToString(id.Value)!;
             }
 
             public override void Complete(T entity, IRetriever retriver)
@@ -548,15 +553,17 @@ namespace Signum.Engine.Cache
             {
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
-
-            public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
+#pragma warning disable CS8631
+            public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             {
+               // throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
                 var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
 
                 var ids = dic.TryGetC(lite.Id).EmptyIfNull();
 
-                return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))).ToList();
+                return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
+#pragma warning restore CS8631
 
             public Type Type
             {
@@ -567,7 +574,7 @@ namespace Signum.Engine.Cache
         public static IEnumerable<Type> SemiControllers { get { return controllers.Where(a=>a.Value == null).Select(a=>a.Key); } }
 
         internal static Dictionary<Type, List<CachedTableBase>> semiControllers = new Dictionary<Type, List<CachedTableBase>>();
-        static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
+        static Dictionary<Type, ICacheLogicController?> controllers = new Dictionary<Type, ICacheLogicController?>(); //CachePack
 
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
         static DirectedGraph<Type> dependencies = new DirectedGraph<Type>();
@@ -594,7 +601,7 @@ namespace Signum.Engine.Cache
             if (!Transaction.HasTransaction)
                 return false;
 
-            HashSet<Type> disabledTypes = Transaction.TopParentUserData().TryGetC(DisabledCachesKey) as HashSet<Type>;
+            HashSet<Type>? disabledTypes = Transaction.TopParentUserData().TryGetC(DisabledCachesKey) as HashSet<Type>;
 
             return disabledTypes != null && disabledTypes.Contains(type);
         }
@@ -602,10 +609,8 @@ namespace Signum.Engine.Cache
         internal static void DisableTypeInTransaction(Type type)
         {
             DisabledTypesDuringTransaction().Add(type);
-
-
-
-            controllers[type].NotifyDisabled();
+            
+            controllers[type]!.NotifyDisabled();
         }
 
         internal static void DisableAllConnectedTypesInTransaction(Type type)
@@ -715,8 +720,10 @@ Remember that the Start could be called with an empty database!");
                 if (controller != null)
                     controller.NotifyInvalidated();
 
-                if (CacheInvalidator != null)
-                    CacheInvalidator.SendInvalidation(TypeLogic.GetCleanName(stype));
+                var ci = CacheInvalidator;
+
+                if (ci != null)
+                    ci.SendInvalidation(TypeLogic.GetCleanName(stype));
             }
         }
 
@@ -730,7 +737,7 @@ Remember that the Start could be called with an empty database!");
             if (!type.IsEntity())
                 throw new ArgumentException("type should be an Entity");
 
-            if (!controllers.TryGetValue(type, out ICacheLogicController controller))
+            if (!controllers.TryGetValue(type, out ICacheLogicController? controller))
                 return CacheType.None;
 
             if (controller == null)
@@ -741,7 +748,7 @@ Remember that the Start could be called with an empty database!");
 
         public static CachedTableBase GetCachedTable(Type type)
         {
-            return controllers.GetOrThrow(type).CachedTable;
+            return controllers.GetOrThrow(type)!.CachedTable;
         }
 
         public static void ForceReset()
@@ -835,7 +842,7 @@ Remember that the Start could be called with an empty database!");
                 else
                 {
                     foreach (var t in invalidateWith.Types)
-                        sb.Schema.CacheController(t).Load();
+                        sb.Schema.CacheController(t)!.Load();
                 }
             }
         }
@@ -849,7 +856,7 @@ Remember that the Start could be called with an empty database!");
         }
 
 
-        internal static ThreadVariable<Dictionary<Type, bool>> assumeMassiveChangesAsInvalidations = Statics.ThreadVariable<Dictionary<Type, bool>>("assumeMassiveChangesAsInvalidations");
+        internal static ThreadVariable<Dictionary<Type, bool>?> assumeMassiveChangesAsInvalidations = Statics.ThreadVariable<Dictionary<Type, bool>?>("assumeMassiveChangesAsInvalidations");
 
         public static IDisposable AssumeMassiveChangesAsInvalidations<T>(bool assumeInvalidations) where T : Entity
         {
@@ -914,3 +921,5 @@ Remember that the Start could be called with an empty database!");
         None
     }
 }
+
+

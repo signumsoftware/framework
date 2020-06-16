@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Basics;
@@ -9,32 +9,23 @@ namespace Signum.Entities.Authorization
 {
     [Serializable]
     public class DefaultDictionary<K, A>
+        where K : notnull
     {
-        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A> overridesDictionary)
+        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A>? overridesDictionary)
         {
-            this.defaultAllowed = defaultAllowed;
-            this.overrideDictionary = overridesDictionary;
+            this.DefaultAllowed = defaultAllowed;
+            this.OverrideDictionary = overridesDictionary;
         }
 
-        readonly Dictionary<K, A> overrideDictionary;
-        readonly Func<K, A> defaultAllowed;
+        public Dictionary<K, A>? OverrideDictionary { get; private set; }
+        public Func<K, A> DefaultAllowed { get; private set; }
 
         public A GetAllowed(K key)
         {
-            if (overrideDictionary != null && overrideDictionary.TryGetValue(key, out A result))
+            if (OverrideDictionary != null && OverrideDictionary.TryGetValue(key, out A result))
                 return result;
 
-            return defaultAllowed(key);
-        }
-
-        public Dictionary<K, A> OverrideDictionary
-        {
-            get { return overrideDictionary; }
-        }
-
-        public Func<K, A> DefaultAllowed
-        {
-            get { return defaultAllowed; }
+            return DefaultAllowed(key);
         }
     }
 
@@ -85,7 +76,7 @@ namespace Signum.Entities.Authorization
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class BaseRulePack<T> : ModelEntity
     {
-        [NotNullValidator]
+        
         public Lite<RoleEntity> Role { get; internal set; }
 
         [HiddenProperty]
@@ -94,7 +85,6 @@ namespace Signum.Entities.Authorization
         [HiddenProperty]
         public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
 
-        [NotNullValidator]
         public string Strategy
         {
             get
@@ -105,14 +95,15 @@ namespace Signum.Entities.Authorization
                     SubRoles.CommaAnd());
             }
         }
-
-
-        [NotNullValidator]
+        
+        
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
+        where R : notnull
+        where A : notnull
     {
         A allowedBase;
         [InTypeScript(Null = false)]
@@ -213,16 +204,11 @@ namespace Signum.Entities.Authorization
 
         public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
 
+        public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
         public bool Equals(TypeAllowedAndConditions other)
         {
             return this.fallback.Equals(other.fallback) &&
                 this.Conditions.SequenceEqual(other.Conditions);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as TypeAllowedAndConditions;
-            return other != null && Equals(other);
         }
 
         public override int GetHashCode()
@@ -255,7 +241,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback!.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Min());
         }
 
         public TypeAllowedBasic MaxUI()
@@ -263,7 +249,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback!.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Max());
         }
 
         public TypeAllowedBasic MinDB()
@@ -271,7 +257,7 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback!.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Min());
         }
 
         public TypeAllowedBasic MaxDB()
@@ -279,13 +265,13 @@ namespace Signum.Entities.Authorization
             if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback!.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Max());
         }
 
         public override string ToString()
         {
             if (Conditions.IsEmpty())
-                return Fallback.ToString();
+                return Fallback.ToString()!;
 
             return "{0} | {1}".FormatWith(Fallback, Conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
         }
@@ -328,6 +314,8 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
+        where R : notnull
+        where A : notnull
     {
         public A[] CoercedValues { get; internal set; }
     }
@@ -335,7 +323,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()
@@ -352,7 +340,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class QueryRulePack : BaseRulePack<QueryAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()
@@ -367,7 +355,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class OperationRulePack : BaseRulePack<OperationAllowedRule>
     {
-        [NotNullValidator]
+        
         public TypeEntity Type { get; internal set; }
 
         public override string ToString()

@@ -1,10 +1,11 @@
 import * as React from 'react'
+import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
@@ -23,15 +24,32 @@ import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Bas
 
 
 import "./AuthAdmin.css"
-import { Button } from '@framework/Components';
 import { is } from '@framework/Signum.Entities';
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
+export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
-  state = { filter: "" };
+  const [filter, setFilter] = React.useState("");
 
-  handleSaveClick = (bc: ButtonsContext) => {
-    let pack = this.props.ctx.value;
+  function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
+
+    GraphExplorer.propagateAll(bc.pack.entity);
+
+    const hasChanges = bc.pack.entity.modified;
+
+    return [
+      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+    ];
+  }
+
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+  const forceUpdate = useForceUpdate();
+
+
+  function handleSaveClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
     API.saveTypeRulePack(pack)
       .then(() => API.fetchTypeRulePack(pack.role.id!))
@@ -42,8 +60,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
       .done();
   }
 
-  handleResetChangesClick = (bc: ButtonsContext) => {
-    let pack = this.props.ctx.value;
+  function handleResetChangesClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
     API.fetchTypeRulePack(pack.role.id!)
       .then(newPack => {
@@ -52,8 +70,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
       .done();
   }
 
-  handleSwitchToClick = (bc: ButtonsContext) => {
-    let pack = this.props.ctx.value;
+  function handleSwitchToClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
     Finder.find(RoleEntity).then(r => {
       if (!r)
@@ -65,131 +83,113 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     });
   }
 
-  updateFrame() {
-    this.props.ctx.frame!.frameComponent.forceUpdate();
+
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
   }
 
-  renderButtons(bc: ButtonsContext): ButtonBarElement[] {
 
-    GraphExplorer.propagateAll(bc.pack.entity);
+  function handleSetFilter(e: React.FormEvent<any>) {
+    setFilter((e.currentTarget as HTMLInputElement).value);
+  }
 
-    const hasChanges = bc.pack.entity.modified;
+  const parts = filter.match(/[+-]?((!?\w+)|\*)/g);
 
-    return [
-      { button: <Button color="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> },
-      { button: <Button color="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
-      { button: <Button color="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+  function isMatch(rule: TypeAllowedRule): boolean {
+
+    if (!parts || parts.length == 0)
+      return true;
+
+    const array = [
+      rule.resource.namespace,
+      rule.resource.cleanName,
+      getTypeInfo(rule.resource.cleanName).niceName
     ];
-  }
-
-  handleSetFilter = (e: React.FormEvent<any>) => {
-    this.setState({
-      filter: (e.currentTarget as HTMLInputElement).value
-    });
-  }
-
-  render() {
-    const parts = this.state.filter.match(/[+-]?((!?\w+)|\*)/g);
-
-    const isMatch = (rule: TypeAllowedRule): boolean => {
-
-      if (!parts || parts.length == 0)
-        return true;
-
-      const array = [
-        rule.resource.namespace,
-        rule.resource.cleanName,
-        getTypeInfo(rule.resource.cleanName).niceName
-      ];
 
 
-      const str = array.join("|");
+    const str = array.join("|");
 
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const p = parts[i];
-        const pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
-          p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
-            { isPositive: true, token: p };
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      const pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
+        p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
+          { isPositive: true, token: p };
 
-        if (pair.token == "*")
+      if (pair.token == "*")
+        return pair.isPositive;
+
+      if (pair.token.startsWith("!")) {
+        if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
           return pair.isPositive;
 
-        if (pair.token.startsWith("!")) {
-          if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
-            return pair.isPositive;
-
-          if ("conditions".startsWith(pair.token.after("!")) && rule.allowed.conditions.length)
-            return pair.isPositive;
-        }
-
-        if (str.toLowerCase().contains(pair.token.toLowerCase()))
+        if ("conditions".startsWith(pair.token.after("!")) && rule.allowed.conditions.length)
           return pair.isPositive;
       }
 
-      return false;
-    };
+      if (str.toLowerCase().contains(pair.token.toLowerCase()))
+        return pair.isPositive;
+    }
 
-    let ctx = this.props.ctx;
+    return false;
+  };
 
-    return (
-      <div>
-        <div className="form-compact">
-          <EntityLine ctx={ctx.subCtx(f => f.role)} />
-          <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
-        </div>
 
-        <table className="table table-sm sf-auth-rules">
-          <thead>
-            <tr>
-              <th>
-                <div style={{ marginBottom: "-2px" }}>
-                  <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
-                </div>
-              </th>
-
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Create")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Modify")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Read")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("None")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {AuthAdminMessage.Overriden.niceToString()}
-              </th>
-              {properties && <th style={{ textAlign: "center" }}>
-                {PropertyRouteEntity.niceName()}
-              </th>}
-              {operations && <th style={{ textAlign: "center" }}>
-                {OperationSymbol.niceName()}
-              </th>}
-              {queries && <th style={{ textAlign: "center" }}>
-                {QueryEntity.niceName()}
-              </th>}
-            </tr>
-          </thead>
-          <tbody>
-            {ctx.mlistItemCtxs(a => a.rules)
-              .filter((n, i) => isMatch(n.value))
-              .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
-                <tr key={gr.key} className="sf-auth-namespace">
-                  <td colSpan={10}><b>{gr.key}</b></td>
-                </tr>
-              ].concat(gr.elements.orderBy(a => a.value.resource.className).flatMap(c => this.renderType(c))))}
-          </tbody>
-        </table>
-
+  return (
+    <div>
+      <div className="form-compact">
+        <EntityLine ctx={ctx.subCtx(f => f.role)} />
+        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
-    );
-  }
 
-  handleAddConditionClick = (remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) => {
-    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") || a.toStr })
+      <table className="table table-sm sf-auth-rules">
+        <thead>
+          <tr>
+            <th>
+              <div style={{ marginBottom: "-2px" }}>
+                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={filter} onChange={handleSetFilter} />
+              </div>
+            </th>
+
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("Write")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("Read")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("None")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {AuthAdminMessage.Overriden.niceToString()}
+            </th>
+            {properties && <th style={{ textAlign: "center" }}>
+              {PropertyRouteEntity.niceName()}
+            </th>}
+            {operations && <th style={{ textAlign: "center" }}>
+              {OperationSymbol.niceName()}
+            </th>}
+            {queries && <th style={{ textAlign: "center" }}>
+              {QueryEntity.niceName()}
+            </th>}
+          </tr>
+        </thead>
+        <tbody>
+          {ctx.mlistItemCtxs(a => a.rules)
+            .filter((n, i) => isMatch(n.value))
+            .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
+              <tr key={gr.key} className="sf-auth-namespace">
+                <td colSpan={10}><b>{gr.key}</b></td>
+              </tr>
+            ].concat(gr.elements.orderBy(a => a.value.resource.className).flatMap(c => renderType(c))))}
+        </tbody>
+      </table>
+
+    </div>
+  );
+
+
+  function handleAddConditionClick(remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
+    SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") ?? a.toStr })
       .then(tc => {
         if (!tc)
           return;
@@ -199,35 +199,35 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
           allowed: "None"
         })));
 
-        this.updateFrame();
+        updateFrame();
       })
       .done();
   }
 
-  handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
+  function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) {
     taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
     taac.modified = true;
-    this.updateFrame();
+    updateFrame();
   }
 
-  renderType(ctx: TypeContext<TypeAllowedRule>) {
+  function renderType(tctx: TypeContext<TypeAllowedRule>) {
 
-    let roleId = this.props.ctx.value.role.id!;
+    let roleId = ctx.value.role.id!;
 
-    let used = ctx.value.allowed.conditions.map(mle => mle.element.typeCondition.id!);
+    let used = tctx.value.allowed.conditions.map(mle => mle.element.typeCondition.id!);
 
-    let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
+    let remaining = tctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
 
-    var typeInfo = getTypeInfo(ctx.value.resource.cleanName);
+    var typeInfo = getTypeInfo(tctx.value.resource.cleanName);
 
     var masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
 
-    let fallback = Binding.create(ctx.value.allowed, a => a.fallback);
+    let fallback = Binding.create(tctx.value.allowed, a => a.fallback);
     return [
-      <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className} className={classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
+      <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
         <td>
           {remaining.length > 0 ?
-            <span className="sf-condition-icon" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed)}>
+            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(remaining, tctx.value.allowed)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
@@ -235,75 +235,68 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
-          {this.colorRadio(fallback, "Create", "#0099FF")}
-        </td>
-        <td style={{ textAlign: "center" }} className={masterClass}>
-          {this.colorRadio(fallback, "Modify", "green")}
+          {colorRadio(fallback, "Write", "green")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {this.colorRadio(fallback, "Read", "#FFAD00")}
+          {colorRadio(fallback, "Read", "#FFAD00")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {this.colorRadio(fallback, "None", "red")}
+          {colorRadio(fallback, "None", "red")}
         </td>
         <td style={{ textAlign: "center" }}>
-          <GrayCheckbox checked={!typeAllowedEquals(ctx.value.allowed, ctx.value.allowedBase)} onUnchecked={() => {
-            ctx.value.allowed = JSON.parse(JSON.stringify(ctx.value.allowedBase));
-            ctx.value.modified = true;
-            this.updateFrame();
+          <GrayCheckbox checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
+            tctx.value.allowed = JSON.parse(JSON.stringify(tctx.value.allowedBase));
+            tctx.value.modified = true;
+            updateFrame();
           }} />
         </td>
         {properties && <td style={{ textAlign: "center" }}>
-          {this.link("edit", ctx.value.modified ? "Invalidated" : ctx.value.properties,
-            () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
-            m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
+          {link("edit", tctx.value.modified ? "Invalidated" : tctx.value.properties,
+            () => API.fetchPropertyRulePack(tctx.value.resource.cleanName, roleId),
+            m => tctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
+              m.rules.every(a => a.element.allowed == "Write") ? "All" : "Mix"
           )}
         </td>}
         {operations && <td style={{ textAlign: "center" }}>
-          {this.link("bolt", ctx.value.modified ? "Invalidated" : ctx.value.operations,
-            () => API.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
-            m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
+          {link("bolt", tctx.value.modified ? "Invalidated" : tctx.value.operations,
+            () => API.fetchOperationRulePack(tctx.value.resource.cleanName, roleId),
+            m => tctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
         {queries && <td style={{ textAlign: "center" }}>
-          {this.link("search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
-            () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
-            m => ctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
+          {link("search", tctx.value.modified ? "Invalidated" : tctx.value.queries,
+            () => API.fetchQueryRulePack(tctx.value.resource.cleanName, roleId),
+            m => tctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
       </tr>
-    ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map((c, i) => {
+    ].concat(tctx.value.allowed!.conditions!.map(mle => mle.element).map((c, i) => {
       let b = Binding.create(c, ca => ca.allowed);
       return (
-        <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className="sf-auth-condition" >
+        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + c.typeCondition.id} className="sf-auth-condition" >
           <td>
             {"\u00A0 \u00A0".repeat(i + 1)}
-            <span className="sf-condition-icon" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
+            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-                        <small>{c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr}</small>
+            <small>{c.typeCondition.toStr.tryAfter(".") ?? c.typeCondition.toStr}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
-            {this.colorRadio(b, "Create", "#0099FF")}
-          </td>
-          <td style={{ textAlign: "center" }} className={masterClass}>
-            {this.colorRadio(b, "Modify", "green")}
+            {colorRadio(b, "Write", "green")}
           </td>
           <td style={{ textAlign: "center" }}>
-            {this.colorRadio(b, "Read", "#FFAD00")}
+            {colorRadio(b, "Read", "#FFAD00")}
           </td>
           <td style={{ textAlign: "center" }}>
-            {this.colorRadio(b, "None", "red")}
+            {colorRadio(b, "None", "red")}
           </td>
           <td style={{ textAlign: "center" }}>
           </td>
         </tr>
       );
     }));
-
   }
 
-  colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
+  function colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
     const allowed = b.getValue();
 
     const niceName = TypeAllowedBasic.niceToString(basicAllowed)!;
@@ -314,29 +307,29 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
           getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
             niceName;
 
-    const icon = !allowed ? null :
-      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? null :
+    const icon: IconProp | undefined = !allowed ? undefined :
+      getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? undefined :
         getDB(allowed) == basicAllowed ? "database" :
           getUI(allowed) == basicAllowed ? "window-restore" :
-            null;
+            undefined;
 
     return <ColorRadio
       checked={isActive(allowed, basicAllowed)}
       title={title}
       color={color}
       icon={icon}
-      onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); this.updateFrame(); }}
+      onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); updateFrame(); }}
     />;
   }
 
-  link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
+  function link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
     if (!allowed)
       return undefined;
 
     let onClick = () => {
-      GraphExplorer.propagateAll(this.props.ctx.value);
+      GraphExplorer.propagateAll(ctx.value);
 
-      if (this.props.ctx.value.modified) {
+      if (ctx.value.modified) {
         MessageModal.show({
           title: NormalControlMessage.SaveChangesFirst.niceToString(),
           message: AuthAdminMessage.PleaseSaveChangesFirst.niceToString(),
@@ -351,7 +344,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
           .then(() => action())
           .then(m => {
             setNewValue(m);
-            this.updateFrame();
+            updateFrame();
           })
           .done();
       }
@@ -368,7 +361,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
       </a>
     );
   }
-}
+});
 
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
   return allowed.fallback == allowedBase.fallback
@@ -394,7 +387,7 @@ function getUI(allowed: TypeAllowed): TypeAllowedBasic {
   return allowed as TypeAllowedBasic;
 }
 
-let values: TypeAllowedBasic[] = ["Create", "Modify", "Read", "None"];
+let values: TypeAllowedBasic[] = ["Write", "Read", "None"];
 
 function combine(val1: TypeAllowedBasic, val2: TypeAllowedBasic): TypeAllowed {
 

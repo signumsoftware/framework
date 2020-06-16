@@ -1,26 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TypeScriptToolsVersion>3.7</TypeScriptToolsVersion>
+    <TypeScriptBuildMode>true</TypeScriptBuildMode>
+    <LangVersion>preview</LangVersion>
     <OutputType>Library</OutputType>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <StartupObject></StartupObject>
-    <Platforms>x64;x86</Platforms>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Platforms>x64;x86;AnyCPU;linux64;win64;win86</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NoWarn>1701;1702;8618;NU1605</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='win64'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='win86'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)'=='linux64'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>linux-64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.3.1">
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="5.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.6.0" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
-    <PackageReference Include="Signum.TSGenerator" Version="1.0.3" />
+    <PackageReference Include="Signum.TSGenerator" Version="2.2.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,19 +74,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Axis.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\InitialMessage.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Legend.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\PivotTable.ts" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\ReactChart.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Rule.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Stratify.ts" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\TextEllipsis.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\Components\Ticks.tsx" />
-    <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />
-    <TypeScriptCompile Remove="Dynamic\Api\DynamicApi.tsx" />
-    <TypeScriptCompile Remove="Dynamic\DynamicApiClient.tsx" />
-    <TypeScriptCompile Remove="Toolbar\QueryToolbarConfig.tsx" />
+    <Compile Remove="ts_out\**" />
+    <EmbeddedResource Remove="ts_out\**" />
+    <None Remove="ts_out\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
+    <TypeScriptCompile Remove="ts_out\**" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <None Remove="Files\ImageModal.tsx" />
+    <None Remove="Files\MultiFileImageLine.tsx" />
+  </ItemGroup>
 </Project>

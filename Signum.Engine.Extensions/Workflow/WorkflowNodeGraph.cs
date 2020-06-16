@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities;
@@ -11,6 +11,7 @@ namespace Signum.Engine.Workflow
 {
     public class WorkflowNodeGraph
     {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public WorkflowEntity Workflow { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> NextGraph { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> PreviousGraph { get; internal set; }
@@ -19,6 +20,7 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {
@@ -46,7 +48,7 @@ namespace Signum.Engine.Workflow
                     gateways
                 }
             .Except(excludes.EmptyIfNull())
-            .OrderByDescending(a => a.ToString().Length)
+            .OrderByDescending(a => a.ToString()!.Length)
             .Take(count)
             .ToList();
         }
@@ -65,12 +67,14 @@ namespace Signum.Engine.Workflow
             this.PreviousGraph = graph.Inverse();
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
         public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)
         {
-            return PreviousConnections(entity).Select(a => TrackCreatedBy.GetOrThrow(TrackId.GetOrThrow(a.From))).Distinct().SingleEx();
+            return PreviousConnections(entity).Select(a => TrackCreatedBy.GetOrThrow(TrackId.GetOrThrow(a.From))).Distinct().SingleEx()!;
         }
 
 
@@ -172,6 +176,9 @@ namespace Signum.Engine.Workflow
                             issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
                         }
                     }
+
+                    if (e.Type == WorkflowEventType.IntermediateTimer && !e.Name.HasText())
+                        issues.AddError(e, WorkflowValidationMessage.IntermediateTimer0ShouldHaveName.NiceToString(e));
                 }
             });
 
@@ -241,7 +248,7 @@ namespace Signum.Engine.Workflow
 
             var starts = Events.Values.Where(a => a.Type.IsStart()).ToList();
             TrackId = starts.ToDictionary(a => (IWorkflowNodeEntity)a, a => 0);
-            TrackCreatedBy = new Dictionary<int, IWorkflowNodeEntity> { { 0, null } };
+            TrackCreatedBy = new Dictionary<int, IWorkflowNodeEntity> { { 0, null! } };
 
 
             Queue<IWorkflowNodeEntity> queue = new Queue<IWorkflowNodeEntity>();
@@ -399,8 +406,8 @@ namespace Signum.Engine.Workflow
 
             if (issues.Any(a => a.Type == WorkflowIssueType.Error))
             {
-                this.TrackCreatedBy = null;
-                this.TrackId = null;
+                this.TrackCreatedBy = null!;
+                this.TrackId = null!;
             }
         }
 
@@ -414,7 +421,7 @@ namespace Signum.Engine.Workflow
             return type == ConnectionType.Approve || type == ConnectionType.Decline;
         }
 
-        private bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
+        public bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
         {
             var gateway = a as WorkflowGatewayEntity;
 
@@ -427,10 +434,10 @@ namespace Signum.Engine.Workflow
     public class WorkflowIssue
     {
         public WorkflowIssueType Type;
-        public string BpmnElementId;
+        public string? BpmnElementId;
         public string Message;
 
-        public WorkflowIssue(WorkflowIssueType type, string bpmnElementId, string message)
+        public WorkflowIssue(WorkflowIssueType type, string? bpmnElementId, string message)
         {
             this.Type = type;
             this.BpmnElementId = bpmnElementId;
@@ -446,7 +453,7 @@ namespace Signum.Engine.Workflow
     public static class WorkflowIssuesExtensions
     {
 
-        public static void AddError(this List<WorkflowIssue> issues, IWorkflowNodeEntity node, string message)
+        public static void AddError(this List<WorkflowIssue> issues, IWorkflowNodeEntity? node, string message)
         {
             issues.Add(new WorkflowIssue(WorkflowIssueType.Error, node?.BpmnElementId, message));
         }

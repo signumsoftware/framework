@@ -13,168 +13,163 @@ import ValueLineModal from '@framework/ValueLineModal'
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
 import { Typeahead } from '@framework/Components';
+import { useForceUpdate } from '@framework/Hooks'
 
 interface DynamicExpressionComponentProps {
-    ctx: TypeContext<DynamicExpressionEntity>;
+  ctx: TypeContext<DynamicExpressionEntity>;
 }
 
-interface DynamicExpressionComponentState {
-    exampleEntity?: Entity;
-    response?: DynamicExpressionTestResponse;
-}
+export default function DynamicExpressionComponent(p: DynamicExpressionComponentProps) {
 
-export default class DynamicExpressionComponent extends React.Component<DynamicExpressionComponentProps, DynamicExpressionComponentState> {
 
-    constructor(props: DynamicExpressionComponentProps) {
-        super(props);
-        this.state = {};
+
+
+  const exampleEntity = React.useRef<Entity | undefined>(undefined);
+  const [response, setResponse] = React.useState<DynamicExpressionTestResponse | undefined>(undefined);
+
+  const forceUpdate = useForceUpdate();
+
+  function handleCodeChange(newScript: string) {
+    const entity = p.ctx.value;
+    entity.body = newScript;
+    entity.modified = true;
+    forceUpdate();
+  }
+
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
+    if (!pr)
+      return;
+
+    ValueLineModal.show({
+      type: { name: "string" },
+      initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
+      valueLineType: "TextArea",
+      title: "Property Template",
+      message: "Copy to clipboard: Ctrl+C, ESC",
+      initiallyFocused: true,
+    }).done();
+  }
+
+
+  function handleGetItems(query: string, type: "ReturnType" | "FromType") {
+    return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeModelEntities: type == "ReturnType", includeQueriable: type == "ReturnType" });
+  }
+
+  function renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {
+    return (
+      <Typeahead
+        inputAttrs={{
+          className: "input-code",
+          placeholder: ctx.niceName(),
+          size: ctx.value ? ctx.value.length : ctx.niceName().length
+        }}
+        getItems={query => handleGetItems(query, ctx.propertyRoute.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
+        value={ctx.value ?? undefined}
+        onChange={txt => { ctx.value = txt; forceUpdate(); }} />
+    );
+  }
+
+  function renderInput(ctx: TypeContext<string | null | undefined>) {
+    return (
+      <input type="text"
+        className="input-code"
+        placeholder={ctx.niceName()}
+        size={ctx.value ? ctx.value.length : ctx.niceName().length}
+        value={ctx.value ?? undefined}
+        onChange={e => {
+          ctx.value = (e.currentTarget as HTMLInputElement).value;
+          forceUpdate();
+        }} />
+    );
+  }
+
+  function handleEvaluate() {
+    if (exampleEntity.current == undefined)
+      setResponse(undefined);
+    else {
+      API.expressionTest({
+        dynamicExpression: p.ctx.value,
+        exampleEntity: exampleEntity.current,
+      })
+        .then(r => setResponse(r))
+        .done();
     }
+  }
 
-    handleCodeChange = (newScript: string) => {
-        const entity = this.props.ctx.value;
-        entity.body = newScript;
-        entity.modified = true;
-        this.forceUpdate();
-    }
+  function renderTest(cleanFromType: string) {
+    const res = response;
 
-    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
-        if (!pr)
-            return;
+    return (
+      <fieldset>
+        <legend>TEST</legend>
+        {renderExampleEntity(cleanFromType)}
+        {res && renderMessage(res)}
+      </fieldset>
+    );
+  }
 
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-            valueLineType: "TextArea",
-            title: "Property Template",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-        }).done();
-    }
+  function renderExampleEntity(typeName: string) {
+    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntity, s => s.current));
 
-    render() {
-        var ctx = this.props.ctx;
+    return (
+      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
+        type={{ name: typeName }} labelText="Example Entity" />
+    );
+  }
 
-        let cleanFromType = ctx.value.fromType || undefined;
+  function handleOnView(exampleEntity: ModifiableEntity | Lite<Entity>) {
+    return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
+  }
 
-        if (cleanFromType && cleanFromType.endsWith("Entity"))
-            cleanFromType = cleanFromType.beforeLast("Entity");
+  function renderMessage(res: DynamicExpressionTestResponse) {
+    if (res.compileError)
+      return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 
-        if (cleanFromType && !isTypeEntity(cleanFromType))
-            cleanFromType = undefined;
+    if (res.validationException)
+      return <div className="alert alert-danger">EXCEPTION: {res.validationException}</div>;
 
-        return (
-            <div>
-                <ValueLine ctx={ctx.subCtx(dt => dt.translation)} />
-                <div className="row">
-                    <div className="col-sm-6">
-                        <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
-                            helpText={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
-                    </div>
-                    <div className="col-sm-6">
-                        <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />
-                    </div>
-                </div>
-                <br />
-                <div className="row">
-                    <div className="col-sm-7">
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
-                                {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
-                            </pre>
-                            <CSharpCodeMirror script={ctx.value.body || ""} onChange={this.handleCodeChange} />
-                        </div>
-                        {ctx.value.body && cleanFromType && this.renderTest(cleanFromType)}
-                    </div>
-                    <div className="col-sm-5">
-                        <TypeHelpComponent initialType={cleanFromType} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    return <div className="alert alert-success">VALUE: {res.validationResult}</div>;
+  }
 
-    handleGetItems = (query: string, type: "ReturnType" | "FromType") => {
-        return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeModelEntities: type == "ReturnType", includeQueriable: type == "ReturnType" });
-    }
+  var ctx = p.ctx;
 
-    renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {
-        return (
-            <span style={{ position: "relative" }}>
-                <Typeahead
-                    inputAttrs={{
-                        className: "input-code",
-                        placeholder: ctx.niceName(),
-                        size: ctx.value ? ctx.value.length : ctx.niceName().length
-                    }}
-                    getItems={query => this.handleGetItems(query, ctx.propertyRoute.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
-                    value={ctx.value || undefined}
-                    onChange={txt => { ctx.value = txt; this.forceUpdate(); }} />
-            </span>
-        );
-    }
+  let cleanFromType = ctx.value.fromType || undefined;
 
-    renderInput(ctx: TypeContext<string | null | undefined>) {
-        return (
-            <input type="text"
-                className="input-code"
-                placeholder={ctx.niceName()}
-                size={ctx.value ? ctx.value.length : ctx.niceName().length}
-                value={ctx.value || undefined}
-                onChange={e => {
-                    ctx.value = (e.currentTarget as HTMLInputElement).value;
-                    this.forceUpdate();
-                }} />
-        );
-    }
+  if (cleanFromType?.endsWith("Entity"))
+    cleanFromType = cleanFromType.beforeLast("Entity");
 
-    handleEvaluate = () => {
+  if (cleanFromType && !isTypeEntity(cleanFromType))
+    cleanFromType = undefined;
 
-        if (this.state.exampleEntity == undefined)
-            this.setState({ response: undefined });
-        else {
-            API.expressionTest({
-                dynamicExpression: this.props.ctx.value,
-                exampleEntity: this.state.exampleEntity,
-            })
-                .then(r => this.setState({ response: r }))
-                .done();
-        }
-    }
-
-    renderTest(cleanFromType: string) {
-        const res = this.state.response;
-
-        return (
-            <fieldset>
-                <legend>TEST</legend>
-                {this.renderExampleEntity(cleanFromType)}
-                {res && this.renderMessage(res)}
-            </fieldset>
-        );
-    }
-
-    renderExampleEntity(typeName: string) {
-        const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
-
-        return (
-            <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEvaluate}
-                type={{ name: typeName }} labelText="Example Entity" />
-        );
-    }
-
-    handleOnView = (exampleEntity: ModifiableEntity | Lite<Entity>) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
-    }
-
-    renderMessage(res: DynamicExpressionTestResponse) {
-        if (res.compileError)
-            return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
-
-        if (res.validationException)
-            return <div className="alert alert-danger">EXCEPTION: {res.validationException}</div>;
-
-        return <div className="alert alert-success">VALUE: {res.validationResult}</div>;
-    }
+  return (
+    <div>
+      <ValueLine ctx={ctx.subCtx(dt => dt.translation)} />
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
+            helpText={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
+        </div>
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />
+        </div>
+      </div>
+      <br />
+      <div className="row">
+        <div className="col-sm-7">
+          {exampleEntity && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
+          <div className="code-container">
+            <pre style={{ border: "0px", margin: "0px", display: "flex", overflow: "visible" }}>
+              {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))}&nbsp;{renderInput(ctx.subCtx(dt => dt.name))}&nbsp;({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
+            </pre>
+            <CSharpCodeMirror script={ctx.value.body ?? ""} onChange={handleCodeChange} />
+          </div>
+          {ctx.value.body && cleanFromType && renderTest(cleanFromType)}
+        </div>
+        <div className="col-sm-5">
+          <TypeHelpComponent initialType={cleanFromType} mode="CSharp" onMemberClick={handleTypeHelpClick} />
+        </div>
+      </div>
+    </div>
+  );
 }
 

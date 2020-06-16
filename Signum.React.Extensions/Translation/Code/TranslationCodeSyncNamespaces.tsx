@@ -1,64 +1,22 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, NamespaceSyncStats } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import "../Translation.css"
+import { encodeDots, decodeDots } from './TranslationCodeStatus'
+import { useAPI } from '@framework/Hooks'
 
-interface TranslationCodeStatusProps extends RouteComponentProps<{ culture: string; assembly: string; }> {
+export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ culture: string; assembly: string; }>) {
+  const assembly = decodeDots(p.match.params.assembly);
+  const culture = p.match.params.culture;
 
-}
+  const result = useAPI(() => API.namespaceStatus(assembly, culture), [assembly, culture]);
+  
 
-export default class TranslationCodeSyncNamespaces extends React.Component<TranslationCodeStatusProps, { result?: NamespaceSyncStats[] }> {
-
-  constructor(props: TranslationCodeStatusProps) {
-    super(props);
-    this.state = { result: undefined };
-  }
-
-  componentWillMount() {
-    this.loadState().done();
-  }
-
-  componentWillReceiveProps() {
-    this.loadState().done();
-  }
-
-  async loadState() {
-    var p = this.props.match.params;
-    const result = await API.namespaceStatus(p.assembly, p.culture);
-    return this.setState({ result });
-  }
-
-  render() {
-    if (this.state.result && this.state.result.length == 0) {
-      return (
-        <div>
-          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
-          <Link to={`~/translation/status`}>
-            {TranslationMessage.BackToTranslationStatus.niceToString()}
-          </Link>
-        </div>
-      );
-    }
-
-    var p = this.props.match.params;
-
-    return (
-      <div>
-        <h2>{TranslationMessage.Synchronize0In1.niceToString(p.assembly, p.culture)}</h2>
-        {this.renderTable()}
-      </div>
-    );
-  }
-
-  renderTable() {
-    if (this.state.result == undefined)
+  function renderTable() {
+    if (result == undefined)
       return <strong>{JavascriptMessage.loading.niceToString()}</strong>;
-
-
-
-    var p = this.props.match.params;
 
     return (
       <table className="st">
@@ -72,18 +30,18 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
         <tbody>
           <tr key={"All"}>
             <th>
-              <Link to={`~/translation/sync/${p.assembly}/${p.culture}`}>
+              <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}`}>
                 {TranslationMessage.All.niceToString()}
               </Link>
             </th>
-            <th> {this.state.result.sum(a => a.types)}</th>
-            <th> {this.state.result.sum(a => a.translations)}</th>
+            <th> {result.sum(a => a.types)}</th>
+            <th> {result.sum(a => a.translations)}</th>
           </tr>
 
-          {this.state.result.map(stats =>
+          {result.map(stats =>
             <tr key={stats.namespace}>
               <td>
-                <Link to={`~/translation/sync/${p.assembly}/${p.culture}/${stats.namespace}`}>
+                <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}/${encodeDots(stats.namespace)}`}>
                   {stats.namespace}
                 </Link>
               </td>
@@ -95,6 +53,24 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
       </table>
     );
   }
+  if (result?.length == 0) {
+    return (
+      <div>
+        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
+        <Link to={`~/translation/status`}>
+          {TranslationMessage.BackToTranslationStatus.niceToString()}
+        </Link>
+      </div>
+    );
+  }
+
+
+  return (
+    <div>
+      <h2>{TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      {renderTable()}
+    </div>
+  );
 }
 
 

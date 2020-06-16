@@ -84,7 +84,7 @@ namespace Signum.Engine.Basics
                 {
                     CanExecute = e =>
                     !e.Mixin<DisabledMixin>().IsDisabled ? DisabledIsNotSetMessage() :
-                    e.InDBEntity(_ => (bool?)_.Parent().Mixin<DisabledMixin>().IsDisabled) == true ? DisabledMessage.ParentIsDisabled.NiceToString() :
+                    e.InDBEntity(_ => (bool?)_.Parent()!.Mixin<DisabledMixin>().IsDisabled) == true ? DisabledMessage.ParentIsDisabled.NiceToString() :
                     null,
                     Execute = (e, _) =>
                     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -8,7 +8,8 @@ namespace Signum.Engine.Help
 {
     static class HelpTools
     {
-        internal static Dictionary<K, V> CollapseDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
+        internal static Dictionary<K, V>? CollapseDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
+            where K : notnull
         {
             var dic = collection.ToDictionary();
             if (dic.Count == 0)
@@ -50,7 +51,7 @@ namespace Signum.Engine.Help
                     key = newKey;
                 }
 
-                T val = should.TryGetC(key);
+                T? val = should.TryGetC(key);
 
                 if (val == null)
                 {
@@ -89,7 +90,7 @@ namespace Signum.Engine.Help
                 var newVal = newDictionary.TryGetC(key);
 
                 if (oldVal == null)
-                    createNew(key, newVal);
+                    createNew(key, newVal!);
                 else if (newVal == null)
                     removeOld(key, oldVal);
                 else

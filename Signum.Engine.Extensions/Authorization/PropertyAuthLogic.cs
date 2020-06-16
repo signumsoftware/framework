@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -13,7 +13,7 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed> cache;
+        static AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed> cache = null!;
 
         public static IManualAuth<PropertyRoute, PropertyAllowed> Manual { get { return cache; } }
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
 
                     foreach (var item in groups)
                     {
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, item.Key));
+                        Type? type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, item.Key));
 
                         if (type == null)
                             continue;
@@ -79,12 +79,11 @@ namespace Signum.Engine.Authorization
                     {
                         var pp = new PropertyPair(s);
 
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, pp.Type));
+                        Type? type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, pp.Type));
                         if (type == null)
                             return null;
 
-                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), pp.Property));
-
+                        PropertyRoute? route = routesDicCache[type].TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), pp.Property));
                         if (route == null)
                             return null;
 
@@ -158,17 +157,26 @@ namespace Signum.Engine.Authorization
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return PropertyAllowed.Modify;
+                return PropertyAllowed.Write;
 
             route = route.SimplifyToPropertyOrRoot();
 
             if (!typeof(Entity).IsAssignableFrom(route.RootType))
-                return PropertyAllowed.Modify;
+                return PropertyAllowed.Write;
 
             return cache.GetAllowed(RoleEntity.Current, route);
         }
 
-        public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        public static PropertyAllowed GetNoUserPropertyAllowed(this PropertyRoute route)
+        {
+            var hasAttr = route.RootType.HasAttribute<AllowedNoUserAttribute>() ||
+                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowedNoUserAttribute>()) ||
+                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowedNoUserAttribute>());
+
+            return hasAttr ? PropertyAllowed.Write : PropertyAllowed.None;
+        }
+
+        public static string? GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return null;
@@ -194,7 +202,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
+        public static Dictionary<PropertyRoute, PropertyAllowed>? OverridenProperties()
         {
             var dd = cache.GetDefaultDictionary();
 
@@ -247,7 +255,7 @@ namespace Signum.Engine.Authorization
                 if (item > result)
                     result = item;
 
-                if (result == PropertyAllowed.Modify)
+                if (result == PropertyAllowed.Write)
                     return result;
             }
             return result;
@@ -255,7 +263,7 @@ namespace Signum.Engine.Authorization
 
         static PropertyAllowed Min(IEnumerable<PropertyAllowed> baseValues)
         {
-            PropertyAllowed result = PropertyAllowed.Modify;
+            PropertyAllowed result = PropertyAllowed.Write;
 
             foreach (var item in baseValues)
             {
@@ -273,7 +281,7 @@ namespace Signum.Engine.Authorization
             return pr =>
             {
                 if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Modify : PropertyAllowed.None;
+                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Write : PropertyAllowed.None;
 
                 var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
 
@@ -297,7 +305,7 @@ namespace Signum.Engine.Authorization
             return (pr, a) =>
             {
                 if (!TypeLogic.TypeToEntity.ContainsKey(pr.RootType))
-                    return PropertyAllowed.Modify;
+                    return PropertyAllowed.Write;
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.GetAllowed(role, pr.RootType);
 
@@ -305,7 +313,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
 
@@ -314,7 +322,7 @@ namespace Signum.Engine.Authorization
             return (role, a) =>
             {
                 if (!TypeLogic.TypeToEntity.ContainsKey(pr.RootType))
-                    return PropertyAllowed.Modify;
+                    return PropertyAllowed.Write;
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.Manual.GetAllowed(role, pr.RootType);
 
@@ -322,7 +330,7 @@ namespace Signum.Engine.Authorization
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
-                return a < pa ? a : pa; ;
+                return a < pa ? a : pa;
             };
         }
     }

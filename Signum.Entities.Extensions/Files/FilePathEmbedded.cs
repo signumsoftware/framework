@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.IO;
 using System.Linq.Expressions;
@@ -8,7 +8,7 @@ namespace Signum.Entities.Files
     [Serializable]
     public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     {
-        public static string ForceExtensionIfEmpty = ".dat";
+        public static string? ForceExtensionIfEmpty = ".dat";
 
         public FilePathEmbedded() { }
 
@@ -20,7 +20,7 @@ namespace Signum.Entities.Files
         public FilePathEmbedded(FileTypeSymbol fileType, string readFileFrom)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(readFileFrom);
+            this.FileName = Path.GetFileName(readFileFrom)!;
             this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 
@@ -32,7 +32,7 @@ namespace Signum.Entities.Files
         }
 
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
+        [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -48,6 +48,7 @@ namespace Signum.Entities.Files
 
         [Ignore]
         byte[] binaryFile;
+        [NotNullValidator(Disabled = true)]
         public byte[] BinaryFile
         {
             get { return binaryFile; }
@@ -60,25 +61,20 @@ namespace Signum.Entities.Files
 
         public int FileLength { get; internal set; }
 
-        static Expression<Func<FilePathEmbedded, string>> FileLengthStringExpression =
-          @this => ((long)@this.FileLength).ToComputerSize(true);
-        [ExpressionField]
-        public string FileLengthString
-        {
-            get { return FileLengthStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260, DisabledInModelBinder = true)]
+        [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]
-        public string CalculatedDirectory { get; set; }
+        public string? CalculatedDirectory { get; set; }
 
-        [NotNullable]
+        [ForceNotNullable]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
-        internal PrefixPair _prefixPair;
+        internal PrefixPair? _prefixPair;
         public void SetPrefixPair(PrefixPair prefixPair)
         {
             this._prefixPair = prefixPair;
@@ -106,16 +102,19 @@ namespace Signum.Entities.Files
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
-        public string FullWebPath()
+        public static Func<string, string> ToAbsolute = str => str;
+
+
+        public string? FullWebPath()
         {
             var pp = this.GetPrefixPair();
 
             if (string.IsNullOrEmpty(pp.WebPrefix))
                 return null;
 
-            string url = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
 
-            return url;
+            return result;
         }
 
         public override string ToString()

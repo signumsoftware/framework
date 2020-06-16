@@ -26,43 +26,36 @@ namespace Signum.Entities.UserQueries
         [Ignore]
         internal object queryName;
 
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
         public bool GroupResults { get; set; }
 
-        public Lite<TypeEntity> EntityType { get; set; }
+        public Lite<TypeEntity>? EntityType { get; set; }
 
         public bool HideQuickLink { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public bool? IncludeDefaultFilters { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
+        public Lite<Entity>? Owner { get; set; }
+
+        [StringLengthValidator(Min = 1, Max = 200)]
         public string DisplayName { get; set; }
 
         public bool AppendFilters { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         public ColumnOptionsMode ColumnsMode { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
 
-        public bool SearchOnLoad { get; set; } = true;
-
-        public bool ShowFilterButton { get; set; } = true;
-
-        PaginationMode? paginationMode;
-        public PaginationMode? PaginationMode
-        {
-            get { return paginationMode; }
-            set { if (Set(ref paginationMode, value)) Notify(() => ShouldHaveElements); }
-        }
+        public PaginationMode? PaginationMode { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 1)]
         public int? ElementsPerPage { get; set; }
@@ -70,14 +63,11 @@ namespace Signum.Entities.UserQueries
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static readonly Expression<Func<UserQueryEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => 
+        DisplayName);
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(ElementsPerPage))
             {
@@ -85,7 +75,7 @@ namespace Signum.Entities.UserQueries
                     return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm => pm.NiceToString()) ?? "");
 
                 if (ElementsPerPage == null && ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode!.NiceToString());
             }
 
             return base.PropertyValidation(pi);
@@ -125,9 +115,11 @@ namespace Signum.Entities.UserQueries
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                AppendFilters == true ? null : new XAttribute("AppendFilters", true),
+                !HideQuickLink ? null : new XAttribute("HideQuickLink", HideQuickLink),
+                IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
+                !AppendFilters ? null : new XAttribute("AppendFilters", AppendFilters),
+                !GroupResults ? null : new XAttribute("GroupResults", GroupResults),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
@@ -141,9 +133,11 @@ namespace Signum.Entities.UserQueries
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
-            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
-            AppendFilters = element.Attribute("AppendFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
+            AppendFilters = element.Attribute("AppendFilters")?.Let(a => bool.Parse(a.Value)) ?? false;
+            GroupResults = element.Attribute("GroupResults")?.Let(a => bool.Parse(a.Value)) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
@@ -153,13 +147,13 @@ namespace Signum.Entities.UserQueries
             ParseData(ctx.GetQueryDescription(Query));
         }
 
-        public Pagination GetPagination()
+        public Pagination? GetPagination()
         {
             switch (PaginationMode)
             {
                 case Signum.Entities.DynamicQuery.PaginationMode.All: return new Pagination.All();
-                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage.Value);
-                case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage.Value, 1);
+                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage!.Value);
+                case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage!.Value, 1);
                 default: return null;
             }
         }
@@ -182,7 +176,7 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryOrderEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public QueryTokenEmbedded Token { get; set; }
 
         public OrderType OrderType { get; set; }
@@ -205,7 +199,7 @@ namespace Signum.Entities.UserQueries
             Token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
@@ -224,13 +218,13 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryColumnEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public QueryTokenEmbedded Token { get; set; }
 
-        string displayName;
-        public string DisplayName
+        string? displayName;
+        public string? DisplayName
         {
-            get { return displayName.DefaultText(null); }
+            get { return displayName.DefaultToNull(); }
             set { Set(ref displayName, value); }
         }
 
@@ -252,7 +246,7 @@ namespace Signum.Entities.UserQueries
             Token.ParseData(context, description, options);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
@@ -273,8 +267,8 @@ namespace Signum.Entities.UserQueries
     {
         public QueryFilterEmbedded() { }
 
-        QueryTokenEmbedded token;
-        public QueryTokenEmbedded Token
+        QueryTokenEmbedded? token;
+        public QueryTokenEmbedded? Token
         {
             get { return token; }
             set
@@ -293,10 +287,10 @@ namespace Signum.Entities.UserQueries
 
         public FilterOperation? Operation { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 300)]
-        public string ValueString { get; set; }
+        [StringLengthValidator(Max = 300)]
+        public string? ValueString { get; set; }
         
-        public PinnedQueryFilterEmbedded Pinned { get; set; }
+        public PinnedQueryFilterEmbedded? Pinned { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Indentation { get; set; }
@@ -306,7 +300,7 @@ namespace Signum.Entities.UserQueries
             token?.ParseData(context, description, options);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (IsGroup)
             {
@@ -339,7 +333,7 @@ namespace Signum.Entities.UserQueries
 
                     if (pi.Name == nameof(Operation) && Operation != null)
                     {
-                        FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
+                        FilterType? filterType = QueryUtils.TryGetFilterType(Token!.Token.Type);
 
                         if (filterType == null)
                             return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
@@ -350,7 +344,7 @@ namespace Signum.Entities.UserQueries
 
                     if (pi.Name == nameof(ValueString))
                     {
-                        var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.Value.IsList());
+                        var result = FilterValueConverter.TryParse(ValueString, Token!.Token.Type, Operation!.Value.IsList());
                         return result is Result<object>.Error e ? e.ErrorText : null;
                     }
                 }
@@ -374,7 +368,7 @@ namespace Signum.Entities.UserQueries
             {
                 return new XElement("Filter",
                     new XAttribute("Indentation", Indentation),
-                    new XAttribute("Token", Token.Token.FullKey()),
+                    new XAttribute("Token", Token!.Token.FullKey()),
                     new XAttribute("Operation", Operation),
                     new XAttribute("Value", ValueString ?? ""),
                     Pinned?.ToXml(ctx));
@@ -389,7 +383,7 @@ namespace Signum.Entities.UserQueries
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
             ValueString = element.Attribute("Value")?.Value;
-            Pinned = element.Element("Pinned")?.Let(p => new PinnedQueryFilterEmbedded().FromXml(p, ctx));
+            Pinned = element.Element("Pinned")?.Let(p => (this.Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
         }
 
         public override string ToString()
@@ -399,7 +393,11 @@ namespace Signum.Entities.UserQueries
 
         internal QueryFilterEmbedded Clone() => new QueryFilterEmbedded
         {
-            Token = Token.Clone(),
+            Indentation = Indentation,
+            GroupOperation = GroupOperation,
+            IsGroup = IsGroup,
+            Pinned = Pinned?.Clone(),
+            Token = Token?.Clone(),
             Operation = Operation,
             ValueString = ValueString,
         };
@@ -409,34 +407,43 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class PinnedQueryFilterEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Label { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Label { get; set; }
 
         public int? Column { get; set; }
 
         public int? Row { get; set; }
 
-        public bool DisableOnNull { get; set; }
+        public PinnedFilterActive Active { get; set; }
 
         public bool SplitText { get; set; }
+
+        internal PinnedQueryFilterEmbedded Clone() => new PinnedQueryFilterEmbedded
+        {
+            Label = Label,
+            Column = Column,
+            Row = Row,
+            Active = Active,
+            SplitText = SplitText,
+        };
 
         internal PinnedQueryFilterEmbedded FromXml(XElement p, IFromXmlContext ctx)
         {
             Label = p.Attribute("Label")?.Value;
             Column = p.Attribute("Column")?.Value.ToInt();
             Row = p.Attribute("Row")?.Value.ToInt();
-            DisableOnNull = p.Attribute("DisableOnNull")?.Value.ToBool() ?? false;
-            DisableOnNull = p.Attribute("SplitText")?.Value.ToBool() ?? false;
+            Active = p.Attribute("Active")?.Value.ToEnum<PinnedFilterActive>() ?? (p.Attribute("DisableOnNull")?.Value.ToBool() == true ? PinnedFilterActive.WhenHasValue : PinnedFilterActive.Always);
+            SplitText = p.Attribute("SplitText")?.Value.ToBool() ?? false;
             return this;
         }
 
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Pinned",
-                Label.DefaultText(null)?.Let(l => new XAttribute("Label", l)),
+                Label.DefaultToNull()?.Let(l => new XAttribute("Label", l)),
                 Column?.Let(l => new XAttribute("Column", l)),
                 Row?.Let(l => new XAttribute("Row", l)),
-                DisableOnNull == false ? null : new XAttribute("DisableOnNull", DisableOnNull),
+                Active == PinnedFilterActive.Always ? null : new XAttribute("Active", Active.ToString()),
                 SplitText == false ? null : new XAttribute("SplitText", SplitText)
             );
         }
@@ -457,7 +464,7 @@ namespace Signum.Entities.UserQueries
 
                     var filter = gr.Key;
 
-                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList());
+                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token!.Token.Type, filter.Operation!.Value.IsList());
 
                     return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
                 }
@@ -465,7 +472,7 @@ namespace Signum.Entities.UserQueries
                 {
                     var group = gr.Key;
 
-                    return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
+                    return (Filter)new FilterGroup(group.GroupOperation!.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
                 }
             }).ToList();
         }
@@ -499,7 +506,7 @@ namespace Signum.Entities.UserQueries
             }
             else
             {
-                if (current.Zip(ideal).All(t => t.first.Similar(t.second)))
+                if (current.Zip(ideal).All(t => t.First.Similar(t.Second)))
                     return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEmbedded
                     {
                         Token = new QueryTokenEmbedded(c.Token),
@@ -541,6 +548,8 @@ namespace Signum.Entities.UserQueries
         UserQueries_CreateNew,
         [Description("Edit")]
         UserQueries_Edit,
+        [Description("Back to Default")]
+        UserQueries_BackToDefault,
         [Description("User Queries")]
         UserQueries_UserQueries,
         [Description("The Filter Operation {0} is not compatible with {1}")]

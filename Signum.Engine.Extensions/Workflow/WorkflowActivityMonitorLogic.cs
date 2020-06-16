@@ -49,14 +49,15 @@ namespace Signum.Engine.Workflow
                 CustomColumns = request.Columns.Select(a => a.Token.FullKey()).ToList(),
                 Activities = rt.Rows.Select(row => new WorkflowActivityStats
                 {
-                    WorkflowActivity = (Lite<IWorkflowNodeEntity>)row[0],
-                    CaseActivityCount = (int)row[1],
+                    WorkflowActivity = (Lite<IWorkflowNodeEntity>)row[0]!,
+                    CaseActivityCount = (int)row[1]!,
                     CustomValues = row.GetValues(customCols),
                 }).ToList(),
             };
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class WorkflowActivityMonitorRequest
     {
         public Lite<WorkflowEntity> Workflow;
@@ -68,7 +69,7 @@ namespace Signum.Engine.Workflow
     {
         public Lite<IWorkflowNodeEntity> WorkflowActivity;
         public int CaseActivityCount;
-        public object[] CustomValues;
+        public object?[] CustomValues;
     }
 
     public class WorkflowActivityMonitor
@@ -77,4 +78,5 @@ namespace Signum.Engine.Workflow
         public List<string> CustomColumns;
         public List<WorkflowActivityStats> Activities;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

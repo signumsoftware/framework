@@ -13,12 +13,14 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
+import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
+  partEmbedded: PanelPartEmbedded;
   part: T;
   entity?: Lite<Entity>;
 }
@@ -29,7 +31,7 @@ interface IconColor {
 }
 
 export interface PartRenderer<T extends IPartEntity> {
-  component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+  component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
   defaultIcon: (element: T) => IconColor;
   withPanel?: (element: T) => boolean;
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
@@ -53,7 +55,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
 
-  Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
+  Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: DashboardEntity.token(d => d.dashboardPriority), defaultOrderType: "Descending" });
 
   options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
 
@@ -103,10 +105,10 @@ export function start(options: { routes: JSX.Element[] }) {
       }
   });
 
-  onEmbeddedWidgets.push(ctx => ctx.pack.embeddedDashboard &&
+  onEmbeddedWidgets.push(wc => wc.frame.pack.embeddedDashboard &&
     {
-      position: ctx.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
-      embeddedWidget: <DashboardWidget dashboard={ctx.pack.embeddedDashboard} pack={ctx.pack as EntityPack<Entity>} />
+      position: wc.frame.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
+      embeddedWidget: <DashboardWidget dashboard={wc.frame.pack.embeddedDashboard} pack={wc.frame.pack as EntityPack<Entity>} />
     });
 
   QuickLinks.registerGlobalQuickLink(ctx => {
@@ -114,11 +116,11 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.dashboards || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.dashboards ?? []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(das =>
-      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
+      das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr ?? "", e => {
         Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
       }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
   });
@@ -154,11 +156,11 @@ export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer:
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
-    return ajaxGet<Lite<DashboardEntity>[]>({ url: `~/api/dashboard/forEntityType/${type}` });
+    return ajaxGet({ url: `~/api/dashboard/forEntityType/${type}` });
   }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
-    return ajaxGet<Lite<DashboardEntity> | null>({ url: "~/api/dashboard/home" });
+    return ajaxGet({ url: "~/api/dashboard/home" });
   }
 }
 
@@ -175,35 +177,16 @@ export interface DashboardWidgetProps {
   dashboard: DashboardEntity;
 }
 
-export interface DashboardWidgetState {
-  component?: React.ComponentClass<{ dashboard: DashboardEntity, entity?: Entity }>
-}
+export function DashboardWidget(p: DashboardWidgetProps) {
 
-export class DashboardWidget extends React.Component<DashboardWidgetProps, DashboardWidgetState> {
+  const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
 
-  state = { component: undefined } as DashboardWidgetState;
+  if (!component)
+    return null;
 
-  componentWillMount() {
-    this.load(this.props);
-  }
-
-
-  load(props: DashboardWidgetProps) {
-
-    import("./View/DashboardView")
-      .then(mod => this.setState({ component: mod.default }))
-      .done();
-  }
-
-  render() {
-
-    if (!this.state.component)
-      return null;
-
-    return React.createElement(this.state.component, {
-      dashboard: this.props.dashboard,
-      entity: this.props.pack.entity
-    });
-  }
+  return React.createElement(component, {
+    dashboard: p.dashboard,
+    entity: p.pack.entity
+  });
 }
 

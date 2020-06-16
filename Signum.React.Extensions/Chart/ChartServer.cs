@@ -63,7 +63,7 @@ namespace Signum.React.Chart
 
                 var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
                 if (userCharts.Any())
-                    ep.Extension.Add("userCharts", userCharts);
+                    ep.extension.Add("userCharts", userCharts);
             };
 
         }
@@ -78,7 +78,7 @@ namespace Signum.React.Chart
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    ((ChartRequestModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
+                    ((ChartRequestModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value!);
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
@@ -94,7 +94,7 @@ namespace Signum.React.Chart
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>));
+                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>))!;
 
                     var cr = (ChartRequestModel)ctx.Entity;
 

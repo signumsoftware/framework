@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -41,16 +41,18 @@ namespace Signum.Engine.Translation
                 gr.ZipForeach(result, (sp, translated) => sp.AutomaticTranslation = translated);
             }
 
-            return new TypeInstancesChanges
-            {
-                Type = type,
-                Instances = instances
-            };
+            return new TypeInstancesChanges(type, instances);
         }
     }
 
     public class TypeInstancesChanges
     {
+        public TypeInstancesChanges(Type type, List<InstanceChanges> instances)
+        {
+            Type = type;
+            Instances = instances;
+        }
+
         public Type Type { get; set; }
 
         public List<InstanceChanges> Instances { get; set; }

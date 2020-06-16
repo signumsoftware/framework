@@ -15,14 +15,14 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Title { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Title { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string IconColor { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? IconColor { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Row { get; set; }
@@ -44,10 +44,10 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return Title.HasText() ? Title : Content.ToString();
+            return Title.HasText() ? Title : Content.ToString()!;
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Title) && string.IsNullOrEmpty(Title))
             {
@@ -99,7 +99,7 @@ namespace Signum.Entities.Dashboard
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Default);
+            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Light);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -111,15 +111,14 @@ namespace Signum.Entities.Dashboard
 
     public enum PanelStyle
     {
-        Default,
+        Light,
+        Dark,
         Primary,
         Secondary,
         Success,
         Info,
         Warning,
         Danger,
-        Light,
-        Dark,
     }
 
     public interface IGridEntity
@@ -141,17 +140,16 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
 
         public UserQueryPartRenderMode RenderMode { get; set; }
 
-        static Expression<Func<UserQueryPartEntity, string>> ToStringExpression = @this => @this.UserQuery + "";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        public bool AllowSelection { get; set; }
+
+        public bool ShowFooter { get; set; }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserQuery + "");
 
         public bool RequiresTitle
         {
@@ -164,7 +162,8 @@ namespace Signum.Entities.Dashboard
             {
                 UserQuery = this.UserQuery,
                 RenderMode = this.RenderMode,
-
+                AllowSelection = this.AllowSelection,
+                ShowFooter = this.ShowFooter,
             };
         }
 
@@ -172,39 +171,39 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserQueryPart",
                 new XAttribute("UserQuery", ctx.Include(UserQuery)),
-                new XAttribute("RenderMode", RenderMode.ToString()));
+                new XAttribute("RenderMode", RenderMode.ToString()),
+                new XAttribute("AllowSelection", AllowSelection.ToString()),
+                new XAttribute("ShowFooter", ShowFooter.ToString())
+                );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
             RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
+            AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
+            ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
         }
     }
 
     public enum UserQueryPartRenderMode
     {
         SearchControl,
-        SearchControlWithoutSelection,
         BigValue,
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public UserChartEntity UserChart { get; set; }
 
         public bool ShowData { get; set; } = false;
 
         public bool AllowChangeShowData { get; set; } = false;
 
-        static Expression<Func<UserChartPartEntity, string>> ToStringExpression = @this => @this.UserChart + "";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserChart + "");
 
         public bool RequiresTitle
         {
@@ -239,8 +238,7 @@ namespace Signum.Entities.Dashboard
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
-    {
-        [NotNullValidator]
+    {   
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
@@ -276,17 +274,13 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class ValueUserQueryElementEmbedded : EmbeddedEntity
     {
-        string label;
-        public string Label
-        {
-            get { return label ?? UserQuery?.DisplayName; }
-            set { Set(ref label, value); }
-        }
-
-        [NotNullValidator]
+        [StringLengthValidator(Max = 200)]
+        public string? Label { get; set; }
+        
         public UserQueryEntity UserQuery { get; set; }
 
-        public string Href { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Href { get; set; }
 
         public ValueUserQueryElementEmbedded Clone()
         {
@@ -317,7 +311,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartEntity : Entity, IPartEntity
     {
-        [NotNullValidator]
+        
         public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
         public override string ToString()
@@ -354,10 +348,10 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class LinkElementEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string Label { get; set; }
 
-        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(Max = int.MaxValue)]
         public string Link { get; set; }
 
         public LinkElementEmbedded Clone()

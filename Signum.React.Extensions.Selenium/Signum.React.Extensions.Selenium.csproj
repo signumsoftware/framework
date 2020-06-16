@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <Platforms>x64;x86</Platforms>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Platforms>x64;x86;AnyCPU</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,5 +22,4 @@
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
   </ItemGroup>
-
 </Project>

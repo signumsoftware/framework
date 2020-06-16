@@ -1,22 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <Platforms>x64</Platforms>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Platforms>x86;x64;AnyCPU</Platforms>
+    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.3" />
+    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CNTK.CPUOnly" Version="2.6.0" />
+    <PackageReference Include="CNTK.CPUOnly" Version="2.7.0" />
   </ItemGroup>
-
 </Project>

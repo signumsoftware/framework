@@ -1,17 +1,19 @@
 import * as React from 'react'
+import { Button } from 'react-bootstrap';
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
-import { Button } from '@framework/Components';
 import "./AuthAdmin.css"
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
 
-export default class PropertyRulesPackControl extends React.Component<{ ctx: TypeContext<PropertyRulePack> }> implements IRenderButtons {
-  handleSaveClick = (bc: ButtonsContext) => {
-    let pack = this.props.ctx.value;
+export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx: TypeContext<PropertyRulePack> }, ref: React.Ref<IRenderButtons>) {
+
+  function handleSaveClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
     API.savePropertyRulePack(pack)
       .then(() => API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
@@ -22,89 +24,88 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
       .done();
   }
 
-  renderButtons(bc: ButtonsContext) {
+  function renderButtons(bc: ButtonsContext) {
     return [
-      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 
-  handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
+  const forceUpdate = useForceUpdate();
 
-    this.props.ctx.value.rules.forEach(mle => {
+  function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
+
+    ctx.value.rules.forEach(mle => {
       if (!mle.element.coercedValues!.contains(hc)) {
         mle.element.allowed = hc;
         mle.element.modified = true;
       }
     });
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  render() {
 
-    let ctx = this.props.ctx;
 
-    return (
-      <div>
-        <div className="form-compact">
-          <EntityLine ctx={ctx.subCtx(f => f.role)} />
-          <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
-          <EntityLine ctx={ctx.subCtx(f => f.type)} />
-        </div>
-        <table className="table table-sm sf-auth-rules">
-          <thead>
-            <tr>
-              <th>
-                {PropertyRouteEntity.niceName()}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceToString("Modify")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "Read")}>{PropertyAllowed.niceToString("Read")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "None")}>{PropertyAllowed.niceToString("None")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {AuthAdminMessage.Overriden.niceToString()}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
-              <tr key={i}>
-                <td>
-                  {c.value.resource.path}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "Modify", "green")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "Read", "#FFAD00")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "None", "red")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
-                    c.value.allowed = c.value.allowedBase;
-                    ctx.value.modified = true;
-                    this.forceUpdate();
-                  }} />
-                </td>
-              </tr>
-            )
-            }
-          </tbody>
-        </table>
-
+  return (
+    <div>
+      <div className="form-compact">
+        <EntityLine ctx={ctx.subCtx(f => f.role)} />
+        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
-    );
-  }
+      <table className="table table-sm sf-auth-rules">
+        <thead>
+          <tr>
+            <th>
+              {PropertyRouteEntity.niceName()}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleHeaderClick(e, "Write")}>{PropertyAllowed.niceToString("Write")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleHeaderClick(e, "Read")}>{PropertyAllowed.niceToString("Read")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleHeaderClick(e, "None")}>{PropertyAllowed.niceToString("None")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {AuthAdminMessage.Overriden.niceToString()}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+            <tr key={i}>
+              <td>
+                {c.value.resource.path}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "Write", "green")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "Read", "#FFAD00")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "None", "red")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                  c.value.allowed = c.value.allowedBase;
+                  ctx.value.modified = true;
+                  forceUpdate();
+                }} />
+              </td>
+            </tr>
+          )
+          }
+        </tbody>
+      </table>
 
+    </div>
+  );
 
-  renderRadio(c: PropertyAllowedRule, allowed: PropertyAllowed, color: string) {
+  function renderRadio(c: PropertyAllowedRule, allowed: PropertyAllowed, color: string) {
 
     if (c.coercedValues!.contains(allowed))
       return;
@@ -112,9 +113,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
     return <ColorRadio
       checked={c.allowed == allowed}
       color={color}
-      onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() }}
+      onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }}
     />;
   }
-}
-
-
+});

@@ -19,7 +19,17 @@ export module ActiveDirectoryAuthorizerMessage {
 export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
-  domainName?: string | null;
+  domainName: string | null;
+  domainServer: string | null;
+  azure_ApplicationID: string | null;
+  azure_DirectoryID: string | null;
+  loginWithWindowsAuthenticator: boolean;
+  loginWithActiveDirectoryRegistry: boolean;
+  loginWithAzureAD: boolean;
+  allowSimpleUserNames: boolean;
+  autoCreateUsers: boolean;
+  roleMapping: Entities.MList<RoleMappingEmbedded>;
+  defaultRole: Entities.Lite<RoleEntity> | null;
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -63,6 +73,9 @@ export module AuthEmailMessage {
   export const IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs = new MessageKey("AuthEmailMessage", "IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs");
   export const AccountLockedSubject = new MessageKey("AuthEmailMessage", "AccountLockedSubject");
   export const YourAccountHasBeenBlockedDueToSeveralFailedLogins = new MessageKey("AuthEmailMessage", "YourAccountHasBeenBlockedDueToSeveralFailedLogins");
+  export const YourResetPasswordRequestHasExpired = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestHasExpired");
+  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
+  export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
 }
 
 export module AuthMessage {
@@ -116,6 +129,10 @@ export module AuthMessage {
   export const PasswordDoesNotMatchCurrent = new MessageKey("AuthMessage", "PasswordDoesNotMatchCurrent");
   export const PasswordHasBeenChangedSuccessfully = new MessageKey("AuthMessage", "PasswordHasBeenChangedSuccessfully");
   export const PasswordMustHaveAValue = new MessageKey("AuthMessage", "PasswordMustHaveAValue");
+  export const AnErrorOccurredRequestNotProcessed = new MessageKey("AuthMessage", "AnErrorOccurredRequestNotProcessed");
+  export const WeHaveSentYouAnEmailToResetYourPassword = new MessageKey("AuthMessage", "WeHaveSentYouAnEmailToResetYourPassword");
+  export const EnterYourUserEmail = new MessageKey("AuthMessage", "EnterYourUserEmail");
+  export const RequestAccepted = new MessageKey("AuthMessage", "RequestAccepted");
   export const YourPasswordIsNearExpiration = new MessageKey("AuthMessage", "YourPasswordIsNearExpiration");
   export const PasswordsAreDifferent = new MessageKey("AuthMessage", "PasswordsAreDifferent");
   export const PasswordsDoNotMatch = new MessageKey("AuthMessage", "PasswordsDoNotMatch");
@@ -145,6 +162,11 @@ export module AuthMessage {
   export const Welcome0 = new MessageKey("AuthMessage", "Welcome0");
   export const LoginWithAnotherUser = new MessageKey("AuthMessage", "LoginWithAnotherUser");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("AuthMessage", "TheUserIsNotLongerInTheDatabase");
+  export const IForgotMyPassword = new MessageKey("AuthMessage", "IForgotMyPassword");
+  export const GiveUsYourUserEmailToResetYourPassword = new MessageKey("AuthMessage", "GiveUsYourUserEmailToResetYourPassword");
+  export const LoginWithWindowsUser = new MessageKey("AuthMessage", "LoginWithWindowsUser");
+  export const NoWindowsUserFound = new MessageKey("AuthMessage", "NoWindowsUserFound");
+  export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("AuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
 }
 
 export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");
@@ -156,8 +178,8 @@ export type AuthThumbnail =
 export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmbedded>("AuthTokenConfigurationEmbedded");
 export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "AuthTokenConfigurationEmbedded";
-  refreshTokenEvery?: number;
-  refreshAnyTokenPreviousTo?: string | null;
+  refreshTokenEvery: number;
+  refreshAnyTokenPreviousTo: string | null;
 }
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
@@ -205,9 +227,9 @@ export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
 export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
 export interface PasswordExpiresIntervalEntity extends Entities.Entity {
   Type: "PasswordExpiresInterval";
-  days?: number;
-  daysWarning?: number;
-  enabled?: boolean;
+  days: number;
+  daysWarning: number;
+  enabled: boolean;
 }
 
 export module PasswordExpiresIntervalOperation {
@@ -233,7 +255,7 @@ export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
 export type PropertyAllowed =
   "None" |
   "Read" |
-  "Modify";
+  "Write";
 
 export const PropertyAllowedRule = new Type<PropertyAllowedRule>("PropertyAllowedRule");
 export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
@@ -266,18 +288,29 @@ export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
-  code?: string | null;
-  user?: UserEntity | null;
-  requestDate?: string;
-  lapsed?: boolean;
+  code: string;
+  user: UserEntity;
+  requestDate: string;
+  lapsed: boolean;
+}
+
+export module ResetPasswordRequestOperation {
+  export const Execute : Entities.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
 }
 
 export const RoleEntity = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
   Type: "Role";
-  name?: string | null;
-  mergeStrategy?: MergeStrategy;
+  name: string;
+  mergeStrategy: MergeStrategy;
   roles: Entities.MList<Entities.Lite<RoleEntity>>;
+}
+
+export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");
+export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
+  Type: "RoleMappingEmbedded";
+  aDNameOrGuid: string;
+  role: Entities.Lite<RoleEntity>;
 }
 
 export module RoleOperation {
@@ -290,9 +323,9 @@ export module RoleQuery {
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {
-  role?: Entities.Lite<RoleEntity> | null;
-  resource?: R | null;
-  allowed?: A | null;
+  role: Entities.Lite<RoleEntity>;
+  resource: R;
+  allowed: A;
 }
 
 export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
@@ -318,8 +351,8 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAll
 export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
 export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
   Type: "RuleTypeConditionEmbedded";
-  condition?: Signum.TypeConditionSymbol | null;
-  allowed?: TypeAllowed;
+  condition: Signum.TypeConditionSymbol;
+  allowed: TypeAllowed;
 }
 
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
@@ -331,12 +364,12 @@ export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowe
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
-  user?: Entities.Lite<UserEntity> | null;
-  sessionStart?: string;
-  sessionEnd?: string | null;
-  sessionTimeOut?: boolean;
-  userHostAddress?: string | null;
-  userAgent?: string | null;
+  user: Entities.Lite<UserEntity>;
+  sessionStart: string;
+  sessionEnd: string | null;
+  sessionTimeOut: boolean;
+  userHostAddress: string | null;
+  userAgent: string | null;
 }
 
 export module SessionLogPermission {
@@ -348,13 +381,9 @@ export type TypeAllowed =
   "None" |
   "DBReadUINone" |
   "Read" |
-  "DBModifyUINone" |
-  "DBModifyUIRead" |
-  "Modify" |
-  "DBCreateUINone" |
-  "DBCreateUIRead" |
-  "DBCreateUIModify" |
-  "Create";
+  "DBWriteUINone" |
+  "DBWriteUIRead" |
+  "Write";
 
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
@@ -367,8 +396,7 @@ export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic
 export type TypeAllowedBasic =
   "None" |
   "Read" |
-  "Modify" |
-  "Create";
+  "Write";
 
 export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
@@ -394,16 +422,19 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
-  userName?: string | null;
-  passwordHash?: string | null;
-  passwordSetDate?: string;
-  passwordNeverExpires?: boolean;
-  role?: Entities.Lite<RoleEntity> | null;
-  email?: string | null;
-  cultureInfo?: Signum.CultureInfoEntity | null;
-  anulationDate?: string | null;
-  state?: UserState;
-  loginFailedCounter?: number;
+  userName: string;
+  passwordHash: string;
+  role: Entities.Lite<RoleEntity>;
+  email: string | null;
+  cultureInfo: Signum.CultureInfoEntity | null;
+  disabledOn: string | null;
+  state: UserState;
+}
+
+export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");
+export interface UserOIDMixin extends Entities.MixinEntity {
+  Type: "UserOIDMixin";
+  oID: string | null;
 }
 
 export module UserOperation {
@@ -423,10 +454,10 @@ export type UserState =
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
-  user?: Entities.Lite<UserEntity> | null;
-  ticket?: string | null;
-  connectionDate?: string;
-  device?: string | null;
+  user: Entities.Lite<UserEntity>;
+  ticket: string;
+  connectionDate: string;
+  device: string;
 }
 
 

@@ -1,15 +1,18 @@
-﻿import * as React from 'react'
-import { Retrieve } from '@framework/Retrieve'
+import * as React from 'react'
 import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
+import { EntityBaseProps, EntityBaseController } from '@framework/Lines/EntityBase'
 import { FileDownloaderConfiguration } from './FileDownloader'
-import FileUploader from './FileUploader'
+import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
+import { useFetchInState, useFetchAndRemember } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
+import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };
 
@@ -26,19 +29,14 @@ export interface FileImageLineProps extends EntityBaseProps {
 }
 
 
-export default class FileImageLine extends EntityBase<FileImageLineProps, FileImageLineProps> {
+export class FileImageLineController extends EntityBaseController<FileImageLineProps> {
 
-  static defaultProps = {
-    accept: "image/*",
-    dragAndDrop: true
-  }
+  getDefaultProps(state: FileImageLineProps) {
 
-  calculateDefaultState(state: FileImageLineProps) {
-
-    super.calculateDefaultState(state);
+    super.getDefaultProps(state);
 
     const m = state.ctx.propertyRoute.member;
-    if (m && m.defaultFileTypeInfo) {
+    if (m?.defaultFileTypeInfo) {
 
       if (state.fileType == null)
         state.fileType = getSymbol(FileTypeSymbol, m.defaultFileTypeInfo.key);
@@ -51,52 +49,53 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileLoaded = (file: IFile & ModifiableEntity) =>{
     this.convert(file)
       .then(f => this.setValue(f))
       .done();
   }
+}
 
+export const FileImageLine = React.forwardRef(function FileImageLine(props: FileImageLineProps, ref: React.Ref<FileImageLineController>) {
+  const c = useController(FileImageLineController, props, ref);
+  const p = c.props;
 
-  renderInternal() {
+  const hasValue = !!p.ctx.value;
 
-    const s = this.state;
+  if (c.isHidden)
+    return null;
 
-    const hasValue = !!s.ctx.value;
+  return (
+    <FormGroup ctx={p.ctx} labelText={p.labelText}
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
+      helpText={c.props.helpText}>
+      {hasValue ? renderImage() : p.ctx.readOnly ? undefined :
+        <FileUploader
+          accept={p.accept}
+          maxSizeInBytes={p.maxSizeInBytes}
+          dragAndDrop={c.props.dragAndDrop}
+          dragAndDropMessage={c.props.dragAndDropMessage}
+          fileType={c.props.fileType}
+          onFileLoaded={c.handleFileLoaded}
+          typeName={p.ctx.propertyRoute.typeReference().name}
+          buttonCss={p.ctx.buttonClass}
+          divHtmlAttributes={{ className: "sf-file-line-new" }} />
+      }
+    </FormGroup>
+  );
 
-    return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText}
-        labelHtmlAttributes={s.labelHtmlAttributes}
-        htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-        helpText={this.props.helpText}>
-        {hasValue ? this.renderImage() : s.ctx.readOnly ? undefined :
-          <FileUploader
-            accept={s.accept}
-            maxSizeInBytes={s.maxSizeInBytes}
-            dragAndDrop={this.props.dragAndDrop}
-            dragAndDropMessage={this.props.dragAndDropMessage}
-            fileType={this.props.fileType}
-            onFileLoaded={this.handleFileLoaded}
-            typeName={s.ctx.propertyRoute.typeReference().name}
-            buttonCss={s.ctx.buttonClass}
-            divHtmlAttributes={{ className: "sf-file-line-new" }} />
-        }
-      </FormGroup>
-    );
-  }
+  function renderImage() {
 
-
-  renderImage() {
-
-    var ctx = this.state.ctx;
+    var ctx = p.ctx;
 
     const val = ctx.value!;
 
     var content = ctx.propertyRoute.typeReference().isLite ?
-      Retrieve.create(val as Lite<IFile & Entity>, file => <FileImage file={file} {...this.props.imageHtmlAttributes} />) :
-      <FileImage file={val as IFile & ModifiableEntity} {...this.props.imageHtmlAttributes} />
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />;
 
-    const removeButton = this.renderRemoveButton(true, val);
+    const removeButton = c.renderRemoveButton(true, val);
 
     if (removeButton == null)
       return content;
@@ -108,5 +107,10 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
       </div>
     );
   }
-}
+});
+
+FileImageLine.defaultProps = {
+  accept: "image/*",
+  dragAndDrop: true
+};
 

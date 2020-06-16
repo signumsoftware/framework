@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -55,10 +55,11 @@ namespace Signum.React.Omnibox
             return QueryLogic.Queries.QueryAllowed(queryName, true);
         }
 
-        public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
+        public override Lite<Entity>? RetrieveLite(Type type, PrimaryKey id)
         {
             if (!Database.Exists(type, id))
                 return null;
+
             return Database.FillToString(Lite.Create(type, id));
         }
 

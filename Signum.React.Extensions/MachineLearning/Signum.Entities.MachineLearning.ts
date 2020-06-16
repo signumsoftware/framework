@@ -14,20 +14,20 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
 export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "AutoconfigureNeuralNetwork";
-  initialPredictor?: Entities.Lite<PredictorEntity> | null;
-  exploreLearner?: boolean;
-  exploreLearningValues?: boolean;
-  exploreHiddenLayers?: boolean;
-  exploreOutputLayer?: boolean;
-  maxLayers?: number;
-  minNeuronsPerLayer?: number;
-  maxNeuronsPerLayer?: number;
-  oneTrainingDuration?: number | null;
-  generations?: number;
-  population?: number;
-  survivalRate?: number;
-  initialMutationProbability?: number;
-  seed?: number | null;
+  initialPredictor: Entities.Lite<PredictorEntity>;
+  exploreLearner: boolean;
+  exploreLearningValues: boolean;
+  exploreHiddenLayers: boolean;
+  exploreOutputLayer: boolean;
+  maxLayers: number;
+  minNeuronsPerLayer: number;
+  maxNeuronsPerLayer: number;
+  oneTrainingDuration: number | null;
+  generations: number;
+  population: number;
+  survivalRate: number;
+  initialMutationProbability: number;
+  seed: number | null;
 }
 
 export module CNTKPredictorAlgorithm {
@@ -64,9 +64,9 @@ export type NeuralNetworkEvalFunction =
 export const NeuralNetworkHidenLayerEmbedded = new Type<NeuralNetworkHidenLayerEmbedded>("NeuralNetworkHidenLayerEmbedded");
 export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity {
   Type: "NeuralNetworkHidenLayerEmbedded";
-  size?: number;
-  activation?: NeuralNetworkActivation;
-  initializer?: NeuralNetworkInitializer;
+  size: number;
+  activation: NeuralNetworkActivation;
+  initializer: NeuralNetworkInitializer;
 }
 
 export const NeuralNetworkInitializer = new EnumType<NeuralNetworkInitializer>("NeuralNetworkInitializer");
@@ -94,23 +94,23 @@ export type NeuralNetworkLearner =
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
   Type: "NeuralNetworkSettings";
-  device?: string | null;
-  predictionType?: PredictionType;
+  device: string | null;
+  predictionType: PredictionType;
   hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
-  outputActivation?: NeuralNetworkActivation;
-  outputInitializer?: NeuralNetworkInitializer;
-  learner?: NeuralNetworkLearner;
-  lossFunction?: NeuralNetworkEvalFunction;
-  evalErrorFunction?: NeuralNetworkEvalFunction;
-  learningRate?: number;
-  learningMomentum?: number | null;
-  learningUnitGain?: boolean | null;
-  learningVarianceMomentum?: number | null;
-  minibatchSize?: number;
-  numMinibatches?: number;
-  bestResultFromLast?: number;
-  saveProgressEvery?: number;
-  saveValidationProgressEvery?: number;
+  outputActivation: NeuralNetworkActivation;
+  outputInitializer: NeuralNetworkInitializer;
+  learner: NeuralNetworkLearner;
+  lossFunction: NeuralNetworkEvalFunction;
+  evalErrorFunction: NeuralNetworkEvalFunction;
+  learningRate: number;
+  learningMomentum: number | null;
+  learningUnitGain: boolean | null;
+  learningVarianceMomentum: number | null;
+  minibatchSize: number;
+  numMinibatches: number;
+  bestResultFromLast: number;
+  saveProgressEvery: number;
+  saveValidationProgressEvery: number;
 }
 
 export const PredictionSet = new EnumType<PredictionSet>("PredictionSet");
@@ -133,36 +133,36 @@ export interface PredictorAlgorithmSymbol extends Entities.Symbol {
 export const PredictorClassificationMetricsEmbedded = new Type<PredictorClassificationMetricsEmbedded>("PredictorClassificationMetricsEmbedded");
 export interface PredictorClassificationMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorClassificationMetricsEmbedded";
-  totalCount?: number;
-  missCount?: number;
-  missRate?: number | null;
+  totalCount: number;
+  missCount: number;
+  missRate: number | null;
 }
 
 export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>("PredictorCodification");
 export interface PredictorCodificationEntity extends Entities.Entity {
   Type: "PredictorCodification";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  usage?: PredictorColumnUsage;
-  index?: number;
-  subQueryIndex?: number | null;
-  originalColumnIndex?: number;
-  splitKey0?: string | null;
-  splitKey1?: string | null;
-  splitKey2?: string | null;
-  isValue?: string | null;
-  average?: number | null;
-  stdDev?: number | null;
-  min?: number | null;
-  max?: number | null;
+  predictor: Entities.Lite<PredictorEntity>;
+  usage: PredictorColumnUsage;
+  index: number;
+  subQueryIndex: number | null;
+  originalColumnIndex: number;
+  splitKey0: string | null;
+  splitKey1: string | null;
+  splitKey2: string | null;
+  isValue: string | null;
+  average: number | null;
+  stdDev: number | null;
+  min: number | null;
+  max: number | null;
 }
 
 export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
 export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorColumnEmbedded";
-  usage?: PredictorColumnUsage;
-  token?: UserAssets.QueryTokenEmbedded | null;
-  encoding?: PredictorColumnEncodingSymbol | null;
-  nullHandling?: PredictorColumnNullHandling;
+  usage: PredictorColumnUsage;
+  token: UserAssets.QueryTokenEmbedded;
+  encoding: PredictorColumnEncodingSymbol;
+  nullHandling: PredictorColumnNullHandling;
 }
 
 export const PredictorColumnEncodingSymbol = new Type<PredictorColumnEncodingSymbol>("PredictorColumnEncoding");
@@ -186,38 +186,38 @@ export type PredictorColumnUsage =
 export const PredictorEntity = new Type<PredictorEntity>("Predictor");
 export interface PredictorEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "Predictor";
-  name?: string | null;
-  settings?: PredictorSettingsEmbedded | null;
-  algorithm?: PredictorAlgorithmSymbol | null;
-  resultSaver?: PredictorResultSaverSymbol | null;
-  publication?: PredictorPublicationSymbol | null;
-  trainingException?: Entities.Lite<Basics.ExceptionEntity> | null;
-  user?: Entities.Lite<Basics.IUserEntity> | null;
-  algorithmSettings?: IPredictorAlgorithmSettings | null;
-  state?: PredictorState;
+  name: string | null;
+  settings: PredictorSettingsEmbedded;
+  algorithm: PredictorAlgorithmSymbol;
+  resultSaver: PredictorResultSaverSymbol | null;
+  publication: PredictorPublicationSymbol | null;
+  trainingException: Entities.Lite<Basics.ExceptionEntity> | null;
+  user: Entities.Lite<Basics.IUserEntity> | null;
+  algorithmSettings: IPredictorAlgorithmSettings;
+  state: PredictorState;
   mainQuery: PredictorMainQueryEmbedded;
   subQueries: Entities.MList<PredictorSubQueryEntity>;
   files: Entities.MList<Files.FilePathEmbedded>;
-  resultTraining?: PredictorMetricsEmbedded | null;
-  resultValidation?: PredictorMetricsEmbedded | null;
-  classificationTraining?: PredictorClassificationMetricsEmbedded | null;
-  classificationValidation?: PredictorClassificationMetricsEmbedded | null;
-  regressionTraining?: PredictorRegressionMetricsEmbedded | null;
-  regressionValidation?: PredictorRegressionMetricsEmbedded | null;
+  resultTraining: PredictorMetricsEmbedded | null;
+  resultValidation: PredictorMetricsEmbedded | null;
+  classificationTraining: PredictorClassificationMetricsEmbedded | null;
+  classificationValidation: PredictorClassificationMetricsEmbedded | null;
+  regressionTraining: PredictorRegressionMetricsEmbedded | null;
+  regressionValidation: PredictorRegressionMetricsEmbedded | null;
 }
 
 export const PredictorEpochProgressEntity = new Type<PredictorEpochProgressEntity>("PredictorEpochProgress");
 export interface PredictorEpochProgressEntity extends Entities.Entity {
   Type: "PredictorEpochProgress";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  creationDate?: string;
-  ellapsed?: number;
-  trainingExamples?: number;
-  epoch?: number;
-  lossTraining?: number | null;
-  evaluationTraining?: number | null;
-  lossValidation?: number | null;
-  evaluationValidation?: number | null;
+  predictor: Entities.Lite<PredictorEntity>;
+  creationDate: string;
+  ellapsed: number;
+  trainingExamples: number;
+  epoch: number;
+  lossTraining: number | null;
+  evaluationTraining: number | null;
+  lossValidation: number | null;
+  evaluationValidation: number | null;
 }
 
 export module PredictorFileType {
@@ -227,8 +227,8 @@ export module PredictorFileType {
 export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMainQueryEmbedded";
-  query?: Basics.QueryEntity | null;
-  groupResults?: boolean;
+  query: Basics.QueryEntity;
+  groupResults: boolean;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorColumnEmbedded>;
 }
@@ -266,8 +266,8 @@ export module PredictorMessage {
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
 export interface PredictorMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMetricsEmbedded";
-  loss?: number | null;
-  evaluation?: number | null;
+  loss: number | null;
+  evaluation: number | null;
 }
 
 export module PredictorOperation {
@@ -295,12 +295,12 @@ export interface PredictorPublicationSymbol extends Entities.Symbol {
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
 export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorRegressionMetricsEmbedded";
-  meanError?: number | null;
-  meanSquaredError?: number | null;
-  meanAbsoluteError?: number | null;
-  rootMeanSquareError?: number | null;
-  meanPercentageError?: number | null;
-  meanAbsolutePercentageError?: number | null;
+  meanError: number | null;
+  meanSquaredError: number | null;
+  meanAbsoluteError: number | null;
+  rootMeanSquareError: number | null;
+  meanPercentageError: number | null;
+  meanAbsolutePercentageError: number | null;
 }
 
 export const PredictorResultSaverSymbol = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");
@@ -311,8 +311,8 @@ export interface PredictorResultSaverSymbol extends Entities.Symbol {
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSettingsEmbedded";
-  testPercentage?: number;
-  seed?: number | null;
+  testPercentage: number;
+  seed: number | null;
 }
 
 export module PredictorSimpleResultSaver {
@@ -330,10 +330,10 @@ export type PredictorState =
 export const PredictorSubQueryColumnEmbedded = new Type<PredictorSubQueryColumnEmbedded>("PredictorSubQueryColumnEmbedded");
 export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSubQueryColumnEmbedded";
-  usage?: PredictorSubQueryColumnUsage;
-  token?: UserAssets.QueryTokenEmbedded | null;
-  encoding?: PredictorColumnEncodingSymbol | null;
-  nullHandling?: PredictorColumnNullHandling | null;
+  usage: PredictorSubQueryColumnUsage;
+  token: UserAssets.QueryTokenEmbedded;
+  encoding: PredictorColumnEncodingSymbol;
+  nullHandling: PredictorColumnNullHandling | null;
 }
 
 export const PredictorSubQueryColumnUsage = new EnumType<PredictorSubQueryColumnUsage>("PredictorSubQueryColumnUsage");
@@ -346,27 +346,27 @@ export type PredictorSubQueryColumnUsage =
 export const PredictorSubQueryEntity = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
 export interface PredictorSubQueryEntity extends Entities.Entity {
   Type: "PredictorSubQuery";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  name?: string | null;
-  query?: Basics.QueryEntity | null;
+  predictor: Entities.Lite<PredictorEntity>;
+  name: string;
+  query: Basics.QueryEntity;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
-  order?: number;
+  order: number;
 }
 
 export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
 export interface PredictSimpleResultEntity extends Entities.Entity {
   Type: "PredictSimpleResult";
-  predictor?: Entities.Lite<PredictorEntity> | null;
-  target?: Entities.Lite<Entities.Entity> | null;
-  key0?: string | null;
-  key1?: string | null;
-  key2?: string | null;
-  type?: PredictionSet;
-  originalCategory?: string | null;
-  originalValue?: number | null;
-  predictedCategory?: string | null;
-  predictedValue?: number | null;
+  predictor: Entities.Lite<PredictorEntity>;
+  target: Entities.Lite<Entities.Entity> | null;
+  key0: string | null;
+  key1: string | null;
+  key2: string | null;
+  type: PredictionSet;
+  originalCategory: string | null;
+  originalValue: number | null;
+  predictedCategory: string | null;
+  predictedValue: number | null;
 }
 
 

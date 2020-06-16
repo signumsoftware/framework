@@ -77,7 +77,7 @@ export default function renderColumns({ data, width, height, parameters, loading
           transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
           height={y(valueColumn.getValue(r))}
           width={x.bandwidth()}
-          fill={keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r))}
+          fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           cursor="pointer"
           stroke={x.bandwidth() > 4 ? '#fff' : undefined}
           onClick={e => onDrillDown(r)}>
@@ -94,7 +94,7 @@ export default function renderColumns({ data, width, height, parameters, loading
               transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, 0) + rotate(-90)}
               dominantBaseline="middle"
               fontWeight="bold"
-              fill={(keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
+              fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
               textAnchor="end"
               cursor="pointer"
               onClick={de => onDrillDown(r)}>
@@ -110,7 +110,7 @@ export default function renderColumns({ data, width, height, parameters, loading
                     transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))) + rotate(-90)}
                     dominantBaseline="middle"
                     fontWeight="bold"
-                    fill={y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))}
+                    fill={y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dx={y(valueColumn.getValue(r)) >= size / 2 ? -labelMargin : labelMargin}
                     textAnchor={y(valueColumn.getValue(r)) >= size / 2 ? 'end' : 'start'}
                     onClick={e => onDrillDown(r)}
@@ -127,7 +127,7 @@ export default function renderColumns({ data, width, height, parameters, loading
             .filter(r => y(valueColumn.getValue(r)) > 10)
             .map(r => <text key={keyColumn.getValueKey(r)} className="number-label sf-transition"
               transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r)) / 2) + rotate(-90)}
-              fill={parameters["NumberColor"] || "#000"}
+              fill={parameters["NumberColor"] ?? "#000"}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}
               textAnchor="middle"

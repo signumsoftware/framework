@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
@@ -10,7 +10,7 @@ namespace Signum.Entities.Alerts
     public class AlertEntity : Entity
     {
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity>? Target { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
@@ -19,67 +19,44 @@ namespace Signum.Entities.Alerts
 
         public DateTime? AttendedDate { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Title { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Title { get; set; }
 
         [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Text { get; set; }
 
-        public Lite<IUserEntity> CreatedBy { get; set; }
+        public Lite<IUserEntity>? CreatedBy { get; set; }
 
-        public Lite<IUserEntity> Recipient { get; set; }
+        public Lite<IUserEntity>? Recipient { get; set; }
 
-        public Lite<IUserEntity> AttendedBy { get; set; }
+        public Lite<IUserEntity>? AttendedBy { get; set; }
 
-        public AlertTypeEntity AlertType { get; set; }
+        public AlertTypeEntity? AlertType { get; set; }
 
         public AlertState State { get; set; }
 
         public override string ToString()
         {
-            return Text.FirstNonEmptyLine().Etc(100);
+            return Text.FirstNonEmptyLine()?.Etc(100)!;
         }
 
-        static Expression<Func<AlertEntity, bool>> AttendedExpression =
-           a => a.AttendedDate.HasValue;
-        [ExpressionField]
-        public bool Attended
-        {
-            get { return AttendedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Attended => As.Expression(() => AttendedDate.HasValue);
 
-        static Expression<Func<AlertEntity, bool>> NotAttendedExpression =
-           a => a.AttendedDate == null;
-        [ExpressionField]
-        public bool NotAttended
-        {
-            get { return NotAttendedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool NotAttended => As.Expression(() => AttendedDate == null);
 
-        static Expression<Func<AlertEntity, bool>> AlertedExpression =
-            a => !a.AttendedDate.HasValue && a.AlertDate <= TimeZoneManager.Now;
-        [ExpressionField]
-        public bool Alerted
-        {
-            get { return AlertedExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Alerted => As.Expression(() => !AttendedDate.HasValue && AlertDate <= TimeZoneManager.Now);
 
-        static Expression<Func<AlertEntity, bool>> FutureExpression =
-            a => !a.AttendedDate.HasValue && a.AlertDate > TimeZoneManager.Now;
-        [ExpressionField]
-        public bool Future
-        {
-            get { return FutureExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public bool Future => As.Expression(() => !AttendedDate.HasValue && AlertDate > TimeZoneManager.Now);
 
-        static Expression<Func<AlertEntity, AlertCurrentState>> CurrentStateExpression =
-            a => a.AttendedDate.HasValue ? AlertCurrentState.Attended :
-                a.AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted : AlertCurrentState.Future;
-        [ExpressionField]
-        public AlertCurrentState CurrentState
-        {
-            get { return CurrentStateExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public AlertCurrentState CurrentState => As.Expression(() =>
+            AttendedDate.HasValue ? AlertCurrentState.Attended :
+            AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted :
+            AlertCurrentState.Future);
     }
 
     public enum AlertState

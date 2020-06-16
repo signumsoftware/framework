@@ -1,4 +1,3 @@
-﻿/// <reference path="react-rte.d.ts" />
 import * as React from 'react'
 import RichTextEditor, { EditorValue } from 'react-rte';
 import { IBinding } from '@framework/Reflection';
@@ -10,33 +9,35 @@ export interface HtmlEditorProps {
   editorStyle?: React.CSSProperties;
 }
 
-export default class HtmlEditor extends React.Component<HtmlEditorProps, { editorValue: EditorValue }>{
-  constructor(props: HtmlEditorProps) {
-    super(props);
+export default function HtmlEditor(p: HtmlEditorProps) {
 
-    this.state = { editorValue: RichTextEditor.createValueFromString(props.binding.getValue() || "", "html") };
+
+  const [editorValue, setEditorValue] = React.useState<EditorValue>(() => RichTextEditor.createValueFromString(p.binding.getValue() ?? "", "html"));
+
+  React.useEffect(() => {
+
+
+    return () => { saveHtml() };
+  });
+
+  function componentWillUnmount() {
+    saveHtml();
   }
 
-  componentWillUnmount() {
-    this.saveHtml();
+  function saveHtml() {
+    if (!p.readonly)
+      p.binding.setValue(editorValue.toString("html") ?? "");
   }
 
-  saveHtml() {
-    if (!this.props.readonly)
-      this.props.binding.setValue(this.state.editorValue.toString("html") || "");
-  }
-
-  render() {
-    return (
-      <RichTextEditor
-        value={this.state.editorValue}
-        readOnly={this.props.readonly}
-        onChange={ev => this.setState({ editorValue: ev })}
-        onBlur={() => this.saveHtml()}
-        rootStyle={this.props.rootStyle}
-        editorStyle={this.props.editorStyle}
-      />
-    );
-  }
+  return (
+    <RichTextEditor
+      value={editorValue}
+      readOnly={p.readonly}
+      onChange={ev => setEditorValue(editorValue)}
+      rootStyle={p.rootStyle}
+      editorStyle={p.editorStyle}
+      {...({ onBlur: () => saveHtml() }) as any}
+    />
+  );
 }
 

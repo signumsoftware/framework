@@ -29,16 +29,16 @@ export interface FilePathEmbedded extends IFilePath { }
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
   Type: "FileEmbedded";
-  fileName?: string | null;
-  binaryFile?: string | null;
+  fileName: string;
+  binaryFile: string;
 }
 
 export const FileEntity = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
   Type: "File";
-  fileName?: string | null;
-  hash?: string | null;
-  binaryFile?: string | null;
+  fileName: string;
+  hash: string;
+  binaryFile: string;
 }
 
 export module FileMessage {
@@ -64,24 +64,24 @@ export module FileMessage {
 export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
 export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
-  fileName?: string | null;
-  binaryFile?: string | null;
-  fileLength?: number;
-  suffix?: string | null;
-  calculatedDirectory?: string | null;
-  fileType?: FileTypeSymbol | null;
+  fileName: string;
+  binaryFile: string;
+  fileLength: number;
+  suffix: string;
+  calculatedDirectory: string | null;
+  fileType: FileTypeSymbol;
 }
 
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Patterns.LockableEntity {
   Type: "FilePath";
-  creationDate?: string;
-  fileName?: string | null;
-  binaryFile?: string | null;
-  fileLength?: number;
-  suffix?: string | null;
-  calculatedDirectory?: string | null;
-  fileType?: FileTypeSymbol | null;
+  creationDate: string;
+  fileName: string;
+  binaryFile: string;
+  fileLength: number;
+  suffix: string;
+  calculatedDirectory: string | null;
+  fileType: FileTypeSymbol;
 }
 
 export module FilePathOperation {

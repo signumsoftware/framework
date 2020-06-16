@@ -64,14 +64,10 @@ namespace Signum.Engine.Dynamic
                             .Where(a => a.Mixin<DisabledMixin>().IsDisabled == false)
                             .ToList();
 
-                    var dtcg = new DynamicApiCodeGenerator(DynamicCode.CodeGenControllerNamespace, controllers, DynamicCode.Namespaces);
+                    var dtcg = new DynamicApiCodeGenerator(DynamicCode.CodeGenControllerNamespace, controllers, DynamicCode.GetNamespaces().ToHashSet());
 
                     var content = dtcg.GetFileCode();
-                    result.Add(new CodeFile
-                    {
-                        FileName = "CodeGenController.cs",
-                        FileContent = content,
-                    });
+                    result.Add(new CodeFile("CodeGenController.cs", content));
                     return result;
                 }
             }
@@ -86,7 +82,6 @@ namespace Signum.Engine.Dynamic
     {
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
-        public string TypeName { get; private set; }
         public List<DynamicApiEntity> DynamicApis { get; private set; }
 
         public DynamicApiCodeGenerator(string @namespace, List<DynamicApiEntity> dynamicApis, HashSet<string> usings)

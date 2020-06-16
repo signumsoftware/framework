@@ -28,17 +28,17 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        private static Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
+        private static Assembly AssemblyResolveHandler(object? sender, ResolveEventArgs args)
         {
-            if (args.Name.StartsWith(DynamicCode.CodeGenAssembly.Before(".")))
-                return Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+            if (args.Name!.StartsWith(DynamicCode.CodeGenAssembly.Before(".")))
+                return Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
 
-            return null;
+            return null!;
         }
 
-        public static Func<List<CodeFile>> GetCodeFiles = null;
-        public static Action<StringBuilder, int> OnWriteDynamicStarter;
-        public static Exception CodeGenError;
+        public static Func<List<CodeFile>>? GetCodeFiles;
+        public static Action<StringBuilder, int>? OnWriteDynamicStarter;
+        public static Exception? CodeGenError;
 
         public static FileInfo GetLastCodeGenAssemblyFileInfo()
         {
@@ -50,7 +50,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLastCodeGenControllerAssemblyFileInfo()
+        public static FileInfo? GetLastCodeGenControllerAssemblyFileInfo()
         {
             Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
 
@@ -60,7 +60,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLoadedCodeGenAssemblyFileInfo()
+        public static FileInfo? GetLoadedCodeGenAssemblyFileInfo()
         {
             if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
                 return null;
@@ -70,7 +70,7 @@ namespace Signum.Engine.Dynamic
                 .FirstOrDefault();
         }
 
-        public static FileInfo GetLoadedCodeGenControllerAssemblyFileInfo()
+        public static FileInfo? GetLoadedCodeGenControllerAssemblyFileInfo()
         {
             if (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty())
                 return null;
@@ -94,7 +94,7 @@ namespace Signum.Engine.Dynamic
             var errors = new List<string>();
             try
             {
-                CompilationResult cr = null;
+                CompilationResult? cr = null;
 
                 bool cleaned = false;
                 if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
@@ -106,7 +106,6 @@ namespace Signum.Engine.Dynamic
                         Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
 
                         cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false);
-                        //cr = Compile(codeFiles, inMemory: false);
 
                         if (cr.Errors.Count == 0)
                             DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
@@ -119,7 +118,6 @@ namespace Signum.Engine.Dynamic
                 {
                     Dictionary<string, CodeFile> codeFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
                     cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true);
-                    //cr = CompileDynamicApi(inMemory: false);
 
                     if (cr.Errors.Count == 0)
                         DynamicCode.CodeGenControllerAssemblyPath = cr.OutputAssembly;
@@ -159,9 +157,9 @@ namespace Signum.Engine.Dynamic
 
             try
             {
-                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
                 Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenMixinLogic").SingleEx();
-                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
                 mi.Invoke(null, null);
             }
             catch (Exception e)
@@ -177,9 +175,9 @@ namespace Signum.Engine.Dynamic
 
             try
             {
-                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
                 Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenBeforeSchemaLogic").SingleEx();
-                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
                 mi.Invoke(null, new[] { sb });
             }
             catch (Exception e)
@@ -195,9 +193,9 @@ namespace Signum.Engine.Dynamic
 
             try
             {
-                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
                 Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
-                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
                 mi.Invoke(null, new object[] { sb });
             }
             catch (Exception e)
@@ -213,8 +211,14 @@ namespace Signum.Engine.Dynamic
 
         public class CompilationResult
         {
-            public string OutputAssembly;
+            public string? OutputAssembly;
             public List<CompilationError> Errors;
+
+            public CompilationResult(string? outputAssembly, List<CompilationError> errors)
+            {
+                OutputAssembly = outputAssembly;
+                Errors = errors;
+            }
         }
 
         public class CompilationError
@@ -225,6 +229,16 @@ namespace Signum.Engine.Dynamic
             public string ErrorNumber;
             public string ErrorText;
             public string FileContent;
+
+            public CompilationError(Diagnostic d)
+            {
+                this.Column = d.Location.GetLineSpan().StartLinePosition.Character;
+                this.Line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
+                this.FileContent = d.Location.SourceTree.ToString();
+                this.FileName = d.Location.SourceTree.FilePath;
+                this.ErrorNumber = d.Descriptor.Id;
+                this.ErrorText = d.GetMessage(null);
+            }
 
             public override string ToString()
             {
@@ -263,9 +277,9 @@ namespace Signum.Engine.Dynamic
                     .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly));
 
                 var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(assemblyName))
-                      .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                      .WithOptions(new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
                       .AddReferences(references)
-                      .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
+                      .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName), options: new CSharpParseOptions(LanguageVersion.CSharp8))));
 
                 var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, $"{assemblyName.Before(".")}.{Guid.NewGuid()}.dll");
 
@@ -275,28 +289,20 @@ namespace Signum.Engine.Dynamic
 
                     if (emitResult.Success && !inMemory)
                     {
-                        using (FileStream file = new FileStream(outputAssembly, FileMode.Create, FileAccess.ReadWrite))
+                        using (FileStream file = new FileStream(outputAssembly!, FileMode.Create, FileAccess.ReadWrite))
                         {
                             stream.Position = 0;
                             stream.CopyTo(file);
                         }
                     }
 
-                    return new CompilationResult
-                    {
-                        OutputAssembly = emitResult.Success ? outputAssembly : null,
-                        Errors = emitResult.Diagnostics.Where(a => a.Severity == DiagnosticSeverity.Error)
-                        .Select(d => new CompilationError
-                        {
-                            Column = d.Location.GetLineSpan().StartLinePosition.Character,
-                            Line = d.Location.GetLineSpan().StartLinePosition.Line + 1,
-                            FileContent = d.Location.SourceTree.ToString(),
-                            FileName = d.Location.SourceTree.FilePath,
-                            ErrorNumber = d.Descriptor.Id,
-                            ErrorText = d.GetMessage(null)
-                        })
-                        .ToList()
-                    };
+                    var errors = emitResult.Diagnostics.Where(a => a.Severity == DiagnosticSeverity.Error)
+                        .Select(d => new CompilationError(d)).ToList();
+
+                    return new CompilationResult(
+                        outputAssembly: emitResult.Success ? outputAssembly : null,
+                        errors: errors
+                    );
                 }
             }
         }
@@ -308,13 +314,9 @@ namespace Signum.Engine.Dynamic
             var code = dscg.GetFileCode();
 
             var starter = new List<CodeFile>
-                    {
-                        new CodeFile
-                        {
-                            FileName = "CodeGenStarter.cs",
-                            FileContent = code,
-                        }
-                    };
+            {
+                new CodeFile( "CodeGenStarter.cs",code)
+            };
 
             return starter;
         }
@@ -354,7 +356,7 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine("{");
                 sb.AppendLine("    public static void Start(SchemaBuilder sb)");
                 sb.AppendLine("    {");
-                DynamicLogic.OnWriteDynamicStarter(sb, 8);
+                DynamicLogic.OnWriteDynamicStarter?.Invoke(sb, 8);
                 sb.AppendLine("    }");
                 sb.AppendLine("}");
 
@@ -367,5 +369,11 @@ namespace Signum.Engine.Dynamic
     {
         public string FileName; //Just for debugging
         public string FileContent;
+
+        public CodeFile(string fileName, string fileContent)
+        {
+            FileName = fileName;
+            FileContent = fileContent;
+        }
     }
 }

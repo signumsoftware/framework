@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
@@ -12,7 +12,7 @@ namespace Signum.React.Selenium
 
         public IWebElement Element { get; private set; }
 
-        public FiltersProxy Filters => new FiltersProxy(this.Element.FindElement(By.CssSelector("div.sf-filters")));
+        public FiltersProxy Filters => new FiltersProxy(this.FiltersPanel.Find());
         public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(this.Element.FindElement(By.CssSelector(".sf-column-editor")));
 
         public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
@@ -45,10 +45,10 @@ namespace Signum.React.Selenium
 
         public void WaitInitialSearchCompleted()
         {
-            WaitSearchCompleted((string)null);
+            WaitSearchCompleted((string?)null);
         }
 
-        void WaitSearchCompleted(string counter)
+        void WaitSearchCompleted(string? counter)
         {
             Selenium.Wait(() =>
              this.Element.GetAttribute("data-search-count") != counter
@@ -76,7 +76,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator FiltersPanel
         {
-            get { return this.Element.WithLocator(By.ClassName("sf-filters")); }
+            get { return this.Element.WithLocator(By.ClassName("sf-filters-list")); }
         }
 
         public void ToggleFilters(bool show)
@@ -92,22 +92,22 @@ namespace Signum.React.Selenium
 
         public WebElementLocator ContextualMenu => this.Element.WithLocator(By.ClassName("sf-context-menu"));
 
-        public FilterConditionOptionProxy AddQuickFilter(int rowIndex, string token)
+        public FilterConditionProxy AddQuickFilter(int rowIndex, string token)
         {
             Results.CellElement(rowIndex, token).Find().ContextClick();
 
             var menuItem = ContextualMenu.WaitVisible().FindElement(By.CssSelector(".sf-quickfilter-header a"));
 
-            return this.Filters.GetNewFilter(() => menuItem.Click());
+            return (FilterConditionProxy)this.Filters.GetNewFilter(() => menuItem.Click());
         }
 
-        public FilterConditionOptionProxy AddQuickFilter(string token)
+        public FilterConditionProxy AddQuickFilter(string token)
         {
             Results.HeaderCellElement(token).Find().ContextClick();
 
             var menuItem = ContextualMenu.WaitVisible().FindElement(By.CssSelector(".sf-quickfilter-header a"));
 
-            return this.Filters.GetNewFilter(() => menuItem.Click());
+            return (FilterConditionProxy)this.Filters.GetNewFilter(() => menuItem.Click());
         }
 
         public FrameModalProxy<T> Create<T>() where T : ModifiableEntity

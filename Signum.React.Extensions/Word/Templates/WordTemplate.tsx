@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, EntityCombo, EntityDetail } from '@framework/Lin
 import { TypeContext } from '@framework/TypeContext'
 import { WordTemplateEntity } from '../Signum.Entities.Word'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
-import FileLine from '../../Files/FileLine'
+import { FileLine } from '../../Files/FileLine'
 import TemplateControls from '../../Templating/TemplateControls'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable'
 import ValueLineModal from '@framework/ValueLineModal'
@@ -26,7 +26,7 @@ export default function WordTemplate(p : { ctx: TypeContext<WordTemplateEntity> 
     <div>
       <ValueLine ctx={ctx.subCtx(f => f.name)} />
       <EntityLine ctx={ctx.subCtx(f => f.query)} />
-      <EntityCombo ctx={ctx.subCtx(f => f.systemWordTemplate)} />
+      <EntityCombo ctx={ctx.subCtx(f => f.model)} />
       <EntityCombo ctx={ctx.subCtx(f => f.culture)} />
       <EntityCombo ctx={ctx.subCtx(f => f.wordTransformer)} />
       <EntityCombo ctx={ctx.subCtx(f => f.wordConverter)} />

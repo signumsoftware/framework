@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using System.Reflection;
@@ -10,10 +10,10 @@ namespace Signum.Entities.Scheduler
     public class HolidayCalendarEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
         public bool IsHoliday(DateTime date)
@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
             return Holidays.Any(h => h.Date == date);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Holidays) && Holidays != null)
             {
@@ -37,12 +37,8 @@ namespace Signum.Entities.Scheduler
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<HolidayCalendarEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -58,8 +54,8 @@ namespace Signum.Entities.Scheduler
         [DaysPrecisionValidator]
         public DateTime Date { get; set; } = DateTime.Today;
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public override string ToString()
         {

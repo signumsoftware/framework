@@ -96,7 +96,7 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
 }
 
 export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
-  
+
   if (completeValues == null || completeValues == "No")
     return values;
 
@@ -137,7 +137,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.format("YYYY-MM-DDTHH:mm:ss"));
+      allValues.push(minMoment.format());
       minMoment.add(unit, 1);
     }
 

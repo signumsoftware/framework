@@ -13,21 +13,16 @@ namespace Signum.Entities.Workflow
     public class WorkflowScriptEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
-
-        [NotNullValidator]
+        
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public WorkflowScriptEval Eval { get; set; }
 
-        static Expression<Func<WorkflowScriptEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -42,12 +37,12 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
     {
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string CustomTypes { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? CustomTypes { get; set; }
 
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowScriptEntity)this.GetParentEntity();
+            var parent = this.GetParentEntity<WorkflowScriptEntity>();
 
             var script = this.Script.Trim();
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
@@ -82,7 +77,7 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowScriptContext
     {
-        public CaseActivityEntity CaseActivity { get; internal set; }
+        public CaseActivityEntity? CaseActivity { get; internal set; }
         public int RetryCount { get; internal set; }
     }
 }

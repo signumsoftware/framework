@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -20,32 +20,24 @@ namespace Signum.Engine.Mailing
 {
     public static class NewsletterLogic
     {
-        static Expression<Func<IEmailOwnerEntity, IQueryable<NewsletterDeliveryEntity>>> NewsletterDeliveriesExpression =
-            eo => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.Is(eo));
-        [ExpressionField]
-        public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo)
-        {
-            return NewsletterDeliveriesExpression.Evaluate(eo);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo) => 
+            As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.Is(eo)));
 
-        static Expression<Func<NewsletterEntity, IQueryable<NewsletterDeliveryEntity>>> DeliveriesExpression =
-            n => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n));
-        [ExpressionField]
-        public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n)
-        {
-            return DeliveriesExpression.Evaluate(n);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n) => 
+            As.Expression(() => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n)));
         
-        public static Func<NewsletterEntity, SmtpConfigurationEntity> GetStmpConfiguration;
+        public static Func<NewsletterEntity, EmailSenderConfigurationEntity> GetEmailSenderConfiguration = null!;
 
-        public static void Start(SchemaBuilder sb, Func<NewsletterEntity, SmtpConfigurationEntity> getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<NewsletterEntity, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NewsletterEntity>();
                 sb.Include<NewsletterDeliveryEntity>();
 
-                NewsletterLogic.GetStmpConfiguration = getSmtpConfiguration;
+                NewsletterLogic.GetEmailSenderConfiguration = getEmailSenderConfiguration;
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(NewsletterProcess.SendNewsletter, new NewsletterProcessAlgorithm());
@@ -59,12 +51,12 @@ namespace Signum.Engine.Mailing
                      n.Id,
                      n.Name,
                      n.Subject,
-                     Text = n.Text.Etc(100),
+                     Text = n.Text.Try(a => a.Etc(100)),
                      n.State,
                      NumDeliveries = n.Deliveries().Count(),
                      LastProcess = p,
                      NumErrors = n.Deliveries().Count(d => d.Exception(p) != null)
-                 });           
+                 });
 
                 QueryLogic.Queries.Register(typeof(NewsletterDeliveryEntity), () =>
                     from e in Database.Query<NewsletterDeliveryEntity>()
@@ -92,17 +84,17 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static string ValidateTokens(NewsletterEntity newsletter, string text)
+        static string? ValidateTokens(NewsletterEntity newsletter, string? text)
         {
-            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryName = QueryLogic.ToQueryName(newsletter.Query!.Key);
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
             try
             {
-                EmailTemplateParser.TryParse(text, qd, null, out string error);
+                TextTemplateParser.TryParse(text, qd, null, out string error);
 
-                return error.DefaultText(null);
+                return error.DefaultToNull();
             }
             catch (Exception e)
             {
@@ -113,11 +105,11 @@ namespace Signum.Engine.Mailing
 
         static void Newsletter_PreSaving(NewsletterEntity newsletter, PreSavingContext ctx)
         {
-            var queryname = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryname = QueryLogic.ToQueryName(newsletter.Query!.Key);
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryname);
 
-            newsletter.Subject = EmailTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
-            newsletter.Text = EmailTemplateParser.Parse(newsletter.Text, qd, null).ToString();
+            newsletter.Subject = TextTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
+            newsletter.Text = TextTemplateParser.Parse(newsletter.Text, qd, null).ToString();
         }
     }
 
@@ -206,6 +198,7 @@ namespace Signum.Engine.Mailing
 
     class NewsletterProcessAlgorithm : IProcessAlgorithm
     {
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         class SendLine
         {
             public IGrouping<Lite<Entity>, ResultRow> Rows;
@@ -213,14 +206,15 @@ namespace Signum.Engine.Mailing
             public EmailOwnerData Email;
             public Exception Exception;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public int NotificationSteps = 100;
 
         public void Execute(ExecutingProcess executingProcess)
         {
-            NewsletterEntity newsletter = (NewsletterEntity)executingProcess.Data;
+            NewsletterEntity newsletter = (NewsletterEntity)executingProcess.Data!;
 
-            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+            var queryName = QueryLogic.ToQueryName(newsletter.Query!.Key);
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
@@ -232,8 +226,8 @@ namespace Signum.Engine.Mailing
                 list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, SubTokensOptions.CanElement));
                 list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, 0));
 
-                EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
-                EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
+                TextTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
+                TextTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
 
                 list = list.Distinct().ToList();
             }
@@ -266,19 +260,19 @@ namespace Signum.Engine.Mailing
             var entityColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity");
             var deliveryColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
             var emailOwnerColumn = resultTable.Columns.SingleEx(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
-            
-            var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]).Select(g => new SendLine
-                {
-                    NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn),
-                    Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn),
-                    Rows = g,
-                }).ToList();
+
+            var lines = resultTable.Rows.GroupBy(r => (Lite<Entity>)r[entityColumn]!).Select(g => new SendLine
+            {
+                NewsletterDelivery = (Lite<NewsletterDeliveryEntity>)g.DistinctSingle(deliveryColumn)!,
+                Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn)!,
+                Rows = g,
+            }).ToList();
             
             if (newsletter.SubjectParsedNode == null)
-                newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, qd, null);
+                newsletter.SubjectParsedNode = TextTemplateParser.Parse(newsletter.Subject, qd, null);
 
             if (newsletter.TextParsedNode == null)
-                newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, qd, null);
+                newsletter.TextParsedNode = TextTemplateParser.Parse(newsletter.Text, qd, null);
 
             var conf = EmailLogic.Configuration;
 
@@ -295,26 +289,26 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            var smtpConfig = NewsletterLogic.GetStmpConfiguration(newsletter);
+                            var emailSenderConfig = NewsletterLogic.GetEmailSenderConfiguration(newsletter);
 
-                            var client = smtpConfig.GenerateSmtpClient();
+                            var client = emailSenderConfig.SMTP.ThrowIfNull("Only SMTP supported").GenerateSmtpClient();
                             var message = new MailMessage();
                             
                             if (newsletter.From.HasText())
                                 message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             else
-                                message.From = smtpConfig.DefaultFrom.ToMailAddress();
+                                message.From = emailSenderConfig.DefaultFrom!.ToMailAddress();
                             
                             message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 
-                            message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
-                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
+                            message.Subject = ((TextTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
+                                new TextTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = false,
                                 });
 
-                            message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
-                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
+                            message.Body = ((TextTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
+                                new TextTemplateParameters(null, null!, dicTokenColumn, s.Rows)
                                 {
                                     IsHtml = true,
                                 });

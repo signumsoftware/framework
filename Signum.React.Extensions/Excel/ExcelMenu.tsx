@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
-import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 
 export interface ExcelMenuProps {
@@ -15,79 +15,74 @@ export interface ExcelMenuProps {
   excelReport: boolean;
 }
 
-export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelReport?: Lite<ExcelReportEntity>[], isOpen: boolean }> {
-  constructor(props: ExcelMenuProps) {
-    super(props);
-    this.state = { isOpen: false };
+export default function ExcelMenu(p: ExcelMenuProps) {
+
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  const [excelReports, setExcelReports] = React.useState<Lite<ExcelReportEntity>[] | undefined>(undefined);
+
+  function handleSelectedToggle() {
+    if (isOpen == false && excelReports == undefined)
+      reloadList().done();
+
+    setIsOpen(!isOpen);
   }
 
-  handleSelectedToggle = () => {
-
-    if (this.state.isOpen == false && this.state.excelReport == undefined)
-      this.reloadList().done();
-
-    this.setState({ isOpen: !this.state.isOpen })
-  }
-
-  reloadList(): Promise<void> {
-    return ExcelClient.API.forQuery(this.props.searchControl.props.findOptions.queryKey)
-      .then(list => this.setState({ excelReport: list }));
-  }
-
-
-  handlePlainExcel = () => {
-    ExcelClient.API.generatePlanExcel(this.props.searchControl.getQueryRequest());
+  function reloadList(): Promise<void> {
+    return ExcelClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
+      .then(list => setExcelReports(list));
   }
 
 
-  handleClick = (er: Lite<ExcelReportEntity>) => {
-    ExcelClient.API.generateExcelReport(this.props.searchControl.getQueryRequest(), er);
+  function handlePlainExcel() {
+    ExcelClient.API.generatePlainExcel(p.searchControl.getQueryRequest());
   }
 
-  handleCreate = () => {
-    Finder.API.fetchQueryEntity(this.props.searchControl.props.findOptions.queryKey)
+
+  function handleClick(er: Lite<ExcelReportEntity>) {
+    ExcelClient.API.generateExcelReport(p.searchControl.getQueryRequest(), er);
+  }
+
+  function handleCreate() {
+    Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
       .then(qe => ExcelReportEntity.New({ query: qe }))
       .then(er => Navigator.view(er))
-      .then(() => this.reloadList())
+      .then(() => reloadList())
       .done();
   }
 
-  handleAdmnister = () => {
-    Finder.explore({ queryName: ExcelReportEntity, parentToken: ExcelReportEntity.token(a => a.query!.key), parentValue: this.props.searchControl.props.findOptions.queryKey })
-      .then(() => this.reloadList())
+  function handleAdmnister() {
+    Finder.explore({ queryName: ExcelReportEntity, parentToken: ExcelReportEntity.token(a => a.query!.key), parentValue: p.searchControl.props.findOptions.queryKey })
+      .then(() => reloadList())
       .done();
   }
 
-  render() {
-    const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
 
-    if (this.props.plainExcel && !this.props.excelReport)
-      return <button className={"sf-query-button sf-search btn btn-light"} onClick={this.handlePlainExcel}>{label} </button>;
+  if (p.plainExcel && !p.excelReport)
+    return <button className={"sf-query-button sf-search btn btn-light"} onClick={handlePlainExcel}>{label} </button>;
 
-    const excelReports = this.state.excelReport;
-    return (
-      <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
-        isOpen={this.state.isOpen} toggle={this.handleSelectedToggle}>
-        <DropdownToggle color="light" caret>
-          {label as any}
-        </DropdownToggle>
-        <DropdownMenu>
-          {this.props.plainExcel && <DropdownItem onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
-          {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
-          {
-            excelReports && excelReports.map((uq, i) =>
-              <DropdownItem key={i}
-                onClick={() => this.handleClick(uq)}>
-                {uq.toStr}
-              </DropdownItem>)
-          }
-          {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>}
-          {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <DropdownItem onClick={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>}
-        </DropdownMenu>
-      </Dropdown>
-    );
-  }
+  return (
+    <Dropdown show={isOpen} onToggle={handleSelectedToggle}>
+      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
+      {label}
+      </Dropdown.Toggle>
+      <Dropdown.Menu>
+        {p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
+        {p.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Divider />}
+        {
+          excelReports?.map((uq, i) =>
+            <Dropdown.Item key={i}
+              onClick={() => handleClick(uq)}>
+              {uq.toStr}
+            </Dropdown.Item>)
+        }
+        {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}
+        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="mr-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
+        {Operations.isOperationAllowed(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 

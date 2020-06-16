@@ -3,20 +3,20 @@ import * as React from 'react'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLink from '@framework/QuickLinks'
-import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '@framework/Components/Tabs';
+import { Tab } from 'react-bootstrap';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
@@ -32,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
       (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
 
       Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-        .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
           if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
             MessageModal.show({
@@ -49,7 +49,8 @@ export function start(options: { routes: JSX.Element[] }) {
         })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
         .done();
-    }
+    },
+    alternatives: eoc => [],
   }));
 
   QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
@@ -62,22 +63,43 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
   DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
-    <Tab eventKey="migrations" title="Migrations" >
+    <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
       <h3>{DynamicRenameEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-    </Tab>;
+    </>;
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
+    { token: t.append(p => p.typeName), type: "Text" },
+    { token: t.entity(p => p.typeDefinition), type: "JSon" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
+    { token: t.append(p => p.mixinName), type: "Text" },
+    { token: t.entity(p => p.entityType.entity!.cleanName), type: "Text" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
+    { token: t.append(p => p.comment), type: "Text" },
+    { token: t.entity(p => p.script), type: "Code" },
+  ]);
+
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [
+    { token: t.append(p => p.oldName), type: "Text" },
+    { token: t.append(p => p.newName), type: "Text" },
+    { token: t.append(p => p.replacementKey), type: "Text" },
+  ]);
 }
 
 export namespace API {
 
   export function getPropertyType(property: DynamicProperty): Promise<string> {
-    return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
+    return ajaxPost({ url: `~/api/dynamic/type/propertyType` }, property);
   }
 
   export function expressionNames(typeName: string): Promise<Array<string>> {
-    return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
+    return ajaxGet({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
   }
 }
 
@@ -90,6 +112,7 @@ export interface DynamicTypeDefinition {
   operationCreate?: OperationConstruct;
   operationSave?: OperationExecute;
   operationDelete?: OperationDelete;
+  operationClone?: OperationConstructFrom;
   customInheritance?: DynamicTypeCustomCode;
   customEntityMembers?: DynamicTypeCustomCode;
   customStartCode?: DynamicTypeCustomCode;
@@ -156,6 +179,11 @@ export interface OperationExecute {
   execute: string;
 }
 
+export interface OperationConstructFrom {
+  canConstruct?: string;
+  construct: string;
+}
+
 export interface OperationDelete {
   canDelete?: string;
   delete: string;
@@ -172,9 +200,13 @@ export namespace Validators {
     type: string;
   }
 
+  export interface NotNull extends DynamicValidator {
+    type: 'NotNull';
+    disabled?: number;
+  }
+
   export interface StringLength extends DynamicValidator {
     type: 'StringLength';
-    allowNulls: boolean;
     multiLine: boolean;
     min?: number;
     max?: number;

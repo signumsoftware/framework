@@ -29,27 +29,27 @@ export interface CompilationError {
 
 export namespace API {
   export function compile(): Promise<CompilationError[]> {
-    return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile?inMemory=false` }, null);
+    return ajaxPost({ url: `~/api/dynamic/compile?inMemory=false` }, null);
   }
 
   export function getCompilationErrors(): Promise<CompilationError[]> {
-    return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile?inMemory=true` }, null);
+    return ajaxPost({ url: `~/api/dynamic/compile?inMemory=true` }, null);
   }
 
   export function restartServer(): Promise<void> {
-    return ajaxPost<void>({ url: `~/api/dynamic/restartServer` }, null);
+    return ajaxPost({ url: `~/api/dynamic/restartServer` }, null);
   }
 
   export function getStartErrors(): Promise<WebApiHttpError[]> {
-    return ajaxGet<WebApiHttpError[]>({ url: `~/api/dynamic/startErrors` });
+    return ajaxGet({ url: `~/api/dynamic/startErrors` });
   }
 
   export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
-    return ajaxPost<EvalEntityError[]>({ url: `~/api/dynamic/evalErrors` }, request);
+    return ajaxPost({ url: `~/api/dynamic/evalErrors` }, request);
   }
 
   export function getPanelInformation(): Promise<DynamicPanelInformation> {
-    return ajaxPost<DynamicPanelInformation>({ url: `~/api/dynamic/getPanelInformation` }, null);
+    return ajaxPost({ url: `~/api/dynamic/getPanelInformation` }, null);
   }
 }
 

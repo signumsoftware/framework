@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
@@ -26,27 +26,22 @@ namespace Signum.Entities.Processes
 
         public ProcessEntity(ProcessAlgorithmSymbol process)
         {
-            this.algorithm = process;
+            this.Algorithm = process;
         }
+        
+        public ProcessAlgorithmSymbol Algorithm { get; private set; }
 
-        ProcessAlgorithmSymbol algorithm;
-        [NotNullValidator]
-        public ProcessAlgorithmSymbol Algorithm
-        {
-            get { return algorithm; }
-        }
-
-        public IProcessDataEntity Data { get; set; }
+        public IProcessDataEntity? Data { get; set; }
 
         public const string None = "none";
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ApplicationName { get; set; }
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> User { get; set; }
 
         public ProcessState State { get; set; }
@@ -79,7 +74,7 @@ namespace Signum.Entities.Processes
         }
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
-         log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+         log => (double?)(log.ExecutionEnd - log.ExecutionStart)!.Value.TotalMilliseconds;
         [ExpressionField("DurationExpression")]
         public double? Duration
         {
@@ -98,13 +93,13 @@ namespace Signum.Entities.Processes
 
         public DateTime? ExceptionDate { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         [NumberBetweenValidator(0, 1), Format("p")]
         public decimal? Progress { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
         (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.Status, e => e.ExceptionDate, e => e.Exception, e => e.MachineName, e => e.ApplicationName)
@@ -120,7 +115,7 @@ namespace Signum.Entities.Processes
        {ProcessState.Error,     null,           null,                   null,              null,                  null,                null,               null,        null,         true,                true ,          null,          null },
         };
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(ExecutionStart) || pi.Name == nameof(ExecutionEnd))
             {
@@ -139,16 +134,16 @@ namespace Signum.Entities.Processes
         {
             switch (State)
             {
-                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), CreationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
-                case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
-                case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Finished.NiceToString(), executionEnd);
-                case ProcessState.Error: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Error.NiceToString(), executionEnd);
-                default: return "{0} ??".FormatWith(algorithm);
+                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Created.NiceToString(), CreationDate);
+                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(Algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
+                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
+                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
+                case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Executing.NiceToString(), executionStart);
+                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
+                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
+                case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Finished.NiceToString(), executionEnd);
+                case ProcessState.Error: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Error.NiceToString(), executionEnd);
+                default: return "{0} ??".FormatWith(Algorithm);
             }
         }
     }
@@ -211,14 +206,12 @@ namespace Signum.Entities.Processes
     public class ProcessExceptionLineEntity : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
-        public string ElementInfo { get; set; }
+        public string? ElementInfo { get; set; }
 
-        public Lite<IProcessLineDataEntity> Line { get; set; }
-
-        [NotNullValidator]
+        public Lite<IProcessLineDataEntity>? Line { get; set; }
+        
         public Lite<ProcessEntity> Process { get; set; }
-
-        [NotNullValidator]
+        
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

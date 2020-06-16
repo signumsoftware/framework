@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,43 +18,26 @@ namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
-        static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
-            c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c));
-        [ExpressionField]
-        public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c)
-        {
-            return ReceptionsExpression.Evaluate(c);
-        }
+        [AutoExpressionField]
+        public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c) => 
+            As.Expression(() => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c)));
 
-        static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
-            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Is(r));
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
-        {
-            return EmailMessagesExpression.Evaluate(r);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r) => 
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r)));
 
-        static Expression<Func<Pop3ReceptionEntity, IQueryable<ExceptionEntity>>> ExceptionsExpression =
-            e => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity);
-        [ExpressionField]
-        public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e)
-        {
-            return ExceptionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e) => 
+            As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
+
+        [AutoExpressionField]
+        public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) => 
+            As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
+
+        public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client = null!;
 
 
-        static Expression<Func<ExceptionEntity, Pop3ReceptionEntity>> Pop3ReceptionExpression =
-            ex => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx();
-        [ExpressionField]
-        public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity entity)
-        {
-            return Pop3ReceptionExpression.Evaluate(entity);
-        }
-
-        public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
-
-
-        public static Action<Pop3ReceptionEntity> ReceptionComunication;
+        public static Action<Pop3ReceptionEntity>? ReceptionComunication;
 
         public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
@@ -88,7 +71,7 @@ namespace Signum.Engine.Mailing.Pop3
                         e.Template,
                         e.State,
                         e.Sent,
-                        SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
+                        SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate,
                         e.Package,
                         e.Exception,
                     });
@@ -146,7 +129,7 @@ namespace Signum.Engine.Mailing.Pop3
             }
         }
 
-        public static event Func<Pop3ConfigurationEntity, IDisposable> SurroundReceiveEmail;
+        public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;
 
         public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config)
         {
@@ -176,9 +159,9 @@ namespace Signum.Engine.Mailing.Pop3
 
 
                         var lastsEmails = Database.Query<EmailMessageEntity>()
-                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Entity.Pop3Configuration.Is(config))
-                            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo.UniqueId })
-                            .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId);
+                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.Pop3Configuration.Is(config))
+                            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
+                            .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId!); /*CSBUG*/
 
 
                         List<MessageUid> messagesToSave;
@@ -251,7 +234,7 @@ namespace Signum.Engine.Mailing.Pop3
                  where ri != null && ri.UniqueId == mi.Uid
                  select em)
                  .UnsafeUpdate()
-                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo.DeletionDate, em => now)
+                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo!.DeletionDate, em => now)
                  .Execute();
             }
         }
@@ -278,7 +261,7 @@ namespace Signum.Engine.Mailing.Pop3
                             (from em in Database.Query<EmailMessageEntity>()
                              let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
                              where ri != null && l.Contains(ri.UniqueId)
-                             select KVP.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
+                             select KeyValuePair.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
 
                         using (Transaction tr = Transaction.ForceNew())
                         {
@@ -338,7 +321,7 @@ namespace Signum.Engine.Mailing.Pop3
                 using (OperationLogic.AllowSave<EmailMessageEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
-                    string rawContent = null;
+                    string? rawContent = null;
                     try
                     {
                         var email = client.GetMessage(mi, reception.ToLite());
@@ -349,7 +332,7 @@ namespace Signum.Engine.Mailing.Pop3
                         {
                             email.Recipients.Add(new EmailRecipientEmbedded
                             {
-                                EmailAddress = config.Username,
+                                EmailAddress = config.Username!,
                                 Kind = EmailRecipientKind.To,
                             });
                         }
@@ -359,7 +342,7 @@ namespace Signum.Engine.Mailing.Pop3
                             .Select(a => a.ToLite())
                             .FirstOrDefault();
 
-                        if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                        if (duplicate != null && AreDuplicates(email, duplicate.RetrieveAndRemember()))
                         {
                             var dup = duplicate.Entity;
 
@@ -374,7 +357,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         email.Save();
 
-                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
+                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate;
 
                         tr.Commit();
                     }
@@ -427,7 +410,7 @@ namespace Signum.Engine.Mailing.Pop3
             return true;
         }
 
-        public static Action<EmailMessageEntity> AssociateNewEmail;
-        public static Action<EmailMessageEntity, EmailMessageEntity> AssociateDuplicateEmail;
+        public static Action<EmailMessageEntity>? AssociateNewEmail;
+        public static Action<EmailMessageEntity, EmailMessageEntity>? AssociateDuplicateEmail;
     }
 }

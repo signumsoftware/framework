@@ -55,7 +55,7 @@ namespace Signum.Engine.Dynamic
                     {
                         if (!e.IsNew)
                         {
-                            var old = e.ToLite().Retrieve();
+                            var old = e.ToLite().RetrieveAndRemember();
                             if (old.Name != e.Name)
                             {
                                 DynamicSqlMigrationLogic.AddDynamicRename(typeof(TypeConditionSymbol).Name,
@@ -93,11 +93,7 @@ namespace Signum.Engine.Dynamic
                     var dtcg = new DynamicTypeConditionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, typeConditions, typeConditionSymbols, DynamicCode.Namespaces);
 
                     var content = dtcg.GetFileCode();
-                    result.Add(new CodeFile
-                    {
-                        FileName = "CodeGenTypeCondition.cs",
-                        FileContent = content,
-                    });
+                    result.Add(new CodeFile("CodeGenTypeCondition.cs", content));
                     return result;
                 }
             }
@@ -112,7 +108,6 @@ namespace Signum.Engine.Dynamic
     {
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
-        public string TypeName { get; private set; }
         public List<DynamicTypeConditionSymbolEntity> TypeConditionSymbols { get; private set; }
         public List<DynamicTypeConditionEntity> TypeConditions { get; private set; }
 

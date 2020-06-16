@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Entities.Basics;
@@ -10,25 +10,25 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NewsletterEntity : Entity, IProcessDataEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public NewsletterState State { get; set; } = NewsletterState.Created;
 
-                [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+                [EMailValidator, StringLengthValidator(Min = 3, Max = 100)]
         public string From { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string DisplayFrom { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
-        public string Subject { get; set; }
+        [StringLengthValidator(Min = 3, Max = 300)]
+        public string? Subject { get; set; }
 
         [Ignore]
         internal object SubjectParsedNode;
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
-        public string Text { get; set; }
+        [StringLengthValidator(Min = 3, MultiLine = true)]
+        public string? Text { get; set; }
 
         [Ignore]
         internal object TextParsedNode;
@@ -41,20 +41,16 @@ namespace Signum.Entities.Mailing
                 { NewsletterState.Sent,    true,           true },
             };
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
 
-        public QueryEntity Query { get; set; }
+        public QueryEntity? Query { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
@@ -65,7 +61,7 @@ namespace Signum.Entities.Mailing
         [DateTimePrecisionValidator(DateTimePrecision.Seconds)]
         public DateTime? SendDate { get; set; }
 
-        public Lite<IEmailOwnerEntity> Recipient { get; set; }
+        public Lite<IEmailOwnerEntity>? Recipient { get; set; }
 
         public Lite<NewsletterEntity> Newsletter { get; set; }
     }

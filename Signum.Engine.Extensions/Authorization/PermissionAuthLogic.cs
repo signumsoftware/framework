@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
             get { return permissions; }
         }
 
-        static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache;
+        static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache = null!;
 
         public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
 
@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -118,7 +118,7 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".FormatWith(permissionSymbol));
         }
 
-        public static string IsAuthorizedString(this PermissionSymbol permissionSymbol)
+        public static string? IsAuthorizedString(this PermissionSymbol permissionSymbol)
         {
             if (!IsAuthorized(permissionSymbol))
                 return "Permission '{0}' is denied".FormatWith(permissionSymbol);

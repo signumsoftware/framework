@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,15 +10,11 @@ namespace Signum.Entities.Isolation
     public class IsolationEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public static readonly SessionVariable<Lite<IsolationEntity>> DefaultVariable = Statics.SessionVariable<Lite<IsolationEntity>>("DefaultIsolation");
         public static Lite<IsolationEntity> Default
@@ -28,7 +24,7 @@ namespace Signum.Entities.Isolation
         }
 
 
-        public static IDisposable Override(Lite<IsolationEntity> isolation)
+        public static IDisposable? Override(Lite<IsolationEntity>? isolation)
         {
             if (isolation == null)
                 return null;
@@ -47,13 +43,13 @@ namespace Signum.Entities.Isolation
 
         //null: no override
         //Tuple<T>(null): override to null
-        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>>>("CurrentIsolation");
+        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>?>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>?>>("CurrentIsolation");
         public static IDisposable Disable()
         {
             return UnsafeOverride(null);
         }
 
-        public static IDisposable UnsafeOverride(Lite<IsolationEntity> isolation)
+        public static IDisposable UnsafeOverride(Lite<IsolationEntity>? isolation)
         {
             var old = CurrentThreadVariable.Value;
 
@@ -62,7 +58,7 @@ namespace Signum.Entities.Isolation
             return new Disposable(() => CurrentThreadVariable.Value = old);
         }
 
-        public static Lite<IsolationEntity> Current
+        public static Lite<IsolationEntity>? Current
         {
             get
             {
@@ -95,12 +91,12 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
+        IsolationMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 
-        [NotNullable, AttachToUniqueIndexes]
-        public Lite<IsolationEntity> Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
+        [AttachToUniqueIndexes]
+        public Lite<IsolationEntity>? Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
 
         protected override void CopyFrom(MixinEntity mixin, object[] args)
         {
@@ -110,15 +106,11 @@ namespace Signum.Entities.Isolation
 
     public static class IsolationExtensions
     {
-        static Expression<Func<IEntity, Lite<IsolationEntity>>> IsolationExpression =
-             entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
-        [ExpressionField]
-        public static Lite<IsolationEntity> Isolation(this IEntity entity)
-        {
-            return IsolationExpression.Evaluate(entity);
-        }
+        [AutoExpressionField]
+        public static Lite<IsolationEntity>? Isolation(this IEntity entity) => 
+            As.Expression(() => ((Entity)entity).Mixin<IsolationMixin>().Isolation);
 
-        public static Lite<IsolationEntity> TryIsolation(this IEntity entity)
+        public static Lite<IsolationEntity>? TryIsolation(this IEntity entity)
         {
             var mixin = ((Entity)entity).Mixins.OfType<IsolationMixin>().SingleOrDefaultEx();
 

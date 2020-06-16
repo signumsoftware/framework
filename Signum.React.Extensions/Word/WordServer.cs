@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ namespace Signum.React.Word
                 {
                     var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
                     if (applicable.HasItems())
-                        ep.Extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                        ep.extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
                 }
             };
 
@@ -65,7 +65,7 @@ namespace Signum.React.Word
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    ((QueryModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
+                    ((QueryModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value!);
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
@@ -81,7 +81,7 @@ namespace Signum.React.Word
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>));
+                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>))!;
 
                     var cr = (QueryModel)ctx.Entity;
 
@@ -103,7 +103,7 @@ namespace Signum.React.Word
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    var list = (List<OrderTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<OrderTS>));
+                    var list = (List<OrderTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<OrderTS>))!;
 
                     var cr = (QueryModel)ctx.Entity;
 
@@ -129,7 +129,7 @@ namespace Signum.React.Word
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    var pagination = (PaginationTS)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(PaginationTS));
+                    var pagination = (PaginationTS)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(PaginationTS))!;
                     var cr = (QueryModel)ctx.Entity;
                     cr.Pagination = pagination.ToPagination();
                 },

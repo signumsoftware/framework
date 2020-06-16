@@ -47,12 +47,10 @@ namespace Signum.React.Selenium
 
         public string GetWebQueryName(object queryName)
         {
-            if (queryName is Type)
-            {
-                return TypeLogic.TryGetCleanName((Type)queryName) ?? Reflector.CleanTypeName((Type)queryName);
-            }
+            if (queryName is Type t)
+                return TypeLogic.TryGetCleanName(t) ?? Reflector.CleanTypeName(t);
 
-            return queryName.ToString();
+            return queryName.ToString()!;
         }
 
 
@@ -70,7 +68,7 @@ namespace Signum.React.Selenium
 
         public FramePageProxy<T> NormalPage<T>(Lite<T> lite) where T : Entity
         {
-            if(lite != null && lite.EntityType != typeof(T))
+            if(lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
 
             var url = Url(NavigateRoute(lite));
@@ -101,7 +99,7 @@ namespace Signum.React.Selenium
         }
 
 
-        public virtual string GetCurrentUser()
+        public virtual string? GetCurrentUser()
         {
             var element = Selenium.WaitElementPresent(By.CssSelector("#sfUserDropDown, .sf-login"));
 
@@ -131,9 +129,6 @@ namespace Signum.React.Selenium
             if (currentUser == username)
                 return;
 
-            if (currentUser.HasText())
-                Logout();
-
             Selenium.FindElement(By.Id("userName")).SafeSendKeys(username);
             Selenium.FindElement(By.Id("password")).SafeSendKeys(password);
            // Selenium.FindElement(By.Id("login")).Submit();
@@ -141,14 +136,14 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("login")).Click();
             Selenium.WaitElementNotPresent(By.Id("login"));
 
-            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
+            Selenium.WaitElementPresent(By.ClassName("sf-login-dropdown"));
 
             SetCurrentCulture();
         }
 
         public virtual void SetCurrentCulture()
         {
-            string culture = Selenium.WaitElementPresent(By.Id("cultureDropdown")).GetAttribute("data-culture");
+            string culture = Selenium.WaitElementPresent(By.ClassName("sf-culture-dropdown")).GetAttribute("data-culture");
 
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }

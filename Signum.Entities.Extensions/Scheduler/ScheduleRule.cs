@@ -72,7 +72,7 @@ namespace Signum.Entities.Scheduler
 
         public bool Sunday { get; set; }
 
-        public HolidayCalendarEntity Calendar { get; set; }
+        public HolidayCalendarEntity? Calendar { get; set; }
 
         public bool Holiday { get; set; }
 
@@ -107,7 +107,7 @@ namespace Signum.Entities.Scheduler
             }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Monday) && !(Monday || Tuesday || Wednesday || Thursday || Friday || Saturday || Sunday || Holiday))
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
@@ -201,7 +201,7 @@ namespace Signum.Entities.Scheduler
             }
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(January) && !(0.To(12).Any(i => IsAllowed(i + 1))))
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());

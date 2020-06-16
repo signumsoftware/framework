@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
@@ -33,7 +33,7 @@ namespace Signum.Engine.MachineLearning
                     using (ExecutionMode.Global())
                     using (var t = Transaction.ForceNew())
                     {
-                        var p = predictor.Retrieve();
+                        var p = predictor.RetrieveAndRemember();
                         if (p.State != PredictorState.Trained)
                             throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
 
@@ -51,7 +51,7 @@ namespace Signum.Engine.MachineLearning
             return ppc;
         }
 
-        public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity, PredictionOptions options = null)
+        public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity, PredictionOptions? options = null)
         {
             var qd = QueryLogic.Queries.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
 
@@ -60,7 +60,7 @@ namespace Signum.Engine.MachineLearning
             return ctx.FromFilters(new List<Filter> { new FilterCondition(entityToken, FilterOperation.EqualTo, entity) }, options).SingleEx();
         }
 
-        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object> parentKeyValues, PredictionOptions options = null)
+        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object?> parentKeyValues, PredictionOptions? options = null)
         {
             if (!ctx.Predictor.MainQuery.GroupResults)
             {
@@ -85,22 +85,21 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx, PredictionOptions options = null)
+        public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx, PredictionOptions? options = null)
         {
-            var result = new PredictDictionary(ctx.Predictor)
+            var result = new PredictDictionary(ctx.Predictor, options, null)
             {
-                Options = options,
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, (object?)null)).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQueryGroups = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                    SubQueryGroups = new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance)
                 })
             };
 
             return result;
         }
 
-        public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters, PredictionOptions options = null)
+        public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters, PredictionOptions? options = null)
         {
             var qd = QueryLogic.Queries.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
             
@@ -128,7 +127,7 @@ namespace Signum.Engine.MachineLearning
 
                 QueryDescription sqd = QueryLogic.Queries.QueryDescription(sqe.Query.ToQueryName());
 
-                Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KVP.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
+                Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KeyValuePair.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
 
                 Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements, sqd)).ToArray();
 
@@ -165,15 +164,13 @@ namespace Signum.Engine.MachineLearning
 
             var mainKeys = rt.Columns.Where(rc => !(rc.Column.Token is AggregateToken)).ToArray();
 
-            var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor)
+            var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor, options, row.TryEntity)
             {
-                Options = options,
-                Entity = row.TryEntity,
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
                     SubQueryGroups = subQueryResults.TryGetC(sq)?.TryGetC(row.GetValues(mainKeys)) ?? 
-                    new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                    new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance)
                 })
             }).ToList();
 
@@ -183,7 +180,7 @@ namespace Signum.Engine.MachineLearning
         private static Filter Replace(Filter filter, Dictionary<string, string> tokenReplacements, QueryDescription qd)
         {
             if (filter is FilterGroup fg)
-                return new FilterGroup(fg.GroupOperation, Replace(fg.Token, tokenReplacements, qd), fg.Filters.Select(f => Replace(f, tokenReplacements, qd)).ToList());
+                return new FilterGroup(fg.GroupOperation, Replace(fg.Token!, tokenReplacements, qd), fg.Filters.Select(f => Replace(f, tokenReplacements, qd)).ToList());
 
             if (filter is FilterCondition fc)
                 return new FilterCondition(Replace(fc.Token, tokenReplacements, qd), fc.Operation, fc.Value);
@@ -206,7 +203,7 @@ namespace Signum.Engine.MachineLearning
 
         }
 
-        public static Dictionary<ResultRow, PredictDictionary> ToPredictDictionaries(this PredictorTrainingContext ctx, PredictionOptions options = null)
+        public static Dictionary<ResultRow, PredictDictionary> ToPredictDictionaries(this PredictorTrainingContext ctx, PredictionOptions? options = null)
         {   
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
@@ -227,14 +224,12 @@ namespace Signum.Engine.MachineLearning
                 );
             });
 
-            var result = ctx.MainQuery.ResultTable.Rows.ToDictionaryEx(row => row, row => new PredictDictionary(ctx.Predictor)
+            var result = ctx.MainQuery.ResultTable.Rows.ToDictionaryEx(row => row, row => new PredictDictionary(ctx.Predictor, options, row.TryEntity)
             {
-                Options = options,
-                Entity = row.TryEntity,
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KeyValuePair.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(ctx.MainQuery.GetParentKey(row))) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(ctx.MainQuery.GetParentKey(row))) ?? new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance)
                 })
             });
 

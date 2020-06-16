@@ -13,22 +13,22 @@ namespace Signum.Entities.Scheduler
             typeof(ScheduleRuleMinutelyEntity),
             typeof(ScheduleRuleWeekDaysEntity),
             typeof(ScheduleRuleMonthsEntity))]
-        [NotNullValidator]
+        
         public IScheduleRuleEntity Rule { get; set; }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        [NotNullValidator]
+        
         public ITaskEntity Task { get; set; }
 
         public bool Suspended { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string MachineName { get; set; } = None;
 
-        [NotNullValidator]
+        
         public Lite<IUserEntity> User { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ApplicationName { get; set; } = None;
 
         public override string ToString()

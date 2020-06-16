@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
@@ -19,7 +19,9 @@ namespace Signum.React.Maps
         {
             var getStats = GetRuntimeStats();
 
-            var nodes = (from t in Schema.Current.Tables.Values
+            var s = Schema.Current;
+            var nodes = (from t in s.Tables.Values
+                         where s.IsAllowed(t.Type, true) == null
                          let type = EnumEntity.Extract(t.Type) ?? t.Type
                          select new TableInfo
                          {
@@ -30,14 +32,14 @@ namespace Signum.React.Maps
                              entityData = EntityKindCache.GetEntityData(t.Type),
                              entityKind = EntityKindCache.GetEntityKind(t.Type),
                              entityBaseType = GetEntityBaseType(t.Type),
-                             @namespace = type.Namespace,
+                             @namespace = type.Namespace!,
                              rows = getStats.TryGetC(t.Name)?.rows,
                              total_size_kb = getStats.TryGetC(t.Name)?.total_size_kb,
                              rows_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.rows),
                              total_size_kb_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.total_size_kb),
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
-                                 niceName = ml.PropertyRoute.PropertyInfo.NiceName(),
+                                 niceName = ml.PropertyRoute.PropertyInfo!.NiceName(),
                                  tableName = ml.Name.ToString(),
                                  rows = getStats.TryGetC(ml.Name)?.rows,
                                  total_size_kb = getStats.TryGetC(ml.Name)?.total_size_kb,
@@ -61,9 +63,11 @@ namespace Signum.React.Maps
                 }
             }
 
-            var normalEdges = (from t in Schema.Current.Tables.Values
+            var normalEdges = (from t in s.Tables.Values
+                               where s.IsAllowed(t.Type, true) == null
                                from kvp in t.DependentTables()
                                where !kvp.Value.IsCollection
+                               where s.IsAllowed(kvp.Key.Type, true) == null
                                select new RelationInfo
                                {
                                    fromTable = t.Name.ToString(),
@@ -72,9 +76,11 @@ namespace Signum.React.Maps
                                    nullable = kvp.Value.IsNullable
                                }).ToList();
 
-            var mlistEdges = (from t in Schema.Current.Tables.Values
+            var mlistEdges = (from t in s.Tables.Values
+                              where s.IsAllowed(t.Type, true) == null
                               from tm in t.TablesMList()
                               from kvp in tm.GetTables()
+                              where s.IsAllowed(kvp.Key.Type, true) == null
                               select new RelationInfo
                               {
                                   fromTable = tm.Name.ToString(),
@@ -115,7 +121,7 @@ namespace Signum.React.Maps
             {
                 using (Administrator.OverrideDatabaseInSysViews(dbName))
                 {
-                    var dic = Database.View<SysTables>().Select(t => KVP.Create(
+                    var dic = Database.View<SysTables>().Select(t => KeyValuePair.Create(
                         new ObjectName(new SchemaName(dbName, t.Schema().name), t.name),
                         new RuntimeStats
                         {
@@ -160,7 +166,7 @@ namespace Signum.React.Maps
         public int? total_size_kb;
         public int? rows_history;
         public int? total_size_kb_history;
-        public Dictionary<string, object> extra = new Dictionary<string, object>();
+        public Dictionary<string, object?> extra = new Dictionary<string, object?>();
 
         public List<MListTableInfo> mlistTables;
     }
@@ -185,7 +191,7 @@ namespace Signum.React.Maps
         public int? history_rows;
         public int? history_total_size_kb;
 
-        public Dictionary<string, object> extra = new Dictionary<string, object>();
+        public Dictionary<string, object?> extra = new Dictionary<string, object?>();
     }
 
     public class RelationInfo

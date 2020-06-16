@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
@@ -9,27 +9,23 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class CaseEntity : Entity
     {
-        [NotNullValidator]
+        
         public WorkflowEntity Workflow { get; set; }
 
-        public CaseEntity ParentCase { get; set; }
+        public CaseEntity? ParentCase { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Description { get; set; }
 
         [ImplementedByAll]
-        [NotNullValidator]
+        
         public ICaseMainEntity MainEntity { get; set; }
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
         public DateTime? FinishDate { get; set; }
 
-        static Expression<Func<CaseEntity, string>> ToStringExpression = @this => @this.Description;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Description);
     }
 
     [AutoInit]
@@ -47,11 +43,11 @@ namespace Signum.Entities.Workflow
     public class CaseTagsModel : ModelEntity
     {
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<CaseTagTypeEntity> CaseTags { get; set; } = new MList<CaseTagTypeEntity>();
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<CaseTagTypeEntity> OldCaseTags { get; set; } = new MList<CaseTagTypeEntity>();
     }
 
@@ -61,13 +57,13 @@ namespace Signum.Entities.Workflow
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullValidator]
+        
         public Lite<CaseEntity> Case { get; set; }
 
-        [NotNullValidator]
+        
         public CaseTagTypeEntity TagType { get; set; }
 
-        [NotNullValidator, ImplementedBy(typeof(UserEntity))]
+        [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> CreatedBy { get; set; }
     }
 
@@ -75,18 +71,14 @@ namespace Signum.Entities.Workflow
     public class CaseTagTypeEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(Min = 2, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 12)]
+        [StringLengthValidator(Min = 3, Max = 12)]
         public string Color { get; set; }
 
-        static Expression<Func<CaseTagTypeEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

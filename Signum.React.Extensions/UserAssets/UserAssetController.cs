@@ -40,7 +40,7 @@ namespace Signum.React.UserAssets
             var qd = QueryLogic.Queries.QueryDescription(queryName);
             var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
 
-            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
+            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.RetrieveAndRemember()) : null)
             {
                 var result = ParseFilterInternal(request.filters, qd, options, 0).ToList();
 
@@ -59,9 +59,9 @@ namespace Signum.React.UserAssets
 
                     var filter = gr.Key;
 
-                    var token = QueryUtils.Parse(filter.tokenString, qd, options);
+                    var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList());
+                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList());
 
                     return new FilterNode
                     {
@@ -75,13 +75,13 @@ namespace Signum.React.UserAssets
                 {
                     var group = gr.Key;
 
-                    var token = group.token == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
+                    var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
 
                     var value = FilterValueConverter.Parse(group.valueString, typeof(string), false);
 
                     return new FilterNode
                     {
-                        groupOperation = group.groupOperation.Value,
+                        groupOperation = group.groupOperation!.Value,
                         token = token == null ? null : new QueryTokenTS(token, true),
                         pinned = gr.Key.pinned,
                         filters = ParseFilterInternal(gr, qd, options, indent + 1).ToList()
@@ -117,9 +117,9 @@ namespace Signum.React.UserAssets
         {
             if (filter.groupOperation == null)
             {
-                var token = QueryUtils.Parse(filter.tokenString, qd, options);
+                var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                var expectedValueType = filter.operation.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
+                var expectedValueType = filter.operation!.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
                 
                 var val = filter.value is JToken jtok ?
                      jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
@@ -161,12 +161,12 @@ namespace Signum.React.UserAssets
 
         public class QueryFilterItem
         {
-            public QueryTokenTS token;
-            public string tokenString;
+            public QueryTokenTS? token;
+            public string? tokenString;
             public bool isGroup;
             public FilterGroupOperation? groupOperation;
             public FilterOperation? operation;
-            public string valueString;
+            public string? valueString;
             public PinnedFilter pinned;
             public int indentation;
         }
@@ -176,17 +176,17 @@ namespace Signum.React.UserAssets
             public string label;
             public int? row;
             public int? column;
-            public bool? disableOnNull;
+            public PinnedFilterActive? active;
             public bool? splitText;
         }
 
         public class FilterNode
         {
             public FilterGroupOperation? groupOperation;
-            public string tokenString; //For Request
-            public QueryTokenTS token; //For response
+            public string? tokenString; //For Request
+            public QueryTokenTS? token; //For response
             public FilterOperation? operation;
-            public object value;
+            public object? value;
             public List<FilterNode> filters;
             public PinnedFilter pinned;
         }
@@ -197,11 +197,14 @@ namespace Signum.React.UserAssets
         }
         
         [HttpPost("api/userAssets/export")]
-        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
+        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity>[] lites)
         {
-            var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
+            var bytes = UserAssetsExporter.ToXml(lites.RetrieveFromListOfLite().ToArray());
 
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
+            string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
+            var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));
+
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), fileName);
         }
 
         [HttpPost("api/userAssets/importPreview")]

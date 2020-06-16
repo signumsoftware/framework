@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -18,13 +18,9 @@ namespace Signum.Engine.Notes
 {
     public static class NoteLogic
     {
-        static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
-            ident => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident));
-        [ExpressionField]
-        public static IQueryable<NoteEntity> Notes(this Entity ident)
-        {
-            return NotesExpression.Evaluate(ident);
-        }
+        [AutoExpressionField]
+        public static IQueryable<NoteEntity> Notes(this Entity ident) => 
+            As.Expression(() => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident)));
 
         static HashSet<NoteTypeEntity> SystemNoteTypes = new HashSet<NoteTypeEntity>();
         static bool started = false;
@@ -83,7 +79,7 @@ namespace Signum.Engine.Notes
         }
 
 
-        public static NoteEntity CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType,  Lite<UserEntity> user = null, string title = null) where T : class, IEntity
+        public static NoteEntity? CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType, Lite<UserEntity>? user = null, string? title = null) where T : class, IEntity
         {
             if (started == false)
                 return null;

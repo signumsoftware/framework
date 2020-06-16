@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
@@ -8,15 +8,12 @@ namespace Signum.Entities.Migrations
     public class CSharpMigrationEntity : Entity
     {
         [UniqueIndex]
+        [StringLengthValidator(Max = 200)]
         public string UniqueName { get; set; }
 
         public DateTime ExecutionDate { get; set; }
 
-        static Expression<Func<CSharpMigrationEntity, string>> ToStringExpression = e => e.UniqueName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UniqueName);
     }
 }

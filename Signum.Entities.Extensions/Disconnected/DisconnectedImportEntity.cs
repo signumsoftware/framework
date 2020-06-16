@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -11,7 +11,7 @@ namespace Signum.Entities.Disconnected
     {
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        public Lite<DisconnectedMachineEntity> Machine { get; set; }
+        public Lite<DisconnectedMachineEntity>? Machine { get; set; }
 
         [Unit("ms")]
         public int? RestoreDatabase { get; set; }
@@ -22,7 +22,7 @@ namespace Signum.Entities.Disconnected
         [Unit("ms")]
         public int? DisableForeignKeys { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<DisconnectedImportTableEmbedded> Copies { get; set; } = new MList<DisconnectedImportTableEmbedded>();
 
         [Unit("ms")]
@@ -39,11 +39,11 @@ namespace Signum.Entities.Disconnected
 
         public DisconnectedImportState State { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         public double Ratio(DisconnectedImportEntity orientative)
         {
-            double total = orientative.Total.Value;
+            double total = orientative.Total!.Value;
 
             double result = 0;
 
@@ -52,47 +52,43 @@ namespace Signum.Entities.Disconnected
 
             if (!SynchronizeSchema.HasValue)
                 return result;
-            result += (orientative.SynchronizeSchema.Value) / total;
+            result += (orientative.SynchronizeSchema!.Value) / total;
 
             if (!DisableForeignKeys.HasValue)
                 return result;
-            result += (orientative.DisableForeignKeys.Value) / total;
+            result += (orientative.DisableForeignKeys!.Value) / total;
 
             result += Copies.Where(c => c.CopyTable.HasValue).Join(
                 orientative.Copies.Where(o => o.CopyTable.HasValue && o.CopyTable.Value > 0),
-                c => c.Type, o => o.Type, (c, o) => o.CopyTable.Value / total).Sum();
+                c => c.Type, o => o.Type, (c, o) => o.CopyTable!.Value / total).Sum();
 
             if (!Copies.All(a => a.CopyTable.HasValue))
                 return result;
 
             if (!Unlock.HasValue)
                 return result;
-            result += (orientative.Unlock.Value) / total;
+            result += (orientative.Unlock!.Value) / total;
 
             if (!EnableForeignKeys.HasValue)
                 return result;
-            result += (orientative.EnableForeignKeys.Value) / total;
+            result += (orientative.EnableForeignKeys!.Value) / total;
 
             if (!DropDatabase.HasValue)
                 return result;
-            result += (orientative.DropDatabase.Value) / total;
+            result += (orientative.DropDatabase!.Value) / total;
 
             return result;
         }
 
-        static Expression<Func<DisconnectedImportEntity, int>> CalculateTotalExpression =
-            stat => (stat.RestoreDatabase.Value) +
-                (stat.SynchronizeSchema.Value) +
-                (stat.DisableForeignKeys.Value) +
-                (stat.Copies.Sum(a => a.CopyTable.Value)) +
-                (stat.Unlock.Value) +
-                (stat.EnableForeignKeys.Value) +
-                (stat.DropDatabase.Value);
-        [ExpressionField]
-        public int CalculateTotal()
-        {
-            return CalculateTotalExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public int CalculateTotal() => As.Expression(() => 
+                (RestoreDatabase!.Value) +
+                (SynchronizeSchema!.Value) +
+                (DisableForeignKeys!.Value) +
+                (Copies.Sum(a => a.CopyTable!.Value)) +
+                (Unlock!.Value) +
+                (EnableForeignKeys!.Value) +
+                (DropDatabase!.Value));
     }
 
     public enum DisconnectedImportState
@@ -105,7 +101,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedImportTableEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("ms")]

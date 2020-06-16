@@ -1,7 +1,7 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
@@ -10,102 +10,75 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
 import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
+import { decodeDots } from './TranslationCodeStatus'
+import { useAPI } from '@framework/Hooks'
 
-interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
+export default function TranslationCodeView(p: RouteComponentProps<{ culture: string; assembly: string }>) {
 
-}
+  const assembly = decodeDots(p.match.params.assembly);
+  const culture = p.match.params.culture;
 
-export default class TranslationCodeView extends React.Component<TranslationCodeViewProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
+  const cultures = useAPI(() => CultureClient.getCultures(true), []);
 
-  constructor(props: TranslationCodeViewProps) {
-    super(props);
-    this.state = {};
-  }
+  const [filter, setFilter] = React.useState("");
 
-  componentWillMount() {
-    CultureClient.getCultures(true).then(cultures => this.setState({ cultures })).done();
-  }
+  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
 
-  render() {
-
-    const { assembly, culture } = this.props.match.params;
-
-    const message = TranslationMessage.View0In1.niceToString(assembly,
-      culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
-        this.state.cultures ? this.state.cultures[culture].toStr :
-          culture);
-
-    return (
-      <div>
-        <h2>{message}</h2>
-        <TranslateSearchBox search={this.handleSearch} />
-        <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
-        <br />
-        {this.renderTable()}
-      </div>
-    );
-  }
-
-  handleSearch = (filter: string) => {
-    const { assembly, culture } = this.props.match.params;
-
-    return API.retrieve(assembly, culture || "", filter)
-      .then(result => this.setState({ result: result }))
-      .done();
-  }
-
-  renderTable() {
-
-    if (this.state.result == undefined)
+  function renderTable() {
+    if (result == undefined)
       return undefined;
-
-
-    const result = this.state.result;
 
     if (Dic.getKeys(result).length == 0)
       return <strong> {TranslationMessage.NoResultsFound.niceToString()}</strong>;
 
     return (
       <div>
-        {Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.match.params.culture} />)}
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={this.handleSave} />
+        {Dic.getValues(result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={p.match.params.culture} />)}
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={handleSave} />
       </div>
     );
   }
 
-  handleSave = (e: React.FormEvent<any>) => {
+  function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    const params = this.props.match.params;
-    API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
+    const params = p.match.params;
+    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess()).done();
   }
+
+  const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),
+    culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
+      cultures ? cultures[culture].toStr :
+        culture);
+
+  return (
+    <div>
+      <h2>{message}</h2>
+      <TranslateSearchBox setFilter={setFilter} filter={filter} />
+      <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
+      <br />
+      {renderTable()}
+    </div>
+  );
 }
 
-export class TranslateSearchBox extends React.Component<{ search: (newValue: string) => void }, { filter: string }>
-{
-  state = { filter: "" };
+export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }){
 
-  handleChange = (e: React.FormEvent<any>) => {
+  const [tmpFilter, setTmpFilter] = React.useState(p.filter);
+
+  function handleSearch(e: React.FormEvent<any>) {
     e.preventDefault();
-    this.setState({ filter: (e.currentTarget as HTMLInputElement).value });
+    p.setFilter(tmpFilter);
   }
 
-  handleSearch = (e: React.FormEvent<any>) => {
-    e.preventDefault();
-    this.props.search(this.state.filter);
-  }
-
-  render() {
-
-    return (
-      <form onSubmit={this.handleSearch} className="input-group">
-        <input type="text" className="form-control"
-          placeholder={TranslationMessage.Search.niceToString()} value={this.state.filter} onChange={this.handleChange} />
-        <div className="input-group-append">
-          <button className="btn btn-light" type="submit" title={TranslationMessage.Search.niceToString()}>
-            <FontAwesomeIcon icon="search" />
-          </button>
-        </div>
-      </form>
-    );
-  }
+  return (
+    <form onSubmit={handleSearch} className="input-group">
+      <input type="text" className="form-control"
+        placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} />
+      <div className="input-group-append">
+        <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
+          <FontAwesomeIcon icon="search" />
+        </button>
+      </div>
+    </form>
+  );
 }

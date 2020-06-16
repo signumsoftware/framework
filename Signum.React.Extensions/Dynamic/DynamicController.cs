@@ -19,14 +19,15 @@ using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Dynamic;
 using Signum.Engine;
 using Signum.Entities.Basics;
+using Microsoft.Extensions.Hosting;
 
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
     public class DynamicController : ControllerBase
     {
-        IApplicationLifetime lifeTime;
-        public DynamicController(IApplicationLifetime lifeTime)
+        IHostApplicationLifetime lifeTime;
+        public DynamicController(IHostApplicationLifetime lifeTime)
         {
             this.lifeTime = lifeTime;
         }
@@ -43,10 +44,12 @@ namespace Signum.React.Dynamic
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
             compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false));
 
-            Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
-            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
-
-            codeFiles.AddRange(apiFiles);
+            if (DynamicApiLogic.IsStarted)
+            {
+                Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionaryEx(a => a.FileName, "CodeGenController C# code file");
+                compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
+                codeFiles.AddRange(apiFiles);
+            }
 
             return (from cr in compileResult
                     from ce in cr.Errors
@@ -83,7 +86,7 @@ namespace Signum.React.Dynamic
         [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
-            return new Sequence<Exception>
+            return new Sequence<Exception?>
             {
                 DynamicLogic.CodeGenError,
                 StartParameters.IgnoredCodeErrors.EmptyIfNull(),
@@ -116,12 +119,13 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/getPanelInformation")]
         public DynamicPanelInformation GetPanelInformation()
         {
-            return new DynamicPanelInformation() {
+            return new DynamicPanelInformation
+            {
                 lastDynamicCompilationDateTime = DynamicLogic.GetLastCodeGenAssemblyFileInfo()?.CreationTime,
                 loadedCodeGenAssemblyDateTime = DynamicLogic.GetLoadedCodeGenAssemblyFileInfo()?.CreationTime,
                 loadedCodeGenControllerAssemblyDateTime = DynamicLogic.GetLoadedCodeGenControllerAssemblyFileInfo()?.CreationTime,
                 lastDynamicChangeDateTime = Database.Query<OperationLogEntity>()
-                        .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target.EntityType))
+                        .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target!.EntityType))
                         .Max(a => a.End),
             };
         } 

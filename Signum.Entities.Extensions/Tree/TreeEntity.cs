@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Types;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
@@ -25,19 +25,14 @@ namespace Signum.Entities.Tree
         }
 
 
-        static Expression<Func<TreeEntity, string>> RouteToStringExpression =
-        @this => @this.Route.ToString();
-        [ExpressionField]
-        public string RouteToString
-        {
-            get { return RouteToStringExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public string RouteToString => As.Expression(() => Route.ToString());
 
-        [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+        [NotNullValidator(Disabled = true)]
+        [SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
-
         [Ignore]
         short? level;
         [ExpressionField("LevelExpression"), InTypeScript(true)]
@@ -53,15 +48,16 @@ namespace Signum.Entities.Tree
         }
 
         [Ignore, ImplementedByAll]
-        public Lite<TreeEntity> ParentOrSibling { get; set; }
+        public Lite<TreeEntity>? ParentOrSibling { get; set; }
 
         [Ignore]
         public bool IsSibling { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
+        [StringLengthValidator(Min = 1, Max = 255)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
+        [NotNullValidator(Disabled = true)]
+        [StringLengthValidator(Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)
@@ -69,12 +65,8 @@ namespace Signum.Entities.Tree
             this.FullName = newFullName;
         }
 
-        static Expression<Func<TreeEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -127,13 +119,14 @@ namespace Signum.Entities.Tree
     public class MoveTreeModel : ModelEntity
     {
         [ImplementedByAll]
-        public Lite<TreeEntity> NewParent { get; set; }
+        public Lite<TreeEntity>? NewParent { get; set; }
+
         public InsertPlace InsertPlace { get; set; }
 
         [ImplementedByAll]
-        public Lite<TreeEntity> Sibling { get; set; }
+        public Lite<TreeEntity>? Sibling { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if(pi.Name == nameof(Sibling) && Sibling == null &&
                 (InsertPlace == InsertPlace.After || InsertPlace == InsertPlace.Before))

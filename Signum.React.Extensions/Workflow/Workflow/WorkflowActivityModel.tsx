@@ -1,14 +1,23 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded
 } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater } from '@framework/Lines'
+import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
+import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { newMListElement, ModifiableEntity } from '@framework/Signum.Entities';
+import { Button } from 'react-bootstrap';
+import { useFetchInState } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { isFunctionOrStringOrNull } from '../../Dynamic/View/NodeUtils';
+import { useForceUpdate } from '@framework/Hooks'
+
 
 interface WorkflowActivityModelComponentProps {
   ctx: TypeContext<WorkflowActivityModel>;
@@ -16,38 +25,84 @@ interface WorkflowActivityModelComponentProps {
 
 interface WorkflowActivityModelComponentState {
   viewNames?: string[];
+  viewProps?: DynamicViewClient.DynamicViewProps[];
 }
 
-export default class WorkflowActivityModelComponent extends React.Component<WorkflowActivityModelComponentProps, WorkflowActivityModelComponentState> {
-  constructor(props: WorkflowActivityModelComponentProps) {
-    super(props);
+export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps){
+  const forceUpdate = useForceUpdate();
 
-    this.state = {};
-  }
+  const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);
 
-  componentWillMount() {
 
-    if (this.props.ctx.value.mainEntityType) {
+  const [viewProps, setViewProps] = React.useState<DynamicViewClient.DynamicViewProps[] | undefined>(undefined);
 
-      const typeName = this.props.ctx.value.mainEntityType.cleanName;
+  
+  React.useEffect(() => {
+    if (p.ctx.value.mainEntityType) {
+
+      const typeName = p.ctx.value.mainEntityType.cleanName;
 
       Navigator.viewDispatcher.getViewNames(typeName)
-        .then(vn => this.setState({ viewNames: vn }))
+        .then(vn => setViewNames(vn))
         .done();
+
+      fillViewProps();
     }
 
-    this.handleTypeChange();
+    handleTypeChange();
+  }, []);
+
+  function isNamedView(typeName: string, viewName: string) : boolean {
+    const es = Navigator.getSettings(typeName);
+    return ((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []).contains(viewName);
   }
 
-  handleViewNameChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
-    this.props.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
-    this.props.ctx.value.modified = true;
-    this.forceUpdate();
+  function fillViewProps() {
+    const typeName = p.ctx.value.mainEntityType.cleanName;
+    const viewName = p.ctx.value.viewName;
+
+    const isStaticView = !viewName || viewName == "" || isNamedView(typeName, viewName);
+
+    if (isStaticView) {
+      setViewProps(undefined);
+      p.ctx.value.viewNameProps = [];
+      p.ctx.value.modified = true;
+      forceUpdate();
+      return;
+    }
+
+    const oldViewNameProps = p.ctx.value.viewNameProps.toObject(a => a.element.name, a => a.element.expression);
+    DynamicViewClient.API.getDynamicViewProps(typeName, viewName!).then(dvp => {
+
+      setViewProps(dvp);
+      if (dvp.length > 0) {
+
+        var newViewNameProps = dvp.map(p => {
+
+          const oldExpr = oldViewNameProps[p.name];
+          return newMListElement(ViewNamePropEmbedded.New({
+            name: p.name,
+            expression: oldExpr,
+          }))
+        });
+
+        p.ctx.value.viewNameProps = newViewNameProps;
+      }
+      else
+        p.ctx.value.viewNameProps = [];
+
+      p.ctx.value.modified = true;
+      forceUpdate();
+    }).done();
+  }
+
+  function handleViewNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
+    p.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
+    fillViewProps();
   };
 
-  handleTypeChange = () => {
-
-    var wa = this.props.ctx.value;
+  function handleTypeChange() {
+    var wa = p.ctx.value;
 
     if (wa.type == "Script") {
       if (!wa.script)
@@ -75,115 +130,179 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
     wa.modified = true;
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  render() {
-    var ctx = this.props.ctx;
+  function handleCheckView() {
+    const typeName = p.ctx.value.mainEntityType.cleanName;
+    const viewName = p.ctx.value.viewName;
+    const props = p.ctx.value.viewNameProps.map(a => a.element).toObject(a => a.name, a => !a.expression ? undefined : eval(a.expression));
 
-    const mainEntityType = this.props.ctx.value.mainEntityType;
+    const isStaticView = !viewName || viewName == "" || isNamedView(typeName, viewName);
 
-    return (
-      <div>
-        <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => this.forceUpdate()} />
-        <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} />
-        <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} />
+    if (isStaticView)
+      Finder.find({ queryName: typeName }).then(lite => {
+        if (!lite)
+          return Promise.resolve(undefined);
 
-        {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
-          <div>
-            {ctx.value.mainEntityType ?
-              <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
-                {
-                  <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control form-control-sm" onChange={this.handleViewNameChange}>
-                    <option value="">{" - "}</option>
-                    {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
-                  </select>
-                }
-              </FormGroup>
-              : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
+        return Navigator.API.fetchAndForget(lite).then(entity => {
 
-
-            <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
-
-            {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
-              <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
-
-            <fieldset>
-              <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
-              <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
-            </fieldset>
-            <ValueLine ctx={ctx.subCtx(d => d.comments)} />
-          </div>
-        }
-
-        {ctx.value.script ?
-          ctx.value.workflow ? <ScriptComponent ctx={ctx.subCtx(a => a.script!)} mainEntityType={ctx.value.mainEntityType} workflow={ctx.value.workflow!} />
-            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.script))}</div>
-          : undefined
-        }
-
-        {ctx.value.subWorkflow ?
-          ctx.value.mainEntityType ? <DecompositionComponent ctx={ctx.subCtx(a => a.subWorkflow!)} mainEntityType={ctx.value.mainEntityType} />
-            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.subWorkflow), ctx.niceName(e => e.mainEntityType))}</div>
-          : undefined}
-      </div>
-    );
+          const vp = Navigator.viewDispatcher.getViewPromise(entity, viewName || undefined);
+          return Navigator.view(entity,
+            {
+              getViewPromise: e => vp,
+              extraProps: props,
+              isOperationVisible: eoc => false,
+              avoidPromptLoseChange: true,
+              readOnly: true,
+            })
+        })
+      }).done();
+    else
+      DynamicViewClient.API.getDynamicView(typeName, viewName!)
+        .then(dv => {
+          Navigator.navigate(dv, { extraProps: props });
+        }).done();
   }
+
+  function getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {
+    const vp = viewProps;
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
+
+    return !vp ? undefined :
+      !p ? <div style={{ color: "#a94442" }}><strong>Property not found</strong></div> :
+        <strong>{p.type}</strong>;
+  }
+
+  function getViewNamePropsIsMandatory(ctx: TypeContext<ViewNamePropEmbedded>) {
+    const vp = viewProps;
+    const p = vp?.singleOrNull(a => a.name == ctx.value.name);
+
+    return p != null && !p.type.endsWith("?");
+  }
+
+  var ctx = p.ctx;
+
+  const mainEntityType = p.ctx.value.mainEntityType;
+
+  return (
+    <div>
+      <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => forceUpdate()} />
+      <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={handleTypeChange} valueColumns={5} />
+      <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} valueColumns={5} />
+
+      {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
+        <div>
+          {ctx.value.mainEntityType ? <>
+            <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+              {
+                <div className="row">
+                  <div className="col-sm-6">
+                    <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control form-control-sm" onChange={handleViewNameChange}>
+                      <option value="">{" - "}</option>
+                      {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div className="col-sm-6">
+                  <Button variant="success" size="sm" onClick={handleCheckView}>Check View …</Button>
+                  </div>
+                </div>
+              }
+            </FormGroup>
+            <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
+              <EntityTable avoidFieldSet
+                ctx={ctx.subCtx(d => d.viewNameProps)}
+                columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
+                  {
+                    property: a => a.name,
+                    template: ctx => <ValueLine ctx={ctx.subCtx(a => a.name)} />
+                  },
+                  {
+                    property: a => a.expression,
+                    template: (ctx: TypeContext<ViewNamePropEmbedded>) =>
+                      <ValueLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
+                      />
+                  }
+                ])} />
+            </FormGroup>
+          </>
+            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
+
+
+          <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+
+          {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
+            <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
+
+          <fieldset>
+            <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
+            <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
+          </fieldset>
+          <ValueLine ctx={ctx.subCtx(d => d.comments)} />
+        </div>
+      }
+
+      {ctx.value.script ?
+        ctx.value.workflow ? <ScriptComponent ctx={ctx.subCtx(a => a.script!)} mainEntityType={ctx.value.mainEntityType} workflow={ctx.value.workflow!} />
+          : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.script))}</div>
+        : undefined
+      }
+
+      {ctx.value.subWorkflow ?
+        ctx.value.mainEntityType ? <DecompositionComponent ctx={ctx.subCtx(a => a.subWorkflow!)} mainEntityType={ctx.value.mainEntityType} />
+          : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.subWorkflow), ctx.niceName(e => e.mainEntityType))}</div>
+        : undefined}
+    </div>
+  );
 }
 
-class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }>{
-
-
-  render() {
-    const ctx = this.props.ctx;
-    const mainEntityName = this.props.workflow.mainEntityType!.cleanName;
-    return (
-      <fieldset>
-        <legend>{ctx.niceName()}</legend>
-        <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
-          queryName: WorkflowScriptEntity,
-          parentToken: WorkflowScriptEntity.token().entity(e => e.mainEntityType),
-          parentValue: this.props.mainEntityType
-        }} />
-        <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
-      </fieldset>
-    );
-  }
+function ScriptComponent(p : { ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }){
+  const ctx = p.ctx;
+  const mainEntityName = p.workflow.mainEntityType!.cleanName;
+  return (
+    <fieldset>
+      <legend>{ctx.niceName()}</legend>
+      <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
+        queryName: WorkflowScriptEntity,
+        parentToken: WorkflowScriptEntity.token().entity(e => e.mainEntityType),
+        parentValue: p.mainEntityType
+      }} />
+      <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
+    </fieldset>
+  );
 }
 
-class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEmbedded>, mainEntityType: TypeEntity }>{
-
-  handleCodeChange = (newScript: string) => {
-    const subEntitiesEval = this.props.ctx.value.subEntitiesEval!;
+function DecompositionComponent(p : { ctx: TypeContext<SubWorkflowEmbedded>, mainEntityType: TypeEntity }){
+  const forceUpdate = useForceUpdate();
+  function handleCodeChange(newScript: string) {
+    const subEntitiesEval = p.ctx.value.subEntitiesEval!;
     subEntitiesEval.script = newScript;
     subEntitiesEval.modified = true;
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  render() {
-    const ctx = this.props.ctx;
-    const mainEntityName = this.props.mainEntityType.cleanName;
-    return (
-      <fieldset>
-        <legend>{ctx.niceName()}</legend>
-        <EntityLine ctx={ctx.subCtx(a => a.workflow)} onChange={() => this.forceUpdate()} />
-        {ctx.value.workflow &&
-          <div>
-            <br />
-            <div className="row">
-              <div className="col-sm-7">
-                <div className="code-container">
-                  <pre style={{ border: "0px", margin: "0px" }}>{`IEnumerable<${ctx.value.workflow.mainEntityType!.cleanName}Entity> SubEntities(${mainEntityName}Entity e, WorkflowTransitionContext ctx)\n{`}</pre>
-                  <CSharpCodeMirror script={ctx.value.subEntitiesEval!.script || ""} onChange={this.handleCodeChange} />
-                  <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-                </div>
-              </div>
-              <div className="col-sm-5">
-                <TypeHelpComponent initialType={mainEntityName} mode="CSharp" />
+  const ctx = p.ctx;
+  const mainEntityName = p.mainEntityType.cleanName;
+  return (
+    <fieldset>
+      <legend>{ctx.niceName()}</legend>
+      <EntityLine ctx={ctx.subCtx(a => a.workflow)} onChange={() => forceUpdate()} />
+      {ctx.value.workflow &&
+        <div>
+          <br />
+          <div className="row">
+            <div className="col-sm-7">
+              <div className="code-container">
+                <pre style={{ border: "0px", margin: "0px" }}>{`IEnumerable<${ctx.value.workflow.mainEntityType!.cleanName}Entity> SubEntities(${mainEntityName}Entity e, WorkflowTransitionContext ctx)\n{`}</pre>
+                <CSharpCodeMirror script={ctx.value.subEntitiesEval!.script ?? ""} onChange={handleCodeChange} />
+                <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
             </div>
-          </div>}
-      </fieldset>
-    );
-  }
+            <div className="col-sm-5">
+              <TypeHelpComponent initialType={mainEntityName} mode="CSharp" />
+            </div>
+          </div>
+        </div>}
+    </fieldset>
+  );
 }

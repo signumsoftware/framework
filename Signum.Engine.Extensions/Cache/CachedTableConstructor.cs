@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,13 +20,13 @@ namespace Signum.Engine.Cache
 
         public ParameterExpression origin;
 
-        public AliasGenerator aliasGenerator;
-        public Alias currentAlias;
+        public AliasGenerator? aliasGenerator;
+        public Alias? currentAlias;
         public Type tupleType;
 
-        public string remainingJoins;
+        public string? remainingJoins;
 
-        public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator aliasGenerator)
+        public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator? aliasGenerator)
         {
             this.cachedTable = cachedTable;
             this.table = cachedTable.Table;
@@ -94,16 +94,16 @@ namespace Signum.Engine.Cache
         }
 
 
-        static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedTable =
-         new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
+        static GenericInvoker<Func<ICacheLogicController, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTable =
+         new GenericInvoker<Func<ICacheLogicController, AliasGenerator?, string, string?, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
              new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
-        static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedSemiTable =
-          new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
+        static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>> ciCachedSemiTable =
+          new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
               new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
-        static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>> ciCachedTableMList =
-          new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
+        static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTableMList =
+          new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator?, string, string?, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
               new CachedTableMList<Entity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
         static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
@@ -159,7 +159,7 @@ namespace Signum.Engine.Cache
                             NewPrimaryKey(typeId.UnNullify()),
                             id.UnNullify());
 
-                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)), liteCreate);
+                        var liteRequest = Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(field.FieldType)!), liteCreate);
 
                         return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(id), NullId), liteRequest, nullRef);
                     }
@@ -193,7 +193,7 @@ namespace Signum.Engine.Cache
 
                 string lastPartialJoin = CreatePartialInnerJoin(idColumn);
 
-                Type elementType = field.FieldType.ElementType();
+                Type elementType = field.FieldType.ElementType()!;
 
                 CachedTableBase ctb = ciCachedTableMList.GetInvoker(elementType)(cachedTable.controller, mListField.TableMList, aliasGenerator, lastPartialJoin, remainingJoins);
 
@@ -230,7 +230,7 @@ namespace Signum.Engine.Cache
                         {
                             string lastPartialJoin = CreatePartialInnerJoin(column);
 
-                            CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
+                            CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator!, lastPartialJoin, remainingJoins);
 
                             if (cachedTable.subTables == null)
                                 cachedTable.subTables = new List<CachedTableBase>();
@@ -291,14 +291,14 @@ namespace Signum.Engine.Cache
         static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<Entity>(null)).GetGenericMethodDefinition();
         static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<Entity>(null, null)).GetGenericMethodDefinition();
         static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<Entity>(null)).GetGenericMethodDefinition();
-        static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<Entity>(0, null)).GetGenericMethodDefinition();
+        static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<Entity>(0, null!)).GetGenericMethodDefinition();
         static MethodInfo miModifiablePostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.ModifiablePostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
         internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
         internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
 
 
-        static MethodInfo miGetIBALite = ReflectionTools.GetMethodInfo((Schema s) => GetIBALite<Entity>(null, 1, "")).GetGenericMethodDefinition();
+        static MethodInfo miGetIBALite = ReflectionTools.GetMethodInfo((Schema s) => GetIBALite<Entity>(null!, 1, "")).GetGenericMethodDefinition();
         public static Lite<T> GetIBALite<T>(Schema schema, PrimaryKey typeId, string id) where T : Entity
         {
             Type type = schema.GetType(typeId);

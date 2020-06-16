@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Signum.Engine.Basics;
 using Signum.Engine.MachineLearning;
@@ -17,9 +17,9 @@ namespace Signum.React.MachineLearning
 {
     public static class PredictRequestExtensions
     {
-        public static Dictionary<QueryToken, object> ParseMainKeys(this PredictorPredictContext pctx, Dictionary<string, object> mainKeys)
+        public static Dictionary<QueryToken, object?> ParseMainKeys(this PredictorPredictContext pctx, Dictionary<string, object?> mainKeys)
         {
-            Dictionary<QueryToken, object> filters = new Dictionary<QueryToken, object>();
+            Dictionary<QueryToken, object?> filters = new Dictionary<QueryToken, object?>();
 
             var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
             var qd = QueryLogic.Queries.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
@@ -39,12 +39,12 @@ namespace Signum.React.MachineLearning
         {
             ParseValues(request, pctx);
 
-            return new PredictDictionary(pctx.Predictor)
+            return new PredictDictionary(pctx.Predictor, null, null)
             {
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
-                .Where(a => a.col.Usage == PredictorColumnUsage.Input)
-                .Select(a => KVP.Create(a.col, a.value))
+                .Where(a => a.col!.Usage == PredictorColumnUsage.Input)
+                .Select(a => KeyValuePair.Create(a.col!, a.value))
                 .ToDictionaryEx(),
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
@@ -54,9 +54,9 @@ namespace Signum.React.MachineLearning
 
                     return new PredictSubQueryDictionary(sq)
                     {
-                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(
+                        SubQueryGroups = sqt.rows.Select(array => KeyValuePair.Create(
                             array.Slice(0, splitKeys.Count),
-                            values.Select((a, i) => KVP.Create(a, array[splitKeys.Count + i])).ToDictionary()
+                            values.Select((a, i) => KeyValuePair.Create(a, array[splitKeys.Count + i])).ToDictionary()
                         )).ToDictionary(ObjectArrayComparer.Instance)
                     };
                 }).ToDictionaryEx(a => a.SubQuery)
@@ -71,7 +71,7 @@ namespace Signum.React.MachineLearning
             values = columns.ToList();
         }
 
-        public static void SetOutput(this PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
+        public static void SetOutput(this PredictRequestTS request, PredictDictionary predicted)
         {
             var predictedMainCols = predicted.MainQueryValues.SelectDictionary(qt => qt.Token.Token.FullKey(), v => v);
 
@@ -79,7 +79,7 @@ namespace Signum.React.MachineLearning
             {
                 var pValue = predictedMainCols.GetOrThrow(c.token.fullKey);
                 if (request.hasOriginal)
-                    ((PredictOutputTuple)c.value).predicted = pValue;
+                    ((PredictOutputTuple)c.value!).predicted = pValue;
                 else
                     c.value = pValue;
             }
@@ -112,7 +112,7 @@ namespace Signum.React.MachineLearning
 
                             var pValue = dic?.GetOrThrow(token);
                             if (request.hasOriginal)
-                                ((PredictOutputTuple)box).predicted = pValue;
+                                ((PredictOutputTuple)box!).predicted = pValue;
                             else
                                 box = pValue;
 
@@ -122,7 +122,10 @@ namespace Signum.React.MachineLearning
             }
         }
 
-        public static PredictRequestTS CreatePredictModel(this PredictorPredictContext pctx, PredictDictionary inputs, PredictDictionary originalOutputs, PredictDictionary predictedOutputs)
+        public static PredictRequestTS CreatePredictModel(this PredictorPredictContext pctx, 
+            PredictDictionary? inputs, 
+            PredictDictionary? originalOutputs, 
+            PredictDictionary predictedOutputs)
         {
             return new PredictRequestTS
             {
@@ -160,15 +163,17 @@ namespace Signum.React.MachineLearning
                     {
                         subQuery = sq.ToLite(),
                         columnHeaders = columnHeaders,
-                        rows = pctx.SubQueryOutputCodifications[sq].Groups.Select(kvp => CreateRow(splitKeys, values, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
+                        rows = pctx.SubQueryOutputCodifications[sq].Groups
+                        .Select(kvp => CreateRow(splitKeys, values, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ))
+                        .ToList()
                     };
                 }).ToList()
             };
         }
 
-        static object[] CreateRow(List<PredictorSubQueryColumnEmbedded> groupKeys, List<PredictorSubQueryColumnEmbedded> values, object[] key, PredictSubQueryDictionary inputs, PredictSubQueryDictionary originalOutputs, PredictSubQueryDictionary predictedOutputs)
+        static object?[] CreateRow(List<PredictorSubQueryColumnEmbedded> groupKeys, List<PredictorSubQueryColumnEmbedded> values, object?[] key, PredictSubQueryDictionary? inputs, PredictSubQueryDictionary? originalOutputs, PredictSubQueryDictionary? predictedOutputs)
         {
-            var row = new object[groupKeys.Count + values.Count];
+            var row = new object?[groupKeys.Count + values.Count];
 
             var inputsGR = inputs?.SubQueryGroups.TryGetC(key);
             var originalOutputsGR = originalOutputs?.SubQueryGroups.TryGetC(key);
@@ -183,10 +188,10 @@ namespace Signum.React.MachineLearning
             {
                 var v = values[i];
                 row[i + key.Length] = v.Usage == PredictorSubQueryColumnUsage.Input ? inputsGR?.GetOrThrow(v) :
-                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(v) :
+                    originalOutputs == null ? predictedOutputsGR!.GetOrThrow(v) :
                     new PredictOutputTuple
                     {
-                        predicted = predictedOutputsGR.GetOrThrow(v),
+                        predicted = predictedOutputsGR!.GetOrThrow(v),
                         original = originalOutputsGR?.GetOrThrow(v),
                     };
             }
@@ -225,7 +230,7 @@ namespace Signum.React.MachineLearning
             }
         }
 
-        static object FixValue(object value, QueryToken token, JsonSerializer serializer)
+        static object? FixValue(object? value, QueryToken token, JsonSerializer serializer)
         {
             if (!(value is JToken jt))
                 return ReflectionTools.ChangeType(value, token.Type);
@@ -267,7 +272,7 @@ namespace Signum.React.MachineLearning
     {
         public QueryTokenTS token { get; set; }
         public PredictorColumnUsage usage { get; set; }
-        public object value { get; set; }
+        public object? value { get; set; }
     }
 
     public class PredictSubQueryTableTS
@@ -275,13 +280,13 @@ namespace Signum.React.MachineLearning
         public Lite<PredictorSubQueryEntity> subQuery { get; set; }
         //Key* (Input|Output)*
         public List<PredictSubQueryHeaderTS> columnHeaders { get; set; }
-        public List<object[]> rows { get; set; }
+        public List<object?[]> rows { get; set; }
     }
 
     public class PredictOutputTuple
     {
-        public object predicted;
-        public object original;
+        public object? predicted;
+        public object? original;
     }
 
     public class PredictSubQueryHeaderTS

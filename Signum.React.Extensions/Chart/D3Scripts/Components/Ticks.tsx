@@ -11,7 +11,7 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
   var availableHeight = yRule.size("content");
 
   var yTicks = y.ticks(availableHeight / 50);
-  var yTickFormat = format || y.tickFormat(availableHeight / 50);
+  var yTickFormat = format ?? y.tickFormat(availableHeight / 50);
 
   return (
     <>
@@ -54,7 +54,7 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
   var availableWidth = yRule.size("content");
 
   var xTicks = x.ticks(availableWidth / 50);
-  var xTickFormat = format || x.tickFormat(availableWidth / 50);
+  var xTickFormat = format ?? x.tickFormat(availableWidth / 50);
 
   return (
     <>
@@ -84,7 +84,7 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
         <text className="x-title"
           textAnchor="middle"
           dominantBaseline="middle">
-          {valueColumn.title || ""}
+          {valueColumn.title ?? ""}
         </text>
       </g>
     </>
@@ -172,7 +172,7 @@ export function YKeyTicks({ xRule, yRule, keyValues, keyColumn, y, showLabels, s
 
       <g className="y-title-group" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
         <text className="y-title" textAnchor="middle" dominantBaseline="middle">
-          {keyColumn.title || ""}
+          {keyColumn.title ?? ""}
         </text>
       </g>
     </>

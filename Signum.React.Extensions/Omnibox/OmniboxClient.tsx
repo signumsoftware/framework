@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Dic } from '@framework/Globals';
@@ -100,8 +100,8 @@ function getProvider(resultTypeName: string) {
 export namespace API {
 
   export function getResults(query: string, signal: AbortSignal): Promise<OmniboxResult[]> {
-    return ajaxPost<OmniboxResult[]>({ url: "~/api/omnibox", signal }, {
-      query: query || "help",
+    return ajaxPost({ url: "~/api/omnibox", signal }, {
+      query: query ?? "",
       specialActions: Dic.getKeys(specialActions).filter(a => specialActions[a].allowed == null || specialActions[a].allowed())
     })
   }

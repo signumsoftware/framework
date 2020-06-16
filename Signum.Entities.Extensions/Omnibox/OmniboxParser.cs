@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -51,19 +51,11 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
         public static int MaxResults = 20;
 
-        static bool IsHelp(string omniboxQuery)
-        {
-            var rawQuery = omniboxQuery.ToLower();
-            return rawQuery == "help" ||
-                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() ||
-                rawQuery == "?";
-        }
-
         public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
         {
             List<OmniboxResult> result = new List<OmniboxResult>();
 
-            if (IsHelp(omniboxQuery))
+            if (omniboxQuery == "")
             {
                 result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
 
@@ -85,7 +77,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
             {
                 List<OmniboxToken> tokens = new List<OmniboxToken>();
 
-                foreach (Match m in tokenizer.Matches(omniboxQuery))
+                foreach (Match m in tokenizer.Matches(omniboxQuery).Cast<Match>())
                 {
                     if (ct.IsCancellationRequested)
                         return result;
@@ -169,7 +161,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
         public abstract QueryDescription GetDescription(object queryName);
 
-        public abstract Lite<Entity> RetrieveLite(Type type, PrimaryKey id);
+        public abstract Lite<Entity>? RetrieveLite(Type type, PrimaryKey id);
 
         public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
         {
@@ -214,7 +206,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         [JsonIgnore]
         public Type ReferencedType { get; set; }
 
-        public string ReferencedTypeName => this.ReferencedType?.Name;
+        public string? ReferencedTypeName => this.ReferencedType?.Name;
 
         public override string ToString()
         {

@@ -32,7 +32,7 @@ namespace Signum.Engine.Chart
 
         public static Task<ResultTable> ExecuteChartAsync(ChartRequestModel request, CancellationToken token)
         {
-            IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
+            IDynamicQueryCore core = QueryLogic.Queries.GetQuery(request.QueryName).Core.Value;
 
             return miExecuteChartAsync.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core, token);
         }
@@ -57,7 +57,7 @@ namespace Signum.Engine.Chart
 
         public static ResultTable ExecuteChart(ChartRequestModel request)
         {
-            IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
+            IDynamicQueryCore core = QueryLogic.Queries.GetQuery(request.QueryName).Core.Value;
 
             return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
         }

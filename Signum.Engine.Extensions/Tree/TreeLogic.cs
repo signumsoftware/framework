@@ -63,24 +63,20 @@ namespace Signum.Engine.Tree
         public class ParentMethodExpander<T> : GenericMethodExpander
             where T : TreeEntity
         {
-            public static Expression<Func<T, T>> Expression = 
+            public static Expression<Func<T, T?>> Expression = 
                 cc => Database.Query<T>().SingleOrDefaultEx(cp => (bool)(cp.Route == cc.Route.GetAncestor(1)));
             public ParentMethodExpander() : base(Expression) { }
         }
         [MethodExpander(typeof(ParentMethodExpander<>))]
-        public static T Parent<T>(this T e)
+        public static T? Parent<T>(this T e)
              where T : TreeEntity
         {
             return ParentMethodExpander<T>.Expression.Evaluate(e);
         }
        
-        public static Expression<Func<TreeEntity, short>> LevelExpression =
-                cc => (short)cc.Route.GetLevel();
-        [ExpressionField]
-        public static short Level(this TreeEntity e)
-        {
-            return LevelExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static short Level(this TreeEntity t) => 
+            As.Expression(() => (short)t.Route.GetLevel());
 
         public static void CalculateFullName<T>(T tree)
             where T : TreeEntity
@@ -198,7 +194,7 @@ namespace Signum.Engine.Tree
             if(model.InsertPlace == InsertPlace.LastNode)
                 return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), SqlHierarchyId.Null);
 
-            var newSiblingRoute = model.Sibling.InDB(a => a.Route);
+            var newSiblingRoute = model.Sibling!.InDB(a => a.Route);
 
             if (!newSiblingRoute.IsDescendantOf(newParentRoute) || 
                 newSiblingRoute.GetLevel() != newParentRoute.GetLevel() + 1 || 
@@ -214,7 +210,7 @@ namespace Signum.Engine.Tree
             throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
 
-        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, Func<T, MoveTreeModel, T> copy = null) where T : TreeEntity, new()
+        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, Func<T, MoveTreeModel, T>? copy = null) where T : TreeEntity, new()
         {
             RegisterExpressions<T>();
             RegisterOperations<T>(copy);
@@ -232,7 +228,7 @@ namespace Signum.Engine.Tree
             QueryLogic.Expressions.Register((T c) => c.Level(), () => TreeMessage.Level.NiceToString());
         }
 
-        public static void RegisterOperations<T>(Func<T, MoveTreeModel, T> copy) where T : TreeEntity, new()
+        public static void RegisterOperations<T>(Func<T, MoveTreeModel, T>? copy) where T : TreeEntity, new()
         {
             Graph<T>.Construct.Untyped(TreeOperation.CreateRoot).Do(c =>
             {
@@ -279,7 +275,7 @@ namespace Signum.Engine.Tree
                     {
                         t.Route = CalculateRoute(t);
                         if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.ParentOrSibling != null)
-                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent().Mixin<DisabledMixin>().IsDisabled;
+                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent()!.Mixin<DisabledMixin>().IsDisabled;
                     }
 
                     TreeLogic.FixName(t);
@@ -319,7 +315,7 @@ namespace Signum.Engine.Tree
 
                          var list = descendants.Select(oldNode =>
                          {
-                             var newNode = copy(oldNode, model);
+                             var newNode = copy!(oldNode, model);
                              if (hasDisabledMixin)
                                  newNode.Mixin<DisabledMixin>().IsDisabled = oldNode.Mixin<DisabledMixin>().IsDisabled || isParentDisabled;
 
@@ -364,7 +360,7 @@ namespace Signum.Engine.Tree
             }
             else
             {
-                var siblingRoute = t.ParentOrSibling.InDB(p => p.Route);
+                var siblingRoute = t.ParentOrSibling!.InDB(p => p.Route);
                 return siblingRoute.GetAncestor(1).GetDescendant(siblingRoute, Next<T>(siblingRoute));
             }
         }

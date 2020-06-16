@@ -1,10 +1,14 @@
 import * as React from 'react'
+import { Location } from 'history'
 import { getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
+import { useInterval } from '../../../Framework/Signum.React/Scripts/Hooks'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -13,16 +17,15 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   }
 
   getLabel(res: ToolbarResponse<QueryEntity>) {
-    return res.label || getQueryNiceName(res.content!.toStr!);
+    return res.label ?? getQueryNiceName(res.content!.toStr!);
   }
 
-  countIcon?: CountIcon | null;
   getIcon(element: ToolbarResponse<QueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountIcon ref={ci => this.countIcon = ci} findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountIcon findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName) , ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
@@ -36,6 +39,10 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   navigateTo(res: ToolbarResponse<QueryEntity>): Promise<string> {
     return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
+
+  isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: any): boolean {
+    return location.pathname == Navigator.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
+  }
 }
 
 interface CountIconProps {
@@ -44,42 +51,14 @@ interface CountIconProps {
   findOptions: FindOptions;
 }
 
-export class CountIcon extends React.Component<CountIconProps>{
+export function CountIcon(p: CountIconProps) {
 
-  componentWillUnmount() {
-    if (this.handler)
-      clearTimeout(this.handler);
+  const refreshKey = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
-    this._isMounted = false;
-  }
-
-  _isMounted = true;
-  handler: number | undefined;
-  handleValueChanged = () => {
-    if (this.props.autoRefreshPeriod && this._isMounted) {
-
-      if (this.handler)
-        clearTimeout(this.handler);
-
-      this.handler = setTimeout(() => {
-        this.refreshValue();
-      }, this.props.autoRefreshPeriod * 1000);
-    }
-  }
-
-  refreshValue() {
-    this.valueSearchControl && this.valueSearchControl.refreshValue();
-  }
-
-  valueSearchControl?: ValueSearchControl | null;
-
-  render() {
-    return <ValueSearchControl ref={vsc => this.valueSearchControl = vsc}
-      findOptions={this.props.findOptions}
-      customClass="icon"
-      customStyle={{ color: this.props.color }}
-      onValueChange={this.handleValueChanged}
-      avoidNotifyPendingRequest={true}
-    />;
-  }
+  return <ValueSearchControl refreshKey={refreshKey}
+    findOptions={p.findOptions}
+    customClass="icon"
+    customStyle={{ color: p.color }}
+    avoidNotifyPendingRequest={true}
+  />;
 }

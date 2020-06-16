@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -153,7 +153,7 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 export namespace API {
 
   export function availableDevices(algorithm: PredictorAlgorithmSymbol): Promise<string[]> {
-    return ajaxGet<string[]>({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
+    return ajaxGet({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
   }
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
@@ -187,15 +187,15 @@ export namespace API {
   }
 
   export function getPredict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<PredictRequest> {
-    return ajaxPost<PredictRequest>({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
+    return ajaxPost({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
   }
 
   export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {
-    return ajaxPost<PredictRequest>({ url: `~/api/predict/update/` }, predict);
+    return ajaxPost({ url: `~/api/predict/update/` }, predict);
   }
 
   export function publications(queryKey: string): Promise<PredictorPublicationSymbol[]> {
-    return ajaxGet<PredictorPublicationSymbol[]>({ url: `~/api/predict/publications/${queryKey}` });
+    return ajaxGet({ url: `~/api/predict/publications/${queryKey}` });
   }
 }
 

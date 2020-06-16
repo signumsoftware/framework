@@ -13,8 +13,9 @@ namespace Signum.Entities.Templating
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var parentEntity = this.GetParentEntity();
-            var query = parentEntity is WordTemplateEntity wt ? wt.Query :
+            var parentEntity = this.TryGetParentEntity<Entity>()!;
+            var query = 
+                parentEntity is WordTemplateEntity wt ? wt.Query :
                 parentEntity is EmailTemplateEntity et ? et.Query :
                 throw new UnexpectedValueException(parentEntity);
 
@@ -27,7 +28,7 @@ namespace Signum.Entities.Templating
 {
     class Evaluator : Signum.Entities.Templating.ITemplateApplicable
     {
-        public bool ApplicableUntyped(Entity e)
+        public bool ApplicableUntyped(Entity? e)
         {
             return this.Applicable((" + entityTypeName + @")e);
         }
@@ -43,6 +44,6 @@ namespace Signum.Entities.Templating
 
     public interface ITemplateApplicable
     {
-        bool ApplicableUntyped(Entity e);
+        bool ApplicableUntyped(Entity? e);
     }
 }

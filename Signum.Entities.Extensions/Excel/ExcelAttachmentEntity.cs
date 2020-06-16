@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Entities.UserQueries;
@@ -10,7 +10,7 @@ namespace Signum.Entities.Excel
     public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
+        [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -22,11 +22,11 @@ namespace Signum.Entities.Excel
         }
 
         [Ignore]
-        internal object FileNameNode;
+        internal object? FileNameNode;
 
-        string title;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
-        public string Title
+        string? title;
+        [StringLengthValidator(Min = 3, Max = 300)]
+        public string? Title
         {
             get { return title; }
             set
@@ -38,19 +38,15 @@ namespace Signum.Entities.Excel
 
 
         [Ignore]
-        internal object TitleNode;
+        internal object? TitleNode;
 
-        [NotNullValidator]
+        
         public Lite<UserQueryEntity> UserQuery { get; set; }
 
         [ImplementedByAll]
         public Lite<Entity> Related { get; set; }
 
-        static Expression<Func<ExcelAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FileName);
     }
 }

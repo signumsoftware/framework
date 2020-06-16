@@ -9,30 +9,27 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
+        
+        public string? GetName() => Name;
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
-
-        [NotNullValidator]
+        
         public WorkflowLaneEntity Lane { get; set; }
 
         public WorkflowEventType Type { get; set; }
 
-        public WorkflowTimerEmbedded Timer { get; set; }
+        public WorkflowTimerEmbedded? Timer { get; set; }
 
-        public Lite<WorkflowActivityEntity> BoundaryOf { get; set; }
+        public Lite<WorkflowActivityEntity>? BoundaryOf { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
         public ModelEntity GetModel()
         {
@@ -43,7 +40,9 @@ namespace Signum.Entities.Workflow
                 Type = this.Type,
                 Task = WorkflowEventTaskModel.GetModel(this),
                 Timer = this.Timer,
+                BpmnElementId = this.BpmnElementId,
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -53,41 +52,20 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.Timer = wModel.Timer;
+            this.BpmnElementId = wModel.BpmnElementId;
+            this.CopyMixinsFrom(wModel);
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(Timer))
-            {
-                if (Timer == null && this.Type.IsTimer())
-                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-
-                if (Timer != null && !this.Type.IsTimer())
-                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-            }
-
-            if (pi.Name == nameof(BoundaryOf))
-            {
-                if (BoundaryOf == null && this.Type.IsBoundaryTimer())
-                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-
-                if (BoundaryOf != null && !this.Type.IsBoundaryTimer())
-                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
-            }
-
-            return base.PropertyValidation(pi);
         }
     }
 
     [Serializable]
     public class WorkflowTimerEmbedded : EmbeddedEntity
     {
-        public TimeSpanEmbedded Duration { get; set; }
+        public TimeSpanEmbedded? Duration { get; set; }
 
-        public Lite<WorkflowTimerConditionEntity> Condition { get; set; }
+        public Lite<WorkflowTimerConditionEntity>? Condition { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Duration) && Duration == null && Condition == null)
                 return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
@@ -96,6 +74,17 @@ namespace Signum.Entities.Workflow
                 return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(NicePropertyName(() => Condition), pi.NiceName());
 
             return base.PropertyValidation(pi);
+        }
+
+        public WorkflowTimerEmbedded Clone()
+        {
+            WorkflowTimerEmbedded result = new WorkflowTimerEmbedded
+            {
+                Condition = this.Condition,
+                Duration = this.Duration == null ? null : this.Duration.Clone(),
+            };
+
+            return result;
         }
     }
 
@@ -142,17 +131,17 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public WorkflowEventType Type { get; set; }
 
-        public WorkflowEventTaskModel Task { get; set; }
+        public WorkflowEventTaskModel? Task { get; set; }
 
-        public WorkflowTimerEmbedded Timer { get; set; }
+        public WorkflowTimerEmbedded? Timer { get; set; }
 
         public string BpmnElementId { get; set; }
     }

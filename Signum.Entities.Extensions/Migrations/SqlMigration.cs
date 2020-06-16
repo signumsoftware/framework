@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 
@@ -8,16 +8,13 @@ namespace Signum.Entities.Migrations
     public class SqlMigrationEntity : Entity
     {
         [UniqueIndex]
+        [StringLengthValidator(Max = 200)]
         public string VersionNumber { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 0, Max = 400)]
-        public string Comment { get; set; }
+        [StringLengthValidator(Min = 0, Max = 400)]
+        public string? Comment { get; set; }
 
-        static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => VersionNumber);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
@@ -12,15 +12,15 @@ namespace Signum.Entities.Joyride
     public class JoyrideEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public Lite<CultureInfoEntity> Culture { get; set; }
+        public Lite<CultureInfoEntity>? Culture { get; set; }
 
         public JoyrideType Type { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<JoyrideStepEntity> Steps { get; set; } = new MList<JoyrideStepEntity>();
 
         public bool ShowSkipButton { get; set; }
@@ -34,12 +34,8 @@ namespace Signum.Entities.Joyride
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static Expression<Func<JoyrideEntity, string>> ToStringExpression = e => e.Name.ToString();
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         public XElement ToXml(IToXmlContext ctx)
         {
@@ -59,7 +55,7 @@ namespace Signum.Entities.Joyride
         {
             Name = element.Element("Name").Value;
             Culture = element.Element("Culture")?.Let(a => Lite.Parse<CultureInfoEntity>(a.Value));
-            Type = (JoyrideType) element.Element("Type")?.Value.ToEnum<JoyrideType>();
+            Type = element.Element("Type").Value.ToEnum<JoyrideType>();
             Steps.Synchronize(element.Element("Steps").Elements().ToList(), (s, x) => s.FromXml(x, ctx));
             ShowSkipButton = Boolean.Parse(element.Element("ShowSkipButton").Value);
             ShowStepsProgress = Boolean.Parse(element.Element("ShowStepsProgress").Value);

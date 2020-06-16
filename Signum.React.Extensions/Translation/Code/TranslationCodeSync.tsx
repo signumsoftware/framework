@@ -1,7 +1,7 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { notifySuccess } from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
@@ -10,94 +10,58 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";
 import "../Translation.css"
+import { decodeDots } from './TranslationCodeStatus'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
 
-interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }> {
+export default function TranslationCodeSync(p: RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }>) {
+  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const assembly = decodeDots(p.match.params.assembly);
+  const culture = p.match.params.culture;
+  const namespace = p.match.params.namespace && decodeDots(p.match.params.namespace);
 
+  const [result, reloadResult] = useAPIWithReload(() => API.sync(assembly, culture, namespace), [assembly, culture, namespace]);  
+    
+  if (result?.totalTypes == 0) {
+    return (
+      <div>
+        <h2>{TranslationMessage._0AlreadySynchronized.niceToString(namespace ?? assembly)}</h2>
+        <Link to={`~/translation/status`}>
+          {TranslationMessage.BackToTranslationStatus.niceToString()}
+        </Link>
+      </div>
+    );
+  }
+
+  function handleSave() {
+    API.save(assembly, culture ?? "", result!)
+      .then(() => notifySuccess())
+      .then(() => reloadResult())
+      .done();
+  }
+
+  let message = TranslationMessage.Synchronize0In1.niceToString(namespace ?? assembly,
+    cultures ? cultures[culture].toStr : culture);
+
+  if (result) {
+    message += ` [${Dic.getKeys(result.types).length}/${result.totalTypes}]`;
+  }
+
+  return (
+    <div>
+      <h2>{message}</h2>
+      <br />
+      {result && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
+    </div>
+  );
 }
 
-export default class TranslationCodeSync extends React.Component<TranslationCodeSyncProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
+function SyncTable({ result, onSave, currentCulture }: { result: AssemblyResult, onSave: () => void, currentCulture: string }) {
 
-  constructor(props: TranslationCodeSyncProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    CultureClient.getCultures(true).then(cultures => this.setState({ cultures })).done();
-
-    this.loadSync().done();
-  }
-
-  loadSync() {
-    const { assembly, culture, namespace } = this.props.match.params;
-    return API.sync(assembly, culture, namespace).then(result => this.setState({ result }))
-  }
-
-  render() {
-
-    const { assembly, culture, namespace } = this.props.match.params;
-
-
-    if (this.state.result && this.state.result.totalTypes == 0) {
-      return (
-        <div>
-          <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
-          <Link to={`~/translation/status`}>
-            {TranslationMessage.BackToTranslationStatus.niceToString()}
-          </Link>
-        </div>
-      );
-    }
-
-    let message = TranslationMessage.Synchronize0In1.niceToString(namespace || assembly,
-      this.state.cultures ? this.state.cultures[culture].toStr : culture);
-
-    if (this.state.result) {
-      message += ` [${Dic.getKeys(this.state.result.types).length}/${this.state.result.totalTypes}]`;
-    }
-
-    return (
-      <div>
-        <h2>{message}</h2>
-        <br />
-        {this.renderTable()}
-      </div>
-    );
-  }
-
-
-
-  handleSearch = (filter: string) => {
-    const { assembly, culture } = this.props.match.params;
-
-    return API.retrieve(assembly, culture || "", filter)
-      .then(result => this.setState({ result: result }))
-      .done();
-  }
-
-  renderTable() {
-
-    if (this.state.result == undefined)
-      return undefined;
-
-
-    if (Dic.getKeys(this.state.result).length == 0)
-      return <strong> {TranslationMessage.NoResultsFound.niceToString()}</strong>;
-
-    return (
-      <div>
-        {Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result!} currentCulture={this.props.match.params.culture} />)}
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={this.handleSave} />
-      </div>
-    );
-  }
-
-  handleSave = (e: React.FormEvent<any>) => {
-    e.preventDefault();
-    const params = this.props.match.params;
-    API.save(params.assembly, params.culture || "", this.state.result!)
-      .then(() => notifySuccess())
-      .then(() => this.loadSync())
-      .done();
-  }
+  return (
+    <div>
+      {Dic.getValues(result.types)
+        .map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={currentCulture} />)}
+      <button className="btn btn-primary" onClick={onSave}>{TranslationMessage.Save.niceToString()}</button>
+    </div>
+  );
 }

@@ -13,25 +13,23 @@ namespace Signum.Entities.Files
 
         public FileEmbedded(string readFileFrom)
         {
-            this.FileName = Path.GetFileName(readFileFrom);
+            this.FileName = Path.GetFileName(readFileFrom)!;
             this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string FileName { get; set; }
 
-        [NotNullValidator]
         public byte[] BinaryFile { get; set; }
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} - {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
-
-        public string FullWebPath()
+        public string? FullWebPath()
         {
-            return null;
+            throw new NotImplementedException("Full web path not implemented for File Embedded");
         }
     }
 }

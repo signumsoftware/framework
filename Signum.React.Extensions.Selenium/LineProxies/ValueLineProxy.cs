@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -15,21 +15,20 @@ namespace Signum.React.Selenium
         }
 
 
-        public void SetStringValue(string value)
+        public void SetStringValue(string? value)
         {
             IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
             if (checkBox != null)
             {
-                checkBox.SetChecked(bool.Parse(value));
+                checkBox.SetChecked(bool.Parse(value!));
                 return;
             }
 
             IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetime-picker input[type=text]"));
             if(dateTimePicker != null)
             {
-                dateTimePicker.Click();
-                dateTimePicker.SendKeys(value);
-                dateTimePicker.LoseFocus();
+                dateTimePicker.SafeSendKeys(value);
+                dateTimePicker.SendKeys(Keys.Tab);
 
 //                var js = this.Element.GetDriver() as IJavaScriptExecutor;
 
@@ -108,12 +107,12 @@ namespace Signum.React.Selenium
         }
 
 
-        public object GetValue()
+        public object? GetValue()
         {
             return this.GetValue(Route.Type);
         }
 
-        public object GetValue(Type type)
+        public object? GetValue(Type type)
         {
             return ReflectionTools.Parse(GetStringValue(), type);
         }
@@ -123,13 +122,13 @@ namespace Signum.React.Selenium
             return ReflectionTools.Parse<T>(GetStringValue());
         }
 
-        public void SetValue(object value)
+        public void SetValue(object? value)
         {
             var format = Reflector.FormatString(Route);
             this.SetValue(value, format);
         }
 
-        public void SetValue(object value, string format)
+        public void SetValue(object? value, string? format)
         {
             var str = value == null ? null :
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :

@@ -37,11 +37,11 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.userCharts || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.userCharts ?? []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
+      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr ?? "", e => {
         window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
   });
@@ -84,7 +84,7 @@ export module Converter {
 
     return promise.then(filters => {
 
-      cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
+      cr.filterOptions = (cr.filterOptions ?? []).filter(f => f.frozen);
 
       cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
 
@@ -129,11 +129,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forEntityType/" + type });
+    return ajaxGet({ url: "~/api/userChart/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
+    return ajaxGet({ url: "~/api/userChart/forQuery/" + queryKey });
   }
 }
 

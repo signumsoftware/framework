@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -16,21 +16,18 @@ namespace Signum.Engine.Basics
     {
         public static CultureInfo ToCultureInfo(this CultureInfoEntity ci)
         {
-            if (ci == null)
-                return null;
-
-            return EntityToCultureInfo.Value.TryGetC(ci);
+            return EntityToCultureInfo.Value.GetOrThrow(ci);
         }
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null!)));
         }
 
         public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
 
-        public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity;
-        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo;
+        public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity = null!;
+        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -59,7 +56,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements rep)
+        static SqlPreCommand? Schema_Synchronizing(Replacements rep)
         {
             var cis = Database.Query<CultureInfoEntity>().ToList();
 
@@ -74,7 +71,7 @@ namespace Signum.Engine.Basics
             return CultureInfoToEntity.Value.GetOrThrow(ci.Name);
         }
 
-        public static CultureInfoEntity TryGetCultureInfoEntity(this CultureInfo ci)
+        public static CultureInfoEntity? TryGetCultureInfoEntity(this CultureInfo ci)
         {
             return CultureInfoToEntity.Value.TryGetC(ci.Name);
         }

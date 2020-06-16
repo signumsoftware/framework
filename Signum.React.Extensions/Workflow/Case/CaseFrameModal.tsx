@@ -5,25 +5,26 @@ import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
-import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import ValidationErrors from '@framework/Frames/ValidationErrors'
-import ButtonBar from '@framework/Frames/ButtonBar'
-import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
+import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { IHasCaseActivity } from '../WorkflowClient';
-import { Modal, ErrorBoundary } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { ErrorBoundary, ModalHeaderButtons } from '@framework/Components';
+import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Frames/FrameModal';
+import * as AuthClient from '../../Authorization/AuthClient'
 
-interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
+interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<CaseActivityEntity | undefined> {
   title?: string;
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;
@@ -65,7 +66,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   }
 
   handleKeyDown(e: KeyboardEvent) {
-    this.buttonBar && this.buttonBar.hanldleKeyDown(e);
+    this.buttonBar && this.buttonBar.handleKeyDown(e);
   }
 
   calculateState(props: CaseFrameModalState): CaseFrameModalState {
@@ -82,9 +83,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
   loadComponent(pack: WorkflowClient.CaseEntityPack): Promise<void> {
     const ca = pack.activity;
-    const wa = ca.workflowActivity as WorkflowActivityEntity;
 
-    return Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined).promise
+    return WorkflowClient.getViewPromiseCompoment(ca)
       .then(c => this.setState({ getComponent: c }));
   }
 
@@ -185,7 +185,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
   }
 
-  buttonBar?: ButtonBar | null;
+  buttonBar?: ButtonBarHandle | null;
 
   renderBody() {
     var pack = this.state.pack!;
@@ -194,14 +194,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
-      onReload: newPack => {
+      onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
           pack.activity = newPack.entity as CaseActivityEntity;
           pack.canExecuteActivity = newPack.canExecute;
         }
-        this.setState({ refreshCount: this.state.refreshCount + 1 });
+        this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
-      onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
+      onClose: (pack?: EntityPack<ModifiableEntity>) => this.props.onExited!(this.getCaseActivity()),
       revalidate: () => {
         this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
@@ -228,8 +228,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     );
   }
 
-  validationErrorsTop?: ValidationErrors | null;
-  validationErrorsBottom?: ValidationErrors | null;
+  validationErrorsTop?: ValidationErrorHandle | null;
+  validationErrorsBottom?: ValidationErrorHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -237,20 +237,22 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
   renderMainEntity() {
 
+    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
     const mainFrame: EntityFrame = {
       frameComponent: this,
       entityComponent: this.entityComponent,
-      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
-      onReload: newPack => {
+      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },
+      onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
           pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
           pack.canExecuteMainEntity = newPack.canExecute;
         }
-        this.setState({ refreshCount: this.state.refreshCount + 1 });
+        this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
-      onClose: () => this.props.onExited!(null),
+      onClose: () => this.props.onExited!(undefined),
       revalidate: () => {
         this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
@@ -272,19 +274,15 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
-    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
-
-    var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
-
     const wc: WidgetContext<ICaseMainEntity> = {
       ctx: ctx,
-      pack: mainPack,
+      frame: mainFrame,
     };
 
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
         {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainPack} /> : <br />}
+        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
@@ -307,7 +305,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
                 {this.renderExpandLink()}
         <br />
-        {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
+        {!activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
+          <CaseFlowButton caseActivity={this.state.pack.activity} />}
         <small className="sf-type-nice-name text-muted"> {Navigator.getTypeTitle(activity, undefined)}</small>
       </div>
     );
@@ -354,3 +353,4 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     />) as Promise<void>;
   }
 }
+

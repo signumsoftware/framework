@@ -12,21 +12,16 @@ namespace Signum.Entities.Workflow
     public class WorkflowConditionEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
-
-        [NotNullValidator]
+        
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public WorkflowConditionEval Eval { get; set; }
 
-        static Expression<Func<WorkflowConditionEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
@@ -42,7 +37,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowConditionEntity)this.GetParentEntity();
+            var parent = this.GetParentEntity<WorkflowConditionEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");

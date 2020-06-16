@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Authorization
 {
@@ -8,12 +8,17 @@ namespace Signum.Entities.Authorization
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
         [StringLengthValidator(AllowNulls = false, Max = 32)]
         public string Code { get; set; }
-
-        [NotNullValidator]
+        
         public UserEntity User { get; set; }
 
         public DateTime RequestDate { get; set; }
 
         public bool Lapsed { get; set; }
     }
-}
+
+    [AutoInit]
+    public static class ResetPasswordRequestOperation
+    {
+        public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
+    }
+    }

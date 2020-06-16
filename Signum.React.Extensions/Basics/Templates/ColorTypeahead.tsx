@@ -7,10 +7,13 @@ import { Typeahead } from '@framework/Components'
 import { TypeContext } from '@framework/TypeContext'
 import { namedColors } from '../Color'
 import { useForceUpdate } from '@framework/Hooks'
+import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 
 export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefined>; onChange?: () => void }){
+
   const forceUpdate = useForceUpdate();
+
   function handleOnChange(newColor: string | undefined | null) {
     p.ctx.value = newColor;
     if (p.onChange)
@@ -68,23 +71,21 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
     return (
       <span>
         <FontAwesomeIcon icon="square" className="icon" color={item as string} />
-        {Typeahead.highlightedText(item as string, query)}
+        {TypeaheadOptions.highlightedText(item as string, query)}
       </span>
     );
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <Typeahead
-        value={p.color || ""}
-        inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
-        getItems={handleGetItems}
-        onSelect={handleSelect}
-        onChange={handleSelect}
-        renderItem={handleRenderItem}
-        minLength={0}
-      />
-    </div>
+    <Typeahead
+      value={p.color ?? ""}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      getItems={handleGetItems}
+      onSelect={handleSelect}
+      onChange={handleSelect}
+      renderItem={handleRenderItem}
+      minLength={0}
+    />
   );
 }
 

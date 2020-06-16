@@ -103,7 +103,7 @@ export default function EmailTemplate(p : { ctx: TypeContext<EmailTemplateEntity
   return (
     <div>
       <ValueLine ctx={ctx3.subCtx(e => e.name)} />
-      <EntityCombo ctx={ctx3.subCtx(e => e.systemEmail)} />
+      <EntityCombo ctx={ctx3.subCtx(e => e.model)} />
       <EntityLine ctx={ctx3.subCtx(e => e.query)} onChange={() => forceUpdate()}
         remove={ctx.value.from == undefined &&
           (ctx.value.recipients == null || ctx.value.recipients.length == 0) &&

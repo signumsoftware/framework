@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Entities;
@@ -19,7 +19,7 @@ namespace Signum.React.Selenium
             get { return this.Element.FindElement(By.CssSelector("select")).SelectElement(); }
         }
 
-        public Lite<IEntity> LiteValue
+        public Lite<IEntity>? LiteValue
         {
             get
             {
@@ -40,7 +40,7 @@ namespace Signum.React.Selenium
             }
         }
 
-        public List<Lite<Entity>> Options()
+        public List<Lite<Entity>?> Options()
         {
             return this.ComboElement.Options
                 .Select(o => Lite.Parse(o.GetAttribute("value"))?.Do(l => l.SetToString(o.Text)))
@@ -73,7 +73,7 @@ namespace Signum.React.Selenium
                 "ComboBox selected");
         }
 
-        public EntityInfoProxy EntityInfo()
+        public EntityInfoProxy? EntityInfo()
         {
             return EntityInfoInternal(null);
         }
@@ -83,10 +83,10 @@ namespace Signum.React.Selenium
             {
                 var options = this.Options();
                 if (removeNullElement)
-                    options = options.NotNull().ToList();
+                    options = options.NotNull().ToList()!;
 
                 if (orderIndependent)
-                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                    return options.OrderBy(a => a?.Id).SequenceEqual(list.OrderBy(a => a?.Id));
                 else
                     return options.SequenceEqual(list);
             });

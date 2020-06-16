@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Entities.Mailing;
@@ -10,7 +10,7 @@ namespace Signum.Entities.Word
     public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
+        [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -22,9 +22,9 @@ namespace Signum.Entities.Word
         }
 
         [Ignore]
-        internal object FileNameNode;
+        internal object? FileNameNode;
 
-        [NotNullValidator]
+        
         public Lite<WordTemplateEntity> WordTemplate { get; set; }
 
         [ImplementedByAll]
@@ -32,11 +32,7 @@ namespace Signum.Entities.Word
 
         public ModelConverterSymbol ModelConverter { get; set; }
 
-        static Expression<Func<WordAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FileName);
     }
 }

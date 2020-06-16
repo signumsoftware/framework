@@ -1,56 +1,33 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '@framework/Globals';
 import { Lite, is } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
+import { NavDropdown } from 'react-bootstrap';
+import { useAPI } from '@framework/Hooks';
 
-export interface CultureDropdownProps {
-}
 
-export interface CultureDropdownState {
-  cultures?: { [name: string]: Lite<CultureInfoEntity> };
-}
+export default function CultureDropdown(props: {}) {
 
-export default class CultureDropdown extends React.Component<CultureDropdownProps, CultureDropdownState> {
-  constructor(props: CultureDropdownProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    CultureClient.getCultures(false)
-      .then(cultures => this.setState({ cultures: cultures }))
-      .done();
-  }
-
-  handleSelect = (c: Lite<CultureInfoEntity>) => {
+  var cultures = useAPI(signal => CultureClient.getCultures(false), []);
+  function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
   }
 
-  render() {
-    const cultures = this.state.cultures;
+  if (!cultures)
+    return null;
 
-    if (!cultures)
-      return null;
+  const current = CultureClient.currentCulture;
 
-    const current = CultureClient.currentCulture;
+  const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
-    const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
-
-    return (
-      <UncontrolledDropdown id="cultureDropdown" data-culture={pair && pair.name} nav inNavbar>
-        <DropdownToggle nav caret>
-          {current.nativeName}
-        </DropdownToggle>
-        <DropdownMenu right>
-          {Dic.map(cultures, (name, c, i) =>
-            <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onClick={() => this.handleSelect(c)}>
-              {c.toStr}
-            </DropdownItem>
-          )}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    );
-  }
+  return (
+    <NavDropdown id="cultureDropdown" data-culture={pair?.name} title={current.nativeName} className="sf-culture-dropdown">
+      {Dic.map(cultures, (name, c, i) =>
+        <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
+          {c.toStr}
+        </NavDropdown.Item>
+      )}
+    </NavDropdown >
+  );
 }

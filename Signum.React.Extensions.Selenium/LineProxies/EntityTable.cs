@@ -1,6 +1,7 @@
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
+using System;
 
 namespace Signum.React.Selenium
 {
@@ -33,9 +34,14 @@ namespace Signum.React.Selenium
             return this.TableElement.CombineCss(" > tbody > tr").FindElements().Count;
         }
 
-        public LineContainer<T> Row<T>(int index) where T : ModifiableEntity
+        public EntityTableRow<T> Row<T>(int index) where T : ModifiableEntity
         {
-            return new LineContainer<T>(RowElement(index).WaitPresent(), this.ItemRoute);
+            return new EntityTableRow<T>(this, RowElement(index).WaitPresent(), this.ItemRoute);
+        }
+
+        internal int IndexOf(IWebElement row)
+        {
+            return this.TableElement.CombineCss(" > tbody > tr").FindElements().IndexOf(row);
         }
 
         public IWebElement RemoveRowButton(int index)
@@ -48,20 +54,48 @@ namespace Signum.React.Selenium
             this.RemoveRowButton(index).Click();
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }
 
-        public LineContainer<T> CreateRow<T>() where T : ModifiableEntity
+        public EntityTableRow<T> CreateRow<T>() where T : ModifiableEntity
         {
             CreateEmbedded<T>();
             return this.LastRow<T>();
         }
 
-        public LineContainer<T> LastRow<T>() where T : ModifiableEntity
+        public EntityTableRow<T> LastRow<T>() where T : ModifiableEntity
         {
             return this.Row<T>(this.RowsCount() - 1);
+        }
+    }
+
+    public class EntityTableRow<T> : LineContainer<T>
+        where T : ModifiableEntity
+    {
+        public EntityTableProxy EntityTable { get; private set; }
+
+        public int Index => this.EntityTable.IndexOf(this.Element);
+
+        public EntityTableRow(EntityTableProxy entityTable, IWebElement element, PropertyRoute? route = null) : base(element, route)
+        {
+            this.EntityTable = entityTable;
+        }
+
+        public EntityTableRow<T> WaitRefresh(Action action)
+        {
+            var selenium = this.EntityTable.Element.GetDriver();
+            var index = this.Index;
+            action();
+            EntityTableRow<T> result = null!;
+            selenium.Wait(() =>
+            {
+                result = this.EntityTable.Row<T>(index);
+                return !result.Element.Equals(this.Element);
+            });
+
+            return result;
         }
     }
 }

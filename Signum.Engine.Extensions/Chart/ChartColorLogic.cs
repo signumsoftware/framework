@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -15,7 +15,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors;
+        public static ResetLazy<Dictionary<Type, Dictionary<PrimaryKey, Color>>> Colors = null!;
 
         public static readonly int Limit = 360;
 
@@ -33,8 +33,8 @@ namespace Signum.Engine.Chart
 
                 Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorEntity>()
-                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
-                        .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
+                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color!.Argb })
+                        .AgGroupToDictionary(a => a.EntityType!, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
                     new InvalidateWith(typeof(ChartColorEntity)));
             }
         }
@@ -118,7 +118,7 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
+                    Color = dic?.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }

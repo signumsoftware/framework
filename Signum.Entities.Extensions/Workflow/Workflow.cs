@@ -11,10 +11,10 @@ namespace Signum.Entities.Workflow
     public class WorkflowEntity : Entity
     {
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullValidator]
+        
         public TypeEntity MainEntityType { get; set; }
 
         public MList<WorkflowMainEntityStrategy> MainEntityStrategies { get; set; } = new MList<WorkflowMainEntityStrategy>();
@@ -24,19 +24,16 @@ namespace Signum.Entities.Workflow
         /// REDUNDANT! Only for diff logging
         /// </summary>
         [InTypeScript(false), AvoidDump]
-        public WorkflowXmlEmbedded FullDiagramXml { get; set; }
+        public WorkflowXmlEmbedded? FullDiagramXml { get; set; }
 
-        static Expression<Func<WorkflowEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
     public static class WorkflowOperation
     {
+        public static readonly ConstructSymbol<WorkflowEntity>.Simple Create;
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
@@ -62,7 +59,6 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class WorkflowModel : ModelEntity
     {
-        [NotNullValidator]
         public string DiagramXml { get; set;  }
 
         public MList<BpmnEntityPairEmbedded> Entities { get; set; } = new MList<BpmnEntityPairEmbedded>();
@@ -71,11 +67,9 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
         [ImplementedBy()]
         public ModelEntity Model { get; set; }
 
-        [NotNullValidator]
         public string BpmnElementId { get; set; }
 
         public override string ToString()
@@ -127,14 +121,14 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowXmlEmbedded : EmbeddedEntity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue, MultiLine = true)]
+        [StringLengthValidator(Min = 3, Max = int.MaxValue, MultiLine = true)]
         public string DiagramXml { get; set; }
     }
 
     public interface IWorkflowObjectEntity : IEntity
     {
         WorkflowXmlEmbedded Xml { get; set; }
-        string Name { get; set; }
+        string? GetName();
         string BpmnElementId { get; set; }
     }
 
@@ -152,27 +146,27 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
+        [InTypeScript(Undefined = false, Null= false)]
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
-        public Lite<IWorkflowNodeEntity> OldNode { get; set; }
+        public Lite<IWorkflowNodeEntity>? OldNode { get; set; }
 
-        public Lite<WorkflowEntity> SubWorkflow { get; set; }
+        public Lite<WorkflowEntity>? SubWorkflow { get; set; }
 
         public string NewNode { get; set; }
     }
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn)
+        public WorkflowTransitionContext(CaseEntity? @case, CaseActivityEntity? previous, WorkflowConnectionEntity? conn)
         {
             this.Case = @case;
             this.PreviousCaseActivity = previous;
             this.Connection = conn;
         }
 
-        public CaseActivityEntity PreviousCaseActivity { get; internal set; }
-        public WorkflowConnectionEntity Connection { get; internal set; }
-        public CaseEntity Case { get; set; }
+        public CaseActivityEntity? PreviousCaseActivity { get; internal set; }
+        public WorkflowConnectionEntity? Connection { get; internal set; }
+        public CaseEntity? Case { get; set; }
     }
 
     public enum WorkflowValidationMessage
@@ -240,6 +234,8 @@ namespace Signum.Entities.Workflow
         BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
         [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
         IntermediateTimer0ShouldHaveOneOutputOfType1,
+        [Description("Intermediate timer '{0}' should have name.")]
+        IntermediateTimer0ShouldHaveName,
         [Description("Parallel Split '{0}' should have at least one connection.")]
         ParallelSplit0ShouldHaveAtLeastOneConnection,
         [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
@@ -259,8 +255,9 @@ namespace Signum.Entities.Workflow
     }
 
     [AutoInit]
-    public static class WorkflowPanelPermission
+    public static class WorkflowPermission
     {
         public static PermissionSymbol ViewWorkflowPanel;
+        public static PermissionSymbol ViewCaseFlow;
     }
 }

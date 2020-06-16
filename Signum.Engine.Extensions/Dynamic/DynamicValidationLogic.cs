@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -19,9 +19,15 @@ namespace Signum.Engine.Dynamic
         {
             public PropertyRoute PropertyRoute;
             public DynamicValidationEntity Validation;
+
+            public DynamicValidationPair(PropertyRoute propertyRoute, DynamicValidationEntity validation)
+            {
+                PropertyRoute = propertyRoute;
+                Validation = validation;
+            }
         }
 
-        static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations; 
+        static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!; 
 
         public static void Start(SchemaBuilder sb)
         {
@@ -52,7 +58,7 @@ namespace Signum.Engine.Dynamic
 
 
                 DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
-                        .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)) })
+                        .SelectCatch(dv => new DynamicValidationPair(dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)), dv))
                         .GroupToDictionary(a => a.PropertyRoute.Type),
                 new InvalidateWith(typeof(DynamicValidationEntity)));
 
@@ -66,7 +72,7 @@ namespace Signum.Engine.Dynamic
         }
         static bool initialized = false;
 
-        public static string DynamicValidation(ModifiableEntity mod, PropertyInfo pi)
+        public static string? DynamicValidation(ModifiableEntity mod, PropertyInfo pi)
         {
             if (!initialized)
                 return null;

@@ -4,7 +4,7 @@ import { RestApiKeyEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, EntityLine } from "@framework/Lines";
 import { classes } from "@framework/Globals";
 import { API } from "../RestClient";
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useForceUpdate } from '@framework/Hooks';
 
 export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }){
 

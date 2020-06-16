@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
@@ -11,14 +12,14 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElemen
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
-import { ValueSearchControl } from '../../../Framework/Signum.React/Scripts/Search';
+import { ValueSearchControl } from '@framework/Search';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
   Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
   Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
 
-  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
+  Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: ToolbarEntity.token(a => a.priority), defaultOrderType: "Descending" });
 
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 
@@ -35,7 +36,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   getIcon(element: ToolbarResponse<T>) {
-    return ToolbarConfig.coloredIcon(element.iconName == null ? undefined : parseIcon(element.iconName), element.iconColor);
+    return ToolbarConfig.coloredIcon(parseIcon(element.iconName), element.iconColor);
   }
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
@@ -46,15 +47,14 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   getLabel(element: ToolbarResponse<T>) {
-    return element.label || element.content!.toStr;
+    return element.label ?? element.content!.toStr;
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
-
+  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
-
-    var openWindow = e.ctrlKey || e.button == 1;
+    e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
       Navigator.pushOrOpenInTab(url, e);
@@ -70,8 +70,8 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any>> {
-    return ajaxGet<ToolbarResponse<any>>({ url: `~/api/toolbar/current/${location}` });
+  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
 }
 

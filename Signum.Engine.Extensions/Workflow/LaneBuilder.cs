@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Utilities;
@@ -40,7 +40,7 @@ namespace Signum.Engine.Workflow
             public void ApplyChanges(XElement processElement, XElement laneElement, Locator locator)
             {
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
-                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
+                var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value!));
 
                 var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
                 var oldEvents = this.events.Values.Where(a => a.Entity.BoundaryOf == null).ToDictionaryEx(a => a.bpmnElementId, "events");
@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(events, oldEvents,
                    (id, e) =>
                    {
-                       var already = (WorkflowEventEntity)locator.FindEntity(id);
+                       var already = (WorkflowEventEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).events.Remove(id);
@@ -80,7 +80,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(activities, oldActivities,
                    (id, a) =>
                    {
-                       var already = (WorkflowActivityEntity)locator.FindEntity(id);
+                       var already = (WorkflowActivityEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).activities.Remove(id);
@@ -111,7 +111,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(gateways, oldGateways,
                    (id, g) =>
                    {
-                       var already = (WorkflowGatewayEntity)locator.FindEntity(id);
+                       var already = (WorkflowGatewayEntity?)locator.FindEntity(id);
                        if (already != null)
                        {
                            locator.FindLane(already.Lane).gateways.Remove(id);
@@ -135,11 +135,11 @@ namespace Signum.Engine.Workflow
                    });
             }
 
-            public IWorkflowNodeEntity FindEntity(string bpmElementId)
+            public IWorkflowNodeEntity? FindEntity(string bpmElementId)
             {
                 return this.events.TryGetC(bpmElementId)?.Entity ??
                     this.activities.TryGetC(bpmElementId)?.Entity ??
-                    (IWorkflowNodeEntity)this.gateways.TryGetC(bpmElementId)?.Entity;
+                    (IWorkflowNodeEntity?)this.gateways.TryGetC(bpmElementId)?.Entity;
             }
 
             internal IEnumerable<XmlEntity<WorkflowEventEntity>> GetEvents()
@@ -244,7 +244,7 @@ namespace Signum.Engine.Workflow
                     e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null,
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
                     e.Entity.Type.IsScheduledStart() || e.Entity.Type.IsTimer() ? 
-                        new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || (e.Entity.Type.IsTimer() && e.Entity.Timer.Duration != null)) ? 
+                        new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || (e.Entity.Type.IsTimer() && e.Entity.Timer!.Duration != null)) ? 
                             "timerEventDefinition" : "conditionalEventDefinition")) : null, 
                     GetConnections(e.Entity.ToLite()));
             }
@@ -274,7 +274,7 @@ namespace Signum.Engine.Workflow
             }
 
           
-            internal void DeleteAll(Locator locator)
+            internal void DeleteAll(Locator? locator)
             {
                 foreach (var c in connections.Values.Select(a => a.Entity))
                 {
@@ -327,9 +327,9 @@ namespace Signum.Engine.Workflow
             {
                 if (node is WorkflowActivityEntity wa && (wa.Type == WorkflowActivityType.DecompositionWorkflow || wa.Type == WorkflowActivityType.CallWorkflow))
                 {
-                    var sw = wa.SubWorkflow.Workflow;
+                    var sw = wa.SubWorkflow!.Workflow;
                     var wb = new WorkflowBuilder(sw);
-                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == wa.Lane.Pool.Workflow);
+                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase!) && c.ParentCase!.Workflow == wa.Lane.Pool.Workflow);
                 }
 
                 var caseActivities = node.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
@@ -338,9 +338,9 @@ namespace Signum.Engine.Workflow
                     caseActivities.SelectMany(a => a.Notifications()).UnsafeDelete();
 
                     Database.Query<CaseActivityEntity>()
-                        .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(node) && filter.Evaluate(ca.Previous.Entity.Case))
+                        .Where(ca => ca.Previous!.Entity.WorkflowActivity.Is(node) && filter.Evaluate(ca.Previous.Entity.Case))
                         .UnsafeUpdate()
-                        .Set(ca => ca.Previous, ca => ca.Previous.Entity.Previous)
+                        .Set(ca => ca.Previous, ca => ca.Previous!.Entity.Previous)
                         .Execute();
 
                     var running = caseActivities.Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
@@ -356,13 +356,13 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void MoveCasesAndDelete(IWorkflowNodeEntity node, Locator locator)
+            private static void MoveCasesAndDelete(IWorkflowNodeEntity node, Locator? locator)
             {
                 if (node.CaseActivities().Any())
                 {
-                    if (locator.HasReplacement(node.ToLite()))
+                    if (locator!.HasReplacement(node.ToLite()))
                     {
-                        var replacement = locator.GetReplacement(node.ToLite());
+                        var replacement = locator.GetReplacement(node.ToLite())!;
 
                         node.CaseActivities()
                             .Where(a => a.State == CaseActivityState.Done)
@@ -401,7 +401,7 @@ namespace Signum.Engine.Workflow
                     Name = oldLane.Name,
                     BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval != null ? oldLane.ActorsEval.Clone() : null,
+                    ActorsEval = oldLane.ActorsEval?.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -410,6 +410,7 @@ namespace Signum.Engine.Workflow
                     Lane = newLane,
                     Name = e.Name,
                     BpmnElementId = e.BpmnElementId,
+                    Timer = e.Timer?.Clone(),
                     Type = e.Type,
                     Xml = e.Xml,
                 });
@@ -426,6 +427,11 @@ namespace Signum.Engine.Workflow
                         Xml = a.Xml,
                         Type = a.Type,
                         ViewName = a.ViewName,
+                        ViewNameProps = a.ViewNameProps.Select(p=> new ViewNamePropEmbedded
+                        {
+                            Name = p.Name,
+                            Expression = p.Expression
+                        }).ToMList(),
                         RequiresOpen = a.RequiresOpen,
                         EstimatedDuration = a.EstimatedDuration,
                         Script = a.Script?.Clone(),
@@ -433,7 +439,7 @@ namespace Signum.Engine.Workflow
                         UserHelp = a.UserHelp,
                         Comments = a.Comments,
                     };
-                    na.BoundaryTimers  = (a.BoundaryTimers.Select(newEvents.GetOrThrow)).ToMList();
+                    na.BoundaryTimers  = a.BoundaryTimers.Select(t => newEvents.GetOrThrow(t)).ToMList();
                     return na;
                 });
                 newActivities.Values.SaveList();

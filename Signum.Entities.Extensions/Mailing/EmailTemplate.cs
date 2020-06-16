@@ -32,41 +32,40 @@ namespace Signum.Entities.Mailing
         internal object queryName;
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public bool EditableMessage { get; set; } = true;
 
         public bool DisableAuthorization { get; set; }
-
-        [NotNullValidator]
+        
         public QueryEntity Query { get; set; }
 
-        public SystemEmailEntity SystemEmail { get; set; }
+        public EmailModelEntity? Model { get; set; }
 
         public bool SendDifferentMessages { get; set; }
 
-        public EmailTemplateContactEmbedded From { get; set; }
+        public EmailTemplateContactEmbedded? From { get; set; }
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
+        [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
-        public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
+        public Lite<EmailMasterTemplateEntity>? MasterTemplate { get; set; }
 
         public bool IsBodyHtml { get; set; } = true;
 
-        [NotNullValidator, NotifyCollectionChanged, NotifyChildProperty]
+        [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
         [NotifyChildProperty]
-        public TemplateApplicableEval Applicable { get; set; }
+        public TemplateApplicableEval? Applicable { get; set; }
 
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(Messages))
             {
@@ -80,31 +79,27 @@ namespace Signum.Entities.Mailing
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
 
         internal void ParseData(QueryDescription queryDescription)
         {
             if (Recipients != null)
                 foreach (var r in Recipients.Where(r => r.Token != null))
-                    r.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
+                    r.Token!.ParseData(this, queryDescription, SubTokensOptions.CanElement);
 
             if (From != null && From.Token != null)
                 From.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
         }
 
-        public bool IsApplicable(Entity entity)
+        public bool IsApplicable(Entity? entity)
         {
             if (Applicable == null)
                 return true;
 
             try
             {
-                return Applicable.Algorithm.ApplicableUntyped(entity);
+                return Applicable.Algorithm!.ApplicableUntyped(entity);
             }
             catch (Exception e)
             {
@@ -125,11 +120,11 @@ namespace Signum.Entities.Mailing
                 new XAttribute("DisableAuthorization", DisableAuthorization),
                 new XAttribute("Query", Query.Key),
                 new XAttribute("EditableMessage", EditableMessage),
-                new XAttribute("SystemEmail", SystemEmail.FullClassName),
+                Model == null ? null : new XAttribute("SystemEmail", Model.FullClassName),
                 new XAttribute("SendDifferentMessages", SendDifferentMessages),
-                new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
+                MasterTemplate == null ? null : new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
                 new XAttribute("IsBodyHtml", IsBodyHtml),
-                new XElement("From",
+                From == null ? null : new XElement("From",
                     From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null,
                     From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null,
                     From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null),
@@ -159,7 +154,7 @@ namespace Signum.Entities.Mailing
 
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
-            SystemEmail = ctx.GetSystemEmail(element.Attribute("SystemEmail").Value);
+            Model = ctx.GetEmailModel(element.Attribute("SystemEmail").Value);
             SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
 
             MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
@@ -195,18 +190,18 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailTemplateContactEmbedded : EmbeddedEntity
     {
-        public QueryTokenEmbedded Token { get; set; }
+        public QueryTokenEmbedded? Token { get; set; }
 
-        public string EmailAddress { get; set; }
+        public string? EmailAddress { get; set; }
 
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
         public override string ToString()
         {
             return "{0} <{1}>".FormatWith(DisplayName, EmailAddress);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token))
             {
@@ -245,12 +240,12 @@ namespace Signum.Entities.Mailing
             this.CultureInfo = culture;
         }
 
-        [NotNullValidator]
+        
         public CultureInfoEntity CultureInfo { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(AllowNulls = false, MultiLine=true)]
+        [StringLengthValidator(MultiLine=true)]
         public string Text
         {
             get { return text; }
@@ -262,10 +257,10 @@ namespace Signum.Entities.Mailing
         }
 
         [Ignore]
-        internal object TextParsedNode;
+        internal object? TextParsedNode;
 
         string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string Subject
         {
             get { return subject; }
@@ -277,7 +272,7 @@ namespace Signum.Entities.Mailing
         }
 
         [Ignore]
-        internal object SubjectParsedNode;
+        internal object? SubjectParsedNode;
 
         public override string ToString()
         {
@@ -293,7 +288,7 @@ namespace Signum.Entities.Mailing
     [AutoInit]
     public static class EmailTemplateOperation
     {
-        public static ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail;
+        public static ConstructSymbol<EmailTemplateEntity>.From<EmailModelEntity> CreateEmailTemplateFromModel;
         public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
         public static ExecuteSymbol<EmailTemplateEntity> Save;
         public static DeleteSymbol<EmailTemplateEntity> Delete;

@@ -7,6 +7,8 @@ import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, 
 import * as ChartClient from '../ChartClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
+import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { UserState } from '../../Authorization/Signum.Entities.Authorization'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -17,34 +19,14 @@ export interface ChartBuilderProps {
   onOrderChanged: () => void;
 }
 
-export interface ChartBuilderState {
-  chartScripts?: ChartScript[],
-  colorPalettes?: string[];
-}
+export default function ChartBuilder(p: ChartBuilderProps) {
+  const forceUpdate = useForceUpdate();
 
+  const colorPalettes = useAPI(signal => ChartClient.getColorPalettes(), []);
+  const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
-export default class ChartBuilder extends React.Component<ChartBuilderProps, ChartBuilderState> {
-
-  constructor(props: ChartBuilderProps) {
-    super(props);
-    this.state = {};
-  }
-
-  componentWillMount() {
-    const ctx = this.props.ctx;
-
-    ChartClient.getChartScripts().then(scripts => {
-      this.setState({ chartScripts: scripts });
-      ChartClient.synchronizeColumns(ctx.value, scripts.single(a => is(a.symbol, ctx.value.chartScript)));
-    }).done();
-
-    ChartClient.getColorPalettes().then(colorPalettes =>
-      this.setState({ colorPalettes: colorPalettes }))
-      .done();
-  }
-
-  chartTypeImgClass(script: ChartScript): string {
-    const cb = this.props.ctx.value;
+  function chartTypeImgClass(script: ChartScript): string {
+    const cb = p.ctx.value;
 
     let css = "sf-chart-img";
 
@@ -57,93 +39,39 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     return css;
   }
 
-  handleOnRedraw = () => {
-    this.forceUpdate();
-    this.props.onRedraw();
+  function handleOnRedraw() {
+    forceUpdate();
+    p.onRedraw();
   }
 
-  handleTokenChange = (cc: ChartColumnEmbedded) => {
-    cc.displayName = undefined;
+  function handleTokenChange(cc: ChartColumnEmbedded) {
+    cc.displayName = null!;
     cc.modified = true;
-    this.forceUpdate();
-    this.props.onTokenChange();
+    forceUpdate();
+    p.onTokenChange();
   }
 
-  handleChartScriptOnClick = (cs: ChartScript) => {
-
-    const chart = this.props.ctx.value;
+  function handleChartScriptOnClick(cs: ChartScript) {
+    const chart = p.ctx.value;
     let compatible = ChartClient.isCompatibleWith(cs, chart)
     chart.chartScript = cs.symbol;
     ChartClient.synchronizeColumns(chart, cs);
     chart.modified = true;
 
     if (!compatible)
-      this.props.onInvalidate();
+      p.onInvalidate();
     else
-      this.props.onRedraw();
+      p.onRedraw();
   }
 
-  handleOrderChart = (c: ChartColumnEmbedded, e: React.MouseEvent<any>) => {
-    ChartClient.handleOrderColumn(this.props.ctx.value, c, e.shiftKey);
-    this.props.onOrderChanged();
+  function handleOrderChart(c: ChartColumnEmbedded, e: React.MouseEvent<any>) {
+    ChartClient.handleOrderColumn(p.ctx.value, c, e.shiftKey);
+    p.onOrderChanged();
   }
 
-  render() {
 
-    const chart = this.props.ctx.value;
-
-    const chartScript = this.state.chartScripts && this.state.chartScripts.single(cs => is(cs.symbol, chart.chartScript));
-
-    return (
-      <div className="row sf-chart-builder">
-        <div className="col-lg-2">
-          <div className="sf-chart-type card">
-            <div className="card-header">
-              <h6 className="card-title mb-0">{ChartMessage.Chart.niceToString()}</h6>
-            </div>
-            <div className="card-body">
-              {this.state.chartScripts && this.state.chartScripts.map((cs, i) =>
-                <div key={i} className={this.chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => this.handleChartScriptOnClick(cs)}>
-                  <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
-                </div>)}
-            </div>
-          </div>
-        </div >
-        <div className="col-lg-10">
-          <div className="sf-chart-tokens card">
-            <div className="card-header">
-              <h6 className="card-title mb-0">{ChartMessage.Chart_ChartSettings.niceToString()}</h6>
-            </div>
-            <div className="card-body">
-              <table className="table" style={{ marginBottom: "0px" }}>
-                <thead>
-                  <tr>
-                    <th className="sf-chart-token-narrow">
-                      {ChartMessage.Chart_Dimension.niceToString()}
-                    </th>
-                    <th className="sf-chart-token-wide">
-                      Token
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chartScript && this.state.colorPalettes && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).map((ctx, i) =>
-                    <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
-                      queryKey={this.props.queryKey} onTokenChange={() => this.handleTokenChange(ctx.value)}
-                      onRedraw={this.handleOnRedraw}
-                      onOrderChanged={this.handleOrderChart} colorPalettes={this.state.colorPalettes!} />)
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-          { chartScript && this.renderParameters(chartScript) }
-        </div>
-      </div >);
-  }
-
-  renderParameters(chartScript: ChartScript) {
-    var parameterDic = mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+  function renderParameters(chartScript: ChartScript) {
+    var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
     return (
       <fieldset className="sf-chart-parameters">
@@ -152,7 +80,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             chartScript.parameterGroups.map((gr, i) =>
               <div className="col-sm-2" key={i}>
                 <span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>
-                {gr.parameters.map((p, j) => parameterDic[p.name] ? this.getParameterValueLine(parameterDic[p.name], p, j) : <p key={p.name} className="text-danger">{p.name}</p>)}
+                {gr.parameters.map((p, j) => parameterDic[p.name] ? getParameterValueLine(parameterDic[p.name], p, j) : <p key={p.name} className="text-danger">{p.name}</p>)}
               </div>
             )
           }
@@ -161,9 +89,8 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     );
   }
 
-  getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, j: number) {
-
-    const chart = this.props.ctx.value;
+  function getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, j: number) {
+    const chart = p.ctx.value;
 
     const vl: ValueLineProps = {
       ctx: ctx.subCtx(a => a.value, { labelColumns: { sm: 6 } }),
@@ -189,11 +116,62 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
       vl.valueHtmlAttributes = { size: null as any };
     }
-    vl.onChange = this.handleOnRedraw;
+    vl.onChange = handleOnRedraw;
 
     return <ValueLine key={j} {...vl} />;
   }
 
+  const chart = p.ctx.value;
+
+  const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
+
+  return (
+    <div className="row sf-chart-builder">
+      <div className="col-lg-2">
+        <div className="sf-chart-type card">
+          <div className="card-header">
+            <h6 className="card-title mb-0">{ChartMessage.Chart.niceToString()}</h6>
+          </div>
+          <div className="card-body">
+            {chartScripts?.map((cs, i) =>
+              <div key={i} className={chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => handleChartScriptOnClick(cs)}>
+                <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
+              </div>)}
+          </div>
+        </div>
+      </div >
+      <div className="col-lg-10">
+        <div className="sf-chart-tokens card">
+          <div className="card-header">
+            <h6 className="card-title mb-0">{ChartMessage.Chart_ChartSettings.niceToString()}</h6>
+          </div>
+          <div className="card-body">
+            <table className="table" style={{ marginBottom: "0px" }}>
+              <thead>
+                <tr>
+                  <th className="sf-chart-token-narrow">
+                    {ChartMessage.Chart_Dimension.niceToString()}
+                  </th>
+                  <th className="sf-chart-token-wide">
+                    Token
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {chartScript && colorPalettes && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).map((ctx, i) =>
+                  <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
+                    queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
+                    onRedraw={handleOnRedraw}
+                    onOrderChanged={handleOrderChart} colorPalettes={colorPalettes!} />)
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {chartScript && renderParameters(chartScript)}
+      </div>
+    </div >
+  );
 }
 
 

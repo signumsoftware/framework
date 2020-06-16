@@ -36,7 +36,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
       return (
         <button
           className="sf-query-button sf-chart-script-edit btn btn-light"
-          onClick={() => { API.generatePlanExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
+          onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
           <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
         </button>
       );
@@ -46,14 +46,15 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
 export namespace API {
 
-  export function generatePlanExcel(request: QueryRequest): void {
+  export function generatePlainExcel(request: QueryRequest, overrideFileName?: string): void {
+    debugger;
     ajaxPostRaw({ url: "~/api/excel/plain" }, request)
-      .then(response => saveFile(response))
+      .then(response => saveFile(response, overrideFileName))
       .done();
   }
 
   export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
+    return ajaxGet({ url: "~/api/excel/reportsFor/" + queryKey });
   }
 
 

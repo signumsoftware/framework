@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -33,6 +33,9 @@ namespace Signum.Entities.Authorization
     class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
+        where A : notnull
+        where R : class
+        where K : notnull
     {
         readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
@@ -42,7 +45,8 @@ namespace Signum.Entities.Authorization
         IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, 
+            Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K>? coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
@@ -114,7 +118,7 @@ namespace Signum.Entities.Authorization
                             where isEquals.Evaluate(r.Resource, resource)
                             select new { r.Role, r.Allowed }).ToList();
 
-                specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
+                specificRules = list.ToDictionary(a => a.Role!, a => a.Allowed); /*CSBUG*/
 
                 this.coercer = coercer;
                 this.merger = merger;
@@ -130,7 +134,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(Lite<RoleEntity> role)
             {
-                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KVP.Create(r, GetAllowed(r))));
+                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KeyValuePair.Create(r, GetAllowed(r))));
 
                 return coercer(role, result);
             }
@@ -143,8 +147,8 @@ namespace Signum.Entities.Authorization
             Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules =
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
-                  .AgGroupToDictionary(ru => ru.Role, gr => gr
-                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource), ru.Allowed))
+                  .AgGroupToDictionary(ru => ru.Role!, gr => gr
+                    .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), ru.Allowed))
                     .ToDictionaryEx());
 
             Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -218,7 +222,7 @@ namespace Signum.Entities.Authorization
             readonly List<RoleAllowedCache> baseCaches;
 
 
-            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
+            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues, Func<K, A, A> coercer)
             {
                 this.role = role;
 
@@ -229,14 +233,14 @@ namespace Signum.Entities.Authorization
 
                 Func<K, A> defaultAllowed = merger.MergeDefault(role);
 
-                Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
 
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
-                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
+                    .SelectMany(a => a.rules.OverrideDictionary!.Keys)
                     .ToHashSet();
 
-                Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, baseAllowed);
+                Dictionary<K, A>? tmpRules = keys.ToDictionary(k => k, baseAllowed);
                 if (newValues != null)
                     tmpRules.SetRange(newValues);
 
@@ -245,7 +249,7 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
+            internal Dictionary<K, A>? Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
@@ -269,7 +273,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(K key)
             {
-                var raw = merger.Merge(key, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(key))));
+                var raw = merger.Merge(key, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(key))));
 
                 return coercer(key, raw);
             }
@@ -280,7 +284,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, List<K> allKeys)
+        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, List<K>? allKeys)
         {
             var rules = runtimeRules.Value;
 
@@ -302,8 +306,8 @@ namespace Signum.Entities.Authorization
         }
 
 
-        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
-            Func<string, R> toResource, Func<string, A> parseAllowed)
+        internal SqlPreCommand? ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
+            Func<string, R?> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element(rootName)?.Elements("Role")).EmptyIfNull();
@@ -317,10 +321,10 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
+                               select KeyValuePair.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
+                    SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RT
                     {
                         Resource = kvp.Key,
                         Role = role,
@@ -337,12 +341,12 @@ namespace Signum.Entities.Authorization
                     var shouldResources = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(ToKey(r), xr))
+                               select KeyValuePair.Create(ToKey(r), xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
+                    SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);

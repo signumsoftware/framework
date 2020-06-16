@@ -52,7 +52,7 @@ namespace Signum.Engine.Migrations
 
             foreach (var migration in executedMigrations)
             {
-                var m = dic.TryGetC(migration.VersionNumber);
+                var m = dic.TryGetC(migration.VersionNumber!);
                 if (m != null)
                     m.IsExecuted = true;
                 else
@@ -61,7 +61,7 @@ namespace Signum.Engine.Migrations
                         FileName = null,
                         Comment = ">> In Database Only << " + migration.Comment,
                         IsExecuted = true,
-                        Version = migration.VersionNumber
+                        Version = migration.VersionNumber!
                     });
 
             }
@@ -102,7 +102,7 @@ namespace Signum.Engine.Migrations
             var matches =  Directory.EnumerateFiles(MigrationsDirectory, "*.sql")
                 .Select(fileName => new { fileName, match = regex.Match(Path.GetFileName(fileName)) }).ToList();
 
-            var errors = matches.Where(a => !a.match.Success);
+            var errors = matches.Where(a => !a.match!.Success);
 
             if (errors.Any())
                 throw new InvalidOperationException("Some scripts in the migrations directory have an invalid format (yyyy.MM.dd-HH.mm.ss_OptionalComment.sql) " +
@@ -111,8 +111,8 @@ namespace Signum.Engine.Migrations
             var list = matches.Select(a => new MigrationInfo
             {
                 FileName = a.fileName,
-                Version = a.match.Groups["version"].Value,
-                Comment = a.match.Groups["comment"].Value,
+                Version = a.match!.Groups["version"].Value,
+                Comment = a.match!.Groups["comment"].Value,
             }).OrderBy(a => a.Version).ToList();
             
             return list;
@@ -298,7 +298,7 @@ namespace Signum.Engine.Migrations
             }
         }
 
-        private static void Draw(List<MigrationInfo> migrationsInOrder, MigrationInfo current)
+        private static void Draw(List<MigrationInfo> migrationsInOrder, MigrationInfo? current)
         {
             Console.WriteLine();
 
@@ -323,9 +323,10 @@ namespace Signum.Engine.Migrations
             Console.WriteLine();
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class MigrationInfo
         {
-            public string FileName;
+            public string? FileName;
             public string Version;
             public string Comment;
 
@@ -335,7 +336,7 @@ namespace Signum.Engine.Migrations
             {
                 return Version;
             }
-
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
     }
 }

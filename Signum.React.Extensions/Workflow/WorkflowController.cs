@@ -41,7 +41,7 @@ namespace Signum.React.Workflow
                     activity = activity,
                     canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
                     canExecuteMainEntity = ep.canExecute,
-                    Extension = ep.Extension,
+                    Extension = ep.extension,
                 };
             }
         }
@@ -61,7 +61,7 @@ namespace Signum.React.Workflow
             public Dictionary<string, string> canExecuteMainEntity { get; set; }
 
             [JsonExtensionData]
-            public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+            public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();
         }
 
         [HttpGet("api/workflow/starts")]
@@ -79,17 +79,19 @@ namespace Signum.React.Workflow
             var wb = new WorkflowBuilder(wf);
             List<WorkflowIssue> issues = new List<WorkflowIssue>();
             wb.ValidateGraph(issues);
-            return new WorkflowModelAndIssues
-            {
-                model = model,
-                issues = issues,
-            };
+            return new WorkflowModelAndIssues(model, issues);
         }
 
         public class WorkflowModelAndIssues
         {
             public WorkflowModel model;
             public List<WorkflowIssue> issues;
+
+            public WorkflowModelAndIssues(WorkflowModel model, List<WorkflowIssue> issues)
+            {
+                this.model = model;
+                this.issues = issues;
+            }
         }
 
         [HttpPost("api/workflow/previewChanges/{workflowId}")]
@@ -108,7 +110,7 @@ namespace Signum.React.Workflow
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
             try
             {
-                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, request.args.And(issuesContainer).ToArray());
+                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, (request.args.EmptyIfNull()).And(issuesContainer).ToArray());
             }
             catch (IntegrityCheckException ex)
             {
@@ -118,13 +120,19 @@ namespace Signum.React.Workflow
                 return BadRequest(this.ModelState);
             }
 
-            return new EntityPackWithIssues { entityPack = SignumServer.GetEntityPack(entity), issues = issuesContainer };
+            return new EntityPackWithIssues(SignumServer.GetEntityPack(entity), issuesContainer);
         }
 
         public class EntityPackWithIssues
         {
             public EntityPackTS entityPack;
             public List<WorkflowIssue> issues;
+
+            public EntityPackWithIssues(EntityPackTS entityPack, List<WorkflowIssue> issues)
+            {
+                this.entityPack = entityPack;
+                this.issues = issues;
+            }
         }
 
         [HttpGet("api/workflow/findMainEntityType")]
@@ -201,7 +209,7 @@ namespace Signum.React.Workflow
         [HttpGet("api/workflow/scriptRunner/view")]
         public WorkflowScriptRunnerState ViewScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunnerState state = WorkflowScriptRunner.ExecutionState();
 
@@ -211,7 +219,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/scriptRunner/start")]
         public void StartScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.StartRunningScripts(0);
 
@@ -221,7 +229,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/scriptRunner/stop")]
         public void StopScriptRunner()
         {
-            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
+            WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.Stop();
 
@@ -233,7 +241,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
-            return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
+            return CaseFlowLogic.GetCaseFlow(lite.RetrieveAndRemember());
         }
 
         [HttpPost("api/workflow/activityMonitor")]

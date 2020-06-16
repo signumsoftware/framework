@@ -8,79 +8,45 @@ import { DiffLogMixin, DiffLogMessage } from '../Signum.Entities.DiffLog'
 import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
 import { TypeContext } from '@framework/TypeContext'
 import { DiffDocument } from './DiffDocument'
-import { UncontrolledTabs, Tab, LinkContainer } from '@framework/Components';
+import { Tabs, Tab } from 'react-bootstrap';
+import { LinkContainer } from '@framework/Components';
 import "./DiffLog.css"
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
-  render() {
-    const ctx = this.props.ctx;
-    const ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
+export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }){
+  const ctx = p.ctx;
+  const ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
-    return (
-      <div>
-        <div className="row">
-          <div className="col-sm-6">
-            <EntityLine ctx={ctx6.subCtx(f => f.target)} />
-            <EntityLine ctx={ctx6.subCtx(f => f.operation)} />
-            <EntityLine ctx={ctx6.subCtx(f => f.origin)} />
-            <EntityLine ctx={ctx6.subCtx(f => f.user)} />
-          </div>
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx6.subCtx(f => f.start)} />
-            <ValueLine ctx={ctx6.subCtx(f => f.end)} />
-            <EntityLine ctx={ctx6.subCtx(f => f.exception)} />
-          </div>
+  return (
+    <div>
+      <div className="row">
+        <div className="col-sm-6">
+          <EntityLine ctx={ctx6.subCtx(f => f.target)} />
+          <EntityLine ctx={ctx6.subCtx(f => f.operation)} />
+          <EntityLine ctx={ctx6.subCtx(f => f.origin)} />
+          <EntityLine ctx={ctx6.subCtx(f => f.user)} />
         </div>
-        <div className="code-container">
-          <DiffMixinTabs ctx={ctx} />
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx6.subCtx(f => f.start)} />
+          <ValueLine ctx={ctx6.subCtx(f => f.end)} />
+          <EntityLine ctx={ctx6.subCtx(f => f.exception)} />
         </div>
       </div>
-    );
-  }
+      <div className="code-container">
+        <DiffMixinTabs ctx={ctx} />
+      </div>
+    </div>
+  );
 }
 
-export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, { result?: DiffLogResult }>
-{
-  constructor(props: any) {
-    super(props);
-    this.state = { result: undefined };
-  }
+export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
-  componentWillMount() {
-    API.diffLog(this.props.ctx.value.id!)
-      .then(result => this.setState({ result }))
-      .done();
-  }
+  const result = useAPI(() => API.diffLog(p.ctx.value.id!), [p.ctx.value.id]);
+
+  var mctx = p.ctx.subCtx(DiffLogMixin);
 
 
-  componentWillReceiveProps(nextProps: { ctx: TypeContext<OperationLogEntity> }) {
-    if (!is(nextProps.ctx.value, this.props.ctx.value))
-      API.diffLog(nextProps.ctx.value.id!)
-        .then(result => this.setState({ result }))
-        .done();
-  }
-
-  mctx() {
-    return this.props.ctx.subCtx(DiffLogMixin);
-  }
-
-  render() {
-    const result = this.state.result;
-    const target = this.props.ctx.value.target;
-    return (
-      <UncontrolledTabs id="diffTabs" defaultEventKey="diff">
-        {result && result.prev && this.renderPrev(result.prev)}
-        {result && result.diffPrev && this.renderPrevDiff(result.diffPrev)}
-        {this.renderInitialState()}
-        {this.renderDiff()}
-        {this.renderFinalState()}
-        {result && result.diffNext && this.renderNextDiff(result.diffNext)}
-        {result && (result.next ? this.renderNext(result.next) : target && this.renderCurrentEntity(target))}
-      </UncontrolledTabs>
-    );
-  }
-
-  renderPrev(prev: Lite<OperationLogEntity>) {
+  function renderPrev(prev: Lite<OperationLogEntity>) {
     return (
       <Tab eventKey="prev" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(prev)}>
@@ -95,8 +61,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     );
   }
 
-  renderPrevDiff(diffPrev: Array<DiffPair<Array<DiffPair<string>>>>) {
-
+  function renderPrevDiff(diffPrev: Array<DiffPair<Array<DiffPair<string>>>>) {
     const eq = isEqual(diffPrev);
 
     const title = (
@@ -113,21 +78,20 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     );
   }
 
-  renderInitialState() {
+  function renderInitialState() {
     return (
-      <Tab eventKey="initialState" title={this.mctx().niceName(d => d.initialState)}>
-        <pre><code>{this.mctx().value.initialState}</code></pre>
+      <Tab eventKey="initialState" title={mctx.niceName(d => d.initialState)}>
+        <pre><code>{mctx.value.initialState}</code></pre>
       </Tab>
     );
   }
 
-  renderDiff() {
-
-    if (!this.state.result) {
+  function renderDiff() {
+    if (!result) {
       return <Tab eventKey="diff" title={JavascriptMessage.loading.niceToString()} />
     }
 
-    const eq = !this.state.result.diff || isEqual(this.state.result.diff);
+    const eq = !result.diff || isEqual(result.diff);
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString()}>
@@ -138,21 +102,20 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
     return (
       <Tab eventKey="diff" title={title as any}>
-        {this.state.result.diff && <DiffDocument diff={this.state.result.diff} />}
+        {result.diff && <DiffDocument diff={result.diff} />}
       </Tab>
     );
   }
 
-  renderFinalState() {
+  function renderFinalState() {
     return (
-      <Tab eventKey="finalState" title={this.mctx().niceName(d => d.finalState)}>
-        <pre><code>{this.mctx().value.finalState}</code></pre>
+      <Tab eventKey="finalState" title={mctx.niceName(d => d.finalState)}>
+        <pre><code>{mctx.value.finalState}</code></pre>
       </Tab>
     );
   }
 
-  renderNextDiff(diffNext: Array<DiffPair<Array<DiffPair<string>>>>) {
-
+  function renderNextDiff(diffNext: Array<DiffPair<Array<DiffPair<string>>>>) {
     const eq = isEqual(diffNext);
 
     const title = (
@@ -170,7 +133,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     );
   }
 
-  renderNext(next: Lite<OperationLogEntity>) {
+  function renderNext(next: Lite<OperationLogEntity>) {
     return (
       <Tab eventKey="next" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(next)}>
@@ -184,7 +147,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     );
   }
 
-  renderCurrentEntity(target: Lite<Entity>) {
+  function renderCurrentEntity(target: Lite<Entity>) {
     return (
       <Tab eventKey="next" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(target)}>
@@ -197,6 +160,18 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
       </Tab>
     );
   }
+  const target = p.ctx.value.target;
+  return (
+    <Tabs id="diffTabs" defaultActiveKey="diff">
+      {result?.prev && renderPrev(result.prev)}
+      {result?.diffPrev && renderPrevDiff(result.diffPrev)}
+      {renderInitialState()}
+      {renderDiff()}
+      {renderFinalState()}
+      {result?.diffNext && renderNextDiff(result.diffNext)}
+      {result && (result.next ? renderNext(result.next) : target && renderCurrentEntity(target))}
+    </Tabs>
+  );
 }
 
 function isEqual(diff: Array<DiffPair<Array<DiffPair<string>>>>) {

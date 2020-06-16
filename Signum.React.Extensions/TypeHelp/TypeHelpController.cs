@@ -1,4 +1,4 @@
-﻿
+
 using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
@@ -13,6 +13,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.React.TypeHelp
 {
@@ -129,9 +132,9 @@ namespace Signum.React.TypeHelp
 
 
         [HttpGet("api/typeHelp/{typeName}/{mode}")]
-        public TypeHelpTS GetTypeHelp(string typeName, TypeHelpMode mode)
+        public TypeHelpTS? GetTypeHelp(string typeName, TypeHelpMode mode)
         {
-            Type type = TypeLogic.TryGetType(typeName);
+            Type? type = TypeLogic.TryGetType(typeName);
             if (type == null)
                 return null;
 
@@ -141,7 +144,7 @@ namespace Signum.React.TypeHelp
 
             if (isEnum)
             {
-                var enumType = EnumEntity.Extract(type);
+                var enumType = EnumEntity.Extract(type)!;
                 var values = EnumEntity.GetValues(enumType).ToList();
                 members.AddRange(values.Select(ev => new TypeMemberHelpTS(ev)));
             }
@@ -165,7 +168,7 @@ namespace Signum.React.TypeHelp
 
             return new TypeHelpTS
             {
-                type = (isEnum ? EnumEntity.Extract(type).Name : type.Name),
+                type = (isEnum ? EnumEntity.Extract(type)!.Name : type.Name),
                 cleanTypeName = typeName,
                 isEnum = isEnum,
                 members = members
@@ -190,10 +193,10 @@ namespace Signum.React.TypeHelp
 
     public class TypeMemberHelpTS
     {
-        public string propertyString;
-        public string name;
+        public string? propertyString;
+        public string? name;
         public string type;
-        public string cleanTypeName;
+        public string? cleanTypeName;
         public bool isExpression;
         public bool isEnum;
 
@@ -207,9 +210,16 @@ namespace Signum.React.TypeHelp
                 pr.PropertyInfo?.Name.FirstLower() :
                 pr.PropertyInfo?.Name;
 
-            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
-                PrimaryKey.Type(pr.RootType).Nullify().TypeName():
-                pr.Type.TypeName();
+            this.type = mode == TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
+                PrimaryKey.Type(pr.RootType).Nullify().TypeName() :
+                pr.Let(propertyRoute =>
+                {
+                    var typeName = propertyRoute.Type.TypeName();
+                    var nullable = propertyRoute.PropertyInfo?.IsNullable();
+
+                    return typeName + (nullable == true ? "?" : "");
+                });
+
 
             this.isExpression = false;
             this.isEnum = pr.Type.UnNullify().IsEnum;
@@ -237,7 +247,7 @@ namespace Signum.React.TypeHelp
             this.subMembers = new List<TypeMemberHelpTS>();
         }
 
-        string GetCleanTypeName(Type type)
+        string? GetCleanTypeName(Type type)
         {
             type = type.ElementType() ?? type;
             return TypeLogic.TryGetCleanName(type.CleanType());

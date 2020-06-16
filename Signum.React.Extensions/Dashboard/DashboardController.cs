@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
@@ -17,11 +17,8 @@ namespace Signum.React.Dashboard
             return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
         }
         [HttpGet("api/dashboard/home")]
-        public Lite<DashboardEntity> Home()
+        public Lite<DashboardEntity>? Home()
         {
-            if (TypeAuthLogic.GetAllowed(typeof(DashboardEntity)).MaxUI() == TypeAllowedBasic.None)
-                return null;
-
             var result = DashboardLogic.GetHomePageDashboard();
             return result?.ToLite();
         }

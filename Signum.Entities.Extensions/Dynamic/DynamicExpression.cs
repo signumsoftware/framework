@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
@@ -7,32 +7,28 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicExpressionEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
+        [StringLengthValidator(Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string FromType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string ReturnType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
+        [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Body { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
-        public string Format { get; set; }
+        [StringLengthValidator(Min = 1, Max = 100)]
+        public string? Format { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
-        public string Unit { get; set; }
+        [StringLengthValidator(Min = 1, Max = 100)]
+        public string? Unit { get; set; }
 
         public DynamicExpressionTranslation Translation { get; set; }
 
-        static Expression<Func<DynamicExpressionEntity, string>> ToStringExpression = @this => @this.ReturnType + " " + @this.Name + "(" + @this.FromType + " e)";
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ReturnType + " " + Name + "(" + FromType + " e)");
     }
 
     public enum DynamicExpressionTranslation

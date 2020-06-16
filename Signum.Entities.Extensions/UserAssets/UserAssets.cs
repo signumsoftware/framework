@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
@@ -18,7 +18,7 @@ namespace Signum.Entities.UserAssets
     [Serializable]
     public class UserAssetPreviewLineEmbedded : EmbeddedEntity
     {
-        public TypeEntity Type { get; set; }
+        public TypeEntity? Type { get; set; }
 
         public string Text { get; set; }
 
@@ -75,10 +75,10 @@ namespace Signum.Entities.UserAssets
 
     public interface IFromXmlContext
     {
-        QueryEntity TryGetQuery(string queryKey);
+        QueryEntity? TryGetQuery(string queryKey);
         QueryEntity GetQuery(string queryKey);
 
-        PermissionSymbol TryPermission(string permissionKey);
+        PermissionSymbol? TryPermission(string permissionKey);
 
         Lite<TypeEntity> GetType(string cleanName);
 
@@ -90,7 +90,7 @@ namespace Signum.Entities.UserAssets
 
         DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
-        SystemEmailEntity GetSystemEmail(string fullClassName);
+        EmailModelEntity GetEmailModel(string fullClassName);
         CultureInfoEntity GetCultureInfoEntity(string cultureName);
     }
 
@@ -105,7 +105,7 @@ namespace Signum.Entities.UserAssets
 
     public static class FromXmlExtensions
     {
-        public static void Synchronize<T>(this MList<T> entities, List<XElement> xElements, Action<T, XElement> syncAction)
+        public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
             where T : new()
         {
             if (xElements == null)

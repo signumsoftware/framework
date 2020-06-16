@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -28,7 +28,7 @@ namespace Signum.Engine.Isolation
     {
         public static bool IsStarted;
 
-        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations;
+        public static ResetLazy<List<Lite<IsolationEntity>>> Isolations = null!;
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
@@ -66,17 +66,12 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static IDisposable ProcessLogic_ApplySession(ProcessEntity process)
+        static IDisposable? ProcessLogic_ApplySession(ProcessEntity process)
         {
-            return IsolationEntity.Override(process.Data.TryIsolation());
+            return IsolationEntity.Override(process.Data!.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled, IUserEntity user)
-        {
-            return IsolationEntity.Override(scheduled?.TryIsolation() ?? task?.TryIsolation() ?? user?.TryIsolation());
-        }
-
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
+        static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)
         {
             return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }
@@ -158,7 +153,7 @@ namespace Signum.Engine.Isolation
                     var newBody = Expression.Call(
                       miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationEntity>)),
                       constructor.Body,
-                      Expression.Quote(isolationProperty),
+                      Expression.Quote(IsolationLambda),
                       Expression.Constant(IsolationEntity.Current));
 
                     return Expression.Lambda(newBody, constructor.Parameters);
@@ -169,7 +164,7 @@ namespace Signum.Engine.Isolation
         }
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
-        static Expression<Func<IsolationMixin, Lite<IsolationEntity>>> isolationProperty = (IsolationMixin m) => m.Isolation;
+        static Expression<Func<IsolationMixin, Lite<IsolationEntity>?>> IsolationLambda = (IsolationMixin m) => m.Isolation;
 
         public static void Register<T>(IsolationStrategy strategy) where T : Entity
         {
@@ -180,7 +175,7 @@ namespace Signum.Engine.Isolation
 
             if (strategy == IsolationStrategy.Optional)
             {
-                Schema.Current.Settings.FieldAttributes((T e) => e.Mixin<IsolationMixin>().Isolation).Remove<NotNullableAttribute>(); //Remove non-null 
+                Schema.Current.Settings.FieldAttributes((T e) => e.Mixin<IsolationMixin>().Isolation).Remove<ForceNotNullableAttribute>(); //Remove non-null 
             }
         }
         

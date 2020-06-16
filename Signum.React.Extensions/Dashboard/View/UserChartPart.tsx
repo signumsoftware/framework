@@ -8,90 +8,28 @@ import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
-import PinnedFilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/PinnedFilterBuilder';
+import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
+import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { PanelPartContentProps } from '../DashboardClient'
 
-export interface UserChartPartProps {
-  part: UserChartPartEntity
-  entity?: Lite<Entity>;
+interface ResultOrError {
+
 }
 
-export interface UserChartPartState {
-  chartRequest?: ChartRequestModel;
-  result?: ChartClient.API.ExecuteChartResult;
-  loading: boolean;
-  error?: any;
-  showData?: boolean;
-}
+export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
-export default class UserChartPart extends React.Component<UserChartPartProps, UserChartPartState> {
-  constructor(props: UserChartPartProps) {
-    super(props);
-    this.state = { showData: props.part.showData, loading: false };
-  }
+  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
 
-  componentWillMount() {
-    this.loadChartRequest(this.props);
-  }
+  const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
+    ChartClient.getChartScript(chartRequest!.chartScript)
+      .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
+      .then(result => ({ result }))
+      .catch(error => ({ error })), [chartRequest]);
 
-  componentWillReceiveProps(newProps: UserChartPartProps) {
 
-    if (is(this.props.part.userChart, newProps.part.userChart) &&
-      is(this.props.entity, newProps.entity))
-      return;
-
-    this.loadChartRequest(newProps);
-  }
-
-  loadChartRequest(props: UserChartPartProps) {
-    this.setState({ chartRequest: undefined, result: undefined, error: undefined }, () =>
-      UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
-        .then(cr => this.setState({ chartRequest: cr, result: undefined, error: undefined, loading: true }, () => this.makeQuery()))
-        .done());
-  }
-
-  makeQuery() {
-    ChartClient.getChartScript(this.state.chartRequest!.chartScript)
-      .then(cs => ChartClient.API.executeChart(this.state.chartRequest!, cs))
-      .then(rt => this.setState({ result: rt, loading: false, error: undefined }))
-      .catch(e => { this.setState({ error: e }); })
-      .done();
-  }
-
-  render() {
-
-    const s = this.state;
-    if (s.error) {
-      return (
-        <div>
-          <h4>Error!</h4>
-          {this.renderError(s.error)}
-        </div>
-      );
-    }
-
-    if (!s.chartRequest || !s.result)
-      return <span>{JavascriptMessage.loading.niceToString()}</span>;
-
-    return (
-      <div>
-        <PinnedFilterBuilder filterOptions={s.chartRequest.filterOptions} onFiltersChanged={() => this.makeQuery()} extraSmall={true} />
-        {this.props.part.allowChangeShowData &&
-          <label>
-            <input type="checkbox" checked={this.state.showData} onChange={e => this.setState({ showData: e.currentTarget.checked })} />
-            {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
-          </label>}
-        {this.state.showData ?
-          <ChartTableComponent chartRequest={s.chartRequest} lastChartRequest={s.chartRequest}
-            resultTable={s.result.resultTable} onOrderChanged={() => this.makeQuery()} /> :
-          <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest}
-            data={s.result.chartTable} loading={s.loading} />
-        }
-      </div>
-    );
-  }
-
-  renderError(e: any) {
-
+  const [showData, setShowData] = React.useState(p.part.showData);
+  
+  function renderError(e: any) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
     if (se == undefined)
@@ -104,4 +42,36 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
     );
 
   }
+
+  if (!chartRequest)
+    return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (resultOrError?.error) {
+    return (
+      <div>
+        <h4>Error!</h4>
+        {renderError(resultOrError.error)}
+      </div>
+    );
+  }
+
+  const result = resultOrError?.result!;
+
+  return (
+    <div>
+      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
+      {p.part.allowChangeShowData &&
+        <label>
+          <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
+          {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
+        </label>}
+      {showData ?
+        (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
+          <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
+          resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
+        <ChartRenderer chartRequest={chartRequest} lastChartRequest={chartRequest}
+          data={result?.chartTable} loading={result == null} />
+      }
+    </div>
+  );
 }

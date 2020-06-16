@@ -5,11 +5,10 @@ import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
 import MessageModal from '@framework/Modals/MessageModal'
-import { DynamicViewTree } from './DynamicViewTree'
-import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
+import { DynamicViewTabs } from './DynamicViewTabs'
+import { CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
-import { DesignerNode, DesignerContext } from './NodeUtils'
-import * as NodeUtils from './NodeUtils'
+import { DesignerNode, DesignerContext, RenderWithViewOverrides } from './NodeUtils'
 import ShowCodeModal from './ShowCodeModal'
 import { ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import "./DynamicView.css"
@@ -86,7 +85,10 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
   }
 
   getZeroNode() {
-    const context = {
+
+    var { ctx, children, ...extraProps } = this.props;
+
+    const context: DesignerContext = {
       refreshView: () => {
         this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode());
         this.props.ctx.value.modified = true;
@@ -95,8 +97,13 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
       setSelectedNode: (newNode) => {
         this.updateStateSelectedNode(newNode);
         this.props.ctx.value.modified = true;
-      }
-    } as DesignerContext;
+      },
+      onClose: () => { },
+      props: extraProps,
+      propTypes: this.props.ctx.value.props.toObject(a => a.element.name, a => a.element.type),
+      locals: {},
+      localsCode: this.props.ctx.value.locals,
+    };
 
     return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
   }
@@ -108,7 +115,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     var dve = this.props.ctx.value;
 
     if (dve.entityType == null) {
-      dve.viewContent = null;
+      dve.viewContent = null!;
       this.setState({ exampleEntity: undefined });
     } else {
       dve.viewContent = JSON.stringify(NodeConstructor.createDefaultNode(getTypeInfo(dve.entityType.cleanName)));
@@ -156,14 +163,14 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
           <div className="code-container">
             <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.forceUpdate()} formGroupStyle="Basic"
               type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
-            <DynamicViewTree rootNode={root} />
-            <DynamicViewInspector selectedNode={root.context.getSelectedNode()} />
+            <DynamicViewTabs ctx={this.props.ctx} rootNode={root} />
             <CollapsableTypeHelp initialTypeName={ctx.value.entityType!.cleanName} />
           </div>
         </div>
         <div className="design-content open">
-          {this.state.exampleEntity && this.state.viewOverrides && NodeUtils.renderWithViewOverrides(root, exampleCtx as TypeContext<Entity>, this.state.viewOverrides.filter(a => a.viewName == ctx.value.viewName))}
+          {this.state.exampleEntity && this.state.viewOverrides && <RenderWithViewOverrides dn={root} parentCtx={exampleCtx as TypeContext<Entity>} vos={this.state.viewOverrides.filter(a => a.viewName == ctx.value.viewName)} />}
         </div>
-      </div>);
+      </div>
+    );
   }
 }

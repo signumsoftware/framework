@@ -13,13 +13,13 @@ import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 export const PrintLineEntity = new Type<PrintLineEntity>("PrintLine");
 export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
   Type: "PrintLine";
-  creationDate?: string;
-  testFileType?: Files.FileTypeSymbol | null;
-  file?: Files.FilePathEmbedded | null;
-  package?: Entities.Lite<PrintPackageEntity> | null;
-  printedOn?: string | null;
-  referred?: Entities.Lite<Entities.Entity> | null;
-  state?: PrintLineState;
+  creationDate: string;
+  testFileType: Files.FileTypeSymbol;
+  file: Files.FilePathEmbedded;
+  package: Entities.Lite<PrintPackageEntity> | null;
+  printedOn: string | null;
+  referred: Entities.Lite<Entities.Entity>;
+  state: PrintLineState;
 }
 
 export module PrintLineOperation {
@@ -43,7 +43,7 @@ export type PrintLineState =
 export const PrintPackageEntity = new Type<PrintPackageEntity>("PrintPackage");
 export interface PrintPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
   Type: "PrintPackage";
-  name?: string | null;
+  name: string | null;
 }
 
 export module PrintPackageProcess {

@@ -11,15 +11,15 @@ import * as Basics from '../Basics/Signum.Entities.Basics'
 export const JoyrideEntity = new Type<JoyrideEntity>("Joyride");
 export interface JoyrideEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Joyride";
-  name?: string | null;
-  culture?: Entities.Lite<Basics.CultureInfoEntity> | null;
-  type?: JoyrideType;
+  name: string;
+  culture: Entities.Lite<Basics.CultureInfoEntity> | null;
+  type: JoyrideType;
   steps: Entities.MList<JoyrideStepEntity>;
-  showSkipButton?: boolean;
-  showStepsProgress?: boolean;
-  keyboardNavigation?: boolean;
-  debug?: boolean;
-  guid?: string;
+  showSkipButton: boolean;
+  showStepsProgress: boolean;
+  keyboardNavigation: boolean;
+  debug: boolean;
+  guid: string;
 }
 
 export module JoyrideMessage {
@@ -37,16 +37,16 @@ export module JoyrideOperation {
 export const JoyrideStepEntity = new Type<JoyrideStepEntity>("JoyrideStep");
 export interface JoyrideStepEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "JoyrideStep";
-  guid?: string;
-  culture?: Entities.Lite<Basics.CultureInfoEntity> | null;
-  title?: string | null;
-  text?: string | null;
-  style?: JoyrideStepStyleEntity | null;
-  selector?: string | null;
-  position?: JoyrideStepPosition;
-  type?: JoyrideStepType;
-  allowClicksThruHole?: boolean;
-  isFixed?: boolean;
+  guid: string;
+  culture: Entities.Lite<Basics.CultureInfoEntity> | null;
+  title: string;
+  text: string;
+  style: JoyrideStepStyleEntity | null;
+  selector: string;
+  position: JoyrideStepPosition;
+  type: JoyrideStepType;
+  allowClicksThruHole: boolean;
+  isFixed: boolean;
 }
 
 export module JoyrideStepOperation {
@@ -65,14 +65,14 @@ export type JoyrideStepPosition =
 export const JoyrideStepStyleEntity = new Type<JoyrideStepStyleEntity>("JoyrideStepStyle");
 export interface JoyrideStepStyleEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "JoyrideStepStyle";
-  name?: string | null;
-  backgroundColor?: string | null;
-  color?: string | null;
-  mainColor?: string | null;
-  borderRadius?: string | null;
-  textAlign?: string | null;
-  width?: string | null;
-  guid?: string;
+  name: string;
+  backgroundColor: string | null;
+  color: string | null;
+  mainColor: string | null;
+  borderRadius: string | null;
+  textAlign: string | null;
+  width: string | null;
+  guid: string;
 }
 
 export module JoyrideStepStyleOperation {

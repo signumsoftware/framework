@@ -37,11 +37,11 @@ export function start(options: { routes: JSX.Element[] }) {
       return undefined;
 
     var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.pack.userQueries || []) :
+      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
+      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr ?? "", e => {
         window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
   });
@@ -90,15 +90,15 @@ export module Converter {
     return convertedFilters.then(filters => {
 
       fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-
+      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
       fo.columnOptionsMode = uq.columnsMode;
 
-      fo.columnOptions = (uq.columns || []).map(f => ({
+      fo.columnOptions = (uq.columns ?? []).map(f => ({
         token: f.element.token!.tokenString,
         displayName: f.element.displayName
       }) as ColumnOption);
 
-      fo.orderOptions = (uq.orders || []).map(f => ({
+      fo.orderOptions = (uq.orders ?? []).map(f => ({
         token: f.element.token!.tokenString,
         orderType: f.element.orderType
       }) as OrderOption);
@@ -106,8 +106,7 @@ export module Converter {
 
       const qs = Finder.querySettings[query.key];
 
-      fo.pagination = uq.paginationMode == undefined ?
-        ((qs && qs.pagination) || Finder.defaultPagination) : {
+      fo.pagination = uq.paginationMode == undefined ? undefined : {
           mode: uq.paginationMode,
           currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
           elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
@@ -117,13 +116,12 @@ export module Converter {
     });
   }
 
-  export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptionsParsed> {
+  export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     return toFindOptions(uq, entity)
-      .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd)))
+      .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd, uq.includeDefaultFilters == null ? defaultIncudeDefaultFilters : uq.includeDefaultFilters)))
       .then(fop2 => {
         if (!uq.appendFilters)
           fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
-
         fop.filterOptions.push(...fop2.filterOptions);
         fop.groupResults = fop2.groupResults;
         fop.orderOptions = fop2.orderOptions;
@@ -136,11 +134,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forEntityType/" + type });
+    return ajaxGet({ url: "~/api/userQueries/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forQuery/" + queryKey });
+    return ajaxGet({ url: "~/api/userQueries/forQuery/" + queryKey });
   }
 }
 

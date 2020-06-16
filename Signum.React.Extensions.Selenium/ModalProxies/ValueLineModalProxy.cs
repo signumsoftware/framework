@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 
 namespace Signum.React.Selenium
 {
@@ -13,7 +13,7 @@ namespace Signum.React.Selenium
             get
             {
                 var formGroup = this.Element.FindElement(By.CssSelector("div.modal-body div.form-group"));
-                return new ValueLineProxy(formGroup, null);
+                return new ValueLineProxy(formGroup, null!);
             }
         }
     }

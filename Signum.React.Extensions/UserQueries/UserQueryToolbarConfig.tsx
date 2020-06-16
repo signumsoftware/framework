@@ -1,3 +1,4 @@
+import { Location } from 'history'
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -7,7 +8,8 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
-import { useAPI, useFetchAndForget } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
+import { useAPI, useFetchInState } from '@framework/Hooks';
 import { CountIcon } from '../Toolbar/QueryToolbarConfig';
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
@@ -16,13 +18,12 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     super(type);
   }
 
-  countIcon?: CountIcon | null;
   getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountUserQueryIcon innerRef={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountUserQueryIcon userQuery={element.content!} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : ["far", "list-alt"], element.iconColor || "dodgerblue");
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor ?? "dodgerblue");
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
@@ -32,7 +33,6 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       Navigator.API.fetchAndForget(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
         .then(fo => Finder.explore(fo))
-        .then(() => this.countIcon && this.countIcon.refreshValue())
         .done();
     }
   }
@@ -42,6 +42,10 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
       .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
   }
+
+  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): boolean {
+    return query["userQuery"] == liteKey(res.content!);
+  }
 }
 
 
@@ -49,17 +53,16 @@ interface CountUserQueryIconProps {
   userQuery: Lite<UserQueryEntity>;
   color?: string;
   autoRefreshPeriod?: number;
-  innerRef: (e: CountIcon | null) => void;
 }
 
 
 export function CountUserQueryIcon(p: CountUserQueryIconProps) {
 
-  var userQuery = useFetchAndForget(p.userQuery)
-  var findOptions = useAPI(undefined, [userQuery], signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined));
+  var userQuery = useFetchInState(p.userQuery)
+  var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)
     return <span className="icon" style={{ color: p.color }}>…</span>;
 
-  return <CountIcon ref={p.innerRef} findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
+  return <CountIcon findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
 }

@@ -10,7 +10,7 @@ import { New } from '@framework/Reflection';
 export { FileTypeSymbol };
 
 export interface FileUploaderProps {
-  onFileLoaded: (file: IFile & ModifiableEntity, index: number, count: number) => void;
+  onFileLoaded: (file: IFile & ModifiableEntity, index: number, count: number, htmlFile: File) => void;
   typeName: string;
   fileType?: FileTypeSymbol;
   dragAndDrop?: boolean;
@@ -28,131 +28,126 @@ export interface FileUploaderState {
   errors: string[];
 }
 
-export default class FileUploader extends React.Component<FileUploaderProps, FileUploaderState> {
+export function FileUploader(p: FileUploaderProps) {
 
-  static defaultProps = {
-    dragAndDrop: true
-  };
+  const [isLoading, setIsLodaing] = React.useState<boolean>(false);
+  const [isOver, setIsOver] = React.useState<boolean>(false);
+  const [errors, setErrors] = React.useState<string[]>([]);
 
-  constructor(props: FileUploaderProps) {
-    super(props);
 
-    this.state = { isLoading: false, isOver: false, errors: [] };
-  }
 
-  handleDragOver = (e: React.DragEvent<any>) => {
+  function handleDragOver(e: React.DragEvent<any>) {
     e.stopPropagation();
     e.preventDefault();
-    this.setState({ isOver: true });
+    setIsOver(true);
   }
 
-  handleDragLeave = (e: React.DragEvent<any>) => {
+  function handleDragLeave(e: React.DragEvent<any>) {
     e.stopPropagation();
     e.preventDefault();
-    this.setState({ isOver: false });
+    setIsOver(false);
   }
 
-  handleDrop = (e: React.DragEvent<any>) => {
+  function handleDrop(e: React.DragEvent<any>) {
     e.stopPropagation();
     e.preventDefault();
 
-    this.uploadAll(e.dataTransfer.files);
+    uploadAll(e.dataTransfer.files);
   }
 
-  handleFileChange = (e: React.FormEvent<any>) => {
+  function handleFileChange(e: React.FormEvent<any>) {
     e.preventDefault();
 
     var input = e.target as HTMLInputElement;
 
-    this.uploadAll(input.files!);
+    uploadAll(input.files!);
   }
 
-  uploadAll(files: FileList) {
-    this.state.errors.clear();
-    this.setState({
-      isOver: false,
-      isLoading: true,
-    });
+  function uploadAll(files: FileList) {
+    setErrors([]);
+    setIsOver(false);
+    setIsLodaing(true);
+
     var promises: Promise<void>[] = [];
     for (var i = 0; i < files!.length; i++) {
-      promises.push(this.uploadFile(files![i], i + 1, files!.length));
+      promises.push(uploadFile(files![i], i + 1, files!.length));
     }
 
-    Promise.all(promises).then(() => this.setState({ isLoading: false, isOver: false })).done();
+    Promise.all(promises).then(() => { setIsLodaing(false); setIsOver(false); }).done();
   }
 
-  setError(error: string) {
-    this.state.errors.push(error);
-    this.forceUpdate();
+  function setNewError(newError: string) {
+    setErrors([...errors, newError]);
   }
 
-  uploadFile(file: File, index: number, count: number): Promise<void> {
+  function uploadFile(file: File, index: number, count: number): Promise<void> {
 
     return new Promise((resolve) => {
-      if (file.type && this.props.accept) {
-        
+      if (file.type && p.accept) {
 
-        if (!this.props.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
-          this.setError(FileMessage.TheFile0IsNotA1.niceToString(file.name, this.props.accept));
+
+        if (!p.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
+          setNewError(FileMessage.TheFile0IsNotA1.niceToString(file.name, p.accept));
           return resolve();
         }
       }
 
-      if (this.props.maxSizeInBytes != null && this.props.maxSizeInBytes < file.size) {
-        this.setError(FileMessage.File0IsTooBigTheMaximumSizeIs1.niceToString(file.name, bytesToSize(this.props.maxSizeInBytes)));
+      if (p.maxSizeInBytes != null && p.maxSizeInBytes < file.size) {
+        setNewError(FileMessage.File0IsTooBigTheMaximumSizeIs1.niceToString(file.name, bytesToSize(p.maxSizeInBytes)));
         return resolve();
       }
 
       if (file.name.contains("%")) {
-        this.setError(FileMessage.TheNameOfTheFileMustNotContainPercentSymbol.niceToString());
+        setNewError(FileMessage.TheNameOfTheFileMustNotContainPercentSymbol.niceToString());
         return resolve();
       }
 
       const fileReader = new FileReader();
       fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
       fileReader.onload = e => {
-        const fileEntity = New(this.props.typeName) as ModifiableEntity & IFile;
+        const fileEntity = New(p.typeName) as ModifiableEntity & IFile;
         fileEntity.fileName = file.name;
         fileEntity.binaryFile = ((e.target as any).result as string).after("base64,");
 
-        if (this.props.fileType)
-          (fileEntity as any as IFilePath).fileType = this.props.fileType;
+        if (p.fileType)
+          (fileEntity as any as IFilePath).fileType = p.fileType;
 
 
-        this.props.onFileLoaded(fileEntity, index, count);
+        p.onFileLoaded(fileEntity, index, count, file);
         resolve();
       };
       fileReader.readAsDataURL(file);
     });
   }
 
-  render() {
-    return (
-      <div {...this.props.divHtmlAttributes}>
-        {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
-          (this.props.dragAndDrop ? <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined)}
-            onDragEnter={this.handleDragOver}
-            onDragOver={this.handleDragOver}
-            onDragLeave={this.handleDragLeave}
-            onDrop={this.handleDrop}
-          >
-            <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-              <FontAwesomeIcon icon="upload" />
-              {FileMessage.SelectFile.niceToString()}
-              <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
-            </div>
-            &nbsp;{this.props.dragAndDropMessage || FileMessage.OrDragAFileHere.niceToString()}
-          </div> :
-            <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-              <FontAwesomeIcon icon="upload"  className="mr-1"/>
-              {FileMessage.SelectFile.niceToString()}
-              <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
-            </div>
-          )
-        }
-        {this.state.errors.map((e, i) => <p key={i} className="text-danger">{e}</p>)}
-      </div>
-    );
-  }
-
+  return (
+    <div {...p.divHtmlAttributes}>
+      {isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
+        (p.dragAndDrop ? <div className={classes("sf-file-drop", isOver ? "sf-file-drop-over" : undefined)}
+          onDragEnter={handleDragOver}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
+            <FontAwesomeIcon icon="upload" />
+            {FileMessage.SelectFile.niceToString()}
+            <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
+          </div>
+          &nbsp;{p.dragAndDropMessage ?? FileMessage.OrDragAFileHere.niceToString()}
+        </div> :
+          <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
+            <FontAwesomeIcon icon="upload" className="mr-1" />
+            {FileMessage.SelectFile.niceToString()}
+            <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
+          </div>
+        )
+      }
+      {errors.map((e, i) => <p key={i} className="text-danger">{e}</p>)}
+    </div>
+  );
 }
+
+FileUploader.defaultProps = {
+  dragAndDrop: true
+};

@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Processes;
+using Signum.Entities.Processes;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -11,13 +11,13 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     {
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Device { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Device { get; set; }
 
         public PredictionType PredictionType { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<NeuralNetworkHidenLayerEmbedded> HiddenLayers { get; set; } = new MList<NeuralNetworkHidenLayerEmbedded>();
 
         public NeuralNetworkActivation OutputActivation { get; set; }
@@ -54,7 +54,7 @@ namespace Signum.Entities.MachineLearning
         [Unit("Minibaches"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SaveValidationProgressEvery { get; set; } = 10;
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(SaveValidationProgressEvery))
             {
@@ -69,7 +69,7 @@ namespace Signum.Entities.MachineLearning
             {
                 if (OutputActivation == NeuralNetworkActivation.ReLU || OutputActivation == NeuralNetworkActivation.Sigmoid)
                 {
-                    var p = this.GetParentEntity() as PredictorEntity;
+                    var p = this.GetParentEntity<PredictorEntity>();
                     var errors = p.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList();
                     errors.AddRange(p.SubQueries.SelectMany(sq => sq.Columns).Where(a => a.Usage == PredictorSubQueryColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList());
 
@@ -78,7 +78,7 @@ namespace Signum.Entities.MachineLearning
                 }
             }
 
-            string Validate(NeuralNetworkEvalFunction function)
+            string? Validate(NeuralNetworkEvalFunction function)
             {
                 bool lossIsClassification = function == NeuralNetworkEvalFunction.CrossEntropyWithSoftmax || function == NeuralNetworkEvalFunction.ClassificationError;
                 bool typeIsClassification = this.PredictionType == PredictionType.Classification || this.PredictionType == PredictionType.MultiClassification;
@@ -198,7 +198,7 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
     {
-        [NotNullValidator]
+        
         public Lite<PredictorEntity> InitialPredictor { get; set; }
 
         public bool ExploreLearner { get; set; }

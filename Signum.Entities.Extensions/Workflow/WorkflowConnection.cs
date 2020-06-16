@@ -10,41 +10,44 @@ namespace Signum.Entities.Workflow
     public class WorkflowConnectionEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
-        //[NotNullValidator] needs to be disabled temporally
+        [ForceNullable]
         public IWorkflowNodeEntity From { get; set; }
 
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
-        //[NotNullValidator] needs to be disabled temporally
+        [ForceNullable]
         public IWorkflowNodeEntity To { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string? GetName() => Name;
+
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
         public ConnectionType Type { get; set; }
 
-        public Lite<WorkflowConditionEntity> Condition { get; set; }
+        public Lite<WorkflowConditionEntity>? Condition { get; set; }
 
-        public Lite<WorkflowActionEntity> Action { get; set; }
+        public Lite<WorkflowActionEntity>? Action { get; set; }
 
         public int? Order { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         public ModelEntity GetModel()
         {
             var model = new WorkflowConnectionModel()
             {
-                MainEntityType = this.From.Lane.Pool.Workflow.MainEntityType,
+                MainEntityType = this.From!.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
                 Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
                 Order = this.Order
             };
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -56,15 +59,12 @@ namespace Signum.Entities.Workflow
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
             this.Order = wModel.Order;
+            this.CopyMixinsFrom(wModel);
         }
 
 
-        static Expression<Func<WorkflowConnectionEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
     }
 
     public enum ConnectionType
@@ -86,20 +86,20 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
-        public string Name { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? Name { get; set; }
 
         public bool NeedCondition { get; set; }
         public bool NeedOrder { get; set; }
 
         public ConnectionType Type { get; set; }
 
-        public Lite<WorkflowConditionEntity> Condition { get; set; }
+        public Lite<WorkflowConditionEntity>? Condition { get; set; }
 
-        public Lite<WorkflowActionEntity> Action { get; set; }
+        public Lite<WorkflowActionEntity>? Action { get; set; }
 
         public int? Order { get; set; }
     }

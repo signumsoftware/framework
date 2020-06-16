@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -8,29 +8,26 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class NamespaceHelpEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 300)]
+        [StringLengthValidator(Max = 300)]
         public string Name { get; set; }
-
-        [NotNullValidator]
+        
         public CultureInfoEntity Culture { get; set; }
 
-                public string Title { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Title { get; set; }
 
-		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
-        public string Description { get; set; }
+		[StringLengthValidator(MultiLine = true)]
+        public string? Description { get; set; }
 
-        static Expression<Func<NamespaceHelpEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]
     public static class NamespaceHelpOperation
     {
         public static ExecuteSymbol<NamespaceHelpEntity> Save;
+        public static DeleteSymbol<NamespaceHelpEntity> Delete;
     }
 
 

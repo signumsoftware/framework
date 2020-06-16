@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { TypeAllowedBasic, BasicPermission } from '../../../Authorization/Signum.Entities.Authorization'
 import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
@@ -48,8 +48,7 @@ function gradient(name: string) {
 function color(typeAllowedBasic: TypeAllowedBasic): string {
   switch (typeAllowedBasic) {
     case undefined: return "black";
-    case "Create": return "#0066FF";
-    case "Modify": return "green";
+    case "Write": return "green";
     case "Read": return "gold";
     case "None": return "red";
     default: throw new Error();

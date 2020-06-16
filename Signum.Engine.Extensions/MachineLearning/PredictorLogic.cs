@@ -26,40 +26,39 @@ namespace Signum.Engine.MachineLearning
     public class PredictorTrainingState
     {
         internal CancellationTokenSource CancellationTokenSource;
-        public PredictorTrainingContext Context; 
+        public PredictorTrainingContext Context;
+
+        public PredictorTrainingState(CancellationTokenSource cancellationTokenSource, PredictorTrainingContext context)
+        {
+            CancellationTokenSource = cancellationTokenSource;
+            Context = context;
+        }
     }
 
     public class PublicationSettings
     {
         public object QueryName;
-        public Func<PredictorEntity, Entity> OnPublicate;
+        public Func<PredictorEntity, Entity>? OnPublicate;
+
+        public PublicationSettings(object queryName)
+        {
+            QueryName = queryName;
+        }
     }
 
     public static class PredictorLogic
     {
-        static Expression<Func<PredictorEntity, IQueryable<PredictSimpleResultEntity>>> SimpleResultsExpression =
-           e => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e)
-        {
-            return SimpleResultsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(e)));
 
-        static Expression<Func<PredictorEntity, IQueryable<PredictorCodificationEntity>>> CodificationsExpression =
-        e => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictorCodificationEntity> Codifications(this PredictorEntity e)
-        {
-            return CodificationsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictorCodificationEntity> Codifications(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.Is(e)));
         
-        static Expression<Func<PredictorEntity, IQueryable<PredictorEpochProgressEntity>>> ProgressesExpression =
-        e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Is(e));
-        [ExpressionField]
-        public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e)
-        {
-            return ProgressesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e) => 
+            As.Expression(() => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Is(e)));
 
         public static Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm>();
 
@@ -84,7 +83,7 @@ namespace Signum.Engine.MachineLearning
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
 
-        public static PredictorTrainingContext GetTrainingContext(Lite<PredictorEntity> lite)
+        public static PredictorTrainingContext? GetTrainingContext(Lite<PredictorEntity> lite)
         {
             return Trainings.TryGetC(lite)?.Context;
         }
@@ -222,9 +221,9 @@ namespace Signum.Engine.MachineLearning
             sb.Settings.FieldAttributes((PredictorSubQueryEntity p) => p.Filters.Single().Pinned).Add(new IgnoreAttribute());
         }
 
-        static string SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)
+        static string? SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)
         {
-            var p = (PredictorEntity)sq.GetParentEntity();
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             var tokens = GetParentKeys(p.MainQuery);
             
             var current = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
@@ -239,10 +238,10 @@ namespace Signum.Engine.MachineLearning
             return null;
         }
 
-        static string GroupKey_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
+        static string? GroupKey_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
-            var sq = (PredictorSubQueryEntity)column.GetParentEntity();
-            var p = (PredictorEntity)sq.GetParentEntity();
+            var sq = column.GetParentEntity<PredictorSubQueryEntity>()!;
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             if (column.Token != null && column.Usage == PredictorSubQueryColumnUsage.ParentKey)
             {
                 var index = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey).IndexOf(column);
@@ -288,10 +287,10 @@ namespace Signum.Engine.MachineLearning
             return false;
         }
 
-        static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
+        static string? Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
         {
-            var mq = (PredictorMainQueryEmbedded)column.GetParentEntity();
-            var p = (PredictorEntity)mq.GetParentEntity();
+            var mq = column.GetParentEntity<PredictorMainQueryEmbedded>();
+            var p = mq.GetParentEntity<PredictorEntity>();
             if (p.Algorithm == null)
                 return null;
 
@@ -299,10 +298,10 @@ namespace Signum.Engine.MachineLearning
             return algorithm.ValidateEncodingProperty(p, null, column.Encoding, column.Usage, column.Token);
         }
 
-        static string SubQueryColumn_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
+        static string? SubQueryColumn_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
-            var sq = (PredictorSubQueryEntity)column.GetParentEntity();
-            var p = (PredictorEntity)sq.GetParentEntity();
+            var sq = column.GetParentEntity<PredictorSubQueryEntity>();
+            var p = sq.GetParentEntity<PredictorEntity>()!;
             if (p.Algorithm == null || column.Usage == PredictorSubQueryColumnUsage.ParentKey || column.Usage == PredictorSubQueryColumnUsage.SplitBy)
                 return null;
 
@@ -311,7 +310,7 @@ namespace Signum.Engine.MachineLearning
             return algorithm.ValidateEncodingProperty(p, sq, column.Encoding, usage, column.Token);
         }
 
-        public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null, CancellationToken? cancellationToken = null)
+        public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?>? onReportProgres = null, CancellationToken? cancellationToken = null)
         {
             if(autoReset)
             {
@@ -354,11 +353,7 @@ namespace Signum.Engine.MachineLearning
 
             var ctx = new PredictorTrainingContext(p, cancellationSource.Token);
 
-            var state = new PredictorTrainingState
-            {
-                CancellationTokenSource = cancellationSource,
-                Context = ctx
-            };
+            var state = new PredictorTrainingState(cancellationSource, ctx);
 
             if (!Trainings.TryAdd(p.ToLite(), state))
                 throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(p));
@@ -367,7 +362,7 @@ namespace Signum.Engine.MachineLearning
             {
                 Task.Run(() =>
                 {
-                    var user = ExecutionMode.Global().Using(_ => p.User.Retrieve());
+                    var user = ExecutionMode.Global().Using(_ => p.User!.RetrieveAndRemember());
                     using (UserHolder.UserSession(user))
                     {
                         try
@@ -588,7 +583,7 @@ namespace Signum.Engine.MachineLearning
                     p.State != PredictorState.Trained ? ValidationMessage._0Or1ShouldBeSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.State),  p.State.NiceToString()) :                    p.Publication == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.Publication)) :
                     Publications.GetOrThrow(p.Publication).OnPublicate == null ? PredictorMessage.NoPublicationsProcessRegisteredFor0.NiceToString(p.Publication) :
                     null,
-                    Construct = (p, _) => Publications.GetOrThrow(p.Publication).OnPublicate(p)
+                    Construct = (p, _) => Publications.GetOrThrow(p.Publication!).OnPublicate!(p)
                 }.Register();
                 
                 new Delete(PredictorOperation.Delete)
@@ -616,8 +611,8 @@ namespace Signum.Engine.MachineLearning
                         ResultSaver = e.ResultSaver,
                         MainQuery = e.MainQuery.Clone(),
                         SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
-                        AlgorithmSettings = e.AlgorithmSettings?.Clone(),
-                        Settings = e.Settings?.Clone(),
+                        AlgorithmSettings = e.AlgorithmSettings.Clone(),
+                        Settings = e.Settings.Clone(),
                     },
                 }.Register();
             }

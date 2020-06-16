@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -29,21 +29,13 @@ namespace Signum.Engine.Disconnected
         public static ImportManager ImportManager = new ImportManager();
         public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
 
-        static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ImportsExpression =
-                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
-        [ExpressionField]
-        public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m)
-        {
-            return ImportsExpression.Evaluate(m);
-        }
+        [AutoExpressionField]
+        public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m) => 
+            As.Expression(() => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m)));
 
-        static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ExportsExpression =
-               m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
-        [ExpressionField]
-        public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m)
-        {
-            return ExportsExpression.Evaluate(m);
-        }
+        [AutoExpressionField]
+        public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m) => 
+            As.Expression(() => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m)));
 
         public static long ServerSeed;
 
@@ -97,14 +89,14 @@ namespace Signum.Engine.Disconnected
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync);
 
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
             }
         }
 
-        private static SqlPreCommand Schema_Generating()
+        private static SqlPreCommand? Schema_Generating()
         {
             if (DisconnectedLogic.OfflineMode)
                 return null;
@@ -114,7 +106,7 @@ namespace Signum.Engine.Disconnected
                 .Combine(Spacing.Simple);
         }
 
-        private static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        private static SqlPreCommand? Schema_Synchronizing(Replacements arg)
         {
             if (DisconnectedLogic.OfflineMode)
                 return null;
@@ -136,7 +128,7 @@ namespace Signum.Engine.Disconnected
                 .Where(t => t.PrimaryKey.Identity);
         }
 
-        static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
+        static string? ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
                 .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && e != dm)
@@ -186,13 +178,13 @@ namespace Signum.Engine.Disconnected
                     CanConstruct = dm => dm.State.InState(DisconnectedMachineState.Faulted),
                     Construct = (dm, _) =>
                     {
-                        return ImportManager.BeginImportDatabase(dm, null).Retrieve();
+                        return ImportManager.BeginImportDatabase(dm, null).RetrieveAndRemember();
                     }
                 }.Register();
             }
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        static SqlPreCommand? AuthCache_PreDeleteSqlSync(Entity arg)
         {
             TypeEntity type = (TypeEntity)arg;
 
@@ -348,13 +340,13 @@ namespace Signum.Engine.Disconnected
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
             }
 
-            public ICustomImporter Importer
+            public ICustomImporter? Importer
             {
                 get { return null; }
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
             }
 
-            public ICustomExporter Exporter
+            public ICustomExporter? Exporter
             {
                 get { return null; }
                 set { throw new InvalidOperationException("Disable foreign keys not allowed for Enums"); }
@@ -392,13 +384,13 @@ namespace Signum.Engine.Disconnected
 
         void Saving(Entity ident);
 
-        ICustomImporter Importer { get; set; }
-        ICustomExporter Exporter { get; set; }
+        ICustomImporter? Importer { get; set; }
+        ICustomExporter? Exporter { get; set; }
     }
 
     public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : Entity
     {
-        internal DisconnectedStrategy(Download download, Expression<Func<T, bool>> downloadSubset, Upload upload, Expression<Func<T, bool>> uploadSubset, BasicImporter<T> importer)
+        internal DisconnectedStrategy(Download download, Expression<Func<T, bool>>? downloadSubset, Upload upload, Expression<Func<T, bool>>? uploadSubset, BasicImporter<T> importer)
         {
             if (download == Download.Subset && downloadSubset == null)
                 throw new InvalidOperationException("In order to use Download.Subset, use an overload that takes a downloadSubset expression");
@@ -432,10 +424,10 @@ namespace Signum.Engine.Disconnected
         }
 
         public Download Download { get; private set; }
-        public Expression<Func<T, bool>> DownloadSubset { get; private set; }
+        public Expression<Func<T, bool>>? DownloadSubset { get; private set; }
 
         public Upload Upload { get; private set; }
-        public Expression<Func<T, bool>> UploadSubset { get; private set; }
+        public Expression<Func<T, bool>>? UploadSubset { get; private set; }
 
         public void Saving(Entity entity)
         {
@@ -485,7 +477,7 @@ namespace Signum.Engine.Disconnected
 
         public bool? DisableForeignKeys { get; set; }
 
-        public ICustomImporter Importer { get; set; }
-        public ICustomExporter Exporter { get; set; }
+        public ICustomImporter? Importer { get; set; }
+        public ICustomExporter? Exporter { get; set; }
     }
 }

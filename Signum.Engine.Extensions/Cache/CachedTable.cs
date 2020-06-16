@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -16,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Entities.Internal;
+using Signum.Engine.Connection;
 
 namespace Signum.Engine.Cache
 {
@@ -23,14 +24,13 @@ namespace Signum.Engine.Cache
     {
         public abstract ITable Table { get; }
 
-        public abstract IColumn ParentColumn { get; set; }
+        public abstract IColumn? ParentColumn { get; set; }
 
-        internal List<CachedTableBase> subTables;
-        public List<CachedTableBase> SubTables { get { return subTables; } }
-        protected SqlPreCommandSimple query;
+        internal List<CachedTableBase>? subTables;
+        public List<CachedTableBase>? SubTables { get { return subTables; } }
+        protected SqlPreCommandSimple query = null!;
         internal ICacheLogicController controller;
-
-        internal CachedTableConstructor Constructor;
+        internal CachedTableConstructor Constructor = null!;
 
         internal CachedTableBase(ICacheLogicController controller)
         {
@@ -157,14 +157,14 @@ namespace Signum.Engine.Cache
         Action<object, IRetriever, T> completer;
         Expression<Action<object, IRetriever, T>> completerExpression;
         Func<object, PrimaryKey> idGetter;
-        Expression<Func<PrimaryKey, string>> toStrGetterExpression;
-        Func<PrimaryKey, string> toStrGetter;
+        Expression<Func<PrimaryKey, string>> toStrGetterExpression = null!;
+        Func<PrimaryKey, string> toStrGetter = null!;
 
-        public override IColumn ParentColumn { get; set; }
+        public override IColumn? ParentColumn { get; set; }
 
-        SemiCachedController<T> semiCachedController;
+        SemiCachedController<T>? semiCachedController;
 
-        public CachedTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
+        public CachedTable(ICacheLogicController controller, AliasGenerator? aliasGenerator, string? lastPartialJoin, string? remainingJoins)
             : base(controller)
         {
             this.table = Schema.Current.Table(typeof(T));
@@ -177,7 +177,7 @@ namespace Signum.Engine.Cache
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToString(),
-                    ctr.currentAlias.ToString());
+                    ctr.currentAlias!.ToString());
 
                 ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + ".Id\r\n" + remainingJoins;
 
@@ -208,30 +208,33 @@ namespace Signum.Engine.Cache
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-                Table table = connector.Schema.Table(typeof(T));
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+                    Table table = connector.Schema.Table(typeof(T));
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        object obj = rowReader(fr);
-                        result[idGetter(obj)] = obj; //Could be repeated joins
-                    });
-                    tr.Commit();
-                }
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                return result;
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            object obj = rowReader(fr);
+                            result[idGetter(obj)] = obj; //Could be repeated joins
+                    });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
             if(!CacheLogic.WithSqlDependency && lastPartialJoin.HasText()) //Is semi
@@ -285,7 +288,7 @@ namespace Signum.Engine.Cache
             return origin;
         }
 
-        public string TryGetToString(PrimaryKey id)
+        public string? TryGetToString(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
             var origin = this.GetRows().TryGetC(id);
@@ -344,7 +347,7 @@ namespace Signum.Engine.Cache
         ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries =
             new ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
 
-        internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>>> backReference)
+        internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>?>> backReference)
             where R : Entity
         {
             var lazy = BackReferenceDictionaries.GetOrAdd(backReference, br =>
@@ -380,8 +383,8 @@ namespace Signum.Engine.Cache
 
         private IColumn GetColumn(MemberInfo[] members)
         {
-            IFieldFinder current = (Table)this.Table;
-            Field field = null;
+            IFieldFinder? current = (Table)this.Table;
+            Field? field = null;
 
             for (int i = 0; i < members.Length - 1; i++)
             {
@@ -396,7 +399,7 @@ namespace Signum.Engine.Cache
             var lastMember = members[members.Length - 1];
 
             if (lastMember is Type t)
-                return ((FieldImplementedBy)field).ImplementationColumns.GetOrThrow(t);
+                return ((FieldImplementedBy)field!).ImplementationColumns.GetOrThrow(t);
             else if (current != null)
                 return (IColumn)current.GetField(lastMember);
             else
@@ -407,7 +410,7 @@ namespace Signum.Engine.Cache
 
     class CachedTableMList<T> : CachedTableBase
     {
-        public override IColumn ParentColumn { get; set; }
+        public override IColumn? ParentColumn { get; set; }
 
         TableMList table;
 
@@ -421,7 +424,7 @@ namespace Signum.Engine.Cache
         Func<object, PrimaryKey> parentIdGetter;
         Func<object, PrimaryKey> rowIdGetter;
 
-        public CachedTableMList(ICacheLogicController controller, TableMList table, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
+        public CachedTableMList(ICacheLogicController controller, TableMList table, AliasGenerator? aliasGenerator, string lastPartialJoin, string? remainingJoins)
             : base(controller)
         {
             this.table = table;
@@ -434,7 +437,7 @@ namespace Signum.Engine.Cache
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToString(),
-                    ctr.currentAlias.ToString());
+                    ctr.currentAlias!.ToString());
 
                 ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
 
@@ -472,35 +475,38 @@ namespace Signum.Engine.Cache
 
             relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
-
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
+
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        object obj = rowReader(fr);
-                        PrimaryKey parentId = parentIdGetter(obj);
-                        var dic = result.TryGetC(parentId);
-                        if (dic == null)
-                            result[parentId] = dic = new Dictionary<PrimaryKey, object>();
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        dic[rowIdGetter(obj)] = obj;
-                    });
-                    tr.Commit();
-                }
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            object obj = rowReader(fr);
+                            PrimaryKey parentId = parentIdGetter(obj);
+                            var dic = result.TryGetC(parentId);
+                            if (dic == null)
+                                result[parentId] = dic = new Dictionary<PrimaryKey, object>();
 
-                return result;
+                            dic[rowIdGetter(obj)] = obj;
+                        });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -574,20 +580,20 @@ namespace Signum.Engine.Cache
 
     class CachedLiteTable<T> : CachedTableBase where T : Entity
     {
-        public override IColumn ParentColumn { get; set; }
+        public override IColumn? ParentColumn { get; set; }
 
         Table table;
 
         Alias currentAlias;
         string lastPartialJoin;
-        string remainingJoins;
+        string? remainingJoins;
 
-        Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader;
-        ResetLazy<Dictionary<PrimaryKey, string>> toStrings;
+        Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader = null!;
+        ResetLazy<Dictionary<PrimaryKey, string>> toStrings = null!;
 
-        SemiCachedController<T> semiCachedController;
+        SemiCachedController<T>? semiCachedController;
 
-        public CachedLiteTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string remainingJoins)
+        public CachedLiteTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string? remainingJoins)
             : base(controller)
         {
             this.table = Schema.Current.Table(typeof(T));
@@ -633,30 +639,33 @@ namespace Signum.Engine.Cache
 
             toStrings = new ResetLazy<Dictionary<PrimaryKey, string>>(() =>
             {
-                CacheLogic.AssertSqlDependencyStarted();
-
-                var connector = (SqlConnector)Connector.Current;
-
-                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
-                Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
-
-                using (MeasureLoad())
-                using (Connector.Override(subConnector))
-                using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                return SqlServerRetry.Retry(() =>
                 {
-                    if (CacheLogic.LogWriter != null)
-                        CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
+                    CacheLogic.AssertSqlDependencyStarted();
 
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                    var connector = (SqlConnector)Connector.Current;
+
+                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+
+                    Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
+
+                    using (MeasureLoad())
+                    using (Connector.Override(subConnector))
+                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
-                        var kvp = rowReader(fr);
-                        result[kvp.Key] = kvp.Value;
-                    });
-                    tr.Commit();
-                }
+                        if (CacheLogic.LogWriter != null)
+                            CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                return result;
+                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        {
+                            var kvp = rowReader(fr);
+                            result[kvp.Key] = kvp.Value;
+                        });
+                        tr.Commit();
+                    }
+
+                    return result;
+                });
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
             if (this.subTables != null)
@@ -688,7 +697,9 @@ namespace Signum.Engine.Cache
         {
             Interlocked.Increment(ref hits);
 
-            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id,toStrings?.Value[id]));
+            var lite = (LiteImp<T>)Lite.Create<T>(id, toStrings.Value[id]);
+
+            return retriever.ModifiablePostRetrieving(lite)!;
         }
 
         public override int? Count
@@ -715,24 +726,31 @@ namespace Signum.Engine.Cache
 
             Table table;
 
+            public ToStringExpressionVisitor(ParameterExpression param, ParameterExpression reader, List<IColumn> columns, Table table)
+            {
+                this.param = param;
+                this.reader = reader;
+                this.columns = columns;
+                this.table = table;
+            }
+
             public static Expression GetToString(Table table, ParameterExpression reader, List<IColumn> columns)
             {
-                LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(table.Type, CachedTableBase.ToStringMethod);
+                LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(table.Type, CachedTableBase.ToStringMethod)!;
 
                 if (lambda == null)
                 {
-                    columns.Add(table.ToStrColumn);
+                    columns.Add(table.ToStrColumn!);
 
                     return FieldReader.GetExpression(reader, columns.Count - 1, typeof(string));
                 }
 
-                ToStringExpressionVisitor toStr = new ToStringExpressionVisitor
-                {
-                    param = lambda.Parameters.SingleEx(),
-                    reader = reader,
-                    columns = columns,
-                    table = table,
-                };
+                ToStringExpressionVisitor toStr = new ToStringExpressionVisitor(
+                    lambda.Parameters.SingleEx(),
+                    reader,
+                    columns,
+                    table
+                );
 
                 var result = toStr.Visit(lambda.Body);
 

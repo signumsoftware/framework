@@ -7,12 +7,14 @@ import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
-import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { Modal, Typeahead } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Typeahead } from '@framework/Components';
+import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
+import { ModulesHelp } from './ModulesHelp';
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;
@@ -25,15 +27,17 @@ export interface ExpressionOrValueProps {
   avoidDelete?: boolean;
   hideLabel?: boolean;
   exampleExpression?: string;
-  onRenderValue?: (value: number | string| null | undefined, e: ExpressionOrValueComponent) => React.ReactElement<any>;
+  onRenderValue?: (value: number | string | null | undefined, e: ExpressionOrValueComponentHandle) => React.ReactElement<any>;
 }
 
-export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps> {
+interface ExpressionOrValueComponentHandle {
+  updateValue(value: string | boolean | null | undefined): void;
+}
 
-  updateValue(value: string | boolean | null | undefined) {
-    var p = this.props;
+export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
+  function updateValue(value: string | boolean | null | undefined) {
 
-    var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
+    var parsedValue = p.type != "number" ? value : (parseFloat(value as string) ?? null);
 
     if (parsedValue === "")
       parsedValue = null;
@@ -43,28 +47,27 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     else
       p.binding.setValue(parsedValue);
 
-    (p.refreshView || p.dn.context.refreshView)();
+    (p.refreshView ?? p.dn.context.refreshView)();
   }
 
-  handleChangeCheckbox = (e: React.ChangeEvent<any>) => {
+  function handleChangeCheckbox(e: React.ChangeEvent<any>) {
     var sender = (e.currentTarget as HTMLInputElement);
-    this.updateValue(sender.checked);
+    updateValue(sender.checked);
   }
 
-  handleChangeSelectOrInput = (e: React.ChangeEvent<any>) => {
+  function handleChangeSelectOrInput(e: React.ChangeEvent<any>) {
     var sender = (e.currentTarget as HTMLSelectElement | HTMLInputElement);
-    this.updateValue(sender.value);
+    updateValue(sender.value);
   }
 
-  handleTypeaheadSelect = (item: unknown) => {
-    this.updateValue(item as string);
+  function handleTypeaheadSelect(item: unknown) {
+    updateValue(item as string);
     return item as string;
   }
 
-  handleToggleExpression = (e: React.MouseEvent<any>) => {
+  function handleToggleExpression(e: React.MouseEvent<any>) {
     e.preventDefault();
     e.stopPropagation();
-    var p = this.props;
     var value = p.binding.getValue();
 
     if (value instanceof Object && (value as Object).hasOwnProperty("__code__")) {
@@ -75,157 +78,155 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     }
     else
       p.binding.setValue({
-        __code__: this.props.exampleExpression || JSON.stringify(value == undefined ? this.props.defaultValue : value)
+        __code__: p.exampleExpression ?? JSON.stringify(value == undefined ? p.defaultValue : value)
       } as Expression<any>);
 
-    (p.refreshView || p.dn.context.refreshView)();
+    (p.refreshView ?? p.dn.context.refreshView)();
   }
 
-  render() {
-    const p = this.props;
-    const value = p.binding.getValue();
 
-    const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
-
-    const expressionIcon = this.props.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={this.handleToggleExpression}><FontAwesomeIcon icon="calculator" /></span>;
-
-
-    if (!expr && p.type == "boolean") {
-
-
-      if (p.defaultValue == null) {
-
-        return (<div>
-          <label className="label-xs">
-            {expressionIcon}
-            <NullableCheckBox value={value}
-              onChange={newValue => this.updateValue(newValue)}
-              label={!this.props.hideLabel && this.renderMember(value)}
-            />
-          </label>
-        </div>
-        );
-      } else {
-        return (
-          <div>
-            <label className="label-xs">
-              {expressionIcon}
-              <input className="design-check-box"
-                type="checkbox"
-                checked={value == undefined ? this.props.defaultValue as boolean : value}
-                onChange={this.handleChangeCheckbox} />
-              {!this.props.hideLabel && this.renderMember(value)}
-            </label>
-          </div>
-        );
-      }
-    }
-
-    if (this.props.hideLabel) {
-      return (
-        <div className="form-inline">
-          {expressionIcon}
-          {expr ? this.renderExpression(expr, p.dn!) : this.renderValue(value)}
-        </div>
-      );
-    }
-
-    return (
-      <div className="form-group form-group-xs">
-        <label className="control-label label-xs">
-          {expressionIcon}
-          {this.renderMember(value)}
-        </label>
-        <div>
-          {expr ? this.renderExpression(expr, p.dn!) : this.renderValue(value)}
-        </div>
-      </div>
-    );
-  }
-
-  renderMember(value: number | string | null | undefined): React.ReactNode | undefined {
+  function renderMember(value: number | string | null | undefined): React.ReactNode | undefined {
 
     return (
       <span
         className={value === undefined ? "design-default" : "design-changed"}>
-        {this.props.binding.member}
+        {p.binding.member}
       </span>
     );
   }
 
-  renderValue(value: number | string | null | undefined) {
+  function renderValue(value: number | string | null | undefined) {
+    if (p.onRenderValue)
+      return p.onRenderValue(value, { updateValue });
 
-    if (this.props.onRenderValue)
-      return this.props.onRenderValue(value, this);
-
-    if (this.props.type == null)
+    if (p.type == null)
       return <p className="form-control-static form-control-xs">{DynamicViewMessage.UseExpression.niceToString()}</p>;
 
-    const val = value === undefined ? this.props.defaultValue : value;
+    const val = value === undefined ? p.defaultValue : value;
 
-    const style = this.props.hideLabel ? { display: "inline-block" } as React.CSSProperties : undefined;
+    const style = p.hideLabel ? { display: "inline-block" } as React.CSSProperties : undefined;
 
-    if (this.props.options) {
-      if (typeof this.props.options == "function")
+    if (p.options) {
+      if (typeof p.options == "function")
         return (
-          <div style={{ position: "relative" }}>
             <Typeahead
               inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
-              getItems={this.handleGetItems}
-              onSelect={this.handleTypeaheadSelect} />
-          </div>
+            getItems={handleGetItems}
+            onSelect={handleTypeaheadSelect} />
         );
       else
         return (
           <select className="form-control form-control-xs" style={style}
-            value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
-            {this.props.defaultValue == null && <option value="">{" - "}</option>}
-            {this.props.options.map((o, i) =>
+            value={val == null ? "" : val.toString()} onChange={handleChangeSelectOrInput} >
+            {p.defaultValue == null && <option value="">{" - "}</option>}
+            {p.options.map((o, i) =>
               <option key={i} value={o.toString()}>{o.toString()}</option>)
             }
           </select>);
     }
     else {
 
-      if (this.props.type == "textArea") {
+      if (p.type == "textArea") {
         return (<textarea className="form-control form-control-xs" style={style}
           value={val == null ? "" : val.toString()}
-          onChange={this.handleChangeSelectOrInput} />);
+          onChange={handleChangeSelectOrInput} />);
       }
 
       return (<input className="form-control form-control-xs" style={style}
         type="text"
         value={val == null ? "" : val.toString()}
-        onChange={this.handleChangeSelectOrInput} />);
+        onChange={handleChangeSelectOrInput} />);
     }
   }
 
-  handleGetItems = (query: string) => {
-
-    if (typeof this.props.options != "function")
+  function handleGetItems(query: string) {
+    if (typeof p.options != "function")
       throw new Error("Unexpected options");
 
-    const result = this.props.options(query);
+    const result = p.options(query);
 
     return Promise.resolve(result);
   }
 
 
 
-  renderExpression(expression: Expression<any>, dn: DesignerNode<BaseNode>) {
-
-    if (this.props.allowsExpression == false)
+  function renderExpression(expression: Expression<any>, dn: DesignerNode<BaseNode>) {
+    if (p.allowsExpression == false)
       throw new Error("Unexpected expression");
 
     const typeName = dn.parent!.fixRoute()!.typeReference().name.split(",").map(tn => tn.endsWith("Entity") ? tn : tn + "Entity").join(" | ");
+
     return (
       <div className="code-container">
-        <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules) =>"}</pre>
-        <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() }} />
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
+          {"(ctx: TypeContext<" + typeName + ">, "}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={typeName.replace("Entity", "")} />{", "}<PropsHelp node={dn} />{", locals) =>"}
+          </div>
+        </pre>
+        <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; p.dn.context.refreshView() }} />
       </div>
     );
 
   }
+  const value = p.binding.getValue();
+
+  const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
+
+  const expressionIcon = p.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={handleToggleExpression}><FontAwesomeIcon icon="calculator" /></span>;
+
+
+  if (!expr && p.type == "boolean") {
+
+
+    if (p.defaultValue == null) {
+
+      return (<div>
+        <label className="label-xs">
+          {expressionIcon}
+          <NullableCheckBox value={value}
+            onChange={newValue => updateValue(newValue)}
+            label={!p.hideLabel && renderMember(value)}
+          />
+        </label>
+      </div>
+    );
+    } else {
+      return (
+        <div>
+          <label className="label-xs">
+            {expressionIcon}
+            <input className="design-check-box"
+              type="checkbox"
+              checked={value == undefined ? p.defaultValue as boolean : value}
+              onChange={handleChangeCheckbox} />
+            {!p.hideLabel && renderMember(value)}
+          </label>
+        </div>
+      );
+    }
+  }
+
+  if (p.hideLabel) {
+    return (
+      <div className="form-inline">
+        {expressionIcon}
+        {expr ? renderExpression(expr, p.dn!) : renderValue(value)}
+      </div>
+    );
+  }
+
+  return (
+    <div className="form-group form-group-xs">
+      <label className="control-label label-xs">
+        {expressionIcon}
+        {renderMember(value)}
+      </label>
+      <div>
+        {expr ? renderExpression(expr, p.dn!) : renderValue(value)}
+      </div>
+    </div>
+  );
 }
 
 
@@ -235,100 +236,92 @@ interface NullableCheckBoxProps {
   onChange: (newValue: boolean | undefined) => void;
 }
 
-export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
-  getIcon() {
-    switch (this.props.value) {
+export function NullableCheckBox(p : NullableCheckBoxProps){
+  function getIcon() {
+    switch (p.value) {
       case true: return "check";
       case false: return "times";
       case undefined: return "minus"
     }
   }
 
-  getClass() {
-    switch (this.props.value) {
+  function getClass() {
+    switch (p.value) {
       case true: return "design-changed";
       case false: return "design-changed";
       case undefined: return "design-default"
     }
   }
 
-  handleClick = (e: React.MouseEvent<any>) => {
+  function handleClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    switch (this.props.value) {
-      case true: this.props.onChange(false); break;
-      case false: this.props.onChange(undefined); break;
-      case undefined: this.props.onChange(true); break;
+    switch (p.value) {
+      case true: p.onChange(false); break;
+      case false: p.onChange(undefined); break;
+      case undefined: p.onChange(true); break;
     }
   }
 
-  render() {
     return (
-      <a href="#" onClick={this.handleClick}>
-        <FontAwesomeIcon icon={this.getIcon()} className={this.getClass()} />
+    <a href="#" onClick={handleClick}>
+      <FontAwesomeIcon icon={getIcon()} className={getClass()} />
         {" "}
-        {this.props.label}
+      {p.label}
       </a>
     );
   }
-}
 
 export interface FieldComponentProps {
   dn: DesignerNode<BaseNode>,
   binding: Binding<string | undefined>,
 }
 
-export class FieldComponent extends React.Component<FieldComponentProps> {
-
-  handleChange = (e: React.ChangeEvent<any>) => {
+export function FieldComponent(p : FieldComponentProps){
+  function handleChange(e: React.ChangeEvent<any>) {
     var sender = (e.currentTarget as HTMLSelectElement);
 
-    const node = this.props.dn.node;
+    const node = p.dn.node;
     if (!sender.value)
-      this.props.binding.deleteValue()
+      p.binding.deleteValue()
     else
-      this.props.binding.setValue(sender.value);
+      p.binding.setValue(sender.value);
 
 
-    this.props.dn.context.refreshView();
+    p.dn.context.refreshView();
   }
 
-  render() {
-    var p = this.props;
-    var value = p.binding.getValue();
 
-    return (
-      <div className="form-group form-group-xs">
-        <label className="control-label label-xs">
-          {p.binding.member}
-        </label>
-        <div>
-          {this.renderValue(value)}
-        </div>
-      </div>
-    );
-  }
-
-  renderValue(value: string | null | undefined) {
-
+  function renderValue(value: string | null | undefined) {
     const strValue = value == null ? "" : value.toString();
 
-    const route = this.props.dn.parent!.fixRoute();
+    const route = p.dn.parent!.fixRoute();
 
     const subMembers = route ? route.subMembers() : {};
 
-    return (<select className="form-control form-control-xs" value={strValue} onChange={this.handleChange} >
+    return (<select className="form-control form-control-xs" value={strValue} onChange={handleChange} >
       <option value=""> - </option>
       {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
         <option key={i} value={name}>{name}</option>)
       })
         </select>);
   }
+  var p = p;
+  var value = p.binding.getValue();
+
+  return (
+    <div className="form-group form-group-xs">
+      <label className="control-label label-xs">
+        {p.binding.member}
+      </label>
+      <div>
+        {renderValue(value)}
+      </div>
+    </div>
+  );
 }
 
-export class DynamicViewInspector extends React.Component<{ selectedNode?: DesignerNode<BaseNode> }>{
-  render() {
-
-    const sn = this.props.selectedNode;
+export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode> }){
+  const sn = p.selectedNode;
 
     if (!sn)
       return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
@@ -344,28 +337,18 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
       {NodeUtils.renderDesigner(sn)}
     </div>);
   }
-}
 
 
-export interface CollapsableTypeHelpState {
-  open: boolean;
-}
+export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
 
-export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: string }, CollapsableTypeHelpState>{
+  const [open, setOpen] = React.useState<boolean>(false);
 
-  constructor(props: any) {
-    super(props);
-    this.state = { open: false };
-  }
-
-  handleHelpClick = (e: React.FormEvent<any>) => {
+  function handleHelpClick(e: React.FormEvent<any>) {
     e.preventDefault();
-    this.setState({
-      open: !this.state.open
-    });
+    setOpen(!open);
   }
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr)
       return;
 
@@ -379,68 +362,82 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
     }).done();
   }
 
-  render() {
     return (
       <div>
-        <a href="#" onClick={this.handleHelpClick} className="design-help-button">
-          {this.state.open ?
+      <a href="#" onClick={handleHelpClick} className="design-help-button">
+        {open ?
             DynamicViewMessage.HideHelp.niceToString() :
             DynamicViewMessage.ShowHelp.niceToString()}
         </a>
-        {this.state.open &&
+      {open &&
           <TypeHelpComponent
-            initialType={this.props.initialTypeName}
+          initialType={p.initialTypeName}
             mode="TypeScript"
-            onMemberClick={this.handleTypeHelpClick} />}
+          onMemberClick={handleTypeHelpClick} />}
       </div>
     );
   }
-}
 
-interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
+interface DesignerModalProps extends IModalProps<boolean | undefined> {
   title: React.ReactNode;
   mainComponent: () => React.ReactElement<any>;
 }
 
-export class DesignerModal extends React.Component<DesignerModalProps, { show: boolean }>  {
+export function DesignerModal(p: DesignerModalProps) {
 
-  constructor(props: DesignerModalProps) {
-    super(props);
+  const [show, setShow] = React.useState<boolean>(true);
+  const okClicked = React.useRef<boolean | undefined>();
 
-    this.state = { show: true };
+  function handleOkClicked() {
+    okClicked.current = true;
+    setShow(false);
   }
 
-  okClicked?: boolean
-  handleOkClicked = () => {
-    this.okClicked = true;
-    this.setState({ show: false });
-
+  function handleCancelClicked() {
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(okClicked.current);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.okClicked);
-  }
-
-  render() {
     return (
-      <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
         <ModalHeaderButtons
-          onOk={this.handleOkClicked}
-          onCancel={this.handleCancelClicked}>
-          {this.props.title}
+        onOk={handleOkClicked}
+        onCancel={handleCancelClicked}>
+        {p.title}
         </ModalHeaderButtons>
         <div className="modal-body">
-          {this.props.mainComponent()}
+        {p.mainComponent()}
         </div>
       </Modal>
     );
   }
 
-  static show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> {
+DesignerModal.show = (title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> => {
     return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
+  }
+
+export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
+
+  return (
+    <DropdownButton id="props_help_dropdown" variant="success" size={"xs" as any} title={DynamicViewMessage.PropsHelp.niceToString()}>
+        {Dic.map(p.node.context.propTypes, (name, typeName, i) =>
+          <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handlePropsClick(name)}>{name}: {typeName}</Dropdown.Item>)}
+    </DropdownButton>
+  );
+
+  function handlePropsClick(val: string) {
+
+    ValueLineModal.show({
+      type: { name: "string" },
+      initialValue: `props.${val}`,
+      valueLineType: "TextArea",
+      title: `${DynamicViewMessage.PropsHelp.niceToString()}.${val}`,
+      message: "Copy to clipboard: Ctrl+C, ESC",
+      initiallyFocused: true,
+      valueHtmlAttributes: { style: { height: "200px" } },
+    }).done();
   }
 }

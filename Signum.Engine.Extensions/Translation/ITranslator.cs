@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace Signum.Engine.Translation
 {
     public interface ITranslator
     {
-        List<string> TranslateBatch(List<string> list, string from, string to);
+        List<string?> TranslateBatch(List<string> list, string from, string to);
 
         bool AutoSelect();
     }
@@ -21,9 +21,9 @@ namespace Signum.Engine.Translation
 
     public class EmptyTranslator : ITranslator
     {
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
-            return list.Select(text => "").ToList();
+            return list.Select(text => (string?)null).ToList();
         }
 
         public bool AutoSelect()
@@ -34,9 +34,9 @@ namespace Signum.Engine.Translation
 
     public class MockTranslator : ITranslator
     {
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
-            return list.Select(text => "In{0}({1})".FormatWith(to, text)).ToList();
+            return list.Select(text => (string?)"In{0}({1})".FormatWith(to, text)).ToList();
         }
 
         public bool AutoSelect()
@@ -57,7 +57,7 @@ namespace Signum.Engine.Translation
             this.Inner = inner;
         }
 
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             var alreadyTranslated = (from ass in AppDomain.CurrentDomain.GetAssemblies()
                                      let daca = ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()
@@ -66,7 +66,7 @@ namespace Signum.Engine.Translation
                                      group trans.Value by trans.Key into g
                                      let only = g.Distinct().Only()
                                      where only != null
-                                     select KVP.Create(g.Key, only))
+                                     select KeyValuePair.Create(g.Key, only))
                                      .ToDictionary();
 
             var dic = list.Distinct().ToDictionary(l => l, l => alreadyTranslated.TryGetC(l));
@@ -80,7 +80,7 @@ namespace Signum.Engine.Translation
                 dic.SetRange(subList, subResult);
             }
 
-            return list.Select(dic.GetOrThrow).ToList();
+            return list.Select(s => (string?)dic.GetOrThrow(s)).ToList();
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
@@ -97,17 +97,17 @@ namespace Signum.Engine.Translation
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(LocalizedType from, LocalizedType to)
         {
             if (from.Description.HasText() && to.Description.HasText())
-                yield return KVP.Create(from.Description, to.Description);
+                yield return KeyValuePair.Create(from.Description, to.Description);
 
             if (from.PluralDescription.HasText() && to.PluralDescription.HasText())
-                yield return KVP.Create(from.PluralDescription, to.PluralDescription);
+                yield return KeyValuePair.Create(from.PluralDescription, to.PluralDescription);
 
-            foreach (var item in from.Members)
+            foreach (var item in from.Members!)
             {
-                var toMember = to.Members.TryGetC(item.Key);
+                var toMember = to.Members!.TryGetC(item.Key);
 
                 if (toMember.HasText())
-                    yield return KVP.Create(item.Value, toMember);
+                    yield return KeyValuePair.Create(item.Value, toMember);
             }
         }
 
@@ -129,24 +129,23 @@ namespace Signum.Engine.Translation
             this.Inner = inner;
         }
 
-        public List<string> TranslateBatch(List<string> list, string from, string to)
+        public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             var result = Inner.TranslateBatch(list, from, to);
 
-            TranslationReplacementPack pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
-
+            TranslationReplacementPack? pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
             if (pack == null)
                 return result;
 
-            return result.Select(s => s == null ? s : pack.Regex.Replace(s, m =>
-            {
-                string replacement = pack.Dictionary.GetOrThrow(m.Value);
+            return result.Select(s => (string?)pack.Regex.Replace(s, m =>
+           {
+               string replacement = pack.Dictionary.GetOrThrow(m.Value);
 
-                return IsUpper(m.Value) ? replacement.ToUpper() :
-                    IsLower(m.Value) ? replacement.ToLower() :
-                    char.IsUpper(m.Value[0]) ? replacement.FirstUpper() :
-                    replacement.FirstLower();
-            })).ToList();
+               return IsUpper(m.Value) ? replacement.ToUpper() :
+                   IsLower(m.Value) ? replacement.ToLower() :
+                   char.IsUpper(m.Value[0]) ? replacement.FirstUpper() :
+                   replacement.FirstLower();
+           })).ToList();
         }
 
 
@@ -181,7 +180,7 @@ namespace Signum.Engine.Translation
     //        request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3";
     //        request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
-    //        string response = null;
+    //        string? response = null;
     //        using (StreamReader readStream = new StreamReader(request.GetResponse().GetResponseStream(), Encoding.UTF8))
     //        {
     //            response = readStream.ReadToEnd();

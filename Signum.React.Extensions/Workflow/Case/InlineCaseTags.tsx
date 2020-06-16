@@ -15,72 +15,49 @@ export interface InlineCaseTagsProps {
   defaultTags?: CaseTagTypeEntity[];
 }
 
-export interface InlineCaseTagsState {
-  tags: CaseTagTypeEntity[];
-}
+export default function InlineCaseTags(p: InlineCaseTagsProps) {
 
+  const [tags, setTags] = React.useState<CaseTagTypeEntity[]>(() => p.defaultTags ?? []);
 
-export default class InlineCaseTags extends React.Component<InlineCaseTagsProps, InlineCaseTagsState> {
-
-  constructor(props: InlineCaseTagsProps) {
-    super(props);
-
-    this.state = { tags: props.defaultTags || [] };
-  }
-
-  componentWillMount() {
-    this.reload(this.props);
-  }
-
-  componentWillReceiveProps(newProps: InlineCaseTagsProps) {
-    if (!Dic.equals(this.props, newProps, true))
-      this.reload(newProps);
-  }
-
-  reload(props: InlineCaseTagsProps) {
-
-    if (props.defaultTags) {
-      this.setState({ tags: props.defaultTags });
+  React.useEffect(() => {
+    if (p.defaultTags) {
+      setTags(p.defaultTags);
     } else {
-      WorkflowClient.API.fetchCaseTags(props.case)
-        .then(tags => this.setState({ tags }))
+      WorkflowClient.API.fetchCaseTags(p.case)
+        .then(tags => setTags(tags))
         .done();
     }
-  }
 
-  render() {
+  }, [p.case, ...p.defaultTags ?? []]);
 
-
-    return (
-      <a href="#" onClick={this.handleTagsClick} className={classes("case-icon", this.state.tags.length == 0 && "case-icon-ghost")}>
-        {
-          this.state.tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
-            this.state.tags.map((t, i) => <Tag key={i} tag={t} />)
-        }
-      </a>
-    );
-  }
-
-  handleTagsClick = (e: React.MouseEvent<any>) => {
+  function handleTagsClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
     var model = CaseTagsModel.New({
-      caseTags: this.state.tags.map(m => newMListElement(m)),
-      oldCaseTags: this.state.tags.map(m => newMListElement(m)),
+      caseTags: tags.map(m => newMListElement(m)),
+      oldCaseTags: tags.map(m => newMListElement(m)),
     });
 
     Navigator.view(model,
-      { title: this.props.case.toStr || "" })
+      { title: p.case.toStr ?? "" })
       .then(cm => {
         if (!cm)
           return;
 
-        Operations.API.executeLite(this.props.case, CaseOperation.SetTags, cm)
-          .then(() => WorkflowClient.API.fetchCaseTags(this.props.case))
-          .then(tags => this.setState({ tags }))
+        Operations.API.executeLite(p.case, CaseOperation.SetTags, cm)
+          .then(() => WorkflowClient.API.fetchCaseTags(p.case))
+          .then(tags => setTags(tags))
           .done()
       }).done();
 
   }
 
+  return (
+    <a href="#" onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && "case-icon-ghost")}>
+      {
+        tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
+          tags.map((t, i) => <Tag key={i} tag={t} />)
+      }
+    </a>
+  );
 }

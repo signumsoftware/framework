@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,50 +23,41 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Action<ScheduledTaskLogEntity> OnFinally;
+        public static Action<ScheduledTaskLogEntity>? OnFinally;
         
-        static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
-         ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
-        [ExpressionField]
-        public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
-        {
-            return ExecutionsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) => 
+            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == t));
 
-        static Expression<Func<ITaskEntity, ScheduledTaskLogEntity>> LastExecutionExpression =
-            e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
-        [ExpressionField]
-        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity e)
-        {
-            return LastExecutionExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity t) => 
+            As.Expression(() => t.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault());
 
-        static Expression<Func<ScheduledTaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsSTExpression =
-            ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == ct);
-        [ExpressionField]
-        public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity e)
-        {
-            return ExecutionsSTExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity st) => 
+            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == st));
 
 
-        static Expression<Func<ScheduledTaskLogEntity, IQueryable<SchedulerTaskExceptionLineEntity>>> ExceptionLinesExpression =
-        e => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e));
-        [ExpressionField]
-        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e)
-        {
-            return ExceptionLinesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) => 
+            As.Expression(() => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e)));
 
-        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>>();
+        public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask = 
+            new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
         public class ScheduledTaskPair
         {
             public ScheduledTaskEntity ScheduledTask;
             public DateTime NextDate;
+
+            public ScheduledTaskPair(ScheduledTaskEntity scheduledTask, DateTime nextDate)
+            {
+                ScheduledTask = scheduledTask;
+                NextDate = nextDate;
+            }
         }
 
-        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
+        static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
         static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
 
@@ -109,6 +100,7 @@ namespace Signum.Engine.Scheduler
                     });
 
                 sb.Include<ScheduledTaskLogEntity>()
+                    .WithIndex(s => s.ScheduledTask, includeFields: s=> s.StartTime)
                     .WithQuery(() => cte => new
                     {
                         Entity = cte,
@@ -212,15 +204,26 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
+            Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog == null).UnsafeDeleteChunksLog(parameters, sb, token);
 
+            var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+            {
+                var query = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value);
+                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity());
             if (dateLimit == null)
                 return;
 
-            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            var queryWithExceptions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value && a.Exception != null);
+            queryWithExceptions.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
+            queryWithExceptions.UnsafeUpdate().Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
         }
 
-        static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
+        static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)
         {
             if (running)
                 using (ExecutionContext.SuppressFlow())
@@ -285,10 +288,10 @@ namespace Signum.Engine.Scheduler
                 lock (priorityQueue)
                 {
                     DateTime now = TimeZoneManager.Now;
-                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a=>a.ScheduledTask != null).GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
-                        gr.Key,
-                        gr.Max(a => a.StartTime)
-                    )).ToDictionary();
+                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask != null).GroupBy(a => a.ScheduledTask!).Select(gr => KeyValuePair.Create(
+                          gr.Key,
+                          gr.Max(a => a.StartTime)
+                      )).ToDictionary();
 
                     priorityQueue.Clear();
                     priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => {
@@ -302,10 +305,10 @@ namespace Signum.Engine.Scheduler
                         bool isMiss = next < now;
 
                         return new ScheduledTaskPair
-                        {
-                            ScheduledTask = st,
-                            NextDate = isMiss ? now : next,
-                        };
+                        (
+                            scheduledTask: st,
+                            nextDate: isMiss ? now : next
+                        );
                     }));
 
                     SetTimer();
@@ -337,7 +340,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static void TimerCallback(object obj) // obj ignored
+        static void TimerCallback(object? obj) // obj ignored
         {
             try
             {
@@ -354,7 +357,7 @@ namespace Signum.Engine.Scheduler
                         {
                             var pair = priorityQueue.Pop();
 
-                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.Retrieve());
+                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.RetrieveAndRemember());
 
                             pair.NextDate = pair.ScheduledTask.Rule.Next(now);
 
@@ -380,7 +383,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
         {
             using (ExecutionContext.SuppressFlow())
                 Task.Run(() =>
@@ -400,9 +403,9 @@ namespace Signum.Engine.Scheduler
                 });
         }
 
-        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
+        public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity? user)
         {
-            IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
+            IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.RetrieveAndRemember())!;
 
             var isolation = entityIUser.TryIsolation();
             if (isolation == null)
@@ -435,7 +438,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext { Log = stl };
+                    var ctx = new ScheduledTaskContext(stl);
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -497,7 +500,7 @@ namespace Signum.Engine.Scheduler
                 Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
                 {
                     ScheduledTask = p.ScheduledTask.ToLite(),
-                    Rule = p.ScheduledTask.Rule.ToString(),
+                    Rule = p.ScheduledTask.Rule.ToString()!,
                     NextDate = p.NextDate,
                 }).ToList(),
 
@@ -519,6 +522,7 @@ namespace Signum.Engine.Scheduler
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class SchedulerState
     {
         public bool Running;
@@ -542,9 +546,15 @@ namespace Signum.Engine.Scheduler
         public DateTime StartTime;
         public string Remarks;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class ScheduledTaskContext
     {
+        public ScheduledTaskContext(ScheduledTaskLogEntity log)
+        {
+            Log = log;
+        }
+
         public ScheduledTaskLogEntity Log { internal get; set; }
 
         public StringBuilder StringBuilder { get; } = new StringBuilder();
@@ -575,7 +585,7 @@ namespace Signum.Engine.Scheduler
                     catch (Exception e)
                     {
                         SafeConsole.WriteLineColor(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
                         var ex = e.LogException();
                         using (ExecutionMode.Global())

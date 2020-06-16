@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Signum.Utilities;
@@ -18,12 +18,12 @@ namespace Signum.Entities.Dynamic
         public DynamicBaseType BaseType { set; get; }
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
+        [StringLengthValidator(Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string TypeName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         string typeDefinition;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(Min = 3)]
         public string TypeDefinition
         {
             get { return this.Get(typeDefinition); }
@@ -35,7 +35,7 @@ namespace Signum.Entities.Dynamic
         }
 
         [Ignore]
-        DynamicTypeDefinition definition;
+        DynamicTypeDefinition? definition;
         public DynamicTypeDefinition GetDefinition()
         {
             return definition ?? JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
@@ -47,25 +47,24 @@ namespace Signum.Entities.Dynamic
             this.definition = definition;
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(TypeDefinition))
             {
                 var def = this.GetDefinition();
 
-                return def.Properties.Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name)).Select(p =>
-                  ValidationMessage._0DoesNotHaveAValid1IdentifierFormat.NiceToString(p.Name, IdentifierType.PascalAscii)).ToString("\r\n").DefaultText(null);
+                return def.Properties
+                    .Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name))
+                    .Select(p => ValidationMessage._0DoesNotHaveAValid1IdentifierFormat.NiceToString(p.Name, IdentifierType.PascalAscii))
+                    .ToString("\r\n")
+                    .DefaultToNull();
             }
             return base.PropertyValidation(pi);
         }
 
 
-        static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => TypeName);
     }
 
     [AutoInit]
@@ -165,6 +164,9 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
 
+        [JsonProperty(PropertyName = "operationClone")]
+        public OperationConstructFrom OperationClone;
+
         [JsonProperty(PropertyName = "customInheritance")]
         public DynamicTypeCustomCode CustomInheritance;
 
@@ -225,6 +227,15 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "delete")]
         public string Delete;
+    }
+
+    public class OperationConstructFrom
+    {
+        [JsonProperty(PropertyName = "canConstruct")]
+        public string CanConstruct;
+
+        [JsonProperty(PropertyName = "construct")]
+        public string Construct;
     }
 
     public class DynamicTypeCustomCode
@@ -319,19 +330,19 @@ namespace Signum.Entities.Dynamic
             return (objectType == typeof(DynamicValidator));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             JObject obj = JObject.Load(reader);
-            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
+            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type")!.Value.Value<string>());
 
-            object target = Activator.CreateInstance(type);
+            object target = Activator.CreateInstance(type)!;
             serializer.Populate(obj.CreateReader(), target);
             return target;
         }
 
         public override bool CanWrite { get { return false; } }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
@@ -347,6 +358,7 @@ namespace Signum.Entities.Dynamic
         {
             switch (type)
             {
+                case "NotNull": return typeof(NotNull);
                 case "StringLength": return typeof(StringLength);
                 case "Decimals": return typeof(Decimals);
                 case "NumberIs": return typeof(NumberIs);
@@ -359,7 +371,7 @@ namespace Signum.Entities.Dynamic
             }
         }
 
-        public virtual string ExtraArguments()
+        public virtual string? ExtraArguments()
         {
             return null;
         }
@@ -372,12 +384,22 @@ namespace Signum.Entities.Dynamic
             return CSharpRenderer.Value(obj);
         }
 
+        public class NotNull : DynamicValidator
+        {
+            [JsonProperty(PropertyName = "disabled", DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public bool Disabled;
+
+            public override string? ExtraArguments()
+            {
+                return new string?[]
+                {
+                    Disabled ? "Disabled=true" : null,
+                }.NotNull().ToString(", ");
+            }
+        }
 
         public class StringLength : DynamicValidator
         {
-            [JsonProperty(PropertyName = "allowNulls", DefaultValueHandling = DefaultValueHandling.Ignore)]
-            public bool AllowNulls;
-
             [JsonProperty(PropertyName = "multiLine", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool MultiLine;
 
@@ -393,10 +415,10 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "allowTrailingSpaces", NullValueHandling = NullValueHandling.Ignore)]
             public bool? AllowTrailingSpaces;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
-                return new string[] {
-                    "AllowNulls="+ Value(this.AllowNulls),
+                return new string?[] 
+                {
                     MultiLine ? "MultiLine=true" : null,
                     Min.HasValue ? "Min=" + Value(Min.Value) : null,
                     Max.HasValue ? "Max=" + Value(Max.Value) : null,
@@ -411,7 +433,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "decimalPlaces")]
             public int DecimalPlaces;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(DecimalPlaces);
             }
@@ -425,7 +447,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "number")]
             public decimal Number;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(ComparisonType) + ", " + Value(Number);
             }
@@ -439,7 +461,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "number")]
             public decimal Number;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(ComparisonType) + ", " + Value(Number);
             }
@@ -453,7 +475,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "max")]
             public decimal Max;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(Min) + ", " + Value(Max);
             }
@@ -464,7 +486,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "precision")]
             public Signum.Utilities.DateTimePrecision Precision;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(Precision);
             }
@@ -475,7 +497,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "precision")]
             public Signum.Utilities.DateTimePrecision Precision;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(Precision);
             }
@@ -486,7 +508,7 @@ namespace Signum.Entities.Dynamic
             [JsonProperty(PropertyName = "textCase")]
             public Signum.Entities.StringCase TextCase;
 
-            public override string ExtraArguments()
+            public override string? ExtraArguments()
             {
                 return Value(TextCase);
             }

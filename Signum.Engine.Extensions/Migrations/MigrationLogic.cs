@@ -8,6 +8,9 @@ using Signum.Entities.Migrations;
 using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
+using System.Text;
+using System.Threading;
 
 namespace Signum.Engine.Migrations
 {
@@ -45,7 +48,22 @@ namespace Signum.Engine.Migrations
                         e.MethodName,
                         e.Description,
                     });
+
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
+        }
+
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            var dateLimit = parameters.GetDateLimitDelete(typeof(LoadMethodLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(LoadMethodLogEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void EnsureMigrationTable<T>() where T : Entity
@@ -73,7 +91,7 @@ namespace Signum.Engine.Migrations
             }
         }
 
-        public static Exception ExecuteLoadProcess(Action action, string description)
+        public static Exception? ExecuteLoadProcess(Action action, string description)
         {
             string showDescription = description ?? action.Method.Name.SpacePascal(true);
             Console.WriteLine("------- Executing {0} ".FormatWith(showDescription).PadRight(Console.WindowWidth - 2, '-'));
@@ -81,7 +99,7 @@ namespace Signum.Engine.Migrations
             var log = !Schema.Current.Tables.ContainsKey(typeof(LoadMethodLogEntity)) ? null : new LoadMethodLogEntity
             {
                 Start = TimeZoneManager.Now,
-                ClassName = action.Method.DeclaringType.FullName,
+                ClassName = action.Method.DeclaringType!.FullName,
                 MethodName = action.Method.Name,
                 Description = description,
             }.Save();
@@ -93,8 +111,8 @@ namespace Signum.Engine.Migrations
                 {
                     log.End = TimeZoneManager.Now;
                     log.Save();
+                    Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
                 }
-                Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
 
                 return null;
             }

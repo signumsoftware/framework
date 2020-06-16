@@ -14,14 +14,14 @@ namespace Signum.Entities.Mailing
 
         public int Port { get; set; } = 110;
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Host { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Username { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Username { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Password { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? Password { get; set; }
 
         bool enableSSL;
         public bool EnableSSL
@@ -42,7 +42,7 @@ namespace Signum.Entities.Mailing
         [Unit("d")]
         public int? DeleteMessagesAfter { get; set; } = 14;
 
-        [NotNullValidator]
+        
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
 
         public override string ToString()
@@ -68,7 +68,7 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<Pop3ConfigurationEntity> Pop3Configuration { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -77,18 +77,18 @@ namespace Signum.Entities.Mailing
 
         public int NewEmails { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
     }
 
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionExceptionEntity : Entity
     {
-        [NotNullValidator]
+        
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
         [UniqueIndex]
-        [NotNullValidator]
+        
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

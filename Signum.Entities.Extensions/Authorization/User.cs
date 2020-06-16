@@ -4,13 +4,14 @@ using System.Reflection;
 using Signum.Entities.Mailing;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
-        public static Func<string, string> ValidatePassword = p =>
+        public static Func<string, string?> ValidatePassword = p =>
         {
             if (p.Length >= 5)
                 return null;
@@ -18,7 +19,7 @@ namespace Signum.Entities.Authorization
             return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
         };
 
-        public static string OnValidatePassword(string password)
+        public static string? OnValidatePassword(string password)
         {
             if (ValidatePassword != null)
                 return ValidatePassword(password);
@@ -27,55 +28,36 @@ namespace Signum.Entities.Authorization
         }
 
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(Min = 2, Max = 100)]
         public string UserName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 128)]
-        byte[] passwordHash;
-        [NotNullValidator]
-        public byte[] PasswordHash
-        {
-            get { return passwordHash; }
-            set
-            {
-                if (Set(ref passwordHash, value))
-                    PasswordSetDate = TimeZoneManager.Now.TrimToSeconds();
-            }
-        }
+        [SqlDbType(Size = 128)]
+        public byte[] PasswordHash { get; set; }
 
-        public DateTime PasswordSetDate { get; private set; }
-
-        public bool PasswordNeverExpires { get; set; }
-
-        [NotNullValidator]
         public Lite<RoleEntity> Role { get; set; }
 
-        [EMailValidator]
-        public string Email { get; set; }
+        [StringLengthValidator(Max = 200), EMailValidator]
+        public string? Email { get; set; }
 
-        public CultureInfoEntity CultureInfo { get; set; }
+        public CultureInfoEntity? CultureInfo { get; set; }
 
-        public DateTime? AnulationDate { get; set; }
+        public DateTime? DisabledOn { get; set; }
 
         public UserState State { get; set; } = UserState.New;
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(State))
             {
-                if (AnulationDate != null && State != UserState.Disabled)
+                if (DisabledOn != null && State != UserState.Disabled)
                     return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
             return base.PropertyValidation(pi);
         }
 
-        public static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserName);
 
         public static UserEntity Current
         {
@@ -83,21 +65,21 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
-        {
-            Owner = u.ToLite(),
-            CultureInfo = u.CultureInfo,
-            DisplayName = u.UserName,
-            Email = u.Email,
-        };
-        [ExpressionField]
-        public EmailOwnerData EmailOwnerData
-        {
-            get { return EmailOwnerDataExpression.Evaluate(this); }
-        }
+    public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
+    {
+        Owner = u.ToLite(),
+        CultureInfo = u.CultureInfo,
+        DisplayName = u.UserName,
+        Email = u.Email!,
+    };
 
-        public int LoginFailedCounter { get; set; }
+    [ExpressionField]
+    public EmailOwnerData EmailOwnerData
+    {
+        get { return EmailOwnerDataExpression.Evaluate(this); }
     }
+
+    public int LoginFailedCounter { get; set; }
 
     public enum UserState
     {
@@ -139,5 +121,17 @@ namespace Signum.Entities.Authorization
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
+    }
+
+
+    [Serializable]
+    public class UserOIDMixin : MixinEntity
+    {
+        UserOIDMixin(ModifiableEntity mainEntity, MixinEntity? next)
+            : base(mainEntity, next)
+        {
+        }
+
+        public Guid? OID { get; set; }
     }
 }

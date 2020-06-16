@@ -5,175 +5,159 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
-import { CaseActivityEntity, WorkflowActivityType, WorkflowPanelPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { UncontrolledTabs, Tab } from '@framework/Components/Tabs';
+import { Tabs, Tab } from 'react-bootstrap';
+import { useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
-
-}
-
-export default class WorkflowPanelPage extends React.Component<WorkflowPanelPageProps, {}> {
-  componentWillMount() {
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
+  function componentWillMount() {
+    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
     Navigator.setTitle("WorkflowPanel State");
   }
 
-  componentWillUnmount() {
+  function componentWillUnmount() {
     Navigator.setTitle();
   }
 
-  render() {
-    return (
-      <div>
-        <h2 className="display-6">Workflow Panel</h2>
+  return (
+    <div>
+      <h2 className="display-6">Workflow Panel</h2>
 
-        <UncontrolledTabs>
-          <Tab title="Script Runner" eventKey="scriptRunner">
-            <WorkflowScriptRunnerTab />
-          </Tab>
-          <Tab title="Timers" eventKey="timers">
-            <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(Navigator.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
-          </Tab>
-        </UncontrolledTabs>
-      </div>
-    );
-  }
+      <Tabs id="workflowTabs">
+        <Tab title="Script Runner" eventKey="scriptRunner">
+          <WorkflowScriptRunnerTab />
+        </Tab>
+        <Tab title="Timers" eventKey="timers">
+          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(Navigator.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
+        </Tab>
+      </Tabs>
+    </div>
+  );
 }
 
 
-export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerState: WorkflowScriptRunnerState }> {
+export function WorkflowScriptRunnerTab(p: {}) {
 
-  componentWillMount() {
-    this.loadState().done();
-    AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
-  }
+  const [srs, reloadState] = useAPIWithReload(() => {
+    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
+    return API.view();
+  }, []);
 
-  loadState() {
-    return API.view()
-      .then(s => this.setState({ scriptRunerState: s }));
-  }
-
-  handleStop = (e: React.MouseEvent<any>) => {
+  function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => this.loadState()).done();
+    API.stop().then(() => reloadState()).done();
   }
 
-  handleStart = (e: React.MouseEvent<any>) => {
+  function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => this.loadState()).done();
+    API.start().then(() => reloadState()).done();
   }
 
+  var title = "WorkflowScriptRunner State";
 
-  render() {
+  if (srs == undefined)
+    return <h4>{title} (loading...) </h4>;
 
-    var title = "WorkflowScriptRunner State";
+  return (
+    <div>
+      <h4>{title}</h4>
+      <div className="btn-toolbar">
+        {srs.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
+        {!srs.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+      </div >
 
-    if (this.state == undefined)
-      return <h4>{title} (loading...) </h4>;
-
-    const srs = this.state.scriptRunerState;
-
-    return (
       <div>
-        <h4>{title}</h4>
-        <div className="btn-toolbar">
-          {srs.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-          {!srs.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
-        </div >
-
-        <div>
-          <br />
-          State: <strong>
-            {srs.running ?
-              <span style={{ color: "Green" }}> RUNNING </span> :
-              <span style={{ color: "Red" }}> STOPPED </span>
-            }</strong>
-          <br />
-          CurrentProcessIdentifier: {srs.currentProcessIdentifier}
-          <br />
-          ScriptRunnerPeriod: {srs.scriptRunnerPeriod} sec
-                    <br />
-          NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : moment(srs.nextPlannedExecution).fromNow()})
-                    <br />
-          IsCancelationRequested: {srs.isCancelationRequested}
-          <br />
-          QueuedItems: {srs.queuedItems}
-        </div>
         <br />
-        <h4>Next activities to execute</h4>
-        <SearchControl
-          showContextMenu="Basic"
-          navigate={false}
-          findOptions={{
-            queryName: CaseActivityEntity,
+        State: <strong>
+          {srs.running ?
+            <span style={{ color: "Green" }}> RUNNING </span> :
+            <span style={{ color: "Red" }}> STOPPED </span>
+          }</strong>
+        <br />
+        CurrentProcessIdentifier: {srs.currentProcessIdentifier}
+        <br />
+        ScriptRunnerPeriod: {srs.scriptRunnerPeriod} sec
+                  <br />
+        NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : moment(srs.nextPlannedExecution).fromNow()})
+                  <br />
+        IsCancelationRequested: {srs.isCancelationRequested}
+        <br />
+        QueuedItems: {srs.queuedItems}
+      </div>
+      <br />
+      <h4>Next activities to execute</h4>
+      <SearchControl
+        showContextMenu={fo => "Basic"}
+        navigate={false}
+        findOptions={{
+          queryName: CaseActivityEntity,
+          filterOptions: [
+            { token: CaseActivityEntity.token().entity(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+            { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "EqualTo", value: null }
+          ],
+          columnOptionsMode: "Replace",
+          columnOptions: [
+            { token: CaseActivityEntity.token(e => e.id) },
+            { token: CaseActivityEntity.token(e => e.startDate) },
+            { token: CaseActivityEntity.token(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
+            { token: CaseActivityEntity.token(e => e.workflowActivity) },
+            { token: CaseActivityEntity.token(e => e.case) },
+            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution) },
+            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.retryCount) },
+          ],
+          orderOptions: [
+            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution), orderType: "Ascending" }
+          ],
+          pagination: { elementsPerPage: 10, mode: "Firsts" }
+        }} />
+      <Tabs id="workflowScriptTab">
+        <Tab title="Last operation logs" eventKey="logs">
+          <SearchControl findOptions={{
+            queryName: OperationLogEntity,
             filterOptions: [
-              { token: CaseActivityEntity.token().entity(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-              { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "EqualTo", value: null }
-            ],
-            columnOptionsMode: "Replace",
-            columnOptions: [
-              { token: CaseActivityEntity.token(e => e.id) },
-              { token: CaseActivityEntity.token(e => e.startDate) },
-              { token: CaseActivityEntity.token(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
-              { token: CaseActivityEntity.token(e => e.workflowActivity) },
-              { token: CaseActivityEntity.token(e => e.case) },
-              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution) },
-              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.retryCount) },
-            ],
-            orderOptions: [
-              { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution), orderType: "Ascending" }
+              {
+                token: OperationLogEntity.token(e => e.operation), operation: "IsIn", value: [
+                  CaseActivityOperation.ScriptExecute,
+                  CaseActivityOperation.ScriptScheduleRetry,
+                  CaseActivityOperation.ScriptFailureJump,
+                ]
+              },
             ],
             pagination: { elementsPerPage: 10, mode: "Firsts" }
           }} />
-        <UncontrolledTabs>
-          <Tab title="Last operation logs" eventKey="logs">
-            <SearchControl findOptions={{
-              queryName: OperationLogEntity,
+        </Tab>
+        <Tab title="Last executed activities" eventKey="lastActivities">
+          <SearchControl
+            showContextMenu={fo => "Basic"}
+            navigate={false}
+            findOptions={{
+              queryName: CaseActivityEntity,
               filterOptions: [
-                {
-                  token: OperationLogEntity.token(e => e.operation), operation: "IsIn", value: [
-                    CaseActivityOperation.ScriptExecute,
-                    CaseActivityOperation.ScriptScheduleRetry,
-                    CaseActivityOperation.ScriptFailureJump,
-                  ]
-                },
+                { token: CaseActivityEntity.token().entity(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "DistinctTo", value: null }
+              ],
+              columnOptionsMode: "Replace",
+              columnOptions: [
+                { token: CaseActivityEntity.token(a => a.id) },
+                { token: CaseActivityEntity.token(e => e.startDate) },
+                { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
+                { token: CaseActivityEntity.token(a => a.workflowActivity) },
+                { token: CaseActivityEntity.token(a=>a.case) },
+                { token: CaseActivityEntity.token().entity(e => e.doneDate) },
+                { token: CaseActivityEntity.token().entity(e => e.doneType) },
+                { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.nextExecution) },
+                { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.retryCount) },
+              ],
+              orderOptions: [
+                { token: CaseActivityEntity.token().entity(e => e.doneDate), orderType: "Descending" }
               ],
               pagination: { elementsPerPage: 10, mode: "Firsts" }
             }} />
-          </Tab>
-          <Tab title="Last executed activities" eventKey="lastActivities">
-            <SearchControl
-              showContextMenu="Basic"
-              navigate={false}
-              findOptions={{
-                queryName: CaseActivityEntity,
-                filterOptions: [
-                  { token: CaseActivityEntity.token().entity(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                  { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "DistinctTo", value: null }
-                ],
-                columnOptionsMode: "Replace",
-                columnOptions: [
-                  { token: CaseActivityEntity.token(a => a.id) },
-                  { token: CaseActivityEntity.token(e => e.startDate) },
-                  { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
-                  { token: CaseActivityEntity.token(a => a.workflowActivity) },
-                  { token: CaseActivityEntity.token(a=>a.case) },
-                  { token: CaseActivityEntity.token().entity(e => e.doneDate) },
-                  { token: CaseActivityEntity.token().entity(e => e.doneType) },
-                  { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.nextExecution) },
-                  { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.retryCount) },
-                ],
-                orderOptions: [
-                  { token: CaseActivityEntity.token().entity(e => e.doneDate), orderType: "Descending" }
-                ],
-                pagination: { elementsPerPage: 10, mode: "Firsts" }
-              }} />
-          </Tab>
-        </UncontrolledTabs>
-      </div>
-    );
-  }
+        </Tab>
+      </Tabs>
+    </div>
+  );
 }
 
 

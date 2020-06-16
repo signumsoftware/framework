@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,71 +23,41 @@ namespace Signum.Engine.Processes
     {
         public static bool JustMyProcesses = true;
 
-        public static Func<ProcessEntity, IDisposable> ApplySession;
+        public static Func<ProcessEntity, IDisposable?>? ApplySession;
 
-        static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessEntity>>> ProcessesFromAlgorithmExpression =
-            p => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p);
-        [ExpressionField]
-        public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p)
-        {
-            return ProcessesFromAlgorithmExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p) => 
+            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p));
 
-        static Expression<Func<ProcessAlgorithmSymbol, ProcessEntity>> LastProcessFromAlgorithmExpression =
-            p => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-        [ExpressionField]
-        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p)
-        {
-            return LastProcessFromAlgorithmExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p) => 
+            As.Expression(() => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
-        static Expression<Func<ProcessEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesProcessExpression =
-            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p));
-        [ExpressionField]
-        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p)
-        {
-            return ExceptionLinesProcessExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p) => 
+            As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p)));
 
+        [AutoExpressionField]
+        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl) => 
+            As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(pl)));
 
-        static Expression<Func<IProcessLineDataEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesLineExpression =
-            p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(p));
-        [ExpressionField]
-        public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl)
-        {
-            return ExceptionLinesLineExpression.Evaluate(pl);
-        }
+        [AutoExpressionField]
+        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p) =>
+            As.Expression(() => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl)).Exception.Entity);
 
-        static Expression<Func<IProcessLineDataEntity, ProcessEntity, ExceptionEntity>> ExceptionExpression =
-            (pl, p) => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl)).Exception.Entity;
-        [ExpressionField]
-        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p)
-        {
-            return ExceptionExpression.Evaluate(pl, p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e) =>
+            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Data == e));
 
-
-        static Expression<Func<IProcessDataEntity, IQueryable<ProcessEntity>>> ProcessesFromDataExpression =
-            e => Database.Query<ProcessEntity>().Where(a => a.Data == e);
-        [ExpressionField]
-        public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e)
-        {
-            return ProcessesFromDataExpression.Evaluate(e);
-        }
-
-        static Expression<Func<IProcessDataEntity, ProcessEntity>> LastProcessFromDataExpression =
-          e => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-        [ExpressionField]
-        public static ProcessEntity LastProcess(this IProcessDataEntity e)
-        {
-            return LastProcessFromDataExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ProcessEntity LastProcess(this IProcessDataEntity e) => 
+            As.Expression(() => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
         static Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm> registeredProcesses = new Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -126,8 +96,9 @@ namespace Signum.Engine.Processes
                     .WithQuery(() => p => new
                     {
                         Entity = p,
-                        p.Line,
                         p.Process,
+                        p.Line,
+                        p.ElementInfo,
                         p.Exception,
                     });
 
@@ -156,26 +127,31 @@ namespace Signum.Engine.Processes
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            void Remove(ProcessState processState)
+            void Remove(ProcessState processState, DateTime dateLimit, bool withExceptions)
             {
-                var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
-
-                if (dateLimit == null)
-                    return;
-
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit.Value);
-
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit && (!withExceptions || p.Exception != null));
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-
                 query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
-            Remove(ProcessState.Canceled);
-            Remove(ProcessState.Finished);
-            Remove(ProcessState.Error);
+            var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit != null)
+            {
+                Remove(ProcessState.Canceled, dateLimit.Value, false);
+                Remove(ProcessState.Finished, dateLimit.Value, false);
+                Remove(ProcessState.Error, dateLimit.Value, false);
+            }
+
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ProcessEntity).ToTypeEntity());
+            if (dateLimit == null)
+                return;
+
+            Remove(ProcessState.Canceled, dateLimit.Value, true);
+            Remove(ProcessState.Finished, dateLimit.Value, true);
+            Remove(ProcessState.Error, dateLimit.Value, true);
         }
 
-        public static IDisposable OnApplySession(ProcessEntity process)
+        public static IDisposable? OnApplySession(ProcessEntity process)
         {
             return Disposable.Combine(ApplySession, f => f(process));
         }
@@ -273,7 +249,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity processData, Entity copyMixinsFrom = null)
+        public static ProcessEntity Create(this ProcessAlgorithmSymbol process, IProcessDataEntity? processData, Entity? copyMixinsFrom = null)
         {
             using (OperationLogic.AllowSave<ProcessEntity>())
             {
@@ -366,7 +342,7 @@ namespace Signum.Engine.Processes
         }
 
         public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action, string status = null)
+            Func<T, string> elementInfo, Action<T> action, string? status = null)
         {
             if (executingProcess == null)
             {
@@ -386,7 +362,7 @@ namespace Signum.Engine.Processes
 
 
         public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action, string status = null)
+            Func<T, string> elementInfo, Action<T> action, string? status = null)
         {
             if (executingProcess == null)
             {
@@ -439,6 +415,7 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge)
+            where K : notnull
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -464,17 +441,17 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string s)
+        public static void WriteLineColor(this ExecutingProcess? ep, ConsoleColor color, string? str)
         {
             if (ep != null)
             {
-                ep.WriteMessage(s);
+                ep.WriteMessage(str);
             }
             else
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    SafeConsole.WriteLineColor(color, s);
+                    SafeConsole.WriteLineColor(color, str);
                 }
             }
         }
@@ -486,9 +463,10 @@ namespace Signum.Engine.Processes
             Action<K, N> createNew,
             Action<K, O> removeOld,
             Action<K, N, O> merge,
-            string status = null)
+            string? status = null)
             where O : class
             where N : class
+            where K : notnull
         {
 
             if (ep == null)
@@ -501,14 +479,14 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEach(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
 
                     if (oldVal == null)
                     {
-                        createNew?.Invoke(key, newVal);
+                        createNew?.Invoke(key, newVal!);
                     }
                     else if (newVal == null)
                     {
@@ -531,6 +509,7 @@ namespace Signum.Engine.Processes
             Action<K, N, O> merge)
             where O : class
             where N : class
+            where K : notnull
         {
 
             if (ep == null)
@@ -540,14 +519,14 @@ namespace Signum.Engine.Processes
                 HashSet<K> keys = new HashSet<K>();
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
-                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString()!, key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
 
                     if (oldVal == null)
                     {
-                        createNew?.Invoke(key, newVal);
+                        createNew?.Invoke(key, newVal!);
                     }
                     else if (newVal == null)
                     {

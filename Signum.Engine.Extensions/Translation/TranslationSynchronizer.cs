@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -12,12 +12,12 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 800;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity> role, string @namespace, out int totalTypes)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity>? role, string? @namespace, out int totalTypes)
         {
             var types = GetMergeChanges(target, master, support);
 
             if (role != null)
-                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role, t.Type.Assembly.Culture, t.Type.Type) > 0).ToList();
+                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role!, t.Type.Assembly.Culture, t.Type.Type) > 0).ToList();
 
             if (@namespace != null)
                 types = types.Where(t => t.Type.Type.Namespace == @namespace).ToList();
@@ -39,13 +39,13 @@ namespace Signum.Engine.Translation
                 var ltm = kvp.Value;
                 var ltt = target.Types.TryGetC(kvp.Key);
 
-                var count = (ltm.Description != null && ltt?.Description == null ? 1 : 0) +
-                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt.Members.TryGetC(kvp2.Key) == null);
+                var count = ((ltm.IsTypeCompleted() && ltt?.IsTypeCompleted() != true) ? 1 : 0) +
+                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
 
                 return new { Type = kvp.Key, count };
             })
             .Where(a => a.count > 0)
-            .GroupBy(a => a.Type.Namespace)
+            .GroupBy(a => a.Type!.Namespace!)
             .Select(gr => new NamespaceSyncStats
             {
                 @namespace = gr.Key,
@@ -65,7 +65,7 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
-                List<string> result = translator.TranslateBatch(gr.Select(a => a.Original.Description).ToList(), gr.Key.Name, target.Culture.Name);
+                List<string?> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
@@ -79,7 +79,7 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, MemberNameConflict> gr in memberGroups)
             {
-                var result = translator.TranslateBatch(gr.Select(a => a.Original).ToList(), gr.Key.Name, target.Culture.Name);
+                var result = translator.TranslateBatch(gr.Select(a => a.Original!).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
@@ -97,17 +97,17 @@ namespace Signum.Engine.Translation
             {
                 Type type = kvp.Key;
 
-                LocalizedType targetType = target.Types.TryGetC(type);
+                LocalizedType targetType = target.Types.GetOrThrow(type);
 
                 LocalizedType masterType = master.Types[type];
                 List<LocalizedType> supportTypes = support.Select(la => la.Types.TryGetC(type)).NotNull().ToList();
 
-                Dictionary<CultureInfo, TypeNameConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
+                Dictionary<CultureInfo, TypeNameConflict>? typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
 
-                var memberConflicts = (from m in masterType.Members.Keys
+                var memberConflicts = (from m in masterType.Members!.Keys
                                        let con = MemberConflicts(m, targetType, masterType, supportTypes)
                                        where con != null
-                                       select KVP.Create(m, con)).ToDictionary();
+                                       select KeyValuePair.Create(m, con)).ToDictionary();
 
                 if (memberConflicts.IsEmpty() && typeConflicts == null)
                     return null;
@@ -117,12 +117,12 @@ namespace Signum.Engine.Translation
             return types;
         }
 
-        static Dictionary<CultureInfo, TypeNameConflict> TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
+        static Dictionary<CultureInfo, TypeNameConflict>? TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
-            if(master.Description == null)
+            if(!master.IsTypeCompleted())
                 return null;
 
-            if (target != null && target.Description != null)
+            if (target.IsTypeCompleted())
                 return null;
 
             var sentences = new Dictionary<CultureInfo, TypeNameConflict>
@@ -132,31 +132,32 @@ namespace Signum.Engine.Translation
 
             sentences.AddRange(from lt in support
                                where lt.Description != null
-                               select KVP.Create(lt.Assembly.Culture, new TypeNameConflict { Original = lt }));
+                               select KeyValuePair.Create(lt.Assembly.Culture, new TypeNameConflict { Original = lt }));
 
             return sentences;
         }
 
-        static Dictionary<CultureInfo, MemberNameConflict> MemberConflicts(string member, LocalizedType target, LocalizedType master, List<LocalizedType> support)
+        static Dictionary<CultureInfo, MemberNameConflict>? MemberConflicts(string member, LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
-            if (master.Members.TryGetC(member) == null)
+            if (master.Members!.TryGetC(member) == null)
                 return null;
 
-            if (target != null && target.Members.TryGetC(member) != null)
+            if (target != null && target.Members!.TryGetC(member) != null)
                 return null;
 
             var sentences = new Dictionary<CultureInfo, MemberNameConflict>
             {
-                { master.Assembly.Culture, new MemberNameConflict { Original = master.Members.TryGetC(member) } }
+                { master.Assembly.Culture, new MemberNameConflict { Original = master.Members!.TryGetC(member) } }
             };
             sentences.AddRange(from lt in support
-                               where lt.Members.TryGetC(member).HasText()
-                               select KVP.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members.TryGetC(member) }));
+                               where lt.Members!.TryGetC(member).HasText()
+                               select KeyValuePair.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members!.TryGetC(member) }));
 
             return sentences;
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class LocalizedAssemblyChanges
     {
         public LocalizedAssembly LocalizedAssembly { get; set; }
@@ -173,7 +174,7 @@ namespace Signum.Engine.Translation
     {
         public LocalizedType Type { get; set; }
 
-        public Dictionary<CultureInfo, TypeNameConflict> TypeConflict;
+        public Dictionary<CultureInfo, TypeNameConflict>? TypeConflict;
 
         public Dictionary<string, Dictionary<CultureInfo, MemberNameConflict>> MemberConflicts { get; set; }
 
@@ -186,15 +187,15 @@ namespace Signum.Engine.Translation
         {
             var ci = CultureInfo.GetCultureInfo(LocalizedAssembly.GetDefaultAssemblyCulture(Type.Assembly.Assembly));
 
-            return (TypeConflict == null ? 0 : TypeConflict[ci].Original.Description.Length) +
-                MemberConflicts.Values.Sum(m => m[ci].Original.Length);
+            return (TypeConflict == null ? 0 : TypeConflict![ci].Original.Description!.Length) +
+                MemberConflicts.Values.Sum(m => m[ci].Original!.Length);
         }
     }
 
     public class TypeNameConflict
     {
         public LocalizedType Original;
-        public string Translated;
+        public string? Translated;
 
         public override string ToString()
         {
@@ -204,8 +205,8 @@ namespace Signum.Engine.Translation
 
     public class MemberNameConflict
     {
-        public string Original;
-        public string Translated;
+        public string? Original;
+        public string? Translated;
 
         public override string ToString()
         {
@@ -219,4 +220,5 @@ namespace Signum.Engine.Translation
         public int types;
         public int translations;
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

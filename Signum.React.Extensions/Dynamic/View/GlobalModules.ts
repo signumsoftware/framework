@@ -11,7 +11,11 @@ import * as Navigator from '@framework/Navigator'
 import * as Components from '@framework/Components'
 import * as AuthClient from '../../Authorization/AuthClient'
 import * as Services from '@framework/Services'
-
+import * as TreeClient from '../../Tree/TreeClient'
+import * as AutoCompleteConfig from '@framework/Lines/AutoCompleteConfig'
+import * as Hooks from '@framework/Hooks'
+import * as SelectorModal from '@framework/SelectorModal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const globalModules: any = {
   numbro,
@@ -27,4 +31,9 @@ export const globalModules: any = {
   Operations,
   Constructor,
   Services,
+  TreeClient,
+  AutoCompleteConfig,
+  Hooks,
+  SelectorModal,
+  FontAwesomeIcon,
 };

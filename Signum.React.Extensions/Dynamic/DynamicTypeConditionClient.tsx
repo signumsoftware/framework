@@ -26,11 +26,16 @@ export function start(options: { routes: JSX.Element[] }) {
     parentToken: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName),
     parentValue: type
   }} />);
+  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
+    { token: t.entity(p => p.entityType.cleanName), type: "Text" },
+    { token: t.entity(p => p.symbolName.name), type: "Text" },
+    { token: t.entity(p => p.eval!.script), type: "Code" },
+  ]);
 }
 
 export namespace API {
   export function typeConditionTest(request: DynamicTypeConditionTestRequest): Promise<DynamicTypeConditionTestResponse> {
-    return ajaxPost<DynamicTypeConditionTestResponse>({ url: `~/api/dynamic/typeCondition/test` }, request);
+    return ajaxPost({ url: `~/api/dynamic/typeCondition/test` }, request);
   }
 }
 

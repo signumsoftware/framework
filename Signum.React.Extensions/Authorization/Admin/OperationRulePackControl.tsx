@@ -1,18 +1,19 @@
 import * as React from 'react'
-import { notifySuccess } from '@framework/Operations/EntityOperations'
+import { Button } from 'react-bootstrap'
+import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
-import { Button } from '@framework/Components';
 import "./AuthAdmin.css"
+import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default class OperationRulePackControl extends React.Component<{ ctx: TypeContext<OperationRulePack> }> implements IRenderButtons {
+export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
 
-  handleSaveClick = (bc: ButtonsContext) => {
-    let pack = this.props.ctx.value;
+  function handleSaveClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
     API.saveOperationRulePack(pack)
       .then(() => API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
@@ -23,95 +24,91 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
       .done();
   }
 
-  renderButtons(bc: ButtonsContext): ButtonBarElement[]{
+  const forceUpdate = useForceUpdate();
+
+  function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button> }
     ];
   }
 
-  handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
 
-    this.props.ctx.value.rules.forEach(mle => {
+  function handleRadioClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+
+    ctx.value.rules.forEach(mle => {
       if (!mle.element.coercedValues!.contains(hc)) {
         mle.element.allowed = hc;
         mle.element.modified = true;
       }
     });
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  render() {
-
-    let ctx = this.props.ctx;
-
-    return (
-      <div>
-        <div className="form-compact">
-          <EntityLine ctx={ctx.subCtx(f => f.role)} />
-          <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
-          <EntityLine ctx={ctx.subCtx(f => f.type)} />
-        </div>
-        <table className="table table-sm sf-auth-rules">
-          <thead>
-            <tr>
-              <th>
-                {OperationSymbol.niceName()}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                <a onClick={e => this.handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {AuthAdminMessage.Overriden.niceToString()}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
-              <tr key={i}>
-                <td>
-                  {c.value.resource!.operation!.toStr}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "Allow", "green")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "DBOnly", "#FFAD00")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  {this.renderRadio(c.value, "None", "red")}
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
-                    c.value.allowed = c.value.allowedBase;
-                    ctx.value.modified = true;
-                    this.forceUpdate();
-                  }} />
-                </td>
-              </tr>
-            )
-            }
-          </tbody>
-        </table>
-
+  return (
+    <div>
+      <div className="form-compact">
+        <EntityLine ctx={ctx.subCtx(f => f.role)} />
+        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
-    );
-  }
+      <table className="table table-sm sf-auth-rules">
+        <thead>
+          <tr>
+            <th>
+              {OperationSymbol.niceName()}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleRadioClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleRadioClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              <a onClick={e => handleRadioClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {AuthAdminMessage.Overriden.niceToString()}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+            <tr key={i}>
+              <td>
+                {c.value.resource!.operation!.toStr}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "Allow", "green")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "DBOnly", "#FFAD00")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                {renderRadio(c.value, "None", "red")}
+              </td>
+              <td style={{ textAlign: "center" }}>
+                <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                  c.value.allowed = c.value.allowedBase;
+                  ctx.value.modified = true;
+                  forceUpdate();
+                }} />
+              </td>
+            </tr>
+          )
+          }
+        </tbody>
+      </table>
 
-  renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
+    </div>
+  );
+
+  function renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
 
     if (c.coercedValues!.contains(allowed))
       return;
 
-    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() }} />;
+    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
-}
-
-
-
+});

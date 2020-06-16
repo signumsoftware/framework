@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Engine.Maps;
 using Signum.Entities.Files;
@@ -16,25 +16,9 @@ namespace Signum.Engine.Files
 {
     public static class FilePathLogic
     {
-        static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => fp == null ? null: new WebImage { FullWebPath = fp.FullWebPath() };
-        [ExpressionField]
-        public static WebImage WebImage(this FilePathEntity fp)
-        {
-            return WebImageExpression.Evaluate(fp);
-        }
-
-        static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath() };
-        [ExpressionField]
-        public static WebDownload WebDownload(this FilePathEntity fp)
-        {
-            return WebDownloadExpression.Evaluate(fp);
-        }
-
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null!)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -56,7 +40,7 @@ namespace Signum.Engine.Files
                 FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-                
+
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
                     CanBeNew = true,
@@ -65,7 +49,7 @@ namespace Signum.Engine.Files
                     {
                         if (!fp.IsNew)
                         {
-                            var ofp = fp.ToLite().Retrieve();
+                            var ofp = fp.ToLite().RetrieveAndRemember();
 
                             if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
                             {
@@ -77,23 +61,13 @@ namespace Signum.Engine.Files
                                     fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
                                     tr.Commit();
                                 }
-                            }  
+                            }
                         }
                     }
                 }.Register();
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
-
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
-        }
-
-
-
-        static void FilePathLogic_Retrieved(FilePathEntity fp)
-        {
-            fp.GetPrefixPair();
         }
 
         static PrefixPair CalculatePrefixPair(FilePathEntity fp)
@@ -102,7 +76,7 @@ namespace Signum.Engine.Files
                return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
         }
 
-        public static IDisposable FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
+        public static IDisposable? FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
         {
             if (!unsafeMode.Value)
             {
@@ -123,7 +97,7 @@ namespace Signum.Engine.Files
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
-        public static IDisposable UnsafeMode()
+        public static IDisposable? UnsafeMode()
         {
             if (unsafeMode.Value) return null;
             unsafeMode.Value = true;

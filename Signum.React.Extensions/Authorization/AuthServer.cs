@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Authorization;
+using Signum.Entities.Authorization;
 using Signum.React.Facades;
 using Signum.React.Json;
 using Signum.Utilities;
@@ -13,6 +13,8 @@ using Signum.Services;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Microsoft.AspNetCore.Builder;
+using Signum.React.ApiControllers;
+using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -22,7 +24,7 @@ namespace Signum.React.Authorization
 
         public static Action<ActionContext, UserEntity> UserPreLogin;
         public static Action<ActionContext, UserEntity> UserLogged;
-        public static Action UserLoggingOut;
+        public static Action<UserEntity> UserLoggingOut;
 
 
         public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -47,7 +49,8 @@ namespace Signum.React.Authorization
                     {
                         var ta = UserEntity.Current != null ? TypeAuthLogic.GetAllowed(t) : null;
 
-                        ti.Extension.Add("typeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
+                        ti.Extension.Add("maxTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
+                        ti.Extension.Add("minTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MinUI());
                         ti.RequiresEntityPack |= ta != null && ta.Conditions.Any();
                     }
                 };
@@ -58,11 +61,27 @@ namespace Signum.React.Authorization
                     var typeAllowed =
                     UserEntity.Current == null ? TypeAllowedBasic.None :
                     ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
-                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Modify, true) ? TypeAllowedBasic.Modify :
+                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Write, true) ? TypeAllowedBasic.Write :
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
                     TypeAllowedBasic.None;
 
-                    ep.Extension.Add("typeAllowed", typeAllowed);
+                    ep.extension.Add("typeAllowed", typeAllowed);
+                };
+
+                OperationController.AnyReadonly += (Lite<Entity>[] lites) =>
+                {
+                    return lites.GroupBy(ap => ap.EntityType).Any(gr =>
+                    {
+                        var ta = TypeAuthLogic.GetAllowed(gr.Key);
+
+                        if (ta.Min(inUserInterface: true) == TypeAllowedBasic.Write)
+                            return false;
+
+                        if (ta.Max(inUserInterface: true) <= TypeAllowedBasic.Read)
+                            return true;
+
+                        return giCountReadonly.GetInvoker(gr.Key)() > 0;
+                    });
                 };
             }
 
@@ -76,8 +95,8 @@ namespace Signum.React.Authorization
 
                 ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
-                    if (fi.DeclaringType.Name.EndsWith("Query"))
-                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
+                    if (fi.DeclaringType!.Name.EndsWith("Query"))
+                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)!));
                 };
 
             }
@@ -86,7 +105,7 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
                 {
-                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
+                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed());
                 };
 
             }
@@ -109,7 +128,7 @@ namespace Signum.React.Authorization
                     if (fi.FieldType == typeof(PermissionSymbol))
                         mi.Extension.Add("permissionAllowed",
                             UserEntity.Current == null ? false :
-                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
+                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)!));
                 };
 
             }
@@ -126,7 +145,7 @@ namespace Signum.React.Authorization
                 {
                     EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash));
 
-                    var password = (string)ctx.JsonReader.Value;
+                    var password = (string)ctx.JsonReader.Value!;
 
                     var error = UserEntity.OnValidatePassword(password);
                     if (error != null)
@@ -149,6 +168,12 @@ namespace Signum.React.Authorization
                 };
 
             SchemaMap.GetColorProviders += GetMapColors;
+        }
+
+        static GenericInvoker<Func<int>> giCountReadonly = new GenericInvoker<Func<int>>(() => CountReadonly<Entity>());
+        public static int CountReadonly<T>() where T : Entity
+        {
+            return Database.Query<T>().Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true));
         }
 
         public static void OnUserPreLogin(ActionContext ac, UserEntity user)
@@ -177,7 +202,7 @@ namespace Signum.React.Authorization
                 NiceName = "Role - " + r.ToString(),
                 AddExtra = t =>
                 {
-                    TypeAllowedAndConditions tac = roleRules[r].TryGetC(t.typeName);
+                    TypeAllowedAndConditions? tac = roleRules[r].TryGetC(t.typeName);
 
                     if (tac == null)
                         return;

@@ -5,9 +5,13 @@
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "react",
-    "noEmit": true,
+    "incremental": true,
+    "outDir": "./ts_out",
+    "composite": true,
+    //"noEmit": true,
     "strict": true,
     "baseUrl": ".",
+    "declarationMap": true,
     "paths": {
       "*": [
         "../../Framework/Signum.React/node_modules/@types/*",
@@ -21,5 +25,14 @@
       //"esnext",
       "dom"
     ]
-  }
+  },
+  "exclude": [
+    "../../Framework/Signum.React/ts_out",
+    "../../Framework/Signum.React/node_modules",
+    "./node_modules",
+    "./ts_out"
+  ],
+  "references": [
+    { "path": "../../Framework/Signum.React" }
+  ]
 }

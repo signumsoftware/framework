@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -31,13 +31,13 @@ namespace Signum.Entities.Authorization
                 new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Type);
-            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Condition);
+            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Type);
+            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Condition);
 
             Validator.PropertyValidator((RuleTypeEntity r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
 
-        string TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        string? TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             RuleTypeEntity rt = (RuleTypeEntity)sender;
             if (rt.Resource == null)
@@ -71,7 +71,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync_Type(Entity arg)
+        static SqlPreCommand? AuthCache_PreDeleteSqlSync_Type(Entity arg)
         {
             TypeEntity type = (TypeEntity)arg;
 
@@ -80,7 +80,7 @@ namespace Signum.Entities.Authorization
             return command;
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync_Condition(Entity arg)
+        static SqlPreCommand? AuthCache_PreDeleteSqlSync_Condition(Entity arg)
         {
             TypeConditionSymbol condition = (TypeConditionSymbol)arg;
 
@@ -142,7 +142,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role)
             {
-                if (rules.TryGetValue(role, out TypeAllowedAndConditions result))
+                if (rules.TryGetValue(role, out var result))
                     return result;
 
                 return GetAllowedBase(role);
@@ -152,7 +152,7 @@ namespace Signum.Entities.Authorization
             {
                 IEnumerable<Lite<RoleEntity>> related = AuthLogic.RelatedTo(role);
 
-                return merger.Merge(resource.ToType(), role, related.Select(r => KVP.Create(r, GetAllowed(r))));
+                return merger.Merge(resource.ToType(), role, related.Select(r => KeyValuePair.Create(r, GetAllowed(r))));
             }
 
         }
@@ -172,7 +172,7 @@ namespace Signum.Entities.Authorization
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .SelectCatch(ru => KVP.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
+                          .SelectCatch(ru => KeyValuePair.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
                           .ToDictionaryEx());
 
                 Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -255,7 +255,7 @@ namespace Signum.Entities.Authorization
             readonly List<RoleAllowedCache> baseCaches;
             readonly Lite<RoleEntity> role;
 
-            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<Type, TypeAllowedAndConditions> merger, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
+            public RoleAllowedCache(Lite<RoleEntity> role, IMerger<Type, TypeAllowedAndConditions> merger, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions>? newValues)
             {
                 this.role = role;
 
@@ -265,15 +265,15 @@ namespace Signum.Entities.Authorization
 
                 Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role);
 
-                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
 
 
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
-                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
+                    .SelectMany(a => a.rules.OverrideDictionary!.Keys)
                     .ToHashSet();
 
-                Dictionary<Type, TypeAllowedAndConditions> tmpRules = keys.ToDictionary(k => k, baseAllowed);
+                Dictionary<Type, TypeAllowedAndConditions>? tmpRules = keys.ToDictionary(k => k, baseAllowed);
                 if (newValues != null)
                     tmpRules.SetRange(newValues);
 
@@ -282,7 +282,7 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<Type, TypeAllowedAndConditions>(defaultAllowed, tmpRules);
             }
 
-            internal static Dictionary<Type, TypeAllowedAndConditions> Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary,
+            internal static Dictionary<Type, TypeAllowedAndConditions>? Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary,
                 Func<Type, TypeAllowedAndConditions> defaultAllowed,
                 Func<Type, TypeAllowedAndConditions> baseAllowed)
             {
@@ -306,7 +306,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowedBase(Type k)
             {
-                return merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
+                return merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
             }
 
             internal DefaultDictionary<Type, TypeAllowedAndConditions> DefaultDictionary()
@@ -315,7 +315,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(List<Type> allTypes)
+        internal XElement ExportXml(List<Type>? allTypes)
         {
             var rules = runtimeRules.Value;
 
@@ -334,10 +334,8 @@ namespace Signum.Entities.Authorization
                             new XAttribute("Resource", resource),
                             new XAttribute("Allowed", allowed.Fallback.ToString()),
                             from c in allowed.Conditions
-                            let conditionName = c.TypeCondition.Key
-                            orderby conditionName
                             select new XElement("Condition",
-                                new XAttribute("Name", conditionName),
+                                new XAttribute("Name", c.TypeCondition.Key),
                                 new XAttribute("Allowed", c.Allowed.ToString()))
                          )
                      )
@@ -347,7 +345,7 @@ namespace Signum.Entities.Authorization
         internal static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
         internal static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
 
-        internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+        internal SqlPreCommand? ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
         {
             var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element("Types")?.Elements("Role")).EmptyIfNull();
@@ -364,9 +362,9 @@ namespace Signum.Entities.Authorization
                 SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
                 typeConditionReplacementKey);
 
-            Func<string, TypeEntity> getResource = s =>
+            Func<string, TypeEntity?> getResource = s =>
             {
-                Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeReplacementKey, s));
+                Type? type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeReplacementKey, s));
 
                 if (type == null)
                     return null;
@@ -381,18 +379,18 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null
-                               select KVP.Create(t, new
+                               select KeyValuePair.Create(t, new
                                {
                                    Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
                                    Condition = Conditions(xr, replacements)
                                })).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
-                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeEntity
+                    SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeEntity
                     {
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value.Allowed,
-                        Conditions = kvp.Value.Condition
+                        Conditions = kvp.Value.Condition! /*CSBUG*/
                     }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                     return restSql;
@@ -403,9 +401,9 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null && !t.ToType().IsEnumEntity()
-                               select KVP.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
+                               select KeyValuePair.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(
+                    SqlPreCommand? restSql = Synchronizer.SynchronizeScript(
                         Spacing.Simple,
                         dic,
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),

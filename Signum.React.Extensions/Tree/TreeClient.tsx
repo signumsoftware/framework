@@ -1,24 +1,24 @@
 import * as React from 'react'
 import * as QueryString from 'query-string'
-import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import { Type } from '@framework/Reflection'
+import { Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
-import { FilterRequest, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
-import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { FilterRequest, FilterOption } from "@framework/FindOptions";
+import { ImportRoute } from "@framework/AsyncImport";
+import { getAllTypes, getTypeInfo } from "@framework/Reflection";
+import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
-import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
+import { toLite } from "@framework/Signum.Entities";
+import { SearchControlLoaded } from "@framework/Search";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { LiteAutocompleteConfig } from '@framework/Lines';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -35,14 +35,14 @@ export function start(options: { routes: JSX.Element[] }) {
     new EntityOperationSettings(TreeOperation.Copy, {
       onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
         if (m) {
-          ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+          ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
           ctx.defaultClick(m);
         }
       }),
       contextual: {
         onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
           if (m) {
-            ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+            ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
             ctx.defaultContextualClick(m);
           }
         })
@@ -64,25 +64,25 @@ export function start(options: { routes: JSX.Element[] }) {
 
 function moveModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createMoveModel)
+  if (s?.createMoveModel)
     return s.createMoveModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
       title: TreeMessage.Move0.niceToString(lite.toStr),
       modalSize: "md",
-      extraComponentProps: { lite },
+      extraProps: { lite },
     })
 }
 
 function copyModal(lite: Lite<TreeEntity>) {
   const s = settings[lite.EntityType];
-  if (s && s.createCopyModel)
+  if (s?.createCopyModel)
     return s.createCopyModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
       title: TreeMessage.Copy0.niceToString(lite.toStr),
       modalSize: "md",
-      extraComponentProps: { lite },
+      extraProps: { lite },
     });
 }
 
@@ -121,11 +121,30 @@ function getQuerySetting(typeName: string) {
   return qs;
 }
 
+function getEntitySetting(typeName: string) {
+  var es = Navigator.getSettings(typeName);
+  if (!es) {
+    es = new Navigator.EntitySettings(typeName);
+    Navigator.addSettings(es);
+  }
+  return es;
+}
+
 export function overrideOnFind(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
   if (!qs.onFind)
-    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+    qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo?.title });
+}
+
+export function overrideAutocomplete(ti: TypeInfo) {
+  var es = getEntitySetting(ti.name);
+
+  if (!es.autocomplete)
+    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac), false, false);
+
+  if (!es.autocompleteDelay)
+    es.autocompleteDelay = 750;
 }
 
 export function overrideDefaultOrder(ti: TypeInfo) {
@@ -145,17 +164,17 @@ export function getAllTreeTypes() {
   return getAllTypes().filter(t => isTree(t));
 }
 
-export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: { title?: string }): Promise<Lite<T> | undefined>;
+export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<T> | undefined>;
 export function openTree(typeName: string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
 export function openTree(type: Type<TreeEntity> | string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
   const typeName = type instanceof Type ? type.typeName : type;
 
   return import("./TreeModal")
-    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
+    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions ?? [], options));
 }
 
 export interface TreeModalOptions {
-  title?: string;
+  title?: React.ReactNode;
   excludedNodes?: Array<Lite<TreeEntity>>;
 }
 
@@ -203,6 +222,10 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 
 export namespace API {
+  export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
+    return ajaxGet({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+  }
+
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
     return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
   }

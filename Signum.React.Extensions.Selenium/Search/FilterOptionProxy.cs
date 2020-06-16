@@ -1,15 +1,27 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 
 namespace Signum.React.Selenium
 {
-    public class FilterConditionOptionProxy
+
+    public abstract class FilterProxy { }
+    public class FilterGroupProxy : FilterProxy
     {
         public IWebElement Element;
 
-        public FilterConditionOptionProxy(IWebElement element)
+        public FilterGroupProxy(IWebElement element)
+        {
+            this.Element = element;
+        }
+    }
+
+    public class FilterConditionProxy : FilterProxy
+    {
+        public IWebElement Element;
+
+        public FilterConditionProxy(IWebElement element)
         {
             this.Element = element;
         }
@@ -47,12 +59,12 @@ namespace Signum.React.Selenium
 
         public ValueLineProxy ValueLine()
         {
-            return new ValueLineProxy(this.Element, null);
+            return new ValueLineProxy(this.Element, null!);
         }
 
         public EntityLineProxy EntityLine()
         {
-            return new EntityLineProxy(this.Element, null);
+            return new EntityLineProxy(this.Element, null!);
         }
 
         internal void SetValue(object value)
@@ -65,7 +77,7 @@ namespace Signum.React.Selenium
             else if (value is Entity)
                 EntityLine().SetLite(((Entity)value).ToLite());
             else
-                ValueLine().SetValue(value);
+                ValueLine().SetStringValue(value.ToString());
         }
     }
 }

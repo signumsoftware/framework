@@ -39,11 +39,11 @@ namespace Signum.Entities.Chart
 
             public override bool CanConvert(Type objectType) => typeof(ChartScriptParameterGroup) == objectType;
 
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>throw new NotImplementedException();
+            public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => throw new NotImplementedException();
 
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
             {
-                var group = (ChartScriptParameterGroup)value;
+                var group = (ChartScriptParameterGroup)value!;
                 writer.WriteStartObject();
                 writer.WritePropertyName("name");
                 writer.WriteValue(group.Name);
@@ -67,7 +67,7 @@ namespace Signum.Entities.Chart
         public ChartParameterType Type { get; set; }
         public IChartParameterValueDefinition ValueDefinition { get; set; }
 
-        public QueryToken GetToken(IChartBase chartBase)
+        public QueryToken? GetToken(IChartBase chartBase)
         {
             if (this.ColumnIndex == null)
                 return null;
@@ -75,12 +75,12 @@ namespace Signum.Entities.Chart
             return chartBase.Columns[this.ColumnIndex.Value].Token?.Token;
         }
 
-        public string Validate(string value, QueryToken token)
+        public string? Validate(string? value, QueryToken? token)
         {
             return ValueDefinition?.Validate(value, token);
         }
 
-        internal string DefaultValue(QueryToken token)
+        internal string DefaultValue(QueryToken? token)
         {
             return this.ValueDefinition.DefaultValue(token);
         }
@@ -88,8 +88,8 @@ namespace Signum.Entities.Chart
 
     public interface IChartParameterValueDefinition
     {
-        string DefaultValue(QueryToken token);
-        string Validate(string parameter, QueryToken token);
+        string DefaultValue(QueryToken? token);
+        string? Validate(string? parameter, QueryToken? token);
     }
 
     public class NumberInterval : IChartParameterValueDefinition
@@ -98,7 +98,7 @@ namespace Signum.Entities.Chart
         public decimal? MinValue;
         public decimal? MaxValue;
 
-        public static string TryParse(string valueDefinition, out NumberInterval interval)
+        public static string? TryParse(string valueDefinition, out NumberInterval? interval)
         {
             interval = null;
             var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\s*(\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\])?\s*$");
@@ -108,7 +108,7 @@ namespace Signum.Entities.Chart
 
             interval = new NumberInterval();
 
-            if (!ReflectionTools.TryParse(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
+            if (!ReflectionTools.TryParse(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval!.DefaultValue))
                 return "Invalid default value";
 
             if (!ReflectionTools.TryParse(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
@@ -125,7 +125,7 @@ namespace Signum.Entities.Chart
             return "{0}[{1},{2}]".FormatWith(DefaultValue, MinValue, MaxValue);
         }
 
-        public string Validate(string parameter, QueryToken token)
+        public string? Validate(string? parameter, QueryToken? token)
         {
             if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
                 return "{0} is not a valid number".FormatWith(parameter);
@@ -139,7 +139,7 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        string IChartParameterValueDefinition.DefaultValue(QueryToken token)
+        string IChartParameterValueDefinition.DefaultValue(QueryToken? token)
         {
             return DefaultValue.ToString(CultureInfo.InvariantCulture);
         }
@@ -155,16 +155,16 @@ namespace Signum.Entities.Chart
     
     public class EnumValueList : List<EnumValue>, IChartParameterValueDefinition
     {
-        public static string TryParse(string valueDefinition, out EnumValueList list)
+        public static string? TryParse(string valueDefinition, out EnumValueList list)
         {
             list = new EnumValueList();
             foreach (var item in valueDefinition.SplitNoEmpty('|'))
             {
-                string error = EnumValue.TryParse(item, out EnumValue val);
+                string? error = EnumValue.TryParse(item, out EnumValue? val);
                 if (error.HasText())
                     return error;
 
-                list.Add(val);
+                list.Add(val!);
             }
 
             if (list.Count == 0)
@@ -182,7 +182,7 @@ namespace Signum.Entities.Chart
             throw new Exception(error);
         }
 
-        public string Validate(string parameter, QueryToken token)
+        public string? Validate(string? parameter, QueryToken? token)
         {
             if (token == null)
                 return null; //?
@@ -198,9 +198,9 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public string DefaultValue(QueryToken token)
+        public string DefaultValue(QueryToken? token)
         {
-            return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token.NiceName())).Name;
+            return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token?.NiceName())).Name;
         }
 
         internal string ToCode()
@@ -222,7 +222,7 @@ namespace Signum.Entities.Chart
             return "{0} ({1})".FormatWith(Name, TypeFilter.Value.GetComposedCode());
         }
 
-        public static string TryParse(string value, out EnumValue enumValue)
+        public static string? TryParse(string value, out EnumValue? enumValue)
         {
             var m = Regex.Match(value, @"^\s*(?<name>[^\(]*)\s*(\((?<filter>.*?)\))?\s*$");
 
@@ -237,7 +237,7 @@ namespace Signum.Entities.Chart
                 Name = m.Groups["name"].Value.Trim()
             };
 
-            if (string.IsNullOrEmpty(enumValue.Name))
+            if (string.IsNullOrEmpty(enumValue!.Name))
                 return "Parameter has no name";
 
             string composedCode = m.Groups["filter"].Value;
@@ -245,7 +245,7 @@ namespace Signum.Entities.Chart
                 return null;
 
 
-            string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
+            string? error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
             if (error.HasText())
                 return enumValue.Name + ": " + error;
 
@@ -254,7 +254,7 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public bool CompatibleWith(QueryToken token)
+        public bool CompatibleWith(QueryToken? token)
         {
             return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
         }
@@ -285,12 +285,12 @@ namespace Signum.Entities.Chart
             this.DefaultValue = defaultValue;
         }
 
-        public string Validate(string parameter, QueryToken token)
+        public string? Validate(string? parameter, QueryToken? token)
         {
             return null;
         }
 
-        string IChartParameterValueDefinition.DefaultValue(QueryToken token)
+        string IChartParameterValueDefinition.DefaultValue(QueryToken? token)
         {
             return DefaultValue;
         }

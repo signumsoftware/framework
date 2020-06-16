@@ -22,8 +22,8 @@ namespace Signum.Entities.Dashboard
             RebindEvents();
         }
 
-        Lite<TypeEntity> entityType;
-        public Lite<TypeEntity> EntityType
+        Lite<TypeEntity>? entityType;
+        public Lite<TypeEntity>? EntityType
         {
             get { return entityType; }
             set
@@ -35,38 +35,33 @@ namespace Signum.Entities.Dashboard
 
         public DashboardEmbedededInEntity? EmbeddedInEntity { get; set; }
 
-        public Lite<Entity> Owner { get; set; }
+        public Lite<Entity>? Owner { get; set; }
 
         public int? DashboardPriority { get; set; }
 
         [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
         public int? AutoRefreshPeriod { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 200)]
+        [StringLengthValidator(Min = 2, Max = 200)]
         public string DisplayName { get; set; }
 
         public bool CombineSimilarRows { get; set; } = true;
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
+        [NotifyCollectionChanged, NotifyChildProperty]
         [NoRepeatValidator]
         public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        public bool ForNavbar { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? Key { get; set; }
 
-        public string Key { get; set; }
+        [AutoExpressionField]
+        public bool ContainsContent(IPartEntity content) => 
+            As.Expression(() => Parts.Any(p => p.Content.Is(content)));
 
-        static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
-            (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
-        [ExpressionField]
-        public bool ContainsContent(IPartEntity content)
-        {
-            return ContainsContentExpression.Evaluate(this, content);
-        }
-
-        protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             if (sender is PanelPartEmbedded part)
             {
@@ -91,7 +86,7 @@ namespace Signum.Entities.Dashboard
                         .ToString(uc => DashboardMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
                         "\r\n");
 
-                    return errorsUserQuery.DefaultText(null);
+                    return errorsUserQuery.DefaultText(null!);
                 }
             }
 
@@ -123,12 +118,8 @@ namespace Signum.Entities.Dashboard
             base.ChildPropertyChanged(sender, e);
         }
 
-        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.DisplayName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
 
         public DashboardEntity Clone()
         {
@@ -141,7 +132,6 @@ namespace Signum.Entities.Dashboard
                 EntityType = this.EntityType,
                 EmbeddedInEntity = this.EmbeddedInEntity,
                 AutoRefreshPeriod = this.AutoRefreshPeriod,
-                ForNavbar = this.ForNavbar,
                 Key = this.Key
             };
         }
@@ -171,7 +161,7 @@ namespace Signum.Entities.Dashboard
             Parts.Synchronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(EmbeddedInEntity))
             {

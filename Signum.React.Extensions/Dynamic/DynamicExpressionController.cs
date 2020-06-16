@@ -81,7 +81,7 @@ namespace Signum.Entities.Dynamic
             }
         }
 
-        private string Dump(object result, string format)
+        private string Dump(object? result, string? format)
         {
             if (result == null)
                 return "null";
@@ -89,7 +89,7 @@ namespace Signum.Entities.Dynamic
             if (result is IFormattable f)
                 return f.ToString(format, CultureInfo.CurrentCulture);
 
-            return result.ToString();
+            return result.ToString()!;
         }
 
         public class DynamicExpressionTestRequest

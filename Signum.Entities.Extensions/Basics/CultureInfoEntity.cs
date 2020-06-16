@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
@@ -19,11 +19,13 @@ namespace Signum.Entities.Basics
         }
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 10)]
+        [StringLengthValidator(Min = 2, Max = 10)]
         public string Name { get; set; }
 
+        [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string NativeName { get; private set; }
 
+        [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string EnglishName { get; private set; }
 
         /// <summary>
@@ -31,7 +33,7 @@ namespace Signum.Entities.Basics
         /// </summary>
         public bool Hidden { get; set; }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Name) && Name.HasText())
             {
@@ -67,12 +69,8 @@ namespace Signum.Entities.Basics
             base.PreSaving(ctx);
         }
 
-        static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => EnglishName);
     }
 
     [AutoInit]

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Signum.Utilities;
 
 namespace Signum.Entities.Help
@@ -23,8 +23,8 @@ namespace Signum.Entities.Help
         Call0Over1OfThe2,
         [Description("character")]
         Character,
-        [Description("check")]
-        Check,
+        [Description("boolean value (yes or no)")]
+        BooleanValue,
         [Description("Constructs a new {0}")]
         ConstructsANew0,
         [Description("date")]

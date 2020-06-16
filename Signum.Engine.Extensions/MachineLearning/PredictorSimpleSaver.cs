@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
@@ -86,8 +86,8 @@ namespace Signum.Engine.MachineLearning
                                         PredictDictionary input = inputs[i];
                                         PredictDictionary output = outputs[i];
 
-                                        object inValue = input.MainQueryValues.GetOrThrow(outputColumn);
-                                        object outValue = output.MainQueryValues.GetOrThrow(outputColumn);
+                                        object? inValue = input.MainQueryValues.GetOrThrow(outputColumn);
+                                        object? outValue = output.MainQueryValues.GetOrThrow(outputColumn);
 
                                         toInsert.Add(new PredictSimpleResultEntity
                                         {

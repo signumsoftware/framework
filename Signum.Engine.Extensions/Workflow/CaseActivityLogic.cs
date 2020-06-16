@@ -18,156 +18,85 @@ using Signum.Engine.Scheduler;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
+using Signum.Entities.SMS;
+using Signum.Entities.Mailing;
 
 namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
-        static Expression<Func<ICaseMainEntity, IQueryable<CaseActivityEntity>>> MainEntityCaseActivitiesExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e)
-        {
-            return MainEntityCaseActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e));
 
-        static Expression<Func<ICaseMainEntity, CaseActivityEntity>> LastCaseActivityExpression =
-            e => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault();
-        [ExpressionField]
-        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e)
-        {
-            return LastCaseActivityExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault());
 
-        static Expression<Func<ICaseMainEntity, IQueryable<CaseEntity>>> MainEntityCasesExpression =
-            e => e.CaseActivities().Select(a => a.Case);
-        [ExpressionField]
-        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e)
-        {
-            return MainEntityCasesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().Select(a => a.Case));
 
-        static Expression<Func<ICaseMainEntity, bool>> MainEntityCurrentUserHasNotificationExpression =
-            e => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current));
-        [ExpressionField]
-        public static bool CurrentUserHasNotification(this ICaseMainEntity e)
-        {
-            return MainEntityCurrentUserHasNotificationExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static bool CurrentUserHasNotification(this ICaseMainEntity e) => 
+            As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current)));
 
-        static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
-            w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
-        [ExpressionField]
-        public static IQueryable<CaseEntity> Cases(this WorkflowEntity e)
-        {
-            return CasesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) => 
+            As.Expression(() => Database.Query<CaseEntity>().Where(a => a.Workflow == w));
 
-        static Expression<Func<CaseActivityEntity, bool>> CurrentUserHasNotificationExpression =
-            ca => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
-                                                (cn.State == CaseNotificationState.New ||
-                                                 cn.State == CaseNotificationState.Opened ||
-                                                 cn.State == CaseNotificationState.InProgress));
-        [ExpressionField]
-        public static bool CurrentUserHasNotification(this CaseActivityEntity e)
-        {
-            return CurrentUserHasNotificationExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static bool CurrentUserHasNotification(this CaseActivityEntity ca) =>
+            As.Expression(() => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+                                                 (cn.State == CaseNotificationState.New ||
+                                                  cn.State == CaseNotificationState.Opened ||
+                                                  cn.State == CaseNotificationState.InProgress)));
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityEntity>>> NextActivitiesExpression =
-            ca => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca));
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity e)
-        {
-            return NextActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity ca) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca)));
 
-        static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
-            childCase => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous.Entity).First();
-        [ExpressionField]
-        public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase)
-        {
-            return DecompositionSurrogateActivityExpression.Evaluate(childCase);
-        }
+        [AutoExpressionField]
+        public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase) => 
+            As.Expression(() => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous!.Entity).First());
 
+        [AutoExpressionField]
+        public static IQueryable<CaseEntity> SubCases(this CaseEntity p) => 
+            As.Expression(() => Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(p)));
 
-
-        static Expression<Func<CaseEntity, IQueryable<CaseEntity>>> SubCasesExpression =
-        p => Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(p));
-        [ExpressionField]
-        public static IQueryable<CaseEntity> SubCases(this CaseEntity p)
-        {
-            return SubCasesExpression.Evaluate(p);
-        }
-
-
-        static Expression<Func<CaseActivityEntity, bool>> IsFreshNewExpression =
-        ca => (ca.State == CaseActivityState.PendingNext || ca.State == CaseActivityState.PendingDecision) && 
-                ca.Notifications().All(n => n.State == CaseNotificationState.New);
-        [ExpressionField]
-        public static bool IsFreshNew(this CaseActivityEntity entity)
-        {
-            return IsFreshNewExpression.Evaluate(entity);
-        }
-  
+        [AutoExpressionField]
+        public static bool IsFreshNew(this CaseActivityEntity ca) =>
+            As.Expression(() => (ca.State == CaseActivityState.PendingNext || ca.State == CaseActivityState.PendingDecision) && ca.Notifications().All(n => n.State == CaseNotificationState.New));
         
-        static Expression<Func<IWorkflowNodeEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e)
-        {
-            return CaseActivitiesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e));
 
-        static Expression<Func<WorkflowActivityEntity, double?>> AverageDurationActivityExpression =
-        wa => wa.CaseActivities().Average(a => a.Duration);
-        [ExpressionField]
-        public static double? AverageDuration(this WorkflowActivityEntity wa)
-        {
-            return AverageDurationActivityExpression.Evaluate(wa);
-        }
+        [AutoExpressionField]
+        public static double? AverageDuration(this WorkflowActivityEntity wa) => 
+            As.Expression(() => wa.CaseActivities().Average(a => a.Duration));
 
-        static Expression<Func<WorkflowEventEntity, double?>> AverageDurationEventExpression =
-            we => we.CaseActivities().Average(a => a.Duration);
-        [ExpressionField]
-        public static double? AverageDuration(this WorkflowEventEntity we)
-        {
-            return AverageDurationEventExpression.Evaluate(we);
-        }
+        [AutoExpressionField]
+        public static double? AverageDuration(this WorkflowEventEntity we) => 
+            As.Expression(() => we.CaseActivities().Average(a => a.Duration));
 
-        static Expression<Func<CaseEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesFromCaseExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.Case == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e)
-        {
-            return CaseActivitiesFromCaseExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case == e));
 
 
-        static Expression<Func<CaseEntity, IQueryable<CaseTagEntity>>> TagsExpression =
-        e => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseTagEntity> Tags(this CaseEntity e)
-        {
-            return TagsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseTagEntity> Tags(this CaseEntity e) => 
+            As.Expression(() => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e)));
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseNotificationEntity>>> NotificationsExpression =
-            e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e)
-        {
-            return NotificationsExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) => 
+            As.Expression(() => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e)));
 
 
-        static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityExecutedTimerEntity>>> ExecutedTimersExpression =
-        e => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e));
-        [ExpressionField]
-        public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e)
-        {
-            return ExecutedTimersExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) => 
+            As.Expression(() => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e)));
 
         public static void Start(SchemaBuilder sb)
         {
@@ -209,7 +138,7 @@ namespace Signum.Engine.Workflow
 
                 new Graph<CaseEntity>.Execute(CaseOperation.SetTags)
                 {
-                    Execute = (e, args) => 
+                    Execute = (e, args) =>
                     {
                         var current = e.Tags().ToList();
 
@@ -229,8 +158,8 @@ namespace Signum.Engine.Workflow
                 }.Register();
 
                 sb.Include<CaseActivityEntity>()
-                    .WithIndex(a => new { a.ScriptExecution.ProcessIdentifier }, a => a.DoneDate == null)
-                    .WithIndex(a => new { a.ScriptExecution.NextExecution }, a => a.DoneDate == null)
+                    .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)
+                    .WithIndex(a => new { a.ScriptExecution!.NextExecution }, a => a.DoneDate == null)
                     .WithExpressionFrom((WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom((CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom((CaseActivityEntity c) => c.NextActivities())
@@ -264,33 +193,35 @@ namespace Signum.Engine.Workflow
                 {
                     var boundaryCandidates =
                     (from ca in Database.Query<CaseActivityEntity>()
+                     where !ca.Workflow().HasExpired()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
                      we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we)) :
                      false
-                     select new { Activity = ca, Event = we }).ToList();
+                     select new ActivityEvent(ca, we)).ToList();
 
 
                     var intermediateCandidates =
                     (from ca in Database.Query<CaseActivityEntity>()
+                     where !ca.Workflow().HasExpired()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      let we = ((WorkflowEventEntity)ca.WorkflowActivity)
                      where we.Type == WorkflowEventType.IntermediateTimer
-                     select new { Activity = ca, Event = we }).ToList();
+                     select new ActivityEvent(ca, we)).ToList();
 
                     var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
-                    var conditions = candidates.Select(a => a.Event.Timer.Condition).Distinct().ToList();
+                    var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
 
                     var now = TimeZoneManager.Now;
                     var activities = conditions.SelectMany(cond =>
                     {
                         if (cond == null)
-                            return candidates.Where(a => a.Event.Timer.Duration != null && a.Event.Timer.Duration.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
+                            return candidates.Where(a => a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
 
                         var condEval = cond.RetrieveFromCache().Eval.Algorithm;
 
-                        return candidates.Where(a => a.Event.Timer.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                        return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                     }).Distinct().ToList();
 
                     if (!activities.Any())
@@ -335,7 +266,7 @@ namespace Signum.Engine.Workflow
                         from cn in Database.Query<CaseNotificationEntity>()
                         where cn.User == UserEntity.Current.ToLite()
                         let ca = cn.CaseActivity.Entity
-                        let previous = ca.Previous.Entity
+                        let previous = ca.Previous!.Entity
                         select new
                         {
                             Entity = cn.CaseActivity,
@@ -343,13 +274,13 @@ namespace Signum.Engine.Workflow
                             Workflow = ca.Case.Workflow.ToLite(),
                             Activity = new ActivityWithRemarks
                             {
-                                workflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
-                                @case = ca.Case.ToLite(),
-                                caseActivity = ca.ToLite(),
-                                notification = cn.ToLite(),
-                                remarks = cn.Remarks,
-                                alerts = ca.MyActiveAlerts().Count(),
-                                tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
+                                WorkflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
+                                Case = ca.Case.ToLite(),
+                                CaseActivity = ca.ToLite(),
+                                Notification = cn.ToLite(),
+                                Remarks = cn.Remarks,
+                                Alerts = ca.MyActiveAlerts().Count(),
+                                Tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
                             },
                             MainEntity = ca.Case.MainEntity.ToLite(ca.Case.ToString()),
                             Sender = previous.DoneBy,
@@ -375,7 +306,20 @@ namespace Signum.Engine.Workflow
                 });
 
                 CaseActivityGraph.Register();
+                OverrideCaseActivityMixin(sb);
             }
+        }
+
+        class ActivityEvent
+        {
+            public ActivityEvent(CaseActivityEntity activity, WorkflowEventEntity @event)
+            {
+                Activity = activity;
+                Event = @event;
+            }
+
+            public CaseActivityEntity Activity { get; set; }
+            public WorkflowEventEntity Event { get; set; }
         }
 
         public static CaseActivityEntity CreateCaseActivity(this WorkflowEntity workflow, ICaseMainEntity mainEntity)
@@ -385,6 +329,7 @@ namespace Signum.Engine.Workflow
         }
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
+
         public static void FixCaseDescriptions<T>() where T : Entity
         {
             Database.Query<CaseEntity>()
@@ -400,6 +345,12 @@ namespace Signum.Engine.Workflow
         {
             public Func<ICaseMainEntity> Constructor;
             public Action<ICaseMainEntity> SaveEntity;
+
+            public WorkflowOptions(Func<ICaseMainEntity> constructor, Action<ICaseMainEntity> saveEntity)
+            {
+                Constructor = constructor;
+                SaveEntity = saveEntity;
+            }
         }
         
         public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T> constructor, Action<T> save)
@@ -413,11 +364,7 @@ namespace Signum.Engine.Workflow
                 e.NotifyInProgress();
             };
 
-            Options[typeof(T)] = new WorkflowOptions
-            {
-                Constructor = constructor,
-                SaveEntity = e => save((T)e)
-            };
+            Options[typeof(T)] = new WorkflowOptions(constructor, e => save((T)e));
 
             return fi; 
         }
@@ -444,11 +391,17 @@ namespace Signum.Engine.Workflow
         public class WorkflowExecuteStepContext
         {
             public CaseEntity Case;
-            public CaseActivityEntity CaseActivity;
+            public CaseActivityEntity? CaseActivity;
             public List<WorkflowActivityEntity> ToActivities = new List<WorkflowActivityEntity>();
             public List<WorkflowEventEntity> ToIntermediateEvents = new List<WorkflowEventEntity>();
             public bool IsFinished { get; set; }
             public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
+
+            public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? caseActivity)
+            {
+                Case = @case;
+                CaseActivity = caseActivity;
+            }
 
             public void ExecuteConnection(WorkflowConnectionEntity connection)
             {
@@ -488,7 +441,6 @@ namespace Signum.Engine.Workflow
             return true;
         }
 
-
         static void SaveEntity(ICaseMainEntity mainEntity)
         {
             var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
@@ -498,7 +450,7 @@ namespace Signum.Engine.Workflow
 
         public static CaseActivityEntity RetrieveForViewing(Lite<CaseActivityEntity> lite)
         {
-            var ca = lite.Retrieve();
+            var ca = lite.RetrieveAndRemember();
 
             if (ca.DoneBy == null)
                 ca.Notifications()
@@ -549,7 +501,7 @@ namespace Signum.Engine.Workflow
                 GetState = ca => ca.State;
                 new ConstructFrom<WorkflowEntity>(CaseActivityOperation.CreateCaseActivityFromWorkflow)
                 {
-                    ToStates = { CaseActivityState.New},
+                    ToStates = { CaseActivityState.New },
                     Construct = (w, args) =>
                     {
                         if (w.HasExpired())
@@ -575,12 +527,8 @@ namespace Signum.Engine.Workflow
                             Case = @case,
                         };
 
-                        new WorkflowExecuteStepContext
-                        {
-                            Case = @case,
-                            CaseActivity = ca,
-                        }.ExecuteConnection(connection);
-                       
+                        new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
+
                         return ca;
                     }
                 }.Register();
@@ -589,16 +537,20 @@ namespace Signum.Engine.Workflow
                 {
                     Construct = (wet, args) =>
                     {
-                        var mainEntity = args.TryGetArgC<ICaseMainEntity>();
-                        var w = wet.GetWorkflow();
+                        var workflow = wet.GetWorkflow();
+
+                        if (workflow.HasExpired())
+                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+
+                        var mainEntity = args.GetArg<ICaseMainEntity>();
                         var @case = new CaseEntity
                         {
-                            Workflow = w,
-                            Description = w.Name,
+                            Workflow = workflow,
+                            Description = workflow.Name,
                             MainEntity = mainEntity,
                         };
 
-                        var start = wet.Event.Retrieve();
+                        var start = wet.Event.RetrieveAndRemember();
                         ExecuteInitialStep(@case, start, start.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
 
                         return @case;
@@ -608,8 +560,8 @@ namespace Signum.Engine.Workflow
                 new Execute(CaseActivityOperation.Register)
                 {
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
-                    FromStates = {  CaseActivityState.New },
-                    ToStates = {  CaseActivityState.PendingNext, CaseActivityState.PendingDecision},
+                    FromStates = { CaseActivityState.New },
+                    ToStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     CanBeNew = true,
                     CanBeModified = true,
                     Execute = (ca, _) =>
@@ -618,16 +570,12 @@ namespace Signum.Engine.Workflow
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
                         c.StartDate = now;
-                        c.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
+                        c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                         c.Save();
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
 
-                        new WorkflowExecuteStepContext
-                        {
-                            Case = ca.Case,
-                            CaseActivity = ca,
-                        }.ExecuteConnection(prevConn);
+                        new WorkflowExecuteStepContext(ca.Case, ca).ExecuteConnection(prevConn);
 
                         ca.StartDate = now;
                         ca.Save();
@@ -654,10 +602,10 @@ namespace Signum.Engine.Workflow
 
                 new Execute(CaseActivityOperation.Approve)
                 {
-                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : 
+                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
                     !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
-                    FromStates = {  CaseActivityState.PendingDecision },
-                    ToStates = {  CaseActivityState.Done },
+                    FromStates = { CaseActivityState.PendingDecision },
+                    ToStates = { CaseActivityState.Done },
                     CanBeModified = true,
                     Execute = (ca, _) =>
                     {
@@ -694,11 +642,11 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
-            
+
 
                 new Execute(CaseActivityOperation.Jump)
                 {
-                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : 
+                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
                     ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).IsEmpty() ? CaseActivityMessage.Activity0HasNoJumps.NiceToString(ca.WorkflowActivity) :
                     !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
@@ -717,8 +665,8 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done, CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
-                    CanExecute = ca => (ca.WorkflowActivity is WorkflowEventEntity we && we.Type.IsTimer() || 
-                    ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ?  null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
+                    CanExecute = ca => (ca.WorkflowActivity is WorkflowEventEntity we && we.Type.IsTimer() ||
+                    ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ? null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
                     Execute = (ca, _) =>
                     {
                         var now = TimeZoneManager.Now;
@@ -730,12 +678,12 @@ namespace Signum.Engine.Workflow
 
                         var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || !alreadyExecuted.Contains(e.ToLite())).FirstOrDefault(t =>
                         {
-                            if (t.Timer.Duration != null)
-                                return t.Timer.Duration.Add(ca.StartDate) < now;
+                            if (t.Timer!.Duration != null)
+                                return t.Timer!.Duration!.Add(ca.StartDate) < now;
 
-                            return t.Timer.Condition.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
+                            return t.Timer!.Condition!.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
                         });
-                        
+
                         if (timer == null)
                             throw new InvalidOperationException(WorkflowActivityMessage.NoActiveTimerFound.NiceToString());
 
@@ -758,7 +706,7 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
-                    CanExecute = c=> c.Notifications().Any(a=>a.User.Is(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
+                    CanExecute = c => c.Notifications().Any(a => a.User.Is(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
                         CaseActivityMessage.NoOpenedOrInProgressNotificationsFound.NiceToString(),
                     Execute = (ca, args) =>
                     {
@@ -782,7 +730,7 @@ namespace Signum.Engine.Workflow
                         if (!ca.NextActivities().All(na => na.IsFreshNew()))
                             return CaseActivityMessage.NextActivityAlreadyInProgress.NiceToString();
 
-                        if (ca.Case.ParentCase != null && !ca.Case.InDB().SelectMany(c=>c.DecompositionSurrogateActivity().NextActivities()).All(na =>na.IsFreshNew()))
+                        if (ca.Case.ParentCase != null && !ca.Case.InDB().SelectMany(c => c.DecompositionSurrogateActivity().NextActivities()).All(na => na.IsFreshNew()))
                             return CaseActivityMessage.NextActivityOfDecompositionSurrogateAlreadyInProgress.NiceToString();
 
                         return null;
@@ -798,7 +746,7 @@ namespace Signum.Engine.Workflow
                             Database.Query<CaseEntity>().Where(c => cases.Contains(c) && !c.CaseActivities().Any()).UnsafeDelete();
 
                         //Recomposition
-                        if(ca.Case.ParentCase != null && ca.Case.FinishDate.HasValue)
+                        if (ca.Case.ParentCase != null && ca.Case.FinishDate.HasValue)
                         {
                             var surrogate = ca.Case.DecompositionSurrogateActivity();
                             surrogate.NextActivities().SelectMany(a => a.Notifications()).UnsafeDelete();
@@ -829,12 +777,16 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.Done },
                     Execute = (ca, args) =>
                     {
-                        var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script.Script.RetrieveFromCache();
-                        script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
+                        using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca }))
                         {
-                            CaseActivity = ca,
-                            RetryCount = ca.ScriptExecution.RetryCount,
-                        });
+                            var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.Script!.RetrieveFromCache();
+                            script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
+                            {
+                                CaseActivity = ca,
+                                RetryCount = ca.ScriptExecution!.RetryCount,
+                            });
+                        }
+
                         ExecuteStep(ca, DoneType.ScriptSuccess, null);
                     },
                 }.Register();
@@ -846,9 +798,10 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.PendingNext },
                     Execute = (ca, args) =>
                     {
-                        ca.ScriptExecution.RetryCount++;
-                        ca.ScriptExecution.NextExecution = args.GetArg<DateTime>();
-                        ca.ScriptExecution.ProcessIdentifier = null;
+                        var se = ca.ScriptExecution!;
+                        se.RetryCount++;
+                        se.NextExecution = args.GetArg<DateTime>();
+                        se.ProcessIdentifier = null;
                         ca.Save();
                     },
                 }.Register();
@@ -875,7 +828,7 @@ namespace Signum.Engine.Workflow
             }
 
 
-            private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity firstConnection)
+            private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity? firstConnection)
             {
                 using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
                 {
@@ -885,7 +838,7 @@ namespace Signum.Engine.Workflow
                 ca.DoneBy = UserEntity.Current.ToLite();
                 ca.DoneDate = TimeZoneManager.Now;
                 ca.DoneType = doneType;
-                ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
+                ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                 ca.Save();
 
                 ca.Notifications()
@@ -893,11 +846,7 @@ namespace Signum.Engine.Workflow
                    .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
                    .Execute();
 
-                var ctx = new WorkflowExecuteStepContext
-                {
-                    Case = ca.Case,
-                    CaseActivity = ca,
-                };
+                var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
 
                 if (firstConnection != null)
                 {
@@ -924,10 +873,9 @@ namespace Signum.Engine.Workflow
                 FinishStep(ca.Case, ctx, ca);
             }
 
-            private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
+            private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
             {
-                
-                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
+                @case.Description = @case.MainEntity.ToString()!.Trim().Etc(100);
 
                 if (ctx.IsFinished)
                 {
@@ -937,7 +885,7 @@ namespace Signum.Engine.Workflow
                     if (@case.CaseActivities().Any(a => a.State == CaseActivityState.PendingNext || a.State == CaseActivityState.PendingDecision))
                         return;
 
-                    @case.FinishDate = ca.DoneDate.Value;
+                    @case.FinishDate = ca!.DoneDate.Value;
                     @case.Save();
 
                     if (@case.ParentCase != null)
@@ -949,7 +897,7 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
+            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
             {
                 @case.Save();
 
@@ -979,7 +927,7 @@ namespace Signum.Engine.Workflow
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
-                var ctx = new WorkflowExecuteStepContext
+                var ctx = new WorkflowExecuteStepContext(@case, ca)
                 {
                     Case = @case,
                     CaseActivity = ca,
@@ -998,19 +946,15 @@ namespace Signum.Engine.Workflow
                 }.Save();
             }
 
-            private static void ExecuteInitialStep(CaseEntity  @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
+            private static void ExecuteInitialStep(CaseEntity @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
             {
-
                 SaveEntity(@case.MainEntity);
-                
-                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
+
+                @case.Description = @case.MainEntity.ToString()!.Trim().Etc(100);
                 @case.Save();
-                
-                var ctx = new WorkflowExecuteStepContext
-                {
-                    Case = @case
-                };
-             
+
+                var ctx = new WorkflowExecuteStepContext(@case, null);
+
                 if (transition.Condition != null)
                 {
                     var jumpCtx = new WorkflowTransitionContext(@case, null, transition);
@@ -1027,14 +971,14 @@ namespace Signum.Engine.Workflow
                 FinishStep(@case, ctx, null);
             }
 
-            static CaseActivityEntity InsertNewCaseActivity(CaseEntity @case, IWorkflowNodeEntity workflowActivity, CaseActivityEntity previous)
+            static CaseActivityEntity InsertNewCaseActivity(CaseEntity @case, IWorkflowNodeEntity workflowActivity, CaseActivityEntity? previous)
             {
                 return new CaseActivityEntity
                 {
                     StartDate = previous?.DoneDate ?? TimeZoneManager.Now,
                     Previous = previous?.ToLite(),
                     WorkflowActivity = workflowActivity,
-                    OriginalWorkflowActivityName = workflowActivity.Name,
+                    OriginalWorkflowActivityName = workflowActivity.GetName()!,
                     Case = @case,
                     ScriptExecution = workflowActivity is WorkflowActivityEntity w && w.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
                     {
@@ -1046,22 +990,22 @@ namespace Signum.Engine.Workflow
 
             private static void TryToRecompose(CaseEntity childCase)
             {
-                if(Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow == childCase.Workflow).All(a => a.FinishDate.HasValue))
+                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow == childCase.Workflow).All(a => a.FinishDate.HasValue))
                 {
                     var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
                     if (decompositionCaseActivity.DoneDate != null)
                         throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
-                    
+
                     var lastActivities = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault()).ToList();
                     decompositionCaseActivity.Note = lastActivities.NotNull().Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
                     ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null);
                 }
             }
 
-            private static void Decompose(CaseEntity @case, CaseActivityEntity previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
+            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
             {
                 var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
-                var subEntities = decActivity.SubWorkflow.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
+                var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
                 if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
                     throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
 
@@ -1094,7 +1038,7 @@ namespace Signum.Engine.Workflow
                         ctx.IsFinished = true;
                         return true;
                     }
-                    else if(ne.Type == WorkflowEventType.IntermediateTimer)
+                    else if (ne.Type == WorkflowEventType.IntermediateTimer)
                     {
                         ctx.ToIntermediateEvents.Add(ne);
                         return true;
@@ -1137,9 +1081,9 @@ namespace Signum.Engine.Workflow
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
                             {
                                 var applicable = gateway.NextConnectionsFromCache(null)
-                                     .Where(a => 
-                                     a.Type == ConnectionType.Approve || 
-                                     a.Type == ConnectionType.Decline || 
+                                     .Where(a =>
+                                     a.Type == ConnectionType.Approve ||
+                                     a.Type == ConnectionType.Decline ||
                                      a.Type == ConnectionType.Normal && (gateway.Type == WorkflowGatewayType.Parallel || a.Condition != null))
                                      .Where(c =>
                                      {
@@ -1173,7 +1117,7 @@ namespace Signum.Engine.Workflow
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
                             {
-                                if (!AllTrackCompleted(0, gateway, ctx))
+                                if (!AllTrackCompleted(0, gateway, ctx, new HashSet<IWorkflowNodeEntity>()).IsCompleted)
                                     return false;
 
                                 var singleConnection = gateway.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
@@ -1185,94 +1129,252 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            static bool? IsCaseActivityCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
+            public static IDisposable Visiting(HashSet<IWorkflowNodeEntity> visited, IWorkflowNodeEntity node)
             {
-                if (node.Is(ctx.CaseActivity.WorkflowActivity))
-                    return true;
-
-                // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
-                var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(node)).OrderBy(a => a.StartDate).LastOrDefault();
-                if (last != null)
-                    return (last.DoneDate.HasValue);
-                else
-                    return null;
+                visited.Add(node);
+                return new Disposable(() => visited.Remove(node));
             }
 
-            private static bool AllTrackCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
+
+
+
+            private static BoolBox AllTrackCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx, HashSet<IWorkflowNodeEntity> visited)
             {
                 if (node is WorkflowActivityEntity || node is WorkflowEventEntity we && we.Type == WorkflowEventType.IntermediateTimer)
                 {
-                    var completed = IsCaseActivityCompleted(depth, node, ctx);
+                    var caseActivity = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(node)).OrderBy(a => a.StartDate).LastOrDefault();
 
-                    if (completed.HasValue)
-                        return completed.Value;
-
-                    var previous = node.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                    return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
-                }
-                if (node is WorkflowEventEntity e && (e.Type == WorkflowEventType.BoundaryForkTimer || e.Type == WorkflowEventType.BoundaryInterruptingTimer))
-                {
-                    var parentActivity = WorkflowLogic.GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).Activities.GetOrThrow(e.BoundaryOf);
-
-                    var completed = IsCaseActivityCompleted(depth, parentActivity, ctx);
-
-                    if (completed.HasValue)
-                        return completed.Value;
-                    
-                    var previous = parentActivity.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                    if (parentActivity.BoundaryTimers.Any(a => a.Type == WorkflowEventType.BoundaryForkTimer))
+                    if (caseActivity != null)
                     {
-                        if (depth <= 1)
-                            return true;
+                        if (node.Is(ctx.CaseActivity!.WorkflowActivity))
+                            caseActivity = ctx.CaseActivity;
 
-                        return previous.Any(wn => AllTrackCompleted(depth - 1, wn, ctx));
+                        if (caseActivity.DoneDate.HasValue)
+                            return BoolBox.True(caseActivity);
+                        else
+                            return BoolBox.False;
                     }
-                    else
-                        return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+
+                    if (visited.Contains(node))
+                        return BoolBox.False;
+
+                    var previous = node.PreviousConnectionsFromCache().ToList();
+                    using (Visiting(visited, node))
+                    {
+                        if (previous.Any(wc => AllTrackCompleted(depth, wc.From, ctx, visited).IsCompatible(wc)))
+                            return BoolBox.True(caseActivity);
+                        else
+                            return BoolBox.False;
+                    }
+                }
+                else if (node is WorkflowEventEntity e && (e.Type == WorkflowEventType.BoundaryForkTimer || e.Type == WorkflowEventType.BoundaryInterruptingTimer))
+                {
+                    var parentActivity = WorkflowLogic.GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).Activities.GetOrThrow(e.BoundaryOf!);
+
+                    var caseActivity = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(parentActivity)).OrderBy(a => a.StartDate).LastOrDefault();
+
+                    if (caseActivity != null)
+                    {
+                        if (node.Is(ctx.CaseActivity!.WorkflowActivity))
+                            caseActivity = ctx.CaseActivity;
+
+                        if (caseActivity.DoneDate.HasValue)
+                            return BoolBox.True(caseActivity);
+                        else
+                            return BoolBox.False;
+                    }
+
+                    if (visited.Contains(parentActivity))
+                        return BoolBox.False;
+
+                    using (Visiting(visited, parentActivity))
+                    {
+                        var connections = parentActivity.PreviousConnectionsFromCache().ToList();
+                        if (parentActivity.BoundaryTimers.Any(a => a.Type == WorkflowEventType.BoundaryForkTimer))
+                        {
+                            if (depth <= 1)
+                                return BoolBox.True(null);
+
+                            if (connections.Any(wc => AllTrackCompleted(depth - 1, wc.From, ctx, visited).IsCompatible(wc)))
+                                return BoolBox.True(caseActivity);
+                            else
+                                return BoolBox.False;
+                        }
+                        else
+                        {
+                            if (connections.Any(wc => AllTrackCompleted(depth, wc.From, ctx, visited).IsCompatible(wc)))
+                                return BoolBox.True(caseActivity);
+                            else
+                                return BoolBox.False;
+                        }
+                    }
 
                 }
                 else if (node is WorkflowGatewayEntity g)
                 {
                     if (g.Direction == WorkflowGatewayDirection.Split)
                     {
-                        var from = g.PreviousConnectionsFromCache().Select(a => a.From).SingleEx();
-
+                        var wc = g.PreviousConnectionsFromCache().SingleEx();
                         switch (g.Type)
                         {
                             case WorkflowGatewayType.Exclusive:
-                                return AllTrackCompleted(depth, from, ctx);
+                                {
+                                    var bb = AllTrackCompleted(depth, wc.From, ctx, visited);
+                                    if (bb.IsCompatible(wc))
+                                        return BoolBox.True(bb.CaseActivity);
+                                    else
+                                        return BoolBox.False;
+                                }
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
-                                if (depth <= 1)
-                                    return true;
+                                {
+                                    if (depth <= 1)
+                                        return BoolBox.True(null);
 
-                                return AllTrackCompleted(depth - 1, from, ctx);
+                                    var bb = AllTrackCompleted(depth - 1, wc.From, ctx, visited);
+                                    if (bb.IsCompatible(wc))
+                                        return BoolBox.True(bb.CaseActivity);
+                                    else
+                                        return BoolBox.False;
+                                }
                             default:
                                 throw new UnexpectedValueException(g.Type);
                         }
                     }
                     else if (g.Direction == WorkflowGatewayDirection.Join)
                     {
-                        var previous = g.PreviousConnectionsFromCache().Select(a => a.From).ToList();
+                        var connections = g.PreviousConnectionsFromCache().ToList();
 
                         switch (g.Type)
                         {
                             case WorkflowGatewayType.Exclusive:
-                                return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+                                var first = (from wc in connections
+                                             let tuple = AllTrackCompleted(depth, wc.From, ctx, visited)
+                                             where tuple.IsCompatible(wc)
+                                             select tuple).FirstOrDefault();
+
+                                return first;
+
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
-                                return previous.All(wn => AllTrackCompleted(depth + 1, wn, ctx));
+
+                                if (connections.All(wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)))
+                                    return BoolBox.True(null);
+                                else
+                                    return BoolBox.False;
                             default:
                                 throw new UnexpectedValueException(g.Type);
-
                         }
 
-
                     }
-                    else throw new UnexpectedValueException(g.Direction);
+                    else
+                        throw new UnexpectedValueException(g.Direction);
                 }
-                throw new UnexpectedValueException(node);
+                else
+                    throw new UnexpectedValueException(node);
             }
+
+            struct BoolBox
+            {
+                public bool IsCompleted { get; private set; }
+                public CaseActivityEntity? CaseActivity { get; private set; }
+
+                public BoolBox(bool isCompleted, CaseActivityEntity? caseActivity)
+                {
+                    if (caseActivity != null && !isCompleted)
+                        throw new InvalidOperationException("Not completed should not have caseActivities");
+
+                    if(caseActivity != null && caseActivity.DoneDate == null)
+                        throw new InvalidOperationException("caseActivity is not completed");
+
+                    this.IsCompleted = isCompleted;
+                    this.CaseActivity = caseActivity;
+                }
+
+                public static BoolBox False => new BoolBox(false, null);
+                public static BoolBox True(CaseActivityEntity? ca) => new BoolBox(true, ca);
+
+                public bool IsCompatible(WorkflowConnectionEntity wc)
+                {
+                    if (!this.IsCompleted)
+                        return false;
+
+                    if (CaseActivity == null)
+                        return true;
+
+
+                    var doneTypeOk = CaseActivity.DoneType.Value switch
+                    {
+                        DoneType.Approve => wc.Type == ConnectionType.Approve || wc.Type == ConnectionType.Normal,
+                        DoneType.Decline => wc.Type == ConnectionType.Decline || wc.Type == ConnectionType.Normal,
+                        DoneType.Jump => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.Jump : wc.Type == ConnectionType.Normal,
+                        DoneType.Next => wc.Type == ConnectionType.Normal,
+                        DoneType.ScriptFailure => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.ScriptException : wc.Type == ConnectionType.Normal,
+                        DoneType.ScriptSuccess => wc.Type == ConnectionType.Normal,
+                        DoneType.Timeout => 
+                        CaseActivity.WorkflowActivity is WorkflowActivityEntity wa ? !wc.From.Is(wa) /*wa.BoundaryTimers.Contains(wc.From)*/ && wc.Type == ConnectionType.Normal :
+                        CaseActivity.WorkflowActivity is WorkflowEventEntity we && we.Is(wc.From) ? wc.Type == ConnectionType.Normal :
+                        false,
+                        DoneType other => throw new UnexpectedValueException(other),
+                    };
+
+                    if (!doneTypeOk)
+                        return false;
+
+                    if (wc.Condition != null)
+                    {
+                        var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
+                        var result = alg.EvaluateUntyped(CaseActivity.Case.MainEntity, new WorkflowTransitionContext(CaseActivity.Case, CaseActivity, wc));
+
+                        return result;
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        private static void OverrideCaseActivityMixin(SchemaBuilder sb)
+        {
+            sb.Schema.WhenIncluded<SMSMessageEntity>(() =>
+            {
+                if (MixinDeclarations.IsDeclared(typeof(SMSMessageEntity), typeof(CaseActivityMixin)))
+                    QueryLogic.Queries.Register(typeof(SMSMessageEntity), () =>
+                        from m in Database.Query<SMSMessageEntity>()
+                        select new
+                        {
+                            Entity = m,
+                            m.Id,
+                            m.From,
+                            m.DestinationNumber,
+                            m.State,
+                            m.SendDate,
+                            m.Template,
+                            m.Referred,
+                            m.Mixin<CaseActivityMixin>().CaseActivity,
+                            m.Exception,
+                        });
+            });
+
+            sb.Schema.WhenIncluded<EmailMessageEntity>(() =>
+            {
+                if (MixinDeclarations.IsDeclared(typeof(EmailMessageEntity), typeof(CaseActivityMixin)))
+                    QueryLogic.Queries.Register(typeof(EmailMessageEntity), () =>
+                        from e in Database.Query<EmailMessageEntity>()
+                        select new
+                        {
+                            Entity = e,
+                            e.Id,
+                            e.State,
+                            e.Subject,
+                            e.Template,
+                            e.Sent,
+                            e.Target,
+                            e.Mixin<CaseActivityMixin>().CaseActivity,
+                            e.Package,
+                            e.Exception,
+                        });
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
@@ -44,17 +44,13 @@ namespace Signum.Engine.Authorization
 
         static void UserTicketLogic_Saving(UserEntity user)
         {
-            if (!user.IsNew && user.IsGraphModified & user.InDBEntity(u => u.PasswordHash != user.PasswordHash))
+            if (!user.IsNew && user.IsGraphModified && user.InDBEntity(u => u.PasswordHash != user.PasswordHash))
                 user.UserTickets().UnsafeDelete();
         }
 
-        static Expression<Func<UserEntity, IQueryable<UserTicketEntity>>> UserTicketsExpression =
-            u => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite());
-        [ExpressionField]
-        public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u)
-        {
-            return UserTicketsExpression.Evaluate(u);
-        }
+        [AutoExpressionField]
+        public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) => 
+            As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite()));
 
         public static string NewTicket(string device)
         {
@@ -88,7 +84,7 @@ namespace Signum.Engine.Authorization
                 UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
                 CleanExpiredTickets(user);
 
-                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
+                UserTicketEntity? userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");

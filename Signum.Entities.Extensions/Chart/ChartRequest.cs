@@ -35,7 +35,7 @@ namespace Signum.Entities.Chart
         }
 
         object queryName;
-        [NotNullValidator, InTypeScript(false)]
+        [InTypeScript(false)]
         public object QueryName
         {
             get { return queryName; }
@@ -43,7 +43,6 @@ namespace Signum.Entities.Chart
         }
 
         ChartScriptSymbol chartScript;
-        [NotNullValidator]
         public ChartScriptSymbol ChartScript
         {
             get { return chartScript; }
@@ -65,10 +64,10 @@ namespace Signum.Entities.Chart
             return GetChartScriptFunc(this.ChartScript);
         }
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
+        [NotifyCollectionChanged, NotifyChildProperty]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
         public List<Column> GetQueryColumns()
@@ -80,8 +79,8 @@ namespace Signum.Entities.Chart
         {
             var result = Columns
                 .Where(a => a.OrderByIndex != null && a.Token != null)
-                .OrderBy(a => a.OrderByType.Value)
-                .Select(o => new Order(o.Token.Token, o.OrderByType.Value)).ToList();
+                .OrderBy(a => a.OrderByType!.Value)
+                .Select(o => new Order(o.Token!.Token, o.OrderByType!.Value)).ToList();
 
             return result;
         }
@@ -124,7 +123,7 @@ namespace Signum.Entities.Chart
         
         public List<QueryToken> AllTokens()
         {
-            var allTokens = Columns.Select(a => a.Token?.Token).ToList();
+            var allTokens = Columns.Select(a => a.Token?.Token).NotNull().ToList();
 
             if (Filters != null)
                 allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));

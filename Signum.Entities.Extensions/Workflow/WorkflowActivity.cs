@@ -14,54 +14,54 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string? GetName() => Name;
+
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Comments { get; set; }
+        [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
+        public string? Comments { get; set; }
 
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
 
         [Ignore, QueryableProperty]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 255)]
+        public string? ViewName { get; set; }
+
+        [PreserveOrder, NoRepeatValidator, NotifyChildProperty]
+        public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
         [NotifyChildProperty]
-        public WorkflowScriptPartEmbedded Script { get; set; }
+        public WorkflowScriptPartEmbedded? Script { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
         [NotifyChildProperty]
-        public SubWorkflowEmbedded SubWorkflow { get; set; }
+        public SubWorkflowEmbedded? SubWorkflow { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string UserHelp { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? UserHelp { get; set; }
 
-        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
 
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(SubWorkflow))
             {
@@ -83,8 +83,22 @@ namespace Signum.Entities.Workflow
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
 
+            if(pi.Name == nameof(ViewNameProps))
+            {
+                if (ViewNameProps.Count > 0 && !ViewName.HasText())
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (ViewName.HasText())
+                {
+                    var dv = DynamicViewEntity.TryGetDynamicView(Lane.Pool.Workflow.MainEntityType.ToType(), ViewName);
+                    if(dv != null)
+                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                }
+            }
+
             return base.PropertyValidation(pi);
         }
+
 
         public ModelEntity GetModel()
         {
@@ -97,7 +111,7 @@ namespace Signum.Entities.Workflow
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
-            model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel()
+            model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel
             {
                 Name = we.Name,
                 MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
@@ -108,9 +122,12 @@ namespace Signum.Entities.Workflow
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
+            model.ViewNameProps.AssignMList(this.ViewNameProps);
             model.UserHelp = this.UserHelp;
             model.SubWorkflow = this.SubWorkflow;
             model.Comments = this.Comments;
+            model.CopyMixinsFrom(this);
+
             return model;
         }
 
@@ -125,9 +142,32 @@ namespace Signum.Entities.Workflow
             this.EstimatedDuration = wModel.EstimatedDuration;
             this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
+            this.ViewNameProps.AssignMList(wModel.ViewNameProps);
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
+            this.CopyMixinsFrom(wModel);
+        }
+    }
+
+    [Serializable]
+    public class ViewNamePropEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
+        public string Name { get; set; }
+
+        [StringLengthValidator(Max = 100)]
+        public string? Expression { get; set; }
+
+        internal static string? ValidateViewNameProps(DynamicViewEntity dv, MList<ViewNamePropEmbedded> viewNameProps)
+        {
+            var extra = viewNameProps.Where(a => !dv.Props.Any(p => p.Name == a.Name)).CommaAnd(a => a.Name);
+            var missing = dv.Props.Where(p => !p.Type.EndsWith("?") && !viewNameProps.Any(a => a.Expression.HasText() && p.Name == a.Name)).CommaAnd(a => a.Name);
+
+            return " and ".Combine(
+                extra.HasText() ? "The ViewProps " + extra + " are not declared in " + dv.ViewName : null,
+                missing.HasText() ? "The ViewProps " + missing + " are mandatory in " + dv.ViewName : null
+                ).DefaultToNull();
         }
     }
 
@@ -145,9 +185,9 @@ namespace Signum.Entities.Workflow
             return new Disposable(() => CurrentVariable.Value = old);
         }
 
-        public WorkflowActivityEntity WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
-        public CaseActivityEntity CaseActivity { get; internal set; }
-        public WorkflowConnectionEntity Connection { get; internal set; }
+        public WorkflowActivityEntity? WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
+        public CaseActivityEntity? CaseActivity { get; internal set; }
+        public WorkflowConnectionEntity? Connection { get; internal set; }
 
         public bool Is(string workflowName, string activityName)
         {
@@ -158,9 +198,9 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptPartEmbedded : EmbeddedEntity
     {
-        public Lite<WorkflowScriptEntity> Script { get; set; }
+        public Lite<WorkflowScriptEntity>? Script { get; set; }
 
-        public WorkflowScriptRetryStrategyEntity RetryStrategy { get; set; }
+        public WorkflowScriptRetryStrategyEntity? RetryStrategy { get; set; }
 
         public WorkflowScriptPartEmbedded Clone()
         {
@@ -190,11 +230,10 @@ namespace Signum.Entities.Workflow
 
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
-    {
-        [NotNullValidator]
+    {   
         public WorkflowEntity Workflow { get; set; }
 
-        [NotNullValidator, NotifyChildProperty]
+        [NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
 
         public SubWorkflowEmbedded Clone()
@@ -212,8 +251,8 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var decomposition = (SubWorkflowEmbedded)this.GetParentEntity();
-            var activity = (WorkflowActivityEntity)decomposition.GetParentEntity();
+            var decomposition = this.GetParentEntity<SubWorkflowEmbedded>();
+            var activity = decomposition.GetParentEntity<WorkflowActivityEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -257,14 +296,14 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
-        public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
+        public Lite<WorkflowActivityEntity>?  WorkflowActivity { get; set; }
 
-        public WorkflowEntity Workflow { get; set; }
+        public WorkflowEntity? Workflow { get; set; }
 
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public WorkflowActivityType Type { get; set; }
@@ -272,24 +311,45 @@ namespace Signum.Entities.Workflow
         public bool RequiresOpen { get; set; }
 
         [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<WorkflowEventModel> BoundaryTimers { get; set; } = new MList<WorkflowEventModel>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
-        public WorkflowScriptPartEmbedded Script { get; set; }
+        public WorkflowScriptPartEmbedded? Script { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
-        public string ViewName { get; set; }
+        [StringLengthValidator(Min = 3, Max = 255)]
+        public string? ViewName { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Comments { get; set; }
+        [PreserveOrder, NoRepeatValidator]
+        public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
-        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
-        public string UserHelp { get; set; }
+        [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
+        public string? Comments { get; set; }
 
-        public SubWorkflowEmbedded SubWorkflow { get; set; }
+        [StringLengthValidator(MultiLine = true)]
+        public string? UserHelp { get; set; }
+
+        public SubWorkflowEmbedded? SubWorkflow { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(ViewNameProps))
+            {
+                if (ViewNameProps.Count > 0 && !ViewName.HasText())
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (ViewName.HasText() && Workflow != null)
+                {
+                    var dv = DynamicViewEntity.TryGetDynamicView(Workflow.MainEntityType.ToType(), ViewName);
+                    if (dv != null)
+                        return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                }
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     public enum WorkflowActivityMessage

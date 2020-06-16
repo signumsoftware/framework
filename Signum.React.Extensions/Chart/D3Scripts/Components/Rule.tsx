@@ -82,7 +82,7 @@ export class Rule {
     return this.starts[name] + this.sizes[name] / 2;
   }
 
-  debugX(chart: d3.Selection<any, any, any, any>) {
+  debugX() {
 
     const keys = d3.keys(this.sizes);
 
@@ -111,7 +111,7 @@ export class Rule {
     );
   }
 
-  debugY(chart: d3.Selection<any, any, any, any>) {
+  debugY() {
 
     const keys = d3.keys(this.sizes);
 

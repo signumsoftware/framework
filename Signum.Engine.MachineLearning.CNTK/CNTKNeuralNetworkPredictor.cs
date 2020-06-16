@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.MachineLearning;
@@ -38,17 +38,17 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             if (!Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
             {
-                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin");
                 if (!Directory.Exists(dir) || !Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
-                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin")}");
+                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin")}");
             }
 
-            var oldPath = Environment.GetEnvironmentVariable("Path");
+            var oldPath = Environment.GetEnvironmentVariable("Path")!;
             if (!oldPath.Contains(dir + ";"))
                 Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }
 
-        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
+        public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
             return Encodings.GetOrThrow(encoding).ValidateEncodingProperty(predictor, subQuery, encoding, usage, token);
         }
@@ -153,7 +153,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     ctx.Progresses.Enqueue(ep);
 
                     if (ctx.StopTraining)
-                        p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
+                        p = ctx.Predictor = ctx.Predictor.ToLite().RetrieveAndRemember();
 
                     var isLast = numMinibatches - nn.BestResultFromLast <= i;
                     if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
@@ -201,7 +201,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
 
-            var best = candidate.WithMin(a => a.ResultValidation.Loss.Value);
+            var best = candidate.WithMin(a => a.ResultValidation.Loss!.Value);
 
             p.ResultTraining = best.ResultTraining;
             p.ResultValidation = best.ResultValidation;
@@ -214,12 +214,14 @@ namespace Signum.Engine.MachineLearning.CNTK
                 p.Save();
         }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class FinalCandidate
         {
             public byte[] Model;
             public PredictorMetricsEmbedded ResultTraining;
             public PredictorMetricsEmbedded ResultValidation;
         }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
         {
@@ -236,7 +238,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     foreach (var kvp in codificationByColumn)
                     {
                         PredictorColumnBase col = kvp.Key;
-                        object value;
+                        object? value;
                         if (col is PredictorColumnMain pcm)
                         {
                             value = mainRow[pcm.PredictorColumnIndex];
@@ -244,7 +246,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         else if (col is PredictorColumnSubQuery pcsq)
                         {
                             SubQuery sq = ctx.SubQueries.GetOrThrow(pcsq.SubQuery);
-                            object[] rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(pcsq.Keys);
+                            object?[]? rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(pcsq.Keys);
                             value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[pcsq.PredictorColumnIndex]];
                         }
                         else
@@ -278,19 +280,19 @@ namespace Signum.Engine.MachineLearning.CNTK
                 var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
                 lock (lockKey) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
                 {
-                    Function calculatedOutputs = (Function)ctx.Model;
+                    Function calculatedOutputs = (Function)ctx.Model!;
                     var device = GetDevice(nnSettings);
                     Value inputValue = GetValueForPredict(ctx, inputs, device);
 
                     var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
                     var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
-                    var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
+                    var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null! } };
 
                     calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
                     Value output = outputDic[calculatedOutputs];
                     IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
-                    var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options)).ToList();
+                    var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
                     return result;
                 }
             }
@@ -300,7 +302,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             using (HeavyProfiler.LogNoStackTrace("GetPredictionDictionary"))
             {
-                return new PredictDictionary(ctx.Predictor)
+                return new PredictDictionary(ctx.Predictor, options, null)
                 {
                     MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col,
                     (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues, options)),
@@ -313,7 +315,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                             .Where(a => a.Key.Usage == PredictorSubQueryColumnUsage.Output)
                             .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues, options)),
                             ObjectArrayComparer.Instance
-                        ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
+                        ) ?? new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>(ObjectArrayComparer.Instance),
 
                     })
                 };
@@ -337,7 +339,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     foreach (var kvp in groups)
                     {
                         PredictorColumnBase col = kvp.Key;
-                        object value;
+                        object? value;
                         if (col is PredictorColumnMain pcm)
                         {
                             value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);

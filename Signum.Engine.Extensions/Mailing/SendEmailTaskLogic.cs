@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -79,12 +79,12 @@ namespace Signum.Engine.Mailing
                 {
                     if (er.UniqueTarget != null)
                     {
-                        ModifiableEntity entity = er.UniqueTarget?.Retrieve();
+                        ModifiableEntity entity = er.UniqueTarget.RetrieveAndRemember();
 
                         if (er.ModelConverter != null)
                             entity = er.ModelConverter.Convert(entity);
 
-                        Lite<EmailMessageEntity> last = null; 
+                        Lite<EmailMessageEntity>? last = null; 
                         foreach (var email in er.EmailTemplate.CreateEmailMessage(entity))
                         {
                             email.SendMailAsync();
@@ -94,7 +94,7 @@ namespace Signum.Engine.Mailing
                     }
                     else
                     {
-                        var qr = er.TargetsFromUserQuery.Retrieve().ToQueryRequest();
+                        var qr = er.TargetsFromUserQuery!.RetrieveAndRemember().ToQueryRequest();
                         qr.Columns.Clear();
                         var result = QueryLogic.Queries.ExecuteQuery(qr);
 

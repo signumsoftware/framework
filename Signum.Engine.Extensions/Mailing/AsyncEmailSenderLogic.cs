@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Threading;
@@ -16,10 +16,10 @@ namespace Signum.Engine.Mailing
 {
     public static class AsyncEmailSenderLogic
     {
-        static Timer timer;
+        static Timer timer = null!;
         internal static DateTime? nextPlannedExecution;
         static bool running = false;
-        static CancellationTokenSource CancelProcess;
+        static CancellationTokenSource CancelProcess = null!;
         static long queuedItems;
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
@@ -58,7 +58,7 @@ namespace Signum.Engine.Mailing
                 Task.Factory.StartNew(() =>
                 {
                     SystemEventLogLogic.Log("Start AsyncEmailSender");
-                    ExceptionEntity exception = null;
+                    ExceptionEntity? exception = null;
                     try
                     {
                         running = true;
@@ -132,7 +132,7 @@ namespace Signum.Engine.Mailing
                                                         {
                                                             using (Transaction tr = Transaction.ForceNew())
                                                             {
-                                                                var nm = email.ToLite().Retrieve();
+                                                                var nm = email.ToLite().RetrieveAndRemember();
                                                                 nm.SendRetries += 1;
                                                                 nm.State = EmailMessageState.ReadyToSend;
                                                                 nm.Save();
@@ -209,7 +209,7 @@ namespace Signum.Engine.Mailing
             return queuedItems > 0;
         }
 
-        internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
         {
             using (HeavyProfiler.Log("EmailAsyncSender WakeUp", () => "WakeUp! " + reason + ToString(args)))
             {
@@ -217,7 +217,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private static string ToString(SqlNotificationEventArgs args)
+        private static string? ToString(SqlNotificationEventArgs? args)
         {
             if (args == null)
                 return null;
@@ -228,7 +228,7 @@ namespace Signum.Engine.Mailing
         private static void SetTimer()
         {
             nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
-            timer.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
+            timer!.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
         }
 
         public static void Stop()
@@ -238,8 +238,8 @@ namespace Signum.Engine.Mailing
 
             using (HeavyProfiler.Log("EmailAsyncSender", () => "Stopping process"))
             {
-                timer.Dispose();
-                CancelProcess.Cancel();
+                timer!.Dispose();
+                CancelProcess!.Cancel();
                 WakeUp("Stop", null);
                 nextPlannedExecution = null;
             }

@@ -19,8 +19,8 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
-        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
-        public static ResetLazy<HashSet<Type>> AvailableModelEntities;
+        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
+        public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -54,7 +54,7 @@ namespace Signum.Engine.Dynamic
                     .Select(t => t.Assembly)
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
-                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -81,7 +81,7 @@ namespace Signum.Engine.Dynamic
                     {
 
                         var def = e.GetDefinition();
-                        var result = new DynamicTypeEntity { TypeName = null, BaseType = e.BaseType };
+                        var result = new DynamicTypeEntity { TypeName = null!, BaseType = e.BaseType };
                         result.SetDefinition(def);
                         return result;
                     },
@@ -104,7 +104,7 @@ namespace Signum.Engine.Dynamic
 
                         if (!e.IsNew)
                         {
-                            var old = e.ToLite().Retrieve();
+                            var old = e.ToLite().RetrieveAndRemember();
                             if (e.TypeName != old.TypeName)
                                 DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
 
@@ -120,23 +120,23 @@ namespace Signum.Engine.Dynamic
 
                             var pairs = newDef.Properties
                                 .Join(oldDef.Properties, n => n.UID, o => o.UID, (n, o) => new { n, o })
-                                .Where(a => a.n.Type == a.o.Type);
+                                .Where(a => a.n!.Type == a.o!.Type); /*CSBUG*/
 
                             {
                                 string ColName(DynamicProperty dp) => dp.ColumnName ?? dp.Name;
 
                                 string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownColumnKey : Replacements.KeyColumnsForTable(oldName);
-                                foreach (var a in pairs.Where(a => ColName(a.n) != ColName(a.o)))
+                                foreach (var a in pairs.Where(a => ColName(a.n!) != ColName(a.o!)))
                                 {
-                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, ColName(a.o), ColName(a.n));
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, ColName(a.o!), ColName(a.n!));
                                 }
                             }
 
                             {
                                 string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownPropertyKey : PropertyRouteLogic.PropertiesFor.FormatWith(old.TypeName);
-                                foreach (var a in pairs.Where(a => a.n.Name != a.o.Name))
+                                foreach (var a in pairs.Where(a => a.n!.Name != a.o!.Name))
                                 {
-                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, a.o.Name, a.n.Name);
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, a.o!.Name, a.n!.Name);
                                 }
 
                             }
@@ -162,7 +162,7 @@ namespace Signum.Engine.Dynamic
 
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, null, DynamicBaseType.Entity, null, new HashSet<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, null!, DynamicBaseType.Entity, null!, new HashSet<string>());
 
             return generator.GetPropertyType(property);
         }
@@ -191,8 +191,8 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb);".Indent(indent));
         }
 
-        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
-        public static Func<Dictionary<string, Dictionary<string, Tuple<string, string>>>> GetFormattedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, string>>>? GetAlreadyTranslatedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, FormatUnit>>>? GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
@@ -202,19 +202,15 @@ namespace Signum.Engine.Dynamic
 
             var result = new List<CodeFile>();
 
-            var entities = types.Select(dt =>
-           {
-               var def = dt.GetDefinition();
+            var entities =  types.Select(dt =>
+            {
+                var def = dt.GetDefinition();
 
-               var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
+                var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
 
-               var content = dcg.GetFileCode();
-               return new CodeFile
-               {
-                   FileName = dt.TypeName + ".cs",
-                   FileContent = content
-               };
-           }).ToList();
+                var content = dcg.GetFileCode();
+                return new CodeFile(dt.TypeName + ".cs", content);
+            }).ToList();
             result.AddRange(entities);
 
             var logics = types.Select(dt =>
@@ -228,20 +224,12 @@ namespace Signum.Engine.Dynamic
                 };
 
                 var content = dlg.GetFileCode();
-                return new CodeFile
-                {
-                    FileName = dt.TypeName + "Logic.cs",
-                    FileContent = content
-                };
+                return new CodeFile(dt.TypeName + "Logic.cs", content);
             }).ToList();
             result.AddRange(logics);
 
             var bs = new DynamicBeforeSchemaGenerator(DynamicCode.CodeGenEntitiesNamespace, types.Select(a => a.GetDefinition().CustomBeforeSchema).NotNull().ToList(), DynamicCode.Namespaces);
-            result.Add(new CodeFile
-            {
-                FileName = "CodeGenBeforeSchema.cs",
-                FileContent = bs.GetFileCode()
-            });
+            result.Add(new CodeFile("CodeGenBeforeSchema.cs", bs.GetFileCode()));
 
             return result;
         }
@@ -287,7 +275,7 @@ namespace Signum.Engine.Dynamic
                 }
             }
 
-            if (this.Def.CustomTypes != null)
+            if (this.Def!.CustomTypes != null)
                 sb.AppendLine(this.Def.CustomTypes.Code);
 
             sb.AppendLine("}");
@@ -306,7 +294,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("{");
 
             if (this.BaseType == DynamicBaseType.MixinEntity)
-                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(Entity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
+                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(ModifiableEntity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
 
             foreach (var prop in Def.Properties)
             {
@@ -322,7 +310,7 @@ namespace Signum.Engine.Dynamic
             if (this.Def.CustomEntityMembers != null)
                 sb.AppendLine(this.Def.CustomEntityMembers.Code.Indent(4));
 
-            string toString = GetToString();
+            string? toString = GetToString();
             if (toString != null)
             {
                 sb.Append(toString.Indent(4));
@@ -335,14 +323,15 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        public string GetEntityOperation()
+        public string? GetEntityOperation()
         {
             if (this.IsTreeEntity)
                 return null;
 
             if (this.Def.OperationCreate == null &&
                  this.Def.OperationSave == null &&
-                 this.Def.OperationDelete == null)
+                 this.Def.OperationDelete == null &&
+                 this.Def.OperationClone == null)
                 return null;
 
             StringBuilder sb = new StringBuilder();
@@ -352,7 +341,6 @@ namespace Signum.Engine.Dynamic
 
             if (this.Def.OperationCreate != null)
                 sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
-
 
             var requiresSaveOperation = (this.Def.EntityKind != null && EntityKindAttribute.CalculateRequiresSaveOperation(this.Def.EntityKind.Value));
             if ((this.Def.OperationSave != null) && !requiresSaveOperation)
@@ -365,6 +353,9 @@ namespace Signum.Engine.Dynamic
 
             if (this.Def.OperationDelete != null)
                 sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
+            if (this.Def.OperationClone != null)
+                sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.From<{this.TypeName}Entity> Clone = OperationSymbol.Construct<{this.TypeName}Entity>.From<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Clone\");");
 
             sb.AppendLine("}");
 
@@ -379,11 +370,11 @@ namespace Signum.Engine.Dynamic
             return baseType.ToString();
         }
 
-        protected virtual string GetToString()
+        protected virtual string? GetToString()
         {
             if (Def.ToStringExpression == null)
                 return null;
-
+            
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"static Expression<Func<{this.GetTypeNameWithSuffix()}, string>> ToStringExpression = e => {Def.ToStringExpression};");
             sb.AppendLine("[ExpressionField(\"ToStringExpression\")]");
@@ -397,7 +388,7 @@ namespace Signum.Engine.Dynamic
         public virtual string GetTypeNameWithSuffix()
         {
             return this.TypeName + (this.BaseType == DynamicBaseType.MixinEntity ? "Mixin" :
-                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded" :
+                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded": 
                 this.BaseType == DynamicBaseType.ModelEntity ? "Model" : "Entity");
         }
 
@@ -451,7 +442,7 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
+            string? inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
             string fieldName = GetFieldName(property);
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
@@ -477,6 +468,9 @@ namespace Signum.Engine.Dynamic
         {
             var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
 
+            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory && !property.Validators.EmptyIfNull().Any(v => v.Type == "NotNull"))
+                atts.Add(GetValidatorAttribute(new DynamicValidator.NotNull { Type = "NotNull" }));
+
             if (property.Unit != null)
                 atts.Add($"Unit(\"{property.Unit}\")");
 
@@ -486,11 +480,9 @@ namespace Signum.Engine.Dynamic
             if (property.NotifyChanges == true)
             {
                 if (property.IsMList != null)
-                {
                     atts.Add("NotifyCollectionChanged");
-                    atts.Add("NotifyChildProperty");
-                }
-                else if (property.Type.EndsWith("Embedded"))
+
+                if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && !property.IsLite)
                     atts.Add("NotifyChildProperty");
             }
 
@@ -523,8 +515,8 @@ namespace Signum.Engine.Dynamic
         private List<string> GetFieldAttributes(DynamicProperty property)
         {
             List<string> atts = new List<string>();
-            if (property.IsNullable != Entities.Dynamic.IsNullable.Yes)
-                atts.Add("NotNullable");
+            if (property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory)
+                atts.Add("ForceNotNullable");
 
             if (property.Size != null || property.Scale != null || property.ColumnType.HasText())
             {
@@ -534,7 +526,7 @@ namespace Signum.Engine.Dynamic
                     property.Scale != null ? "Scale = " + Literal(property.Scale) : null,
                     property.ColumnType.HasText() ?  "SqlDbType = " + Literal(Enum.TryParse(property.ColumnType, out SqlDbType dbType) ? dbType : SqlDbType.Udt) : null,
                     property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out var _) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
-
+                     
                 }.NotNull().ToString(", ");
 
                 atts.Add($"SqlDbType({props})");
@@ -576,16 +568,15 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-
             var objName = ObjectName.Parse(value);
 
-            return new List<string>
-                {
-                     Literal(objName.Name),
-                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
-                     objName.Schema.Database.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-                }.NotNull().ToString(", ");
+            return new List<string?>
+            {
+                Literal(objName.Name),
+                !objName.Schema.IsDefault() ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+                objName.Schema.Database?.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
+            }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)
@@ -595,18 +586,16 @@ namespace Signum.Engine.Dynamic
 
             string result = SimplifyType(property.Type);
 
-
-
-            if (property.IsNullable != Entities.Dynamic.IsNullable.No && IsValueType(property))
-                result = result + "?";
-
             if (property.IsLite)
                 result = "Lite<" + result + ">";
 
             if (property.IsMList != null)
-                result = "MList<" + result + ">";
+                return "MList<" + result + ">";
 
-            return result;
+            var isNullable = (property.IsNullable == Entities.Dynamic.IsNullable.Yes ||
+                property.IsNullable == Entities.Dynamic.IsNullable.OnlyInMemory);
+
+            return result + (isNullable ? "?" : "");
         }
 
         private bool IsValueType(DynamicProperty property)
@@ -639,7 +628,7 @@ namespace Signum.Engine.Dynamic
             return type;
         }
 
-        public Type TryResolveType(string typeName)
+        public Type? TryResolveType(string typeName)
         {
             switch (typeName)
             {
@@ -682,8 +671,8 @@ namespace Signum.Engine.Dynamic
         public DynamicTypeDefinition Def { get; private set; }
         public bool IsTreeEntity { get; private set; }
 
-        public Dictionary<string, string> AlreadyTranslated { get; set; }
-        public Dictionary<string, Tuple<string, string>> Formatted { get; set; }
+        public Dictionary<string, string>? AlreadyTranslated { get; set; }
+        public Dictionary<string, FormatUnit>? Formatted { get; set; }
 
         public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -787,7 +776,7 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        public static string GetComplexQueryField(string field)
+        public static string? GetComplexQueryField(string field)
         {
             var fieldName = field.TryBefore("=")?.Trim();
 
@@ -818,12 +807,12 @@ namespace Signum.Engine.Dynamic
 { lines.ToString(",\r\n").Indent(8)}
     }})
 {complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
-{complexQueryFields.Where(f => this.Formatted?.TryGetC(f) != null).Select(f =>
+{complexQueryFields.Where(f => this.Formatted?.TryGetS(f) != null).Select(f =>
             {
-                (string format, string unit) = this.Formatted?.TryGetC(f);
+                var fu = this.Formatted?.TryGetS(f);
 
-                var formatText = format.HasText() ? $"c.Format = \"{format}\";" : "";
-                var unitText = unit.HasText() ? $"c.Unit = \"{unit}\";" : "";
+                var formatText = fu != null && fu.Value.Format.HasText() ? $"c.Format = \"{fu.Value.Format}\";" : "";
+                var unitText = fu != null && fu.Value.Unit.HasText() ? $"c.Unit = \"{fu.Value.Unit}\";" : "";
 
                 return $".Column(a => a.{f}, c => {{ {formatText} {unitText} }})";
             }).ToString("\r\n").Indent(4)}
@@ -837,7 +826,7 @@ namespace Signum.Engine.Dynamic
         {
             StringBuilder sb = new StringBuilder();
             var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
-            if (!string.IsNullOrWhiteSpace(operationConstruct))
+            if (operationConstruct.HasText())
             {
                 sb.AppendLine();
 
@@ -888,7 +877,34 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
             }
 
+            var operationClone = this.Def.OperationClone?.Construct.Trim();
+            var operationCanClone = this.Def.OperationClone?.CanConstruct?.Trim();
+            if (!string.IsNullOrWhiteSpace(operationClone) || !string.IsNullOrEmpty(operationCanClone))
+            {
+                sb.AppendLine();
+                sb.AppendLine("new Graph<{0}Entity>.ConstructFrom<{0}Entity>({1}Operation.Clone)".FormatWith(this.TypeName, (this.IsTreeEntity ? "Tree" : this.TypeName)));
+                sb.AppendLine("{");
+
+                if (!string.IsNullOrWhiteSpace(operationCanClone))
+                    sb.AppendLine($"    CanConstruct = e => {operationCanClone},");
+
+                sb.AppendLine("    Construct = (e, args) => {\r\n" + (operationClone.DefaultText($"return new {this.TypeName}Entity();")).Indent(8) + "\r\n}");
+                sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
+            }
+
             return sb.ToString();
+        }
+    }
+
+    public struct FormatUnit
+    {
+        public string? Format { get; set; }
+        public string? Unit { get; set; }
+
+        public FormatUnit(string? format, string? unit)
+        {
+            Format = format;
+            Unit = unit;
         }
     }
 
@@ -897,8 +913,6 @@ namespace Signum.Engine.Dynamic
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public List<DynamicTypeCustomCode> BeforeSchema { get; private set; }
-
-        public Dictionary<string, string> AlreadyTranslated { get; set; }
 
         public DynamicBeforeSchemaGenerator(string @namespace, List<DynamicTypeCustomCode> beforeSchema, HashSet<string> usings)
         {

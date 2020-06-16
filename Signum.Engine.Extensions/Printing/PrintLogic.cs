@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Files;
+using Signum.Engine.Files;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -25,20 +25,15 @@ namespace Signum.Engine.Printing
     {
         public static int DeleteFilesAfter = 24 * 60; //Minutes
 
-        public static Action<PrintLineEntity> Print;
+        public static Action<PrintLineEntity> Print = e => throw new NotImplementedException("PrintingLogic.Print is not defined");
          
-        static Expression<Func<PrintPackageEntity, IQueryable<PrintLineEntity>>> LinesExpression =
-            e => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e));
-        
-        [ExpressionField]
-        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e)
-        {
-            return LinesExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e) => 
+            As.Expression(() => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e)));
 
-        public static FileTypeSymbol TestFileType; 
+        public static FileTypeSymbol? TestFileType; 
 
-        public static void Start(SchemaBuilder sb, FileTypeSymbol testFileType = null)
+        public static void Start(SchemaBuilder sb, FileTypeSymbol? testFileType = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -100,7 +95,7 @@ namespace Signum.Engine.Printing
         {
             public void Execute(ExecutingProcess executingProcess)
             {
-                PrintPackageEntity package = (PrintPackageEntity)executingProcess.Data;
+                PrintPackageEntity package = (PrintPackageEntity)executingProcess.Data!;
 
                 executingProcess.ForEachLine(package.Lines().Where(a => a.State != PrintLineState.Printed), line =>
                 {
@@ -124,7 +119,7 @@ namespace Signum.Engine.Printing
             }.Save();
         }
 
-        public static ProcessEntity CreateProcess(FileTypeSymbol fileType = null)
+        public static ProcessEntity? CreateProcess(FileTypeSymbol? fileType = null)
         {
             using (Transaction tr = new Transaction())
             {
@@ -159,11 +154,8 @@ namespace Signum.Engine.Printing
             return Database.Query<PrintLineEntity>()
                 .Where(a => a.State == PrintLineState.ReadyToPrint)
                 .GroupBy(a => a.File.FileType)
-                .Select(gr => new PrintStat
-                {
-                    fileType = gr.Key,
-                    count = gr.Count()
-                }).ToList();            
+                .Select(gr => new PrintStat(gr.Key,gr.Count()))
+                .ToList();            
         }
 
        
@@ -181,7 +173,7 @@ namespace Signum.Engine.Printing
         public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
         {
             CancelPrinting(entity, fileTypeForPrinting);
-            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName)!, file.Bytes);
 
             return file;
         }
@@ -195,6 +187,12 @@ namespace Signum.Engine.Printing
     {
         public FileTypeSymbol fileType;
         public int count;
+
+        public PrintStat(FileTypeSymbol fileType, int count)
+        {
+            this.fileType = fileType;
+            this.count = count;
+        }
     }
 
     public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
@@ -209,7 +207,7 @@ namespace Signum.Engine.Printing
                 Construct = (args) => new PrintLineEntity
                 {
                     State = PrintLineState.NewTest,
-                    TestFileType = PrintingLogic.TestFileType,
+                    TestFileType = PrintingLogic.TestFileType!,
                 }
             }.Register();
 
@@ -263,7 +261,7 @@ namespace Signum.Engine.Printing
             {
                 try
                 {
-                    PrintingLogic.Print(line);
+                    PrintingLogic.Print?.Invoke(line);
                     
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;

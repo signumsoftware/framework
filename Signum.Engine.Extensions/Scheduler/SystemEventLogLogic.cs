@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Scheduler;
@@ -40,14 +40,20 @@ namespace Signum.Engine.Scheduler
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(SystemEventLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
 
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(SystemEventLogEntity).ToTypeEntity());
             if (dateLimit == null)
                 return;
 
-            Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value && a.Exception != null)
+                .UnsafeUpdate()
+                .Set(a => a.Exception, a => null)
+                .ExecuteChunksLog(parameters, sb, token);
         }
 
-        public static bool Log(string eventType, ExceptionEntity exception = null)
+        public static bool Log(string eventType, ExceptionEntity? exception = null)
         {
             if (!Started)
                 return false;

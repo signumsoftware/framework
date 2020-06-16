@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
@@ -13,13 +13,13 @@ namespace Signum.Engine.MachineLearning
 {
     public class TrainingProgress
     {
-        public string Message;
+        public string? Message;
         public decimal? Progress;
         public bool Running;
 
         public PredictorState State { get; set; }
 
-        public List<object[]> EpochProgresses { get; set; }
+        public List<object?[]>? EpochProgresses { get; set; }
     }
 
     public class EpochProgress
@@ -32,10 +32,10 @@ namespace Signum.Engine.MachineLearning
         public double? LossValidation;
         public double? EvaluationValidation;
 
-        object[] array;
-        public object[] ToObjectArray()
+        object?[]? array;
+        public object?[] ToObjectArray()
         {
-            return array ?? (array = new object[]
+            return array ?? (array = new object?[]
             {
                 Ellapsed,
                 TrainingExamples,
@@ -61,8 +61,6 @@ namespace Signum.Engine.MachineLearning
                 EvaluationValidation = EvaluationValidation?.CleanDouble(),
             }.Save();
         }
-
-
     }
 
     public class PredictorPredictContext
@@ -79,7 +77,7 @@ namespace Signum.Engine.MachineLearning
         public Dictionary<PredictorColumnEmbedded, List<PredictorCodification>> MainOutputCodifications { get; }
         public Dictionary<PredictorSubQueryEntity, PredictorPredictSubQueryContext> SubQueryOutputCodifications { get; }
 
-        public object Model { get; set; }
+        public object? Model { get; set; }
 
         public PredictorPredictContext(PredictorEntity predictor, IPredictorAlgorithm algorithm, List<PredictorCodification> codifications)
         {
@@ -92,19 +90,24 @@ namespace Signum.Engine.MachineLearning
 
             OutputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Output).ToList();
             MainOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnMain m).GroupToDictionary(a => ((PredictorColumnMain)a.Column).PredictorColumn);
-            SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup => new PredictorPredictSubQueryContext
-            {
-                SubQuery = sqGroup.Key,
-                Groups = sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys,
-                    keysGroup => keysGroup.GroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).PredictorSubQueryColumn), ObjectArrayComparer.Instance)
-            });
+            SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup =>
+            new PredictorPredictSubQueryContext(sqGroup.Key,
+                sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys!,
+                    keysGroup => keysGroup.GroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).PredictorSubQueryColumn!), ObjectArrayComparer.Instance)
+            ));
         }
     }
 
     public class PredictorPredictSubQueryContext
     {
         public PredictorSubQueryEntity SubQuery;
-        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, List<PredictorCodification>>> Groups;
+        public Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, List<PredictorCodification>>> Groups;
+
+        public PredictorPredictSubQueryContext(PredictorSubQueryEntity subQuery, Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, List<PredictorCodification>>> groups)
+        {
+            SubQuery = subQuery;
+            Groups = groups;
+        }
     }
 
     public class PredictorTrainingContext
@@ -113,21 +116,21 @@ namespace Signum.Engine.MachineLearning
         public CancellationToken CancellationToken { get; }
         public bool StopTraining { get; set; }
 
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public decimal? Progress { get; set; }
 
-        public List<PredictorCodification> Codifications { get; private set; }
+        public List<PredictorCodification> Codifications { get; private set; } = null!;
 
-        public List<PredictorCodification> InputCodifications { get; private set; }
-        public Dictionary<PredictorColumnBase, List<PredictorCodification>> InputCodificationsByColumn { get; private set; }
+        public List<PredictorCodification> InputCodifications { get; private set; } = null!;
+        public Dictionary<PredictorColumnBase, List<PredictorCodification>> InputCodificationsByColumn { get; private set; } = null!;
 
-        public List<PredictorCodification> OutputCodifications { get; private set; }
-        public Dictionary<PredictorColumnBase, List<PredictorCodification>> OutputCodificationsByColumn { get; private set; }
+        public List<PredictorCodification> OutputCodifications { get; private set; } = null!;
+        public Dictionary<PredictorColumnBase, List<PredictorCodification>> OutputCodificationsByColumn { get; private set; } = null!;
 
-        public List<ResultRow> Validation { get; internal set; }
+        public List<ResultRow> Validation { get; internal set; } = null!;
 
-        public MainQuery MainQuery { get; internal set; }
-        public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
+        public MainQuery MainQuery { get; internal set; } = null!;
+        public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; } = null!;
 
         public ConcurrentQueue<EpochProgress> Progresses = new ConcurrentQueue<EpochProgress>();
 
@@ -137,7 +140,7 @@ namespace Signum.Engine.MachineLearning
             this.CancellationToken = cancellationToken;
         }
 
-        public event Action<string, decimal?> OnReportProgres;
+        public event Action<string, decimal?>? OnReportProgres;
 
         public void ReportProgress(string message, decimal? progress = null)
         {
@@ -187,25 +190,28 @@ namespace Signum.Engine.MachineLearning
             return (training, validation);
         }
 
-        public List<object[]> GetProgessArray()
+        public List<object?[]> GetProgessArray()
         {
             return Progresses.Select(a => a.ToObjectArray()).ToList();
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MainQuery
     {
         public QueryRequest QueryRequest { get; internal set; }
         public ResultTable ResultTable { get; internal set; }
-        public Func<ResultRow, object[]> GetParentKey { get; internal set; }
+        public Func<ResultRow, object?[]> GetParentKey { get; internal set; }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class SubQuery
     {
         public PredictorSubQueryEntity SubQueryEntity;
         public QueryRequest QueryGroupRequest;
         public ResultTable ResultTable;
-        public Dictionary<object[], Dictionary<object[], object[]>> GroupedValues;
+        public Dictionary<object?[], Dictionary<object?[], object?[]>> GroupedValues;
 
 
         public ResultColumn[] SplitBy { get; internal set; }
@@ -213,10 +219,11 @@ namespace Signum.Engine.MachineLearning
         //From ColumnIndex (i.e: [3->0, 4->1)
         public Dictionary<int, int> ColumnIndexToValueIndex { get; internal set; }
     }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public interface IPredictorAlgorithm
     {
-        string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
+        string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
@@ -234,27 +241,24 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictDictionary
     {
-        public PredictDictionary(PredictorEntity predictor)
+        public PredictDictionary(PredictorEntity predictor, PredictionOptions? options = null, Lite<Entity>? entity = null)
         {
             Predictor = predictor;
+            Options = options;
+            Entity = entity;
         }
 
-        public Lite<Entity> Entity { get; set; } //Optional
+        public Lite<Entity>? Entity { get; set; }
 
-        public PredictionOptions Options { get; set; }
+        public PredictionOptions? Options { get; set; }
 
         public PredictorEntity Predictor { get; set; }
-        public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
+        public Dictionary<PredictorColumnEmbedded, object?> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object?>();
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
 
         public PredictDictionary Clone()
         {
-            var result = new PredictDictionary(Predictor)
-            {
-                Entity = this.Entity,
-                Options = this.Options,
-            };
-
+            var result = new PredictDictionary(Predictor, this.Options, this.Entity);
             result.MainQueryValues.AddRange(MainQueryValues.ToDictionaryEx());
             result.SubQueries.AddRange(SubQueries, kvp => kvp.Key, kvp => kvp.Value.Clone());
             return result;
@@ -264,13 +268,19 @@ namespace Signum.Engine.MachineLearning
     public class PredictionOptions
     {
         public int? AlternativeCount;
-        public List<PredictorCodification> FilteredCodifications;
+        public List<PredictorCodification>? FilteredCodifications;
     }
 
     public class AlternativePrediction
     {
+        public AlternativePrediction(float probability, object? value)
+        {
+            Probability = probability;
+            Value = value;
+        }
+
         public float Probability { get; set; }
-        public object Value { get; set; }
+        public object? Value { get; set; }
     }
 
     public class PredictSubQueryDictionary
@@ -281,7 +291,7 @@ namespace Signum.Engine.MachineLearning
         }
 
         public PredictorSubQueryEntity SubQuery { get; set; }
-        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; } = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>();
+        public Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>> SubQueryGroups { get; set; } = new Dictionary<object?[], Dictionary<PredictorSubQueryColumnEmbedded, object?>>();
 
         public PredictSubQueryDictionary Clone()
         {

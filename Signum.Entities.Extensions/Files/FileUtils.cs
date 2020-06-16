@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.ComponentModel;
 
@@ -6,7 +6,7 @@ namespace Signum.Entities.Files
 {
     public interface IFilePath : IFile
     {
-        string CalculatedDirectory { get; }
+        string? CalculatedDirectory { get; }
 
         string FullPhysicalPath();
 
@@ -21,7 +21,7 @@ namespace Signum.Entities.Files
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
-        string FullWebPath();
+        string? FullWebPath();
     }
 
     public enum FileMessage
@@ -55,19 +55,5 @@ namespace Signum.Entities.Files
         File0IsTooBigTheMaximumSizeIs1,
         [Description("The name of the file must not contain '%'")]
         TheNameOfTheFileMustNotContainPercentSymbol,
-    }
-
-
-    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
-    public class WebImage
-    {
-        public string FullWebPath;
-    }
-
-    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
-    public class WebDownload
-    {
-        public string FullWebPath;
-        public string FileName;
     }
 }

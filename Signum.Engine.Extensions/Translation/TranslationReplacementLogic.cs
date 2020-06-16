@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Signum.Engine.Translation
 {
     public static class TranslationReplacementLogic
     {
-        public static ResetLazy<Dictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy;
+        public static ResetLazy<Dictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -43,7 +43,7 @@ namespace Signum.Engine.Translation
 
                         var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 
-                        return new TranslationReplacementPack { Dictionary = dic, Regex = regex };
+                        return new TranslationReplacementPack(dic, regex);
                     }),
                     new InvalidateWith(typeof(TranslationReplacementEntity)));
 
@@ -72,5 +72,11 @@ namespace Signum.Engine.Translation
     {
         public Dictionary<string, string> Dictionary;
         public Regex Regex;
+
+        public TranslationReplacementPack(Dictionary<string, string> dictionary, Regex regex)
+        {
+            Dictionary = dictionary;
+            Regex = regex;
+        }
     }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react'
+import Collapse from 'react-bootstrap/Collapse'
 import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
-import { Collapse } from '@framework/Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface CollapsableCardProps {
@@ -15,84 +15,67 @@ export interface CollapsableCardProps {
   cardStyle?: CardStyle;
   headerStyle?: CardStyle;
   bodyStyle?: CardStyle;
+  size?: "sm" | "xs";
+  children?: React.ReactNode;
 }
 interface CardStyle {
   border?: BsColor;
   text?: BsColor;
-  background?: BsColor
+  background?: BsColor;
 }
 
 function cardStyleClasses(style?: CardStyle) {
   return classes(
-    style && style.text && "text-" + style.text,
-    style && style.background && "bg-" + style.background,
-    style && style.border && "border-" + style.border,
+    style?.text && "text-" + style.text,
+    style?.background && "bg-" + style.background,
+    style?.border && "border-" + style.border,
   )
 }
-
-
 
 export interface CollapsableCardState {
   isOpen: boolean,
   isRTL: boolean;
 }
 
-export default class CollapsableCard extends React.Component<CollapsableCardProps, CollapsableCardState> {
+function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean) => void] {
+  if ((p.isOpen != null) && (p.toggle == null))
+    throw new Error("isOpen and toggle should be set together");
 
-  constructor(props: CollapsableCardProps) {
-    super(props);
-
-    CollapsableCard.checkProps(props);
-
-    this.state = {
-      isOpen: this.props.defaultOpen == true,
-      isRTL: document.body.classList.contains("rtl"),
-    };
+  if (p.isOpen != null) {
+    return [p.isOpen, p.toggle!];
   }
 
-  static checkProps(props: CollapsableCardProps) {
-    if ((props.isOpen == null) != (props.toggle == null))
-      throw new Error("isOpen and toggle should be set together");
-  }
+  const [openState, setOpenState] = React.useState(p.defaultOpen == true);
 
-  componentWillReceiveProps(newProps: CollapsableCardProps) {
-    CollapsableCard.checkProps(newProps);
-  }
+  React.useEffect(() => {
+    setOpenState(p.defaultOpen == true);
+  }, [p.defaultOpen]);
 
-  handleToggle = () => {
-    if (this.props.toggle)
-      this.props.toggle(this.props.isOpen!);
-    else
-      this.setState({
-        isOpen: !this.state.isOpen,
-      });
-  }
+  return [openState, (isOpen: boolean) => { setOpenState(isOpen); p.toggle && p.toggle(isOpen); }];
+}
 
-  render() {
+export default function CollapsableCard(p: CollapsableCardProps) {
 
-    var isOpen = this.props.isOpen == undefined ?
-      this.state.isOpen :
-      this.props.isOpen;
-
-    return (
-      <div className={classes("card", cardStyleClasses(this.props.cardStyle))}>
-        <div className={classes("card-header", cardStyleClasses(this.props.headerStyle))} style={{ cursor: "pointer" }} onClick={this.handleToggle}>
-          {(this.props.collapsable == undefined || this.props.collapsable == true) &&
-            <span
-              className={this.state.isRTL ? "float-left" : "float-right"}
-              style={{ cursor: "pointer", margin: "4px" }}
-              onClick={this.handleToggle}>
-              <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />
-            </span>
-          }
-          {this.props.header}
-        </div>
-        <Collapse isOpen={isOpen}>
-          <div className={classes("card-body", cardStyleClasses(this.props.bodyStyle))}>
-            {this.props.children}
-          </div>
-        </Collapse>
+  const [isOpen, setIsOpen] = isControlled(p);
+  const isRTL = React.useMemo(() => document.body.classList.contains("rtl"), []);
+  return (
+    <div className={classes("card", cardStyleClasses(p.cardStyle), p.size && ("card-" + p.size))}>
+      <div className={classes("card-header", cardStyleClasses(p.headerStyle))} style={{ cursor: "pointer" }} onClick={() => setIsOpen(!isOpen)}>
+        {(p.collapsable == undefined || p.collapsable == true) &&
+          <span
+            className={isRTL ? "float-left" : "float-right"}
+            style={{ cursor: "pointer" }}
+            onClick={() => setIsOpen(!isOpen)}>
+            <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />
+          </span>
+        }
+        {p.header}
       </div>
-    );
-  }
+      <Collapse in={isOpen}>
+        <div className={classes("card-body", cardStyleClasses(p.bodyStyle))}>
+          {p.children}
+        </div>
+      </Collapse>
+    </div>
+  );
 }

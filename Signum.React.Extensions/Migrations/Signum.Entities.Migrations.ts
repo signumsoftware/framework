@@ -10,26 +10,26 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 export const CSharpMigrationEntity = new Type<CSharpMigrationEntity>("CSharpMigration");
 export interface CSharpMigrationEntity extends Entities.Entity {
   Type: "CSharpMigration";
-  uniqueName?: string | null;
-  executionDate?: string;
+  uniqueName: string;
+  executionDate: string;
 }
 
 export const LoadMethodLogEntity = new Type<LoadMethodLogEntity>("LoadMethodLog");
 export interface LoadMethodLogEntity extends Entities.Entity {
   Type: "LoadMethodLog";
-  methodName?: string | null;
-  className?: string | null;
-  description?: string | null;
-  start?: string;
-  end?: string | null;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  methodName: string | null;
+  className: string | null;
+  description: string | null;
+  start: string;
+  end: string | null;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const SqlMigrationEntity = new Type<SqlMigrationEntity>("SqlMigration");
 export interface SqlMigrationEntity extends Entities.Entity {
   Type: "SqlMigration";
-  versionNumber?: string | null;
-  comment?: string | null;
+  versionNumber: string;
+  comment: string | null;
 }
 
 

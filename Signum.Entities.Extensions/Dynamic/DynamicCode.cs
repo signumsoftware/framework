@@ -10,14 +10,14 @@ namespace Signum.Entities.Dynamic
 {
     public static class DynamicCode
     {
-        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
+        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase!).LocalPath)!;
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenControllerNamespace = "Signum.React.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
         public static string CodeGenAssembly = "CodeGenAssembly.dll";
         public static string CodeGenControllerAssembly = "CodeGenControllerAssembly.dll";
-        public static string CodeGenAssemblyPath;
-        public static string CodeGenControllerAssemblyPath;
+        public static string? CodeGenAssemblyPath;
+        public static string? CodeGenControllerAssemblyPath;
         public static Action OnApplicationServerRestarted;
 
         public static HashSet<Type> RegisteredDynamicTypes = new HashSet<Type>();
@@ -30,6 +30,7 @@ namespace Signum.Entities.Dynamic
             "System.Text",
             "System.Linq",
             "System.Reflection",
+            "System.ComponentModel",
             "System.Collections",
             "System.Collections.Generic",
             "System.Linq.Expressions",
@@ -43,12 +44,14 @@ namespace Signum.Entities.Dynamic
         public static HashSet<Type> AssemblyTypes = new HashSet<Type>
         {
             typeof(object),
+            typeof(System.IO.File),
             typeof(System.Attribute),
             typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
             typeof(System.Linq.Enumerable),
             typeof(System.Linq.Queryable),
             typeof(System.Collections.Generic.List<>),
             typeof(System.ComponentModel.Component),
+            typeof(System.ComponentModel.DescriptionAttribute),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),
             typeof(System.Net.HttpWebRequest),
@@ -110,7 +113,7 @@ namespace Signum.Entities.Dynamic
 
         public static void AddFullAssembly(Type type)
         {
-            Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace));
+            Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace!));
             AssemblyTypes.Add(type);
         }
     }

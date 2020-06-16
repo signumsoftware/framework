@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarElementTable } from './Toolbar';
 
 export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> }){
   const ctx = p.ctx;
@@ -9,7 +10,7 @@ export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> })
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(f => f.name)} />
-      <EntityRepeater ctx={ctx.subCtx(f => f.elements)} />
+      <ToolbarElementTable ctx={ctx.subCtx(m => m.elements)} />
     </div>
   );
 }

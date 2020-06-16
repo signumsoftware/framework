@@ -1,57 +1,53 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using Signum.Entities.UserAssets;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.SMS
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMSTemplateEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public bool Certified { get; set; }
 
-        public bool EditableMessage { get; set; } = AllowEditMessages;
+        public static bool DefaultEditableMessage = true;
+        public bool EditableMessage { get; set; } = DefaultEditableMessage;
 
-        public TypeEntity AssociatedType { get; set; }
+        public bool DisableAuthorization { get; set; }
+
+        public QueryEntity? Query { get; set; }
+
+        public SMSModelEntity? Model { get; set; }
 
         [NotifyCollectionChanged]
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
-        public string From { get; set; }
+        [StringLengthValidator(Max = 200)]
+        public string? From { get; set; }
+
+        public QueryTokenEmbedded? To { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
 
-        public bool RemoveNoSMSCharacters { get; set; } = true;
+        public static bool DefaultRemoveNoSMSCharacters = false;
+        public bool RemoveNoSMSCharacters { get; set; } = DefaultRemoveNoSMSCharacters;
 
-        public bool Active { get; set; }
+        public static bool DefaultIsActive = false;
+        public bool IsActive { get; set; } = DefaultIsActive;
 
-        [MinutesPrecisionValidator]
-        public DateTime StartDate { get; set; } = TimeZoneManager.Now.TrimToMinutes();
-
-        [MinutesPrecisionValidator]
-        public DateTime? EndDate { get; set; }
-
-        static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
-        [ExpressionField]
-        public bool IsActiveNow()
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            return IsActiveNowExpression.Evaluate(this);
-        }
-
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
+            if (pi.Name == nameof(To) && To == null && (Query != null || Model != null))
             {
-                if (EndDate != null && StartDate >= EndDate)
-                    return SMSTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
+                return SMSTemplateMessage.ToMustBeSetInTheTemplate.NiceToString();
             }
 
             if (pi.Name == nameof(Messages))
@@ -66,42 +62,24 @@ namespace Signum.Entities.SMS
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<SMSTemplateEntity, string>> ToStringExpression = e => e.Name;
-        [ExpressionField]
-        public override string ToString()
+        internal void ParseData(QueryDescription queryDescription)
         {
-            return ToStringExpression.Evaluate(this);
+            if (To != null)
+                To.ParseData(this, queryDescription, 0);
         }
 
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            if (sender == Messages)
-            {
-                if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageEmbedded>())
-                        item.Template = null;
-
-                if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageEmbedded>())
-                        item.Template = this;
-            }
-        }
-
-        protected override void PreSaving(PreSavingContext ctx)
-        {
-            base.PreSaving(ctx);
-
-            Messages.ForEach(e => e.Template = this);
-        }
-
-        public static bool AllowEditMessages = true;
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
+        
     }
 
     [AutoInit]
     public static class SMSTemplateOperation
     {
+        public static ConstructSymbol<SMSTemplateEntity>.From<SMSModelEntity> CreateSMSTemplateFromModel;
         public static ConstructSymbol<SMSTemplateEntity>.Simple Create;
         public static ExecuteSymbol<SMSTemplateEntity> Save;
+
     }
 
     public enum MessageLengthExceeded
@@ -120,19 +98,10 @@ namespace Signum.Entities.SMS
         {
             this.CultureInfo = culture;
         }
-
-        [Ignore]
-        internal SMSTemplateEntity template;
-        public SMSTemplateEntity Template
-        {
-            get { return template; }
-            set { template = value; }
-        }
-
-        [NotNullValidator]
+        
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        [StringLengthValidator(MultiLine = true)]
         public string Message { get; set; }
 
         public override string ToString()
@@ -143,14 +112,55 @@ namespace Signum.Entities.SMS
 
     public enum SMSTemplateMessage
     {
-        [Description("End date must be higher than start date")]
-        EndDateMustBeHigherThanStartDate,
         [Description("There are no messages for the template")]
         ThereAreNoMessagesForTheTemplate,
         [Description("There must be a message for {0}")]
         ThereMustBeAMessageFor0,
         [Description("There's more than one message for the same language")]
         TheresMoreThanOneMessageForTheSameLanguage,
-        NewCulture
+        NewCulture,
+        [Description("{0} characters remaining (before replacements)")]
+        _0CharactersRemainingBeforeReplacements,
+        ToMustBeSetInTheTemplate
+    }
+
+
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    public class SMSModelEntity : Entity
+    {
+        [UniqueIndex]
+        public string FullClassName { get; set; }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullClassName);
+    }
+
+    public interface ISMSOwnerEntity : IEntity
+    {
+
+    }
+
+    [DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
+    public class SMSOwnerData : IEquatable<SMSOwnerData>
+    {
+        public Lite<ISMSOwnerEntity>? Owner { get; set; }
+        public string TelephoneNumber { get; set; }
+        public CultureInfoEntity? CultureInfo { get; set; }
+
+        public override bool Equals(object? obj) => obj is SMSOwnerData sms && Equals(sms);
+        public bool Equals(SMSOwnerData other)
+        {
+            return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
+        }
+
+        public override int GetHashCode()
+        {
+            return Owner == null ? base.GetHashCode() : Owner.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return "{0} ({1})".FormatWith(TelephoneNumber, Owner);
+        }
     }
 }

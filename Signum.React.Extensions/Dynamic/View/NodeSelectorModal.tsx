@@ -1,84 +1,74 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic } from '@framework/Globals';
 import { openModal, IModalProps } from '@framework/Modals';
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { Modal } from '@framework/Components';
-import { ModalHeaderButtons } from '@framework/Components/Modal';
+import { Modal } from 'react-bootstrap';
+import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 
-interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
-}
+export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
 
-export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { show: boolean }>  {
-  constructor(props: NodeSelectorModalProps) {
-    super(props);
-    this.state = { show: true };
+  const [show, setShow] = React.useState<boolean>(true);
+
+  const selectedValue = React.useRef<any>(undefined)
+
+  function handleButtonClicked(val: any) {
+    selectedValue.current = val;
+    setShow(false);
   }
 
-  selectedValue: any;
-  handleButtonClicked = (val: any) => {
-    this.selectedValue = val;
-    this.setState({ show: false });
+  function handleCancelClicked() {
+    setShow(false);
   }
 
-  handleCancelClicked = () => {
-    this.setState({ show: false });
+  function handleOnExited() {
+    p.onExited!(selectedValue!.current);
   }
 
-  handleOnExited = () => {
-    this.props.onExited!(this.selectedValue);
-  }
+  const columnWidth = "200px";
 
-  render() {
+  const nodes = Dic.getValues(NodeUtils.registeredNodes);
 
-    const columnWidth = "200px";
+  var columns = nodes
+    .filter(n => n.group != null)
+    .groupBy(n => n.group!)
+    .groupsOf(nodes.length / 3, g => g.elements.length);
 
-    const nodes = Dic.getValues(NodeUtils.registeredNodes);
-
-    var columns = nodes
-      .filter(n => n.group != null)
-      .groupBy(n => n.group!)
-      .groupsOf(nodes.length / 3, g => g.elements.length);
-
-    return (
-      <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-        <ModalHeaderButtons onClose={this.handleCancelClicked} >
-          {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
-        </ModalHeaderButtons>
-        <div className="modal-body">
-          <div className="row">
-            {
-              columns.map((c, i) =>
-                <div key={i} className={"col-sm-" + (12 / columns.length)}>
-                  {
-                    c.map(gr => <fieldset key={gr.key}>
-                      <legend>{gr.key}</legend>
-                      {
-                        gr.elements.orderBy(n => n.order!).map(n =>
-                          <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
-                            className="sf-chooser-button sf-close-button btn btn-light">
-                            {n.kind}
-                          </button>)
-                      }
-                    </fieldset>)
-                  }
-                </div>)
-            }
-          </div>
+  return (
+    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
+      <ModalHeaderButtons onClose={handleCancelClicked} >
+        {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
+      </ModalHeaderButtons>
+      <div className="modal-body">
+        <div className="row">
+          {
+            columns.map((c, i) =>
+              <div key={i} className={"col-sm-" + (12 / columns.length)}>
+                {
+                  c.map(gr => <fieldset key={gr.key}>
+                    <legend>{gr.key}</legend>
+                    {
+                      gr.elements.orderBy(n => n.order!).map(n =>
+                        <button key={n.kind} type="button" onClick={() => handleButtonClicked(n)}
+                          className="sf-chooser-button sf-close-button btn btn-light">
+                          {n.kind}
+                        </button>)
+                    }
+                  </fieldset>)
+                }
+              </div>)
+          }
         </div>
-      </Modal>
-    );
-  }
-
-  static chooseElement(parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> {
-
-    var o = NodeUtils.registeredNodes[parentNode];
-    if (o.validChild)
-      return Promise.resolve(NodeUtils.registeredNodes[o.validChild]);
-
-    return openModal<NodeUtils.NodeOptions<BaseNode>>(<NodeSelectorModal />);
-  }
+      </div>
+    </Modal>
+  );
 }
 
+NodeSelectorModal.chooseElement = (parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> => {
+  var o = NodeUtils.registeredNodes[parentNode];
+  if (o.validChild)
+    return Promise.resolve(NodeUtils.registeredNodes[o.validChild]);
 
+  return openModal<NodeUtils.NodeOptions<BaseNode>>(<NodeSelectorModal />);
+}

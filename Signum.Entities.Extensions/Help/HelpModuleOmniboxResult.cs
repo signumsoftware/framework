@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Omnibox;
@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Help
 {
@@ -30,7 +31,7 @@ namespace Signum.Entities.Help
             if (keyMatch == null)
                 yield break;
 
-            if (tokenPattern == "I" && rawQuery.EndsWith(" "))
+            if (tokenPattern == "I")
             {
                 yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SecondMatch = null };
                 yield break;
@@ -52,7 +53,7 @@ namespace Signum.Entities.Help
             foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var type = (Type)match.Value;
-                if (OmniboxParser.Manager.AllowedQuery(type))
+                if (OmniboxParser.Manager.AllowedType(type))
                 {
                     yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = type, SecondMatch = match };
                 }
@@ -82,9 +83,12 @@ namespace Signum.Entities.Help
     {
         public OmniboxMatch KeywordMatch { get; set; }
 
-        public Type Type { get; set; }
-        public string SearchString { get; set; }
-        public OmniboxMatch SecondMatch { get; set; }
+        [JsonIgnore]
+        public Type? Type { get; set; }
+        public string? TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
+
+        public string? SearchString { get; set; }
+        public OmniboxMatch? SecondMatch { get; set; }
 
         public override string ToString()
         {

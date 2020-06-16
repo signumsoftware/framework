@@ -10,26 +10,26 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 export const DisconnectedCreatedMixin = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
 export interface DisconnectedCreatedMixin extends Entities.MixinEntity {
   Type: "DisconnectedCreatedMixin";
-  disconnectedCreated?: boolean;
+  disconnectedCreated: boolean;
 }
 
 export const DisconnectedExportEntity = new Type<DisconnectedExportEntity>("DisconnectedExport");
 export interface DisconnectedExportEntity extends Entities.Entity {
   Type: "DisconnectedExport";
-  creationDate?: string;
-  machine?: Entities.Lite<DisconnectedMachineEntity> | null;
-  lock?: number | null;
-  createDatabase?: number | null;
-  createSchema?: number | null;
-  disableForeignKeys?: number | null;
+  creationDate: string;
+  machine: Entities.Lite<DisconnectedMachineEntity>;
+  lock: number | null;
+  createDatabase: number | null;
+  createSchema: number | null;
+  disableForeignKeys: number | null;
   copies: Entities.MList<DisconnectedExportTableEmbedded>;
-  enableForeignKeys?: number | null;
-  reseedIds?: number | null;
-  backupDatabase?: number | null;
-  dropDatabase?: number | null;
-  total?: number | null;
-  state?: DisconnectedExportState;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  enableForeignKeys: number | null;
+  reseedIds: number | null;
+  backupDatabase: number | null;
+  dropDatabase: number | null;
+  total: number | null;
+  state: DisconnectedExportState;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const DisconnectedExportState = new EnumType<DisconnectedExportState>("DisconnectedExportState");
@@ -41,26 +41,26 @@ export type DisconnectedExportState =
 export const DisconnectedExportTableEmbedded = new Type<DisconnectedExportTableEmbedded>("DisconnectedExportTableEmbedded");
 export interface DisconnectedExportTableEmbedded extends Entities.EmbeddedEntity {
   Type: "DisconnectedExportTableEmbedded";
-  type?: Entities.Lite<Basics.TypeEntity> | null;
-  copyTable?: number | null;
-  errors?: string | null;
+  type: Entities.Lite<Basics.TypeEntity>;
+  copyTable: number | null;
+  errors: string;
 }
 
 export const DisconnectedImportEntity = new Type<DisconnectedImportEntity>("DisconnectedImport");
 export interface DisconnectedImportEntity extends Entities.Entity {
   Type: "DisconnectedImport";
-  creationDate?: string;
-  machine?: Entities.Lite<DisconnectedMachineEntity> | null;
-  restoreDatabase?: number | null;
-  synchronizeSchema?: number | null;
-  disableForeignKeys?: number | null;
+  creationDate: string;
+  machine: Entities.Lite<DisconnectedMachineEntity> | null;
+  restoreDatabase: number | null;
+  synchronizeSchema: number | null;
+  disableForeignKeys: number | null;
   copies: Entities.MList<DisconnectedImportTableEmbedded>;
-  unlock?: number | null;
-  enableForeignKeys?: number | null;
-  dropDatabase?: number | null;
-  total?: number | null;
-  state?: DisconnectedImportState;
-  exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+  unlock: number | null;
+  enableForeignKeys: number | null;
+  dropDatabase: number | null;
+  total: number | null;
+  state: DisconnectedImportState;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const DisconnectedImportState = new EnumType<DisconnectedImportState>("DisconnectedImportState");
@@ -72,22 +72,22 @@ export type DisconnectedImportState =
 export const DisconnectedImportTableEmbedded = new Type<DisconnectedImportTableEmbedded>("DisconnectedImportTableEmbedded");
 export interface DisconnectedImportTableEmbedded extends Entities.EmbeddedEntity {
   Type: "DisconnectedImportTableEmbedded";
-  type?: Entities.Lite<Basics.TypeEntity> | null;
-  copyTable?: number | null;
-  disableForeignKeys?: boolean | null;
-  insertedRows?: number | null;
-  updatedRows?: number | null;
-  insertedOrUpdated?: number | null;
+  type: Entities.Lite<Basics.TypeEntity>;
+  copyTable: number | null;
+  disableForeignKeys: boolean | null;
+  insertedRows: number | null;
+  updatedRows: number | null;
+  insertedOrUpdated: number | null;
 }
 
 export const DisconnectedMachineEntity = new Type<DisconnectedMachineEntity>("DisconnectedMachine");
 export interface DisconnectedMachineEntity extends Entities.Entity {
   Type: "DisconnectedMachine";
-  creationDate?: string;
-  machineName?: string | null;
-  state?: DisconnectedMachineState;
-  seedMin?: number;
-  seedMax?: number;
+  creationDate: string;
+  machineName: string;
+  state: DisconnectedMachineState;
+  seedMin: number;
+  seedMax: number;
 }
 
 export module DisconnectedMachineOperation {
@@ -114,8 +114,8 @@ export module DisconnectedMessage {
 export const DisconnectedSubsetMixin = new Type<DisconnectedSubsetMixin>("DisconnectedSubsetMixin");
 export interface DisconnectedSubsetMixin extends Entities.MixinEntity {
   Type: "DisconnectedSubsetMixin";
-  lastOnlineTicks?: number | null;
-  disconnectedMachine?: Entities.Lite<DisconnectedMachineEntity> | null;
+  lastOnlineTicks: number | null;
+  disconnectedMachine: Entities.Lite<DisconnectedMachineEntity> | null;
 }
 
 export const Download = new EnumType<Download>("Download");

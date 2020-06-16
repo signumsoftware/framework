@@ -26,8 +26,8 @@ namespace Signum.Engine.Toolbar
 
     public static class ToolbarLogic
     {
-        public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars;
-        public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus;
+        public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
+        public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -91,12 +91,12 @@ namespace Signum.Engine.Toolbar
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-                t => AuthLogic.CurrentRoles().Contains(t.Owner));
+                t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
 
             sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-                t => AuthLogic.CurrentRoles().Contains(t.Owner));
+                t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
         }
 
         private static void RegisterDelete<T>(SchemaBuilder sb) where T : Entity
@@ -105,7 +105,7 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
@@ -114,7 +114,7 @@ namespace Signum.Engine.Toolbar
                     var entity = (T)arg;
 
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
-                        .Where(mle => mle.Element.Content.Entity == entity));
+                        .Where(mle => mle.Element.Content!.Entity == entity));
 
                     return parts;
                 };
@@ -124,7 +124,7 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
@@ -133,7 +133,7 @@ namespace Signum.Engine.Toolbar
                     var entity = (T)arg;
 
                     var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
-                        .Where(mle => mle.Element.Content.Entity == entity));
+                        .Where(mle => mle.Element.Content!.Entity == entity));
 
                     return parts;
                 };
@@ -142,7 +142,7 @@ namespace Signum.Engine.Toolbar
 
         public static ToolbarEntity GetCurrent(ToolbarLocation location)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 
             var result = Toolbars.Value.Values
                 .Where(t => isAllowed(t) && t.Location == location)
@@ -152,7 +152,7 @@ namespace Signum.Engine.Toolbar
             return result;
         }
 
-        public static ToolbarResponse GetCurrentToolbarResponse(ToolbarLocation location)
+        public static ToolbarResponse? GetCurrentToolbarResponse(ToolbarLocation location)
         {
             var curr = GetCurrent(location);
 
@@ -177,12 +177,20 @@ namespace Signum.Engine.Toolbar
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
-
             retry:
-                var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (i == 0 || result[i - 1].type == ToolbarElementType.Divider || i == result.Count)).ToList();
-                result.RemoveAll(extraDividers.Contains);
-                var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (i == result.Count || IsPureHeader(result[i + 1]) || result[i + 1].type == ToolbarElementType.Divider)).ToList();
-                result.RemoveAll(extraHeaders.Contains);
+            var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (
+                i == 0 ||
+                result[i - 1].type == ToolbarElementType.Divider ||
+                i == result.Count
+            )).ToList();
+            result.RemoveAll(extraDividers.Contains);
+            var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
+                i == result.Count - 1 ||
+                IsPureHeader(result[i + 1]) ||
+                result[i + 1].type == ToolbarElementType.Divider ||
+                result[i + 1].type == ToolbarElementType.Header && result[i + 1].content is Lite<ToolbarMenuEntity>
+            )).ToList();
+            result.RemoveAll(extraHeaders.Contains);
 
             if (extraDividers.Any() || extraHeaders.Any())
                 goto retry;
@@ -195,9 +203,9 @@ namespace Signum.Engine.Toolbar
             return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
         }
 
-        private static ToolbarResponse ToResponse(ToolbarElementEmbedded element)
+        private static ToolbarResponse? ToResponse(ToolbarElementEmbedded element)
         {
-            if(element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
+            if (element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
             {
                 if (!IsAuthorized(element.Content))
                     return null;
@@ -222,16 +230,16 @@ namespace Signum.Engine.Toolbar
                 if (result.elements.Count == 0)
                     return null;
             }
-            
+
             return result;
         }
 
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
         {
             { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
-            { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.Retrieve()) },
-            { typeof(UserQueryEntity), a => InMemoryFilter(UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a)) },
-            { typeof(UserChartEntity), a => InMemoryFilter(UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a)) },
+            { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.RetrieveAndRemember()) },
+            { typeof(UserQueryEntity), a => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); } },
+            { typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
         };
 
@@ -239,7 +247,7 @@ namespace Signum.Engine.Toolbar
         {
             try
             {
-                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
+                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()!), true);
             }
             catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
             {
@@ -249,13 +257,13 @@ namespace Signum.Engine.Toolbar
                 return false;
             }
         }
-        
+
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {
-            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: true) != null)
+            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: false) != null)
                 return false;
 
-            var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: true);
+            var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: false);
             return isAllowed(entity);
         }
 
@@ -268,16 +276,18 @@ namespace Signum.Engine.Toolbar
     public class ToolbarResponse
     {
         public ToolbarElementType type;
-        public string label;
-        public Lite<Entity> content;
-        public string url;
-        public List<ToolbarResponse> elements;
-        public string iconName;
-        public string iconColor;
+        public string? label;
+        public Lite<Entity>? content;
+        public string? url;
+        public List<ToolbarResponse>? elements;
+        public string? iconName;
+        public string? iconColor;
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? autoRefreshPeriod;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore )]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool openInPopup;
+
+        public override string ToString() => $"{type} {label} {content} {url}";
     }
 }

@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +14,37 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine;
 
 namespace Signum.React.Tree
 {
     [ValidateModelFilter]
     public class TreeController : ControllerBase
     {
+        [HttpGet("api/tree/findLiteLikeByName/{typeName}/{subString}/{count}")]
+        public List<Lite<TreeEntity>> FindTreeLiteLikeByName(string typeName, string subString, int count)
+        {
+            Type type = TypeLogic.GetType(typeName);
+            return giFindTreeLiteLikeByNameGeneric.GetInvoker(type)(subString, count);
+        }
+
+        static GenericInvoker<Func<string, int, List<Lite<TreeEntity>>>> giFindTreeLiteLikeByNameGeneric =
+            new GenericInvoker<Func<string, int, List<Lite<TreeEntity>>>>((subString, count) => FindTreeLiteLikeByNameGeneric<TreeEntity>(subString, count));
+        static List<Lite<TreeEntity>> FindTreeLiteLikeByNameGeneric<T>(string subString, int count)
+            where T : TreeEntity
+        {
+            var parts = subString.Trim().SplitNoEmpty(' ');
+
+            return Database.Query<T>()
+                .Where(a => a.Name.ContainsAll(parts))
+                .OrderBy(a => a.Name.Length)
+                .Take(count)
+                .Select(a => a.ToLite())
+                .OfType<Lite<TreeEntity>>()
+                .ToList();
+        }
+
         [HttpPost("api/tree/findNodes/{typeName}")]
         public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
 
@@ -68,7 +93,7 @@ namespace Signum.React.Tree
 
             var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
                             frozenQuery
-                           .Where(t => request.expandedNodes.Contains(t.Parent().ToLite()))
+                           .Where(t => request.expandedNodes.Contains(t.Parent()!.ToLite()))
                            .SelectMany(t => t.Ascendants())
                            .Select(t => new TreeInfo
                            {
@@ -82,7 +107,6 @@ namespace Signum.React.Tree
 
             return list.Concat(expandedChildren).ToList();
         }
-
 
         static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
         {

@@ -8,17 +8,13 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entit
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { parseIcon } from '../Admin/Dashboard';
+import { coalesceIcon } from '@framework/Operations/ContextualOperations';
+import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
 
-export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
-  render() {
-    if (this.props.dashboard.combineSimilarRows)
-      return this.renderCombinedRows();
-    else
-      return this.renderBasic();
-  }
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity }) {
 
-  renderBasic() {
-    const db = this.props.dashboard;
+  function renderBasic() {
+    const db = p.dashboard;
     const ctx = TypeContext.root(db);
 
     return (
@@ -37,7 +33,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
                   return (
                     <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={this.props.entity} />
+                      <PanelPart ctx={c} entity={p.entity} />
                     </div>
                   );
                 })}
@@ -47,9 +43,8 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
     );
   }
 
-
-  renderCombinedRows() {
-    const db = this.props.dashboard;
+  function renderCombinedRows() {
+    const db = p.dashboard;
     const ctx = TypeContext.root(db);
 
     var rows = mlistItemContext(ctx.subCtx(a => a.parts))
@@ -70,14 +65,11 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
         {combinedRows.map((r, i) =>
           <div className="row row-control-panel" key={"row" + i}>
             {r.columns.orderBy(ctx => ctx.startColumn).map((c, j, list) => {
-
               const last = j == 0 ? undefined : list[j - 1];
-
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
-
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((p, i) => <PanelPart key={i} ctx={p} entity={this.props.entity} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} />)}
                 </div>
               );
             })}
@@ -86,6 +78,11 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
       </div>
     );
   }
+
+  if (p.dashboard.combineSimilarRows)
+    return renderCombinedRows();
+  else
+    return renderBasic();
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {
@@ -172,90 +169,70 @@ export interface PanelPartState {
 }
 
 
-export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
+export function PanelPart(p: PanelPartProps) {
+  const content = p.ctx.value.content;
 
-  state = { component: undefined, lastType: undefined } as PanelPartState;
+  const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
+    [content.Type], { avoidReset: true });
 
-  componentWillMount() {
-    this.loadComponent(this.props);
+  if (state == null || state.lastType == null)
+    return null;
+
+  const part = p.ctx.value;
+
+  const renderer = DashboardClient.partRenderers[content.Type];
+
+  const lite = p.entity ? toLite(p.entity) : undefined;
+
+  if (renderer.withPanel && !renderer.withPanel(content)) {
+    return React.createElement(state.component, {
+      partEmbedded: part,
+      part: content,
+      entity: lite,
+    });
   }
 
-  componentWillReceiveProps(nextProps: PanelPartProps): void {
+  const titleText = part.title ?? getToString(content);
+  const defaultIcon = renderer.defaultIcon(content);
+  const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
+  const color = part.iconColor ?? defaultIcon?.iconColor;
 
-    if (this.state.lastType != nextProps.ctx.value.content!.Type) {
-      this.loadComponent(nextProps);
-    }
-  }
+  const title = !icon ? titleText :
+    <span>
+      <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
+    </span>;
 
-  loadComponent(props: PanelPartProps) {
-    const content = props.ctx.value.content!;
-    this.setState({ component: undefined, lastType: undefined })
-    DashboardClient.partRenderers[content.Type].component()
-      .then(c => this.setState({ component: c, lastType: content.Type }))
-      .done();
-  }
+  var style = part.style == undefined ? undefined : part.style.toLowerCase();
 
-  render() {
-
-    if (!this.state.component)
-      return null;
-
-    const p = this.props.ctx.value;
-    const content = p.content!;
-
-    const renderer = DashboardClient.partRenderers[content.Type];
-
-    const lite = this.props.entity ? toLite(this.props.entity) : undefined;
-
-    if (renderer.withPanel && !renderer.withPanel(content)) {
-      return React.createElement(this.state.component, {
-        partEmbedded: p,
-        part: content,
-        entity: lite,
-      } as DashboardClient.PanelPartContentProps<IPartEntity>);
-    }
-
-    const titleText = p.title || getToString(content);
-    const defaultIcon = renderer.defaultIcon(content);
-    const icon = p.iconName ? parseIcon(p.iconName) : defaultIcon && defaultIcon.icon;
-    const color = p.iconColor || defaultIcon && defaultIcon.iconColor;
-
-    const title = !icon ? titleText :
-      <span>
-        <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
-      </span>;
-
-    var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
-
-    return (
-      <div className={classes("card", style && ("border-" + style), "mb-4")}>
-        <div className={classes("card-header", "sf-show-hover",
-          style && style != "light" && "text-white",
-          style && ("bg-" + style)
-        )}>
-          {renderer.handleEditClick &&
-            <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-              <FontAwesomeIcon icon="edit" />&nbsp;Edit
-                        </a>}
-          &nbsp;
-                    {renderer.handleTitleClick == undefined ? title :
-            <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
-
-        </div>
-        <div className="card-body py-2 px-3">
-          <ErrorBoundary>
-            {
-              React.createElement(this.state.component, {
-                partEmbedded: p,
-                part: content,
-                entity: lite,
-              } as DashboardClient.PanelPartContentProps<IPartEntity>)
-            }
-          </ErrorBoundary>
-        </div>
+  return (
+    <div className={classes("card", style && ("border-" + style), "mb-4")}>
+      <div className={classes("card-header", "sf-show-hover",
+        style && style != "light" && "text-white",
+        style && ("bg-" + style)
+      )}>
+        {renderer.handleEditClick &&
+          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
+            <FontAwesomeIcon icon="edit" />&nbsp;Edit
+          </a>
+        }
+        &nbsp;
+      {renderer.handleTitleClick == undefined ? title :
+          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+        }
       </div>
-    );
-  }
+      <div className="card-body py-2 px-3">
+        <ErrorBoundary>
+          {
+            React.createElement(state.component, {
+              partEmbedded: part,
+              part: content,
+              entity: lite,
+            } as DashboardClient.PanelPartContentProps<IPartEntity>)
+          }
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
 }
 
 

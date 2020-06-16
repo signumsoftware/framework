@@ -55,7 +55,7 @@ export function WorkflowReplacementItemCombo(p : { ctx: TypeContext<WorkflowRepl
 
   const ctx = p.ctx;
   return (
-    <select value={ctx.value.newNode || ""} className="form-control form-control-sm" onChange={handleChange}>
+    <select value={ctx.value.newNode ?? ""} className="form-control form-control-sm" onChange={handleChange}>
       <option value=""> - {symbolNiceName(WorkflowOperation.Delete).toUpperCase()} - </option>
       {p.previewTasks.filter(pt => is(pt.subWorkflow, ctx.value.subWorkflow))
         .map(pt => <option value={pt.bpmnId}>{pt.name}</option>)}

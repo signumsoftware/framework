@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Utilities;
 using Signum.Entities.Omnibox;
@@ -27,7 +27,7 @@ namespace Signum.Entities.Dashboard
 
             foreach (var uq in dashboard)
             {
-                var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
+                var match = OmniboxUtils.Contains(uq, uq.ToString()!, ident)!;
 
                 yield return new DashboardOmniboxResult
                 {
@@ -55,7 +55,7 @@ namespace Signum.Entities.Dashboard
         public string ToStr { get; set; }
         public OmniboxMatch ToStrMatch { get; set; }
 
-        public Lite<DashboardEntity> Dashboard { get; set; }
+        public Lite<DashboardEntity>? Dashboard { get; set; }
 
         public override string ToString()
         {

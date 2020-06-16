@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Signum.Utilities;
@@ -19,12 +19,12 @@ namespace Signum.Entities.SMS
 
         private static void FillDoubleCharacters()
         {
-            LoadDoublePeriod(91, 94);
-            LoadDoublePeriod(123, 126);
+            LoadDoubleRange(91, 94);
+            LoadDoubleRange(123, 126);
             DoubleCharacters.Add('€', (ushort)'€');
         }
 
-        private static void LoadDoublePeriod(int a, int b)
+        private static void LoadDoubleRange(int a, int b)
         {
             for (int i = a; i <= b; i++)
             {
@@ -35,19 +35,19 @@ namespace Signum.Entities.SMS
         private static void FillNormalCharacaters()
         {
             NormalCharacters.Add(' ', (ushort)' ');
-            LoadNormalPeriod(33, 90);
-            LoadNormalPeriod(97, 122);
+            LoadNormalRange(33, 90);
+            LoadNormalRange(97, 122);
 
             LoadNormalRange(10, 13, 95);
             LoadNormalRange(161, 163, 165, 167, 191, 201, 209, 214, 216, 220,
             228, 230, 233, 246, 252);
 
-            LoadNormalPeriod(196, 199);
+            LoadNormalRange(196, 199);
 
-            LoadNormalPeriod(223, 224);
-            LoadNormalPeriod(235, 236);
-            LoadNormalPeriod(241, 242);
-            LoadNormalPeriod(248, 249);
+            LoadNormalRange(223, 224);
+            LoadNormalRange(235, 236);
+            LoadNormalRange(241, 242);
+            LoadNormalRange(248, 249);
         }
 
         private static void LoadNormalRange(params int[] caracter)
@@ -58,7 +58,7 @@ namespace Signum.Entities.SMS
             }
         }
 
-        private static void LoadNormalPeriod(int a, int b)
+        private static void LoadNormalRange(int a, int b)
         {
             for (int i = a; i <= b; i++)
             {
@@ -98,8 +98,6 @@ namespace Signum.Entities.SMS
 
         public static string RemoveNoSMSCharacters(string text)
         {
-            if (text == null)
-                return null;
             StringBuilder sb = new StringBuilder();
             foreach (var c in text.RemoveDiacritics().ToCharArray())
 	        {

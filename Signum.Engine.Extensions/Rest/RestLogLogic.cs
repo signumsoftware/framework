@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -43,14 +43,17 @@ namespace Signum.Engine.Rest
         private static void ExceptionLogic_DeleteRestLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(RestLogEntity).ToTypeEntity());
+            if (dateLimit != null)
+                Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
 
+            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(RestLogEntity).ToTypeEntity());
             if (dateLimit == null)
                 return;
 
-            Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit.Value && a.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string oldRequestBody, string oldResponseBody)
+        public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string? oldRequestBody, string? oldResponseBody)
         {
             var result = new RestDiffResult { previous = oldResponseBody };
 

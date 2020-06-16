@@ -13,31 +13,29 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string? GetName() => Name;
+
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullValidator, AvoidDump]
+        [AvoidDump]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        [NotNullValidator]
+        
         public WorkflowPoolEntity Pool { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
         [NotifyChildProperty]
-        public WorkflowLaneActorsEval ActorsEval { get; set; }
+        public WorkflowLaneActorsEval? ActorsEval { get; set; }
 
-        static Expression<Func<WorkflowLaneEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
         public ModelEntity GetModel()
         {
@@ -48,6 +46,7 @@ namespace Signum.Entities.Workflow
             model.Actors.AssignMList(this.Actors);
             model.ActorsEval = this.ActorsEval;
             model.Name = this.Name;
+            model.CopyMixinsFrom(this);
             return model;
         }
 
@@ -57,6 +56,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.ActorsEval = wModel.ActorsEval;
             this.Actors.AssignMList(wModel.Actors);
+            this.CopyMixinsFrom(wModel);
         }
     }
 
@@ -65,7 +65,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowLaneEntity)this.GetParentEntity();
+            var parent = this.GetParentEntity<WorkflowLaneEntity>();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -112,16 +112,16 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
-        public WorkflowLaneActorsEval ActorsEval { get; set; }
+        public WorkflowLaneActorsEval? ActorsEval { get; set; }
     }
 }

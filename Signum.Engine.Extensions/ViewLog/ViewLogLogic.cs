@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,25 +20,16 @@ namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
-        public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog;
+        public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable>? QueryExecutedLog;
 
-        static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
-            a => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a));
-        [ExpressionField]
-        public static IQueryable<ViewLogEntity> ViewLogs(this Entity a)
-        {
-            return ViewLogsExpression.Evaluate(a);
-        }
+        [AutoExpressionField]
+        public static IQueryable<ViewLogEntity> ViewLogs(this Entity a) => 
+            As.Expression(() => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a)));
         
-        static Expression<Func<Entity, ViewLogEntity>> ViewLogMyLastExpression =
-            e => Database.Query<ViewLogEntity>()
-            .Where(a => a.User.Is(UserEntity.Current) && a.Target.Is(e))
-            .OrderBy(a => a.StartDate).FirstOrDefault();     
-        [ExpressionField]
-        public static ViewLogEntity ViewLogMyLast(this Entity e)
-        {
-            return ViewLogMyLastExpression.Evaluate(e);
-        }
+        [AutoExpressionField]
+        public static ViewLogEntity ViewLogMyLast(this Entity e) => As.Expression(() => e.ViewLogs()
+            .Where(a => a.User.Is(UserEntity.Current))
+            .OrderBy(a => a.StartDate).FirstOrDefault());
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
@@ -86,9 +77,9 @@ namespace Signum.Engine.ViewLog
             return Administrator.DeleteWhereScript(t, f, arg.Id);
         }
 
-        static IDisposable Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest request)
+        static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
         {
-            if (request == null || !LogQuery(request, type))
+            if (request == null || !LogQuery(request, type) || UserHolder.Current == null)
                 return null;
 
             var old = Connector.CurrentLogger;
@@ -100,7 +91,7 @@ namespace Signum.Engine.ViewLog
             var viewLog = new ViewLogEntity
             {
                 Target = QueryLogic.GetQueryEntity(queryName).ToLite(),
-                User = UserHolder.Current?.ToLite(),
+                User = UserHolder.Current!.ToLite(),
                 ViewAction = type.ToString(),
             };
 
@@ -112,7 +103,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                         viewLog.Data = GetData(request, sw);
+                         viewLog.Data = GetData(request!, sw);
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();
@@ -171,7 +162,7 @@ namespace Signum.Engine.ViewLog
             Second.Write(buffer, index, count);
         }
 
-        public override void Write(string value)
+        public override void Write(string? value)
         {
             First.Write(value);
             Second.Write(value);

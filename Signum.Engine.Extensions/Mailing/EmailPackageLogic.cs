@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Mailing;
@@ -19,29 +19,17 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailPackageLogic
     {
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> MessagesExpression =
-            p => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(p));
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p)
-        {
-            return MessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p) => 
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(p)));
 
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> RemainingMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending);
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p)
-        {
-            return RemainingMessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p) => 
+            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending));
 
-        static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> ExceptionMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.SentException);
-        [ExpressionField]
-        public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p)
-        {
-            return ExceptionMessagesExpression.Evaluate(p);
-        }
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p) => 
+            As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.SentException));
 
 
         public static void Start(SchemaBuilder sb)
@@ -98,8 +86,11 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol converter)
+        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol? converter)
         {
+            if (converter == null)
+                return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template } }.CreateLines(targets));
+
             return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template, converter } }.CreateLines(targets));
         }
     }
@@ -109,7 +100,7 @@ namespace Signum.Engine.Mailing
     {
         public virtual void Execute(ExecutingProcess executingProcess)
         {
-            PackageEntity package = (PackageEntity)executingProcess.Data;
+            PackageEntity package = (PackageEntity)executingProcess.Data!;
 
             var args = package.OperationArgs;
             var template = args.GetArg<Lite<EmailTemplateEntity>>();
@@ -131,7 +122,7 @@ namespace Signum.Engine.Mailing
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;          
+            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data!;          
 
             List<Lite<EmailMessageEntity>> emails = package.RemainingMessages()
                                                 .OrderBy(e => e.CreationDate)
@@ -166,7 +157,7 @@ namespace Signum.Engine.Mailing
                                 {
                                     using (Transaction tr = Transaction.ForceNew())
                                     {
-                                        var nm = m.ToLite().Retrieve();
+                                        var nm = m.ToLite().RetrieveAndRemember();
                                         nm.SendRetries += 1;
                                         nm.State = EmailMessageState.ReadyToSend;
                                         nm.Save();

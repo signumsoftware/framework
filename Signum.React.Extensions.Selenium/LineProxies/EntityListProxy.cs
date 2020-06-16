@@ -40,7 +40,7 @@ namespace Signum.React.Selenium
             return this.ListElement.Find().FindElements(By.CssSelector("option")).Count;
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }

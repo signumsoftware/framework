@@ -9,18 +9,14 @@ namespace Signum.Entities.Dynamic
     [Mixin(typeof(DisabledMixin))]
     public class DynamicCSSOverrideEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), UniqueIndex]
+        [StringLengthValidator(Min = 3, Max = 100), UniqueIndex]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicCSSOverrideEntity, string>> ToStringExpression = @this => @this.Name;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Name);
     }
 
     [AutoInit]

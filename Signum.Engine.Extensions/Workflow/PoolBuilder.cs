@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Utilities;
@@ -51,8 +51,8 @@ namespace Signum.Engine.Workflow
                          .Set(a => a.To, a => newTo)
                          .Execute();
 
-                         osf.Entity.From = newFrom;
-                         osf.Entity.To = newTo;
+                         osf.Entity.From = newFrom!;
+                         osf.Entity.To = newTo!;
                          osf.Entity.SetCleanModified(false);
                      }
                  });
@@ -151,7 +151,7 @@ namespace Signum.Engine.Workflow
                 )).ToList();
             }
 
-            internal void DeleteAll(Locator locator)
+            internal void DeleteAll(Locator? locator)
             {
                 foreach (var lb in lanes.Values)
                 {

@@ -18,12 +18,12 @@ namespace Signum.Engine.Excel
 {
     public static class PlainExcelGenerator
     {
-        public static byte[] Template { get; set; }
-        public static CellBuilder CellBuilder { get; set; }
+        public static byte[] Template { get; set; } = null!;
+        public static CellBuilder CellBuilder { get; set; } = null!;
 
         static PlainExcelGenerator()
         {
-            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx"));
+            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx")!);
         }
 
         public static void SetTemplate(Stream templateStream)
@@ -114,19 +114,19 @@ namespace Signum.Engine.Excel
                         .Max(f => (uint) f.NumberFormatId)+1;
 
                     var decimalCellFormat = ss.CellFormats.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
-                    foreach (var (key, styleIndex) in CellBuilder.CustomDecimalStyles)
+                    foreach (var kvp in CellBuilder.CustomDecimalStyles)
                     {
                         var numberingFormat = new NumberingFormat
                         {
                             NumberFormatId = maxIndex++,
-                            FormatCode = key
+                            FormatCode = kvp.Key
                         };
                         ss.NumberingFormats.AppendChild(numberingFormat);
                         var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
                         cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
                         ss.CellFormats.AppendChild(cellFormat);
                         ss.CellFormats.Count = (uint)ss.CellFormats.ChildElements.Count;
-                        if (ss.CellFormats.Count != styleIndex+1)
+                        if (ss.CellFormats.Count != kvp.Value + 1)
                         {
                             throw new InvalidOperationException("Unexpected CellFormats count");
                         }
@@ -204,8 +204,8 @@ namespace Signum.Engine.Excel
 
                     from r in results
                     select (from c in members
-                            let template = formats.TryGetC(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
-                            select CellBuilder.Cell(c.Getter(r), template)).ToRow()
+                            let template = formats.TryGetCN(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
+                            select CellBuilder.Cell(c.Getter!(r), template)).ToRow()
                 }.ToSheetData());
 
                 workbookPart.Workbook.Save();

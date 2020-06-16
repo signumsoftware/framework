@@ -41,7 +41,7 @@ namespace Signum.React.Selenium
             RemoveElementIndex(index).Find().Click();
         }
 
-        public EntityInfoProxy EntityInfo(int index)
+        public EntityInfoProxy? EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }
@@ -53,7 +53,7 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), Element, lite);
         }
 
         public FrameModalProxy<T> View<T>(int index) where T : ModifiableEntity

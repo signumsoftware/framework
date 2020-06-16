@@ -12,19 +12,13 @@ import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
-export interface SystemWordTemplateEntity extends Entities.Entity {
-  Type: "SystemWordTemplate";
-  fullClassName?: string | null;
-}
-
 export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
 export interface WordAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "WordAttachment";
-  fileName?: string | null;
-  wordTemplate?: Entities.Lite<WordTemplateEntity> | null;
-  overrideModel?: Entities.Lite<Entities.Entity> | null;
-  modelConverter?: Templating.ModelConverterSymbol | null;
+  fileName: string;
+  wordTemplate: Entities.Lite<WordTemplateEntity>;
+  overrideModel: Entities.Lite<Entities.Entity>;
+  modelConverter: Templating.ModelConverterSymbol;
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
@@ -32,19 +26,25 @@ export interface WordConverterSymbol extends Entities.Symbol {
   Type: "WordConverter";
 }
 
+export const WordModelEntity = new Type<WordModelEntity>("WordModel");
+export interface WordModelEntity extends Entities.Entity {
+  Type: "WordModel";
+  fullClassName: string;
+}
+
 export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
   Type: "WordTemplate";
-  name?: string | null;
-  query?: Basics.QueryEntity | null;
-  systemWordTemplate?: SystemWordTemplateEntity | null;
-  culture?: Signum.CultureInfoEntity | null;
-  applicable?: Templating.TemplateApplicableEval | null;
-  disableAuthorization?: boolean;
-  template?: Entities.Lite<Files.FileEntity> | null;
-  fileName?: string | null;
-  wordTransformer?: WordTransformerSymbol | null;
-  wordConverter?: WordConverterSymbol | null;
+  name: string;
+  query: Basics.QueryEntity;
+  model: WordModelEntity | null;
+  culture: Signum.CultureInfoEntity;
+  applicable: Templating.TemplateApplicableEval | null;
+  disableAuthorization: boolean;
+  template: Entities.Lite<Files.FileEntity> | null;
+  fileName: string;
+  wordTransformer: WordTransformerSymbol | null;
+  wordConverter: WordConverterSymbol | null;
 }
 
 export module WordTemplateMessage {
@@ -62,7 +62,7 @@ export module WordTemplateOperation {
   export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Save");
   export const Delete : Entities.DeleteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Delete");
   export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordReport");
-  export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate");
+  export const CreateWordTemplateFromWordModel : Entities.ConstructSymbol_From<WordTemplateEntity, WordModelEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromWordModel");
 }
 
 export module WordTemplatePermission {

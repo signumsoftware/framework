@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.ComponentModel;
@@ -12,7 +12,7 @@ namespace Signum.Entities.Disconnected
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string MachineName { get; set; }
 
         public DisconnectedMachineState State { get; set; }
@@ -23,30 +23,21 @@ namespace Signum.Entities.Disconnected
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SeedMax { get; set; }
 
-        static Expression<Func<DisconnectedMachineEntity, Interval<int>>> SeedIntervalExpression =
-            entity => new Interval<int>(entity.SeedMin, entity.SeedMax);
-        [HiddenProperty, ExpressionField]
-        public Interval<int> SeedInterval
-        {
-            get { return SeedIntervalExpression.Evaluate(this); }
-        }
+        [AutoExpressionField]
+        public Interval<int> SeedInterval => As.Expression(() => new Interval<int>(SeedMin, SeedMax));
 
-        static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.MachineName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => MachineName);
 
-        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable =
-            Statics.SessionVariable<Lite<DisconnectedMachineEntity>>("disconectedMachine");
-        public static Lite<DisconnectedMachineEntity> Current
+        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>?> CurrentVariable =
+            Statics.SessionVariable<Lite<DisconnectedMachineEntity>?>("disconectedMachine");
+        public static Lite<DisconnectedMachineEntity>? Current
         {
             get { return CurrentVariable.Value; }
             set { CurrentVariable.Value = value; }
         }
 
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(SeedMax) && SeedMax <= SeedMin)
                 return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi, NicePropertyName(() => SeedMin));
@@ -75,7 +66,7 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedCreatedMixin : MixinEntity
     {
-        DisconnectedCreatedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedCreatedMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         public bool DisconnectedCreated { get; set; }
     }
@@ -83,11 +74,11 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedSubsetMixin : MixinEntity
     {
-        DisconnectedSubsetMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+        DisconnectedSubsetMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         public long? LastOnlineTicks { get; set; }
 
-        public Lite<DisconnectedMachineEntity> DisconnectedMachine { get; set; }
+        public Lite<DisconnectedMachineEntity>? DisconnectedMachine { get; set; }
     }
 
     [Serializable]

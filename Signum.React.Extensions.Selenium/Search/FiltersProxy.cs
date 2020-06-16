@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities;
 
 namespace Signum.React.Selenium
 {
@@ -15,28 +16,40 @@ namespace Signum.React.Selenium
             this.Element = element;
         }
 
-        public IEnumerable<IWebElement> Filters()
+        public IEnumerable<FilterProxy> Filters()
         {
-            return Element.FindElements(By.CssSelector("table.sf-filter-table > tbody > tr"));
+            return Element.FindElements(By.XPath("table/tbody/tr")).Select(a =>
+                a.HasClass("sf-filter-condition") ? new FilterConditionProxy(a): 
+                a.HasClass("sf-filter-group") ? new FilterGroupProxy(a) : (FilterProxy?)null).NotNull().ToList();
         }
 
-        public FilterConditionOptionProxy GetNewFilter(Action action)
+        public FilterProxy GetNewFilter(Action action)
         {
             var oldFilters = this.Filters();
             action();
-            var newFilter = this.Element.GetDriver().Wait(() => this.Filters().Except(oldFilters).SingleOrDefault(), () => "new filter to appear");
+            var newFilter = this.Element.GetDriver().Wait(() => this.Filters().Skip(oldFilters.Count()).SingleOrDefault(), () => "new filter to appear");
 
-            return new FilterConditionOptionProxy(newFilter);
+            return newFilter;
         }
 
         public WebElementLocator AddFilterButton
         {
-            get { return this.Element.WithLocator(By.ClassName("sf-line-button sf-create")); }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-create-condition")); }
         }
 
-        public FilterConditionOptionProxy AddFilter()
+        public WebElementLocator AddGroupButton
         {
-            return GetNewFilter(() => this.AddFilterButton.Find().Click());
+            get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-create-group")); }
+        }
+
+        public FilterConditionProxy AddFilter()
+        {
+            return (FilterConditionProxy)GetNewFilter(() => this.AddFilterButton.Find().Click());
+        }
+
+        public FilterGroupProxy AddGroup()
+        {
+            return (FilterGroupProxy)GetNewFilter(() => this.AddGroupButton.Find().Click());
         }
 
         public void AddFilter(string token, FilterOperation operation, object value)
@@ -52,9 +65,9 @@ namespace Signum.React.Selenium
             get { return this.AddFilterButton.CombineCss(":not([disabled])").IsPresent(); }
         }
 
-        public FilterConditionOptionProxy GetFilter(int index)
+        public FilterProxy GetFilter(int index)
         {
-            return new FilterConditionOptionProxy(this.Filters().ElementAt(index));
+            return this.Filters().ElementAt(index);
         }
 
 

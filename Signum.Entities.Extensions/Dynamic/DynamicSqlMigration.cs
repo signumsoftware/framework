@@ -14,27 +14,23 @@ namespace Signum.Entities.Dynamic
         public DateTime CreationDate { get; set; }
 
         [ImplementedBy(typeof(UserEntity))]
-        [NotNullValidator]
+        
         public Lite<IUserEntity> CreatedBy { get; set; }
 
         public DateTime? ExecutionDate { get; set; }
 
         [ImplementedBy(typeof(UserEntity))]
-        public Lite<IUserEntity> ExecutedBy { get; set; }
+        public Lite<IUserEntity>? ExecutedBy { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        [StringLengthValidator(Min = 3, Max = 200)]
         public string Comment { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue, MultiLine = true)]
+        [StringLengthValidator(Max = int.MaxValue, MultiLine = true)]
         public string Script { get; set; }
 
 
-        static Expression<Func<DynamicSqlMigrationEntity, string>> ToStringExpression = @this => @this.Comment.Etc(100);
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Comment.Etc(100));
     }
 
     [AutoInit]
@@ -58,21 +54,17 @@ namespace Signum.Entities.Dynamic
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string ReplacementKey { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string OldName { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        [StringLengthValidator(Max = 200)]
         public string NewName { get; set; }
 
-        static Expression<Func<DynamicRenameEntity, string>> ToStringExpression = @this => @this.ReplacementKey + ": " + @this.OldName + " -> " + @this.NewName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => ReplacementKey + ": " + OldName + " -> " + NewName);
     }
 
 

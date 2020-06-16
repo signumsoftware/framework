@@ -15,10 +15,10 @@ namespace Signum.Entities.Printing
         [Ignore]
         public FileTypeSymbol TestFileType { get; set; }
 
-        [NotNullValidator]
+        
         public FilePathEmbedded File { get; set; }
 
-        public Lite<PrintPackageEntity> Package { get; set; }
+        public Lite<PrintPackageEntity>? Package { get; set; }
 
         public DateTime? PrintedOn { get; set; }
 
@@ -39,7 +39,7 @@ namespace Signum.Entities.Printing
                 { PrintLineState.Cancelled,         false, null  },
                 { PrintLineState.PrintedAndDeleted, true,  null  }
             };
-        protected override string PropertyValidation(PropertyInfo pi)
+        protected override string? PropertyValidation(PropertyInfo pi)
         {
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }

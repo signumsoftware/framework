@@ -5,129 +5,126 @@ import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
+import { useStateWithPromise } from '@framework/Hooks'
 
-export default class ChangePassword extends React.Component<{}, { modelState?: ModelState; success?: boolean }> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {};
-  }
+export default function ChangePassword() {
+  const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
+  const [success, setSuccess] = React.useState(false);
 
-  handleSubmit(e: React.FormEvent<any>) {
+  const oldPassword = React.useRef<HTMLInputElement>(null);
+  const newPassword = React.useRef<HTMLInputElement>(null);
+  const newPassword2 = React.useRef<HTMLInputElement>(null);
+
+  function handleSubmit(e: React.FormEvent<any>) {
 
     e.preventDefault();
 
-    this.setState({ modelState: { ...this.validateOldPassword(), ...this.validateNewPassword(true) } }, () => {
+    setModelState({ ...validateOldPassword(), ...validateNewPassword(true) }).then(ms => {
 
-      if (this.state.modelState && Dic.getValues(this.state.modelState).some(array => array.length > 0))
+      if (ms && Dic.getValues(ms).some(array => array.length > 0))
         return;
 
       const request: AuthClient.API.ChangePasswordRequest = {
-        oldPassword: this.oldPassword.value,
-        newPassword: this.newPassword.value,
+        oldPassword: oldPassword.current!.value,
+        newPassword: newPassword.current!.value,
       };
 
       AuthClient.API.changePassword(request)
         .then(lr => {
-          AuthClient.setAuthToken(lr.token);
+          AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           Navigator.resetUI();
-          this.setState({ success: true });
+          setSuccess(true);
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
-            this.setState({ modelState: e.modelState });
+            setModelState(e.modelState).done();
         })
         .done();
-    });
+
+    }).done();
   }
 
-  oldPassword!: HTMLInputElement;
-  newPassword!: HTMLInputElement;
-  newPassword2!: HTMLInputElement;
-
-
-  error(field: string): string | undefined {
-    var ms = this.state.modelState;
+  function error(field: string): string | undefined {
+    var ms = modelState;
 
     return ms && ms[field] && ms[field].length > 0 ? ms[field][0] : undefined;
   }
 
-  handleOldPasswordBlur = (event: React.SyntheticEvent<any>) => {
-    this.setState({ modelState: { ...this.state.modelState, ...this.validateOldPassword() } as ModelState });
+  function handleOldPasswordBlur(event: React.SyntheticEvent<any>) {
+    setModelState({ ...modelState, ...validateOldPassword() }).done();
   }
 
-  handleNewPasswordBlur = (event: React.SyntheticEvent<any>) => {
-    this.setState({ modelState: { ...this.state.modelState, ...this.validateNewPassword(event.currentTarget == this.newPassword2) } as ModelState });
+  function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
+    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2!.current) }).done();
   }
 
-  validateOldPassword(): ModelState {
+  function validateOldPassword(): ModelState {
 
     return {
-      ["oldPassword"]: this.oldPassword.value ? [] : [AuthMessage.PasswordMustHaveAValue.niceToString()]
+      ["oldPassword"]: oldPassword.current!.value ? [] : [AuthMessage.PasswordMustHaveAValue.niceToString()]
     };
   }
 
-  validateNewPassword(isSecond: boolean) {
+  function validateNewPassword(isSecond: boolean) {
     return {
       ["newPassword"]:
         !isSecond ? [] :
-          !this.newPassword.value && !this.newPassword2.value ? [AuthMessage.PasswordMustHaveAValue.niceToString()] :
-            this.newPassword2.value != this.newPassword.value ? [AuthMessage.PasswordsAreDifferent.niceToString()] :
+          !newPassword.current!.value && !newPassword2.current!.value ? [AuthMessage.PasswordMustHaveAValue.niceToString()] :
+            newPassword2.current!.value != newPassword.current!.value ? [AuthMessage.PasswordsAreDifferent.niceToString()] :
               []
     }
   }
 
-
-  render() {
-
-    if (this.state.success) {
-      return (
-        <div>
-          <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
-          <p>{AuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
-        </div>
-      );
-    }
-
+  if (success) {
     return (
-      <form onSubmit={(e) => this.handleSubmit(e)}>
-        <div className="row">
-          <div className="offset-sm-2 col-sm-6">
-            <h2 className="sf-entity-title">{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString()}</h2>
-            <p>{AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString()}</p>
-          </div>
-        </div>
-        <div>
-          <div className={classes("form-group row", this.error("oldPassword") && "has-error")}>
-            <label className="col-form-label col-sm-2">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString()}</label>
-            <div className="col-sm-4">
-              <input type="password" className="form-control" id="currentPassword" ref={r => this.oldPassword = r!} onBlur={this.handleOldPasswordBlur} />
-              {this.error("oldPassword") && <span className="help-block">{this.error("oldPassword")}</span>}
-            </div>
-          </div>
-          <div className={classes("form-group row", this.error("newPassword") && "has-error")}>
-            <label className="col-form-label col-sm-2">{AuthMessage.EnterTheNewPassword.niceToString()}</label>
-            <div className="col-sm-4">
-              <input type="password" className="form-control" id="newPassword" ref={r => this.newPassword = r!} onBlur={this.handleNewPasswordBlur} />
-              {this.error("newPassword") && <span className="help-block">{this.error("newPassword")}</span>}
-            </div>
-          </div>
-          <div className={classes("form-group row", this.error("newPassword") && "has-error")}>
-            <label className="col-form-label col-sm-2">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}</label>
-            <div className="col-sm-4">
-              <input type="password" className="form-control" id="newPassword2" ref={r => this.newPassword2 = r!} onBlur={this.handleNewPasswordBlur} />
-              {this.error("newPassword") && <span className="help-block">{this.error("newPassword")}</span>}
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="offset-sm-2 col-sm-6">
-            <button type="submit" className="btn btn-primary" id="changePassword">{AuthMessage.ChangePassword.niceToString()}</button>
-          </div>
-        </div>
-      </form>
+      <div>
+        <h2 className="sf-entity-title">{AuthMessage.PasswordChanged.niceToString()}</h2>
+        <p>{AuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+      </div>
     );
   }
 
+  return (
+    <form onSubmit={(e) => handleSubmit(e)} className="w-100">
+      <div className="row">
+        <div className="col-md-6 offset-md-3">
+          <h2 className="sf-entity-title">{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString()}</h2>
+          <p>{AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString()}</p>
+        </div>
+      </div>
+      <div className="row">
+      <div className="col-md-6 offset-md-3">
+        <div className={classes("form-group", error("oldPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString()}</label>
+          <div>
+            <input type="password" className="form-control" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
+            {error("oldPassword") && <span className="help-block">{error("oldPassword")}</span>}
+          </div>
+        </div>
+        <div className={classes("form-group", error("newPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.EnterTheNewPassword.niceToString()}</label>
+          <div>
+            <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
+            {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+          </div>
+        </div>
+        <div className={classes("form-group", error("newPassword") && "has-error")}>
+          <label className="col-form-label">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString()}</label>
+          <div>
+            <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
+            {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+          </div>
+        </div>
+      </div>
+      </div>
+      <div className="row">
+        <div className="col-md-6 offset-md-3">
+          <button type="submit" className="btn btn-primary" id="changePassword">{AuthMessage.ChangePassword.niceToString()}</button>
+        </div>
+      </div>
+    </form>
+  );
 }
+  

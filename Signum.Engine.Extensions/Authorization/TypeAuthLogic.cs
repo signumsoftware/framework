@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Engine.Maps;
@@ -15,7 +15,7 @@ namespace Signum.Engine.Authorization
 {
     public static partial class TypeAuthLogic
     {
-        static TypeAuthCache cache;
+        static TypeAuthCache cache = null!;
 
         public static IManualAuth<Type, TypeAllowedAndConditions> Manual { get { return cache; } }
 
@@ -43,6 +43,11 @@ namespace Signum.Engine.Authorization
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
+                sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
+                {
+                    return TypeAuthLogic.OnIsDelete(query.ElementType);
+                };
+
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToEntity.Keys.ToList() : null);
@@ -60,10 +65,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null!)));
         }
 
-        static string Schema_IsAllowedCallback(Type type, bool inUserInterface)
+        static string? Schema_IsAllowedCallback(Type type, bool inUserInterface)
         {
             var allowed = GetAllowed(type);
 
@@ -79,7 +84,7 @@ namespace Signum.Engine.Authorization
             {
                 TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
-                var requested = ident.IsNew ? TypeAllowedBasic.Create : TypeAllowedBasic.Modify;
+                var requested = TypeAllowedBasic.Write;
 
                 var min = access.MinDB();
                 var max = access.MaxDB();
@@ -134,10 +139,10 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return new TypeAllowedAndConditions(TypeAllowed.Create);
+                return new TypeAllowedAndConditions(TypeAllowed.Write);
 
             if (!TypeLogic.TypeToEntity.ContainsKey(type))
-                return new TypeAllowedAndConditions(TypeAllowed.Create);
+                return new TypeAllowedAndConditions(TypeAllowed.Write);
 
             if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
@@ -199,14 +204,14 @@ namespace Signum.Engine.Authorization
         public TypeAllowedAndConditions Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, TypeAllowedAndConditions>> baseValues)
         {
             if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
+                return MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
             else
-                return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create);
+                return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
         }
 
         static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
         {
-            TypeAllowed result = TypeAllowed.Create;
+            TypeAllowed result = TypeAllowed.Write;
 
             foreach (var item in collection)
             {
@@ -229,7 +234,7 @@ namespace Signum.Engine.Authorization
                 if (item > result)
                     result = item;
 
-                if (result == TypeAllowed.Create)
+                if (result == TypeAllowed.Write)
                     return result;
 
             }
@@ -238,7 +243,7 @@ namespace Signum.Engine.Authorization
 
         public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleEntity> role)
         {
-            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
+            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Write : TypeAllowed.None);
             return new ConstantFunctionButEnums(taac).GetValue;
         }
 

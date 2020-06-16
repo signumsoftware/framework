@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -10,10 +10,10 @@ namespace Signum.Entities.Rest
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class RestLogEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string HttpMethod { get; set; }
+        [StringLengthValidator(Max = 100)]
+        public string? HttpMethod { get; set; }
 
-        [NotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, SqlDbType(Size = MaxValue)]
         public string Url { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -22,43 +22,42 @@ namespace Signum.Entities.Rest
 
         public DateTime? ReplayDate { get; set; }
 
-        [NotNullable, SqlDbType(Size = MaxValue)]
-        public string RequestBody { get; set; }
+        [SqlDbType(Size = MaxValue)]
+        public string? RequestBody { get; set; }
 
-        [NotNullValidator, PreserveOrder]
+        [PreserveOrder]
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
-        public Lite<IUserEntity> User { get; set; }
+        public Lite<IUserEntity>? User { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string UserHostAddress { get; set; }
+        public string? UserHostAddress { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string UserHostName { get; set; }
+        public string? UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Referrer { get; set; }
+        public string? Referrer { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         public string Controller { get; set; }
 
-        [Nullable, SqlDbType(Size = 100)]
-        public string ControllerName { get; set; }
+        [SqlDbType(Size = 100)]
+        public string? ControllerName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         public string Action { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string MachineName { get; set; }
+        public string? MachineName { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string ApplicationName { get; set; }
+        public string? ApplicationName { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
+        public Lite<ExceptionEntity>? Exception { get; set; }
 
         [SqlDbType(Size = MaxValue)]
-        public string ResponseBody { get; set; }
-
+        public string? ResponseBody { get; set; }
 
         public RestLogReplayState? ReplayState { get; set; }
 
@@ -76,7 +75,7 @@ namespace Signum.Entities.Rest
     [Serializable]
     public class QueryStringValueEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, SqlDbType(Size = MaxValue)]
         public string Key { get; set; }
 
         [SqlDbType(Size = MaxValue)]
@@ -91,7 +90,7 @@ namespace Signum.Entities.Rest
 
     public class RestDiffResult
     {
-        public string previous { get; set; }
+        public string? previous { get; set; }
         public string current { get; set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
     }

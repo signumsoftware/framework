@@ -1,4 +1,4 @@
-﻿using CNTK;
+using CNTK;
 using Signum.Entities.MachineLearning;
 using System;
 using System.Collections;
@@ -75,7 +75,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             var outputs = new Dictionary<Variable, Value>()
             {
-                { func.Output, null},
+                { func.Output, null!},
             };
 
             func.Evaluate(inputs, outputs, device);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 
@@ -11,7 +11,7 @@ namespace Signum.React.Selenium
         {
         }
 
-        public void SetLite(Lite<IEntity> value)
+        public void SetLite(Lite<IEntity>? value)
         {
             if (this.EntityInfo() != null)
                 this.Remove();
@@ -27,7 +27,7 @@ namespace Signum.React.Selenium
             }
         }
 
-        public Lite<Entity> GetLite()
+        public Lite<Entity>? GetLite()
         {
             return EntityInfo()?.ToLite();
         }
@@ -39,12 +39,12 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), Element,  lite);
         }
 
         public void AutoCompleteBasic(Lite<IEntity> lite)
         {
-            AutoCompleteBasic(AutoCompleteElement.Find(), lite);
+            AutoCompleteBasic(AutoCompleteElement.Find(), Element, lite);
         }
 
         public FrameModalProxy<T> View<T>() where T : ModifiableEntity
@@ -52,7 +52,7 @@ namespace Signum.React.Selenium
             return base.ViewInternal<T>();
         }
 
-        public EntityInfoProxy EntityInfo()
+        public EntityInfoProxy? EntityInfo()
         {
             return EntityInfoInternal(null);
         }

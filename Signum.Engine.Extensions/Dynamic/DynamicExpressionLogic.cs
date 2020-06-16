@@ -76,12 +76,12 @@ namespace Signum.Engine.Dynamic
                     try
                     {
                         if (!Administrator.ExistsTable<DynamicExpressionEntity>())
-                            return new Dictionary<string, Dictionary<string, Tuple<string, string>>>();
+                            return new Dictionary<string, Dictionary<string, FormatUnit>>();
 
                         using (ExecutionMode.Global())
                             return Database.Query<DynamicExpressionEntity>()
                             .Where(a => a.Format != null || a.Unit != null)
-                            .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => new Tuple<string, string>(a.Format, a.Unit)));
+                            .AgGroupToDictionary(a => a.FromType!, gr => gr.ToDictionary(a => a.Name!, a => new FormatUnit(a.Format, a.Unit)));
                     }
                     finally
                     {
@@ -92,6 +92,7 @@ namespace Signum.Engine.Dynamic
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
             }
         }
+
 
         public static void WriteDynamicStarter(StringBuilder sb, int indent) {
 
@@ -114,11 +115,7 @@ namespace Signum.Engine.Dynamic
                     var dtcg = new DynamicExpressionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, expressions, DynamicCode.Namespaces);
 
                     var content = dtcg.GetFileCode();
-                    result.Add(new CodeFile
-                    {
-                        FileName = "CodeGenExpressionStarter.cs",
-                        FileContent = content,
-                    });
+                    result.Add(new CodeFile("CodeGenExpressionStarter.cs", content));
                     return result;
                 }
             }
@@ -133,7 +130,6 @@ namespace Signum.Engine.Dynamic
     {
         public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
-        public string TypeName { get; private set; }
         public List<DynamicExpressionEntity> Expressions { get; private set; }
 
         public DynamicExpressionCodeGenerator(string @namespace, List<DynamicExpressionEntity> expressions, HashSet<string> usings)
@@ -164,8 +160,8 @@ namespace Signum.Engine.Dynamic
             var fieldNames = this.Expressions
                 .GroupBy(a => a.Name)
                 .SelectMany(gr => gr.Count() == 1 ?
-                new[] { KVP.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
-                gr.Select(a => KVP.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
+                new[] { KeyValuePair.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
+                gr.Select(a => KeyValuePair.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
                 ).ToDictionaryEx("DynamicExpressions");
 
             var namesToTranslate = this.Expressions.Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName).Select(a => a.Name).Distinct();
@@ -218,7 +214,7 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        private string GetNiceNameCode(DynamicExpressionEntity value)
+        private string? GetNiceNameCode(DynamicExpressionEntity value)
         {
             switch (value.Translation)
             {

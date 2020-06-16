@@ -9,9 +9,9 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
-import ButtonBar from '@framework/Frames/ButtonBar';
+import { ButtonBarManager } from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
@@ -19,7 +19,7 @@ import { QueryRequest } from "@framework/FindOptions";
 import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
-import { DropdownItem } from '@framework/Components';
+import { Dropdown } from 'react-bootstrap';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
@@ -59,7 +59,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
   Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
     onClick: ctx => {
 
-      var promise: Promise<string | undefined> = ctx.entity.systemWordTemplate ? API.getConstructorType(ctx.entity.systemWordTemplate) : Promise.resolve(undefined);
+      var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
       promise
         .then<Response | undefined>(ct => {
           var template = toLite(ctx.entity);
@@ -69,7 +69,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
               .then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
           else {
             var s = settings[ct];
-            var promise = (s && s.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.construct(ct).then(a => a && Navigator.view(a)));
+            var promise = (s?.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.constructPack(ct).then(a => a && Navigator.view(a)));
             return promise.then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
           }
         })
@@ -95,7 +95,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     });
 
   if (options.entityButton) {
-    ButtonBar.onButtonBarRender.push(getEntityWordButtons);
+    ButtonBarManager.onButtonBarRender.push(getEntityWordButtons);
   }
 }
 
@@ -132,10 +132,10 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
       return {
         header: WordTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
-          <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+          <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
             <FontAwesomeIcon icon={["far", "file-word"]} className="icon" />
             {wt.toStr}
-          </DropdownItem>
+          </Dropdown.Item>
         )
       } as MenuItemBlock;
     });
@@ -144,7 +144,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
 export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
   Navigator.API.fetchAndForget(wt)
-    .then(wordTemplate => wordTemplate.systemWordTemplate ? API.getConstructorType(wordTemplate.systemWordTemplate) : Promise.resolve(undefined))
+    .then(wordTemplate => wordTemplate.model ? API.getConstructorType(wordTemplate.model) : Promise.resolve(undefined))
     .then(ct => {
       if (!ct || ctx.lites.length == 1 && ctx.lites.single().EntityType == ct)
         return API.createAndDownloadReport({ template: wt, lite: ctx.lites.single() });
@@ -179,12 +179,12 @@ export namespace API {
     return ajaxPostRaw({ url: "~/api/word/createReport" }, request);
   }
 
-  export function getConstructorType(systemWordTemplate: SystemWordTemplateEntity): Promise<string> {
-    return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
+  export function getConstructorType(wordModel: WordModelEntity): Promise<string> {
+    return ajaxPost({ url: "~/api/word/constructorType" }, wordModel);
   }
 
   export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {
-    return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 }
 
@@ -201,3 +201,12 @@ declare module '@framework/FindOptions' {
     wordTemplates?: Array<Lite<WordTemplateEntity>>;
   }
 }
+
+declare module '@framework/SearchControl/SearchControlLoaded' {
+
+  export interface ShowBarExtensionOption {
+    showWordReport?: boolean;
+  }
+}
+
+

@@ -1,0 +1,22 @@
+{
+  "name": "signum-react-extensions",
+  "version": "1.0.0",
+  "description": "Resable modules to use on top of Signum Framework",
+  "repository": "https://github.com/signumsoftware/extensions",
+  "keywords": [
+    "Signum",
+    "Framework",
+    "React",
+    "LINQ",
+    "Bootstrap",
+    "D3"
+  ],
+  "author": "Signum Software",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "16.9.15",
+    "@types/codemirror": "0.0.80",
+    "@types/googlemaps": "3.38.1",
+    "@types/react-rte": "0.16.1"
+  }
+}

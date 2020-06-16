@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import * as numbro from 'numbro'
+import numbro from 'numbro'
 import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -9,7 +9,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregateAndPinned
+  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
@@ -18,15 +18,13 @@ import {
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
-import ChartRequestView from './Templates/ChartRequestView'
+import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
-import { Dic } from '@framework/Globals';
-import { resetPassword } from '../Authorization/AuthClient';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
 
@@ -67,7 +65,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
     registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
     registerChartScriptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
   }
-  }
+}
 
 export interface ChartComponentProps {
   data?: ChartTable;
@@ -104,7 +102,7 @@ export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()
 export namespace ButtonBarChart {
 
   interface ButtonBarChartContext {
-    chartRequestView: ChartRequestView;
+    chartRequestView: ChartRequestViewHandle;
     chartRequest: ChartRequestModel;
   }
 
@@ -310,12 +308,12 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
         cp = ChartParameterEmbedded.New();
         cp.name = sp.name;
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        cp.value = defaultParameterValue(sp, column && column.token && column.token.token);
+        cp.value = defaultParameterValue(sp, column?.token && column.token.token);
       }
       else {
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column && column.token && column.token.token))
-          cp.value = defaultParameterValue(sp, column && column.token && column.token.token);
+        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token))
+          cp.value = defaultParameterValue(sp, column?.token && column.token.token);
         cp.modified = true;
       }
 
@@ -393,7 +391,7 @@ export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isSh
 
     col.orderByType = newOrder;
     if (col.orderByIndex == null)
-      col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) || 0) + 1;
+      col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) ?? 0) + 1;
   }
   
   col.modified = true;
@@ -403,11 +401,11 @@ export module Encoder {
 
   export function toChartOptions(cr: ChartRequestModel, cs: ChartScript | null): ChartOptions {
 
-    var params = cs && cs.parameterGroups.flatMap(a => a.parameters).toObject(a => a.name);
+    var params = cs?.parameterGroups.flatMap(a => a.parameters).toObject(a => a.name);
 
     return {
       queryName: cr.queryKey,
-      chartScript: cr.chartScript && cr.chartScript.key.after(".") || undefined,
+      chartScript: cr.chartScript?.key.after(".") ?? undefined,
       filterOptions: toFilterOptions(cr.filterOptions),
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
@@ -424,7 +422,7 @@ export module Encoder {
 
           var c = scriptParam.columnIndex != null ? cr.columns[scriptParam.columnIndex].element : null;
 
-          return p.element.value != defaultParameterValue(scriptParam, c && c.token && c.token.token);
+          return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
     };
@@ -460,7 +458,7 @@ export module Encoder {
     if (columns)
       columns.forEach((co, i) => query["column" + i] =
         (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
-        (co.token || "") +
+        (co.token ?? "") +
         (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
   }
 
@@ -603,7 +601,7 @@ export module API {
     if (token.type.isLite)
       return v => {
         var lite = v as Lite<Entity> | null;
-        return String(lite && lite.toStr || "");
+        return String(lite?.toStr ?? "");
       };
 
     if (token.filterType == "Enum")
@@ -638,10 +636,10 @@ export module API {
 
     var defaultValues = chartScript.parameterGroups.flatMap(g => g.parameters).toObject(a => a.name, a => {
       var col = a.columnIndex == null ? null : request.columns[a.columnIndex];
-      return defaultParameterValue(a, col && col.element && col.element.token && col.element.token.token);
+      return defaultParameterValue(a, col?.element && col.element.token && col.element.token.token);
     });
 
-    return request.parameters.toObject(a => a.element.name!, a => a.element.value || defaultValues[a.element.name!])
+    return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
   export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
@@ -663,7 +661,7 @@ export module API {
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName || token && token.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
@@ -693,7 +691,7 @@ export module API {
     if (!hasAggregates(request)) {
       const value = (r: ChartRow) => r.entity;
       const color = (v: Lite<Entity> | undefined) => !v ? "#555" : null;
-      const niceName = (v: Lite<Entity> | undefined) => v && v.toStr;
+      const niceName = (v: Lite<Entity> | undefined) => v?.toStr;
       const key = (v: Lite<Entity> | undefined) => v ? liteKey(v) : String(v);
       cols.insertAt(0, ({
         name: "entity",
@@ -756,13 +754,13 @@ export module API {
   }
 
   export function fetchScripts(): Promise<ChartScript[]> {
-    return ajaxGet<ChartScript[]>({
+    return ajaxGet({
       url: "~/api/chart/scripts"
     });
   }
 
   export function fetchColorPalettes(): Promise<string[]> {
-    return ajaxGet<string[]>({
+    return ajaxGet({
       url: "~/api/chart/colorPalettes"
     });
   }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -32,18 +32,21 @@ namespace Signum.Engine.Translation
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
                 
                 if (countLocalizationHits)
-                    DescriptionManager.NotLocalizedMemeber += DescriptionManager_NotLocalizedMemeber;
+                    DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;
             }
         }
 
-        private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, Type type, MemberInfo mi)
+        private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, MemberInfo mi)
         {
             if (UserEntity.Current == null)
                 return;
-            
-            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(mi?.ReflectedType ?? type);
 
-            if (mi == null)
+            var pi = mi as PropertyInfo;
+            var type = pi?.ReflectedType ?? mi as Type;
+
+            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(type!);
+
+            if (pi == null)
                 typeOccurrences.Ocurrences++;
             else
                 typeOccurrences.Members.AddOrUpdate(mi, 1, (id, count) => count + 1);
@@ -52,7 +55,7 @@ namespace Signum.Engine.Translation
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, MemberInfo mi)
         {
-            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType).Members.GetOrAdd(mi, 0);
+            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType!).Members.GetOrAdd(mi, 0);
         }
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, Type type)
@@ -69,14 +72,14 @@ namespace Signum.Engine.Translation
 
         public static void SynchronizeTypes(Assembly assembly, string directoryName)
         {
-            string assemblyName = assembly.GetName().Name;
+            string assemblyName = assembly.GetName().Name!;
 
             HashSet<string> newNames = (from t in assembly.GetTypes()
                                         let opts = LocalizedAssembly.GetDescriptionOptions(t)
                                         where opts != DescriptionOptions.None
                                         select t.Name).ToHashSet();
 
-            Dictionary<string, string> memory = new Dictionary<string, string>();
+            Dictionary<string, string?> memory = new Dictionary<string, string?>();
 
 
             foreach (var fileName in Directory.EnumerateFiles(directoryName, "{0}.*.xml".FormatWith(assemblyName)))
@@ -85,7 +88,7 @@ namespace Signum.Engine.Translation
 
                 HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t => t.Attribute("Name").Value).ToHashSet();
 
-                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)); //cloning
+                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)!); //cloning
 
                 var culture = fileName.After(assemblyName + ".").Before(".xml");
 
@@ -95,7 +98,7 @@ namespace Signum.Engine.Translation
             }
         }
 
-        private static Dictionary<string, string> AskForReplacementsWithMemory(HashSet<string> newNames, HashSet<string> oldNames, Dictionary<string, string> memory, string replacementKey)
+        private static Dictionary<string, string> AskForReplacementsWithMemory(HashSet<string> newNames, HashSet<string> oldNames, Dictionary<string, string?> memory, string replacementKey)
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
@@ -105,11 +108,11 @@ namespace Signum.Engine.Translation
                 {
                     oldNames.Remove(kvp.Key);
                 }
-                else if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value))
+                else if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value!))
                 {
                     oldNames.Remove(kvp.Key);
-                    newNames.Remove(kvp.Value);
-                    result.Add(kvp.Key, kvp.Value);
+                    newNames.Remove(kvp.Value!);
+                    result.Add(kvp.Key, kvp.Value!);
                 }
             }
 
@@ -121,14 +124,14 @@ namespace Signum.Engine.Translation
             if (answers != null)
             {
                 result.AddRange(answers);
-                memory.SetRange(answers);
+                memory!.SetRange(answers);
             }
 
             var toDelete = oldNames.Except(newNames);
             if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
-            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null)));
+            memory.SetRange(toDelete.Select(n => KeyValuePair.Create(n, (string?)null)));
 
             return result;
         }
@@ -141,7 +144,7 @@ namespace Signum.Engine.Translation
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {
@@ -152,7 +155,7 @@ namespace Signum.Engine.Translation
                     fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
                     throw new InvalidOperationException("Unexpected file with name " + fi.Name);
 
-                if (Directory.Exists(targetDirectory))
+                if (!Directory.Exists(targetDirectory))
                     Directory.CreateDirectory(targetDirectory);
 
                 var targetFilePath = Path.Combine(targetDirectory, fi.Name);

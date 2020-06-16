@@ -5,7 +5,7 @@ import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
-import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components';
+import { KeyCodes } from '@framework/Components';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
@@ -54,7 +54,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
         {orderedPie.map(slice => <g key={slice.index} className="slice">
           <path className="shape sf-transition" d={arc(slice)!}
             transform={initialLoad ? scale(0,0) : scale(1,1)}
-            fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))}
+            fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
             shapeRendering="initial"
             onClick={e => onDrillDown(slice.data)} cursor="pointer">
             <title>
@@ -75,7 +75,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 Math.sin(m) * outerRadious * legendRadius,
                 -Math.cos(m) * outerRadious * legendRadius)}
               textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
-              fill={keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data))}
+              fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
               onClick={e => onDrillDown(slice.data)} cursor="pointer">
               {((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : ''}
             </text>

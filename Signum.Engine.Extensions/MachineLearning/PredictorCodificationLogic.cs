@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
@@ -23,7 +23,7 @@ namespace Signum.Engine.MachineLearning
 
             ctx.Codifications.Select(pc =>
             {
-                string ToStringValue(QueryToken token, object obj, int limit)
+                string? ToStringValue(QueryToken? token, object? obj, int limit)
                 {
                     if (token == null || obj == null)
                         return null;
@@ -31,9 +31,8 @@ namespace Signum.Engine.MachineLearning
                     if (obj is Lite<Entity> lite)
                         return lite.KeyLong().TryStart(limit);
 
-                    return FilterValueConverter.ToString(obj, token.Type).TryStart(limit);
+                    return FilterValueConverter.ToString(obj, token.Type)?.TryStart(limit);
                 }
-
 
                 var valueToken = pc.Column.Token;
                 
@@ -52,7 +51,7 @@ namespace Signum.Engine.MachineLearning
 
                 if (pc.Column is PredictorColumnSubQuery pcsq)
                 {
-                    string GetSplitpKey(int index, int limit)
+                    string? GetSplitpKey(int index, int limit)
                     {
                         var token = ctx.SubQueries[pcsq.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
                         var obj = pcsq.Keys?.ElementAtOrDefault(index);
@@ -75,17 +74,17 @@ namespace Signum.Engine.MachineLearning
             var list = predictor.Codifications().ToList();
 
 
-            object ParseValue(string str, QueryToken token)
+            object? ParseValue(string str, QueryToken token)
             {
                 return FilterValueConverter.Parse(str, token.Type, isList: false);
             }
 
-            object ParseKey(string str, PredictorSubQueryColumnEmbedded key)
+            object? ParseKey(string? str, PredictorSubQueryColumnEmbedded key)
             {
                 return FilterValueConverter.Parse(str, key.Token.Token.Type, isList: false);
             }
 
-            object[] GetKeys(PredictorCodificationEntity cod, List<PredictorSubQueryColumnEmbedded> keys)
+            object?[] GetKeys(PredictorCodificationEntity cod, List<PredictorSubQueryColumnEmbedded> keys)
             {
                 switch (keys.Count)
                 {
@@ -113,11 +112,10 @@ namespace Signum.Engine.MachineLearning
             Dictionary<int, PredictorColumnMain> mainColumns = new Dictionary<int, PredictorColumnMain>();
             PredictorColumnMain GetPredictorColumnMain(PredictorCodificationEntity cod)
             {
-                return mainColumns.GetOrCreate(cod.OriginalColumnIndex, () => new PredictorColumnMain
-                {
-                    PredictorColumnIndex = cod.OriginalColumnIndex,
-                    PredictorColumn = predictor.MainQuery.Columns[cod.OriginalColumnIndex]
-                });
+                return mainColumns.GetOrCreate(cod.OriginalColumnIndex, () => new PredictorColumnMain(
+                    predictorColumnIndex : cod.OriginalColumnIndex,
+                    predictorColumn : predictor.MainQuery.Columns[cod.OriginalColumnIndex]
+                ));
             }
 
             Dictionary<int, Dictionary<int, PredictorColumnSubQuery>> subColumns = new Dictionary<int, Dictionary<int, PredictorColumnSubQuery>>();
@@ -130,13 +128,9 @@ namespace Signum.Engine.MachineLearning
                     if (col.Usage == PredictorSubQueryColumnUsage.SplitBy || col.Usage == PredictorSubQueryColumnUsage.ParentKey)
                         throw new InvalidOperationException("Unexpected codification usage");
 
-                    return new PredictorColumnSubQuery
-                    {
-                        PredictorColumnIndex = cod.OriginalColumnIndex,
-                        PredictorSubQueryColumn = col,
-                        SubQuery = sq,
-                        Keys = GetKeys(cod, sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList())
-                    };
+                    var keys = GetKeys(cod, sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList());
+
+                    return new PredictorColumnSubQuery(col, cod.OriginalColumnIndex, sq, keys);
                 });
             }
 

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
@@ -66,7 +66,7 @@ namespace Signum.Engine.MachineLearning
                         GroupedValues = groupedValues,
                         SplitBy = splitKeys,
                         ValueColumns = values,
-                        ColumnIndexToValueIndex = values.Select((r, i) => KVP.Create(r.Index, i)).ToDictionary()
+                        ColumnIndexToValueIndex = values.Select((r, i) => KeyValuePair.Create(r.Index, i)).ToDictionary()
                     });
                 }
 
@@ -80,11 +80,7 @@ namespace Signum.Engine.MachineLearning
                         var col = ctx.Predictor.MainQuery.Columns[i];
                         using (HeavyProfiler.Log("Columns", () => col.Token.Token.ToString()))
                         {
-                            var mainCol = new PredictorColumnMain
-                            {
-                                PredictorColumn = col,
-                                PredictorColumnIndex = i,
-                            };
+                            var mainCol = new PredictorColumnMain(col, i);
                             var mainCodifications = algorithm.GenerateCodifications(col.Encoding, mainResult.Columns[i], mainCol);
                             codifications.AddRange(mainCodifications);
                         }
@@ -93,7 +89,7 @@ namespace Signum.Engine.MachineLearning
 
                 foreach (var sq in ctx.SubQueries.Values)
                 {
-                    using (HeavyProfiler.Log("SubQuery", () => sq.ToString()))
+                    using (HeavyProfiler.Log("SubQuery", () => sq.ToString()!))
                     {
                         var distinctKeys = sq.GroupedValues.SelectMany(a => a.Value.Keys).Distinct(ObjectArrayComparer.Instance).ToList();
 
@@ -108,13 +104,7 @@ namespace Signum.Engine.MachineLearning
                                     var col = sq.SubQueryEntity.Columns[vc.Index];
                                     using (HeavyProfiler.Log("Columns", () => col.Token.Token.ToString()))
                                     {
-                                        var subCol = new PredictorColumnSubQuery
-                                        {
-                                            PredictorColumnIndex = vc.Index,
-                                            PredictorSubQueryColumn = col,
-                                            SubQuery = sq.SubQueryEntity,
-                                            Keys = ks,
-                                        };
+                                        var subCol = new PredictorColumnSubQuery(col, vc.Index, sq.SubQueryEntity, ks);
                                         var subQueryCodifications = algorithm.GenerateCodifications(col.Encoding, vc, subCol);
                                         codifications.AddRange(subQueryCodifications);
                                     }
@@ -182,18 +172,20 @@ namespace Signum.Engine.MachineLearning
         static QueryToken Append(this QueryToken baseToken, QueryToken suffix)
         {
             var steps = suffix.Follow(a => a.Parent).Reverse();
-            var token = baseToken;
+            QueryToken token = baseToken;
             foreach (var step in steps)
             {
+                QueryToken? newToken = null;
                 if (step.Key == "Entity" && step is ColumnToken)
                 {
                     if (token.Type.CleanType() == step.Type.CleanType())
                         continue;
                     else
-                        token = token.SubTokenInternal("[" + TypeLogic.GetCleanName(baseToken.Type.CleanType()) + "]", SubTokensOptions.CanElement);
+                        newToken = token.SubTokenInternal("[" + TypeLogic.GetCleanName(baseToken.Type.CleanType()) + "]", SubTokensOptions.CanElement)!;
                 }
 
-                token = token.SubTokenInternal(step.Key, SubTokensOptions.CanElement);
+                newToken = token.SubTokenInternal(step.Key, SubTokensOptions.CanElement);
+                token = newToken ?? throw new InvalidOperationException($"Token '{step}' not found in '{token.FullKey()}'");
             }
 
             return token;
@@ -205,7 +197,12 @@ namespace Signum.Engine.MachineLearning
     {
         //Index of PredictorColumn in the MainQuery/SubQuery
         public int PredictorColumnIndex;
-        public object ColumnModel;
+        public object? ColumnModel;
+
+        protected PredictorColumnBase(int predictorColumnIndex)
+        {
+            PredictorColumnIndex = predictorColumnIndex;
+        }
 
         public abstract PredictorColumnUsage Usage { get; }
         public abstract QueryToken Token { get; }
@@ -216,6 +213,12 @@ namespace Signum.Engine.MachineLearning
     public class PredictorColumnMain : PredictorColumnBase
     {
         public PredictorColumnEmbedded PredictorColumn;
+
+        public PredictorColumnMain(PredictorColumnEmbedded predictorColumn, int predictorColumnIndex)
+            :base(predictorColumnIndex)
+        {
+            PredictorColumn = predictorColumn;
+        }
 
         public override PredictorColumnUsage Usage => PredictorColumn.Usage;
         public override QueryToken Token => PredictorColumn.Token.Token;
@@ -232,7 +235,15 @@ namespace Signum.Engine.MachineLearning
     {
         public PredictorSubQueryColumnEmbedded PredictorSubQueryColumn;
         public PredictorSubQueryEntity SubQuery;
-        public object[] Keys;
+        public object?[] Keys;
+
+        public PredictorColumnSubQuery(PredictorSubQueryColumnEmbedded predictorSubQueryColumn, int predictorColumnIndex, PredictorSubQueryEntity subQuery, object?[] keys) :
+            base(predictorColumnIndex)
+        {
+            PredictorSubQueryColumn = predictorSubQueryColumn;
+            SubQuery = subQuery;
+            Keys = keys;
+        }
 
         public override PredictorColumnUsage Usage => PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
         public override QueryToken Token => PredictorSubQueryColumn.Token.Token;
@@ -257,7 +268,7 @@ namespace Signum.Engine.MachineLearning
         public PredictorColumnBase Column;
         
         //Only for 1-hot encoding in the column (i.e: Neuronal Networks)
-        public object IsValue;
+        public object? IsValue;
         
         public float? Average;
         public float? StdDev;
@@ -271,11 +282,11 @@ namespace Signum.Engine.MachineLearning
         }
     }
 
-    public class ObjectArrayComparer : IEqualityComparer<object[]>, IComparer<object[]>
+    public class ObjectArrayComparer : IEqualityComparer<object?[]>, IComparer<object?[]>
     {
         public static readonly ObjectArrayComparer Instance = new ObjectArrayComparer();
 
-        public int Compare(object[] x, object[] y)
+        public int Compare(object?[] x, object?[] y)
         {
             if (x.Length != y.Length)
                 return x.Length.CompareTo(y.Length);
@@ -289,7 +300,7 @@ namespace Signum.Engine.MachineLearning
             return 0;
         }
 
-        private int CompareValue(object v1, object v2)
+        private int CompareValue(object? v1, object? v2)
         {
             if (v1 == null && v2 == null)
                 return 0;
@@ -304,7 +315,7 @@ namespace Signum.Engine.MachineLearning
 
         }
 
-        public bool Equals(object[] x, object[] y)
+        public bool Equals(object?[] x, object?[] y)
         {
             if (x.Length != y.Length)
                 return false;
@@ -318,7 +329,7 @@ namespace Signum.Engine.MachineLearning
             return true;
         }
 
-        public int GetHashCode(object[] array)
+        public int GetHashCode(object?[] array)
         {
             int hash = 17;
             foreach (var item in array)

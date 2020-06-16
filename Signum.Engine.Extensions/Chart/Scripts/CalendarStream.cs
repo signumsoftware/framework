@@ -1,10 +1,9 @@
 
-using Signum.Logic.Chart;
-using Signum.Entities.Chart;
 using Signum.Engine.Chart;
+using Signum.Entities.Chart;
 using System.Collections.Generic;
 
-namespace Signum.Logic.Chart.Scripts 
+namespace Signum.Engine.Chart.Scripts 
 {
     public class CalendarStreamChartScript : ChartScript                
     {

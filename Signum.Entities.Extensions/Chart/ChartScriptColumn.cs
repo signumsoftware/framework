@@ -70,7 +70,7 @@ namespace Signum.Entities.Chart
 
         static Dictionary<ChartColumnType, string> codes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
             a => (ChartColumnType)a.Key,
-            a => a.Value.GetCustomAttribute<CodeAttribute>().Code);
+            a => a.Value.GetCustomAttribute<CodeAttribute>()!.Code);
 
         public static string GetCode(this ChartColumnType columnType)
         {
@@ -90,10 +90,10 @@ namespace Signum.Entities.Chart
         }
 
         static Dictionary<string, ChartColumnType> fromCodes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
-            a => a.Value.GetCustomAttribute<CodeAttribute>().Code,
+            a => a.Value.GetCustomAttribute<CodeAttribute>()!.Code,
             a => (ChartColumnType)a.Key);
 
-        public static string TryParse(string code, out ChartColumnType type)
+        public static string? TryParse(string code, out ChartColumnType type)
         {
             if (fromCodes.TryGetValue(code, out type))
                 return null;
@@ -101,13 +101,12 @@ namespace Signum.Entities.Chart
             return "{0} is not a valid type code, use {1} instead".FormatWith(code, fromCodes.Keys.CommaOr());
         }
 
-        public static string TryParseComposed(string code, out ChartColumnType type)
+        public static string? TryParseComposed(string code, out ChartColumnType type)
         {
             type = default(ChartColumnType);
             foreach (var item in code.Split(','))
             {
-                string error = TryParse(item, out ChartColumnType temp);
-
+                string? error = TryParse(item, out ChartColumnType temp);
                 if (error.HasText())
                     return error;
 

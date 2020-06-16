@@ -1,4 +1,3 @@
-﻿/// <reference path="codemirror.d.ts" />
 import * as React from 'react'
 import * as CodeMirror from 'codemirror'
 import { classes } from '@framework/Globals'
@@ -15,91 +14,95 @@ export interface CodeMirrorProps {
   errorLineNumber?: number;
 }
 
-export default class CodeMirrorComponent extends React.Component<CodeMirrorProps, { isFocused: boolean }> {
 
-  codeMirror!: CodeMirror.EditorFromTextArea;
-
-  constructor(props: CodeMirrorProps) {
-    super(props);
-    this.state = { isFocused: false, };
-  }
-
-  textArea!: HTMLTextAreaElement;
-
-  componentDidMount() {
-    this.codeMirror = CodeMirror.fromTextArea(this.textArea!, this.props.options);
-    if (this.props.onChange)
-      this.codeMirror.on('change', this.codemirrorValueChanged);
-    this.codeMirror.on('focus', () => this.focusChanged(true));
-    this.codeMirror.on('blur', () => this.focusChanged.bind(false));
-    this.codeMirror.setValue(this.props.value || '');
-    if (this.props.errorLineNumber != null)
-      this.lineHandle = this.codeMirror.addLineClass(this.props.errorLineNumber - 1, undefined, "exceptionLine");
-  }
-  componentWillUnmount() {
-    // todo: is there a lighter-weight way to remove the cm instance?
-    if (this.codeMirror) {
-      this.codeMirror.toTextArea();
-    }
-  }
-
-  lineHandle?: CodeMirror.LineHandle;
-  componentWillReceiveProps(nextProps: CodeMirrorProps) {
-    if (this.codeMirror) {
-      if (nextProps.value != undefined && this.codeMirror.getValue() !== nextProps.value) {
-        this.codeMirror.off('change', this.codemirrorValueChanged);
-        this.codeMirror.setValue(nextProps.value);
-        this.codeMirror.on('change', this.codemirrorValueChanged);
-      }
-
-      if (typeof nextProps.options === 'object') {
-        for (let optionName in nextProps.options) {
-          if (nextProps.options.hasOwnProperty(optionName)) {
-            this.codeMirror.setOption(optionName, (nextProps.options as any)[optionName]);
-          }
-        }
-      }
-
-      if (this.lineHandle != undefined)
-        this.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
-
-      if (nextProps.errorLineNumber != null)
-        this.lineHandle = this.codeMirror.addLineClass(nextProps.errorLineNumber - 1, undefined, "exceptionLine");
-
-    }
-  }
-
-  focus() {
-    if (this.codeMirror) {
-      this.codeMirror.focus();
-    }
-  }
-
-  focusChanged(focused: boolean) {
-    this.setState({
-      isFocused: focused,
-    });
-    this.props.onFocusChange && this.props.onFocusChange(focused);
-  }
-
-  codemirrorValueChanged = (doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => {
-    const newValue = doc.getValue();
-    if (newValue != this.props.value && this.props.onChange)
-      this.props.onChange(newValue);
-  }
-  render() {
-    const editorClassName = classes(
-      'ReactCodeMirror',
-      this.state.isFocused ? 'ReactCodeMirror--focused' : undefined,
-      this.props.className
-    );
-
-    const css = ".exceptionLine { background: pink }";
-    return (
-      <div className={editorClassName}>
-        <style>{css}</style>
-        <textarea ref={ta => this.textArea = ta!} name={this.props.path} defaultValue={this.props.value || undefined} autoComplete="off" />
-      </div>
-    );
-  }
+export interface CodeMirrorComponentHandler {
+  focus() : void;
 }
+
+export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
+
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+  const codeMirrorRef = React.useRef<CodeMirror.EditorFromTextArea | undefined>(undefined);
+
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  React.useEffect(() => {
+
+    const codeMirror = codeMirrorRef.current = CodeMirror.fromTextArea(textAreaRef.current!, p.options);
+    if (p.onChange)
+      codeMirror.on('change', codemirrorValueChanged);
+    codeMirror.on('focus', () => focusChanged(true));
+    codeMirror.on('blur', () => focusChanged.bind(false));
+    codeMirror.setValue(p.value ?? '');
+
+    return () => {
+      codeMirror.toTextArea();
+    }
+  }, []);
+
+
+  React.useEffect(() => {
+    const codeMirror = codeMirrorRef.current;
+    if (codeMirror && p.value != codeMirror.getValue()) {
+      codeMirror.off('change', codemirrorValueChanged);
+      codeMirror.setValue(p.value ?? "");
+      codeMirror.on('change', codemirrorValueChanged);
+    }
+  }, [p.value]);
+
+  const lineHandleRef = React.useRef<CodeMirror.LineHandle | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (lineHandleRef.current != undefined)
+      codeMirrorRef.current!.removeLineClass(lineHandleRef.current, undefined as any, undefined);
+
+    if (p.errorLineNumber != null)
+      lineHandleRef.current = codeMirrorRef.current!.addLineClass(p.errorLineNumber - 1, undefined as any, "exceptionLine");
+  }, [p.errorLineNumber]);
+
+  React.useEffect(() => {
+    if (typeof p.options === 'object') {
+      for (let optionName in p.options) {
+        const optName = optionName as keyof CodeMirror.EditorConfiguration;
+        var newValue = p.options[optName];
+        if (codeMirrorRef.current!.getOption(optName as keyof CodeMirror.EditorConfiguration) != newValue)
+          codeMirrorRef.current!.setOption(optName, newValue);
+      }
+    }
+  });
+
+  function focus() {
+    if (codeMirrorRef.current) {
+      codeMirrorRef.current.focus();
+    }
+  }
+
+  React.useImperativeHandle(ref, () => ({
+    focus
+  }));
+
+  function focusChanged(focused: boolean) {
+    setIsFocused(focused);
+    p.onFocusChange && p.onFocusChange(focused);
+  }
+
+  function codemirrorValueChanged(doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) {
+    const newValue = doc.getValue();
+    if (newValue != p.value && p.onChange)
+      p.onChange(newValue);
+  }
+
+  const editorClassName = classes(
+    'ReactCodeMirror',
+    isFocused ? 'ReactCodeMirror--focused' : undefined,
+    p.className
+  );
+
+  const css = ".exceptionLine { background: pink }";
+  return (
+    <div className={editorClassName}>
+      <style>{css}</style>
+      <textarea ref={textAreaRef} name={p.path} defaultValue={p.value ?? undefined} autoComplete="off" />
+    </div>
+  );
+});

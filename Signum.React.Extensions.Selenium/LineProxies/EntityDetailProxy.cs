@@ -11,18 +11,20 @@ namespace Signum.React.Selenium
         {
         }
 
-        public Lite<IEntity> Lite
+        public Lite<IEntity>? Lite
         {
             get { return EntityInfo()?.ToLite(); }
             set
             {
-                if (this.EntityInfo() != null)
-                    this.Remove();
-
-                if (this.FindButton.IsVisible())
+                if (value == null)
+                {
+                    if (this.EntityInfo() != null)
+                        this.Remove();
+                }
+                else
+                {
                     this.Find().SelectLite(value);
-
-                throw new NotImplementedException("AutoComplete");
+                }
             }
         }
 
@@ -33,7 +35,7 @@ namespace Signum.React.Selenium
             return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-property-path]")), subRoute);
         }
 
-        public EntityInfoProxy EntityInfo()
+        public EntityInfoProxy? EntityInfo()
         {
             return EntityInfoInternal(null);
         }

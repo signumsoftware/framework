@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Disconnected;
@@ -18,7 +18,7 @@ namespace Signum.Engine.Disconnected
     {
         public ExportManager()
         {
-            this.miUnsafeLock = this.GetType().GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Instance);
+            this.miUnsafeLock = this.GetType().GetMethod("UnsafeLock", BindingFlags.NonPublic | BindingFlags.Instance)!;
         }
 
         class DownloadTable
@@ -26,17 +26,24 @@ namespace Signum.Engine.Disconnected
             public Type Type;
             public Table Table;
             public IDisconnectedStrategy Strategy;
+
+            public DownloadTable(Type type, Table table, IDisconnectedStrategy strategy)
+            {
+                Type = type;
+                Table = table;
+                Strategy = strategy;
+            }
         }
 
         public void Initialize()
         {
             downloadTables = Schema.Current.Tables.Values
-                .Select(t => new DownloadTable { Type = t.Type, Table = t, Strategy = DisconnectedLogic.GetStrategy(t.Type) })
+                .Select(t => new DownloadTable(t.Type, t, DisconnectedLogic.GetStrategy(t.Type)))
                 .Where(p => p.Strategy.Download != Download.None)
                 .ToList();
         }
 
-        List<DownloadTable> downloadTables;
+        List<DownloadTable> downloadTables = null!;
 
         Dictionary<Lite<DisconnectedExportEntity>, RunningExports> runningExports = new Dictionary<Lite<DisconnectedExportEntity>, RunningExports>();
 
@@ -44,6 +51,12 @@ namespace Signum.Engine.Disconnected
         {
             public Task Task;
             public CancellationTokenSource CancelationSource;
+
+            public RunningExports(Task task, CancellationTokenSource cancelationSource)
+            {
+                Task = task;
+                CancelationSource = cancelationSource;
+            }
         }
 
         public virtual Lite<DisconnectedExportEntity> BeginExportDatabase(DisconnectedMachineEntity machine)
@@ -117,7 +130,7 @@ namespace Signum.Engine.Disconnected
                             int ms = 0;
                             using (token.MeasureTime(l => ms = l))
                             {
-                                tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
+                                tuple.Strategy.Exporter!.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
                             }
 
                             export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.Is(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
@@ -197,14 +210,14 @@ namespace Signum.Engine.Disconnected
             });
 
 
-            runningExports.Add(export, new RunningExports { Task = task, CancelationSource = cancelationSource });
+            runningExports.Add(export, new RunningExports(task, cancelationSource));
 
             return export;
         }
 
         private void CopyExport(Lite<DisconnectedExportEntity> export, SqlConnector newDatabase)
         {
-            var clone = export.Retrieve().Clone();
+            var clone = export.RetrieveAndRemember().Clone();
 
             using (Connector.Override(newDatabase))
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
@@ -233,8 +246,10 @@ namespace Signum.Engine.Disconnected
         {
             using (ExecutionMode.Global())
             {
-                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null).Select(a =>
-                    "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
+                var result = Database.Query<T>().Where(strategy.UploadSubset)
+                    .Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null)
+                    .Select(a => "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine!.Entity.MachineName))
+                    .ToString("\r\n");
 
                 if (result.HasText())
                     stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.Is(typeof(T).ToTypeEntity())).UnsafeUpdateMList()
@@ -346,7 +361,7 @@ namespace Signum.Engine.Disconnected
                 CopyTableBasic(rt, newDatabaseName, filter == null ? null : (SqlPreCommandSimple)filter.Clone());
         }
 
-        protected virtual int CopyTableBasic(ITable table, DatabaseName newDatabaseName, SqlPreCommandSimple filter)
+        protected virtual int CopyTableBasic(ITable table, DatabaseName newDatabaseName, SqlPreCommandSimple? filter)
         {
             ObjectName newTableName = table.Name.OnDatabase(newDatabaseName);
 

@@ -74,7 +74,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
     .keys(pivot.columns.map(d => d.key))
     .value((r, k) => {
       var v = r.values[k];
-      return v && v.value || 0;
+      return v?.value ?? 0;
     });
 
   var stackedSeries = stack(pivot.rows);

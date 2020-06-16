@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -23,7 +23,7 @@ namespace Signum.Entities.Omnibox
             return true;
         }
 
-        public static OmniboxMatch SubsequencePascal(object value, string identifier, string pattern)
+        public static OmniboxMatch? SubsequencePascal(object value, string identifier, string pattern)
         {
             char[] mask = new string('_', identifier.Length).ToCharArray();
             int j = 0;
@@ -59,15 +59,17 @@ namespace Signum.Entities.Omnibox
 
         public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
         {
+            pattern = pattern.RemoveDiacritics();
+
             if (values.TryGetValue(pattern, out T val) && filter(val))
             {
-                yield return new OmniboxMatch(val, 0, pattern, new string('#', pattern.Length));
+                yield return new OmniboxMatch(val!, 0, pattern, new string('#', pattern.Length));
             }
             else
             {
                 foreach (var kvp in values.Where(kvp => filter(kvp.Value)))
                 {
-                    OmniboxMatch result;
+                    OmniboxMatch? result;
                     if (isPascalCase)
                     {
                         result = SubsequencePascal(kvp.Value, kvp.Key, pattern);
@@ -89,7 +91,7 @@ namespace Signum.Entities.Omnibox
             }
         }
 
-        public static OmniboxMatch Contains(object value, string identifier, string pattern)
+        public static OmniboxMatch? Contains(object value, string identifier, string pattern)
         {
             var parts = pattern.SplitNoEmpty(' ');
 
@@ -113,7 +115,7 @@ namespace Signum.Entities.Omnibox
 
         public static string CleanCommas(string str)
         {
-            return str.Trim('\'', '"'); ;
+            return str.Trim('\'', '"');
         }
     }
 

@@ -29,3 +29,5 @@ _ReSharper*/
 *.js.map
 *.js
 *.ncrunchproject
+/Signum.React.Extensions/ts_out/*
+/Signum.React.Extensions/node_modules/**

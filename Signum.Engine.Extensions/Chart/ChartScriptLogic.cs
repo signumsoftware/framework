@@ -11,7 +11,7 @@ using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
-using Signum.Logic.Chart.Scripts;
+using Signum.Engine.Chart.Scripts;
 
 namespace Signum.Engine.Chart
 {
@@ -63,7 +63,7 @@ namespace Signum.Engine.Chart
 
         internal static FileContent LoadIcon(string fileName)
         {
-            return new FileContent(fileName, typeof(ChartScriptLogic).Assembly.GetManifestResourceStream("Signum.Engine.Chart.Icons." + fileName).ReadAllBytes());
+            return new FileContent(fileName, typeof(ChartScriptLogic).Assembly.GetManifestResourceStream("Signum.Engine.Chart.Icons." + fileName)!.ReadAllBytes());
         }
     }
 }

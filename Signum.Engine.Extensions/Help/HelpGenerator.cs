@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
@@ -9,6 +9,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Basics;
 using Signum.Entities.Help;
 using Signum.Engine.Operations;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Help
 {
@@ -16,10 +17,12 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.TryGetPropertyValidator(pr)?.Let(vs => vs.Validators.CommaAnd(v => v.HelpMessage));
+            string? validations = Validator.TryGetPropertyValidator(pr)?.Let(vs => vs.Validators.Where(v => !(v is NotNullValidatorAttribute)).CommaAnd(v => v.HelpMessage));
 
             if (validations.HasText())
                 validations = HelpMessage.Should.NiceToString() + validations;
+
+            validations += ".";
 
             if (Reflector.IsIEntity(pr.Type))
             {
@@ -29,7 +32,7 @@ namespace Signum.Engine.Help
             }
             else if (pr.Type.IsLite())
             {
-                Type cleanType = Lite.Extract(pr.Type);
+                Type cleanType = Lite.Extract(pr.Type)!;
 
                 Implementations imp = Schema.Current.FindImplementations(pr);
 
@@ -41,63 +44,75 @@ namespace Signum.Engine.Help
             }
             else if (Reflector.IsMList(pr.Type))
             {
-                Type elemType = pr.Type.ElementType();
+                Type elemType = pr.Type.ElementType()!;
 
                 if (elemType.IsIEntity())
                 {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo!.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
                 {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo!.NiceName(), imp.TypeLinks(Lite.Extract(elemType)!)) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo!.NiceName(), elemType.NiceName()) + validations;
                 }
                 else
                 {
                     string valueType = ValueType(pr.Add("Item"));
-                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), valueType) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo!.NiceName(), valueType) + validations;
                 }
             }
             else if (pr.Type.UnNullify() == typeof(PrimaryKey))
             {
-                var vt = ValueType(PrimaryKey.Type(pr.RootType), null, null);
-                return HelpMessage._0IsThePrimaryKeyOf1OfType2.NiceToString().FormatWith(pr.PropertyInfo.NiceName(), pr.RootType.NiceName(), vt) + validations;
+                var vt = ValueType(PrimaryKey.Type(pr.RootType), false, null, null);
+                return HelpMessage._0IsThePrimaryKeyOf1OfType2.NiceToString().FormatWith(pr.PropertyInfo!.NiceName(), pr.RootType.NiceName(), vt) + validations;
             }
             else
             {
                 string valueType = ValueType(pr);
 
-                return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).FormatWith(pr.PropertyInfo.NiceName(), valueType) + validations;
+                return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).FormatWith(pr.PropertyInfo!.NiceName(), valueType) + validations;
             }
         }
 
         static string EntityProperty(PropertyRoute pr, Type propertyType, string typeName)
         {
-            if (pr.PropertyInfo.IsDefaultName())
+            var orNull = IsNullable(pr) == true ? HelpMessage.OrNull.NiceToString() : null;
+
+            if (pr.PropertyInfo!.IsDefaultName())
                 return
                     HelpMessage.The0.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(typeName) + " " +
-                    HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent.Type.GetGender()).FormatWith(pr.Parent.Type.NiceName());
+                    HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent!.Type.GetGender()).FormatWith(pr.Parent.Type.NiceName()).Add(" ", orNull);
             else
                 return
-                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(pr.PropertyInfo.NiceName(), typeName);
+                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(pr.PropertyInfo!.NiceName(), typeName).Add(" ", orNull);
         }
 
         static string ValueType(PropertyRoute pr)
         {
             Type type = pr.Type;
-            string format = Reflector.FormatString(pr);
-            string unit = pr.PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName;
-            return ValueType(type, format, unit);
+            string? format = Reflector.FormatString(pr);
+            string? unit = pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName;
+            bool? nullable = IsNullable(pr);
+            return ValueType(type, nullable, format, unit);
         }
 
-        private static string ValueType(Type type, string format, string unit)
+        private static bool? IsNullable(PropertyRoute pr)
+        {
+            if (pr.PropertyInfo == null)
+                return null;
+
+            return (Validator.TryGetPropertyValidator(pr)?.Validators.Any(a => a is NotNullValidatorAttribute) ?? false) ? false :
+                            pr.PropertyInfo!.IsNullable() == true ? true : (bool?)null;
+        }
+
+        private static string ValueType(Type type, bool? nullable, string? format, string? unit)
         {
             Type cleanType = Nullable.GetUnderlyingType(type) ?? type;
 
@@ -107,7 +122,7 @@ namespace Signum.Engine.Help
                     cleanType == typeof(DateTime) && format == "d" ? HelpMessage.Date.NiceToString() :
                     NaturalTypeDescription(cleanType);
 
-            string orNull = Nullable.GetUnderlyingType(type) != null ? HelpMessage.OrNull.NiceToString() : null;
+            string? orNull = nullable ?? (Nullable.GetUnderlyingType(type) != null) ? HelpMessage.OrNull.NiceToString() : null;
 
             return typeName.Add(" ", unit != null ? HelpMessage.ExpressedIn.NiceToString() + unit : null).Add(" ", orNull);
         }
@@ -122,9 +137,9 @@ namespace Signum.Engine.Help
 
         static string TypeLink(this Type type)
         {
-            string cleanName = TypeLogic.TryGetCleanName(type);
+            string? cleanName = TypeLogic.TryGetCleanName(type);
             if (cleanName.HasText())
-                return "[e:" + cleanName + "]";
+                return "[t:" + cleanName + "]";
             return type.NiceName();
         }
 
@@ -139,7 +154,7 @@ namespace Signum.Engine.Help
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.Boolean:
-                    return HelpMessage.Check.NiceToString();
+                    return HelpMessage.BooleanValue.NiceToString();
 
                 case TypeCode.Char:
                     return HelpMessage.Character.NiceToString();
@@ -178,7 +193,7 @@ namespace Signum.Engine.Help
                 case OperationType.Execute:
                     return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(
 operationInfo.OperationSymbol.NiceToString(),
-operationInfo.CanBeModified.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(),
+operationInfo.CanBeModified.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(),
 type.NiceName());
                 case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
                 case OperationType.Constructor:
@@ -186,11 +201,11 @@ type.NiceName());
 HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
                 case OperationType.ConstructorFrom:
                     return
-HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
 HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.CanBeModified.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(), type.NiceName());
                 case OperationType.ConstructorFromMany:
                     return
-HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
 HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NicePluralName());
             }
 
@@ -201,7 +216,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumnFactory();
 
-            return HelpMessage.QueryOf0.NiceToString(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
+            return HelpMessage.QueryOf0.NiceToString(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)!));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -211,7 +226,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
             if (kvp.PropertyRoutes != null)
                 return HelpMessage._0IsA1AndShows2.NiceToString(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
                     pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
-                    HelpMessage.TheProperty0.NiceToString(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent : pr))));
+                    HelpMessage.TheProperty0.NiceToString(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent! : pr))));
             else
                 return HelpMessage._0IsACalculated1.NiceToString(kvp.DisplayName(), typeDesc);
         }
@@ -230,13 +245,14 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
             }
             else
             {
-                return ValueType(kvp.Type, kvp.Format, kvp.Unit);
+                var pr = kvp.PropertyRoutes?.Only();
+                return ValueType(kvp.Type, pr == null ? null : IsNullable(pr), kvp.Format, kvp.Unit);
             }
         }
 
         internal static string GetEntityHelp(Type type)
         {
-            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType.GetGender()).FormatWith(type.NiceName(), type.BaseType.NiceName());
+            string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType!.GetGender()).FormatWith(type.NiceName(), type.BaseType!.NiceName());
 
             string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 

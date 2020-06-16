@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Disconnected;
@@ -27,6 +27,13 @@ namespace Signum.Engine.Disconnected
             public Table Table;
             public IDisconnectedStrategy Strategy;
 
+            public UploadTable(Type type, Table table, IDisconnectedStrategy strategy)
+            {
+                Type = type;
+                Table = table;
+                Strategy = strategy;
+            }
+
             public override string ToString()
             {
                 return Table.ToString();
@@ -36,7 +43,7 @@ namespace Signum.Engine.Disconnected
         public void Initialize()
         {
             var tables = Schema.Current.Tables.Values
-                .Select(t => new UploadTable { Type = t.Type, Table = t, Strategy = DisconnectedLogic.GetStrategy(t.Type) })
+                .Select(t => new UploadTable(t.Type, t, DisconnectedLogic.GetStrategy(t.Type)))
                 .Where(p => p.Strategy.Upload != Upload.None)
                 .ToList();
 
@@ -64,18 +71,24 @@ namespace Signum.Engine.Disconnected
             uploadTables = graph.CompilationOrder().Select(t => dic[t]).ToList();
         }
 
-        List<UploadTable> uploadTables;
+        List<UploadTable> uploadTables = null!;
 
 
         class RunningImports
         {
             public Task Task;
             public CancellationTokenSource CancelationSource;
+
+            public RunningImports(Task task, CancellationTokenSource cancelationSource)
+            {
+                Task = task;
+                CancelationSource = cancelationSource;
+            }
         }
 
         Dictionary<Lite<DisconnectedImportEntity>, RunningImports> runningImports = new Dictionary<Lite<DisconnectedImportEntity>, RunningImports>();
 
-        public virtual Lite<DisconnectedImportEntity> BeginImportDatabase(DisconnectedMachineEntity machine, Stream file = null)
+        public virtual Lite<DisconnectedImportEntity> BeginImportDatabase(DisconnectedMachineEntity machine, Stream? file = null)
         {
             Lite<DisconnectedImportEntity> import = new DisconnectedImportEntity
             {
@@ -151,7 +164,7 @@ namespace Signum.Engine.Disconnected
 
                                 foreach (var tuple in uploadTables)
                                 {
-                                    ImportResult result = null;
+                                    ImportResult? result = null;
                                     using (token.MeasureTime(l =>
                                     {
                                         if (result != null)
@@ -163,7 +176,7 @@ namespace Signum.Engine.Disconnected
                                                 .Execute();
                                     }))
                                     {
-                                        result = tuple.Strategy.Importer.Import(machine, tuple.Table, tuple.Strategy, newDatabase);
+                                        result = tuple.Strategy.Importer!.Import(machine, tuple.Table, tuple.Strategy, newDatabase);
                                     }
                                 }
 
@@ -220,7 +233,7 @@ namespace Signum.Engine.Disconnected
             });
 
 
-            runningImports.Add(import, new RunningImports { Task = task, CancelationSource = cancelationSource });
+            runningImports.Add(import, new RunningImports(task, cancelationSource));
 
             return import;
         }
@@ -329,7 +342,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static)!;
         static int UnlockTable<T>(Lite<DisconnectedMachineEntity> machine) where T : Entity
         {
             using (ExecutionMode.Global())
@@ -360,7 +373,7 @@ namespace Signum.Engine.Disconnected
         {
             DatabaseName newDatabaseName = new DatabaseName(null, newDatabase.DatabaseName());
 
-            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar();
+            var count = (int)CountNewItems(table, newDatabaseName).ExecuteScalar()!;
 
             if (count == 0)
                 return 0;
@@ -389,7 +402,7 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        protected IDisposable DisableIdentityIfNecessary(ITable table)
+        protected IDisposable? DisableIdentityIfNecessary(ITable table)
         {
             if (!table.PrimaryKey.Identity)
                 return null;
@@ -400,7 +413,7 @@ namespace Signum.Engine.Disconnected
         protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, DatabaseName newDatabaseName, TableMList rt)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
-            var created = table.Mixins[typeof(DisconnectedCreatedMixin)].Columns().Single();
+            var created = table.Mixins![typeof(DisconnectedCreatedMixin)].Columns().Single();
 
             string command = @"INSERT INTO {0} ({1})
 SELECT {2}
@@ -422,7 +435,7 @@ created.Name.SqlEscape());
 
         protected virtual SqlPreCommandSimple InsertTableScript(Table table, DatabaseName newDatabaseName)
         {
-            var created = table.Mixins[typeof(DisconnectedCreatedMixin)].Columns().Single();
+            var created = table.Mixins![typeof(DisconnectedCreatedMixin)].Columns().Single();
 
             string command = @"INSERT INTO {0} ({1})
 SELECT {2}

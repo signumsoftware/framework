@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -52,7 +52,7 @@ namespace Signum.Engine.Cache
             return node.Update(exp);
         }
 
-        private Expression BindMember(CachedEntityExpression n, Field field, Expression prevPrimaryKey)
+        private Expression BindMember(CachedEntityExpression n, Field field, Expression? prevPrimaryKey)
         {
             Expression body = GetField(field, n.Constructor, prevPrimaryKey);
 
@@ -71,7 +71,7 @@ namespace Signum.Engine.Cache
                 result.Nullify());
         }
 
-        private Expression GetField(Field field, CachedTableConstructor constructor, Expression previousPrimaryKey)
+        private Expression GetField(Field field, CachedTableConstructor constructor, Expression? previousPrimaryKey)
         {
             if (field is FieldValue)
             {
@@ -81,6 +81,9 @@ namespace Signum.Engine.Cache
 
             if (field is FieldEnum)
                 return Expression.Convert(constructor.GetTupleProperty((IColumn)field), field.FieldType);
+
+            if (field is FieldPrimaryKey)
+                return constructor.GetTupleProperty((IColumn)field);
 
             if (field is IFieldReference)
             {
@@ -118,7 +121,7 @@ namespace Signum.Engine.Cache
 
             if (field is FieldEmbedded fe)
             {
-                return new CachedEntityExpression(previousPrimaryKey, fe.FieldType, constructor, fe);
+                return new CachedEntityExpression(previousPrimaryKey!, fe.FieldType, constructor, fe);
             }
 
             if (field is FieldMList)
@@ -137,9 +140,19 @@ namespace Signum.Engine.Cache
 
             CachedTableConstructor typeConstructor = CacheLogic.GetCacheType(entityType) == CacheType.Cached ?
                 CacheLogic.GetCachedTable(entityType).Constructor :
-                constructor.cachedTable.SubTables.SingleEx(a => a.ParentColumn == column).Constructor;
+                constructor.cachedTable.SubTables!.SingleEx(a => a.ParentColumn == column).Constructor;
 
-            return new CachedEntityExpression(pk, entityType, typeConstructor, null);
+            return new CachedEntityExpression(pk, entityType, typeConstructor, null!);
+        }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            var operand = Visit(node.Operand);
+            if (operand != node.Operand && node.NodeType == ExpressionType.Convert)
+            {
+                return Expression.Convert(operand, node.Type);
+            }
+            return node.Update(operand);
         }
 
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
@@ -150,7 +163,7 @@ namespace Signum.Engine.Cache
 
             var args = base.Visit(node.Arguments);
 
-            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
+            LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
             if (lambda != null)
             {
@@ -269,12 +282,12 @@ namespace Signum.Engine.Cache
 
         public readonly CachedTableConstructor Constructor;
         public readonly Expression PrimaryKey;
-        public readonly FieldEmbedded FieldEmbedded;
+        public readonly FieldEmbedded? FieldEmbedded;
 
         public readonly Type type;
         public override Type Type { get { return type; } }
 
-        public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded embedded)
+        public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded? embedded)
         {
             if (primaryKey == null)
                 throw new ArgumentNullException(nameof(primaryKey));
@@ -289,10 +302,7 @@ namespace Signum.Engine.Cache
             }
             else
             {
-                if (embedded == null)
-                    throw new ArgumentNullException(nameof(embedded));
-
-                this.FieldEmbedded = embedded;
+                this.FieldEmbedded = embedded ?? throw new ArgumentNullException(nameof(embedded));
             }
 
             this.PrimaryKey = primaryKey;

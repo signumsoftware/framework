@@ -80,7 +80,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
         return 0;
 
       var v = row.values[k];
-      return v && v.value || 0;
+      return v?.value ?? 0;
     });
 
   var stackedSeries = stack(keyValues);

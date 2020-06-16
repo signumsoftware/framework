@@ -4,7 +4,7 @@ import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PrintLineEntity } from '../Signum.Entities.Printing'
 import { ProcessExceptionLineEntity } from '../../Processes/Signum.Entities.Processes'
-import FileLine from '../../Files/FileLine'
+import { FileLine } from '../../Files/FileLine'
 
 export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
   const e = p.ctx.subCtx({ readOnly: true });
@@ -13,7 +13,7 @@ export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
     <div>
       <ValueLine ctx={e.subCtx(f => f.creationDate)} />
       <EntityLine ctx={e.subCtx(f => f.referred)} />
-      <FileLine ctx={e.subCtx(f => f.file)} fileType={e.value.testFileType || undefined} readOnly={p.ctx.value.state != "NewTest"} />
+      <FileLine ctx={e.subCtx(f => f.file)} fileType={e.value.testFileType ?? undefined} readOnly={p.ctx.value.state != "NewTest"} />
       <ValueLine ctx={e.subCtx(f => f.state)} />
       <ValueLine ctx={e.subCtx(f => f.printedOn)} />
       {!e.value.isNew &&

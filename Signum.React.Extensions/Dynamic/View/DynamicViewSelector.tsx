@@ -10,51 +10,24 @@ import * as Navigator from '@framework/Navigator'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { ModulesHelp } from "./ModulesHelp";
 
-interface DynamicViewSelectorComponentProps {
-  ctx: TypeContext<DynamicViewSelectorEntity>;
-}
 
-interface DynamicViewSelectorComponentState {
-  exampleEntity?: Entity;
-  syntaxError?: string;
-  testResult?: { type: "ERROR", error: string } | { type: "RESULT", result: string | undefined } | undefined;
-  scriptChanged?: boolean;
-  viewNames?: string[];
-}
+export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }) {
 
-export default class DynamicViewSelectorComponent extends React.Component<DynamicViewSelectorComponentProps, DynamicViewSelectorComponentState> {
+  const forceUpdate = useForceUpdate();
+  const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
-  constructor(props: DynamicViewSelectorComponentProps) {
-    super(props);
+  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const scriptChangedRef = React.useRef(false);
 
-    this.state = {};
-  }
+  const [syntaxError, setSyntaxError] = React.useState<string | undefined>(undefined);
+  const [testResult, setTestResult] = React.useState<{ type: "ERROR", error: string } | { type: "RESULT", result: string | undefined } | undefined>(undefined);
 
-  componentWillMount() {
-    this.updateViewNames(this.props);
-  }
-
-  componentWillReceiveProps(newProps: DynamicViewSelectorComponentProps) {
-    if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType))
-      this.updateViewNames(newProps);
-  }
-
-  updateViewNames(props: DynamicViewSelectorComponentProps) {
-    this.setState({ viewNames: undefined });
-    if (props.ctx.value.entityType)
-      DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
-        .then(viewNames => this.setState({ viewNames: viewNames }))
-        .done();
-  }
-
-  handleTypeChange = () => {
-    this.updateViewNames(this.props);
-  }
-
-  handleTypeRemove = () => {
-    if (this.state.scriptChanged == true)
+  function handleTypeRemove() {
+    if (scriptChangedRef.current)
       return MessageModal.show({
         title: NormalWindowMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
@@ -66,7 +39,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
     return Promise.resolve(true);
   }
 
-  handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+  function handleTypeHelpClick(pr: PropertyRoute | undefined) {
     if (!pr)
       return;
 
@@ -80,122 +53,87 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
     }).done();
   }
 
-  render() {
-    const ctx = this.props.ctx;
 
-    return (
-      <div>
-        <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
-
-        {ctx.value.entityType &&
-          <div>
-            <br />
-            <div className="row">
-              <div className="col-sm-7">
-                {this.renderEditor()}
-                {this.renderTest()}
-              </div>
-              <div className="col-sm-5">
-                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="TypeScript" onMemberClick={this.handleTypeHelpClick} />
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-    );
-  }
-
-  renderTest() {
-    const ctx = this.props.ctx;
-    const res = this.state.testResult;
+  function renderTest() {
+    const ctx = p.ctx;
+    const res = testResult;
     return (
       <fieldset>
         <legend>TEST</legend>
-        {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
-        {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
-        {res && res.type == "RESULT" && <div className={classes("alert", this.getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
+        {renderExampleEntity(ctx.value.entityType!.cleanName)}
+        {res?.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
+        {res?.type == "RESULT" && <div className={classes("alert", getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
       </fieldset>
     );
   }
 
-  getTestAlertType(result: string | undefined) {
-
+  function getTestAlertType(result: string | undefined) {
     if (!result)
       return "alert-danger";
 
-    if (this.allViewNames().contains(result))
+    if (allViewNames().contains(result))
       return "alert-success";
 
     return "alert-danger";
   }
 
-  renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
+  function renderExampleEntity(typeName: string) {
+    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
-      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={() => this.evaluateTest()}
+      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={() => evaluateTest()}
         type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
     );
   }
 
-  handleOnView = (exampleEntity: Entity) => {
+  function handleOnView(exampleEntity: Entity) {
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  handleCodeChange = (newCode: string) => {
-    var dvs = this.props.ctx.value;
+  function handleCodeChange(newCode: string) {
+    var dvs = p.ctx.value;
 
     if (dvs.script != newCode) {
       dvs.script = newCode;
       dvs.modified = true;
-      this.setState({ scriptChanged: true });
-      this.evaluateTest();
+      scriptChangedRef.current = true;
+      evaluateTest();
     };
   }
 
-  evaluateTest() {
+  function evaluateTest() {
+    setSyntaxError(undefined);
+    setTestResult(undefined);
 
-    this.setState({
-      syntaxError: undefined,
-      testResult: undefined
-    });
-
-    const dvs = this.props.ctx.value;
+    const dvs = p.ctx.value;
     let func: (e: Entity) => any;
     try {
       func = DynamicViewClient.asSelectorFunction(dvs);
     } catch (e) {
-      this.setState({
-        syntaxError: (e as Error).message
-      });
+      setSyntaxError((e as Error).message);
       return;
     }
 
-
-    if (this.state.exampleEntity) {
+    if (exampleEntityRef.current) {
       try {
-        this.setState({
-          testResult: {
-            type: "RESULT",
-            result: func(this.state.exampleEntity!)
-          }
+        setTestResult({
+          type: "RESULT",
+          result: func(exampleEntityRef.current!)
         });
       } catch (e) {
-        this.setState({
-          testResult: {
-            type: "ERROR",
-            error: (e as Error).message
-          }
+        setTestResult({
+          type: "ERROR",
+          error: (e as Error).message
         });
       }
     }
   }
 
-  allViewNames() {
-    return ["NEW", "STATIC", "CHOOSE"].concat(this.state.viewNames || []);
+  function allViewNames() {
+    return ["NEW", "STATIC", "CHOOSE"].concat(viewNames ?? []);
   }
 
-  handleViewNameClick = (viewName: string) => {
+  function handleViewNameClick(viewName: string) {
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: `"${viewName}"`,
@@ -206,30 +144,53 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
     }).done();
   }
 
-  renderViewNameButtons() {
+  function renderViewNameButtons() {
     return (
-      <UncontrolledDropdown>
-        <DropdownToggle color="success" caret>View Names</DropdownToggle>
-        <DropdownMenu>
-          {this.allViewNames().map((vn, i) =>
-            <DropdownItem key={i} onClick={e => this.handleViewNameClick(vn)}>{vn}</DropdownItem>)}
-        </DropdownMenu>
-      </UncontrolledDropdown>
+      <DropdownButton variant="success" title="View Names" id="views_dropdown">
+        {allViewNames().map((vn, i) =>
+          <Dropdown.Item key={i} onClick={() => handleViewNameClick(vn)}>{vn}</Dropdown.Item>)}
+      </DropdownButton>
     );
   }
 
-  renderEditor() {
-    const ctx = this.props.ctx;
+  function renderEditor() {
+    const ctx = p.ctx;
     return (
       <div className="code-container">
         <div className="btn-toolbar btn-toolbar-small">
-          {this.renderViewNameButtons()}
+          {renderViewNameButtons()}
         </div>
-        <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", modules) =>"}</pre>
-        <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
-        {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
+        <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>{"(e: " + ctx.value.entityType!.className + ", "}
+          <div style={{ display: "inline-flex" }}>
+            <ModulesHelp cleanName={ctx.value.entityType!.className} />{") =>"}
+          </div>
+        </pre>
+        <JavascriptCodeMirror code={ctx.value.script ?? ""} onChange={handleCodeChange} />
+        {syntaxError && <div className="alert alert-danger">{syntaxError}</div>}
       </div>
     );
   }
+  const ctx = p.ctx;
+
+  return (
+    <div>
+      <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={forceUpdate} onRemove={handleTypeRemove} />
+
+      {ctx.value.entityType &&
+        <div>
+          <br />
+          <div className="row">
+            <div className="col-sm-7">
+              {renderEditor()}
+              {renderTest()}
+            </div>
+            <div className="col-sm-5">
+              <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="TypeScript" onMemberClick={handleTypeHelpClick} />
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  );
 }
 

@@ -1,21 +1,17 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Word
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
-    public class SystemWordTemplateEntity : Entity
+    public class WordModelEntity : Entity
     {
-        [StringLengthValidator(AllowNulls = false, Max = 200), UniqueIndex]
+        [StringLengthValidator(Max = 200), UniqueIndex]
         public string FullClassName { get; set; }
 
-        static readonly Expression<Func<SystemWordTemplateEntity, string>> ToStringExpression = e => e.FullClassName;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => FullClassName);
     }
 
 }
