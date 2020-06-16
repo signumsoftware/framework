@@ -107,7 +107,6 @@ export function configureImportExportImages(converter: IContentStateConverter, i
     //@ts-ignore
     var oldCustomEntityTransformer = draftToHtmlOptions.customEntityTransform;
     draftToHtmlOptions.customEntityTransform = (entity, text) => {
-      debugger;
       if (oldCustomEntityTransformer) {
         var result = oldCustomEntityTransformer(entity, text);
         if (result)

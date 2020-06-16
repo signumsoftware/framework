@@ -19,7 +19,7 @@ export interface HtmlEditorProps {
   imageConverter?: ImageConverter<Object>
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
-  toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment;
+  toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
 }
 
 export interface HtmlEditorControllerProps {
@@ -118,9 +118,8 @@ export default React.forwardRef(function HtmlEditor({ readOnly, binding, convert
 
   return (
     <div className="sf-html-editor" onClick={() => c.editor.focus()}>
-      <div className="sf-draft-toolbar">
-        {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
-      </div>
+      {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
+    
       <draftjs.Editor
         ref={c.setRefs}
         editorState={c.editorState}
@@ -133,8 +132,8 @@ export default React.forwardRef(function HtmlEditor({ readOnly, binding, convert
   );
 });
 
-const defaultToolbarButtons = (c: HtmlEditorController) => <>
-  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)"  />
+const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-draft-toolbar">
+  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)" />
   <InlineStyleButton controller={c} style="ITALIC" icon="italic" title="Italic (Ctrl + I)" />
   <InlineStyleButton controller={c} style="UNDERLINE" icon="underline" title="Underline (Ctrl + U)" />
   <InlineStyleButton controller={c} style="CODE" icon="code" title="Code" />
@@ -148,4 +147,4 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <>
   <BlockStyleButton controller={c} blockType="ordered-list-item" icon="list-ol" title="Ordered list" />
   <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" />
   <BlockStyleButton controller={c} blockType="code-block" icon={["far", "file-code"]} title="Quote" />
-</>;
+</div>;

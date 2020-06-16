@@ -8,7 +8,7 @@ import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useInterval } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useInterval } from '@framework/Hooks'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {

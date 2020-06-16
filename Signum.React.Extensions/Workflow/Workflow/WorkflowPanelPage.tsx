@@ -9,7 +9,7 @@ import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { Tabs, Tab } from 'react-bootstrap';
-import { useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPIWithReload } from '@framework/Hooks'
 
 export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
   function componentWillMount() {

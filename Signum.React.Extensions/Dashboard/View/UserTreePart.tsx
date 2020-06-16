@@ -10,7 +10,7 @@ import {  PanelStyle, UserTreePartEntity } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../Admin/Dashboard';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { TreeViewer } from '../../Tree/TreeViewer'
 import { TreeOperation } from '../../Tree/Signum.Entities.Tree'

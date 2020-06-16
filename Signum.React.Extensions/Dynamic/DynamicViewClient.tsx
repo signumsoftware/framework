@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as QueryString from 'query-string'
 import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
@@ -25,6 +24,7 @@ import MessageModal from "@framework/Modals/MessageModal";
 import { Dic } from "@framework/Globals";
 import * as Components from "@framework/Components";
 import * as Constructor from "@framework/Constructor"
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[] }) {
 

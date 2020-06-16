@@ -1,9 +1,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import numbro from 'numbro'
-import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
@@ -27,6 +25,7 @@ import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
 

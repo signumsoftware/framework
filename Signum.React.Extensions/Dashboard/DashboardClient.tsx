@@ -17,7 +17,7 @@ import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 
 

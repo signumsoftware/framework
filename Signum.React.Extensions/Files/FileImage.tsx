@@ -9,10 +9,6 @@ interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | null;
 }
 
-interface FileImageState {
-  objectUrl: string | undefined;
-}
-
 export function FileImage(p: FileImageProps) {
 
   var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);

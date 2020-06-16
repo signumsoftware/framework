@@ -11,7 +11,7 @@ import { toNumbroFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
-import { FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search';
+import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';
 

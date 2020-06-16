@@ -110,7 +110,13 @@ namespace Signum.Engine.Workflow
                 .Select(cs =>
                 {
                     var from = gr.GetNode(cs.WorkflowActivity);
-                    var nextConnection = gr.NextConnections(from).SingleOrDefaultEx(c => IsCompatible(c.Type, cs.DoneType!.Value) && gr.IsParallelGateway(c.To, WorkflowGatewayDirection.Join));
+                    var candidates = cs.DoneType == DoneType.Timeout && from is WorkflowActivityEntity wa ?
+                        wa.BoundaryTimers.SelectMany(e => gr.NextConnections(e)) :
+                        gr.NextConnections(from);
+
+                    var nextConnection = candidates
+                    .SingleOrDefaultEx(c => IsCompatible(c.Type, cs.DoneType!.Value) && gr.IsParallelGateway(c.To, WorkflowGatewayDirection.Join));
+
                     if (nextConnection != null)
                         return new CaseConnectionStats().WithConnection(nextConnection).WithDone(cs);
 
@@ -300,6 +306,8 @@ namespace Signum.Engine.Workflow
         public string? BpmnElementId { get; internal set; }
         public string? FromBpmnElementId { get; internal set; }
         public string? ToBpmnElementId { get; internal set; }
+
+        public override string ToString() => $"{FromBpmnElementId} =({DoneType})=> {ToBpmnElementId}";
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.

@@ -1,13 +1,10 @@
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { RouteComponentProps } from 'react-router'
-import * as QueryString from 'query-string'
-import { useStateWithPromise } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useStateWithPromise } from '@framework/Hooks'
 
 
 interface ForgotPasswordEmailState { modelState?: ModelState; success?: boolean; message?: string }

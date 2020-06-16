@@ -37,7 +37,7 @@ import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ValueLineController } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
+import { ValueLineController } from '@framework/Lines/ValueLine'
 
 export interface BaseNode {
   ref?: Expression<any>;

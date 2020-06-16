@@ -18,7 +18,7 @@ import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicVie
 import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { useAPI, useUpdatedRef } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useUpdatedRef } from '@framework/Hooks'
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
@@ -102,25 +102,26 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
 
   var vos = viewOverrides.filter(a => a.viewName == dynamicView.viewName);
 
-  if (!Navigator.isViewable(DynamicViewEntity)) {
+  if (Navigator.isReadOnly(DynamicViewEntity)) {
     return (
       <div className="design-content">
         <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
       </div>
     );
   }
+
   return (<div className="design-main">
-    <div className={classes("design-left", isDesignerOpen && "open")}>
-      {!isDesignerOpen ?
-        <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
-        <DynamicViewDesigner
-          rootNode={desRootNode}
-          dynamicView={dynamicView}
-          onReload={handleReload}
-          onLoseChanges={handleLoseChanges}
-          typeName={ctx.value.Type} />
-      }
-    </div>
+      <div className={classes("design-left", isDesignerOpen && "open")}>
+        {!isDesignerOpen ?
+          <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon" /></span> :
+          <DynamicViewDesigner
+            rootNode={desRootNode}
+            dynamicView={dynamicView}
+            onReload={handleReload}
+            onLoseChanges={handleLoseChanges}
+            typeName={ctx.value.Type} />
+        }
+      </div>
     <div className={classes("design-content", isDesignerOpen && "open")}>
         <RenderWithViewOverrides dn={desRootNode} parentCtx={ctx} vos={vos} />
     </div>
