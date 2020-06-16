@@ -17,7 +17,7 @@ export interface HtmlEditorProps {
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
   decorators?: draftjs.DraftDecorator[],
-  plugins?: HtmlEditorPlugin[]
+  plugins?: HtmlEditorPlugin[],
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
 }
 
@@ -107,7 +107,6 @@ export class HtmlEditorController {
 }
 
 
-
 export default React.forwardRef(function HtmlEditor({
   readOnly,
   binding,
@@ -140,23 +139,39 @@ export default React.forwardRef(function HtmlEditor({
   if (editorProps.keyBindingFn == undefined)
     editorProps.keyBindingFn = draftjs.getDefaultKeyBinding;
 
+  if (editorProps.handleKeyCommand == undefined)
+    editorProps.handleKeyCommand = command => {
+      const newState = draftjs.RichUtils.handleKeyCommand(
+        c.editorState,
+        command
+      );
+      if (newState) {
+        c.setEditorState(newState);
+        return "handled";
+      }
+      return "not-handled";
+    };
+
   plugins.forEach(p => p.expandEditorProps && p.expandEditorProps(editorProps, c));
 
-  console.log("Rendering: " + JSON.stringify(draftjs.convertToRaw(c.editorState.getCurrentContent()), undefined, 2));
-
   return (
-    <div className="sf-html-editor" onClick={() => c.editor.focus()}>
-      {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
-    
-      <draftjs.Editor
-        ref={c.setRefs}
-        editorState={c.editorState}
-        readOnly={readOnly}
-        onBlur={() => c.saveHtml()}
-        onChange={ev => c.setEditorState(ev)}
-        {...props}
-      />
-    </div>
+    <>
+      <div className="sf-html-editor" onClick={() => c.editor.focus()}>
+        {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
+
+        <draftjs.Editor
+          ref={c.setRefs}
+          editorState={c.editorState}
+          readOnly={readOnly}
+          onBlur={() => c.saveHtml()}
+          onChange={ev => c.setEditorState(ev)}
+          {...props}
+        />
+      </div>
+      {/*<pre style={{ textAlign: "left" }}>
+        {JSON.stringify(draftjs.convertToRaw(c.editorState.getCurrentContent()), undefined, 2)}
+      </pre>*/}
+    </>
   );
 });
 
