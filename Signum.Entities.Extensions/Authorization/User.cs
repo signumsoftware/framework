@@ -2,9 +2,7 @@ using System;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Mailing;
-using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
@@ -56,8 +54,7 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => UserName);
+        public int LoginFailedCounter { get; set; }
 
         public static UserEntity Current
         {
@@ -65,21 +62,18 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-    public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
-    {
-        Owner = u.ToLite(),
-        CultureInfo = u.CultureInfo,
-        DisplayName = u.UserName,
-        Email = u.Email!,
-    };
+        [AutoExpressionField]
+        public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
+        {
+            Owner = this.ToLite(),
+            CultureInfo = CultureInfo,
+            DisplayName = UserName,
+            Email = Email!,
+        });
 
-    [ExpressionField]
-    public EmailOwnerData EmailOwnerData
-    {
-        get { return EmailOwnerDataExpression.Evaluate(this); }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserName);
     }
-
-    public int LoginFailedCounter { get; set; }
 
     public enum UserState
     {
@@ -105,8 +99,8 @@ namespace Signum.Entities.Authorization
         public IncorrectUsernameException() { }
         public IncorrectUsernameException(string message) : base(message) { }
         protected IncorrectUsernameException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }
@@ -117,8 +111,8 @@ namespace Signum.Entities.Authorization
         public IncorrectPasswordException() { }
         public IncorrectPasswordException(string message) : base(message) { }
         protected IncorrectPasswordException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }
