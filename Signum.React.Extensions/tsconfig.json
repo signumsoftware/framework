@@ -4,6 +4,7 @@
     "sourceMap": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "incremental": true,
     "outDir": "./ts_out",

@@ -9,7 +9,7 @@ import { UserQueryPartEntity, PanelPartEmbedded, PanelStyle } from '../Signum.En
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../Admin/Dashboard';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {

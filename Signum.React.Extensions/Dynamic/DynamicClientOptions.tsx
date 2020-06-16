@@ -4,8 +4,8 @@ import { StyleContext } from '@framework/TypeContext'
 import { FindOptions, FilterConditionOption, ColumnOption } from '@framework/FindOptions';
 import { Type, QueryTokenString } from '@framework/Reflection';
 import { Entity } from '@framework/Signum.Entities';
-import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search';
-import { CellFormatter } from '../../../Framework/Signum.React/Scripts/Finder';
+import { ValueSearchControlLine } from '@framework/Search';
+import { CellFormatter } from '@framework/Finder';
 import { expandNumbers } from '../DiffLog/Templates/DiffDocument';
 
 export type FormatColumnType = "Text" | "Code" | "JSon";

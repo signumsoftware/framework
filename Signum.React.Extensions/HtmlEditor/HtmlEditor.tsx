@@ -4,34 +4,30 @@ import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './HtmlEditor.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
+import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;
   textToContentState(html: string): draftjs.ContentState;
 }
 
-export interface ImageConverter<T extends object> {
-  uploadData(blob: Blob): Promise<T>;
-  renderImage(val: T): React.ReactElement;
-  toHtml(val: T): string;
-  fromHtml(val: T): string;
-}
-
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
-  images?: ImageConverter<Object>
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
-  toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment;
+  decorators?: draftjs.DraftDecorator[],
+  plugins?: HtmlEditorPlugin[],
+  toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
 }
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
   converter: IContentStateConverter,
+  decorators?: draftjs.DraftDecorator[],
+  plugins?: HtmlEditorPlugin[];
   innerRef?: React.Ref<draftjs.Editor>;
-  images?: ImageConverter<object>;
 }
 
 export class HtmlEditorController {
@@ -44,23 +40,30 @@ export class HtmlEditorController {
   setOverrideToolbar!: (newState: React.ReactFragment | React.ReactElement | undefined) => void;
 
   converter!: IContentStateConverter;
+  decorators!: draftjs.DraftDecorator[];
+  plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
-  images?: ImageConverter<object>;
 
   init(p: HtmlEditorControllerProps) {
 
     this.binding = p.binding;
     this.readOnly = p.readOnly;
     this.converter = p.converter;
-    this.images = p.images;
+    this.plugins = p.plugins ?? [];
+    this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
 
-    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(p.converter!.textToContentState(this.binding.getValue() ?? "")));
+    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(
+      p.converter!.textToContentState(this.binding.getValue() ?? ""),
+      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators)));
+
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
-
     React.useEffect(() => {
-      this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
+      if (this.binding.getValue() ?? "" == this.lastSave ?? "")
+        this.lastSave = undefined;
+      else
+        this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
     }, [this.binding.getValue()]);
 
     React.useEffect(() => {
@@ -81,43 +84,99 @@ export class HtmlEditorController {
   saveHtml() {
     if (!this.readOnly) {
       var value = this.converter.contentStateToText(this.editorState.getCurrentContent());
-      if (value ?? "" != this.binding.getValue() ?? "")
+      if (value ?? "" != this.binding.getValue() ?? "") {
+        this.lastSave = value;
         this.binding.setValue(value);
+      }
     }
   }
+
+  extraButtons(): React.ReactFragment | null {
+
+    var buttons = this.plugins.map(p => p.getToolbarButtons && p.getToolbarButtons(this)).notNull();
+
+    if (buttons.length == 0)
+      return null;
+
+    return React.createElement(React.Fragment, undefined, <Separator />, ...buttons);
+  }
+
+  lastSave: string | undefined;
 
   setRefs!: (editor: draftjs.Editor | null) => void;
 }
 
-export default React.forwardRef(function HtmlEditor({ readOnly, binding, converter, innerRef, toolbarButtons, images, ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
+
+export default React.forwardRef(function HtmlEditor({
+  readOnly,
+  binding,
+  converter,
+  innerRef,
+  toolbarButtons,
+  decorators,
+  plugins,
+  ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
+
+  const textConverter = converter ?? new HtmlContentStateConverter({}, {});
+
+  plugins = plugins ?? [new BasicCommandsPlugin()];
+
+  plugins.forEach(p => p.expandConverter && p.expandConverter(textConverter));
 
   var c = React.useMemo(() => new HtmlEditorController(), []);
   React.useImperativeHandle(ref, () => c, []);
-  c.init({ binding, readOnly, converter: converter ?? HtmlContentStateConverter.default, innerRef, images });
+  c.init({
+    binding,
+    readOnly,
+    converter: textConverter,
+    innerRef,
+    decorators,
+    plugins,
+  });
 
   const editorProps = props as draftjs.EditorProps;
-  basicCommandsPlugin(editorProps, c);
-  imagePlugin(editorProps, c);
+
+  if (editorProps.keyBindingFn == undefined)
+    editorProps.keyBindingFn = draftjs.getDefaultKeyBinding;
+
+  if (editorProps.handleKeyCommand == undefined)
+    editorProps.handleKeyCommand = command => {
+      const newState = draftjs.RichUtils.handleKeyCommand(
+        c.editorState,
+        command
+      );
+      if (newState) {
+        c.setEditorState(newState);
+        return "handled";
+      }
+      return "not-handled";
+    };
+
+  plugins.forEach(p => p.expandEditorProps && p.expandEditorProps(editorProps, c));
 
   return (
-    <div className="sf-html-editor" onClick={() => c.editor.focus()}>
-      <div className="sf-draft-toolbar">
+    <>
+      <div className="sf-html-editor" onClick={() => c.editor.focus()}>
         {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
+
+        <draftjs.Editor
+          ref={c.setRefs}
+          editorState={c.editorState}
+          readOnly={readOnly}
+          onBlur={() => c.saveHtml()}
+          onChange={ev => c.setEditorState(ev)}
+          {...props}
+        />
       </div>
-      <draftjs.Editor
-        ref={c.setRefs}
-        editorState={c.editorState}
-        readOnly={readOnly}
-        onBlur={() => c.saveHtml()}
-        onChange={ev => c.setEditorState(ev)}
-        {...props}
-      />
-    </div>
+      {/*<pre style={{ textAlign: "left" }}>
+        {JSON.stringify(draftjs.convertToRaw(c.editorState.getCurrentContent()), undefined, 2)}
+      </pre>*/}
+    </>
   );
 });
 
-const defaultToolbarButtons = (c: HtmlEditorController) => <>
-  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)"  />
+const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-draft-toolbar">
+  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)" />
   <InlineStyleButton controller={c} style="ITALIC" icon="italic" title="Italic (Ctrl + I)" />
   <InlineStyleButton controller={c} style="UNDERLINE" icon="underline" title="Underline (Ctrl + U)" />
   <InlineStyleButton controller={c} style="CODE" icon="code" title="Code" />
@@ -131,118 +190,13 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <>
   <BlockStyleButton controller={c} blockType="ordered-list-item" icon="list-ol" title="Ordered list" />
   <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" />
   <BlockStyleButton controller={c} blockType="code-block" icon={["far", "file-code"]} title="Quote" />
-</>;
+  {c.extraButtons()}
+</div>;
 
 
-export function basicCommandsPlugin(props: draftjs.EditorProps, controller: HtmlEditorController) {
-
-  var prevKeyCommand = props.handleKeyCommand;
-  props.handleKeyCommand = (command, state, timeStamp) => {
-
-    if (prevKeyCommand) {
-      var result = prevKeyCommand(command, state, timeStamp);
-      if (result == "handled")
-        return result;
-    }
-
-    const inlineStyle =
-      command == "bold" ? "BOLD" :
-        command == "italic" ? "ITALIC" :
-          command == "underline" ? "UNDERLINE" :
-            undefined;
-
-    if (inlineStyle) {
-      controller.setEditorState(draftjs.RichUtils.toggleInlineStyle(controller.editorState, inlineStyle));
-      return "handled";
-    }
-
-    return "not-handled"; 
-  }
-
-  return props
-}
-
-export function imagePlugin(props: draftjs.EditorProps, controller: HtmlEditorController) {
-
-  var oldRenderer = props.blockRendererFn;
-  props.blockRendererFn = (block) => {
-
-    if (oldRenderer) {
-      const result = oldRenderer(block);
-      if (result)
-        return result;
-    }
-
-    if (block.getType() === 'atomic') {
-      const contentState = controller.editorState.getCurrentContent();
-      const entity = block.getEntityAt(0);
-      if (!entity) return null;
-      const type = contentState.getEntity(entity).getType();
-      if (type === 'IMAGE' || type === 'image') {
-        return {
-          component: ImageComponent,
-          editable: false,
-          props: { controller }
-        };
-      }
-    }
-
-    return null;
-  };
-
-  function addImage(editorState: draftjs.EditorState, data: Object): draftjs.EditorState {
-    const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity(
-      'IMAGE',
-      'IMMUTABLE',
-      data
-    );
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = draftjs.AtomicBlockUtils.insertAtomicBlock(
-      editorState,
-      entityKey,
-      ' '
-    );
-
-    return draftjs.EditorState.forceSelection(
-      newEditorState,
-      newEditorState.getCurrentContent().getSelectionAfter()
-    );
-  }
-
-  props.handlePastedFiles = files => {
-    const imageFiles = files.filter(a => a.type.startsWith("image/"));
-    if (imageFiles.length == 0)
-      return "not-handled";
-
-    Promise.all(imageFiles.map(blob => controller.images!.uploadData(blob)))
-      .then(datas => {
-        var newState = datas.reduce<draftjs.EditorState>((state, data) => addImage(state, data), controller.editorState);
-        controller.setEditorState(newState);
-      }).done();
-
-    return "handled"
-  }
-
-  props.handleDroppedFiles = (selection, files) => {
-    const imageFiles = files.filter(a => a.type.startsWith("image/"));
-    if (imageFiles.length == 0)
-      return "not-handled";
-
-    const editorStateWithSelection = draftjs.EditorState.acceptSelection(controller.editorState, selection);
-    Promise.all(imageFiles.map(blob => controller.images!.uploadData(blob)))
-      .then(datas => {
-        var newState = datas.reduce<draftjs.EditorState>((state, data) => addImage(state, data), editorStateWithSelection);
-        controller.setEditorState(newState);
-      }).done();
-
-    return "handled"
-  }
-
-  return { addImage };
-}
-
-export function ImageComponent(p: { contentState: draftjs.ContentState, block: draftjs.ContentBlock, controller: HtmlEditorController }) {
-  const data = p.contentState.getEntity(p.block.getEntityAt(0)).getData();
-  return p.controller.images!.renderImage(data);
+export interface HtmlEditorPlugin {
+  getDecorators?(controller: HtmlEditorController): [draftjs.DraftDecorator];
+  getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
+  expandConverter?(converter: IContentStateConverter): void;
+  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): void;
 }

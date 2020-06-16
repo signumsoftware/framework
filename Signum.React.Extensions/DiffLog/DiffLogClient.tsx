@@ -18,7 +18,7 @@ import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
-import { SearchControlOptions } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl';
+import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));

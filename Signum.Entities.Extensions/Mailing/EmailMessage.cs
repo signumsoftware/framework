@@ -146,7 +146,7 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type { get; set; }
 
         FilePathEmbedded file;
-        [DefaultFileType(nameof(EmailFileType.Attachment), nameof(EmailFileType))]
+        //[DefaultFileType(nameof(EmailFileType.Attachment), nameof(EmailFileType))] is optional to register it
         public FilePathEmbedded File
         {
             get { return file; }

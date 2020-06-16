@@ -13,8 +13,8 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
-import { FilterOptionParsed } from '../../../Framework/Signum.React/Scripts/Search'
+import { useAPI } from '@framework/Hooks'
+import { FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 
 export interface UserQueryMenuProps {

@@ -134,7 +134,17 @@ namespace Signum.Engine.SMS
 
                 sb.AddUniqueIndex((SMSTemplateEntity t) => new { t.Model }, where: t => t.Model != null && t.IsActive == true);
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
             } 
+        }
+
+        public static void ExceptionLogic_DeletePackages(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            Database.Query<SMSSendPackageEntity>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack) && !pack.SMSMessages().Any())
+                .UnsafeDeleteChunksLog(parameters, sb, token);
+
+            Database.Query<SMSUpdatePackageEntity>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack) && !pack.SMSMessages().Any())
+                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

@@ -7,7 +7,7 @@ import * as TypeHelpClient from './TypeHelpClient'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 interface TypeHelpComponentProps {
   initialType?: string;

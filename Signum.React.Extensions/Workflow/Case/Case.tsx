@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
-import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
+import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity, WorkflowEntity } from '../Signum.Entities.Workflow'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
@@ -12,7 +12,7 @@ import * as Navigator from "@framework/Navigator";
 import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Authorization/AuthClient'
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 
@@ -52,7 +52,7 @@ export default function CaseComponent(p: CaseComponentProps) {
       <br />
       <div className="row">
         <div className="col-sm-6">
-          <EntityLine ctx={ctx.subCtx(a => a.workflow)} />
+          <EntityLine ctx={ctx.subCtx(a => a.workflow)} view={!Navigator.isReadOnly(WorkflowEntity)} />
           <EntityLine ctx={ctx.subCtx(a => a.parentCase)} />
           <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
         </div>

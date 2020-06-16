@@ -55,8 +55,10 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
 
   if (scaleName == "MinMax") {
     if (column.type == "Date" || column.type == "DateTime") {
+      var dates = values.map(d => new Date(d));
+
       const scale = d3.scaleTime()
-        .domain(values)
+        .domain([d3.min(dates)!, d3.max(dates)!])
         .range([minRange, maxRange]);
 
       const f = function (d: string) { return scale(new Date(d)); } as any as d3.ScaleContinuousNumeric<number, number>;

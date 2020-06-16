@@ -58,8 +58,8 @@ namespace Signum.React.Files
                         dft.FileTypeSymbol = SymbolLogic<FileTypeSymbol>.Symbols
                         .Where(a => a.Key.After(".") == dft.SymbolName && (dft.SymbolContainer == null || dft.SymbolContainer == a.Key.Before(".")))
                         .SingleEx(
-                            () => $"No FileTypeSymbol with name {dft.SymbolName} is registered",
-                            () => $"More than one FileTypeSymbol with name {dft.SymbolName} are registered. Consider desambiguating using symbolContainer argument in {pr}"
+                            () => $"No FileTypeSymbol with name {dft.SymbolContainer}.{dft.SymbolName} is registered",
+                            () => $"More than one FileTypeSymbol with name {dft.SymbolContainer}.{dft.SymbolName} are registered. Consider desambiguating using symbolContainer argument in {pr}"
                         );
                     }
 

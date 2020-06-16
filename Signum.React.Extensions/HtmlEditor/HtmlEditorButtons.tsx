@@ -4,7 +4,7 @@ import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals';
+import { classes } from '@framework/Globals';
 import { HtmlEditorController } from './HtmlEditor';
 
 export function Separator() {

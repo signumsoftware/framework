@@ -14,10 +14,10 @@ import { ErrorBoundary } from '@framework/Components';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactChart from '../D3Scripts/Components/ReactChart';
-import { useAppRelativeBasename } from '../../../../Framework/Signum.React/Scripts/AppRelativeRoutes'
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAppRelativeBasename } from '@framework/AppRelativeRoutes'
+import { useAPI } from '@framework/Hooks'
 import { TypeInfo } from '@framework/Reflection'
-import { pushOrOpenInTab } from '../../../../Framework/Signum.React/Scripts/AppContext'
+import { pushOrOpenInTab } from '@framework/AppContext'
 
 
 export interface ChartRendererProps {
@@ -54,7 +54,12 @@ export default function ChartRenderer(p: ChartRendererProps) {
       else
         Navigator.navigate(r.entity).done();
     } else {
-      const filters = cr.filterOptions.map(f => withoutAggregate(withoutPinned(f))!).filter(Boolean);
+      const filters = cr.filterOptions.map(f => {
+        let f2 = withoutPinned(f);
+        if (f2 == null)
+          return null;
+        return withoutAggregate(f2);
+      }).notNull();
 
       const columns: ColumnOption[] = [];
 

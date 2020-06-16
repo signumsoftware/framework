@@ -2,11 +2,11 @@ import * as React from 'react'
 import * as Services from '@framework/Services'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, isEntity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import * as QueryString from 'query-string'
-import { Type, PropertyRoute, getTypeName } from '@framework/Reflection';
+import { Type } from '@framework/Reflection';
 import "./Files.css"
+import { QueryString } from '@framework/QueryString'
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
 

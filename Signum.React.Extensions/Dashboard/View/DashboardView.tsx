@@ -9,7 +9,7 @@ import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { parseIcon } from '../Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 

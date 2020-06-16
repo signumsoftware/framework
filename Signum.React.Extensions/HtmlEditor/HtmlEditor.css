@@ -8,11 +8,13 @@
     box-shadow: inset 0px 1px 4px -3px #ABABAB;
 }
 
+    .sf-html-editor .DraftEditor-root {
+        overflow: auto;
+    }
+
 .html-editor .public-DraftEditor-content {
     min-height: 140px;
 }
-
-
 
 .sf-draft-toolbar {
     border: 1px solid #ddd;

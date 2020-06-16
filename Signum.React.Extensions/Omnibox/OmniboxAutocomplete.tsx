@@ -6,7 +6,7 @@ import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import '@framework/Frames/MenuIcons.css'
-import { TypeaheadController } from '../../../Framework/Signum.React/Scripts/Components/Typeahead';
+import { TypeaheadController } from '@framework/Components/Typeahead';
 
 export interface OmniboxAutocompleteProps {
   inputAttrs?: React.HTMLAttributes<HTMLInputElement>;

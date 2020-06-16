@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as History from 'history'
-import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -17,6 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
@@ -44,14 +44,6 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
 }
 
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-
-  if (!Navigator.isViewable(ToolbarEntity))
-    return null;
-
-  return <ToolbarRendererImp location={p.location} />;
-}
-
-function ToolbarRendererImp(p: { location?: ToolbarLocation; }): React.ReactElement | null {
   const forceUpdate = useForceUpdate();
   const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
   const responseRef = useUpdatedRef(response);
@@ -129,7 +121,7 @@ function ToolbarRendererImp(p: { location?: ToolbarLocation; }): React.ReactElem
               <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
                 {!icon ? title : (<span>{icon}{title}</span>)}
               </Dropdown.Toggle>
-              <Dropdown.Menu>
+              <Dropdown.Menu alignRight={AppContext.isRtl()}>
                 {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
               </Dropdown.Menu>
             </Dropdown>
