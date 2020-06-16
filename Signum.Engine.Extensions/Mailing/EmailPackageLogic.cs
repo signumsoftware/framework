@@ -57,6 +57,9 @@ namespace Signum.Engine.Mailing
                 {
                     Construct = (messages, args) =>
                     {
+                        if (!messages.Any())
+                            return null;
+
                         EmailPackageEntity emailPackage = new EmailPackageEntity()
                         {
                             Name = args.TryGetArgC<string>()
