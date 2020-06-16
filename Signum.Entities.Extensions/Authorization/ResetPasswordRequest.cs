@@ -6,7 +6,6 @@ namespace Signum.Entities.Authorization
     public class ResetPasswordRequestEntity : Entity
     {
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
-        [StringLengthValidator(AllowNulls = false, Max = 32)]
         public string Code { get; set; }
         
         public UserEntity User { get; set; }
