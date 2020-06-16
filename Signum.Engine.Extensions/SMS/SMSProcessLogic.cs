@@ -120,10 +120,10 @@ namespace Signum.Engine.SMS
 
 
 
-        private static ProcessEntity UpdateMessages(List<SMSMessageEntity> messages)
+        private static ProcessEntity? UpdateMessages(List<SMSMessageEntity> messages)
         {
             if (!messages.Any())
-                return null!;
+                return null;
 
             SMSUpdatePackageEntity package = new SMSUpdatePackageEntity().Save();
 
