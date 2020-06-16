@@ -75,6 +75,23 @@ namespace Signum.Engine.Authorization
                     Subject = AuthEmailMessage.PasswordChangedSubject.NiceToString()
                 }).ToMList()
             });
+
+            new Graph<ResetPasswordRequestEntity>.Execute(ResetPasswordRequestOperation.Execute)
+                {
+                    CanBeNew = false,
+                    CanBeModified = false,
+                    CanExecute = (e) => e.Lapsed == false ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
+                    Execute = (e, args) =>
+                    {
+                        string password = args.GetArg<string>();
+                        e.Lapsed = true;
+                        var user = e.User;
+
+                        user.PasswordHash = Security.EncodePassword(password);
+                        using (AuthLogic.Disable())
+                            user.Execute(UserOperation.Save);
+                    }
+                }.Register();
         }
 
         public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string code, string password)
