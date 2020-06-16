@@ -69,6 +69,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     super.overrideProps(state, overridenProps);
 
     if (state.ctx.propertyRoute) {
+      var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
 
       if (!state.columns) {
         var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
@@ -79,8 +80,11 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
             property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
           }) as EntityTableColumn<ModifiableEntity, any>);
       }
+      else {
+        state.columns = state.columns.filter(c => c.property == null ||
+          (c.property == "string" ? pr.addMember("Member", c.property, false) : pr.tryAddLambda(c.property!)) != null);
+      }
 
-      var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
       state.columns.forEach(c => {
         if (c.template === undefined) {
           if (c.property == null)
