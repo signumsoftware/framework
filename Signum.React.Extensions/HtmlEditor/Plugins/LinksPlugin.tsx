@@ -74,7 +74,6 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
     var prevKeyBindingFn = props.keyBindingFn;
     props.keyBindingFn = (event) => {
-      debugger;
       if (prevKeyBindingFn) {
         var result = prevKeyBindingFn(event);
         if (result)
