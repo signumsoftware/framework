@@ -383,7 +383,7 @@ namespace Signum.Utilities
             if (start == -1)
                 throw NotFound(str, firstSeparator);
 
-            start = start+firstSeparator.Length ;
+            start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator, start);
             if (start == -1)
@@ -419,7 +419,7 @@ namespace Signum.Utilities
             if (start == -1)
                 return null;
 
-            start = start + 1;
+            start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
             if (start == -1)
