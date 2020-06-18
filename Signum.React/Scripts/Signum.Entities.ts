@@ -431,6 +431,7 @@ export module SearchMessage {
   export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
+  export const DeleteAllFilter = new MessageKey("SearchMessage", "DeleteAllFilter");
   export const Filters = new MessageKey("SearchMessage", "Filters");
   export const Find = new MessageKey("SearchMessage", "Find");
   export const FinderOf0 = new MessageKey("SearchMessage", "FinderOf0");

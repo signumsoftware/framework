@@ -153,6 +153,8 @@ Lose changes?")]
         AddValue,
         [Description("Delete filter")]
         DeleteFilter,
+        [Description("Delete all filter")]
+        DeleteAllFilter,
         Filters,
         Find,
         [Description("Finder of {0}")]
