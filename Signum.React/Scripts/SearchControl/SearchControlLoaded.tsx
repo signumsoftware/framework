@@ -885,7 +885,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     
     const col = fo.columnOptions[cm.columnIndex!];
     fo.columnOptions.clear();
-    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
+    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
     if (fo.groupResults && col.token) {
       fo.orderOptions.clear();
     }
