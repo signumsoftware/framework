@@ -1,3 +1,4 @@
+using Signum.Entities.Scheduler;
 using System;
 
 namespace Signum.Entities.Authorization
@@ -20,4 +21,10 @@ namespace Signum.Entities.Authorization
     {
         public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
     }
+
+    [AutoInit]
+    public static class ResetPasswordRequestTask
+    {
+        public static SimpleTaskSymbol Timeout;
     }
+}

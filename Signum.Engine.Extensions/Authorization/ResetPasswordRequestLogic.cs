@@ -12,7 +12,6 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Entities.Scheduler;
 using Signum.Utilities;
-using Signum.Engine.Basics;
 using Signum.Engine.Operations;
 using Signum.Services;
 using Signum.Entities.Basics;
@@ -52,7 +51,7 @@ namespace Signum.Engine.Authorization
                 }
             );
 
-            SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateEntity
+            EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
             {
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                 {
@@ -66,7 +65,7 @@ namespace Signum.Engine.Authorization
                 }).ToMList()
             });
 
-            SystemEmailLogic.RegisterSystemEmail<PasswordChangedMail>(() => new EmailTemplateEntity
+            EmailModelLogic.RegisterEmailModel<PasswordChangedEmail>(() => new EmailTemplateEntity
             {
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                 {
@@ -152,18 +151,12 @@ namespace Signum.Engine.Authorization
             }
         }
     }
-    
-    [AutoInit]
-    public static class ResetPasswordRequestTask
-    {
-        public static readonly SimpleTaskSymbol Timeout;
-    }
-
+        
     public class ResetPasswordRequestEmail : EmailModel<ResetPasswordRequestEntity>
     {
         public string Url;
 
-        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com") { }
+        public ResetPasswordRequestEmail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com") { }
 
         public ResetPasswordRequestEmail(ResetPasswordRequestEntity entity, string url) : base(entity)
         {
@@ -176,9 +169,9 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    public class PasswordChangedMail : SystemEmail<ResetPasswordRequestEntity>
+    public class PasswordChangedEmail : EmailModel<ResetPasswordRequestEntity>
     {
-        public PasswordChangedMail(ResetPasswordRequestEntity entity) : base(entity) { }
+        public PasswordChangedEmail(ResetPasswordRequestEntity entity) : base(entity) { }
 
         public override List<EmailOwnerRecipientData> GetRecipients()
         {

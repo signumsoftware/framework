@@ -47,10 +47,11 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-
-        [AutoExpressionField]
-        public static IQueryable<UserEntity> Users(this RoleEntity r) =>
-            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));   
+        static Expression<Func<RoleEntity, IQueryable<UserEntity>>> UsersExpression = r => 
+            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));
+        
+        [ExpressionField(nameof(UsersExpression))]
+        public static IQueryable<UserEntity> Users(this RoleEntity r) => UsersExpression.Evaluate(r);
 
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
@@ -143,7 +144,7 @@ namespace Signum.Engine.Authorization
 
                 UserGraph.Register();
                 
-                SystemEmailLogic.RegisterSystemEmail<UserLockedMail>(() => new EmailTemplateEntity
+                EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
                 {
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
@@ -320,30 +321,7 @@ namespace Signum.Engine.Authorization
                     throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
                 if (!user.PasswordHash.SequenceEqual(passwordHash))
-                {
-                    using (UserHolder.UserSession(SystemUser))
-                    {
-                        user.LoginFailedCounter++;
-                        user.Execute(UserOperation.Save);
-                        
-                        if (user.LoginFailedCounter >= 3) {
-                            var config = EmailLogic.Configuration;
-                            var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
-                            var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
-                            
-                            var mail = new UserLockedMail(user, url);
-                            mail.SendMailAsync();
-
-                            user.LoginFailedCounter = 0;
-                            user.Execute(UserOperation.Save);
-                            user.Execute(UserOperation.Disable);
-                            
-                            throw new ApplicationException(AuthMessage.User0IsDisabled.NiceToString().FormatWith(user.UserName)); 
-                        }
-                    }
-
-                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());   
-                }
+                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
 
                 return user;
             }
@@ -727,7 +705,7 @@ namespace Signum.Engine.Authorization
             : base(info, context) { }
     }
     
-    public class UserLockedMail : SystemEmail<UserEntity>
+    public class UserLockedMail : EmailModel<UserEntity>
     {
         public string Url;
         
