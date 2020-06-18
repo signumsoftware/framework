@@ -1605,7 +1605,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             }
         }
 
-        public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
+        public static void MergeMList<E, V, A>(string? title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
             where E : Entity
             where A : class
         {

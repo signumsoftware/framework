@@ -1,7 +1,6 @@
 import * as React from "react";
 import * as moment from "moment"
 import numbro from "numbro"
-import * as QueryString from "query-string"
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
@@ -35,6 +34,7 @@ import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
+import { QueryString } from "./QueryString";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -608,12 +608,13 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 
   function toFilterOption(fop: FilterOptionParsed): FilterOption | null {
 
-    var pinned = fop.pinned && { ...fop.pinned } as PinnedFilter;
+
+    var pinned = fop.pinned && Dic.simplify({ ...fop.pinned }) as PinnedFilter;
     if (isFilterGroupOptionParsed(fop))
       return ({
         token: fop.token && fop.token.fullKey,
         groupOperation: fop.groupOperation,
-        value: fop.value,
+        value: fop.value == "" ? undefined : fop.value,
         pinned: pinned,
         filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
@@ -624,7 +625,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
       return ({
         token: fop.token && fop.token.fullKey,
         operation: fop.operation,
-        value: fop.value,
+        value: fop.value == "" ? undefined : fop.value,
         frozen: fop.frozen ? true : undefined,
         pinned: pinned
       }) as FilterConditionOption;
@@ -1187,6 +1188,10 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
 }
 
+export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
+  return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
+}
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
@@ -1229,7 +1234,7 @@ export module API {
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
+    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
   }
 
   export interface AutocompleteRequest {
