@@ -351,9 +351,9 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderNode(WordTemplateParameters p)
         {
-            var obj = ValueProvider.GetValue(p);
+            object? obj = ValueProvider.GetValue(p);
 
-            string text;
+            string? text;
             
             switch (obj)
             {
@@ -374,13 +374,13 @@ namespace Signum.Engine.Word
             if (text != null && text.Contains('\n'))
             {
                 var replacements = text.Lines()
-                    .Select((line, i) => NodeProvider.NewRun((OpenXmlCompositeElement)RunProperties?.CloneNode(true), line, initialBr: i > 0));
+                    .Select((line, i) => NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line, initialBr: i > 0));
 
                 this.ReplaceBy(replacements);
             }
             else
             {
-                this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement)RunProperties?.CloneNode(true), text));
+                this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), text));
             }
         }
 

@@ -18,7 +18,11 @@ namespace Signum.Engine.Word
     {
         public static bool AvoidAdaptSize = false; //Jpeg compression creates different images in TeamCity
 
-        /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
+        /// <param name="titleOrDescription">
+        /// Replaces a placeholder-image with the provided image by comparing title/description
+        /// 
+        /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
+        /// </param>
         public static void ReplaceImage(this WordprocessingDocument doc, string titleOrDescription, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
         {
             var blip = doc.FindBlip(titleOrDescription);
@@ -32,10 +36,14 @@ namespace Signum.Engine.Word
             doc.ReplaceBlipContent(blip, bitmap, newImagePartId, imagePartType);
         }
 
-            /// <param name="titleOrDescription">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
+        /// <param name="titleOrDescription">
+        /// Replaces a placeholder-image with multiple images by comparing title/description
+        /// 
+        /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
+        /// </param>
         public static void ReplaceMultipleImages(WordprocessingDocument doc, string titleOrDescription, Bitmap[] bitmaps, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
         {
-            Blip[] blips = FindAllBlips(doc, titleOrDescription);
+            Blip[] blips = FindAllBlips(doc, d => d.Title == titleOrDescription || d.Description == titleOrDescription);
 
             if (blips.Count() != bitmaps.Length)
                 throw new ApplicationException("Images count does not match the images count in word");
