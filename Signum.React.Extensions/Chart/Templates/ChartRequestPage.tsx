@@ -23,7 +23,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
     oldPathPromise.then(oldPath => {
       if (oldPath != newPath) {
         var query = QueryString.parse(p.location.search);
-        var uc = query.userChart ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
+        var uc = !query.userChart ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
         ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
           .then(cr => setPair({ chartRequest: cr, userChart: uc }))
           .done();
