@@ -22,7 +22,7 @@ namespace Signum.Engine
     public static class Database
     {
         #region Save
-        public static void SaveList<T>(this IEnumerable<T> entities)
+        public static IEnumerable<T> SaveList<T>(this IEnumerable<T> entities)
             where T : class, IEntity
         {
             using (new EntityCache())
@@ -31,7 +31,7 @@ namespace Signum.Engine
             {
                 Saver.Save(entities.Cast<Entity>().ToArray());
 
-                tr.Commit();
+                return tr.Commit(entities);
             }
         }
 
