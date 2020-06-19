@@ -1,7 +1,7 @@
 import { ImportRoute } from '@framework/AsyncImport';
 import * as Finder from '@framework/Finder';
 import { ifError } from '@framework/Globals';
-import { LineBase, LineBaseProps, tasks, LineBaseController } from '@framework/Lines/LineBase';
+import { LineBaseProps, tasks, LineBaseController } from '@framework/Lines/LineBase';
 import * as Navigator from '@framework/Navigator';
 import { EntitySettings } from '@framework/Navigator';
 import * as Operations from '@framework/Operations';
@@ -31,7 +31,6 @@ import {
   PropertyRulePack,
   QueryAllowed,
   QueryRulePack,
-  ResetPasswordRequestEntity,
   RoleEntity,
   TypeAllowedBasic,
   TypeRulePack,
