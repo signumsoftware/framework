@@ -9,19 +9,17 @@ interface ProgressBarProps {
   message?: string | null;
   color?: BsColor | null;
   striped?: boolean;
-  active?: boolean;
+  animated?: boolean;
 }
 
 export default function ProgressBar(p : ProgressBarProps){
-  let { value, showPercentageInMessage, message, color, striped, active } = p;
+  let { value, showPercentageInMessage, message, color, striped, animated } = p;
 
   if (striped == null)
     striped = value == null;
 
-  if (active == null)
-    active = value == null;
-
-  const progressContainerClass = value == null ? " active" : "";
+  if (animated == null)
+    animated = value == null;
 
   const progressStyle = color != null ? "bg-" + color : "";
 
@@ -36,7 +34,7 @@ export default function ProgressBar(p : ProgressBarProps){
         "progress-bar",
         progressStyle,
         striped && "progress-bar-striped",
-        active && "active"
+        animated && "progress-bar-animated"
       )}
         role="progressbar" id="progressBar"
         aria-valuenow={value == null ? undefined : value * 100}
