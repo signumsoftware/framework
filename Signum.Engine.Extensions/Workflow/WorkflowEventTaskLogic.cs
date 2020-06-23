@@ -213,13 +213,10 @@ namespace Signum.Engine.Workflow
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(WorkflowEventTaskConditionResultEntity).ToTypeEntity());
-
-            if (dateLimit == null)
-                return;
-
-            Database.Query<WorkflowEventTaskConditionResultEntity>()
-               .Where(a => a.CreationDate < dateLimit.Value)
-               .UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit != null)
+                Database.Query<WorkflowEventTaskConditionResultEntity>()
+                   .Where(a => a.CreationDate < dateLimit.Value)
+                   .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static Lite<IEntity>? ExecuteTask(WorkflowEventTaskEntity wet)

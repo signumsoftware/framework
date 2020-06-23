@@ -137,24 +137,24 @@ namespace Signum.Engine.Processes
                     query = query.Where(p => p.Exception == null);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-                query.UnsafeDeleteChunksLog(parameters, sb, token);
+                query.Where(a => !a.ExceptionLines().Any()).UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
             var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
             if (dateLimit != null)
             {
-                Remove(ProcessState.Canceled, dateLimit.Value, false);
-                Remove(ProcessState.Finished, dateLimit.Value, false);
-                Remove(ProcessState.Error, dateLimit.Value, false);
+                Remove(ProcessState.Canceled, dateLimit.Value, withExceptions: false);
+                Remove(ProcessState.Finished, dateLimit.Value, withExceptions: false);
+                Remove(ProcessState.Error, dateLimit.Value, withExceptions: false);
             }
 
             dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ProcessEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
-
-            Remove(ProcessState.Canceled, dateLimit.Value, true);
-            Remove(ProcessState.Finished, dateLimit.Value, true);
-            Remove(ProcessState.Error, dateLimit.Value, true);
+            if (dateLimit != null)
+            {
+                Remove(ProcessState.Canceled, dateLimit.Value, withExceptions: true);
+                Remove(ProcessState.Finished, dateLimit.Value, withExceptions: true);
+                Remove(ProcessState.Error, dateLimit.Value, withExceptions: true);
+            }
         }
 
         public static IDisposable? OnApplySession(ProcessEntity process)

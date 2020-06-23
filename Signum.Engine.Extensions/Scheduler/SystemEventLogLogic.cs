@@ -39,18 +39,23 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
+            void Remove(DateTime dateLimit, bool withExceptions)
+            {
+                var query = Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit);
+
+                if (withExceptions)
+                    query.Where(a => a.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
+                else
+                    query.Where(a => a.Exception == null).UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
             var dateLimit = parameters.GetDateLimitDelete(typeof(SystemEventLogEntity).ToTypeEntity());
             if (dateLimit != null)
-                Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+                Remove(dateLimit.Value, withExceptions: false);
 
             dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(SystemEventLogEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
-
-            Database.Query<SystemEventLogEntity>().Where(a => a.Date < dateLimit.Value && a.Exception != null)
-                .UnsafeUpdate()
-                .Set(a => a.Exception, a => null)
-                .ExecuteChunksLog(parameters, sb, token);
+            if (dateLimit != null)
+                Remove(dateLimit.Value, withExceptions: true);
         }
 
         public static bool Log(string eventType, ExceptionEntity? exception = null)

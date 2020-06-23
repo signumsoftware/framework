@@ -204,23 +204,28 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
+            void Remove(DateTime dateLimit, bool withExceptions)
+            {
+                var query = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit);
+
+                if (withExceptions)
+                    query = query.Where(a => a.Exception != null);
+                else
+                    query = query.Where(a => a.Exception == null);
+
+                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
+                query.Where(a => !a.ExceptionLines().Any()).UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
             Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog == null).UnsafeDeleteChunksLog(parameters, sb, token);
 
             var dateLimit = parameters.GetDateLimitDelete(typeof(ScheduledTaskLogEntity).ToTypeEntity());
             if (dateLimit != null)
-            {
-                var query = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value);
-                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-                query.UnsafeDeleteChunksLog(parameters, sb, token);
-            }
+                Remove(dateLimit.Value, withExceptions: false);
 
             dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
-
-            var queryWithExceptions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit.Value && a.Exception != null);
-            queryWithExceptions.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
-            queryWithExceptions.UnsafeUpdate().Set(a => a.Exception, a => null).ExecuteChunksLog(parameters, sb, token);
+            if (dateLimit != null)
+                Remove(dateLimit.Value, withExceptions: true);
         }
 
         static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)
