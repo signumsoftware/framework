@@ -28,8 +28,7 @@ namespace Signum.React.Filters
 
         public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
-        public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
-
+        public static readonly List<Type> AvoidLogException = new List<Type> { typeof(OperationCanceledException) };
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
@@ -41,17 +40,15 @@ namespace Signum.React.Filters
 
             if (context.Exception != null)
             {
-                if (!IgnoreExceptions.Contains(context.Exception.GetType()))
+                if (!AvoidLogException.Contains(context.Exception.GetType()))
                 {
-                    var statusCode = GetStatus(context.Exception.GetType());
-
                     var req = context.HttpContext.Request;
 
                     var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
 
                     var exLog = context.Exception.LogException(e =>
                     {
-                        e.ActionName = Try(100, ()=>(context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
+                        e.ActionName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
                         e.ControllerName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName);
                         e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
                         e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
@@ -63,24 +60,26 @@ namespace Signum.React.Filters
                         e.Form = Try(int.MaxValue, () => Encoding.UTF8.GetString(body));
                         e.Session = null;
                     });
-                    
-                    if (ExpectsJsonResult(context))
+                }
+
+                if (ExpectsJsonResult(context))
+                {
+                    var statusCode = GetStatus(context.Exception.GetType());
+
+                    var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
+
+                    using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                     {
+                        var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
 
-                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
-
-                        using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
-                        {
-                            var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
-
-                            var response = context.HttpContext.Response;
-                            response.StatusCode = (int)statusCode;
-                            response.ContentType = "application/json";
-                            await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
-                            context.ExceptionHandled = true;
-                        }
+                        var response = context.HttpContext.Response;
+                        response.StatusCode = (int)statusCode;
+                        response.ContentType = "application/json";
+                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                        context.ExceptionHandled = true;
                     }
                 }
+
             }
         }
 
