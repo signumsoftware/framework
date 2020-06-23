@@ -41,7 +41,7 @@ export default function ProgressBar(p : ProgressBarProps){
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
         style={{ width: value == null ? "100%" : (value * 100) + "%" }}>
-        <span style={{ color: (value != null && value < 0.5) ? "black" : undefined }}>{fullMessage}</span>
+        <span>{fullMessage}</span>
       </div>
     </div>
   );
