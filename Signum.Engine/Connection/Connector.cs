@@ -185,8 +185,15 @@ namespace Signum.Engine
         protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
         protected static DateTime? AssertDateTime(DateTime? dateTime)
         {
-            if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.HasValue && dateTime.Value.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
+
+            if (dateTime.HasValue)
+            {
+                if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.Value.Kind != DateTimeKind.Utc)
+                    throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
+
+                if (Schema.Current.TimeZoneMode != TimeZoneMode.Utc && dateTime.Value.Kind == DateTimeKind.Utc)
+                    throw new InvalidOperationException("Attempt to use a Utc date in the database");
+            }
 
             return dateTime;
         }
