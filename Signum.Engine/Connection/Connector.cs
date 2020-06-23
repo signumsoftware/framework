@@ -181,7 +181,6 @@ namespace Signum.Engine
         public abstract DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value);
         public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value);
 
-
         protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
         protected static DateTime? AssertDateTime(DateTime? dateTime)
         {
@@ -191,8 +190,9 @@ namespace Signum.Engine
                 if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.Value.Kind != DateTimeKind.Utc)
                     throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
 
-                if (Schema.Current.TimeZoneMode != TimeZoneMode.Utc && dateTime.Value.Kind == DateTimeKind.Utc)
-                    throw new InvalidOperationException("Attempt to use a Utc date in the database");
+                //Problematic with Time machine
+                //if (Schema.Current.TimeZoneMode != TimeZoneMode.Utc && dateTime.Value.Kind == DateTimeKind.Utc)
+                //    throw new InvalidOperationException("Attempt to use a Utc date in the database");
             }
 
             return dateTime;
