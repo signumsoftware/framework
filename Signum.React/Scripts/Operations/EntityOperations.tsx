@@ -77,7 +77,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         order: group.order != undefined ? group.order : 100,
         shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
         button: (
-          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.color || "light"}>
+          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
             {
               gr.elements
                 .orderBy(a => a.settings && a.settings.order)
@@ -137,6 +137,16 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
   });
 }
 
+type OutlineBsColor = 
+  | 'outline-primary'
+  | 'outline-secondary'
+  | 'outline-success'
+  | 'outline-danger'
+  | 'outline-warning'
+  | 'outline-info'
+  | 'outline-dark'
+  | 'outline-light';
+
 interface OperationButtonProps extends ButtonProps {
   eoc: EntityOperationContext<any /*Entity*/> | undefined;
   group?: EntityOperationGroup;
@@ -189,7 +199,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     );
   }    
 
-  var button = <Button variant={eoc.color}
+  var button = <Button variant={(eoc.outline ? ("outline-" + eoc.color) as OutlineBsColor: eoc.color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}

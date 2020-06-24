@@ -22,16 +22,17 @@ namespace Signum.Engine
     public static class Database
     {
         #region Save
-        public static void SaveList<T>(this IEnumerable<T> entities)
-            where T : class, IEntity
+        public static List<T> SaveList<T>(this IEnumerable<T> entities)
+                where T : class, IEntity
         {
+            var list = entities.ToList();
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".FormatWith(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(entities.Cast<Entity>().ToArray());
+                Saver.Save(list.Cast<Entity>().ToArray());
 
-                tr.Commit();
+                return tr.Commit(list);
             }
         }
 
