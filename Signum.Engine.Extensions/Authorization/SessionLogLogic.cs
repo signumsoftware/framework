@@ -45,10 +45,8 @@ namespace Signum.Engine.Authorization
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(SessionLogEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
-
-            Database.Query<SessionLogEntity>().Where(a => a.SessionStart < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit != null)
+                Database.Query<SessionLogEntity>().Where(a => a.SessionStart < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static bool RoleTracked(Lite<RoleEntity> role)
