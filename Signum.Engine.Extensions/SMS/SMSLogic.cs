@@ -154,9 +154,9 @@ namespace Signum.Engine.SMS
                 var query = Database.Query<SMSMessageEntity>().Where(o => o.SendDate != null && o.SendDate < dateLimit);
 
                 if (withExceptions)
-                    query.Where(a => a.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
-                else
-                    query.Where(a => a.Exception == null).UnsafeDeleteChunksLog(parameters, sb, token);
+                    query = query.Where(a => a.Exception != null);
+
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
             var dateLimit = parameters.GetDateLimitDelete(typeof(SMSMessageEntity).ToTypeEntity());

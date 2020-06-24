@@ -100,9 +100,9 @@ namespace Signum.Engine.Mailing
                 var query = Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit);
 
                 if (withExceptions)
-                    query.Where(a => a.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
-                else
-                    query.Where(a => a.Exception == null).UnsafeDeleteChunksLog(parameters, sb, token);
+                    query = query.Where(a => a.Exception != null);
+
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
             var dateLimit = parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity());

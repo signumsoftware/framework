@@ -210,8 +210,6 @@ namespace Signum.Engine.Scheduler
 
                 if (withExceptions)
                     query = query.Where(a => a.Exception != null);
-                else
-                    query = query.Where(a => a.Exception == null);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
                 query.Where(a => !a.ExceptionLines().Any()).UnsafeDeleteChunksLog(parameters, sb, token);

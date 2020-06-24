@@ -133,8 +133,6 @@ namespace Signum.Engine.Processes
 
                 if (withExceptions)
                     query = query.Where(p => p.Exception != null);
-                else
-                    query = query.Where(p => p.Exception == null);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
                 query.Where(a => !a.ExceptionLines().Any()).UnsafeDeleteChunksLog(parameters, sb, token);
