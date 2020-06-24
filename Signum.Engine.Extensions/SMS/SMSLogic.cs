@@ -149,8 +149,11 @@ namespace Signum.Engine.SMS
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            void Remove(DateTime dateLimit, bool withExceptions)
+            void Remove(DateTime? dateLimit, bool withExceptions)
             {
+                if (dateLimit == null)
+                    return;
+
                 var query = Database.Query<SMSMessageEntity>().Where(o => o.SendDate != null && o.SendDate < dateLimit);
 
                 if (withExceptions)
@@ -159,13 +162,8 @@ namespace Signum.Engine.SMS
                 query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
-            var dateLimit = parameters.GetDateLimitDelete(typeof(SMSMessageEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Remove(dateLimit.Value, withExceptions: false);
-
-            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(SMSMessageEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Remove(dateLimit.Value, withExceptions: true);
+            Remove(parameters.GetDateLimitDelete(typeof(SMSMessageEntity).ToTypeEntity()), withExceptions: false);
+            Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(SMSMessageEntity).ToTypeEntity()), withExceptions: true);
         }
 
         public static HashSet<Type> GetAllTypes()

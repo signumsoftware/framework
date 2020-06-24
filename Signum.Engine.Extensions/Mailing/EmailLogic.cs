@@ -95,9 +95,12 @@ namespace Signum.Engine.Mailing
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            void Remove(DateTime dateLimit, bool withExceptions)
+            void Remove(DateTime? dateLimit, bool withExceptions)
             {
-                var query = Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit);
+                if (dateLimit == null)
+                    return;
+
+                var query = Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit.Value);
 
                 if (withExceptions)
                     query = query.Where(a => a.Exception != null);
@@ -105,13 +108,8 @@ namespace Signum.Engine.Mailing
                 query.UnsafeDeleteChunksLog(parameters, sb, token);
             }
 
-            var dateLimit = parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Remove(dateLimit.Value, withExceptions: false);
-
-            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(EmailMessageEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Remove(dateLimit.Value, withExceptions: true);
+            Remove(parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity()), withExceptions: false);
+            Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(EmailMessageEntity).ToTypeEntity()), withExceptions: true);
         }
 
         public static HashSet<Type> GetAllTypes()
