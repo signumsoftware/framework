@@ -8,6 +8,7 @@ namespace Signum.Entities.DiffLog
         TimeMachine,
         [Description("[Entity deleted]")]
         EntityDeleted,
+        CompareVersions,
     }
 
     [AutoInit]
