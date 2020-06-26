@@ -55,15 +55,21 @@ namespace Signum.Engine.Migrations
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(LoadMethodLogEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            void Remove(DateTime? dateLimit, bool withExceptions)
+            {
+                if (dateLimit == null)
+                    return;
 
-            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(LoadMethodLogEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
+                var query = Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit);
 
-            Database.Query<LoadMethodLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
+                if (withExceptions)
+                    query = query.Where(a => a.Exception != null);
+
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
+            Remove(parameters.GetDateLimitDelete(typeof(LoadMethodLogEntity).ToTypeEntity()), withExceptions: false);
+            Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(LoadMethodLogEntity).ToTypeEntity()), withExceptions: true);
         }
 
         public static void EnsureMigrationTable<T>() where T : Entity

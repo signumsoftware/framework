@@ -222,7 +222,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     return (
       <div className="modal-body">
         <CaseFromSenderInfo current={pack.activity} />
-        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
+        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
           {this.renderMainEntity()}
         </div>

@@ -215,12 +215,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
     }
   }
 
-  function getRowGroups(gor: RowDictionary | ChartRow[] | undefined, styles: CellStyle[], level: number, filters: FilterConditionOptionParsed[]): RowGroup[] | ChartRow[] {
+  function getRowGroups(gor: RowDictionary | ChartRow[] | undefined, styles: CellStyle[], level: number, filters: FilterConditionOptionParsed[]): RowGroup[] | ChartRow[] | undefined {
     if (Array.isArray(gor)) {
       if (styles.length == level)
         return gor;
 
       throw new Error("Unexpected Array in variable 'gor' at this level");
+    }
+
+    if (gor == undefined && styles.length == level) {
+      return gor;
     }
 
     const style = styles[level];
