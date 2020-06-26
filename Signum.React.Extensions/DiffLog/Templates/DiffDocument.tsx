@@ -74,8 +74,9 @@ export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>>
   return (
     <div>
       <div>
-        <label><input type="checkbox" checked={margin != null} onChange={() => handleSetMargin(margin == null ? 4 : null)} />
-          Show only <NumericTextBox value={margin == null ? 4 : margin} onChange={num => handleSetMargin(num == null ? 0 : Math.max(num, 0))}
+        <label>
+          <input type="checkbox" checked={margin != null} onChange={() => handleSetMargin(margin == null ? 4 : null)} />
+          <span className="mx-2">Show only</span><NumericTextBox value={margin == null ? 4 : margin} onChange={num => handleSetMargin(num == null ? 0 : Math.max(num, 0))}
             validateKey={isNumber} /> lines arround each change</label>
       </div>
       <div>

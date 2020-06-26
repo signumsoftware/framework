@@ -147,7 +147,7 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
       zIndex: 9,
     })}>
 
-      <div key={isFullScreen ? "A" : "B"} style={{ width: "100%", display: "flex" }}>
+      <div key={isFullScreen ? "A" : "B"} style={{ flexGrow: 1, display: "flex", width: "0px" }}>
         {p.children}
       </div>
       <div style={{ display: "flex", flexDirection: "column", marginLeft: "5px" }}>
