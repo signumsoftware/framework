@@ -614,7 +614,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
       return ({
         token: fop.token && fop.token.fullKey,
         groupOperation: fop.groupOperation,
-        value: fop.value == "" ? undefined : fop.value,
+        value: fop.value === "" ? undefined : fop.value,
         pinned: pinned,
         filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
@@ -625,7 +625,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
       return ({
         token: fop.token && fop.token.fullKey,
         operation: fop.operation,
-        value: fop.value == "" ? undefined : fop.value,
+        value: fop.value === "" ? undefined : fop.value,
         frozen: fop.frozen ? true : undefined,
         pinned: pinned
       }) as FilterConditionOption;

@@ -440,22 +440,20 @@ namespace Signum.Engine.Maps
             }
         }
 
-        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View<T>() where T : IView
         {
             return View(typeof(T));
         }
 
+        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View(Type viewType)
         {
-            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+            var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
 
-            if (tn?.SchemaName == "sys")
-            {
-                return ViewBuilder.NewView(viewType);
-            }
+            if (tn != null)
+                return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
 
-            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+            return ViewBuilder.NewView(viewType);
         }
 
         public event Func<SqlPreCommand?> Generating;

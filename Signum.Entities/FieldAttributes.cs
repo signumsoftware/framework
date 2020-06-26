@@ -372,6 +372,11 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class CacheViewMetadataAttribute : Attribute
+    {
+    }
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class TableNameAttribute : Attribute
     {
@@ -389,6 +394,8 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             this.ServerName = parts.ElementAtOrDefault(parts.Length - 4)?.Trim('[', ']');
         }
     }
+
+   
 
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public sealed class TicksColumnAttribute : DbTypeAttribute

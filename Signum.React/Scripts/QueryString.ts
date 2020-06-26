@@ -15,7 +15,7 @@ export namespace QueryString {
     var params = new URLSearchParams();
     for (var key in query) {
       var value = query[key];
-      if (value != null && value != false)
+      if (value != null)
         params.set(key, value.toString());
     }
     return params.toString();
