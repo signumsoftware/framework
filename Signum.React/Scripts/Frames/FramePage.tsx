@@ -100,7 +100,7 @@ export default function FramePage(p: FramePageProps) {
 
     } else {
       const cn = queryString["constructor"];
-      if (cn != null) {
+      if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith(cn.toLowerCase()));
         return Operations.API.construct(ti.name, oi.key);
       }
