@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 
@@ -166,14 +167,25 @@ namespace Signum.Engine.Cache
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            var obj = base.Visit(node.Object);
+            if (node.Method.DeclaringType == typeof(string) && node.Method.Name == nameof(string.Format) ||
+              node.Method.DeclaringType == typeof(StringExtensions) && node.Method.Name == nameof(StringExtensions.FormatWith))
+            {
+                var formatStr = Visit(node.Arguments[0]);
+                var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
 
+
+                return node.Update(null, new Sequence<Expression> { formatStr, remainging });
+            }
+
+            var obj = base.Visit(node.Object);
             var args = base.Visit(node.Arguments);
 
             LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
             if (lambda != null)
             {
+               
+
                 var replace = ExpressionReplacer.Replace(Expression.Invoke(lambda, obj == null ? args : args.PreAnd(obj)));
 
                 return this.Visit(replace);
@@ -189,7 +201,9 @@ namespace Signum.Engine.Cache
                 return BindMember(ce, (FieldValue)table.ToStrColumn, null);
             }
 
-            if(node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
+          
+
+            if (node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
             {
                 var mixin = ((Table)cee.Constructor.table).GetField(node.Method);
 
