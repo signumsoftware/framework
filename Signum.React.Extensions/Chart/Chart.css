@@ -126,6 +126,7 @@ body.rtl .sf-chart-token .sf-query-token {
     min-height: 400px;
     height: auto;
     position:relative;
+    overflow: auto;
 }
 .sf-chart-container svg
 {

@@ -132,10 +132,10 @@ namespace Signum.Engine.Processes
 
         public static void ExceptionLogic_DeletePackages<T>(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token) where T : PackageEntity
         {
-            var toDelete = Database.Query<T>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack));
+            var query = Database.Query<T>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack));
 
-            toDelete.SelectMany(a => a.Lines()).UnsafeDeleteChunksLog(parameters, sb, token);
-            toDelete.UnsafeDeleteChunksLog(parameters, sb, token);
+            query.SelectMany(a => a.Lines()).UnsafeDeleteChunksLog(parameters, sb, token);
+            query.Where(a => !a.Lines().Any()).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static PackageEntity CreateLines(this PackageEntity package, IEnumerable<Lite<IEntity>> lites)
