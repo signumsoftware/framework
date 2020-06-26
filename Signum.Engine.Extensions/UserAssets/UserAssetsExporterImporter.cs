@@ -261,6 +261,8 @@ namespace Signum.Engine.UserAssets
                     if (entity.IsNew || overrideEntity.ContainsKey(guid))
                     {
                         entity.FromXml(element, this);
+
+                        using (OperationLogic.AllowSave<DashboardEntity>())
                         using (OperationLogic.AllowSave(entity.GetType()))
                             entity.Save();
                     }
