@@ -219,8 +219,11 @@ namespace Signum.Engine.Authorization
         {
             return key =>
             {
+                if (AuthLogic.GetDefaultAllowed(role))
+                    return QueryAllowed.Allow;
+
                 if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? QueryAllowed.Allow: QueryAllowed.None;
+                    return QueryAllowed.None;
 
                 var maxUp = QueryAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
 
