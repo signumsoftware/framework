@@ -498,7 +498,11 @@ namespace Signum.Engine.Authorization
                     return Expression.And(Expression.Not(exp), acum);
             });
 
-            return DbQueryProvider.Clean(expression, false, null)!;
+            var cleaned = DbQueryProvider.Clean(expression, false, null)!;
+
+            var orsSimplified = AndOrSimplifierVisitor.SimplifyOrs(cleaned);
+
+            return orsSimplified;
         }
 
 
@@ -718,7 +722,7 @@ namespace Signum.Engine.Authorization
             {
                 var orGroups = OrAndList(b);
 
-                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer)));
+                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer))).ToList();
 
                 return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.Or)).Aggregate(Expression.And);
             }
@@ -728,7 +732,7 @@ namespace Signum.Engine.Authorization
 
         static Expression[][] OrAndList(Expression expression)
         {
-            if (expression is BinaryExpression b && b.NodeType == ExpressionType.Or)
+            if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
             {
                 return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToArray();
             }
@@ -743,7 +747,7 @@ namespace Signum.Engine.Authorization
 
         static Expression[] AndList(Expression expression)
         {
-            if (expression is BinaryExpression b && b.NodeType == ExpressionType.And)
+            if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
                 return AndList(b.Left).Concat(AndList(b.Right)).ToArray();
             else
                 return new[] { expression };
