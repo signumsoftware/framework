@@ -27,15 +27,15 @@ namespace Signum.Utilities.Reflection
             if (types.Length != numParams)
                 throw new InvalidOperationException("Invalid generic arguments ({0} instead of {1})".FormatWith(types.Length, numParams));
 
-                return executor.GetOrAdd(types, (ts) =>
-                     GeneratorVisitor.GetGenerator<T>(expression, ts).Compile());
+            return executor.GetOrAdd(types, (ts) =>
+                 GeneratorVisitor.GetGenerator<T>(expression, ts).Compile());
         }
     }
 
 
     class TypeArrayEqualityComparer : IEqualityComparer<Type[]>
     {
-        public static readonly TypeArrayEqualityComparer Instance = new TypeArrayEqualityComparer(); 
+        public static readonly TypeArrayEqualityComparer Instance = new TypeArrayEqualityComparer();
         public bool Equals(Type[]? x, Type[]? y)
         {
             if (x == null && y == null)
@@ -57,7 +57,12 @@ namespace Signum.Utilities.Reflection
         {
             int result = 0;
             for (int i = 0; i < types.Length; i++)
-                result ^= types[i].GetHashCode() >> i;
+            {
+                var type = types[i];
+                if (type != null)
+                    result ^= type.GetHashCode() >> i;
+            }
+
             return result;
         }
     }
@@ -81,7 +86,7 @@ namespace Signum.Utilities.Reflection
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if(!m.Method.IsGenericMethod)
+            if (!m.Method.IsGenericMethod)
                 throw new InvalidOperationException("The method '{0}' should be generic".FormatWith(m.Method.MethodName()));
 
             parameters = m.Method.GetGenericMethodDefinition().GetGenericArguments().Length;
@@ -116,9 +121,9 @@ namespace Signum.Utilities.Reflection
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            MethodInfo mi = m.Method.GetGenericMethodDefinition().MakeGenericMethod(types); 
-            var result = Expression.Call(m.Object, mi, m.Arguments.Zip(mi.GetParameters(), (e,p)=>Convert(e, p.ParameterType)));
-            return result; 
+            MethodInfo mi = m.Method.GetGenericMethodDefinition().MakeGenericMethod(types);
+            var result = Expression.Call(m.Object, mi, m.Arguments.Zip(mi.GetParameters(), (e, p) => Convert(e, p.ParameterType)));
+            return result;
         }
 
         protected override Expression VisitNew(NewExpression nex)
