@@ -17,6 +17,14 @@ namespace Signum.Engine.Cache
     {
         Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
 
+        CachedEntityExpression root;
+
+        public ToStringExpressionVisitor(ParameterExpression param, CachedEntityExpression root)
+        {
+            this.root = root;
+            this.replacements = new Dictionary<ParameterExpression, Expression> { { param, root } };
+        }
+
         public static Expression<Func<PrimaryKey, string>> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
         {
             Table table = (Table)constructor.table;
@@ -28,10 +36,9 @@ namespace Signum.Engine.Cache
 
             var pk = Expression.Parameter(typeof(PrimaryKey), "pk");
 
-            var visitor = new ToStringExpressionVisitor
-            {
-                replacements = { { param, new CachedEntityExpression(pk, typeof(T), constructor, null, null) } }
-            };
+            var root = new CachedEntityExpression(pk, typeof(T), constructor, null, null);
+
+            var visitor = new ToStringExpressionVisitor(param, root);
 
             var result = visitor.Visit(lambda.Body);
 
@@ -164,7 +171,7 @@ namespace Signum.Engine.Cache
         }
 
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
-
+        
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             if (node.Method.DeclaringType == typeof(string) && node.Method.Name == nameof(string.Format) ||
@@ -180,28 +187,34 @@ namespace Signum.Engine.Cache
             var obj = base.Visit(node.Object);
             var args = base.Visit(node.Arguments);
 
+            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce && ce.Type.IsEntity())
+            {
+                var table = (Table)ce.Constructor.table;
+
+                if (table.ToStrColumn != null)
+                {
+                    return BindMember(ce, (FieldValue)table.ToStrColumn, null);
+                }
+                else if(this.root != ce)
+                {
+                    var cachedTableType = typeof(CachedTable<>).MakeGenericType(table.Type);
+
+                    ConstantExpression tab = Expression.Constant(ce.Constructor.cachedTable, cachedTableType);
+
+                    var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString));
+
+                    return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
+                }
+            }
+
             LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
             if (lambda != null)
             {
-               
-
                 var replace = ExpressionReplacer.Replace(Expression.Invoke(lambda, obj == null ? args : args.PreAnd(obj)));
 
                 return this.Visit(replace);
             }
-
-            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce)
-            {
-                var table = (Table)ce.Constructor.table;
-
-                if (table.ToStrColumn == null)
-                    throw new InvalidOperationException("Impossible to get ToStrColumn from " + ce.ToString());
-
-                return BindMember(ce, (FieldValue)table.ToStrColumn, null);
-            }
-
-          
 
             if (node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
             {
