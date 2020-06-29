@@ -142,7 +142,7 @@ namespace Signum.Engine
             {
                 foreach (SqlParameter param in preCommand.Parameters)
                 {
-                    cmd.Parameters.Add(param);
+                    cmd.Parameters.AddWithValue(param.ParameterName, param.Value);
                 }
             }
 
