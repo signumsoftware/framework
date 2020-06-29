@@ -142,7 +142,22 @@ namespace Signum.Engine
             {
                 foreach (SqlParameter param in preCommand.Parameters)
                 {
-                    cmd.Parameters.AddWithValue(param.ParameterName, param.Value);
+                    cmd.Parameters.Add(new SqlParameter 
+                    {
+                        ParameterName = param.ParameterName,
+                        DbType = param.DbType,
+                        Value = param.Value,
+                        UdtTypeName = param.UdtTypeName,
+                        Precision = param.Precision,
+                        CompareInfo = param.CompareInfo,
+                        Direction = param.Direction,
+                        Scale = param.Scale,
+                        Offset = param.Offset,
+                        Size = param.Size,
+                        SqlDbType = param.SqlDbType,
+                        SqlValue = param.SqlValue,
+                        TypeName = param.TypeName
+                    });
                 }
             }
 
