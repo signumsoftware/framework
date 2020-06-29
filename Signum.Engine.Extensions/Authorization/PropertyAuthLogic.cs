@@ -279,8 +279,11 @@ namespace Signum.Engine.Authorization
         {
             return pr =>
             {
+                if (AuthLogic.GetDefaultAllowed(role))
+                    return PropertyAllowed.Write;
+
                 if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Write : PropertyAllowed.None;
+                    return PropertyAllowed.None;
 
                 var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
 
