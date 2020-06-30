@@ -57,11 +57,7 @@ namespace Signum.Utilities.Reflection
         {
             int result = 0;
             for (int i = 0; i < types.Length; i++)
-            {
-                var type = types[i];
-                if (type != null)
-                    result ^= type.GetHashCode() >> i;
-            }
+                result ^= types[i].GetHashCode() >> i;
 
             return result;
         }
