@@ -51,9 +51,18 @@ namespace Signum.Entities.Translation
 
     }
 
+    [InTypeScript(true)]
     public enum TranslateableRouteType
     {
         Text,
         Html
+    }
+
+    [InTypeScript(true)]
+    public enum TranslatedSummaryState
+    {
+        Completed,
+        Pending,
+        None,
     }
 }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { TranslationPermission } from './Signum.Entities.Translation'
+import { TranslationPermission, TranslatedSummaryState } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
@@ -64,8 +64,6 @@ export interface TranslationFileStatus {
   isDefault: boolean;
   status: TranslatedSummaryState;
 }
-
-export type TranslatedSummaryState = "Completed" | "Pending" | "None";
 
 export interface AssemblyResult {
   totalTypes: number;
