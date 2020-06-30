@@ -270,7 +270,7 @@ namespace Signum.Utilities
             return this.ToShortString();
         }
 
-        public string ToString(IFormatProvider provider) => ToString(null, CultureInfo.CurrentCulture);
+        public string ToString(IFormatProvider provider) => ToString(null, provider);
         public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
         public string ToString(string? format, IFormatProvider? provider)
