@@ -43,7 +43,14 @@ namespace Signum.Engine.Mailing
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
-                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo() ?? EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
+                    CultureInfo ci = EmailTemplateLogic.GetCultureInfo != null
+                        ? EmailTemplateLogic.GetCultureInfo(entity ?? systemEmail.UntypedEntity as Entity)
+                        : recipients
+                              .Where(a => a.Kind == EmailRecipientKind.To)
+                              .Select(a => a.OwnerData.CultureInfo)
+                              .FirstOrDefault()
+                              .ToCultureInfo()
+                          ?? EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
                     EmailMessageEntity email = new EmailMessageEntity
                     {
