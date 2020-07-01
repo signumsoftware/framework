@@ -119,7 +119,7 @@ namespace Signum.Entities
                         var id = ((Lite<Entity>)o).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".FormatWith(id.Value) : "");
                     }
-                    Sb.Append(" /* [CICLE] {0} */".FormatWith(SafeToString(o!)));
+                    Sb.Append(" /* [ALREADY] {0} */".FormatWith(SafeToString(o!)));
                     return;
                 }
 

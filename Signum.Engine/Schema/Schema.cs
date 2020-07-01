@@ -578,8 +578,6 @@ namespace Signum.Engine.Maps
         public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
         {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
-
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
             return list.TableMList;
