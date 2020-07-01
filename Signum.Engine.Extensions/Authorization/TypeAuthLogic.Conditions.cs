@@ -724,7 +724,7 @@ namespace Signum.Engine.Authorization
 
                 var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer))).ToList();
 
-                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.Or)).Aggregate(Expression.And);
+                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
             }
 
             return expr;
