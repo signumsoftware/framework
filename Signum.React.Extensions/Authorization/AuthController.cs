@@ -20,7 +20,7 @@ namespace Signum.React.Authorization
     [ValidateModelFilter]
     public class AuthController : ControllerBase
     {
-        [HttpPost("api/auth/login"), AllowAnonymous]
+        [HttpPost("api/auth/login"), SignumAllowAnonymous]
         public ActionResult<LoginResponse> Login([Required, FromBody] LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
@@ -213,7 +213,7 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
 
-        [HttpGet("api/auth/ResetPasswordMail/{username}"), AllowAnonymous]
+        [HttpGet("api/auth/ResetPasswordMail/{username}"), SignumAllowAnonymous]
         public ActionResult ResetPasswordMail(string username)
         {
             using (UserHolder.UserSession(AuthLogic.SystemUser!))
@@ -235,7 +235,7 @@ namespace Signum.React.Authorization
             }
         }
 
-        [HttpGet("api/auth/ResetPasswordRequest/{code}"), AllowAnonymous]
+        [HttpGet("api/auth/ResetPasswordRequest/{code}"), SignumAllowAnonymous]
         public ActionResult GetResetPasswordRequest(string code)
         {
             using (UserHolder.UserSession(AuthLogic.SystemUser!))
@@ -245,7 +245,7 @@ namespace Signum.React.Authorization
             }
         }
 
-        [HttpPost("api/auth/SetPassword"), AllowAnonymous]
+        [HttpPost("api/auth/SetPassword"), SignumAllowAnonymous]
         public ActionResult SetPassword([Required] [FromBody] SetPasswordRequest request)
         {
             using (UserHolder.UserSession(AuthLogic.SystemUser!))
