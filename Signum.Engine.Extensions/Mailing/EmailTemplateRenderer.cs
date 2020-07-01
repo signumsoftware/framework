@@ -24,7 +24,7 @@ namespace Signum.Engine.Mailing
         {
             this.template = template;
             this.entity = entity;
-            this.model = systemEmail;
+            this.model = model;
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
             this.qd = QueryLogic.Queries.QueryDescription(queryName);
