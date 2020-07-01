@@ -534,6 +534,7 @@ namespace Signum.Engine.Mailing
                 .Select(a => a.ToLite())
                 .ToList();
         }
-
+        
+        public static Func<Entity, CultureInfo> GetCultureInfo;
     }
 }
