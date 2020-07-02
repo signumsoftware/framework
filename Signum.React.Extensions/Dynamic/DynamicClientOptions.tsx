@@ -6,7 +6,7 @@ import { Type, QueryTokenString } from '@framework/Reflection';
 import { Entity } from '@framework/Signum.Entities';
 import { ValueSearchControlLine } from '@framework/Search';
 import { CellFormatter } from '@framework/Finder';
-import { expandNumbers } from '../DiffLog/Templates/DiffDocument';
+import { expandNumbers, DiffDocument } from '../DiffLog/Templates/DiffDocument';
 
 export type FormatColumnType = "Text" | "Code" | "JSon";
 
@@ -100,7 +100,7 @@ function HighlightText({ text, search, type }: { text: string, search: string, t
     if (changes.length == 0)
       changes = [0];
 
-    var result = expandNumbers(changes, 4);
+    var result = expandNumbers(changes, 4, 4);
 
     return (
       <div>
