@@ -239,8 +239,7 @@ namespace Signum.Entities.DynamicQuery
 
         public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination)
         {
-            //this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
-            this.entityColumn = columns.Where(c => c.Column is _EntityColumn).Distinct(c => c.Column.Token).SingleOrDefaultEx();
+            this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
             this.columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
 
             int rowCount = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
