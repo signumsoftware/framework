@@ -221,7 +221,26 @@ export function useThrottle<T>(value: T, limit: number, options?: { enabled?: bo
   }, []);
 
   return throttledValue;
-};
+}
+
+export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => Promise<T>) => Promise<T>] { //TODO: TS4
+
+  const [isLocked, setIsLocked] = React.useState<boolean>(false);
+
+  async function lock(makeCall: () => Promise<T>): Promise<T> {
+    if (isLocked)
+      throw new Error("Call in Progress");
+
+    setIsLocked(true);
+    try {
+      return await makeCall();
+    } finally {
+      setIsLocked(false);
+    }
+  }
+
+  return [isLocked, lock];
+}
 
 export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
   const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);

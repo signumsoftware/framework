@@ -85,14 +85,14 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string GetFileName(DiffTable t)
         {
             var mli = this.GetMListInfo(t);
-            if (mli != null)
+            if (mli != null && !mli.IsVirtual)
                 return this.GetFileName(this.Tables.GetOrThrow(mli.BackReferenceColumn.ForeignKey!.TargetTable));
 
             string name = t.Name.Schema.IsDefault() ? t.Name.Name : t.Name.ToString().Replace('.', '\\');
 
             name = Regex.Replace(name, "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]", "");
 
-            return name + ".cs";
+            return Singularize(name) + ".cs";
         }
 
         protected virtual string? WriteFile(string fileName, IEnumerable<DiffTable> tables)
@@ -214,7 +214,7 @@ namespace Signum.Engine.CodeGeneration
 
             StringBuilder sb = new StringBuilder();
             WriteAttributeTag(sb, GetEntityAttributes(table));
-            sb.AppendLine("public class {0} : {1}".FormatWith(name, GetEntityBaseClass(table.Name)));
+            sb.AppendLine("public class {0} : {1}".FormatWith(name, GetEntityBaseClass(table)));
             sb.AppendLine("{");
 
             string? multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
@@ -455,7 +455,7 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             var orderColumn = GetMListOrderColumn(table);
-            var trivialColumn = GetMListTrivialElementColumn(table, parentColumn, orderColumn);
+            var trivialColumn = isVirtualMList ? null : GetMListTrivialElementColumn(table, parentColumn, orderColumn);
 
             return new MListInfo(parentColumn)
             {
@@ -591,7 +591,7 @@ namespace Signum.Engine.CodeGeneration
 
             return Singularize(table.Name.Name) +
                 (IsEnum(table) ? "" :
-                mListInfo != null && mListInfo.IsVirtual == false ? "Embedded" :
+                mListInfo != null && !mListInfo.IsVirtual ? "Embedded" :
                 "Entity");
         }
 
@@ -600,8 +600,13 @@ namespace Signum.Engine.CodeGeneration
             return ((EnglishPluralizer)NaturalLanguageTools.Pluralizers["en"]).MakeSingular(name);
         }
 
-        protected virtual string GetEntityBaseClass(ObjectName objectName)
+        protected virtual string GetEntityBaseClass(DiffTable table)
         {
+            var mli = GetMListInfo(table);
+
+            if (mli != null && mli.PreserveOrderColumn != null && mli.IsVirtual)
+                return typeof(Entity).Name + ", " + typeof(ICanBeOrdered).Name;
+
             return typeof(Entity).Name;
         }
 
@@ -883,15 +888,15 @@ namespace Signum.Engine.CodeGeneration
             if (preserveOrder != null)
                 fieldAttributes.Add(preserveOrder);
 
-            string? primaryKey = GetPrimaryKeyAttribute(relatedTable);
+            string? primaryKey = mListInfo.IsVirtual ? null : GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
                 fieldAttributes.Add(primaryKey);
 
-            string? tableName = GetTableNameAttribute(relatedTable.Name, mListInfo);
+            string? tableName = mListInfo.IsVirtual ? null : GetTableNameAttribute(relatedTable.Name, mListInfo);
             if (tableName != null)
                 fieldAttributes.Add(tableName);
 
-            string? backColumn = GetBackColumnNameAttribute(mListInfo.BackReferenceColumn);
+            string? backColumn = mListInfo.IsVirtual ? null : GetBackColumnNameAttribute(mListInfo.BackReferenceColumn);
             if (backColumn != null)
                 fieldAttributes.AddRange(backColumn);
 
@@ -913,6 +918,9 @@ namespace Signum.Engine.CodeGeneration
         {
             if(mListInfo.PreserveOrderColumn == null)
                 return null;
+
+            if (mListInfo.IsVirtual)
+                return "PreserveOrder";
 
             var parts = new List<string>();
 

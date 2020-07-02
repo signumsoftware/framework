@@ -92,7 +92,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
       if (tis.length == 1 && tis.first().kind == "Enum")
         return ctx => <EnumCheckboxList ctx={ctx} />;
 
-      if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart"))
+      if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart") && !tr.isLite)
         return ctx => <EntityTable ctx={ctx} />;
 
       if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
@@ -118,7 +118,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
       if (tis.length == 1 && tis.first().kind == "Enum")
         return ctx => <ValueLine ctx={ctx} />;
 
-      if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+      if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart") && !tr.isLite)
         return ctx => <EntityDetail ctx={ctx} />;
 
       if (tis.every(t => t.isLowPopulation == true))
