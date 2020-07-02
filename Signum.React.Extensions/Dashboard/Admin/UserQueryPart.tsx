@@ -13,6 +13,7 @@ export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>
       <ValueLine ctx={ctx.subCtx(p => p.renderMode)} onChange={() => forceUpdate()} />
       {
         ctx.value.renderMode == "SearchControl" && <div>
+          <ValueLine ctx={ctx.subCtx(p => p.createNew)} />
           <ValueLine ctx={ctx.subCtx(p => p.allowSelection)} />
           <ValueLine ctx={ctx.subCtx(p => p.showFooter)} />
         </div>
