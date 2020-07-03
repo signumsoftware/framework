@@ -9,7 +9,7 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <StartupObject></StartupObject>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Platforms>x64;x86;AnyCPU;linux64;win64;win86</Platforms>
   </PropertyGroup>
 
