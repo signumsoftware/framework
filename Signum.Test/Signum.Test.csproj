@@ -6,7 +6,7 @@
     <UserSecretsId>SignumTest</UserSecretsId>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
   </PropertyGroup>
 
