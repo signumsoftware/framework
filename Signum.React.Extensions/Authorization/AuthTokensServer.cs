@@ -21,7 +21,7 @@ namespace Signum.React.Authorization
     public static class AuthTokenServer
     {
         static Func<AuthTokenConfigurationEmbedded> Configuration;
-        public static Action<AuthToken?, AuthToken?> OnAuthToken;
+        public static Action<UserEntity, AuthToken?, AuthToken?> OnAuthToken;
 
 
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -80,7 +80,7 @@ namespace Signum.React.Authorization
             }
             else
             {
-                OnAuthToken?.Invoke(token, null);
+                OnAuthToken?.Invoke(token.User, token, null);
 
             }
 
@@ -110,7 +110,7 @@ namespace Signum.React.Authorization
             };
 
 
-            OnAuthToken?.Invoke(oldToken, newToken);
+            OnAuthToken?.Invoke(user,oldToken, newToken);
 
             var result = SerializeToken(newToken);
             newUser = user;
@@ -147,7 +147,7 @@ namespace Signum.React.Authorization
                 CreationDate = TimeZoneManager.Now,
             };
 
-            OnAuthToken?.Invoke(null, newToken);
+            OnAuthToken?.Invoke(user,null, newToken);
 
             return SerializeToken(newToken);
         }
