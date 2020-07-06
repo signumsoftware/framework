@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Signum.Entities;
 
 namespace Signum.React.Authorization
 {
@@ -52,7 +53,18 @@ namespace Signum.React.Authorization
 
         public static void RemoveCookie(ActionContext ac)
         {
-            ac.HttpContext.Response.Cookies.Delete(CookieName);
+            //ac.HttpContext.Response.Cookies.Delete(CookieName);
+
+            //foreach (var cookie in ac.HttpContext.Request.Cookies)
+            //{
+            //    ac.HttpContext.Response.Cookies.Delete(CookieName);
+            //}
+
+            ac.HttpContext.Response.Cookies.Append(CookieName, "", new CookieOptions()
+            {
+                Expires = DateTime.Now.AddDays(-1)
+            });
+
         }
 
         public static void SaveCookie(ActionContext ac)
