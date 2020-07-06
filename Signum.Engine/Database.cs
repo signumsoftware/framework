@@ -134,6 +134,21 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
             {
+               
+                T? retrieved = TryRetrieve<T>( id);
+
+                if (retrieved == null )
+                    throw new EntityNotFoundException(typeof(T), id);
+
+                return retrieved;
+            }
+        }
+
+
+        public static T? TryRetrieve<T>(PrimaryKey id) where T : Entity
+        {
+            using (HeavyProfiler.Log("TryRetrieve", () => typeof(T).TypeName()))
+            {
                 if (EntityCache.Created)
                 {
                     T? cached = EntityCache.Get<T>(id);
@@ -170,8 +185,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
                 T? retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
-                if (retrieved == null)
-                    throw new EntityNotFoundException(typeof(T), id);
+              
 
                 return retrieved;
             }
