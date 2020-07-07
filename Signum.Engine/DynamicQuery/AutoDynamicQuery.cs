@@ -79,7 +79,8 @@ namespace Signum.Engine.DynamicQuery
         {
             if (!request.GroupResults)
             {
-                request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+                if(!request.Columns.Where(c => c is _EntityColumn).Any())
+                    request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
                 return Query
                     .ToDQueryable(GetQueryDescription())

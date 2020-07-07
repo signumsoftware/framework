@@ -58,7 +58,7 @@ namespace Signum.Utilities.NaturalLanguage
             if (index != -1)
                 return pluralName.Substring(0, index + 1) + MakeSingular(pluralName.Substring(index + 1));
 
-            var result = exceptions.FirstOrDefault(r => pluralName.EndsWith(r.Value));
+            var result = exceptions.FirstOrDefault(r => r.Value != "s" && pluralName.EndsWith(r.Value));
             if (result.Key != null)
                 return pluralName.Substring(0, pluralName.Length - result.Value.Length) + result.Key;
 
