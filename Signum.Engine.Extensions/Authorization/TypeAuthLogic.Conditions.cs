@@ -11,6 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -497,7 +498,11 @@ namespace Signum.Engine.Authorization
                     return Expression.And(Expression.Not(exp), acum);
             });
 
-            return DbQueryProvider.Clean(expression, false, null)!;
+            var cleaned = DbQueryProvider.Clean(expression, false, null)!;
+
+            var orsSimplified = AndOrSimplifierVisitor.SimplifyOrs(cleaned);
+
+            return orsSimplified;
         }
 
 
@@ -704,6 +709,53 @@ namespace Signum.Engine.Authorization
                         .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))!
                         .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", ")));
                 }).Combine(Spacing.Double);
+        }
+    }
+
+    public static class AndOrSimplifierVisitor
+    {
+        static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
+
+        public static Expression SimplifyOrs(Expression expr)
+        {
+            if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
+            {
+                var orGroups = OrAndList(b);
+
+                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer))).ToList();
+
+                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
+            }
+
+            return expr;
+        }
+
+        static Expression[][] OrAndList(Expression expression)
+        {
+            if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
+            {
+                return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToArray();
+            }
+            else
+            {
+                var ands = AndList(expression);
+                var simpleAnds = ands.Distinct(Comparer).ToArray();
+                return new[] { simpleAnds };
+
+            }
+        }
+
+        static Expression[] AndList(Expression expression)
+        {
+            if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
+                return AndList(b.Left).Concat(AndList(b.Right)).ToArray();
+            else
+                return new[] { expression };
+        }
+
+        static bool IsMoreSimpleAndGeneralThan(this Expression[] simple, Expression[] complex, IEqualityComparer<Expression> comparer)
+        {
+            return simple.All(a => complex.Contains(a, comparer));
         }
     }
 }

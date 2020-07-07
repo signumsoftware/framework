@@ -77,13 +77,7 @@ namespace Signum.Engine.Basics
             return CultureInfoToEntity.Value.TryGetC(ci.Name);
         }
 
-        public static IEnumerable<CultureInfo> ApplicationCultures
-        {
-            get
-            {
-                return EntityToCultureInfo.Value.Values;
-            }
-        }
+        public static IEnumerable<CultureInfo> ApplicationCultures => EntityToCultureInfo.Value.Values;
 
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoEntity, T> func)
         {

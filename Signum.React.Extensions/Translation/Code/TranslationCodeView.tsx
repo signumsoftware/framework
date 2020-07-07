@@ -12,6 +12,7 @@ import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
 import { decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
+import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
 
 export default function TranslationCodeView(p: RouteComponentProps<{ culture: string; assembly: string }>) {
 
@@ -49,6 +50,8 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
     culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
       cultures ? cultures[culture].toStr :
         culture);
+
+  useTitle(message);
 
   return (
     <div>

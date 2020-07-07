@@ -37,7 +37,7 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
   getDecorators(controller: HtmlEditorController): [draftjs.DraftDecorator] {
     return [{
-      component: Link,
+      component: DraftLink,
       strategy: (contentBlock, callback, contentState) => {
         contentBlock.findEntityRanges(
           (character) => {
@@ -96,7 +96,7 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
 
 
-export function Link({ contentState, entityKey, children }: { contentState: draftjs.ContentState, entityKey: string, children: React.ReactChildren }) {
+export function DraftLink({ contentState, entityKey, children }: { contentState: draftjs.ContentState, entityKey: string, children: React.ReactChildren }) {
   const { url } = contentState.getEntity(entityKey).getData();
   return (
     <a

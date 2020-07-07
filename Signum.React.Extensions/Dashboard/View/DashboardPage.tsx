@@ -14,11 +14,6 @@ interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }
 
 }
 
-interface DashboardPageState {
-  dashboard?: DashboardEntity;
-  entity?: Entity;
-}
-
 function getQueryEntity(props: DashboardPageProps): string {
   return QueryString.parse(props.location.search).entity as string;
 }
