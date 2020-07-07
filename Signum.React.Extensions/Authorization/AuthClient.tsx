@@ -118,7 +118,6 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
 }
 
 function getCookie(name: string) {
-  debugger;
   var dc = document.cookie;
   var prefix = name ;
   var begin = dc.indexOf(prefix);
@@ -164,7 +163,6 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
-  debugger;
   var cookieName = "sfUser";
   removeCookie(cookieName);
 
