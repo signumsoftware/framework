@@ -45,6 +45,8 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Action<Pop3ReceptionEntity>? ReceptionComunication;
 
+        public static bool IsStarted = false;
+
         public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -160,6 +162,8 @@ namespace Signum.Engine.Mailing.Pop3
                     return null;
                 });
             }
+
+            IsStarted = true;
         }
 
         public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;

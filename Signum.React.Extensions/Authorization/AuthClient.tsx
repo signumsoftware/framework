@@ -74,17 +74,36 @@ export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>>
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
-  var myCookie = getCookie("sfUser");
+  var cookieName = "sfUser";
+
+  var myCookie = getCookie(cookieName);
 
   if (!myCookie) {
     return new Promise<undefined>(resolve => resolve());
   }
   else {
     return API.loginFromCookie().then(au => {
-      au && console.log("loginFromCookie");
+      if (au) {
+        console.log("loginFromCookie");
+      }
+      else {
+        removeCookie(cookieName);
+      }
       return au;
     });
   }
+}
+
+
+export function removeCookie(cookieName: string): void {
+
+
+  document.cookie.split("; ").filter(c => c.startsWith(cookieName)).forEach((c) => {
+    document.cookie = c
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=" + location.pathname);
+  });
+
 }
 
 export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
@@ -99,21 +118,24 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
 }
 
 function getCookie(name: string) {
+  debugger;
   var dc = document.cookie;
-  var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
+  var prefix = name ;
+  var begin = dc.indexOf(prefix);
 
   if (begin == -1) {
     begin = dc.indexOf(prefix);
     if (begin != 0) return null;
   }
 
+  var indexOfEqual = dc.indexOf("=",begin);
+
   var end = document.cookie.indexOf(";", begin + 2);
   if (end == -1) {
     end = dc.length;
   }
 
-  return decodeURI(dc.substring(begin + prefix.length, end));
+  return decodeURI(dc.substring(indexOfEqual+1, end));
 }
 
 
@@ -142,6 +164,10 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
+  debugger;
+  var cookieName = "sfUser";
+  removeCookie(cookieName);
+
 
   API.logout().then(() => {
     logoutInternal();

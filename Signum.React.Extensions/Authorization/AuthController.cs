@@ -59,14 +59,16 @@ namespace Signum.React.Authorization
                 return ModelError("login", e.Message);
             }
 
+        
+            AuthServer.OnUserPreLogin(ControllerContext, user);
+
+            AuthServer.AddUserSession(ControllerContext, user);
+
             if (data.rememberMe == true)
             {
                 UserTicketServer.SaveCookie(ControllerContext);
             }
 
-            AuthServer.OnUserPreLogin(ControllerContext, user);
-
-            AuthServer.AddUserSession(ControllerContext, user);
 
             string? message = AuthLogic.OnLoginMessage();
 

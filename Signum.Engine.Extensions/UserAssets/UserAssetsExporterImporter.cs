@@ -261,6 +261,8 @@ namespace Signum.Engine.UserAssets
                     if (entity.IsNew || overrideEntity.ContainsKey(guid))
                     {
                         entity.FromXml(element, this);
+
+                        using (OperationLogic.AllowSave<DashboardEntity>())
                         using (OperationLogic.AllowSave(entity.GetType()))
                             entity.Save();
                     }
@@ -363,6 +365,8 @@ namespace Signum.Engine.UserAssets
             using (Transaction tr = new Transaction())
             {
                 var doc = new MemoryStream(document).Using(XDocument.Load);
+                if (PreImport != null)
+                    doc = PreImport(doc);
 
                 ImporterContext importer = new ImporterContext(doc,
                     preview.Lines
