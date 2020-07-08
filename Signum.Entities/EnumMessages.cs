@@ -153,6 +153,8 @@ Lose changes?")]
         AddValue,
         [Description("Delete filter")]
         DeleteFilter,
+        [Description("Delete all filter")]
+        DeleteAllFilter,
         Filters,
         Find,
         [Description("Finder of {0}")]
@@ -288,12 +290,7 @@ Lose changes?")]
         addFilter,
         [Description("Open tab")]
         openTab,
-        [Description("Rename column")]
-        renameColumn,
-        [Description("Edit column")]
-        editColumn,
-        [Description("Enter the new column name")]
-        enterTheNewColumnName,
+
         [Description("Error")]
         error,
         [Description("Executed")]
@@ -332,12 +329,14 @@ Lose changes?")]
         popupErrorsStop,
         [Description("Insert column")]
         insertColumn,
+        [Description("Edit column")]
+        editColumn,
         [Description("Remove column")]
         removeColumn,
-        [Description("Move left")]
-        reorderColumn_MoveLeft,
-        [Description("Move right")]
-        reorderColumn_MoveRight,
+        [Description("Remove other columns")]
+        removeOtherColumns,
+        [Description("Restore default columns")]
+        restoreDefaultColumns,
         [Description("Saved")]
         saved,
         [Description("Search")]

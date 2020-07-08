@@ -14,7 +14,7 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteValue(((Date?)value)?.ToString("o"));
+            writer.WriteValue(((Date?)value)?.ToString("o", CultureInfo.InvariantCulture));
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
@@ -26,7 +26,7 @@ namespace Signum.React.Json
             if(date != null)
                 return (Date?)date;
 
-            return Date.ParseExact((string)reader.Value, "o", CultureInfo.CurrentCulture);
+            return Date.ParseExact((string)reader.Value, "o", CultureInfo.InvariantCulture);
         }
     }
 }

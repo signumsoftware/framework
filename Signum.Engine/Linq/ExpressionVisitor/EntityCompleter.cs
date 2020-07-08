@@ -42,6 +42,7 @@ namespace Signum.Engine.Linq
 
             var typeId = binder.GetEntityType(lite.Reference);
             var toStr = LiteToString(lite, typeId);
+            //var toStr2 = Visit(toStr); //AdditionalBinding in embedded requires it, but makes problems in many other lites in Nominator
 
             return new LiteValueExpression(lite.Type, typeId, id, toStr);
         }
@@ -137,9 +138,9 @@ namespace Signum.Engine.Linq
             var bindings = VisitBindings(eee.Bindings);
             var hasValue = Visit(eee.HasValue);
 
-            if (eee.Bindings != bindings || eee.HasValue != hasValue)
+            if (eee.Bindings != bindings || eee.HasValue != hasValue || eee.EntityContext != null)
             {
-                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable);
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable, null);
             }
             return eee;
         }
@@ -148,9 +149,9 @@ namespace Signum.Engine.Linq
         {
             var bindings = VisitBindings(me.Bindings);
 
-            if (me.Bindings != bindings)
+            if (me.Bindings != bindings || me.EntityContext != null)
             {
-                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin);
+                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin, null);
             }
             return me;
         }

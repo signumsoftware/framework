@@ -5,10 +5,11 @@ input[type=radio] {
     height: 16px;
 }
 
-label input[type=checkbox],
-label input[type=radio] {
+label > input[type=checkbox],
+label > input[type=radio] {
     margin: 0;
     vertical-align: middle;
+    margin-bottom: 3px;
 }
 
 input[type=checkbox].form-control {
@@ -32,11 +33,6 @@ input[type=checkbox].form-control {
 
 .numeric {
     text-align: right;
-}
-
-label > input[type=checkbox] {
-    margin: 0px;
-    vertical-align: middle;
 }
 
 .date-time .input-group.date,

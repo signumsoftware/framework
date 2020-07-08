@@ -924,12 +924,13 @@ export function isType(obj: any): obj is IType {
   return (obj as IType).typeName != undefined;
 }
 
-export function newLite<T extends Entity>(type: Type<T>, id: number | string): Lite<T>;
-export function newLite(typeName: PseudoType, id: number | string): Lite<Entity>;
-export function newLite(type: PseudoType, id: number | string): Lite<Entity> {
+export function newLite<T extends Entity>(type: Type<T>, id: number | string, toStr?: string): Lite<T>;
+export function newLite(typeName: PseudoType, id: number | string, toStr?: string): Lite<Entity>;
+export function newLite(type: PseudoType, id: number | string, toStr?: string): Lite<Entity> {
   return {
     EntityType: getTypeName(type),
-    id: id
+    id: id,
+    toStr: toStr
   };
 }
 

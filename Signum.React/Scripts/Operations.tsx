@@ -254,6 +254,7 @@ export class EntityOperationContext<T extends Entity> {
   onDeleteSuccess?: () => void;
 
   color?: BsColor;
+  outline?: boolean;
   group?: EntityOperationGroup;
   keyboardShortcut?: KeyboardShortcut;
   alternatives?: AlternativeOperationSetting<T>[];
@@ -267,6 +268,7 @@ export class EntityOperationContext<T extends Entity> {
   complete() {
     var s = this.settings;
     this.color = s?.color ?? Defaults.getColor(this.operationInfo);
+    this.outline = s?.outline ?? Defaults.getOutline(this.operationInfo);
     this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
     this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
@@ -341,6 +343,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  outline?: boolean;
   classes?: string;
   icon?: IconProp;
   iconAlign?: "start" | "end";
@@ -434,6 +437,7 @@ export interface EntityOperationGroup {
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;
+  outline?: boolean;
   order?: number;
 }
 
@@ -449,7 +453,12 @@ export namespace Defaults {
 
   export function getColor(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "light";
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "secondary";
+  }
+
+  export function getOutline(oi: OperationInfo): boolean {
+    return oi.operationType == OperationType.Delete ? true :
+      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? false : true;
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {

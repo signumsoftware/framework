@@ -243,7 +243,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, IntervalExpression? period)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, EntityContextInfo entityContext, IntervalExpression? period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
@@ -253,7 +253,7 @@ namespace Signum.Engine.Maps
 
             return ee.AdditionalBindings
                 .Where(kvp => kvp.Key.Parent!.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, id, period, kvp.Key)))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, entityContext.EntityId, entityContext.MListRowId, period, kvp.Key)))
                 .ToList();
         }
 
@@ -440,22 +440,20 @@ namespace Signum.Engine.Maps
             }
         }
 
-        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View<T>() where T : IView
         {
             return View(typeof(T));
         }
 
+        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View(Type viewType)
         {
-            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+            var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
 
-            if (tn?.SchemaName == "sys")
-            {
-                return ViewBuilder.NewView(viewType);
-            }
+            if (tn != null)
+                return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
 
-            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+            return ViewBuilder.NewView(viewType);
         }
 
         public event Func<SqlPreCommand?> Generating;
@@ -580,8 +578,6 @@ namespace Signum.Engine.Maps
         public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
         {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
-
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
             return list.TableMList;

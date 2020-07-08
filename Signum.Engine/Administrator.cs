@@ -236,7 +236,7 @@ namespace Signum.Engine
 
 
 
-        public static IDisposable DisableIdentity<T>()
+        public static IDisposable SaveDisableIdentity<T>()
             where T : Entity
         {
             Table table = Schema.Current.Table<T>();
@@ -281,7 +281,7 @@ namespace Signum.Engine
             where T : Entity
         {
             using (Transaction tr = new Transaction())
-            using (Administrator.DisableIdentity<T>())
+            using (Administrator.SaveDisableIdentity<T>())
             {
                 Database.Save(entities);
                 tr.Commit();
@@ -292,7 +292,7 @@ namespace Signum.Engine
             where T : Entity
         {
             using (Transaction tr = new Transaction())
-            using (Administrator.DisableIdentity<T>())
+            using (Administrator.SaveDisableIdentity<T>())
             {
                 Database.SaveList(entities);
                 tr.Commit();

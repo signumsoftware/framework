@@ -10,7 +10,6 @@ import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../Typ
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
-import * as QueryString from 'query-string'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
@@ -19,6 +18,7 @@ import * as Operations from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
 import { FunctionalAdapter } from '../Modals'
+import { QueryString } from '../QueryString'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -68,13 +68,15 @@ export default function FramePage(p: FramePageProps) {
 
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
-    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise;
+    return Navigator.getViewPromise(pack.entity, viewName).promise;
   }
 
 
   function loadEntity(): Promise<EntityPack<Entity>> {
 
-    if (QueryString.parse(p.location.search).waitData) {
+    const queryString = QueryString.parse(p.location.search);
+
+    if (queryString.waitData) {
       if (window.opener.dataForChildWindow == undefined) {
         throw new Error("No dataForChildWindow in parent found!")
       }
@@ -97,10 +99,9 @@ export default function FramePage(p: FramePageProps) {
         });
 
     } else {
-
-      const cn = QueryString.parse(p.location.search).constructor;
-      if (cn != null) {
-        const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith((cn as string).toLowerCase()));
+      const cn = queryString["constructor"];
+      if (cn != null && typeof cn == "string") {
+        const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith(cn.toLowerCase()));
         return Operations.API.construct(ti.name, oi.key);
       }
 

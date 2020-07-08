@@ -150,9 +150,9 @@ namespace Signum.Utilities
             return new Date(this._dt.AddDays(value));
         }
 
-        public Date AddMonths(int value)
+        public Date AddMonths(int months)
         {
-            return new Date(this._dt.AddMonths(value));
+            return new Date(this._dt.AddMonths(months));
         }
 
         public Date AddYears(int value)
@@ -270,7 +270,7 @@ namespace Signum.Utilities
             return this.ToShortString();
         }
 
-        public string ToString(IFormatProvider provider) => ToString(null, CultureInfo.CurrentCulture);
+        public string ToString(IFormatProvider provider) => ToString(null, provider);
         public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
         public string ToString(string? format, IFormatProvider? provider)

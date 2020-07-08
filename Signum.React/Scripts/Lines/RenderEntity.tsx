@@ -16,6 +16,10 @@ export interface RenderEntityProps {
   extraProps?: any;
 }
 
+interface FuncBox {
+  func: ((ctx: TypeContext<any /*T*/>) => React.ReactElement<any>)
+}
+
 export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
@@ -25,12 +29,12 @@ export function RenderEntity(p: RenderEntityProps) {
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
-  var componentBox = useAPI(() => {
+  var componentBox = useAPI<FuncBox | "useGetComponent" | null>(() => {
     if (p.ctx.propertyRoute == null)
       return Promise.resolve(null);
 
     if (p.getComponent)
-      return Promise.resolve({ func: p.getComponent });
+      return Promise.resolve("useGetComponent");
 
     if (entity == null)
       return Promise.resolve(null);
@@ -49,6 +53,8 @@ export function RenderEntity(p: RenderEntityProps) {
   if (componentBox == null)
     return null;
 
+  if (componentBox == "useGetComponent" && p.getComponent == null)
+    return null;
 
   const ti = tryGetTypeInfo(entity.Type);
 
@@ -81,7 +87,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
-  var element = componentBox.func(newCtx);
+  var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
 
   if (p.extraProps)
     element = React.cloneElement(element, p.extraProps);
