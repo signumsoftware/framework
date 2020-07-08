@@ -202,28 +202,10 @@ namespace Signum.Engine.Tree
                 throw new Exception(TreeMessage.ImpossibleToMove01Of2.NiceToString(entity, model.InsertPlace.NiceToString(), model.NewParent));
 
             if (model.InsertPlace == InsertPlace.After)
-            {
-                var next = Next<T>(newSiblingRoute);
-                //var newHid = newParentRoute.GetDescendant(newSiblingRoute, next);
-
-                //if (newHid == newSiblingRoute|| newHid == next)
-                 var   newHid = Database.Query<T>().Where(e=>(bool)(e.Route== newParentRoute)).Select(e => e.Route.GetDescendant(newSiblingRoute, next)).SingleEx();
-
-                return newHid;
-            }
-
+                return newParentRoute.GetDescendant(newSiblingRoute, Next<T>(newSiblingRoute));
 
             if (model.InsertPlace == InsertPlace.Before)
-            {
-                var previous = Previous<T>(newSiblingRoute);
-                //var newHid = newParentRoute.GetDescendant(previous, newSiblingRoute);
-
-                //if (newHid == newSiblingRoute || newHid == previous)
-                  var  newHid = Database.Query<T>().Where(e => (bool)(e.Route == newParentRoute)).Select(e => e.Route.GetDescendant(previous,newSiblingRoute)).SingleEx();
-
-                return newHid;
-
-            }
+                return newParentRoute.GetDescendant(Previous<T>(newSiblingRoute), newSiblingRoute);
 
             throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
@@ -297,7 +279,6 @@ namespace Signum.Engine.Tree
                     }
 
                     TreeLogic.FixName(t);
-                    t.UpdateLevel();
                 }
             }.Register();
 
