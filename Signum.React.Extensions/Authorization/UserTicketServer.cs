@@ -53,18 +53,11 @@ namespace Signum.React.Authorization
 
         public static void RemoveCookie(ActionContext ac)
         {
-            //ac.HttpContext.Response.Cookies.Delete(CookieName);
-
-            //foreach (var cookie in ac.HttpContext.Request.Cookies)
-            //{
-            //    ac.HttpContext.Response.Cookies.Delete(CookieName);
-            //}
-
             ac.HttpContext.Response.Cookies.Append(CookieName, "", new CookieOptions()
             {
+                Path = new UrlHelper(ac).Content("~/"),
                 Expires = DateTime.Now.AddDays(-1)
             });
-
         }
 
         public static void SaveCookie(ActionContext ac)

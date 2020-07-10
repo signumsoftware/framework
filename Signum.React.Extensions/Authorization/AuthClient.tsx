@@ -7,6 +7,7 @@ import { UserEntity, PermissionSymbol } from "./Signum.Entities.Authorization";
 import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
 import { is } from "@framework/Signum.Entities";
 import { ifError } from "@framework/Globals";
+import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
@@ -72,38 +73,26 @@ var notifyLogout: boolean;
 
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
+const cookieName = "sfUser";
+
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
-  var cookieName = "sfUser";
 
-  var myCookie = getCookie(cookieName);
+  var myCookie = Cookies.get(cookieName);
 
   if (!myCookie) {
-    return new Promise<undefined>(resolve => resolve());
+    return Promise.resolve(undefined);
   }
-  else {
-    return API.loginFromCookie().then(au => {
-      if (au) {
-        console.log("loginFromCookie");
-      }
-      else {
-        removeCookie(cookieName);
-      }
-      return au;
-    });
-  }
-}
 
-
-export function removeCookie(cookieName: string): void {
-
-
-  document.cookie.split("; ").filter(c => c.startsWith(cookieName)).forEach((c) => {
-    document.cookie = c
-      .replace(/^ +/, "")
-      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=" + location.pathname);
+  return API.loginFromCookie().then(au => {
+    if (au) {
+      console.log("loginFromCookie");
+    }
+    else {
+      Cookies.remove(cookieName);
+    }
+    return au;
   });
-
 }
 
 export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
@@ -163,9 +152,8 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
-  var cookieName = "sfUser";
-  removeCookie(cookieName);
 
+  Cookies.remove(cookieName)
 
   API.logout().then(() => {
     logoutInternal();
