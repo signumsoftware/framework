@@ -53,7 +53,7 @@ namespace Signum.Entities
         public static Action<Type> AssertNotIncluded = t => { throw new NotImplementedException("Call MixinDeclarations.Register in the server, after the Connector is created."); };
 
         public static void Register<T, M>()
-            where T : ModifiableEntity, IRootEntity
+            where T : ModifiableEntity
             where M : MixinEntity
         {
             Register(typeof(T), typeof(M));

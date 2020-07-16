@@ -1541,6 +1541,21 @@ END $$;"); ;
                         Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
                         Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, suffix);
             }
+
+            if(Mixins != null)
+            {
+                foreach (var mi in Mixins)
+                {
+                    foreach (var f in mi.Value.Fields.Values)
+                    {
+                        f.Field.CreateParameter(trios, assigments,
+                            Expression.Condition(
+                                Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
+                                Expression.Constant(null, f.FieldInfo.FieldType.Nullify()),
+                                Expression.Field(embedded, f.FieldInfo).Nullify()), forbidden, suffix);
+                    }
+                }
+            }
         }
 
         static readonly MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null!));

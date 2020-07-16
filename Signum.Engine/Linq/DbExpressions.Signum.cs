@@ -105,12 +105,14 @@ namespace Signum.Engine.Linq
         public readonly Expression HasValue;
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+        public readonly ReadOnlyCollection<MixinEntityExpression>? Mixins;
         public readonly EntityContextInfo? EntityContext; 
 
         public readonly FieldEmbedded? FieldEmbedded; //used for updates
         public readonly Table? ViewTable; //used for updates
 
-        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded? fieldEmbedded, Table? viewTable, EntityContextInfo? entityContext)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings,
+            IEnumerable<MixinEntityExpression>? mixins, FieldEmbedded? fieldEmbedded, Table? viewTable, EntityContextInfo? entityContext)
             : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
@@ -122,6 +124,7 @@ namespace Signum.Engine.Linq
             HasValue = hasValue;
 
             Bindings = bindings.ToReadOnly();
+            Mixins = mixins.ToReadOnly();
 
             FieldEmbedded = fieldEmbedded;
             EntityContext = entityContext;
