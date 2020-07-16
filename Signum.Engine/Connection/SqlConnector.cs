@@ -423,23 +423,7 @@ namespace Signum.Engine
 
         public override DbParameter CloneParameter(DbParameter p)
         {
-            SqlParameter sp = (SqlParameter)p;
-            return new SqlParameter
-            {
-                ParameterName = sp.ParameterName,
-                DbType = sp.DbType,
-                Value = sp.Value,
-                UdtTypeName = sp.UdtTypeName,
-                Precision = sp.Precision,
-                CompareInfo = sp.CompareInfo,
-                Direction = sp.Direction,
-                Scale = sp.Scale,
-                Offset = sp.Offset,
-                Size = sp.Size,
-                SqlDbType = sp.SqlDbType,
-                SqlValue = sp.SqlValue,
-                TypeName = sp.TypeName
-            };
+            return (SqlParameter)((ICloneable)p).Clone();
         }
 
         public override DbConnection CreateConnection()

@@ -497,7 +497,7 @@ namespace Signum.Engine.CodeGeneration
 
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
-            if (elementType.IsEmbeddedEntity() || (eka!.EntityKind == EntityKind.Part || eka!.EntityKind == EntityKind.SharedPart))
+            if (elementType.IsEmbeddedEntity() || !pi.PropertyType.ElementType()!.IsLite() && (eka!.EntityKind == EntityKind.Part || eka!.EntityKind == EntityKind.SharedPart))
                 if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Length > 1)
                     return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
                 else
@@ -520,7 +520,7 @@ namespace Signum.Engine.CodeGeneration
             if (eka == null)
                 return "<EntityLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
-            if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
+            if (!pi.PropertyType.IsLite() && (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
                 return "<EntityDetail ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
             if (eka.IsLowPopulation)
