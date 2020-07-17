@@ -271,14 +271,7 @@ namespace Signum.Engine.Tree
                 CanBeModified = true,
                 Execute = (t, _) =>
                 {
-                    if (t.IsNew)
-                    {
-                        t.Route = CalculateRoute(t);
-                        if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.ParentOrSibling != null)
-                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent()!.Mixin<DisabledMixin>().IsDisabled;
-                    }
-
-                    TreeLogic.FixName(t);
+                    TreeEntitySave(t);
                 }
             }.Register();
 
@@ -288,13 +281,7 @@ namespace Signum.Engine.Tree
                 {
                     var model = args.GetArg<MoveTreeModel>();
 
-                    TreeLogic.FixRouteAndNames(t, model);
-                    t.Save();
-
-                    if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled) && !t.Mixin<DisabledMixin>().IsDisabled)
-                    {
-                        t.Execute(DisableOperation.Disable);
-                    }
+                    TreeEntityMove(t, model);
 
                 }
             }.Register();
@@ -346,6 +333,29 @@ namespace Signum.Engine.Tree
                     TreeLogic.RemoveDescendants(f);
                 }
             }.Register();
+        }
+
+        public static void TreeEntityMove<T>(T t, MoveTreeModel model) where T : TreeEntity, new()
+        {
+            TreeLogic.FixRouteAndNames(t, model);
+            t.Save();
+
+            if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled) && !t.Mixin<DisabledMixin>().IsDisabled)
+            {
+                t.Execute(DisableOperation.Disable);
+            }
+        }
+
+        public static void TreeEntitySave<T>(T t) where T : TreeEntity, new()
+        {
+            if (t.IsNew)
+            {
+                t.Route = CalculateRoute(t);
+                if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.ParentOrSibling != null)
+                    t.Mixin<DisabledMixin>().IsDisabled = t.Parent()!.Mixin<DisabledMixin>().IsDisabled;
+            }
+
+            TreeLogic.FixName(t);
         }
 
         public static SqlHierarchyId CalculateRoute<T>(T t) where T : TreeEntity, new()
