@@ -712,6 +712,7 @@ const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(ret
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
+const getMixinRegex = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
@@ -733,7 +734,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Mixin" });
       body = m[1];
     }
-    else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+    else if (m = getMixinRegex.exec(body)) {
+      result.push({ name: m[2], type: "Mixin" });
+      body = m[1];
+    }
+    else if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
@@ -1464,8 +1469,18 @@ export class PropertyRoute {
   propertyPath(): string {
     switch (this.propertyRouteType) {
       case "Root": throw new Error("Root has no PropertyString");
-      case "Field": return this.member!.name;
-      case "Mixin": return "[" + this.mixinName + "]";
+      case "Field": {
+        switch (this.parent!.propertyRouteType) {
+          case "Root": return this.member!.name;
+          case "Field":
+          case "Mixin":
+            return this.parent!.propertyPath() + "." + this.member!.name;
+          case "MListItem":
+            return this.parent!.propertyPath() + this.member!.name;
+          default: throw new Error("Unexpected parent propertyRouteType");
+        }
+      }
+      case "Mixin": return (this.parent!.propertyRouteType == "Root" ? "" : this.parent!.propertyPath()) + "[" + this.mixinName + "]";
       case "MListItem": return this.parent!.propertyPath() + "/";
       case "LiteEntity": return this.parent!.propertyPath() + ".entity";
       default: throw new Error("Unexpected propertyRouteType");
@@ -1494,7 +1509,7 @@ export class PropertyRoute {
 
     var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
 
-    if (memberType == "Member") {
+    if (memberType == "Member" || memberType == "Mixin") {
 
       if (this.propertyRouteType == "Field" ||
         this.propertyRouteType == "MListItem" ||
@@ -1502,47 +1517,48 @@ export class PropertyRoute {
         const ref = this.typeReference();
 
         if (ref.isLite) {
-          if (memberName != "Entity")
-            throw new Error("Entity expected");
-
-          return PropertyRoute.liteEntity(this);
+          if (memberType == "Member" && memberName == "Entity")
+            return PropertyRoute.liteEntity(this);
+          
+          throw new Error("Entity expected");
         }
 
         const ti = tryGetTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
-          const m = ti.members[memberName];
-          if (!m) {
-            if (throwIfNotFound)
-              throw new Error(`member '${memberName}' not found` + getErrorContext());
-            return undefined;
+          if (memberType == "Mixin")
+            return PropertyRoute.mixin(this, memberName);
+          else {
+            const m = ti.members[memberName];
+            if (!m) {
+              if (throwIfNotFound)
+                throw new Error(`member '${memberName}' not found` + getErrorContext());
+              return undefined;
+            }
+            return PropertyRoute.member(PropertyRoute.root(ti), m);
           }
-
-          return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
           throw Error("Unexpected lite case" + getErrorContext());
         }
       }
 
-      const fullMemberName = this.propertyRouteType == "Root" ? memberName :
-        this.propertyRouteType == "MListItem" ? this.propertyPath() + memberName :
-          this.propertyPath() + "." + memberName;
+      if (memberType == "Mixin")
+        return PropertyRoute.mixin(this, memberName);
+      else {
+        const fullMemberName =
+          this.propertyRouteType == "Root" ? memberName :
+            this.propertyRouteType == "MListItem" ? this.propertyPath() + memberName :
+              this.propertyPath() + "." + memberName;
 
-      const m = this.findRootType().members[fullMemberName];
-      if (!m) {
-        if (throwIfNotFound)
-          throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
+        const m = this.findRootType().members[fullMemberName];
+        if (!m) {
+          if (throwIfNotFound)
+            throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
-        return undefined;
+          return undefined;
+        }
+        return PropertyRoute.member(this, m);
       }
-      return PropertyRoute.member(this, m);
-    }
-
-    if (memberType == "Mixin") {
-      if (this.propertyRouteType != "Root")
-        throw new Error("invalid mixin at this stage" + getErrorContext());
-
-      return PropertyRoute.mixin(this, memberName);
     }
 
     if (memberType == "Indexer") {

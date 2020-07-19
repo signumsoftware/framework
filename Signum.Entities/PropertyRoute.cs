@@ -386,7 +386,7 @@ namespace Signum.Entities
         static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
-        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true, bool includeMixins = false, bool includeMListElements = false)
+        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true, bool includeMixinItself = false, bool includeMListElements = false)
         {
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
@@ -402,7 +402,7 @@ namespace Signum.Entities
                     result.Add(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixins));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixinItself));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
@@ -413,7 +413,7 @@ namespace Signum.Entities
 
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixins));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixinItself));
                     }
                 }
             }
@@ -422,16 +422,16 @@ namespace Signum.Entities
             {
                 var mixinRoute = root.Add(t);
 
-                if (includeMixins)
+                if (includeMixinItself)
                     result.Add(mixinRoute);
 
-                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixins));
+                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixinItself));
             }
 
             return result;
         }
 
-        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedRoute, bool includeIgnored, bool includeMListElements, bool includeMixins)
+        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedRoute, bool includeIgnored, bool includeMListElements, bool includeMixinItself)
         {
             List<PropertyRoute> result = new List<PropertyRoute>();
             foreach (var pi in Reflector.PublicInstancePropertiesInOrder(embeddedRoute.Type))
@@ -442,7 +442,7 @@ namespace Signum.Entities
                     result.AddRange(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixins));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixinItself));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
@@ -453,21 +453,19 @@ namespace Signum.Entities
 
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixins));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixinItself));
                     }
                 }
             }
 
-            if (includeMixins && Reflector.IsEmbeddedEntity(embeddedRoute.Type))
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(embeddedRoute.Type))
             {
-                foreach (var t in MixinDeclarations.GetMixinDeclarations(embeddedRoute.Type))
-                {
-                    var mixinRoute = embeddedRoute.Add(t);
+                var mixinRoute = embeddedRoute.Add(t);
 
+                if (includeMixinItself)
                     result.Add(mixinRoute);
 
-                    result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixins));
-                }
+                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixinItself));
             }
 
             return result;

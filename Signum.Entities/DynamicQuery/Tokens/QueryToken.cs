@@ -93,20 +93,20 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract PropertyRoute? GetPropertyRoute();
 
-        internal PropertyRoute? AddPropertyRoute(PropertyInfo pi)
+        internal PropertyRoute? NormalizePropertyRoute()
         {
             if (typeof(ModelEntity).IsAssignableFrom(Type))
-                return PropertyRoute.Root(Type).Add(pi);
+                return PropertyRoute.Root(Type);
 
             Type? type = Lite.Extract(Type); //Because Add doesn't work with lites
             if (type != null)
-                return PropertyRoute.Root(type).Add(pi);
+                return PropertyRoute.Root(type);
 
             PropertyRoute? pr = GetPropertyRoute();
             if (pr == null)
                 return null;
 
-            return pr.Add(pi);
+            return pr;
         }
 
         public abstract Implementations? GetImplementations();
@@ -341,17 +341,16 @@ namespace Signum.Entities.DynamicQuery
 
         IEnumerable<QueryToken> EntityProperties(Type type)
         {
+            var normalizedPr = NormalizePropertyRoute();
+
             var result = from p in Reflector.PublicInstancePropertiesInOrder(type)
                          where Reflector.QueryableProperty(type, p)
-                         select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p)!);
-
-            if (!type.IsEntity())
-                return result;
+                         select (QueryToken)new EntityPropertyToken(this, p, (normalizedPr?.Add(p))!);
 
             var mixinProperties = from mt in MixinDeclarations.GetMixinDeclarations(type)
                                   from p in Reflector.PublicInstancePropertiesInOrder(mt)
                                   where Reflector.QueryableProperty(mt, p)
-                                  select (QueryToken)new EntityPropertyToken(this, p, PropertyRoute.Root(type).Add(mt).Add(p));
+                                  select (QueryToken)new EntityPropertyToken(this, p, (normalizedPr?.Add(mt).Add(p))!);
 
             return result.Concat(mixinProperties);
         }

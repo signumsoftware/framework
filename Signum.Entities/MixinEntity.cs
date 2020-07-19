@@ -113,17 +113,23 @@ namespace Signum.Entities
 
         public static HashSet<Type> GetMixinDeclarations(Type mainEntity)
         {
+            if (!typeof(ModifiableEntity).IsAssignableFrom(mainEntity))
+                throw new InvalidOperationException($"Type {mainEntity.Name} is not a ModifiableEntity");
+
+            if (mainEntity.IsAbstract)
+                throw new InvalidOperationException($"{mainEntity.Name} is abstract");
+
             return Declarations.GetOrAdd(mainEntity, me =>
-                {
-                    var hs = new HashSet<Type>(me.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
-                        .Cast<MixinAttribute>()
-                        .Select(t => t.MixinType));
+            {
+                var hs = new HashSet<Type>(me.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
+                    .Cast<MixinAttribute>()
+                    .Select(t => t.MixinType));
 
-                    foreach (var t in hs)
-                        AddConstructor(t);
+                foreach (var t in hs)
+                    AddConstructor(t);
 
-                    return hs;
-                });
+                return hs;
+            });
         }
 
         public static bool IsDeclared(Type mainEntity, Type mixinType)

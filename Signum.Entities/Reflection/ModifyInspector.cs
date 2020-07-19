@@ -73,9 +73,9 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                if (obj is Entity ident)
+                if (obj is ModifiableEntity mod)
                 {
-                    foreach (var mixin in ident.Mixins)
+                    foreach (var mixin in mod.Mixins)
                     {
                         yield return mixin;
                     }
@@ -110,9 +110,9 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                if (obj is Entity ident)
+                if (obj is ModifiableEntity mod)
                 {
-                    foreach (var mixin in ident.Mixins)
+                    foreach (var mixin in mod.Mixins)
                     {
                         yield return mixin;
                     }
@@ -148,9 +148,9 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                if (obj is Entity ident)
+                if (obj is ModifiableEntity mod)
                 {
-                    foreach (var mixin in ident.Mixins)
+                    foreach (var mixin in mod.Mixins)
                     {
                         yield return mixin;
                     }
