@@ -1546,14 +1546,7 @@ END $$;"); ;
             {
                 foreach (var mi in Mixins)
                 {
-                    foreach (var f in mi.Value.Fields.Values)
-                    {
-                        f.Field.CreateParameter(trios, assigments,
-                            Expression.Condition(
-                                Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
-                                Expression.Constant(null, f.FieldInfo.FieldType.Nullify()),
-                                Expression.Field(embedded, f.FieldInfo).Nullify()), forbidden, suffix);
-                    }
+                    mi.Value.CreateParameter(trios, assigments, embedded, forbidden, suffix);
                 }
             }
         }
