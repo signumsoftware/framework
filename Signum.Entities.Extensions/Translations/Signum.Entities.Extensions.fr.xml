@@ -24,6 +24,7 @@
     <Member Name="EmailSent" Description="Email envoyé" />
     <Member Name="EnterTheNewPassword" Description="Entrez le nouveau mot de passe" />
     <Member Name="EnterYourUserEmail" Description="Saississez votre adresse e-mail" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Saississez votre login et votre mot de passe" />
     <Member Name="ExpiredPassword" Description="Mot de passe a expiré" />
     <Member Name="ExpiredPasswordMessage" Description="Votre mot de passe a expiré. Vous devez le modifier" />
     <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Indiquez ci-dessous votre adresse e-mail afin de recevoir un lien vous permettant de réinitialiser votre mot de passe." />
@@ -31,7 +32,7 @@
     <Member Name="IHaveForgottenMyPassword" Description="J'ai oublié mon mot de passe" />
     <Member Name="IncorrectPassword" Description="Mot de passe incorrecte" />
     <Member Name="InvalidUsernameOrPassword" Description="Le nom d'utilisateur ou mot de passe est incorrect" />
-    <Member Name="Login_Password" Description="Mot de passe :" />
+    <Member Name="Login" Description="Connexion" />
     <Member Name="Login_UserName" Description="Login :" />
     <Member Name="Logout" Description="Déconnexion" />
     <Member Name="NewPassword" Description="Nouveau mot de passe" />
@@ -239,7 +240,7 @@
   </Type>
   <Type Name="ExcelReportOperation" />
   <Type Name="ExchangeWebServiceEmbedded">
-    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="Username" Description="Login" />
   </Type>
   <Type Name="FileEmbedded" Description="Fichier incorporé">
     <Member Name="BinaryFile" Description="Fichier binaire" />
@@ -393,7 +394,7 @@
   <Type Name="PinnedQueryFilterEmbedded" />
   <Type Name="Pop3ConfigurationAction" />
   <Type Name="Pop3ConfigurationEntity">
-    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="Username" Description="Login" />
   </Type>
   <Type Name="Pop3ConfigurationOperation" />
   <Type Name="Pop3ReceptionEntity" />
@@ -550,7 +551,7 @@
   <Type Name="SMSUpdatePackageEntity" />
   <Type Name="SmtpEmbedded" />
   <Type Name="SmtpNetworkDeliveryEmbedded">
-    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="Username" Description="Login" />
   </Type>
   <Type Name="SqlMigrationEntity" />
   <Type Name="SubEntitiesEval" />
