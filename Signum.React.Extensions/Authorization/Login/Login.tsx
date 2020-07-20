@@ -75,7 +75,7 @@ export default function Login() {
         <div className="row">
           <div className="col-md-6 offset-md-3">
             <div className={classes("form-group", error("password") && "has-error")}>
-              <label className="sr-only" htmlFor="password">Password</label>
+              <label className="sr-only" htmlFor="password">{AuthMessage.Password.niceToString()}</label>
               <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
