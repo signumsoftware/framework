@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Facades;
 using Signum.Entities.Translation;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
@@ -24,18 +25,15 @@ namespace Signum.React.Translation
 
         public static CultureInfo? GetCultureRequest(ActionContext actionContext)
         {
-            foreach (string lang in actionContext.HttpContext.Request.Headers["accept-languages"])
+            var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
+            foreach (var lang in acceptedLanguages.Select(l => l.Value))
             {
-                string cleanLang = lang.Contains('-') ? lang.Split('-')[0] : lang;
-
+                var cleanLang = lang.Value.Contains('-') ? lang.Value.Split('-')[0] : lang.Value;
                 var culture = CultureInfoLogic.ApplicationCultures
-                    .Where(ci => ci.Name.StartsWith(cleanLang))
-                    .FirstOrDefault();
-
+                    .FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
                 if (culture != null)
                     return culture;
             }
-
             return null;
         }
 
