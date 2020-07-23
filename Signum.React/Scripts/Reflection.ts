@@ -4,8 +4,8 @@ import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
-import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
-import { AggregateType } from './FindOptions';
+import * as AppContext from './AppContext';
+import { QueryString } from './QueryString';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -427,7 +427,12 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 }
 
 export function reloadTypes(): Promise<void> {
-  return ajaxGet<TypeInfoDictionary>({ url: "~/api/reflection/types" })
+  return ajaxGet<TypeInfoDictionary>({
+    url: "~/api/reflection/types?" + QueryString.stringify({
+      user: AppContext.currentUser?.id,
+      culture: AppContext.currentCulture
+    })
+  })
     .then(types => {
       setTypes(types);
       onReloadTypes();
