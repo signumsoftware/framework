@@ -11,7 +11,10 @@ import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 
 Dic.skipClasses.push(React.Component);
 
-
+export let currentCulture: string | undefined;
+export function setCurrentCulture(culture: string | undefined) {
+  currentCulture = culture;
+}
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {

@@ -251,12 +251,13 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
             var bindings = Visit(eee.Bindings, VisitFieldBinding);
+            var mixins = eee.Mixins == null ? null : Visit(eee.Mixins, VisitMixinEntity);
             var hasValue = Visit(eee.HasValue);
             var entityContext = eee.EntityContext == null ? null : VisitEntityContextInfo(eee.EntityContext);
 
-            if (eee.Bindings != bindings || eee.HasValue != hasValue || eee.EntityContext != entityContext)
+            if (eee.Bindings != bindings || eee.Mixins != mixins ||  eee.HasValue != hasValue || eee.EntityContext != entityContext)
             {
-                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable, entityContext);
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, mixins, eee.FieldEmbedded, eee.ViewTable, entityContext);
             }
             return eee;
         }
