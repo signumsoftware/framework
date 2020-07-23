@@ -35,6 +35,7 @@ export default function Login() {
     AuthClient.API.login(request)
       .then(lr => {
         setLoading(true);
+        setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
         AuthClient.Options.onLogin();
