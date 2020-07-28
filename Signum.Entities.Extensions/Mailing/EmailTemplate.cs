@@ -157,7 +157,7 @@ namespace Signum.Entities.Mailing
             Model = ctx.GetEmailModel(element.Attribute("SystemEmail").Value);
             SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
 
-            MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
+            MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(a.Value));
             IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
 
             From = element.Element("From")?.Let(from =>  new EmailTemplateContactEmbedded
