@@ -90,8 +90,8 @@ export default function Login() {
         {AuthClient.Options.userTicket &&
           <div className="row">
             <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
-            <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-              <label className="sf-remember-me">
+              <div className="form-check mb-2 mr-sm-2 mb-sm-0">
+                <label className="sf-remember-me">
                   <input ref={rememberMe} name="remember" type="checkbox" /> {LoginAuthMessage.RememberMe.niceToString()}
                 </label>
               </div>
@@ -99,19 +99,39 @@ export default function Login() {
           </div>
         }
 
-        <div className="row" style={{ paddingTop: "1rem" }}>
+        <div className="row mt-3">
           <div className="col-md-6 offset-md-3">
-            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
+            <div className="row">
+              <div className="col-md-6 offset-md-3">
+                <button type="submit" id="login" className="btn btn-success w-100"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
+                {error("login") && <div className="help-block w-100 mt-3" style={{ color: "red" }}>{error("login")}</div>}
+                {AuthClient.Options.resetPassword &&
+                  <div className="mt-3 w-100 text-center">
+                    <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/*<div className="row" style={{ paddingTop: "1rem" }}>
+          <div className="col-md-6 offset-md-3">
+            <div className="row">
+              <div className="col-md-6 offset-md-3">
+                <button type="submit" id="login" className="btn btn-success w-100"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
+              </div>
+            </div>
             {error("login") && <span className="help-block" style={{ color: "red" }}>{error("login")}</span>}
             {AuthClient.Options.resetPassword &&
-              <span>
-                &nbsp;
-              &nbsp;
-                <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
-              </span>
+              <div className="mt-3 w-100 text-center">
+                  <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+              </div>
             }
           </div>
         </div>
+        */}
         {Login.customLoginButtons && Login.customLoginButtons()}
       </form>
     </div>
