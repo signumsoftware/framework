@@ -90,7 +90,7 @@ namespace Signum.Engine.Basics
 
         public static List<PropertyRouteEntity> GenerateProperties(Type type, TypeEntity typeEntity, bool forSync)
         {
-            return PropertyRoute.GenerateRoutes(type, includeMixins: forSync, includeMListElements: forSync).Select(pr =>
+            return PropertyRoute.GenerateRoutes(type, includeMListElements: forSync).Select(pr =>
                 new PropertyRouteEntity
                 {
                     RootType = typeEntity,
