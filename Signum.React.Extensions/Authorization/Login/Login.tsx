@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
-import { ModelState } from '@framework/Signum.Entities'
+import { ModelState, JavascriptMessage } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
@@ -12,6 +12,7 @@ import "./Login.css"
 export default function Login() {
 
   const [modelState, setModelState] = React.useState<ModelState | undefined>(undefined);
+  const [loading, setLoading] = React.useState<boolean | undefined>(undefined);
   const userName = React.useRef<HTMLInputElement>(null);
   const password = React.useRef<HTMLInputElement>(null);
   const rememberMe = React.useRef<HTMLInputElement>(null);
@@ -33,6 +34,8 @@ export default function Login() {
 
     AuthClient.API.login(request)
       .then(lr => {
+        setLoading(true);
+        setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
         AuthClient.Options.onLogin();
@@ -67,9 +70,9 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
                 </div>
-                <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} />
+                <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} disabled={loading} />
               </div>
-              {error("userName") && <span className="help-block">{error("userName")}</span>}
+              {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
             </div>
           </div>
         </div>
@@ -81,9 +84,9 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
                 </div>
-                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} />
+                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={loading} />
               </div>
-              {error("password") && <span className="help-block">{error("password")}</span>}
+              {error("password") && <span className="help-block text-danger">{error("password")}</span>}
             </div>
           </div>
         </div>
@@ -92,47 +95,32 @@ export default function Login() {
             <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
               <div className="form-check mb-2 mr-sm-2 mb-sm-0">
                 <label className="sf-remember-me">
-                  <input ref={rememberMe} name="remember" type="checkbox" /> {LoginAuthMessage.RememberMe.niceToString()}
+                  <input ref={rememberMe} name="remember" type="checkbox" disabled={loading} /> {LoginAuthMessage.RememberMe.niceToString()}
                 </label>
               </div>
             </div>
           </div>
         }
 
-        <div className="row mt-3">
+        <div className="row" style={{ paddingTop: "1rem" }}>
           <div className="col-md-6 offset-md-3">
-            <div className="row">
-              <div className="col-md-6 offset-md-3">
-                <button type="submit" id="login" className="btn btn-success w-100"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
-                {error("login") && <div className="help-block w-100 mt-3" style={{ color: "red" }}>{error("login")}</div>}
-                {AuthClient.Options.resetPassword &&
-                  <div className="mt-3 w-100 text-center">
-                    <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/*<div className="row" style={{ paddingTop: "1rem" }}>
-          <div className="col-md-6 offset-md-3">
-            <div className="row">
-              <div className="col-md-6 offset-md-3">
-                <button type="submit" id="login" className="btn btn-success w-100"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
-              </div>
-            </div>
-            {error("login") && <span className="help-block" style={{ color: "red" }}>{error("login")}</span>}
-            {AuthClient.Options.resetPassword &&
-              <div className="mt-3 w-100 text-center">
-                  <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
-              </div>
+            <button type="submit" id="login" className="btn btn-success" disabled={loading}>
+              {loading ?
+                <FontAwesomeIcon icon="cog" fixedWidth style={{ fontSize: "larger" }} spin /> :  < FontAwesomeIcon icon="sign-in-alt" />}
+              &nbsp;
+            {loading ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
+            </button>
+            {error("login") && <span className="help-block text-danger" style={{ color: "red" }}>{error("login")}</span>}
+            {AuthClient.Options.resetPassword && !loading &&
+              <span>
+                &nbsp;
+                &nbsp;
+                <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+              </span>
             }
           </div>
         </div>
-        */}
-        {Login.customLoginButtons && Login.customLoginButtons()}
+        {!loading && Login.customLoginButtons && Login.customLoginButtons()}
       </form>
     </div>
   );
