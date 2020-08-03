@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Engine;
@@ -65,6 +66,8 @@ namespace Signum.React.Maps
                 }
             }
 
+            var allBackReferences = VirtualMList.RegisteredVirtualMLists.Values.SelectMany(a => a.Values).Select(a => a.BackReferenceRoute).ToHashSet();
+
             var normalEdges = (from t in s.Tables.Values
                                where s.IsAllowed(t.Type, true) == null
                                from kvp in t.DependentTables()
@@ -75,7 +78,8 @@ namespace Signum.React.Maps
                                    fromTable = t.Name.ToString(),
                                    toTable = kvp.Key.Name.ToString(),
                                    lite = kvp.Value.IsLite,
-                                   nullable = kvp.Value.IsNullable
+                                   nullable = kvp.Value.IsNullable,
+                                   isVirtualMListBackReference = allBackReferences.Contains(kvp.Value.PropertyRoute)
                                }).ToList();
 
             var mlistEdges = (from t in s.Tables.Values
@@ -220,6 +224,8 @@ namespace Signum.React.Maps
         public string toTable;
         public bool nullable;
         public bool lite;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool isVirtualMListBackReference;
     }
 
     public class MapColorProviderInfo

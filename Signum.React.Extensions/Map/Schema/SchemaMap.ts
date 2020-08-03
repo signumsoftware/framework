@@ -53,6 +53,7 @@ export interface RelationInfo extends IRelationInfo {
   toTable: string;
   nullable: boolean;
   lite: boolean;
+  isVirtualMListBackReference?: boolean;
 }
 
 export interface MListRelationInfo extends IRelationInfo {
@@ -126,7 +127,8 @@ export class SchemaMapD3 {
       .attr("class", "link")
       .style("stroke-dasharray", d => (d as RelationInfo).lite ? "2, 2" : null)
       .style("stroke", "black")
-      .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")");
+      .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")")
+      .attr("marker-start", d => (<RelationInfo>d).isVirtualMListBackReference ? "url(#virtual_mlist_arrow)": null);
 
     this.selectedLinks();
 
