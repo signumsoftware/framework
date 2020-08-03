@@ -13,10 +13,10 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
-
     public static class VirtualMList
     {
-        public static Dictionary<Type, Dictionary<Type, PropertyRoute>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, PropertyRoute>>();
+        //Order, OrderLine, Order.Lines
+        public static Dictionary<Type, Dictionary<Type, VirtualMListInfo>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, VirtualMListInfo>>();
 
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
@@ -88,10 +88,11 @@ namespace Signum.Engine
             fi.SchemaBuilder.Include<L>();
 
             var mListPropertRoute = PropertyRoute.Construct(mListField);
+            var backReferenceRoute = PropertyRoute.Construct(backReference);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
-            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 
             var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
             var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
@@ -378,6 +379,18 @@ namespace Signum.Engine
             where T : Entity
         {
             return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
+        }
+    }
+
+    public class VirtualMListInfo
+    {
+        public readonly PropertyRoute MListRoute;
+        public readonly PropertyRoute BackReferenceRoute;
+
+        public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute)
+        {
+            MListRoute = mListRoute;
+            BackReferenceRoute = backReferenceRoute;
         }
     }
 }
