@@ -790,6 +790,8 @@ namespace Signum.Engine.Maps
         public bool IsCollection { get; set; }
         public bool IsEnum { get; set; }
         public bool IsImplementedByAll { get; set; }
+
+        public PropertyRoute PropertyRoute { get; set; } = null!;
     }
 
 

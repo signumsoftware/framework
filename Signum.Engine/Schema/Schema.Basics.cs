@@ -933,9 +933,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
-                 IsLite = IsLite,
-                 IsCollection = false,
-                 IsNullable = Nullable.ToBool()
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable.ToBool(),
+                PropertyRoute = this.Route
             });
         }
 
@@ -998,12 +999,14 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
+
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
                 IsNullable = Nullable.ToBool(),
                 IsEnum = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -1042,7 +1045,8 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = a.Value.Nullable.ToBool()
+                IsNullable = a.Value.Nullable.ToBool(),
+                PropertyRoute = this.Route
             }));
         }
 
@@ -1096,9 +1100,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
-                 IsNullable = this.ColumnType.Nullable.ToBool(),
-                 IsLite = this.IsLite,
-                 IsImplementedByAll = true,
+                IsNullable = this.ColumnType.Nullable.ToBool(),
+                IsLite = this.IsLite,
+                IsImplementedByAll = true,
+                PropertyRoute = this.Route
             });
         }
 
