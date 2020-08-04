@@ -662,9 +662,15 @@ namespace Signum.Engine.Cache
 
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
-            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
+            HashSet<Type> relatedTypes = sb.Schema.Table(type)
+                .DependentTables()
                 .Where(a => !a.Value.IsEnum)
-                .Select(t => t.Key.Type).ToList();
+                .Select(t => t.Key.Type)
+                .ToHashSet();
+
+            var dic = VirtualMList.RegisteredVirtualMLists.TryGetC(type);
+            if (dic != null)
+                relatedTypes.AddRange(dic.Keys);
 
             dependencies.Add(type);
             inverseDependencies.Add(type);

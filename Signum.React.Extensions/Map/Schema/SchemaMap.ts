@@ -125,10 +125,10 @@ export class SchemaMapD3 {
       .data(map.allLinks)
       .enter().append<SVGPathElement>("path")
       .attr("class", "link")
-      .style("stroke-dasharray", d => (d as RelationInfo).lite ? "2, 2" : null)
+      .style("stroke-dasharray", d => (<RelationInfo>d).isVirtualMListBackReference? "4 4" : (d as RelationInfo).lite ? "2, 2" : null)
       .style("stroke", "black")
       .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")")
-      .attr("marker-start", d => (<RelationInfo>d).isVirtualMListBackReference ? "url(#virtual_mlist_arrow)": null);
+      .attr("marker-start", d => (<RelationInfo>d).isVirtualMListBackReference ? "url(#virtual_mlist_arrow)" : null);
 
     this.selectedLinks();
 
