@@ -1474,17 +1474,7 @@ export class PropertyRoute {
   propertyPath(): string {
     switch (this.propertyRouteType) {
       case "Root": throw new Error("Root has no PropertyString");
-      case "Field": {
-        switch (this.parent!.propertyRouteType) {
-          case "Root": return this.member!.name;
-          case "Field":
-          case "Mixin":
-            return this.parent!.propertyPath() + "." + this.member!.name;
-          case "MListItem":
-            return this.parent!.propertyPath() + this.member!.name;
-          default: throw new Error("Unexpected parent propertyRouteType");
-        }
-      }
+      case "Field": return this.member!.name;
       case "Mixin": return (this.parent!.propertyRouteType == "Root" ? "" : this.parent!.propertyPath()) + "[" + this.mixinName + "]";
       case "MListItem": return this.parent!.propertyPath() + "/";
       case "LiteEntity": return this.parent!.propertyPath() + ".entity";
