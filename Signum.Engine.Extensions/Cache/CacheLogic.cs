@@ -96,6 +96,11 @@ namespace Signum.Engine.Cache
                 {
                     foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type).Keys)
                     {
+                        EntityData data = EntityDataOverrides.TryGetS(rType) ?? EntityKindCache.GetEntityData(rType);
+
+                        if (data == EntityData.Transactional)
+                            throw new InvalidOperationException($"Type {rType.Name} should be {nameof(EntityData)}.{nameof(EntityData.Master)} because is in a virtual MList of {type.Name} (Master and cached)");
+
                         TryCacheTable(sb, rType);
 
                         dependencies.Add(type, rType);
@@ -667,10 +672,6 @@ namespace Signum.Engine.Cache
                 .Where(a => !a.Value.IsEnum)
                 .Select(t => t.Key.Type)
                 .ToHashSet();
-
-            var dic = VirtualMList.RegisteredVirtualMLists.TryGetC(type);
-            if (dic != null)
-                relatedTypes.AddRange(dic.Keys);
 
             dependencies.Add(type);
             inverseDependencies.Add(type);
