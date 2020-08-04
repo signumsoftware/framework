@@ -47,6 +47,16 @@ namespace Signum.React.Selenium
             AutoCompleteBasic(AutoCompleteElement.Find(), Element, lite);
         }
 
+        public void AutoComplete(string beginning)
+        {
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), Element, beginning);
+        }
+
+        public void AutoCompleteBasic(string beginning)
+        {
+            AutoCompleteBasic(AutoCompleteElement.Find(), Element, beginning);
+        }
+
         public FrameModalProxy<T> View<T>() where T : ModifiableEntity
         {
             return base.ViewInternal<T>();
