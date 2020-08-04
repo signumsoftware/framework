@@ -198,8 +198,10 @@ namespace Signum.React.Selenium
             input.SafeSendKeys(beginning);
 
             var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
-            var elements = list.FindElements(By.CssSelector("[data-entity-key]"));
-            var elem = elements.SingleEx(a => a.ContainsText(beginning));
+            var elem = input.GetDriver().Wait(() =>
+            {
+                return list.FindElements(By.CssSelector("[data-entity-key]")).SingleEx(a => a.ContainsText(beginning));
+            });
             elem.Click();
         }
     }
