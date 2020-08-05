@@ -575,6 +575,7 @@ export module ValidationMessage {
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
   export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
+  export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
 }
 
 export module VoidEnumMessage {

@@ -136,11 +136,12 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
         {
             var bindings = VisitBindings(eee.Bindings);
+            var mixins = eee.Mixins == null ? null : Visit(eee.Mixins, VisitMixinEntity);
             var hasValue = Visit(eee.HasValue);
 
             if (eee.Bindings != bindings || eee.HasValue != hasValue || eee.EntityContext != null)
             {
-                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable, null);
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, mixins, eee.FieldEmbedded, eee.ViewTable, null);
             }
             return eee;
         }
