@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <TypeScriptToolsVersion>3.9</TypeScriptToolsVersion>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
     <OutputType>Library</OutputType>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
