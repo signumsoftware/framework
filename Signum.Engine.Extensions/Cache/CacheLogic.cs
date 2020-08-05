@@ -92,7 +92,7 @@ namespace Signum.Engine.Cache
         {
             foreach (var type in VirtualMList.RegisteredVirtualMLists.Keys)
             {
-                if (controllers.ContainsKey(type))
+                if (controllers.TryGetCN(type) != null)
                 {
                     foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type).Keys)
                     {
