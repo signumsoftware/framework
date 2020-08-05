@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { TextAlignProperty, VerticalAlignProperty } from 'csstype'
 import numbro from 'numbro'
 import * as Navigator from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
