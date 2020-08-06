@@ -66,7 +66,6 @@ namespace Signum.React.Maps
                 }
             }
 
-            var allBackReferences = VirtualMList.RegisteredVirtualMLists.Values.SelectMany(a => a.Values).Select(a => a.BackReferenceRoute).ToHashSet();
 
             var normalEdges = (from t in s.Tables.Values
                                where s.IsAllowed(t.Type, true) == null
@@ -79,7 +78,7 @@ namespace Signum.React.Maps
                                    toTable = kvp.Key.Name.ToString(),
                                    lite = kvp.Value.IsLite,
                                    nullable = kvp.Value.IsNullable,
-                                   isVirtualMListBackReference = allBackReferences.Contains(kvp.Value.PropertyRoute)
+                                   isVirtualMListBackReference = VirtualMList.RegisteredVirtualMLists.TryGetC(kvp.Key.Type)?.TryGetC(t.Type)?.BackReferenceRoute.Equals(kvp.Value.PropertyRoute) ?? false
                                }).ToList();
 
             var mlistEdges = (from t in s.Tables.Values
