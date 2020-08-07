@@ -632,7 +632,7 @@ export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) : Promise<void> {
+export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event: React.MouseEvent<any>): Promise<void> {
   if (!pack || !pack.entity)
     return Promise.resolve();
 
