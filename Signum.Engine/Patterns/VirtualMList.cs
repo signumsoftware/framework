@@ -88,7 +88,7 @@ namespace Signum.Engine
             fi.SchemaBuilder.Include<L>();
 
             var mListPropertRoute = PropertyRoute.Construct(mListField);
-            var backReferenceRoute = PropertyRoute.Construct(backReference);
+            var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
