@@ -36,7 +36,7 @@ export function useInterval<T>(interval: number | undefined | null, initialState
       }, interval);
       return () => clearInterval(handler);
     }
-  }, [interval, ...(deps || [])]);
+  }, [interval, ...(deps ?? [])]);
 
   return val;
 }
