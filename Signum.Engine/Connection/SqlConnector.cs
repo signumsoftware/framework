@@ -142,7 +142,7 @@ namespace Signum.Engine
             {
                 foreach (SqlParameter param in preCommand.Parameters)
                 {
-                    cmd.Parameters.Add(param);
+                    cmd.Parameters.Add(CloneParameter(param));
                 }
             }
 
@@ -423,8 +423,7 @@ namespace Signum.Engine
 
         public override DbParameter CloneParameter(DbParameter p)
         {
-            SqlParameter sp = (SqlParameter)p;
-            return new SqlParameter(sp.ParameterName, sp.Value) { IsNullable = sp.IsNullable, SqlDbType = sp.SqlDbType };
+            return (SqlParameter)((ICloneable)p).Clone();
         }
 
         public override DbConnection CreateConnection()

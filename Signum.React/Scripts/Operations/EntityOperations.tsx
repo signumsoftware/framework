@@ -17,6 +17,7 @@ import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip,
 import { BsColor } from "../Components";
 import { notifySuccess } from "../Operations";
 import { FunctionalAdapter } from "../Modals";
+import { getTypeNiceName } from "../Finder";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
@@ -77,7 +78,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         order: group.order != undefined ? group.order : 100,
         shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
         button: (
-          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.color || "light"}>
+          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
             {
               gr.elements
                 .orderBy(a => a.settings && a.settings.order)
@@ -137,6 +138,16 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
   });
 }
 
+type OutlineBsColor = 
+  | 'outline-primary'
+  | 'outline-secondary'
+  | 'outline-success'
+  | 'outline-danger'
+  | 'outline-warning'
+  | 'outline-info'
+  | 'outline-dark'
+  | 'outline-light';
+
 interface OperationButtonProps extends ButtonProps {
   eoc: EntityOperationContext<any /*Entity*/> | undefined;
   group?: EntityOperationGroup;
@@ -189,7 +200,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     );
   }    
 
-  var button = <Button variant={eoc.color}
+  var button = <Button variant={(eoc.outline ? ("outline-" + eoc.color) as OutlineBsColor: eoc.color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
@@ -322,7 +333,7 @@ export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperatio
     API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
@@ -338,7 +349,7 @@ export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationC
     API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
@@ -443,7 +454,9 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
 
   //eoc.settings.confirmMessage === undefined
   if (eoc.operationInfo.operationType == OperationType.Delete)
-    return OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString(getToString(eoc.entity));
+    return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString().formatHtml(
+      <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
+    );
 
   return undefined;
 }

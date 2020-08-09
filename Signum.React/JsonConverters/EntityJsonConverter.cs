@@ -427,6 +427,8 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                 throw new UnauthorizedAccessException(error);
         }
 
+        public static Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>(); 
+
         public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object? existingValue, out bool isModified)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
@@ -443,7 +445,8 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
             if (identityInfo.IsNew == true)
             {
-                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
+                var result = CustomConstructor.TryGetC(type)?.Invoke() ??
+                    (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 if (identityInfo.Id != null)
                     ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));

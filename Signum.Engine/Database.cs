@@ -22,16 +22,17 @@ namespace Signum.Engine
     public static class Database
     {
         #region Save
-        public static void SaveList<T>(this IEnumerable<T> entities)
-            where T : class, IEntity
+        public static List<T> SaveList<T>(this IEnumerable<T> entities)
+                where T : class, IEntity
         {
+            var list = entities.ToList();
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".FormatWith(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(entities.Cast<Entity>().ToArray());
+                Saver.Save(list.Cast<Entity>().ToArray());
 
-                tr.Commit();
+                return tr.Commit(list);
             }
         }
 
@@ -1605,7 +1606,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             }
         }
 
-        public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
+        public static void MergeMList<E, V, A>(string? title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
             where E : Entity
             where A : class
         {

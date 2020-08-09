@@ -14,6 +14,8 @@ export interface ModifiableEntity {
   mixins?: { [name: string]: MixinEntity }
 }
 
+export type PrimaryKey = { Object: number | string | undefined }
+
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
@@ -298,9 +300,6 @@ export module JavascriptMessage {
   export const chooseAValue = new MessageKey("JavascriptMessage", "chooseAValue");
   export const addFilter = new MessageKey("JavascriptMessage", "addFilter");
   export const openTab = new MessageKey("JavascriptMessage", "openTab");
-  export const renameColumn = new MessageKey("JavascriptMessage", "renameColumn");
-  export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
-  export const enterTheNewColumnName = new MessageKey("JavascriptMessage", "enterTheNewColumnName");
   export const error = new MessageKey("JavascriptMessage", "error");
   export const executed = new MessageKey("JavascriptMessage", "executed");
   export const hideFilters = new MessageKey("JavascriptMessage", "hideFilters");
@@ -320,9 +319,10 @@ export module JavascriptMessage {
   export const popupErrors = new MessageKey("JavascriptMessage", "popupErrors");
   export const popupErrorsStop = new MessageKey("JavascriptMessage", "popupErrorsStop");
   export const insertColumn = new MessageKey("JavascriptMessage", "insertColumn");
+  export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
   export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
-  export const reorderColumn_MoveLeft = new MessageKey("JavascriptMessage", "reorderColumn_MoveLeft");
-  export const reorderColumn_MoveRight = new MessageKey("JavascriptMessage", "reorderColumn_MoveRight");
+  export const removeOtherColumns = new MessageKey("JavascriptMessage", "removeOtherColumns");
+  export const restoreDefaultColumns = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
   export const saved = new MessageKey("JavascriptMessage", "saved");
   export const search = new MessageKey("JavascriptMessage", "search");
   export const Selected = new MessageKey("JavascriptMessage", "Selected");
@@ -388,9 +388,7 @@ export module OperationMessage {
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
-  export const PleaseConfirmYouDLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDelete0FromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
+  export const PleaseConfirmYouWantLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWantLikeToDelete0FromTheSystem");
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
@@ -429,6 +427,7 @@ export module SearchMessage {
   export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
+  export const DeleteAllFilter = new MessageKey("SearchMessage", "DeleteAllFilter");
   export const Filters = new MessageKey("SearchMessage", "Filters");
   export const Find = new MessageKey("SearchMessage", "Find");
   export const FinderOf0 = new MessageKey("SearchMessage", "FinderOf0");
@@ -574,6 +573,7 @@ export module ValidationMessage {
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
   export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
+  export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
 }
 
 export module VoidEnumMessage {

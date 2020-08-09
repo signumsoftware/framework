@@ -60,11 +60,6 @@ namespace Signum.Engine
 
             modelTables.JoinDictionaryForeach(databaseTables, (tn, tab, diff) =>
             {
-                if(tn.Contains("EmployeeTerritories"))
-                {
-                    tn = tn.Trim();
-                }
-
                 var key = Replacements.KeyColumnsForTable(tn);
 
                 replacements.AskForReplacements(
@@ -325,8 +320,8 @@ namespace Signum.Engine
                                 if (periodRows.Count == 2)
                                 {
                                     combinedAddPeriod = new SqlPreCommandSimple($@"ALTER TABLE {tn} ADD
-    {periodRows[0].Sql.After(" ADD ")},
-    {periodRows[1].Sql.After(" ADD ")},
+    {periodRows[0].Sql.After(" ADD ").BeforeLast(";")},
+    {periodRows[1].Sql.After(" ADD ").BeforeLast(";")},
     {addPeriod.Sql.After(" ADD ")}
 ");
                                     addPeriod = null;
@@ -693,13 +688,20 @@ WHERE {where}"))!;
                     if (oldIx.ViewName != null || (newIx is UniqueTableIndex) && ((UniqueTableIndex)newIx).ViewName != null)
                         return false;
 
-                    var news = newIx.Columns.Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
+                    var newCols = newIx.Columns.Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
+                    var newIncCols = newIx.IncludeColumns.EmptyIfNull().Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
 
-                    if (!news.SetEquals(oldIx.Columns.Select(a => a.ColumnName)))
+                    var oldCols = oldIx.Columns.Where(a => a.IsIncluded == false).Select(a => a.ColumnName);
+                    var oldIncCols = oldIx.Columns.Where(a => a.IsIncluded == true).Select(a => a.ColumnName);
+
+                    if (!newCols.SetEquals(oldCols))
+                        return false;
+
+                    if (!newIncCols.SetEquals(oldIncCols))
                         return false;
 
                     var oldWhere = oldIx.IndexName.TryAfter("__");
-                    var newWhere = newIx.Where == null ? null : StringHashEncoder.Codify(newIx.Where);
+                    var newWhere = newIx.WhereSignature()?.TryAfter("__");
 
                     if (oldWhere != newWhere)
                         return false;

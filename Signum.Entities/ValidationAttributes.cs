@@ -1164,5 +1164,8 @@ namespace Signum.Entities
         BeAString,
         BeAMultilineString,
         IsATimeOfTheDay,
+
+        [Description("There are {0} in state {1}")]
+        ThereAre0InState1,
     }
 }

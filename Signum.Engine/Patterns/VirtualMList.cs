@@ -13,10 +13,10 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
-
     public static class VirtualMList
     {
-        public static Dictionary<Type, Dictionary<Type, PropertyRoute>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, PropertyRoute>>();
+        //Order, OrderLine, Order.Lines
+        public static Dictionary<Type, Dictionary<Type, VirtualMListInfo>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, VirtualMListInfo>>();
 
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
@@ -88,10 +88,11 @@ namespace Signum.Engine
             fi.SchemaBuilder.Include<L>();
 
             var mListPropertRoute = PropertyRoute.Construct(mListField);
+            var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
-            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 
             var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
             var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
@@ -134,8 +135,8 @@ namespace Signum.Engine
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
                      shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
-                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
+                     valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
+                     valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                      Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
                      Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
 
@@ -145,8 +146,8 @@ namespace Signum.Engine
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                     shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                    valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
-                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
+                    valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
+                    valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                     Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
                     Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList()
                 );
@@ -282,7 +283,7 @@ namespace Signum.Engine
 
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                 shouldSet: () => false,
-                valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+                valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
                 );
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -378,6 +379,18 @@ namespace Signum.Engine
             where T : Entity
         {
             return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
+        }
+    }
+
+    public class VirtualMListInfo
+    {
+        public readonly PropertyRoute MListRoute;
+        public readonly PropertyRoute BackReferenceRoute;
+
+        public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute)
+        {
+            MListRoute = mListRoute;
+            BackReferenceRoute = backReferenceRoute;
         }
     }
 }

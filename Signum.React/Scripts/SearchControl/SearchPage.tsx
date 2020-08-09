@@ -7,9 +7,9 @@ import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
-import * as QueryString from 'query-string'
 import { namespace } from 'd3'
 import { useTitle } from '../AppContext'
+import { QueryString } from '../QueryString'
 
 interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
@@ -26,15 +26,13 @@ function SearchPage(p: SearchPageProps) {
   }, []);
 
   function onResize() {
-    var sc = searchControl.current;
-    var scl = sc?.searchControlLoaded;
-    var containerDiv = scl?.containerDiv;
+    const sc = searchControl.current;
+    const scl = sc?.searchControlLoaded;
+    const containerDiv = scl?.containerDiv;
     if (containerDiv) {
 
-      var marginTop = containerDiv.offsetTop;
-
-      var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
-
+      const marginTop = containerDiv.offsetTop;
+      const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
     }
   }

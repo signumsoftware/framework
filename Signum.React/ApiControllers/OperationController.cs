@@ -131,13 +131,13 @@ namespace Signum.React.ApiControllers
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
-        public EntityPackTS ConstructFromMany([Required, FromBody]MultiOperationRequest request)
+        public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
         {
             var type = request.lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.type);
 
             var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, request.GetOperationSymbol(type), request.args);
 
-            return SignumServer.GetEntityPack(entity);
+            return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
 
         [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]

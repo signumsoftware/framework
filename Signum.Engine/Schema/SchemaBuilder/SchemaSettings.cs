@@ -224,9 +224,9 @@ namespace Signum.Engine.Maps
             return pp.Validators.OfType<V>().FirstOrDefault();
         }
 
-        public A TypeAttribute<A>(Type entityType) where A : Attribute
+        public A? TypeAttribute<A>(Type entityType) where A : Attribute
         {
-            return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
+            return (A?)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         internal IsNullable GetIsNullable(PropertyRoute propertyRoute, bool forceNull)

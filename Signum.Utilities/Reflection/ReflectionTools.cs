@@ -92,6 +92,9 @@ namespace Signum.Utilities.Reflection
             if (m1 == m2)
                 return true;
 
+            if (m1 == null || m2 == null)
+                return false;
+
             if (m1.DeclaringType != m2.DeclaringType)
                 return false;
 

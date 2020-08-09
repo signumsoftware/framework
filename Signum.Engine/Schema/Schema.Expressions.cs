@@ -23,19 +23,21 @@ namespace Signum.Engine.Maps
 
             if (IsView)
             {
-                var bindings = this.Fields.Values.Select(ef => new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id!, null))).ToReadOnly();
+                var bindings = this.Fields.Values.Select(ef => new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id!, null, null))).ToReadOnly();
 
                 var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, Expression.Constant(null, id.Type.Nullify()));
 
-                return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null, this);
+                return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null, null, this, null);
             }
             else
             {
                 Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
+                var entityContext = new EntityContextInfo((PrimaryKeyExpression)id!, null);
+
                 var period = GenerateSystemPeriod(tableAlias, binder);
-                var bindings = GenerateBindings(tableAlias, binder, id!, period);
-                var mixins = GenerateMixins(tableAlias, binder, id!, period);
+                var bindings = GenerateBindings(tableAlias, binder, id!, period, entityContext);
+                var mixins = GenerateMixins(tableAlias, binder, id!, period, entityContext);
 
                 var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id!, period, tableAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
@@ -55,7 +57,7 @@ namespace Signum.Engine.Maps
             ) : null;
         }
 
-        internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             List<FieldBinding> result = new List<FieldBinding>
             {
@@ -67,21 +69,21 @@ namespace Signum.Engine.Maps
                 var fi = ef.FieldInfo;
 
                 if (!ReflectionTools.FieldEquals(fi, fiId))
-                    result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id, period)));
+                    result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id, period, entityContext)));
             }
 
-            if (this.Type.IsEntity())
-                result.AddRange(Schema.Current.GetAdditionalQueryBindings(PropertyRoute.Root(this.Type), (PrimaryKeyExpression)id, period));
+            if (this.Type.IsEntity() && entityContext != null)
+                result.AddRange(Schema.Current.GetAdditionalQueryBindings(PropertyRoute.Root(this.Type), entityContext, period));
 
             return result.ToReadOnly();
         }
 
-        internal ReadOnlyCollection<MixinEntityExpression>? GenerateMixins(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal ReadOnlyCollection<MixinEntityExpression>? GenerateMixins(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? context)
         {
             if (this.Mixins == null)
                 return null;
 
-            return this.Mixins.Values.Select(m => (MixinEntityExpression)m.GetExpression(tableAlias, binder, id, period)).ToReadOnly();
+            return this.Mixins.Values.Select(m => (MixinEntityExpression)m.GetExpression(tableAlias, binder, id, period, context)).ToReadOnly();
         }
 
 
@@ -99,7 +101,7 @@ namespace Signum.Engine.Maps
                     return new ColumnExpression(Signum.Entities.PrimaryKey.Type(fr.ReferenceTable.Type).Nullify(), alias, fr.Name);
             }
 
-            return field.Field!.GetExpression(alias, null!, null!, null);
+            return field.Field!.GetExpression(alias, null!, null!, null, null);
         }
 
         public EntityField? GetViewPrimaryKey()
@@ -139,8 +141,10 @@ namespace Signum.Engine.Maps
         internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, IntervalExpression? externalPeriod, bool withRowId)
         {
             var rowId = RowIdExpression(tableAlias);
+            var parentId = new PrimaryKeyExpression(new ColumnExpression(this.BackReference.Type.Nullify(), tableAlias, this.BackReference.Name));
+            var entityContext = new EntityContextInfo(parentId, rowId);
 
-            var exp = Field.GetExpression(tableAlias, binder, rowId, externalPeriod);
+            var exp = Field.GetExpression(tableAlias, binder, rowId, externalPeriod, entityContext);
 
             if (!withRowId)
                 return exp;
@@ -161,13 +165,17 @@ namespace Signum.Engine.Maps
             Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 
             var rowId = RowIdExpression(tableAlias);
+
             IntervalExpression? period = GenerateSystemPeriod(tableAlias, binder);
+
+            var backReference = (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null!, period, null);
+            var entityContext = new EntityContextInfo(backReference.ExternalId, rowId);
 
             return new MListElementExpression(
                 rowId,
-                (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null!, period),
+                backReference,
                 this.Order == null ? null : OrderExpression(tableAlias),
-                this.Field.GetExpression(tableAlias, binder, rowId, period),
+                this.Field.GetExpression(tableAlias, binder, rowId, period, entityContext),
                 period,
                 this,
                 tableAlias);
@@ -191,12 +199,12 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period);
+        internal abstract Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             return new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, this.Name).Nullify());
         }
@@ -204,7 +212,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldValue
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             var column = new ColumnExpression(this.Type, tableAlias, this.Name);
 
@@ -219,7 +227,7 @@ namespace Signum.Engine.Maps
     {
         public static readonly PropertyInfo piDateTimeTicks = ReflectionTools.GetPropertyInfo((DateTime d) => d.Ticks);
 
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             if (this.Type == this.FieldType)
                return new ColumnExpression(this.Type, tableAlias, this.Name);
@@ -233,7 +241,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             Type cleanType = IsLite ? Lite.Extract(FieldType)! : FieldType;
 
@@ -248,7 +256,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             return Expression.Convert(new ColumnExpression(this.Type, tableAlias, Name), FieldType);
         }
@@ -256,7 +264,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, TableMList); // keep back id empty for some seconds
         }
@@ -264,39 +272,41 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period)))
-                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id, period))
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period, entityContext)))
+                            .Concat(entityContext == null ? Enumerable.Empty<FieldBinding>() : Schema.Current.GetAdditionalQueryBindings(this.Route, entityContext, period))
                             .ToReadOnly();
+
+            var mixins = this.Mixins?.Values.Select(m => (MixinEntityExpression)m.GetExpression(tableAlias, binder, id, period, entityContext)).ToReadOnly();
 
             Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id,
                 id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
                 new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
 
-            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this, null);
+            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, mixins, this, null, entityContext);
         }
     }
 
     public partial class FieldMixin
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             var bindings = (from kvp in Fields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period)))
-                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id, period))
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id, period, entityContext)))
+                            .Concat(entityContext == null ? Enumerable.Empty<FieldBinding>() : Schema.Current.GetAdditionalQueryBindings(this.Route, entityContext, period))
                             .ToReadOnly();
 
-            return new MixinEntityExpression(this.FieldType, bindings, tableAlias, this);
+            return new MixinEntityExpression(this.FieldType, bindings, tableAlias, this, entityContext);
         }
     }
 
     public partial class FieldImplementedBy
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             var implementations = ImplementationColumns.SelectDictionary(t => t, (t, ic) =>
                  new EntityExpression(t, new PrimaryKeyExpression(new ColumnExpression(ic.Type.Nullify(), tableAlias, ic.Name)), period, null, null, null, null, AvoidExpandOnRetrieving));
@@ -312,7 +322,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period)
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
             Expression result = new ImplementedByAllExpression(
                 IsLite ? Lite.Extract(FieldType)! : FieldType,

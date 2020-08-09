@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
-import { DomUtils, classes } from '../Globals'
+import { DomUtils, classes, Dic, softCast } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
@@ -25,7 +25,7 @@ import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
-import { MaxHeightProperty } from 'csstype';
+import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
@@ -45,7 +45,7 @@ export interface SearchControlLoadedProps {
   entityFormatter?: EntityFormatter;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  maxResultsHeight?: MaxHeightProperty<string | number> | any;
+  maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
 
   defaultIncudeDefaultFilters: boolean;
@@ -855,13 +855,39 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   handleRemoveColumn = () => {
-    const s = this.state;
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
     const col = fo.columnOptions[cm.columnIndex!];
     fo.columnOptions.removeAt(cm.columnIndex!);
     if (fo.groupResults && col.token) {
       fo.orderOptions.extract(a => a.token.fullKey == col.token!.fullKey);
+    }
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+  }
+
+  handleRemoveOthersColumn = () => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+    const col = fo.columnOptions[cm.columnIndex!];
+    fo.columnOptions.clear();
+    fo.columnOptions.push(col);
+    if (fo.groupResults && col.token) {
+      fo.orderOptions.extract(a => a.token.fullKey != col.token!.fullKey);
+    }
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+  }
+
+  handleRestoreDefaultColumn = () => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+    
+    const col = fo.columnOptions[cm.columnIndex!];
+    fo.columnOptions.clear();
+    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
+    if (fo.groupResults && col.token) {
+      fo.orderOptions.clear();
     }
 
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
@@ -887,9 +913,38 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (menuItems.length)
         menuItems.push(<Dropdown.Divider />);
 
-      menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</Dropdown.Item>);
-      menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</Dropdown.Item>);
-      menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}>
+        <span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
+        </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+      </Dropdown.Item>);
+
+      menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
+      </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
+      </Dropdown.Item>);
+
+      menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
+      </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+      </Dropdown.Item>);
+
+      menuItems.push(<Dropdown.Divider />);
+
+      menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRemoveOthersColumn}><span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="times-circle" transform="shrink-4 up-8 right-8" color="black" />
+      </span>&nbsp;{JavascriptMessage.removeOtherColumns.niceToString()}
+      </Dropdown.Item>);
+
+      menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="undo-alt" transform="shrink-4 up-8 right-8" color="black" />
+      </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
+      </Dropdown.Item>);
     }
 
     if (cm.rowIndex != undefined) {
