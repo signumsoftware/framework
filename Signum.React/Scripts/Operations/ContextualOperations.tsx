@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, External } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
@@ -183,7 +183,8 @@ export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Pro
     title: OperationMessage.Confirm.niceToString(),
     message: confirmMessage,
     buttons: "yes_no",
-    icon: "question"
+    icon: "warning",
+    style: "warning",
   }).then(result => { return result == "yes"; });
 }
 
@@ -194,14 +195,24 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage != undefined)
     return coc.settings.confirmMessage(coc);
 
-  if (coc.operationInfo.operationType == OperationType.Delete)
-    return coc.context.lites.length > 1 ?
-      OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.niceToString() :
-      OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString();
+  if (coc.operationInfo.operationType == OperationType.Delete) {
+
+    if (coc.context.lites.length > 1) {
+      var message = coc.context.lites
+        .groupBy(a => a.EntityType)
+        .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
+        .joinComma(External.CollectionMessage.And.niceToString());
+
+      return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString(<strong>{message}</strong>);
+    }
+    else {
+      var lite = coc.context.lites.single();
+      return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{lite.toStr} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
+    }
+  }
 
   return undefined;
 }
-
 
 export namespace MenuItemConstructor { //To allow monkey patching
 
