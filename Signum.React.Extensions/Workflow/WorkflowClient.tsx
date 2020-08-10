@@ -570,7 +570,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
             .then(entity => {
               if (mainEntityStrategy == "Clone") {
                 return Operations.API.constructFromEntity(entity, coi.key)
-                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack!.entity));
               }
               else
                 return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
