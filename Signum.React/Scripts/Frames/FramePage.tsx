@@ -102,13 +102,10 @@ export default function FramePage(p: FramePageProps) {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key);
+        return Operations.API.construct(ti.name, oi.key).then(pack => pack!);
       }
 
-      return Constructor.constructPack(ti.name)
-        .then(pack => {
-          return Promise.resolve(pack as EntityPack<Entity>);
-        });
+      return Constructor.constructPack(ti.name).then(pack => pack as EntityPack<Entity>);
     }
   }
 

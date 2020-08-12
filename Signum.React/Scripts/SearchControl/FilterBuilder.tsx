@@ -241,10 +241,12 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
   const fg = p.filterGroup;
 
+  const opacity = isFilterActive(fg) ? undefined : 0.4;
+
   const readOnly = fg.frozen || p.readOnly;
 
   return (
-    <tr className="sf-filter-group">
+    <tr className="sf-filter-group" style={{ opacity: opacity}}>
       <td style={{ verticalAlign: "top" }}>
         {!readOnly &&
           <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
@@ -369,6 +371,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   }
 
   function handleValueChange() {
+    forceUpdate();
     p.onFilterChanged();
   }
 
@@ -376,6 +379,14 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     forceUpdate();
     p.onFilterChanged();
   }
+}
+
+function isFilterActive(fo: FilterOptionParsed) {
+  return fo.pinned == null ||
+    fo.pinned.active == null /*Always*/ ||
+    fo.pinned.active == "Always" ||
+    fo.pinned.active == "Checkbox_StartChecked" ||
+    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
 }
 
 export interface FilterConditionComponentProps {
@@ -455,9 +466,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
   const readOnly = f.frozen || p.readOnly;
 
+  const opacity = isFilterActive(f) ? undefined : 0.4;
+
   return (
     <>
-      <tr className="sf-filter-condition">
+      <tr className="sf-filter-condition" style={{ opacity: opacity }}>
         <td>
           {!readOnly &&
             <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
@@ -497,7 +510,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
           </td>
         }
       </tr>
-      {p.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
+      {p.showPinnedFilters && f.pinned && <PinnedFilterEditor pinned={f.pinned} opacity={opacity} onChange={() => changeFilter()} readonly={readOnly} />}
     </>
   );
 
@@ -524,6 +537,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
   }
 
   function handleValueChange() {
+    forceUpdate();
     p.onFilterChanged();
   }
 }
@@ -533,20 +547,21 @@ interface PinnedFilterEditorProps {
   pinned: PinnedFilterParsed;
   readonly: boolean;
   onChange: () => void;
+  opacity?: number
 }
 
 export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
   return (
     <tr className="sf-pinned-filter" style={{ backgroundColor: "#fff6e6", verticalAlign: "top" }}>
       <td></td>
-      <td>
+      <td style={{ opacity: p.opacity }}>
         <div>
           <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={p.readonly}
             value={p.pinned.label ?? ""}
             onChange={e => { p.pinned.label = e.currentTarget.value; p.onChange(); }} />
         </div>
       </td>
-      <td>
+      <td style={{ opacity: p.opacity }}>
         <div className="input-group input-group-xs">
           {numericTextBox(Binding.create(p.pinned, _ => _.column), SearchMessage.Column.niceToString())}
           {numericTextBox(Binding.create(p.pinned, _ => _.row), SearchMessage.Row.niceToString())}

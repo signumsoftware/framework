@@ -26,7 +26,7 @@ export function useForceUpdatePromise(): () => Promise<void> {
   return () => setCount(c => c + 1) as Promise<any>;
 }
 
-export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T) {
+export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>) {
   const [val, setVal] = React.useState(initialState);
 
   React.useEffect(() => {
@@ -36,7 +36,7 @@ export function useInterval<T>(interval: number | undefined | null, initialState
       }, interval);
       return () => clearInterval(handler);
     }
-  }, [interval]);
+  }, [interval, ...(deps ?? [])]);
 
   return val;
 }
