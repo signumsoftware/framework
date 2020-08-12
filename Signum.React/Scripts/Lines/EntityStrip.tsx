@@ -249,6 +249,8 @@ export function EntityStripElement(p: EntityStripElementProps) {
   var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
     isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
 
+  var hasIcon = p.onRemove || p.drag;
+
   return (
     <li className="sf-strip-element"
       {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
@@ -259,7 +261,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
         onDrop={drag?.onDrop}
 
       >
-        {p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
         {
           p.onView ?
             <a href={url} className="sf-entitStrip-link" onClick={p.onView} {...htmlAttributes}>
@@ -270,7 +272,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
               {toStr}
             </span>
         }
-        {!p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
       </div>
     </li>
   );
