@@ -78,7 +78,7 @@ namespace Signum.React.Maps
                                    toTable = kvp.Key.Name.ToString(),
                                    lite = kvp.Value.IsLite,
                                    nullable = kvp.Value.IsNullable,
-                                   isVirtualMListBackReference = VirtualMList.RegisteredVirtualMLists.TryGetC(kvp.Key.Type)?.TryGetC(t.Type)?.BackReferenceRoute.Equals(kvp.Value.PropertyRoute) ?? false
+                                   isVirtualMListBackReference = VirtualMList.RegisteredVirtualMLists.TryGetC(kvp.Key.Type)?.Values.Any(a => a.BackReferenceRoute.Equals(kvp.Value.PropertyRoute)) ?? false
                                }).ToList();
 
             var mlistEdges = (from t in s.Tables.Values

@@ -178,7 +178,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       Operations.API.constructFromEntity(p.dynamicView, DynamicViewOperation.Clone)
-        .then(pack => { reload(pack.entity); return Operations.notifySuccess(); })
+        .then(pack => { reload(pack!.entity); return Operations.notifySuccess(); })
         .done();
     }).done();
   }
