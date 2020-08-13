@@ -183,7 +183,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         var showType = p.multipleValues.showType ?? token.type.name.contains(",");
         return (
           <div className="sf-entity-strip sf-control-container">
-            <ul className={classes("sf-strip", p.multipleValues.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.customClass)}>
+            <ul className={classes("sf-strip", p.multipleValues.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass)}>
               {(value as Lite<Entity>[]).map((lite, i) => {
                 const toStr = getToString(lite);
                 var tag = !showType ? toStr :
