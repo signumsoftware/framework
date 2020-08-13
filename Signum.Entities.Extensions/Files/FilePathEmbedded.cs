@@ -19,6 +19,15 @@ namespace Signum.Entities.Files
             this.FileType = fileType;
         }
 
+        public FilePathEmbedded(FileTypeSymbol fileType, FilePathEmbedded cloneFrom) //Usefull for Email Attachments when combined with WeekFileReference
+        {
+            this.FileType = fileType;
+            this.Suffix = cloneFrom.Suffix;
+            this.Hash = cloneFrom.Hash;
+            this.FileLength = cloneFrom.FileLength;
+            this.fileName = cloneFrom.FileName;
+        }
+
         public FilePathEmbedded(FileTypeSymbol fileType, string readFileFrom)
             : this(fileType)
         {
