@@ -90,12 +90,16 @@ namespace Signum.Engine.Cache
 
         static void Schema_SchemaCompleted(SchemaBuilder sb)
         {
-            foreach (var type in VirtualMList.RegisteredVirtualMLists.Keys)
+            foreach (var kvp in VirtualMList.RegisteredVirtualMLists)
             {
+                var type = kvp.Key;
+
                 if (controllers.TryGetCN(type) != null)
                 {
-                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type).Keys)
+                    foreach (var vml in kvp.Value)
                     {
+                        var rType = vml.Value.BackReferenceRoute.RootType;
+
                         EntityData data = EntityDataOverrides.TryGetS(rType) ?? EntityKindCache.GetEntityData(rType);
 
                         if (data == EntityData.Transactional)
