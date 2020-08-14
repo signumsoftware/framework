@@ -747,7 +747,7 @@ namespace Signum.Engine.Workflow
 
                 new Execute(WorkflowOperation.Deactivate)
                 {
-                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : 
+                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()) : 
                         w.Cases().SelectMany(c => c.CaseActivities()).Any(ca => ca.DoneDate == null) ? CaseActivityMessage.ThereAreInprogressActivities.NiceToString() : null,
                     Execute = (w, args) =>
                     {

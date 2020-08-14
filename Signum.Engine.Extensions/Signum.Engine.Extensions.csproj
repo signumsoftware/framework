@@ -3,15 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Signum.Engine</RootNamespace>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <NoWarn>1701;1702;8629;NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

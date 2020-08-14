@@ -537,7 +537,7 @@ namespace Signum.Engine.Cache
             {
                 AssertEnabled();
 
-                return cachedTable.TryGetToString(id.Value)!;
+                return cachedTable.TryGetToString(id!.Value)!;
             }
 
             public override void Complete(T entity, IRetriever retriver)
