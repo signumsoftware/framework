@@ -483,7 +483,8 @@ namespace Signum.React.Facades
                 {
                     this.Name = "ERROR";
                 }
-            }else
+            }
+            else
             {
                 this.Name = TypeScriptType(type);
             }

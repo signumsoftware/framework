@@ -1425,6 +1425,10 @@ export class PropertyRoute {
     this.mixinName = mixinName;
   }
 
+  allParents(): PropertyRoute[] {
+    return [...this.parent == null ? [] : this.parent.allParents(), this];
+  }
+
   addLambda(property: ((val: any) => any) | string): PropertyRoute {
     const lambdaMembers = typeof property == "function" ?
       getLambdaMembers(property) :

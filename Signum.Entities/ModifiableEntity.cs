@@ -265,6 +265,8 @@ namespace Signum.Entities
             NotifyPrivate("Error");
         }
 
+     
+
         public void NotifyToString()
         {
             NotifyPrivate("ToStringProperty");
@@ -356,6 +358,21 @@ namespace Signum.Entities
         protected internal virtual string? PropertyValidation(PropertyInfo pi)
         {
             return null;
+        }
+
+        public bool IsPropertyReadonly(string propertyName)
+        {
+            IPropertyValidator? pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+
+            if (pp == null)
+                return false; //Hidden properties
+
+            return pp.IsPropertyReadonly(this);
+        }
+
+        protected internal virtual bool IsPropertyReadonly(PropertyInfo pi)
+        {
+            return false;
         }
 
         protected static void Validate<T>(Expression<Func<T, object?>> property, Func<T, PropertyInfo, string?> validate) where T : ModifiableEntity

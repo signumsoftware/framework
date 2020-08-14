@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
@@ -12,6 +12,7 @@ import {
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -86,7 +87,9 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       coc.settings = cos;
       coc.entityOperationSettings = eos;
 
-      const visibleByDefault = !oi.canBeModified && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
+      const visibleByDefault =
+        (!oi.canBeModified || (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(oi)) != "No") &&
+        (oi.operationType != OperationType.ConstructorFrom || ctx.lites.length == 1);
 
       if (eos == undefined ? visibleByDefault :
         cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
@@ -286,35 +289,53 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
             }))
             .done();
         } else {
-          API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-            .then(coc.onContextualSuccess ?? (report => {
-              notifySuccess();
-              coc.context.markRows(report.errors);
-            }))
+          getSetters(coc)
+            .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+              .then(coc.onContextualSuccess ?? (report => {
+                notifySuccess();
+                coc.context.markRows(report.errors);
+              })))
             .done();
         }
         break;
       case OperationType.Execute:
-        API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess ?? (report => {
-            notifySuccess();
-            coc.context.markRows(report.errors);
-          }))
+        getSetters(coc)
+          .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              notifySuccess();
+              coc.context.markRows(report.errors);
+            })))
           .done();
         break;
       case OperationType.Delete:
-        API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess ?? (report => {
-            notifySuccess();
-            coc.context.markRows(report.errors);
-          }))
+        getSetters(coc)
+          .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              notifySuccess();
+              coc.context.markRows(report.errors);
+            })))
           .done();
         break;
     }
   }).done();
 
+  function getSetters(coc: ContextualOperationContext<Entity>): Promise<Operations.API.PropertySetter[] | undefined> {
 
+    if (!coc.operationInfo.canBeModified)
+      return Promise.resolve([]);
 
+    var settersConfig = coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc.operationInfo);
+
+    if (settersConfig == "No")
+      return Promise.resolve([]);
+
+    var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy(a => a).onlyOrNull();
+
+    if (!onlyType)
+      return Promise.resolve([]);
+
+    return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo);
+  }
 }
 
 

@@ -136,7 +136,7 @@ namespace Signum.React.Json
         {
             using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value!.GetType().Name))
             {
-                PropertyRoute pr = GetCurrentPropertyRoute(value!);
+                var tup = GetCurrentPropertyRoute(value!);
 
                 ModifiableEntity mod = (ModifiableEntity)value!;
 
@@ -179,7 +179,7 @@ namespace Signum.React.Json
 
                 foreach (var kvp in PropertyConverter.GetPropertyConverters(value!.GetType()))
                 {
-                    WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
+                    WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, tup.pr);
                 }
 
                 if (mod.Mixins.Any())
@@ -189,9 +189,9 @@ namespace Signum.React.Json
 
                     foreach (var m in mod.Mixins)
                     {
-                        var prm = pr.Add(m.GetType());
+                        var prm = tup.pr.Add(m.GetType());
 
-                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(prm))
+                        using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((prm, m)))
                         {
                             writer.WritePropertyName(m.GetType().Name);
                             serializer.Serialize(writer, m);
@@ -205,13 +205,13 @@ namespace Signum.React.Json
             }
         }
 
-        private static PropertyRoute GetCurrentPropertyRoute(object value)
+        private static (PropertyRoute pr, ModifiableEntity? mod) GetCurrentPropertyRoute(object value)
         {
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+            var tup = JsonSerializerExtensions.CurrentPropertyRouteAndEntity;
 
-            if (value is IRootEntity)
-                pr = PropertyRoute.Root(value.GetType());
-            if (pr == null)
+            if (value is IRootEntity re)
+                tup = (PropertyRoute.Root(value.GetType()), (ModifiableEntity)re);
+            if (tup == null)
             {
                 var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
 
@@ -224,14 +224,15 @@ Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().
 Current action: {controller.MethodInfo.MethodSignature()}
 Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
-                pr = att.PropertyRoute;
+                tup = (att.PropertyRoute, embedded);
             }
-            else if (pr.Type.ElementType() == value.GetType())
-                pr = pr.Add("Item"); //We habe a custom MListConverter but not for other simple collections
-            return pr;
+            else if (tup.Value.pr.Type.ElementType() == value.GetType())
+                tup = (tup.Value.pr.Add("Item"), null); //We habe a custom MListConverter but not for other simple collections
+            
+            return tup.Value;
         }
 
-        public static Func<PropertyRoute, string?>? CanReadPropertyRoute;
+        public static event Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
 
         public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
@@ -250,11 +251,11 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
             {
                 var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
-                string? error = CanReadPropertyRoute?.Invoke(pr);
+                string? error = CanReadPropertyRoute?.Invoke(pr, mod);
                 if (error != null)
                     return;
 
-                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+                using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((pr, mod)))
                 {
                     writer.WritePropertyName(lowerCaseName);
                     var val = pc.GetValue!(mod);
@@ -290,7 +291,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
                     ModifiableEntity mod = GetEntity(reader, objectType, existingValue, out bool markedAsModified);
 
-                    var pr = GetCurrentPropertyRoute(mod);
+                    var tup = GetCurrentPropertyRoute(mod);
 
                     var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
                     using (JsonSerializerExtensions.SetAllowDirectMListChanges(markedAsModified))
@@ -308,7 +309,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
                                     reader.Read();
 
-                                    using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
+                                    using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin)))
                                         serializer.DeserializeValue(reader, mixin.GetType(), mixin);
 
                                     reader.Read();
@@ -331,7 +332,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                                 }
 
                                 reader.Read();
-                                ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
+                                ReadJsonProperty(reader, serializer, mod, pc, tup.pr, markedAsModified);
 
                                 reader.Read();
                             }
@@ -367,7 +368,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
                 var pr = parentRoute.Add(pi);
 
-                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+                using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((pr, entity)))
                 {
                     object? newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
 
@@ -390,7 +391,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                         }
                         else
                         {
-                            AssertCanWrite(pr);
+                            AssertCanWrite(pr, entity);
                             if (newValue == null && pc.IsNotNull())
                             {
                                 entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
@@ -419,10 +420,10 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
         }
 
 
-        public static Func<PropertyRoute, string?>? CanWritePropertyRoute;
-        public static void AssertCanWrite(PropertyRoute pr)
+        public static event Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
+        public static void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
         {
-            string? error = CanWritePropertyRoute?.Invoke(pr);
+            string? error = CanWritePropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).NotNull().FirstOrDefault();
             if (error != null)
                 throw new UnauthorizedAccessException(error);
         }

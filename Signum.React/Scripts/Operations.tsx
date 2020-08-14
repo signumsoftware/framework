@@ -159,6 +159,8 @@ export class ConstructorOperationContext<T extends Entity> {
 
 
 
+export type SettersConfig = "No" | "Optional" | "Mandatory";
+
 /**
  * Contextual Operation Settings
  */
@@ -173,6 +175,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   icon?: IconProp;
   iconColor?: string;
   order?: number;
+  settersConfig?: SettersConfig;
 
   constructor(operationSymbol: ConstructSymbol_FromMany<any, T> | string, options: ContextualOperationOptions<T>) {
     super(operationSymbol);
@@ -451,6 +454,13 @@ export namespace Defaults {
     return oi.key.endsWith(".Save");
   }
 
+  export function defaultSetterConfig(oi: OperationInfo): SettersConfig {
+    if (!oi.canBeModified)
+      return "No";
+
+    return isSave(oi) ? "Mandatory" : "Optional";
+  }
+
   export function getColor(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
       oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "secondary";
@@ -506,9 +516,9 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<ErrorReport> {
+  export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, setters?: PropertySetter[], ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
   }
 
   export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
@@ -526,9 +536,9 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
+  export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, setters?: PropertySetter[], ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
   }
 
   export function deleteEntity<T extends Entity>(entity: T, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
@@ -541,9 +551,9 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
+  export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, setters?: PropertySetter[],...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "~/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
   }
 
   export interface ErrorReport {
@@ -563,8 +573,29 @@ export namespace API {
     operationKey: string;
     type?: string;
     lites: Lite<Entity>[];
-    args: any[]
+    args: any[];
+
+    setters?: PropertySetter[]
   }
+
+  export interface PropertySetter {
+    property: string;
+    value?: any;
+    listAction?: ListAction;
+    newEntity?: NewEntityAction;
+  }
+
+  export interface ListAction {
+    type: ListActionType ;
+    predicate?: PropertySetter[];
+    setters?: PropertySetter[];
+  }
+
+  export interface NewEntityAction {
+    setters: PropertySetter[];
+  }
+
+  type ListActionType = "Add" | "Change" | "Remove";
 
   export interface ConstructOperationRequest {
     operationKey: string;
