@@ -151,14 +151,14 @@ namespace Signum.React.Authorization
                     return mi;
                 };
 
-                EntityJsonConverter.CanReadPropertyRoute = pr =>
+                EntityJsonConverter.CanReadPropertyRoute += (pr, mod) =>
                 {
                     var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
                     return allowed == PropertyAllowed.None ? "Not allowed" : null;
                 };
 
-                EntityJsonConverter.CanWritePropertyRoute = pr =>
+                EntityJsonConverter.CanWritePropertyRoute += (pr, mod) =>
                 {
                     var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
@@ -207,7 +207,7 @@ namespace Signum.React.Authorization
                 CustomWriteJsonProperty = ctx => { },
                 CustomReadJsonProperty = ctx =>
                 {
-                    EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash));
+                    EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
 
                     var password = (string)ctx.JsonReader.Value!;
 
