@@ -3,13 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
     <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
-    <NoWarn>NU1605</NoWarn>
     <UserSecretsId>7b3bfbd4-af24-4a37-a213-f5f281fa39f5</UserSecretsId>
   </PropertyGroup>
 

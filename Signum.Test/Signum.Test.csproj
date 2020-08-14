@@ -3,14 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>SignumTest</UserSecretsId>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>1701;1702;8629;8618;NU1605</NoWarn>
+    <NoWarn>8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
