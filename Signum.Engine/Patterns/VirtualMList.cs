@@ -1,4 +1,5 @@
 using Signum.Engine.Basics;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -16,7 +17,7 @@ namespace Signum.Engine
     public static class VirtualMList
     {
         //Order, OrderLine, Order.Lines
-        public static Dictionary<Type, Dictionary<Type, VirtualMListInfo>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, VirtualMListInfo>>();
+        public static Dictionary<Type, Dictionary<PropertyRoute, VirtualMListInfo>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<PropertyRoute, VirtualMListInfo>>();
 
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
@@ -28,7 +29,7 @@ namespace Signum.Engine
 
         public static bool IsVirtualMList(this PropertyRoute pr)
         {
-            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType()!)?.Equals(pr) ?? false);
+            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.ContainsKey(pr) ?? false);
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -92,7 +93,7 @@ namespace Signum.Engine
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
-            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 
             var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
             var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
