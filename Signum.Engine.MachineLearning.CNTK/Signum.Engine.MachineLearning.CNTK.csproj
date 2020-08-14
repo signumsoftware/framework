@@ -2,11 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x86;x64;AnyCPU</Platforms>
-    <NoWarn>NU1605</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="2.7.0" />

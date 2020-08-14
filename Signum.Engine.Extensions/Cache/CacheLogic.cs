@@ -90,12 +90,21 @@ namespace Signum.Engine.Cache
 
         static void Schema_SchemaCompleted(SchemaBuilder sb)
         {
-            foreach (var type in VirtualMList.RegisteredVirtualMLists.Keys)
+            foreach (var kvp in VirtualMList.RegisteredVirtualMLists)
             {
-                if (controllers.ContainsKey(type))
+                var type = kvp.Key;
+
+                if (controllers.TryGetCN(type) != null)
                 {
-                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type).Keys)
+                    foreach (var vml in kvp.Value)
                     {
+                        var rType = vml.Value.BackReferenceRoute.RootType;
+
+                        EntityData data = EntityDataOverrides.TryGetS(rType) ?? EntityKindCache.GetEntityData(rType);
+
+                        if (data == EntityData.Transactional)
+                            throw new InvalidOperationException($"Type {rType.Name} should be {nameof(EntityData)}.{nameof(EntityData.Master)} because is in a virtual MList of {type.Name} (Master and cached)");
+
                         TryCacheTable(sb, rType);
 
                         dependencies.Add(type, rType);
@@ -532,7 +541,7 @@ namespace Signum.Engine.Cache
             {
                 AssertEnabled();
 
-                return cachedTable.TryGetToString(id.Value)!;
+                return cachedTable.TryGetToString(id!.Value)!;
             }
 
             public override void Complete(T entity, IRetriever retriver)
@@ -662,9 +671,11 @@ namespace Signum.Engine.Cache
 
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
-            List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
+            HashSet<Type> relatedTypes = sb.Schema.Table(type)
+                .DependentTables()
                 .Where(a => !a.Value.IsEnum)
-                .Select(t => t.Key.Type).ToList();
+                .Select(t => t.Key.Type)
+                .ToHashSet();
 
             dependencies.Add(type);
             inverseDependencies.Add(type);

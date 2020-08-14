@@ -139,8 +139,8 @@ namespace Signum.Engine.MachineLearning
                 MeanAbsoluteError = list.Average(p => Math.Abs(Error(p))).CleanDouble(),
                 MeanSquaredError = mse.CleanDouble(),
                 RootMeanSquareError = Math.Sqrt(mse).CleanDouble(),
-                MeanPercentageError = list.Average(p => SafeDiv(Error(p), p.OriginalValue.Value)).CleanDouble(),
-                MeanAbsolutePercentageError = list.Average(p => Math.Abs(SafeDiv(Error(p), p.OriginalValue.Value))).CleanDouble(),
+                MeanPercentageError = list.Average(p => SafeDiv(Error(p), p.OriginalValue!.Value)).CleanDouble(),
+                MeanAbsolutePercentageError = list.Average(p => Math.Abs(SafeDiv(Error(p), p.OriginalValue!.Value))).CleanDouble(),
             };
         }
 
@@ -154,7 +154,7 @@ namespace Signum.Engine.MachineLearning
 
         double Error(PredictSimpleResultEntity p)
         {
-            return p.PredictedValue.Value - p.OriginalValue.Value;
+            return p.PredictedValue!.Value - p.OriginalValue!.Value;
         }
 
         PredictorClassificationMetricsEmbedded GetClassificationStats(List<PredictSimpleResultEntity> list)

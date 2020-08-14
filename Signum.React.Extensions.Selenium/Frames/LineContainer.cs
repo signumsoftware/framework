@@ -283,16 +283,16 @@ namespace Signum.React.Selenium
         {
             string queryKey = QueryUtils.GetKey(queryName);
 
-            var element = lineContainer.Element.FindElement(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
+            var element = lineContainer.Element.WaitElementVisible(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
 
             return new SearchControlProxy(element);
         }
 
-        public static ValueSearchControlLineProxy GetSearchControlLine(this ILineContainer lineContainer, object queryName)
+        public static ValueSearchControlLineProxy GetValueSearchControlLine(this ILineContainer lineContainer, object queryName)
         {
             string queryKey = QueryUtils.GetKey(queryName);
 
-            var element = lineContainer.Element.FindElement(By.CssSelector("[data-value-query-key={0}]".FormatWith(queryKey)));
+            var element = lineContainer.Element.WaitElementVisible(By.CssSelector("[data-value-query-key={0}]".FormatWith(queryKey)));
 
             return new ValueSearchControlLineProxy(element);
         }

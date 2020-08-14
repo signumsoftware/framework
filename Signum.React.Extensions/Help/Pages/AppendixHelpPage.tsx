@@ -71,7 +71,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
   function onClick() {
     MessageModal.show({
       title: OperationMessage.Confirm.niceToString(),
-      message: OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString(getToString(ctx.value)),
+      message: OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(ctx.value)}</strong>),
       buttons: "yes_no",
       icon: "warning",
       style: "warning",

@@ -65,7 +65,7 @@ namespace Signum.Engine.Mailing
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
-            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations!.Value;
 
             if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
                 return new List<Filter>

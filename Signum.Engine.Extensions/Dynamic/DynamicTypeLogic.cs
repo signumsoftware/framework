@@ -398,7 +398,7 @@ namespace Signum.Engine.Dynamic
 
             if (this.BaseType == DynamicBaseType.Entity)
             {
-                atts.Add("EntityKind(EntityKind." + Def.EntityKind.Value + ", EntityData." + Def.EntityData.Value + ")");
+                atts.Add("EntityKind(EntityKind." + Def.EntityKind!.Value + ", EntityData." + Def.EntityData!.Value + ")");
 
                 if (Def.TableName.HasText())
                 {

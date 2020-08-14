@@ -96,7 +96,7 @@ namespace Signum.Engine.Disconnected
                 Copies = uploadTables.Select(t => new DisconnectedImportTableEmbedded
                 {
                     Type = t.Type.ToTypeEntity().ToLite(),
-                    DisableForeignKeys = t.Strategy.DisableForeignKeys.Value,
+                    DisableForeignKeys = t.Strategy.DisableForeignKeys!.Value,
                 }).ToMList()
             }.Save().ToLite();
 
@@ -157,7 +157,7 @@ namespace Signum.Engine.Disconnected
                             try
                             {
                                 using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.DisableForeignKeys, s => l).Execute()))
-                                    foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
+                                    foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys!.Value))
                                     {
                                         DisableForeignKeys(item.Table);
                                     }
@@ -170,7 +170,7 @@ namespace Signum.Engine.Disconnected
                                         if (result != null)
                                             import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type.Is(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
                                                 .Set(mle => mle.Element.CopyTable, mle => l)
-                                                .Set(mle => mle.Element.DisableForeignKeys, mle => tuple.Strategy.DisableForeignKeys.Value)
+                                                .Set(mle => mle.Element.DisableForeignKeys, mle => tuple.Strategy.DisableForeignKeys!.Value)
                                                 .Set(mle => mle.Element.InsertedRows, mle => result.Inserted)
                                                 .Set(mle => mle.Element.UpdatedRows, mle => result.Updated)
                                                 .Execute();
@@ -186,7 +186,7 @@ namespace Signum.Engine.Disconnected
                             finally
                             {
                                 using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.EnableForeignKeys, s => l).Execute()))
-                                    foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
+                                    foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys!.Value))
                                     {
                                         EnableForeignKeys(item.Table);
                                     }

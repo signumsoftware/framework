@@ -174,6 +174,15 @@ namespace Signum.React.Selenium
             }, "autocomplete selection");
         }
 
+        public void AutoCompleteWaitChanges(IWebElement input, IWebElement container, string beginning)
+        {
+            WaitChanges(() =>
+            {
+                AutoCompleteBasic(input, container, beginning);
+
+            }, "autocomplete selection");
+        }
+
         public static void AutoCompleteBasic(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
             input.SafeSendKeys("id:" + lite.Id.ToString());
@@ -182,6 +191,18 @@ namespace Signum.React.Selenium
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
 
             itemElement.Click();
+        }
+
+        public static void AutoCompleteBasic(IWebElement input, IWebElement container, string beginning)
+        {
+            input.SafeSendKeys(beginning);
+
+            var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
+            var elem = input.GetDriver().Wait(() =>
+            {
+                return list.FindElements(By.CssSelector("[data-entity-key]")).SingleEx(a => a.ContainsText(beginning));
+            });
+            elem.Click();
         }
     }
 

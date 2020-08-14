@@ -665,7 +665,7 @@ namespace Signum.Engine.Authorization
             {
                 Role = role,
                 Resource = resource,
-                Allowed = allowed.Fallback.Value,
+                Allowed = allowed.Fallback!.Value,
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
                 {
                     Allowed = a.Allowed,

@@ -216,7 +216,7 @@ namespace Signum.Entities.Authorization
                     (type, pr) => pr.Delete(),
                     (type, ar, pr) =>
                     {
-                        pr.Allowed = ar.Allowed.Fallback.Value;
+                        pr.Allowed = ar.Allowed.Fallback!.Value;
 
                         var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
                         {

@@ -90,7 +90,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
-                    .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
+                    .Where(n => (bool)((SqlHierarchyId)n!.Value.GetAncestor(1) == node))
                     .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
-                    .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
+                    .Where(n => (bool)((SqlHierarchyId)n!.Value.GetAncestor(1) == node))
                     .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -110,7 +110,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
-                    .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
+                    .Where(n => (bool)(n!.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
                     .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -120,7 +120,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
-                    .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
+                    .Where(n => (bool)(n!.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
                     .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -246,7 +246,7 @@ namespace Signum.Engine.Tree
                 c.Construct = (t, _) => new T
                 {
                     ParentOrSibling = t.ToLite(),
-                    Level = (short)(t.Level + 1),
+                    Level = (short)(t.Level! + 1),
                     IsSibling = false
                     //                    
                 };

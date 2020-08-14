@@ -193,7 +193,7 @@ namespace Signum.Engine.Help
                 case OperationType.Execute:
                     return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(
 operationInfo.OperationSymbol.NiceToString(),
-operationInfo.CanBeModified.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(),
+operationInfo.CanBeModified!.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(),
 type.NiceName());
                 case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
                 case OperationType.Constructor:
@@ -202,7 +202,7 @@ HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).
                 case OperationType.ConstructorFrom:
                     return
 HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
-HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.CanBeModified.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(), type.NiceName());
+HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.CanBeModified!.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(), type.NiceName());
                 case OperationType.ConstructorFromMany:
                     return
 HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
@@ -216,7 +216,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumnFactory();
 
-            return HelpMessage.QueryOf0.NiceToString(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)!));
+            return HelpMessage.QueryOf0.NiceToString(cdf.Implementations!.Value.TypeLinks(Lite.Extract(cdf.Type)!));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -237,7 +237,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
 
             if (Reflector.IsIEntity(cleanType))
             {
-                return kvp.Implementations.Value.TypeLinks(cleanType);
+                return kvp.Implementations!.Value.TypeLinks(cleanType);
             }
             else if (Reflector.IsEmbeddedEntity(kvp.Type))
             {
