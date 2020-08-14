@@ -6,7 +6,7 @@ import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity,
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
-import { MaxHeightProperty } from 'csstype';
+import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI, useForceUpdate } from '../Hooks'
 import { useController } from './LineBase'
@@ -19,7 +19,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean;
   avoidEmptyTable?: boolean;
-  maxResultsHeight?: MaxHeightProperty<string | number> | any;
+  maxResultsHeight?: Property.MaxHeight<string | number> | any;
   scrollable?: boolean;
   rowSubContext?: (ctx: TypeContext<any /*T*/>) => TypeContext<any>;
   tableClasses?: string;
@@ -246,6 +246,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       <span className="ml-2">
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
+        {c.props.extraButtons && c.props.extraButtons(c)}
       </span>
     );
 

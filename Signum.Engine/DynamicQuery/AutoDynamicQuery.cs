@@ -142,6 +142,9 @@ namespace Signum.Engine.DynamicQuery
                 if (request.ValueToken is AggregateToken)
                     return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
 
+                if (request.MultipleValues)
+                    return await query.SelectOne(request.ValueToken).ToListAsync(token);
+
                 return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.Single, token);
             }
         }

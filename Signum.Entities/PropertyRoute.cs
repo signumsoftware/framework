@@ -39,19 +39,21 @@ namespace Signum.Entities
         }
 
         [ForceEagerEvaluation]
-        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
+        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
             where T : IRootEntity
         {
-            return Root(typeof(T)).Continue(propertyRoute);
+            return Root(typeof(T)).Continue(lambda, avoidLastCasting);
         }
-                                
 
-        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
+
+        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
         {
             if (typeof(T) != this.Type)
                 throw new InvalidOperationException("Type mismatch between {0} and {1}".FormatWith(typeof(T).TypeName(), this.Type.TypeName()));
 
-            var list = Reflector.GetMemberList(propertyRoute);
+            var list = avoidLastCasting && lambda.Body is UnaryExpression u && u.NodeType == ExpressionType.Convert ?
+                Reflector.GetMemberListUntyped(Expression.Lambda(u.Operand, lambda.Parameters)) :
+                Reflector.GetMemberList(lambda);
 
             return Continue(list);
         }

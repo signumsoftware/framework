@@ -2,15 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <TypeScriptToolsVersion>3.9</TypeScriptToolsVersion>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
     <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
-    <NoWarn>NU1605</NoWarn>
     <UserSecretsId>7b3bfbd4-af24-4a37-a213-f5f281fa39f5</UserSecretsId>
   </PropertyGroup>
 
@@ -34,8 +31,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.4" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.9.2">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.9.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -43,7 +40,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="4.1.3.1" />
+    <PackageReference Include="Npgsql" Version="4.1.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
     <PackageReference Include="Signum.TSGenerator" Version="3.0.0" />

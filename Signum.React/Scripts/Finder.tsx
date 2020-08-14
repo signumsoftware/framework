@@ -759,13 +759,13 @@ export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
   });
 }
 
-export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], valueToken?: string): Promise<any> {
+export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], valueToken?: string, multipleValues?: boolean): Promise<any> {
   return getQueryDescription(queryName).then(qd => {
     return parseFilterOptions(filterOptions, false, qd).then(fops => {
 
       let filters = toFilterRequests(fops);
 
-      return API.queryValue({ queryKey: qd.queryKey, filters, valueToken });
+      return API.queryValue({ queryKey: qd.queryKey, filters, valueToken, multipleValues });
     });
   });
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
@@ -114,7 +114,7 @@ namespace Signum.Test.LinqProvider
         {
             var singles = new[] { Status.Single};
 
-            var artists = Database.Query<ArtistEntity>().Where(r => singles.Contains(r.Status.Value)).Select(a => a.ToLite()).ToList();
+            var artists = Database.Query<ArtistEntity>().Where(r => singles.Contains(r.Status!.Value)).Select(a => a.ToLite()).ToList();
         }
 
 

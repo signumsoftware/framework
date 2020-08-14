@@ -206,7 +206,7 @@ export class ContextualOperationContext<T extends Entity> {
   isReadonly?: boolean;
   event?: React.MouseEvent<any>;
   onContextualSuccess?: (pack: API.ErrorReport) => void;
-  onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
   defaultContextualClick(...args: any[]) {
     defaultContextualClick(this, ...args);
@@ -253,7 +253,7 @@ export class EntityOperationContext<T extends Entity> {
   canExecute?: string;
   event?: React.MouseEvent<any>;
   onExecuteSuccess?: (pack: EntityPack<T>) => void;
-  onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
   color?: BsColor;
@@ -502,16 +502,16 @@ export function isEntityOperation(operationType: OperationType) {
 
 export namespace API {
 
-  export function construct<T extends Entity>(type: string | Type<T>, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T>> {
+  export function construct<T extends Entity>(type: string | Type<T>, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type: getTypeName(type) });
   }
 
-  export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
+  export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(entity, args);
     return ajaxPost({ url: "~/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
-  export function constructFromLite<T extends Entity, F extends Entity>(lite: Lite<F>, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
+  export function constructFromLite<T extends Entity, F extends Entity>(lite: Lite<F>, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(lite, args);
     return ajaxPost({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
@@ -521,7 +521,7 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
   }
 
-  export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
+  export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(lites, args);
     return ajaxPost({ url: "~/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }

@@ -114,6 +114,10 @@ declare global {
     forGenderAndNumber(this: string, gender: any, number?: number): string;
     replaceAll(this: string, from: string, to: string): string;
     indent(this: string, numChars: number): string;
+    between(this: string, separator: string): string;
+    between(this: string, firstSeparator: string, secondSeparator: string): string;
+    tryBetween(this: string, separator: string): string | undefined;
+    tryBetween(this: string, firstSeparator: string, secondSeparator: string): string | undefined;
     after(this: string, separator: string): string;
     before(this: string, separator: string): string;
     tryAfter(this: string, separator: string): string | undefined;
@@ -769,6 +773,40 @@ String.prototype.replaceAll = function (this: string, from: string, to: string) 
 String.prototype.indent = function (this: string, numChars: number) {
   const indent = " ".repeat(numChars);
   return this.split("\n").map(a => indent + a).join("\n");
+};
+
+String.prototype.between = function (this: string, firstSeparator: string, secondSeparator?: string) {
+
+  if (!secondSeparator)
+    secondSeparator = firstSeparator;
+
+  const index = this.indexOf(firstSeparator);
+  if (index == -1)
+    throw Error("{0} not found".formatWith(firstSeparator));
+
+  var from = index + firstSeparator.length;
+  const index2 = this.indexOf(secondSeparator, from);
+  if (index2 == -1)
+    throw Error("{0} not found".formatWith(secondSeparator));
+
+  return this.substring(from, index2);
+};
+
+String.prototype.tryBetween = function (this: string, firstSeparator: string, secondSeparator?: string) {
+
+  if (!secondSeparator)
+    secondSeparator = firstSeparator;
+
+  const index = this.indexOf(firstSeparator);
+  if (index == -1)
+    return undefined;
+
+  var from = index + firstSeparator.length;
+  const index2 = this.indexOf(secondSeparator, from);
+  if (index2 == -1)
+    return undefined;
+
+  return this.substring(from, index2 - from);
 };
 
 String.prototype.after = function (this: string, separator: string) {

@@ -93,6 +93,12 @@ namespace Signum.Engine.DynamicQuery
                 var result = await Execute(req, GetQueryDescription(), cancellationToken);
                 return result.SimpleAggregate((AggregateToken)request.ValueToken);
             }
+            else if(request.MultipleValues)
+            {
+                req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
+                var result = await Execute(req, GetQueryDescription(), cancellationToken);
+                return result.SelectOne(request.ValueToken).ToList();
+            }
             else
             {
                 req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));

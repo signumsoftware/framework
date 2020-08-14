@@ -336,6 +336,7 @@ export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
 export interface QueryValueRequest {
   queryKey: string;
   filters: FilterRequest[];
+  multipleValues?: boolean;
   valueToken?: string;
   systemTime?: SystemTime;
 }
