@@ -26,6 +26,8 @@ namespace Signum.Entities
         }
 
         public static Func<ModifiableEntity, PropertyInfo, string?>? GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, bool>? GlobalIsReadonly { get; set; }
+
 
         static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
@@ -139,6 +141,8 @@ namespace Signum.Entities
 
         string? PropertyCheck(ModifiableEntity modifiableEntity);
         object? GetValueUntyped(ModifiableEntity entity);
+
+        bool IsPropertyReadonly(ModifiableEntity modifiableEntity);
     }
 
     public class PropertyValidator<T> : IPropertyValidator
@@ -256,6 +260,27 @@ namespace Signum.Entities
         public object? GetValueUntyped(ModifiableEntity entity)
         {
             return GetValue((T)entity);
+        }
+
+
+        public bool IsPropertyReadonly(ModifiableEntity modifiableEntity)
+        {
+            if (modifiableEntity.IsPropertyReadonly(this.PropertyInfo))
+                return true;
+
+            if (Validator.GlobalIsReadonly != null)
+            {
+                foreach (var f in Validator.GlobalIsReadonly.GetInvocationListTyped())
+                {
+                    if (f(modifiableEntity, PropertyInfo))
+                        return true;
+                }
+            }
+
+            if (this.PropertyInfo.CanWrite == false)
+                return true;
+
+            return false;
         }
     }
 }

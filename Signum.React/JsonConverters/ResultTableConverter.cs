@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
@@ -50,7 +51,7 @@ namespace Signum.React.Json
                     writer.WriteStartArray();
                     foreach (var column in rt.Columns)
                     {
-                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(column.Column.Token.GetPropertyRoute()))
+                        using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null)))
                         {
                             serializer.Serialize(writer, row[column]);
                         }

@@ -394,6 +394,8 @@ export module OperationMessage {
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
+  export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
+  export const PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
