@@ -174,16 +174,15 @@ namespace Signum.React.Authorization
         public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
-                return LoginAuthMessage.PasswordMustHaveAValue.NiceToString();
+                return LoginAuthMessage.EnterYourUserEmail.NiceToString();
 
             try
             {
-                var rpr = ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
+                ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
             }
             catch (Exception ex)
             {
-                ex.LogException();
-                return LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
+                return ex.Message;
             }
 
             return null;
