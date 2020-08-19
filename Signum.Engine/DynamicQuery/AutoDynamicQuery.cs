@@ -33,7 +33,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination, request.SystemTime);
 
                 return result.ToResultTable(request);
             }
@@ -45,7 +45,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
 
                 return result.ToResultTable(request);
             }
@@ -57,7 +57,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination, request.SystemTime);
 
                 return result.ToResultTable(request);
             }
@@ -69,7 +69,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
 
                 return result.ToResultTable(request);
             }
