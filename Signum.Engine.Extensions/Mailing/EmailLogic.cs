@@ -114,10 +114,19 @@ namespace Signum.Engine.Mailing
 
         public static HashSet<Type> GetAllTypes()
         {
-            return TypeLogic.TypeToEntity
-                      .Where(kvp => typeof(IEmailOwnerEntity).IsAssignableFrom(kvp.Key))
-                      .Select(kvp => kvp.Key)
-                      .ToHashSet();
+            var field = Schema.Current.Field((EmailMessageEntity em) => em.Target);
+
+            if (field is FieldImplementedBy ib)
+                return ib.ImplementationColumns.Keys.ToHashSet();
+
+            //Hacky... 
+            if (field is FieldImplementedByAll iba)
+            {
+                var types = Database.Query<EmailMessageEntity>().Where(a => a.Target != null).Select(a => a.Target!.Entity.GetType()).Distinct().ToHashSet();
+                return types;
+            }
+
+            return new HashSet<Type>();
         }
 
         public static void SendMail(this IEmailModel model)
