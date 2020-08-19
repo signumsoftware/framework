@@ -87,10 +87,6 @@
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="View" Description="Ansehen" />
   </Type>
-  <Type Name="EntityMessage">
-    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Versuche {0} in gesperrter Entität {1} hinzuzufügen/zu löschen" />
-    <Member Name="AttemptToSet0InLockedEntity1" Description="Versuche {0} in gesperrter Entität {1} festzulegen" />
-  </Type>
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" Description="Ausnahme">
     <Member Name="ActionName" Description="Aktionsname" />
@@ -157,7 +153,6 @@
     <Member Name="create" Description="Erstellen" />
     <Member Name="deactivateTimeMachine" Description="Zeitmaschine deaktivieren" />
     <Member Name="editColumn" Description="Spalte bearbeiten" />
-    <Member Name="enterTheNewColumnName" Description="Geben Sie den neuen Spaltennamen ein" />
     <Member Name="error" Description="Fehler" />
     <Member Name="executed" Description="Ausgeführt" />
     <Member Name="find" Description="Finden" />
@@ -178,9 +173,8 @@
     <Member Name="popupErrorsStop" Description="Es sind Fehler in der Entität" />
     <Member Name="remove" Description="Entfernen" />
     <Member Name="removeColumn" Description="Spalte löschen" />
-    <Member Name="renameColumn" Description="Spalte umbenennen" />
-    <Member Name="reorderColumn_MoveLeft" Description="Nach links bewegen" />
-    <Member Name="reorderColumn_MoveRight" Description="Nach rechts bewegen" />
+    <Member Name="removeOtherColumns" Description="Andere Spalten entfernen" />
+    <Member Name="restoreDefaultColumns" Description="Standard-Spalten wiederherstellen" />
     <Member Name="saveChangesBeforeOrPressCancel" Description="Speichern Sie die Änderungen vorher oder drücken Sie &quot;Abbrechen&quot;" />
     <Member Name="saved" Description="Gespeichert" />
     <Member Name="search" Description="Suche" />
@@ -201,9 +195,6 @@
     <Member Name="New_G" Description="Neu[m:er|f:e|n:es]" />
     <Member Name="ToStr" Description="Text" />
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
-  </Type>
-  <Type Name="LockableEntity" Description="blockierbare Entität">
-    <Member Name="Locked" Description="Blockiert" />
   </Type>
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Modellentität" />
@@ -254,9 +245,7 @@
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
-    <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die Entität aus dem System löschen möchten" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die ausgewählten Elemente aus dem System löschen möchten" />
+    <Member Name="PleaseConfirmYouWantLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PreviousOperationLog" Description="Vorheriges Operationsprotokoll" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0} (statt {1}) sein" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} hat keine Enität zurückgegeben" />
@@ -361,6 +350,7 @@
     <Member Name="Column" Description="Spalte" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
+    <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Explore" Description="Erforsche" />
@@ -521,6 +511,7 @@
     <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="Die Länge von {0} muss kleiner als oder gleich {1} sein" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl der {0} wird mit {1} multipliziert" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />
+    <Member Name="ThereAre0InState1" Description="Es gibt {0} im Status {1}" />
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Die Zeilen werden nach {0} gruppiert" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
   </Type>
