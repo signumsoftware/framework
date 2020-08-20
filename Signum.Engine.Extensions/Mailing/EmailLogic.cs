@@ -114,6 +114,9 @@ namespace Signum.Engine.Mailing
 
         public static HashSet<Type> GetAllTypes()
         {
+            if (Schema.Current.IsAllowed(typeof(EmailMessageEntity), true) != null)
+                return new HashSet<Type>();
+
             var field = Schema.Current.Field((EmailMessageEntity em) => em.Target);
 
             if (field is FieldImplementedBy ib)
