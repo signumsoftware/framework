@@ -1552,7 +1552,9 @@ namespace Signum.Engine.Maps
                     case SqlDbType.NText:
                     case SqlDbType.NVarChar:
                     case SqlDbType.Text:
-                    case SqlDbType.VarChar: 
+                    case SqlDbType.VarChar:
+                    case SqlDbType.Char:
+                    case SqlDbType.NChar:
                         return true;
                     default: 
                         return false;
