@@ -119,7 +119,7 @@ namespace Signum.Entities
                 {
                     Implementations imp = GetImplementations();
 
-                    Type only;
+                    Type? only;
                     if (imp.IsByAll || (only = imp.Types.Only()) == null)
                         throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
 

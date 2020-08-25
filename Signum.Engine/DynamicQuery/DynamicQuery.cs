@@ -630,7 +630,7 @@ namespace Signum.Engine.DynamicQuery
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token)!;
                 case UniqueType.Single: return collection.SingleAsync(token);
                 case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token)!;
-                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only());
+                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only()!);
                 default: throw new InvalidOperationException();
             }
         }

@@ -338,6 +338,7 @@ namespace Signum.Utilities
         }
 
         //returns default if 0 or many, returns if one
+        [return: MaybeNull]
         public static T Only<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
