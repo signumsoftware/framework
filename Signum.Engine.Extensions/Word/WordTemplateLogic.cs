@@ -77,7 +77,7 @@ namespace Signum.Engine.Word
                     Execute = (wt, _) => {
                         if (!wt.IsNew)
                         {
-                            var oldFile = wt.InDBEntity(t => t.Template);
+                            var oldFile = wt.InDB(t => t.Template);
                             if (oldFile != null && !wt.Template.Is(oldFile))
                                 Transaction.PreRealCommit += dic => oldFile.Delete();
                         }
