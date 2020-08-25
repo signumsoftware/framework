@@ -1354,7 +1354,7 @@ Consider Synchronize.");
         Circular,
     }
 
-    public class Iteration<T>
+    public struct Iteration<T>
     {
         readonly T value;
         readonly bool isFirst;
