@@ -30,7 +30,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   format?: string;
   throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   searchControlProps?: Partial<SearchControlProps>;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,

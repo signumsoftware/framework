@@ -48,7 +48,7 @@ export interface SearchControlProps {
   avoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   enableAutoFocus?: boolean;
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
