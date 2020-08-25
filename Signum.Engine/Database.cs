@@ -1167,7 +1167,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         [MethodExpander(typeof(InDbExpander))]
-        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
+        public static R InDB<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
         {
             return entity.InDB().Select(selector).SingleEx();
         }
