@@ -30,6 +30,7 @@ export function TranslationTypeTable(p : { type: LocalizableType, result: Assemb
   function editCulture(loc: LocalizedType) {
     return p.currentCulture == undefined || p.currentCulture == loc.culture;
   }
+
   let { type, result } = p;
 
   return (
@@ -50,7 +51,7 @@ export function TranslationTypeTable(p : { type: LocalizableType, result: Assemb
       </thead>
       <tbody>
         {type.hasDescription && Dic.getValues(type.cultures).filter(loc => loc.typeDescription)
-          .map(loc => <TranslationTypeDescription key={loc.culture} edit={editCulture(loc)} loc={loc} result={p.result} type={type} />)}
+          .map(loc => <TranslationTypeDescription key={loc.culture} edit={editCulture(loc)} loc={loc} result={result} type={type} />)}
         {type.hasMembers && renderMembers(type)}
       </tbody>
     </table>
@@ -119,7 +120,7 @@ TranslationMember.normalizeString = (str: string): string => {
   return str;
 };
 
-function initialElementIf(condition: boolean) {
+export function initialElementIf(condition: boolean) {
   return condition ? [<option key={""} value={""}>{" - "}</option>] : []
 }
 

@@ -1,9 +1,9 @@
-import * as QueryString from 'query-string'
 import { RestLogEntity, RestApiKeyEntity } from './Signum.Entities.Rest'
 import { EntitySettings } from "@framework/Navigator";
 import * as Navigator from "@framework/Navigator";
 import { ajaxGet } from "@framework/Services";
 import * as AuthClient from "../Authorization/AuthClient";
+import { QueryString } from '@framework/QueryString';
 
 export function registerAuthenticator() {
   AuthClient.authenticators.insertAt(0, loginFromApiKey);

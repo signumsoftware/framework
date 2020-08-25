@@ -11,7 +11,7 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
-import { softCast } from '../../../Framework/Signum.React/Scripts/Globals';
+import { softCast } from '@framework/Globals';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {

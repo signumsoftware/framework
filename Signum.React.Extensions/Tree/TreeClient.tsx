@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as QueryString from 'query-string'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
@@ -20,6 +19,7 @@ import { toLite } from "@framework/Signum.Entities";
 import { SearchControlLoaded } from "@framework/Search";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { LiteAutocompleteConfig } from '@framework/Lines';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);

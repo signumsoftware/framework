@@ -33,6 +33,7 @@ export interface DiffLogMixin extends Entities.MixinEntity {
 export module TimeMachineMessage {
   export const TimeMachine = new MessageKey("TimeMachineMessage", "TimeMachine");
   export const EntityDeleted = new MessageKey("TimeMachineMessage", "EntityDeleted");
+  export const CompareVersions = new MessageKey("TimeMachineMessage", "CompareVersions");
 }
 
 export module TimeMachinePermission {

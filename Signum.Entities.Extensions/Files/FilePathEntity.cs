@@ -2,13 +2,12 @@ using System;
 using System.IO;
 using Signum.Utilities;
 using System.Linq.Expressions;
-using Signum.Entities.Patterns;
 using Signum.Services;
 
 namespace Signum.Entities.Files
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
-    public class FilePathEntity : LockableEntity, IFile, IFilePath
+    public class FilePathEntity : Entity, IFile, IFilePath
     {
         public static string? ForceExtensionIfEmpty = ".dat";
 

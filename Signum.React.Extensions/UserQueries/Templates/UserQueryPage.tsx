@@ -10,7 +10,7 @@ import SearchControl, { SearchControlHandler } from '@framework/SearchControl/Se
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
 import { RouteComponentProps } from "react-router";
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 

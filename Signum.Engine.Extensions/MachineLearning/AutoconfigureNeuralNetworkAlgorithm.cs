@@ -117,7 +117,7 @@ namespace Signum.Engine.MachineLearning
         {
             PredictorLogic.TrainSync(p, onReportProgres: (str, val) => onProgress(val));
 
-            return p.ResultValidation!.Loss.Value;
+            return p.ResultValidation!.Loss!.Value;
         }
 
         //private static double EvaluateMock(ExecutingProcess ep, PredictorEntity p, Action<decimal?> onProgress)

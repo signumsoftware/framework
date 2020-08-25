@@ -323,45 +323,6 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
   file: Files.FileEmbedded;
 }
 
-export const NewsletterDeliveryEntity = new Type<NewsletterDeliveryEntity>("NewsletterDelivery");
-export interface NewsletterDeliveryEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
-  Type: "NewsletterDelivery";
-  sent: boolean;
-  sendDate: string | null;
-  recipient: Entities.Lite<IEmailOwnerEntity> | null;
-  newsletter: Entities.Lite<NewsletterEntity>;
-}
-
-export const NewsletterEntity = new Type<NewsletterEntity>("Newsletter");
-export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDataEntity {
-  Type: "Newsletter";
-  name: string;
-  state: NewsletterState;
-  from: string;
-  displayFrom: string;
-  subject: string | null;
-  text: string | null;
-  query: Signum.QueryEntity | null;
-}
-
-export module NewsletterOperation {
-  export const Save : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Save");
-  export const Send : Entities.ConstructSymbol_From<Processes.ProcessEntity, NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Send");
-  export const AddRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.AddRecipients");
-  export const RemoveRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.RemoveRecipients");
-  export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Clone");
-}
-
-export module NewsletterProcess {
-  export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "NewsletterProcess.SendNewsletter");
-}
-
-export const NewsletterState = new EnumType<NewsletterState>("NewsletterState");
-export type NewsletterState =
-  "Created" |
-  "Saved" |
-  "Sent";
-
 export module Pop3ConfigurationAction {
   export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations");
 }

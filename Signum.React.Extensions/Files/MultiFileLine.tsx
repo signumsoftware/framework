@@ -10,8 +10,8 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from '
 import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
-import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
+import { useController } from '@framework/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -91,13 +91,14 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                       </a>}
                   </td>
                   <td style={{ width: "100%" }}>
-                  { p.getComponent ? p.getComponent(mlec) :
+                  {p.getComponent ? p.getComponent(mlec) :
                     p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
                       <FileDownloader
-                      configuration={p.configuration}
-                      download={p.download}
+                        configuration={p.configuration}
+                        download={p.download}
                         entityOrLite={mlec.value}
-                        htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />}
+                        htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
+                  }
                   </td>
                 </tr>)
             }

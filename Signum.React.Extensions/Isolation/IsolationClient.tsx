@@ -2,8 +2,8 @@ import * as React from 'react'
 import * as AppContext from '@framework/AppContext'
 import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation'
 import { Lite, liteKey, ModifiableEntity } from '@framework/Signum.Entities'
-import { ajaxGet, addContextHeaders } from '../../../Framework/Signum.React/Scripts/Services'
-import { onWidgets, WidgetContext } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
+import { ajaxGet, addContextHeaders } from '@framework/Services'
+import { onWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { IsolationWidget } from './IsolationWidget'
 
 

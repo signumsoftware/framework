@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as d3 from "d3";
-import { useSize } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useSize } from '@framework/Hooks';
 
 export interface Point {
   x: number;

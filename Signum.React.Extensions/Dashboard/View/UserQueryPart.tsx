@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
@@ -9,8 +9,13 @@ import { UserQueryPartEntity, PanelPartEmbedded, PanelStyle } from '../Signum.En
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../Admin/Dashboard';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
+import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
+import SelectorModal from '@framework/SelectorModal'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
@@ -29,15 +34,38 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
     />;
   }
 
-  return (
-    <SearchControl
-      findOptions={fo}
-      showHeader={"PinnedFilters"}
-      showFooter={p.part.showFooter}
-      allowSelection={p.part.allowSelection} />
-  );
+  return <SearchContolInPart part={p.part} findOptions={fo} />;
 }
 
+function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, part: UserQueryPartEntity }) {
+
+  const [refreshCount, setRefreshCount] = React.useState<number>(0)
+  const qd = useAPI(() => Finder.getQueryDescription(part.userQuery.query.key), [part.userQuery.query.key]);
+  const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+
+  function handleCreateNew(e: React.MouseEvent<any>) {
+    e.preventDefault();
+
+    return Finder.parseFilterOptions(findOptions.filterOptions ?? [], findOptions.groupResults ?? false, qd!)
+      .then(fop => SelectorModal.chooseType(typeInfos!)
+        .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
+          .then(props => Constructor.constructPack(ti.name, props)))
+        .then(pack => pack && Navigator.navigate(pack))
+        .then(() => setRefreshCount(a => a + 1)))
+      .done();
+  }
+
+  return (
+    <FullscreenComponent onReload={e => { e.preventDefault(); setRefreshCount(a => a + 1); }} onCreateNew={part.createNew ? handleCreateNew : undefined} typeInfos={typeInfos}>
+      <SearchControl
+        refreshKey={refreshCount}
+        findOptions={findOptions}
+        showHeader={"PinnedFilters"}
+        showFooter={part.showFooter}
+        allowSelection={part.allowSelection} />
+    </FullscreenComponent>
+  );
+}
 
 interface BigValueBadgeProps {
   findOptions: FindOptions;
@@ -79,8 +107,3 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
     </div>
   );
 }
-
-
-
-
-

@@ -5,7 +5,6 @@ import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import { WebApiHttpError } from '@framework/Services'
 import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -17,14 +16,13 @@ import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import { RouteComponentProps } from "react-router";
-import * as QueryString from 'query-string';
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
-import { validate } from './View/NodeUtils';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }

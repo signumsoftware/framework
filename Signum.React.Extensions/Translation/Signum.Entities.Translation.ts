@@ -9,6 +9,11 @@ import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const TranslateableRouteType = new EnumType<TranslateableRouteType>("TranslateableRouteType");
+export type TranslateableRouteType =
+  "Text" |
+  "Html";
+
 export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
   Type: "TranslatedInstance";
@@ -19,6 +24,12 @@ export interface TranslatedInstanceEntity extends Entities.Entity {
   translatedText: string;
   originalText: string;
 }
+
+export const TranslatedSummaryState = new EnumType<TranslatedSummaryState>("TranslatedSummaryState");
+export type TranslatedSummaryState =
+  "Completed" |
+  "Pending" |
+  "None";
 
 export module TranslationJavascriptMessage {
   export const WrongTranslationToSubstitute = new MessageKey("TranslationJavascriptMessage", "WrongTranslationToSubstitute");

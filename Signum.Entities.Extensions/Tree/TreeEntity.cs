@@ -44,6 +44,11 @@ namespace Signum.Entities.Tree
 
         protected override void PostRetrieving(PostRetrievingContext ctx)
         {
+            UpdateLevel();
+        }
+
+        public void UpdateLevel()
+        {
             this.level = (short)this.Route.GetLevel();
         }
 

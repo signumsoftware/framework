@@ -5,6 +5,7 @@ import { Modal } from 'react-bootstrap';
 import "./Files.css"
 import { FileImage } from './FileImage';
 import { IModalProps, openModal } from '@framework/Modals'
+import { PropertyRoute } from '@framework/Lines';
 
 interface ImageModalProps extends IModalProps<undefined> {
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
@@ -35,7 +36,7 @@ export function ImageModal(p: ImageModalProps) {
         </button>
       </div>
       <div className="modal-body">
-        <FileImage file={p.file} style={{ maxWidth: "100%", marginLeft: "auto", marginRight: "auto", display: "block" }} {...p.imageHtmlAttributes}/>
+        <FileImage file={p.file} style={{ maxWidth: "100%", marginLeft: "auto", marginRight: "auto", display: "block" }} {...p.imageHtmlAttributes} />
       </div>
     </Modal>
   );

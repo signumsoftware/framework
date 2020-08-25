@@ -45,6 +45,8 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Action<Pop3ReceptionEntity>? ReceptionComunication;
 
+        public static bool IsStarted = false;
+
         public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -160,6 +162,8 @@ namespace Signum.Engine.Mailing.Pop3
                     return null;
                 });
             }
+
+            IsStarted = true;
         }
 
         public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;
@@ -274,7 +278,7 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     var messageJoinDict = messageInfos.ToDictionary(e => e.Uid).OuterJoinDictionarySC(lastsEmails, (key, v1, v2) => new { key, v1, v2 });
                     var messageMachings = messageJoinDict.Where(e => e.Value.v1 != null && e.Value.v2 != null).ToList();
-                    var maxId = !messageMachings.Any() ? 0 : messageMachings.Select(e => e.Value.v1.Value.Number).Max();
+                    var maxId = !messageMachings.Any() ? 0 : messageMachings.Select(e => e.Value.v1!.Value.Number).Max();
 
                     messagesToSave = !messageMachings.Any() ?
                         messageInfos.ToList() :

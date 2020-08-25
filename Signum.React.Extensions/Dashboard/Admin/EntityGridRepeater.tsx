@@ -7,7 +7,6 @@ import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entiti
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { PanelStyle } from '../Signum.Entities.Dashboard';
-//import { useController } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { useController } from '@framework/Lines/LineBase';
 
 
@@ -236,7 +235,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
           </div>
         )}
       </div>
-      <div className={c.drag?.dragMode == "move" ? "sf-dragging" : undefined} onDrop={c.handleOnDrop}>
+      <div className={classes("sf-grid-container", c.drag?.dragMode == "move" ? "sf-dragging" : undefined)} onDrop={c.handleOnDrop}>
         {(!p.ctx.value || p.ctx.value.length == 0) && renderSeparator(1)}
         {
           c.getMListItemContext<ModifiableEntity & IGridEntity>(p.ctx)
@@ -305,7 +304,7 @@ export function EntityGridItem(p : EntityGridItemProps){
   var style = p.bsStyle == undefined ? undefined : p.bsStyle.toLowerCase();
 
     return (
-      <div className={classes("card", style && ("border-" + style))}>
+      <div className={classes("card", style && ("border-" + style), "shadow-sm")}>
         <div className={classes("card-header",
           style && style != "light" && "text-white",
           style && ("bg-" + style)

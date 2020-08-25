@@ -6,6 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
@@ -446,12 +447,13 @@ export module WorkflowConnectionOperation {
 }
 
 export const WorkflowEntity = new Type<WorkflowEntity>("Workflow");
-export interface WorkflowEntity extends Entities.Entity {
+export interface WorkflowEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "Workflow";
   name: string;
   mainEntityType: Basics.TypeEntity;
   mainEntityStrategies: Entities.MList<WorkflowMainEntityStrategy>;
   expirationDate: string | null;
+  guid: string;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");

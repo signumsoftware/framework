@@ -14,19 +14,14 @@
   "author": "Signum Software",
   "license": "MIT",
   "dependencies": {
-    "@types/codemirror": "0.0.86",
-    "@types/googlemaps": "3.39.3",
-    "@types/react": "16.9.23",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
-
+    "@types/codemirror": "0.0.95",
     "@types/draft-js": "0.10.40",
+    "@types/googlemaps": "3.39.6",
+    "@types/react": "^16.9.41",
     "draft-js": "0.11.5",
-    "draft-js-plugins-editor": "3.0.0",
-    "draft-js-static-toolbar-plugin": "3.0.1",
-    "draft-js-buttons": "2.0.2",
-    "draft-js-import-html": "1.4.1",
-    "draft-js-export-html": "1.4.1",
-    "immutable": "3.8.2"
+    "draftjs-to-html": "0.9.1",
+    "html-to-draftjs": "1.5.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
   }
 }

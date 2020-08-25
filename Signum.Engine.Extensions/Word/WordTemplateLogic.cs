@@ -77,7 +77,7 @@ namespace Signum.Engine.Word
                     Execute = (wt, _) => {
                         if (!wt.IsNew)
                         {
-                            var oldFile = wt.InDBEntity(t => t.Template);
+                            var oldFile = wt.InDB(t => t.Template);
                             if (oldFile != null && !wt.Template.Is(oldFile))
                                 Transaction.PreRealCommit += dic => oldFile.Delete();
                         }
@@ -88,6 +88,8 @@ namespace Signum.Engine.Word
                 {
                     Delete = (e, _) => e.Delete(),
                 }.Register();
+
+                sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
                 PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
@@ -162,6 +164,16 @@ namespace Signum.Engine.Word
             }
         }
 
+        private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
+        {
+            object? queryName = template.Query.ToQueryNameCatch();
+            if (queryName == null)
+                return;
+
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
+
+            template.ParseData(description);
+        }
 
         public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
         {

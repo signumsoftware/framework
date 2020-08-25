@@ -55,6 +55,7 @@ namespace Signum.Engine.Files
         void SaveFile(IFilePath fp);
         void ValidateFile(IFilePath fp);
         void DeleteFiles(IEnumerable<IFilePath> files);
+        void DeleteFilesIfExist(IEnumerable<IFilePath> files);
         byte[] ReadAllBytes(IFilePath fp);
         Stream OpenRead(IFilePath fp);
         void MoveFile(IFilePath ofp, IFilePath nfp);
@@ -89,7 +90,7 @@ namespace Signum.Engine.Files
     {
         public Action<IFilePath>? OnValidateFile { get; set; }
         public int? MaxSizeInBytes { get; set; }
-        public bool OnlyImages { get; set; }
+        public virtual bool OnlyImages { get; set; }
 
         public void ValidateFile(IFilePath fp)
         {

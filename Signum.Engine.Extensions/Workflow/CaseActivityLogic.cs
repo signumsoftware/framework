@@ -506,7 +506,7 @@ namespace Signum.Engine.Workflow
                     Construct = (w, args) =>
                     {
                         if (w.HasExpired())
-                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()));
+                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.Options.GetOrThrow(w.MainEntityType.ToType()).Constructor();
 
@@ -541,7 +541,7 @@ namespace Signum.Engine.Workflow
                         var workflow = wet.GetWorkflow();
 
                         if (workflow.HasExpired())
-                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate!.Value.ToString()));
 
                         var mainEntity = args.GetArg<ICaseMainEntity>();
                         var @case = new CaseEntity
@@ -877,7 +877,7 @@ namespace Signum.Engine.Workflow
                     if (@case.CaseActivities().Any(a => a.State == CaseActivityState.PendingNext || a.State == CaseActivityState.PendingDecision))
                         return;
 
-                    @case.FinishDate = ca!.DoneDate.Value;
+                    @case.FinishDate = ca!.DoneDate!.Value;
                     @case.Save();
 
                     if (@case.ParentCase != null)
@@ -1315,7 +1315,7 @@ namespace Signum.Engine.Workflow
                         return true;
 
 
-                    var doneTypeOk = CaseActivity.DoneType.Value switch
+                    var doneTypeOk = CaseActivity.DoneType!.Value switch
                     {
                         DoneType.Approve => wc.Type == ConnectionType.Approve || wc.Type == ConnectionType.Normal,
                         DoneType.Decline => wc.Type == ConnectionType.Decline || wc.Type == ConnectionType.Normal,

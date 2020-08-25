@@ -4,53 +4,28 @@ import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine'
 import { useForceUpdate } from '@framework/Hooks'
 
 export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>> }) {
-  const forceUpdate = useForceUpdate();
 
-  function handleSetMargin(newMargin: number | null) {
-    DiffDocument.marginLines = newMargin;
-    forceUpdate();
-  }
+  const [margin, setMargin] = React.useState<number | null>(DiffDocument.defaultMarginLines)
+
+  return (
+    <div>
+      <div>
+        <label>
+          <input type="checkbox" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
+          <span className="mx-2">Show only</span><NumericTextBox value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
+            validateKey={isNumber} /> lines arround each change</label>
+      </div>
+      <div>
+        <DiffDocumentSimple diff={p.diff} margin={margin} />
+      </div>
+    </div>
+  );
+}
+
+DiffDocument.defaultMarginLines = 4 as (number | null);
 
 
-  function renderLines() {
-    var diff = p.diff;
-
-    var margin = DiffDocument.marginLines;
-
-    var indices = margin == null ? Array.range(0, diff.length) :
-      expandNumbers(diff.map((a, i) => a.action != "Equal" || a.value.length != 1 ? i : null).filter(n => n != null) as number[], diff.length);
-
-    const result =
-      indices
-        .flatMap(ix => {
-          if (typeof ix == "object")
-            return [<span style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
-
-          var line = diff[ix];
-
-          if (line.action == "Removed") {
-            return [<span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value)}</span>];
-          }
-          if (line.action == "Added") {
-            return [<span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value)}</span>];
-          }
-          else if (line.action == "Equal") {
-            if (line.value.length == 1) {
-              return [<span>{renderDiffLine(line.value)}</span>];
-            }
-            else {
-              return [
-                <span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value.filter(a => a.action == "Removed" || a.action == "Equal"))}</span>,
-                <span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value.filter(a => a.action == "Added" || a.action == "Equal"))}</span>
-              ];
-            }
-          }
-          else
-            throw new Error("Unexpected");
-        });
-
-    return <pre>{result.map((e, i) => React.cloneElement(e, { key: i }))}</pre>;
-  }
+export function DiffDocumentSimple({ diff, margin }: { diff: Array<DiffPair<Array<DiffPair<string>>>>, margin?: number | null }) {
 
 
   function renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>> {
@@ -69,31 +44,47 @@ export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>>
     return result;
   }
 
-  var margin = DiffDocument.marginLines;
 
-  return (
-    <div>
-      <div>
-        <label><input type="checkbox" checked={margin != null} onChange={() => handleSetMargin(margin == null ? 4 : null)} />
-          Show only <NumericTextBox value={margin == null ? 4 : margin} onChange={num => handleSetMargin(num == null ? 0 : Math.max(num, 0))}
-            validateKey={isNumber} /> lines arround each change</label>
-      </div>
-      <div>
-        {renderLines()}
-      </div>
-    </div>
-  );
+  var indices = margin == null ? Array.range(0, diff.length) :
+    expandNumbers(diff.map((a, i) => a.action != "Equal" || a.value.length != 1 ? i : null).filter(n => n != null) as number[], diff.length, margin);
+
+  const result =
+    indices
+      .flatMap(ix => {
+        if (typeof ix == "object")
+          return [<span style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
+
+        var line = diff[ix];
+
+        if (line.action == "Removed") {
+          return [<span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value)}</span>];
+        }
+        if (line.action == "Added") {
+          return [<span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value)}</span>];
+        }
+        else if (line.action == "Equal") {
+          if (line.value.length == 1) {
+            return [<span>{renderDiffLine(line.value)}</span>];
+          }
+          else {
+            return [
+              <span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value.filter(a => a.action == "Removed" || a.action == "Equal"))}</span>,
+              <span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value.filter(a => a.action == "Added" || a.action == "Equal"))}</span>
+            ];
+          }
+        }
+        else
+          throw new Error("Unexpected");
+      });
+
+  return <pre className="m-0">{result.map((e, i) => React.cloneElement(e, { key: i }))}</pre>;
 }
-
-DiffDocument.marginLines = 4 as (number | null);
 
 interface LinesRemoved {
   numLines: number;
 }
 
-export function expandNumbers(changes: number[], max: number): (number | LinesRemoved)[] {
-
-  const margin = DiffDocument.marginLines!;
+export function expandNumbers(changes: number[], max: number, margin: number): (number | LinesRemoved)[] {
 
   if (changes.length == 0)
     return [];

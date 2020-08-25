@@ -12,7 +12,7 @@ import * as Navigator from "@framework/Navigator";
 import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Authorization/AuthClient'
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 

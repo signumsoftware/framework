@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as QueryString from "query-string"
 import { Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { parseLite } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
@@ -7,7 +6,8 @@ import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from 'react-router'
-import { useStateWithPromise } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useStateWithPromise } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 
@@ -23,7 +23,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
     oldPathPromise.then(oldPath => {
       if (oldPath != newPath) {
         var query = QueryString.parse(p.location.search);
-        var uc = query.userChart == null ? undefined : (parseLite(query.userChart as string) as Lite<UserChartEntity>);
+        var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
         ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
           .then(cr => setPair({ chartRequest: cr, userChart: uc }))
           .done();

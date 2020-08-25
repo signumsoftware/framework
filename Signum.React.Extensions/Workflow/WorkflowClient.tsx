@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as moment from 'moment';
-import * as QueryString from 'query-string';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -52,6 +51,7 @@ import { EntityLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -570,7 +570,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
             .then(entity => {
               if (mainEntityStrategy == "Clone") {
                 return Operations.API.constructFromEntity(entity, coi.key)
-                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack!.entity));
               }
               else
                 return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);

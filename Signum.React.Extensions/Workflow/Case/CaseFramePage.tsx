@@ -20,7 +20,7 @@ import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import * as AuthClient from '../../Authorization/AuthClient'
-import { FunctionalAdapter } from '../../../../Framework/Signum.React/Scripts/Modals'
+import { FunctionalAdapter } from '@framework/Modals'
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }

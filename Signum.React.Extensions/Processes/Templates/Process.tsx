@@ -85,7 +85,7 @@ function ProcessProgressBar({ p }: { p: ProcessEntity }) {
       value={p.state == "Created" ? 0 : (p.progress == 0 || p.progress == 1) ? null : p.progress}
       color={color}
       showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
-      active={p.state == "Finished" ? false : undefined}
+      animated={p.state == "Finished" ? false : undefined}
       striped={p.state == "Finished" ? false : undefined}
     />
   );

@@ -8,7 +8,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
-import { TypeaheadOptions } from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
+import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 export interface IconTypeaheadLineProps {
   ctx: TypeContext<string | null | undefined>;

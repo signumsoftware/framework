@@ -120,17 +120,9 @@ namespace Signum.Engine.UserQueries
 
         static void UserQueryLogic_Retrieved(UserQueryEntity userQuery, PostRetrievingContext ctx)
         {
-            object queryName;
-            try
-            {
-                queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
-            }
-            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
-            {
-                StartParameters.IgnoredCodeErrors.Add(ex);
-
+            object? queryName = userQuery.Query.ToQueryNameCatch();
+            if(queryName == null)
                 return;
-            }
 
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
@@ -290,7 +282,7 @@ namespace Signum.Engine.UserQueries
                     {
                         retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);

@@ -6,18 +6,12 @@ import * as Navigator from '@framework/Navigator'
 import { DashboardEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 import { RouteComponentProps } from "react-router";
-import * as QueryString from 'query-string'
-import * as AuthClient from '../../Authorization/AuthClient'
 import "../Dashboard.css"
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 
-}
-
-interface DashboardPageState {
-  dashboard?: DashboardEntity;
-  entity?: Entity;
 }
 
 function getQueryEntity(props: DashboardPageProps): string {
