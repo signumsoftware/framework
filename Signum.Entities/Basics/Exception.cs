@@ -176,7 +176,7 @@ namespace Signum.Entities.Basics
         {
             if (pi.Name == nameof(DeleteLogsOlderThan))
             {
-                if (DeleteLogsOlderThan.HasValue && DeleteLogsWithExceptionsOlderThan.HasValue && DeleteLogsOlderThan.Value <= DeleteLogsWithExceptionsOlderThan.Value)
+                if (DeleteLogsOlderThan.HasValue && DeleteLogsWithExceptionsOlderThan.HasValue && DeleteLogsOlderThan.Value < DeleteLogsWithExceptionsOlderThan.Value)
                     return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi.NiceName(), NicePropertyName(() => DeleteLogsWithExceptionsOlderThan));
             }
 
