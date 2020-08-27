@@ -311,9 +311,10 @@ namespace Signum.Engine.Linq
             {
                 var mixParam = Expression.Parameter(m.Type);
 
-                var mixAssign = Expression.Assign(mixParam, Expression.Call(e, MixinDeclarations.miMixin.MakeGenericMethod(m.Type)));
-
-                var mixBindings = m.Bindings.Select(b =>
+                var mixBindings = new List<Expression>();
+                mixBindings.Add(Expression.Assign(mixParam, Expression.Call(e, MixinDeclarations.miMixin.MakeGenericMethod(m.Type))));
+                mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(m.Type), mixParam));
+                mixBindings.AddRange(m.Bindings.Select(b =>
                 {
                     var field = Expression.Field(mixParam, b.FieldInfo);
 
@@ -322,11 +323,7 @@ namespace Signum.Engine.Linq
                         Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
                     return (Expression)Expression.Assign(field, value);
-                }).ToList();
-
-                mixBindings.Insert(0, mixAssign);
-
-                mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(m.Type), mixParam));
+                }));
 
                 return Expression.Block(new[] { mixParam }, mixBindings);
             }
@@ -343,38 +340,30 @@ namespace Signum.Engine.Linq
             {
                 var embeddedParam = Expression.Parameter(eee.Type);
 
-                var embeddedAssign = Expression.Assign(embeddedParam, Expression.New(eee.Type));
+                var embeddedBindings = new List<Expression>();
 
-                var embeddedBindings =
-                       eee.Bindings.Select(b =>
-                       {
-                           var field = Expression.Field(embeddedParam, b.FieldInfo);
+                embeddedBindings.Add(Expression.Assign(embeddedParam, Expression.New(eee.Type)));
+                if (typeof(EmbeddedEntity).IsAssignableFrom(eee.Type))
+                    embeddedBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
 
-                           var value = b.Binding is ChildProjectionExpression ?
-                               VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
-                               Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+                embeddedBindings.AddRange(eee.Bindings.Select(b =>
+                {
+                    var field = Expression.Field(embeddedParam, b.FieldInfo);
 
-                           return Expression.Assign(field, value);
-                       }).ToList<Expression>();
+                    var value = b.Binding is ChildProjectionExpression ?
+                        VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                        Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+
+                    return Expression.Assign(field, value);
+                }));
 
                 if (eee.Mixins != null)
                 {
                     var blocks = eee.Mixins.Select(m => AssignMixin(embeddedParam, m)).ToList();
-
                     embeddedBindings.AddRange(blocks);
                 }
 
-                embeddedBindings.Insert(0, embeddedAssign);
-
-                if (typeof(EmbeddedEntity).IsAssignableFrom(eee.Type))
-                {
-                    embeddedBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
-                }
-                else
-                {
-                    embeddedBindings.Add(embeddedParam);
-                }
-
+                embeddedBindings.Add(embeddedParam);
                 var block = Expression.Block(eee.Type, new[] { embeddedParam }, embeddedBindings);
 
                 return Expression.Condition(Expression.Equal(Visit(eee.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))),

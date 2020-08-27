@@ -6,6 +6,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
+export const BigStringEmbedded = new Type<BigStringEmbedded>("BigStringEmbedded");
+export interface BigStringEmbedded extends Entities.EmbeddedEntity {
+  Type: "BigStringEmbedded";
+  text: string | null;
+}
+
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
@@ -30,7 +36,7 @@ export interface ExceptionEntity extends Entities.Entity {
   exceptionType: string | null;
   exceptionMessage: string;
   exceptionMessageHash: number;
-  stackTrace: string;
+  stackTrace: BigStringEmbedded;
   stackTraceHash: number;
   threadId: number;
   user: Entities.Lite<IUserEntity> | null;
@@ -45,10 +51,10 @@ export interface ExceptionEntity extends Entities.Entity {
   applicationName: string | null;
   userHostAddress: string | null;
   userHostName: string | null;
-  form: string | null;
-  queryString: string | null;
-  session: string | null;
-  data: string | null;
+  form: BigStringEmbedded;
+  queryString: BigStringEmbedded;
+  session: BigStringEmbedded;
+  data: BigStringEmbedded;
   hResult: number;
   referenced: boolean;
 }

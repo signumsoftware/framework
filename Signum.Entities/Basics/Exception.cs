@@ -19,7 +19,7 @@ namespace Signum.Entities.Basics
         {
             this.ExceptionType = ex.GetType().Name;
             this.ExceptionMessage = ex.Message!;
-            this.StackTrace = ex.StackTrace!;
+            this.StackTrace = new BigStringEmbedded(ex.StackTrace!);
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
             this.MachineName = System.Environment.MachineName;
@@ -40,21 +40,21 @@ namespace Signum.Entities.Basics
             set
             {
                 if (Set(ref exceptionMessage, value))
-                    ExceptionMessageHash = value == null ? 0 : value.GetHashCode();
+                    ExceptionMessageHash = value?.GetHashCode() ?? 0;
             }
         }
 
         public int ExceptionMessageHash { get; private set; }
 
-        [DbType(Size = int.MaxValue)]
-        string stackTrace;
-        public string StackTrace
+        BigStringEmbedded stackTrace;
+        [NotifyChildProperty]
+        public BigStringEmbedded StackTrace
         {
             get { return stackTrace; }
             set
             {
                 if (Set(ref stackTrace, value))
-                    StackTraceHash = value == null ? 0 : value.GetHashCode();
+                    StackTraceHash = value?.Text?.GetHashCode() ?? 0;
             }
         }
 
@@ -97,17 +97,17 @@ namespace Signum.Entities.Basics
         [DbType(Size = 100)]
         public string? UserHostName { get; set; }
 
-        [DbType(Size = int.MaxValue)]
-        public string? Form { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Form { get; set; }
+        
+        [NotifyChildProperty]
+        public BigStringEmbedded QueryString { get; set; }
+        
+        [NotifyChildProperty]
+        public BigStringEmbedded Session { get; set; }
 
-        [DbType(Size = int.MaxValue)]
-        public string? QueryString { get; set; }
-
-        [DbType(Size = int.MaxValue)]
-        public string? Session { get; set; }
-
-        [DbType(Size = int.MaxValue)]
-        public string? Data { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Data { get; set; }
 
         public int HResult { get; internal set; }
 

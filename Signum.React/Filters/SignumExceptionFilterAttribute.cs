@@ -56,9 +56,9 @@ namespace Signum.React.Filters
                         e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
                         e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
                         e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
-                        e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
-                        e.Form = Try(int.MaxValue, () => Encoding.UTF8.GetString(body));
-                        e.Session = null;
+                        e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
+                        e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
+                        e.Session = new BigStringEmbedded();
                     });
                 }
 
