@@ -719,9 +719,18 @@ namespace Signum.Engine.Maps
             if (predicate(this))
                 return new[] { this };
 
-            return EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
                 f is IFieldFinder ff ? ff.FindFields(predicate) :
                 Enumerable.Empty<Field>()).ToList();
+
+            if (Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
         }
 
         public override IEnumerable<IColumn> Columns()
