@@ -1,3 +1,4 @@
+using Signum.Entities.Basics;
 using System;
 
 namespace Signum.Entities.DiffLog
@@ -10,11 +11,11 @@ namespace Signum.Entities.DiffLog
         {
         }
 
-        [DbType(Size = int.MaxValue)]
-        public string? InitialState { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded InitialState { get; set; }
 
-        [DbType(Size = int.MaxValue)]
-        public string? FinalState { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded FinalState { get; set; }
 
         public bool Cleaned { get; set; }
     }

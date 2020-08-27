@@ -113,7 +113,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                         viewLog.Data = GetData(request!, sw);
+                        viewLog.Data = new BigStringEmbedded(GetData(request!, sw));
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();
@@ -148,6 +148,7 @@ namespace Signum.Engine.ViewLog
                 Target = (Lite<Entity>)entity.Clone(),
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
+                Data = new BigStringEmbedded(),
             };
 
             return new Disposable(() =>

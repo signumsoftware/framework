@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
@@ -25,8 +26,8 @@ export module DiffLogMessage {
 export const DiffLogMixin = new Type<DiffLogMixin>("DiffLogMixin");
 export interface DiffLogMixin extends Entities.MixinEntity {
   Type: "DiffLogMixin";
-  initialState: string | null;
-  finalState: string | null;
+  initialState: Basics.BigStringEmbedded;
+  finalState: Basics.BigStringEmbedded;
   cleaned: boolean;
 }
 

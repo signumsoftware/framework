@@ -20,8 +20,8 @@ namespace Signum.Entities.ViewLog
 
         public DateTime EndDate { get; set; }
 
-        [StringLengthValidator(Min = 0, MultiLine = true)]
-        public string? Data { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Data { get; set; }
 
         [AutoExpressionField, Unit("ms")]
         public double Duration => As.Expression(() => (EndDate - StartDate).TotalMilliseconds);

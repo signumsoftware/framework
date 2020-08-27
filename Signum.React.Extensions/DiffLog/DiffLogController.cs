@@ -21,17 +21,17 @@ namespace Signum.React.DiffLog
 
             StringDistance sd = new StringDistance();
 
-            var prevFinal = logs.Min?.Mixin<DiffLogMixin>().FinalState;
+            var prevFinal = logs.Min?.Mixin<DiffLogMixin>().FinalState.Text;
 
-            string? nextInitial = logs.Max != null ? logs.Max.Mixin<DiffLogMixin>().InitialState :
+            string? nextInitial = logs.Max != null ? logs.Max.Mixin<DiffLogMixin>().InitialState.Text :
                 operationLog.Target!.Exists() ? GetDump(operationLog.Target!) : null;
 
             return new DiffLogResult
             {
                 prev = logs.Min?.ToLite(),
-                diffPrev = prevFinal == null || operationLog.Mixin<DiffLogMixin>().InitialState == null ? null : sd.DiffText(prevFinal, operationLog.Mixin<DiffLogMixin>().InitialState),
-                diff = sd.DiffText(operationLog.Mixin<DiffLogMixin>().InitialState, operationLog.Mixin<DiffLogMixin>().FinalState),
-                diffNext = operationLog.Mixin<DiffLogMixin>().FinalState == null || nextInitial == null ? null : sd.DiffText(operationLog.Mixin<DiffLogMixin>().FinalState, nextInitial),
+                diffPrev = prevFinal == null || operationLog.Mixin<DiffLogMixin>().InitialState.Text == null ? null : sd.DiffText(prevFinal, operationLog.Mixin<DiffLogMixin>().InitialState.Text),
+                diff = sd.DiffText(operationLog.Mixin<DiffLogMixin>().InitialState.Text, operationLog.Mixin<DiffLogMixin>().FinalState.Text),
+                diffNext = operationLog.Mixin<DiffLogMixin>().FinalState.Text == null || nextInitial == null ? null : sd.DiffText(operationLog.Mixin<DiffLogMixin>().FinalState.Text, nextInitial),
                 next = logs.Max?.ToLite(),
             };
         }
