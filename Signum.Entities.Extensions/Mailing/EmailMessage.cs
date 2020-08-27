@@ -47,9 +47,9 @@ namespace Signum.Entities.Mailing
         }
 
         [DbType(Size = int.MaxValue)]
-        string? body;
-        [StringLengthValidator(MultiLine = true)]
-        public string? Body
+        BigStringEmbedded body;
+        [NotifyChildProperty]
+        public BigStringEmbedded Body
         {
             get { return body; }
             set { if (Set(ref body, value)) CalculateHash(); }
@@ -59,7 +59,7 @@ namespace Signum.Entities.Mailing
 
         void CalculateHash()
         {
-            var str = subject + body;
+            var str = subject + body.Text;
 
             BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str.Trim(spaceChars))));
         }
