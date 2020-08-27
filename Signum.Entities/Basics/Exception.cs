@@ -46,7 +46,6 @@ namespace Signum.Entities.Basics
 
         public int ExceptionMessageHash { get; private set; }
 
-        [DbType(Size = int.MaxValue)]
         BigStringEmbedded stackTrace;
         [NotifyChildProperty]
         public BigStringEmbedded StackTrace
