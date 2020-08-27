@@ -172,17 +172,28 @@ namespace Signum.Engine.Cache
 
             if (field is FieldEmbedded fe)
             {
-                Expression ctor = Expression.MemberInit(Expression.New(fe.FieldType),
-                    fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, MaterializeField(f.Field))));
+                var bindings = new List<Expression>();
+                var embParam = Expression.Parameter(fe.FieldType);
+                bindings.Add(Expression.Assign(embParam, Expression.New(fe.FieldType)));
+                bindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(embParam.Type), embParam));
 
-                var result = Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(ctor.Type), ctor);
+                foreach (var f in fe.EmbeddedFields.Values)
+                {
+                    Expression value = MaterializeField(f.Field);
+                    var assigment = Expression.Assign(Expression.Field(embParam, f.FieldInfo), value);
+                    bindings.Add(assigment);
+                }
+
+                bindings.Add(embParam);
+
+                Expression block = Expression.Block(new[] { embParam }, bindings);
 
                 if (fe.HasValue == null)
-                    return result;
+                    return block;
 
                 return Expression.Condition(
                     Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)),
-                    result,
+                    block,
                     Expression.Constant(null, field.FieldType));
             }
 
@@ -365,6 +376,7 @@ namespace Signum.Engine.Cache
         {
             List<Expression> mixBindings = new List<Expression>();
             mixBindings.Add(Expression.Assign(mixParam, GetMixin(me, mixin.FieldType)));
+            mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(mixin.FieldType), mixParam));
 
             foreach (var f in mixin.Fields.Values)
             {
@@ -372,8 +384,6 @@ namespace Signum.Engine.Cache
                 var assigment = Expression.Assign(Expression.Field(mixParam, f.FieldInfo), value);
                 mixBindings.Add(assigment);
             }
-
-            mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(mixin.FieldType), mixParam));
 
             var mixBlock = Expression.Block(new[] { mixParam }, mixBindings);
             return mixBlock;
