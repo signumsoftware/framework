@@ -21,9 +21,9 @@ namespace Signum.Engine.Files
     public enum BigStringMode 
     {
         Database,
-        File, 
-        Migrating_FromDatabase_ToFile,
-        Migrating_FromFile_ToDatabase,
+        FileSystem, 
+        Migrating_FromDatabase_ToFileSystem,
+        Migrating_FromFileSystem_ToDatabase,
     }
 
     public class BigStringConfiguration
@@ -72,21 +72,21 @@ namespace Signum.Engine.Files
             {
                 case BigStringMode.Database:
                     break;
-                case BigStringMode.File:
+                case BigStringMode.FileSystem:
                     if(bs.Modified == ModifiedState.SelfModified)
                     {
                         mixin.File = string.IsNullOrEmpty(bs.Text) ? null : new FilePathEmbedded(config.FileTypeSymbol!, pr.PropertyInfo!.Name + ".txt", Encoding.UTF8.GetBytes(bs.Text));
                         ctx.InvalidateGraph();
                     }
                     break;
-                case BigStringMode.Migrating_FromDatabase_ToFile:
+                case BigStringMode.Migrating_FromDatabase_ToFileSystem:
                     if (bs.Modified == ModifiedState.SelfModified || bs.Text.HasText() && mixin.File == null)
                     {
                         mixin.File = string.IsNullOrEmpty(bs.Text) ? null : new FilePathEmbedded(config.FileTypeSymbol!, pr.PropertyInfo!.Name + ".txt", Encoding.UTF8.GetBytes(bs.Text));
                         ctx.InvalidateGraph();
                     }
                     break;
-                case BigStringMode.Migrating_FromFile_ToDatabase:
+                case BigStringMode.Migrating_FromFileSystem_ToDatabase:
                     if (bs.Modified == ModifiedState.SelfModified || string.IsNullOrEmpty(bs.Text) && mixin.File != null)
                     {
                         bs.Text = mixin.File == null ? null : Encoding.UTF8.GetString(mixin.File.GetByteArray());
@@ -113,14 +113,14 @@ namespace Signum.Engine.Files
             {
                 case BigStringMode.Database:
                     break;
-                case BigStringMode.File:
+                case BigStringMode.FileSystem:
                     bs.Text = mixin.File == null ? null : Encoding.UTF8.GetString(mixin.File.GetByteArray());
                     break;
-                case BigStringMode.Migrating_FromDatabase_ToFile:
+                case BigStringMode.Migrating_FromDatabase_ToFileSystem:
                     if (mixin.File != null)
                         bs.Text = Encoding.UTF8.GetString(mixin.File.GetByteArray());
                     break;
-                case BigStringMode.Migrating_FromFile_ToDatabase:
+                case BigStringMode.Migrating_FromFileSystem_ToDatabase:
                     if (bs.Text == null && mixin.File != null)
                         bs.Text = Encoding.UTF8.GetString(mixin.File.GetByteArray());
                     break;
@@ -158,7 +158,7 @@ namespace Signum.Engine.Files
                 sb.Schema.Settings.FieldAttributes(route.Add(typeof(BigStringMixin)).Add(piFile))!.Add(new IgnoreAttribute());
             else
             {
-                if (config.Mode == BigStringMode.File)
+                if (config.Mode == BigStringMode.FileSystem)
                     sb.Schema.Settings.FieldAttributes(route.Add(piText))!.Add(new IgnoreAttribute());
 
                 if (config.FileTypeSymbol == null)
