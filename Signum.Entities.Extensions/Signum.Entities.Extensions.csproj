@@ -7,9 +7,6 @@
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
-  
-  <PropertyGroup>
     <NoWarn>8618</NoWarn>
   </PropertyGroup>
   

@@ -340,7 +340,7 @@ export function cleanedChartRequest(request: ChartRequestModel): ChartRequestMod
   const clone = { ...request };
   
   clone.filters = toFilterRequests(clone.filterOptions);
-  delete clone.filterOptions;
+  delete (clone as any).filterOptions;
 
   return clone;
 }

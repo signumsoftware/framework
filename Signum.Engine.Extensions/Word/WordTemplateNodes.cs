@@ -19,13 +19,13 @@ namespace Signum.Engine.Word
     {
         OpenXmlLeafTextElement NewText(string text);
         OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default, bool initialBr = false);
-        bool IsRun(OpenXmlElement element);
-        bool IsText(OpenXmlElement element);
+        bool IsRun(OpenXmlElement? element);
+        bool IsText(OpenXmlElement? element);
         string GetText(OpenXmlElement run);
         OpenXmlCompositeElement CastRun(OpenXmlElement element);
         OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run);
-        bool IsParagraph(OpenXmlElement element);
-        bool IsRunProperties(OpenXmlElement a);
+        bool IsParagraph(OpenXmlElement? element);
+        bool IsRunProperties(OpenXmlElement? a);
         OpenXmlCompositeElement WrapInRun(OpenXmlElement text);
     }
 
@@ -58,12 +58,12 @@ namespace Signum.Engine.Word
             return new W.Text(text);
         }
 
-        public bool IsRun(OpenXmlElement a)
+        public bool IsRun(OpenXmlElement? a)
         {
             return a is W.Run;
         }
 
-        public bool IsText(OpenXmlElement a)
+        public bool IsText(OpenXmlElement? a)
         {
             return a is W.Text;
         }
@@ -73,12 +73,12 @@ namespace Signum.Engine.Word
             return ((W.Run)run).RunProperties;
         }
 
-        public bool IsParagraph(OpenXmlElement element)
+        public bool IsParagraph(OpenXmlElement? element)
         {
             return element is W.Paragraph;
         }
 
-        public bool IsRunProperties(OpenXmlElement element)
+        public bool IsRunProperties(OpenXmlElement? element)
         {
             return element is W.RunProperties;
         }
@@ -118,12 +118,12 @@ namespace Signum.Engine.Word
             return run.ChildElements.OfType<D.Text>().SingleOrDefault()?.Text ?? "";
         }
 
-        public bool IsRun(OpenXmlElement a)
+        public bool IsRun(OpenXmlElement? a)
         {
             return a is D.Run;
         }
 
-        public bool IsText(OpenXmlElement a)
+        public bool IsText(OpenXmlElement? a)
         {
             return a is D.Text;
         }
@@ -133,12 +133,12 @@ namespace Signum.Engine.Word
             return ((D.Run)run).RunProperties;
         }
 
-        public bool IsParagraph(OpenXmlElement element)
+        public bool IsParagraph(OpenXmlElement? element)
         {
             return element is D.Paragraph;
         }
 
-        public bool IsRunProperties(OpenXmlElement element)
+        public bool IsRunProperties(OpenXmlElement? element)
         {
             return element is D.RunProperties;
         }
@@ -172,19 +172,19 @@ namespace Signum.Engine.Word
             return new S.Text(text);
         }
 
-        public string GetText(OpenXmlElement run)
+        public string GetText(OpenXmlElement? run)
         {
             return run is S.Run r ? r.ChildElements.OfType<S.Text>().SingleOrDefault()?.Text ?? "" :
                 run is S.Text s ? s.Text ?? "" :
                 "";
         }
 
-        public bool IsRun(OpenXmlElement a)
+        public bool IsRun(OpenXmlElement? a)
         {
             return a is S.Run;
         }
 
-        public bool IsText(OpenXmlElement a)
+        public bool IsText(OpenXmlElement? a)
         {
             return a is S.Text;
         }
@@ -194,12 +194,12 @@ namespace Signum.Engine.Word
             return ((S.Run)run).RunProperties;
         }
 
-        public bool IsParagraph(OpenXmlElement element)
+        public bool IsParagraph(OpenXmlElement? element)
         {
             return false;
         }
 
-        public bool IsRunProperties(OpenXmlElement element)
+        public bool IsRunProperties(OpenXmlElement? element)
         {
             return element is S.RunProperties;
         }
@@ -582,7 +582,7 @@ namespace Signum.Engine.Word
             {
                 var text = c.ChildElements.Where(a => !nodeProvider.IsRunProperties(a)).Only();
 
-                if (nodeProvider.IsText(text) && string.IsNullOrWhiteSpace(nodeProvider.GetText(text)))
+                if (nodeProvider.IsText(text) && string.IsNullOrWhiteSpace(nodeProvider.GetText(text!)))
                     return false;
 
                 return true; 

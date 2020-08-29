@@ -97,7 +97,7 @@ function isSystemVersioned(tr?: TypeReference) {
 }
 
 export function timeMachineRoute(lite: Lite<Entity>) {
-  return "~/timeMachine/" + lite.EntityType + "/" + lite.id;
+  return AppContext.toAbsoluteUrl("~/timeMachine/" + lite.EntityType + "/" + lite.id);
 }
 
 export namespace API {
@@ -142,7 +142,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
 
     event.preventDefault();
 
-    window.open(AppContext.toAbsoluteUrl(timeMachineRoute(lite)));
+    window.open(timeMachineRoute(lite));
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 

@@ -113,7 +113,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   sent: string | null;
   receptionNotified: string | null;
   subject: string | null;
-  body: string | null;
+  body: Signum.BigStringEmbedded;
   bodyHash: string | null;
   isBodyHtml: boolean;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;

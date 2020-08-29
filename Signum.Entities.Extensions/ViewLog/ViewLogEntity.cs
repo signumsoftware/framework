@@ -8,6 +8,11 @@ namespace Signum.Entities.ViewLog
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ViewLogEntity : Entity
     {
+        public ViewLogEntity()
+        {
+            RebindEvents();
+        }
+
         [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
         
@@ -20,8 +25,8 @@ namespace Signum.Entities.ViewLog
 
         public DateTime EndDate { get; set; }
 
-        [StringLengthValidator(Min = 0, MultiLine = true)]
-        public string? Data { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Data { get; set; } = new BigStringEmbedded();
 
         [AutoExpressionField, Unit("ms")]
         public double Duration => As.Expression(() => (EndDate - StartDate).TotalMilliseconds);

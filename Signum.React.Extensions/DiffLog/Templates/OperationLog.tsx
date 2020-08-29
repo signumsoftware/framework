@@ -81,7 +81,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderInitialState() {
     return (
       <Tab eventKey="initialState" title={mctx.niceName(d => d.initialState)}>
-        <pre><code>{mctx.value.initialState}</code></pre>
+        <pre><code>{mctx.value.initialState.text}</code></pre>
       </Tab>
     );
   }
@@ -110,7 +110,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderFinalState() {
     return (
       <Tab eventKey="finalState" title={mctx.niceName(d => d.finalState)}>
-        <pre><code>{mctx.value.finalState}</code></pre>
+        <pre><code>{mctx.value.finalState.text}</code></pre>
       </Tab>
     );
   }

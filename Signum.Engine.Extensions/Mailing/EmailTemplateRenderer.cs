@@ -5,6 +5,7 @@ using System.Linq;
 using Signum.Engine.Basics;
 using Signum.Engine.Templating;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Entities.UserQueries;
@@ -85,12 +86,12 @@ namespace Signum.Engine.Mailing
                                     Model = model
                                 });
 
-                            email.Body = TextNode(message).Print(
+                            email.Body = new BigStringEmbedded(TextNode(message).Print(
                                 new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                                 {
                                     IsHtml = template.IsBodyHtml,
                                     Model = model,
-                                });
+                                }));
                         }
 
                     }

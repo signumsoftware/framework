@@ -249,7 +249,7 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
         {
-            TypeAllowedAndConditions only = baseRules.Only();
+            TypeAllowedAndConditions? only = baseRules.Only();
             if (only != null)
                 return only;
 
@@ -259,7 +259,7 @@ namespace Signum.Engine.Authorization
             if (baseRules.Any(a => a.Exactly(max)))
                 return new TypeAllowedAndConditions(max);
 
-            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
+            TypeAllowedAndConditions? onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
             if (onlyNotOposite != null)
                 return onlyNotOposite;
 

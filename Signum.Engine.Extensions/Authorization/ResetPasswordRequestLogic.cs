@@ -100,15 +100,26 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());
             }
-            var request= ResetPasswordRequest(user);
 
-            string url = EmailLogic.Configuration.UrlLeft+ @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
+            try
+            {
+                var request = ResetPasswordRequest(user);
 
-            using (AuthLogic.Disable())
-                new ResetPasswordRequestEmail(request, url).SendMail();
+                string url = EmailLogic.Configuration.UrlLeft + @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
 
-            return request;
+                using (AuthLogic.Disable())
+                    new ResetPasswordRequestEmail(request, url).SendMail();
+
+                return request;
+            }
+            catch (Exception ex)
+            {
+                ex.LogException();
+                throw new ApplicationException(LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString());
+            }
+
         }
+
         public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
         {
             using (AuthLogic.Disable())
