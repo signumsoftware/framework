@@ -19,6 +19,7 @@ namespace Signum.Entities.Mailing
         public EmailMessageEntity()
         {
             this.UniqueIdentifier = Guid.NewGuid();
+            this.RebindEvents();
         }
 
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
@@ -47,9 +48,9 @@ namespace Signum.Entities.Mailing
         }
 
         [DbType(Size = int.MaxValue)]
-        BigStringEmbedded body;
+        BigStringEmbedded body = new BigStringEmbedded();
         [NotifyChildProperty]
-        public BigStringEmbedded Body
+        public BigStringEmbedded Body 
         {
             get { return body; }
             set { if (Set(ref body, value)) CalculateHash(); }

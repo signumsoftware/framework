@@ -9,13 +9,14 @@ namespace Signum.Entities.DiffLog
         protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
+            this.RebindEvents();
         }
 
         [NotifyChildProperty]
-        public BigStringEmbedded InitialState { get; set; }
+        public BigStringEmbedded InitialState { get; set; } = new BigStringEmbedded();
 
         [NotifyChildProperty]
-        public BigStringEmbedded FinalState { get; set; }
+        public BigStringEmbedded FinalState { get; set; } = new BigStringEmbedded();
 
         public bool Cleaned { get; set; }
     }

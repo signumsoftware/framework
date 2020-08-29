@@ -270,7 +270,6 @@ namespace Signum.Engine.Mailing
                     Construct = _ => new EmailMessageEntity
                     {
                         State = EmailMessageState.Created,
-                        Body = new BigStringEmbedded(),
                     }
                 }.Register();
 
