@@ -8,6 +8,11 @@ namespace Signum.Entities.Basics
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false), InTypeScript(Undefined = false)]
     public class OperationLogEntity : Entity
     {
+        public OperationLogEntity()
+        {
+            RebindEvents();
+        }
+
         [ImplementedByAll]
         public Lite<IEntity>? Target { get; set; }
 
