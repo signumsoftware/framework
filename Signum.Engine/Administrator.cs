@@ -670,7 +670,7 @@ namespace Signum.Engine
 
         public static T GetSetTicks<T>(this T entity) where T : Entity
         {
-            entity.Ticks = entity.InDBEntity(e => e.Ticks);
+            entity.Ticks = entity.InDB(e => e.Ticks);
             return entity;
         }
 

@@ -34,7 +34,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   findButton?: boolean;
   viewEntityButton?: boolean;
   avoidAutoRefresh?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
   create?: boolean;
   onCreate?: () => Promise<void>;

@@ -71,7 +71,7 @@ export interface SearchControlLoadedProps {
   largeToolbarButtons: boolean;
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
-  refreshKey: string | number | undefined;
+  refreshKey: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;

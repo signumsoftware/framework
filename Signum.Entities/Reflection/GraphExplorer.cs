@@ -171,13 +171,12 @@ namespace Signum.Entities.Reflection
 
             PreSavingContext ctx = new PreSavingContext(graph);
 
-            bool graphModified = false;
             foreach (var m in graph)
             {
                 modifier(m, ctx);
             }
 
-            if (!graphModified)
+            if (!ctx.IsGraphInvalidated)
                 return graph; //common case
 
             do
@@ -190,7 +189,7 @@ namespace Signum.Entities.Reflection
                 }
 
                 graph = newGraph;
-            } while (graphModified);
+            } while (ctx.IsGraphInvalidated);
 
             return graph;
         }

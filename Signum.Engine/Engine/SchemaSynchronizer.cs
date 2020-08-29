@@ -475,7 +475,7 @@ namespace Signum.Engine
                     var tabAlias = ag.NextTableAlias(tab.Name.Name);
                     var fkAlias = ag.NextTableAlias(tabCol.ReferenceTable.Name.Name);
 
-                    var oldId = difCol.ForeignKey.Columns.Only().Referenced;
+                    var oldId = difCol.ForeignKey.Columns.Only()?.Referenced;
 
                     if (oldId == null)
                         return null;

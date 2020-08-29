@@ -70,7 +70,7 @@ namespace Signum.Engine.Basics
             string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
 
             entity.ExceptionMessage = messages.DefaultText("- No message - ");
-            entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
+            entity.StackTrace = new BigStringEmbedded(stacktraces.DefaultText("- No stacktrace -"));
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
             entity.ApplicationName = Schema.Current.ApplicationName;
             entity.HResult = ex.HResult;
@@ -85,11 +85,11 @@ namespace Signum.Engine.Basics
 
             try
             {
-                entity.Data = ex.Data.Dump();
+                entity.Data = new BigStringEmbedded(ex.Data.Dump());
             }
             catch (Exception e)
             {
-                entity.Data = $@"Error Dumping Data!{e.GetType().Name}: {e.Message}{e.StackTrace}";
+                entity.Data = new BigStringEmbedded($@"Error Dumping Data!{e.GetType().Name}: {e.Message}{e.StackTrace}");
             }
 
             entity.Version = Schema.Current.Version.ToString();

@@ -1167,5 +1167,7 @@ namespace Signum.Entities
 
         [Description("There are {0} in state {1}")]
         ThereAre0InState1,
+        [Description("There are {0} that reference this{1}")]
+        ThereAre0ThatReferenceThis1,
     }
 }

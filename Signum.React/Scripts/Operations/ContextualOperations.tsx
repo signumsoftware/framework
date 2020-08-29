@@ -206,7 +206,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
         .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
         .joinComma(External.CollectionMessage.And.niceToString());
 
-      return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString(<strong>{message}</strong>);
+      return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{message}</strong>);
     }
     else {
       var lite = coc.context.lites.single();

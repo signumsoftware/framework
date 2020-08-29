@@ -1395,16 +1395,44 @@ export class PropertyRoute {
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     let result = PropertyRoute.root(rootType);
-    const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): { type: MemberType, name: string } => {
-      if (p == "&&")
-        return { type: "Indexer", name: "0" };
 
+    function splitMixin(text: string): LambdaMember[] {
 
-      if (p.startsWith("[") && p.endsWith("]"))
-        return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+      if (text.length == 0)
+        return [];
 
-      return { type: "Member", name: p };
-    });
+      if (text.contains("["))
+        return [
+          ...splitMixin(text.before("[")),
+          { type: "Mixin" as MemberType, name: text.between("[", "]") },
+          ...splitMixin(text.after("]")),
+        ];
+
+      return [{ type: "Member", name: text }];
+    }
+
+    function splitDot(text: string): LambdaMember[] {
+      if (text.contains("."))
+        return [
+          ...splitMixin(text.before(".")),
+          ...splitDot(text.after("."))
+        ];
+
+      return splitMixin(text);
+    }
+
+    function splitIndexer(text: string): LambdaMember[] {
+      if (text.contains("/"))
+        return [
+          ...splitDot(text.before("/")),
+          { type: "Indexer", name: "0" },
+          ...splitIndexer(text.after("/"))
+        ];
+
+      return splitDot(text);
+    }
+
+    const parts = splitIndexer(propertyString);
 
     parts.forEach(m => result = result.addMember(m.type, m.name, true));
 
