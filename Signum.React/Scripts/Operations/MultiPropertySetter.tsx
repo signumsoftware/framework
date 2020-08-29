@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
-import { ModifiableEntity, SearchMessage, External, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
+import { ModifiableEntity, SearchMessage, External, JavascriptMessage, Lite, Entity, OperationMessage, PropertyOperation } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
@@ -94,7 +94,7 @@ export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo:
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
-    setters.push({ property: null! });
+    setters.push({ property: null!, operation: null! });
     onChange();
   }
 
@@ -109,6 +109,7 @@ export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo:
         <tr>
           <th style={{ minWidth: "24px" }}></th>
           <th>{SearchMessage.Field.niceToString()}</th>
+          <th>{SearchMessage.Operation.niceToString()}</th>
           <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
         </tr>
       </thead>
@@ -119,7 +120,6 @@ export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo:
             prefixRoute={undefined}
             typeInfo={typeInfo}
             isPredicate={false}
-            onPropertyChanged={() => { }}
             onSetterChanged={() => onChange()} />
         )}
         {
@@ -144,8 +144,24 @@ export interface PropertySetterComponentProps {
   prefixRoute: PropertyRoute | undefined;
   onDeleteSetter: (pi: API.PropertySetter) => void;
   isPredicate: boolean;
-  onPropertyChanged?: (token: string | undefined) => void;
   onSetterChanged: () => void;
+}
+
+export function getPropertyOperations(type: TypeReference): PropertyOperation[] {
+  if (type.isCollection)
+    return ["AddElement", "ChangeElements", "RemoveElements"];
+
+  if (type.isEmbedded)
+    return ["Set", "CreateNewEntiy", "ModifyEntity"]
+
+  if (type.name == IsByAll)
+    return ["Set"];
+
+  var typeInfos = tryGetTypeInfos(type.name);
+  if (typeInfos.length > 0)
+    return ["Set", "CreateNewEntiy", "ModifyEntity"];
+
+  return ["Set"];
 }
 
 export function PropertySetterComponent(p: PropertySetterComponentProps) {
@@ -159,20 +175,28 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
 
   function handlePropertyChanged(newProperty: PropertyRoute | null | undefined) {
 
-    const f = p.setter;
+    const s = p.setter;
 
-    f.value = undefined;
-    f.property = newProperty?.propertyPath() ?? undefined!;
-
-    if (p.onPropertyChanged)
-      p.onPropertyChanged(f.property!);
+    s.value = undefined;
+    s.property = newProperty?.propertyPath() ?? undefined!;
+    s.operation = newProperty == null ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
+    
+    fixOperation();
 
     p.onSetterChanged();
 
     forceUpdate();
   }
 
-  const pr = p.setter.property == null ? null : PropertyRoute.parse(p.typeInfo, p.setter.property);
+  function fixOperation() {
+    const f = p.setter;
+
+  }
+
+  const pr = React.useMemo(() => p.setter.property == null ? null : PropertyRoute.parse(p.typeInfo, p.setter.property),
+    [p.typeInfo, p.setter.property]);
+
+  var operations = pr == null ? [] : getPropertyOperations(pr.typeReference());
 
   return (
     <>
@@ -215,36 +239,30 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
 export function createSetterValueControl(ctx: TypeContext<any>, handleValueChange: () => void): React.ReactElement<any> {
   var tr = ctx.propertyRoute!.typeReference();
 
-  switch (tr.name) {
-    case "number":
-    case "string":
-    case "Guid":
-    case "boolean":
-    case "DateTime": return <ValueLine ctx={ctx} onChange={handleValueChange} />;
-    default:
-      {
-        if (tr.isEmbedded)
-          return <EntityLine ctx={ctx} autocomplete={null} onChange={handleValueChange} />;
+  var vlt = ValueLineController.getValueLineType(tr)
+  if (vlt)
+    return <ValueLine ctx={ctx} onChange={handleValueChange} />;
 
-        if (tr.isLite)
-          return <EntityLine ctx={ctx} onChange={handleValueChange} />;
+  if (tr.isEmbedded)
+    return <EntityLine ctx={ctx} autocomplete={null} onChange={handleValueChange} />;
 
-        var tis = tryGetTypeInfos(tr.name);
+  if (tr.isLite)
+    return <EntityLine ctx={ctx} onChange={handleValueChange} />;
 
-        if (tis[0]) {
+  var tis = tryGetTypeInfos(tr.name);
 
-          if (tis[0].kind == "Enum") {
-            const ti = tis.single()!;
-            const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-            return <ValueLine ctx={ctx} comboBoxItems={members} onChange={handleValueChange} />;
-          }
+  if (tis[0]) {
 
-          if (tr.name == IsByAll || tis.some(ti => !ti!.isLowPopulation))
-            return <EntityLine ctx={ctx} onChange={handleValueChange} />;
-          else
-            return <EntityCombo ctx={ctx} onChange={handleValueChange} />
-        }
-      }
+    if (tis[0].kind == "Enum") {
+      const ti = tis.single()!;
+      const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
+      return <ValueLine ctx={ctx} comboBoxItems={members} onChange={handleValueChange} />;
+    }
+
+    if (tr.name == IsByAll || tis.some(ti => !ti!.isLowPopulation))
+      return <EntityLine ctx={ctx} onChange={handleValueChange} />;
+    else
+      return <EntityCombo ctx={ctx} onChange={handleValueChange} />
   }
 
   return <span className="text-alert">Not supported</span>
@@ -285,10 +303,14 @@ interface PropertyPartProps {
   defaultOpen: boolean;
 }
 
-
 export function PropertyPart(p: PropertyPartProps) {
 
-  const subMembers = !p.parentRoute ? [] : Dic.getValues(p.parentRoute.subMembers());
+  const subMembers =
+    p.parentRoute.typeReference().name.contains(",") ||
+      p.parentRoute.typeReference().name == IsByAll ? [] : Dic.getValues(p.parentRoute.subMembers());
+
+  if (subMembers.length == 0)
+    return null;
 
   return (
     <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
@@ -344,7 +366,7 @@ export function PropertyItemOptional(p: { item: MemberInfo | null }) {
 
 
   return (
-    <span data-token={item.name}
+    <span data-member={item.name}
       style={{ color: getTypeColor(item.type) }}
       title={StyleContext.default.titleLabels ? getNiceTypeName(item.type) : undefined}>
       {item.niceName ?? "- no member - "}

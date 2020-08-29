@@ -29,9 +29,9 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/construct"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS? Construct([Required, FromBody] ConstructOperationRequest request)
         {
-            var entityType = TypeLogic.GetType(request.type);
+            var entityType = TypeLogic.GetType(request.Type);
 
-            var entity = OperationLogic.ServiceConstruct(entityType, request.GetOperationSymbol(entityType), request.args);
+            var entity = OperationLogic.ServiceConstruct(entityType, request.GetOperationSymbol(entityType), request.Args);
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -39,7 +39,7 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/constructFromEntity"), ProfilerActionSplitter]
         public EntityPackTS? ConstructFromEntity([Required, FromBody] EntityOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
+            var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -47,7 +47,7 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/constructFromLite"), ProfilerActionSplitter]
         public EntityPackTS? ConstructFromLite([Required, FromBody] LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
+            var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
 
@@ -58,7 +58,7 @@ namespace Signum.React.ApiControllers
             Entity entity;
             try
             {
-                entity = OperationLogic.ServiceExecute(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
+                entity = OperationLogic.ServiceExecute(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
             }
             catch (IntegrityCheckException ex)
             {
@@ -76,7 +76,7 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/executeLite"), ProfilerActionSplitter]
         public EntityPackTS ExecuteLite([Required, FromBody] LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceExecuteLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
+            var entity = OperationLogic.ServiceExecuteLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
 
             return SignumServer.GetEntityPack(entity);
         }
@@ -84,13 +84,13 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/deleteEntity"), ProfilerActionSplitter]
         public void DeleteEntity([Required, FromBody] EntityOperationRequest request)
         {
-            OperationLogic.ServiceDelete(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
+            OperationLogic.ServiceDelete(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
         }
 
         [HttpPost("api/operation/deleteLite"), ProfilerActionSplitter]
         public void DeleteLite([Required, FromBody] LiteOperationRequest request)
         {
-            OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
+            OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
         }
 
 
@@ -98,7 +98,7 @@ namespace Signum.React.ApiControllers
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class ConstructOperationRequest : BaseOperationRequest
         {
-            public string type { get; set; }
+            public string Type { get; set; }
         }
 
 
@@ -118,11 +118,11 @@ namespace Signum.React.ApiControllers
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class BaseOperationRequest
         {
-            public string operationKey { get; set; }
+            public string OperationKey { get; set; }
 
-            public object?[]? args { get; set; }
+            public object?[]? Args { get; set; }
 
-            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args);
+            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType, this.Args);
 
             public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object?[]? args = null)
             {
@@ -133,16 +133,16 @@ namespace Signum.React.ApiControllers
                 return symbol;
             }
 
-            public override string ToString() => operationKey;
+            public override string ToString() => OperationKey;
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
         public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
         {
-            var type = request.lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.type);
+            var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type);
 
-            var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, request.GetOperationSymbol(type), request.args);
+            var entity = OperationLogic.ServiceConstructFromMany(request.Lites, type, request.GetOperationSymbol(type), request.Args);
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -150,23 +150,23 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]
         public MultiOperationResponse ConstructFromMultiple([Required, FromBody] MultiOperationRequest request)
         {
-            if (request.setters.HasItems())
+            if (request.Setters.HasItems())
             {
-                var errors = ForeachMultiple(request.lites, lite =>
+                var errors = ForeachMultiple(request.Lites, lite =>
                 {
                     var entity = lite.RetrieveAndForget();
 
-                    MultiSetter.SetSetters(entity, request.setters, PropertyRoute.Root(entity.GetType()));
+                    MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                    OperationLogic.ServiceConstructFrom(entity, request.GetOperationSymbol(entity.GetType()), request.args);
+                    OperationLogic.ServiceConstructFrom(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
                 });
 
                 return new MultiOperationResponse(errors);
             }
             else
             {
-                var errors = ForeachMultiple(request.lites, lite =>
-                            OperationLogic.ServiceConstructFromLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
+                var errors = ForeachMultiple(request.Lites, lite =>
+                            OperationLogic.ServiceConstructFromLite(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
 
                 return new MultiOperationResponse(errors);
             }
@@ -176,23 +176,23 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/executeMultiple"), ProfilerActionSplitter]
         public MultiOperationResponse ExecuteMultiple([Required, FromBody] MultiOperationRequest request)
         {
-            if (request.setters.HasItems())
+            if (request.Setters.HasItems())
             {
-                var errors = ForeachMultiple(request.lites, lite =>
+                var errors = ForeachMultiple(request.Lites, lite =>
                 {
                     var entity = lite.RetrieveAndForget();
 
-                    MultiSetter.SetSetters(entity, request.setters, PropertyRoute.Root(entity.GetType()));
+                    MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                    OperationLogic.ServiceExecute(entity, request.GetOperationSymbol(entity.GetType()), request.args);
+                    OperationLogic.ServiceExecute(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
                 });
 
                 return new MultiOperationResponse(errors);
             }
             else
             {
-                var errors = ForeachMultiple(request.lites, lite =>
-                            OperationLogic.ServiceExecuteLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
+                var errors = ForeachMultiple(request.Lites, lite =>
+                            OperationLogic.ServiceExecuteLite(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
 
                 return new MultiOperationResponse(errors);
             }
@@ -202,23 +202,23 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
         public MultiOperationResponse DeleteMultiple([Required, FromBody] MultiOperationRequest request)
         {
-            if (request.setters.HasItems())
+            if (request.Setters.HasItems())
             {
-                var errors = ForeachMultiple(request.lites, lite =>
+                var errors = ForeachMultiple(request.Lites, lite =>
                 {
                     var entity = lite.RetrieveAndForget();
 
-                    MultiSetter.SetSetters(entity, request.setters, PropertyRoute.Root(entity.GetType()));
+                    MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                    OperationLogic.ServiceDelete(entity, request.GetOperationSymbol(entity.GetType()), request.args);
+                    OperationLogic.ServiceDelete(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
                 });
 
                 return new MultiOperationResponse(errors);
             }
             else
             {
-                var errors = ForeachMultiple(request.lites, lite =>
-                            OperationLogic.ServiceDelete(lite, request.GetOperationSymbol(lite.EntityType), request.args));
+                var errors = ForeachMultiple(request.Lites, lite =>
+                            OperationLogic.ServiceDelete(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
 
                 return new MultiOperationResponse(errors);
             }
@@ -249,37 +249,20 @@ namespace Signum.React.ApiControllers
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class MultiOperationRequest : BaseOperationRequest
         {
-            public string type { get; set; }
-            public Lite<Entity>[] lites { get; set; }
+            public string Type { get; set; }
+            public Lite<Entity>[] Lites { get; set; }
 
-            public List<PropertySetter>? setters { get; set; }
+            public List<PropertySetter>? Setters { get; set; }
         }
 
         public class PropertySetter
         {
-            public string property;
-            public object? value;
-            public ListAction? listAction;
-            public NewEntityAction? newEntity;
-        }
-
-        public class ListAction
-        {
-            public ListActionType type;
-            public List<PropertySetter>? predicate;
-            public List<PropertySetter>? setters;
-        }
-
-        public class NewEntityAction
-        {
-            public List<PropertySetter> setters;
-        }
-
-        public enum ListActionType
-        {
-            Add,
-            Change,
-            Remove
+            public string Property;
+            public PropertyOperation Operation;
+            public object? Value;
+            public string? EntityType;
+            public List<PropertySetter>? Predicate;
+            public List<PropertySetter>? Setters;
         }
 
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
@@ -288,27 +271,27 @@ namespace Signum.React.ApiControllers
         {
             public MultiOperationResponse(Dictionary<string, string> errors)
             {
-                this.errors = errors;
+                this.Errors = errors;
             }
 
-            public Dictionary<string, string> errors { get; set; }
+            public Dictionary<string, string> Errors { get; set; }
         }
 
         [HttpPost("api/operation/stateCanExecutes"), ValidateModelFilter]
         public StateCanExecuteResponse StateCanExecutes([Required, FromBody]StateCanExecuteRequest request)
         {
-            var types = request.lites.Select(a => a.EntityType).ToHashSet();
+            var types = request.Lites.Select(a => a.EntityType).ToHashSet();
 
-            var operationSymbols = request.operationKeys
+            var operationSymbols = request.OperationKeys
                 .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
                 .ToList();
 
-            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols);
-            var anyReadonly = AnyReadonly.GetInvocationListTyped().Any(f => f(request.lites));
+            var result = OperationLogic.GetContextualCanExecute(request.Lites, operationSymbols);
+            var anyReadonly = AnyReadonly.GetInvocationListTyped().Any(f => f(request.Lites));
 
             return new StateCanExecuteResponse(result.SelectDictionary(a => a.Key, v => v))
             {
-                anyReadonly = anyReadonly
+                AnyReadonly = anyReadonly
             };
         }
 
@@ -318,8 +301,8 @@ namespace Signum.React.ApiControllers
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class StateCanExecuteRequest
         {
-            public string[] operationKeys { get; set; }
-            public Lite<Entity>[] lites { get; set; }
+            public string[] OperationKeys { get; set; }
+            public Lite<Entity>[] Lites { get; set; }
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -327,11 +310,11 @@ namespace Signum.React.ApiControllers
         {
             public StateCanExecuteResponse(Dictionary<string, string> canExecutes)
             {
-                this.canExecutes = canExecutes;
+                this.CanExecutes = canExecutes;
             }
 
-            public bool anyReadonly;
-            public Dictionary<string, string> canExecutes { get; set; }
+            public bool AnyReadonly;
+            public Dictionary<string, string> CanExecutes { get; set; }
         }
     }
 
@@ -343,39 +326,36 @@ namespace Signum.React.ApiControllers
 
             foreach (var setter in setters)
             {
-                var pr = route.Add(setter.property);
+                var pr = route.Add(setter.Property);
 
                 EntityJsonConverter.AssertCanWrite(pr, entity);
 
                 if (pr.Type.IsMList())
                 {
-                    if (setter.listAction == null)
-                        throw new InvalidOperationException("listAction not set");
-
                     var elementPr = pr.Add("Item");
                     var mlist = pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile()(entity);
-                    switch (setter.listAction.type)
+                    switch (setter.Operation)
                     {
-                        case ListActionType.Add:
+                        case PropertyOperation.AddElement:
                             {
                                 var item = (ModifiableEntity)Activator.CreateInstance(pr.Type.ElementType()!)!;
-                                SetSetters(item, setter.listAction.setters!, pr);
+                                SetSetters(item, setter.Setters!, pr);
                                 ((IList)mlist).Add(item);
                             }
                             break;
-                        case ListActionType.Change:
+                        case PropertyOperation.ChangeElements:
                             {
-                                var predicate = GetPredicate(setter.listAction.predicate!, elementPr, serializer);
+                                var predicate = GetPredicate(setter.Predicate!, elementPr, serializer);
                                 var toChange = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
                                 foreach (var item in toChange)
                                 {
-                                    SetSetters((ModifiableEntity)item, setter.listAction.setters!, elementPr);
+                                    SetSetters((ModifiableEntity)item, setter.Setters!, elementPr);
                                 }
                             }
                             break;
-                        case ListActionType.Remove:
+                        case PropertyOperation.RemoveElements:
                             {
-                                var predicate = GetPredicate(setter.listAction.predicate!, elementPr, serializer);
+                                var predicate = GetPredicate(setter.Predicate!, elementPr, serializer);
                                 var toRemove = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
                                 foreach (var item in toRemove)
                                 {
@@ -387,15 +367,25 @@ namespace Signum.React.ApiControllers
                             break;
                     }
                 }
-                else if (setter.newEntity != null)
+                else if (setter.Operation == PropertyOperation.CreateNewEntiy)
                 {
-                    var item = (ModifiableEntity)Activator.CreateInstance(pr.Type.ElementType()!)!;
-                    SetSetters(item, setter.newEntity.setters, pr);
+                    var subPr = pr.Type.IsEmbeddedEntity() ? pr : PropertyRoute.Root(TypeLogic.GetType(setter.EntityType!));
+                    var item = (ModifiableEntity)Activator.CreateInstance(subPr.Type)!;
+                    SetSetters(item, setter.Setters!, subPr);
                     SetProperty(entity, pr, route, item);
+                }
+                else if (setter.Operation == PropertyOperation.ModifyEntity)
+                {
+                    var item = GetProperty(entity, pr, route);
+                    if (!(item is ModifiableEntity mod))
+                        throw new InvalidOperationException($"Unable to change entity in {pr}: {item}");
+
+                    SetSetters(mod, setter.Setters!, pr);
+                    SetProperty(entity, pr, route, mod);
                 }
                 else
                 {
-                    var value = ConvertObject(setter.value, pr, serializer);
+                    var value = ConvertObject(setter.Value, pr, serializer);
                     SetProperty(entity, pr, route, value);
                 }
             }
@@ -409,6 +399,14 @@ namespace Signum.React.ApiControllers
             pr.PropertyInfo!.SetValue(subEntity, value);
         }
 
+        private static object? GetProperty(ModifiableEntity entity, PropertyRoute pr, PropertyRoute parentRoute)
+        {
+            var subEntity = pr.Parent == parentRoute ? entity :
+                        (ModifiableEntity)pr.GetLambdaExpression<object, object>(true, parentRoute).Compile()(entity);
+
+            return pr.PropertyInfo!.GetValue(subEntity);
+        }
+
         static MethodInfo miEquals = ReflectionTools.GetMethodInfo(() => object.Equals(null, null));
 
         static Expression<Func<object, bool>> GetPredicate(List<PropertySetter> predicate, PropertyRoute mainRoute, JsonSerializer serializer)
@@ -417,12 +415,12 @@ namespace Signum.React.ApiControllers
 
             var body = predicate.Select(p =>
             {
-                var pr = mainRoute.Add(p.property);
+                var pr = mainRoute.Add(p.Property);
 
                 var lambda = pr.GetLambdaExpression<object, object>(true, mainRoute.GetMListItemsRoute());
 
                 var left = Expression.Invoke(lambda, param);
-                object? objClean = ConvertObject(p.value, pr, serializer);
+                object? objClean = ConvertObject(p.Value, pr, serializer);
 
                 return (Expression)Expression.Call(null, miEquals, left, Expression.Constant(objClean));
 

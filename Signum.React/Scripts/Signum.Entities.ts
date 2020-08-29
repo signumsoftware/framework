@@ -415,6 +415,15 @@ export module PaginationMessage {
   export const All = new MessageKey("PaginationMessage", "All");
 }
 
+export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperation");
+export type PropertyOperation =
+  "Set" |
+  "AddElement" |
+  "ChangeElements" |
+  "RemoveElements" |
+  "ModifyEntity" |
+  "CreateNewEntiy";
+
 export module QuickLinkMessage {
   export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
   export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");

@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
@@ -580,29 +580,18 @@ export namespace API {
 
   export interface PropertySetter {
     property: string;
+    operation: PropertyOperation; 
     value?: any;
-    listAction?: ListAction;
-    newEntity?: NewEntityAction;
-  }
-
-  export interface ListAction {
-    type: ListActionType ;
+    entityType?: string;
     predicate?: PropertySetter[];
     setters?: PropertySetter[];
   }
-
-  export interface NewEntityAction {
-    setters: PropertySetter[];
-  }
-
-  type ListActionType = "Add" | "Change" | "Remove";
 
   export interface ConstructOperationRequest {
     operationKey: string;
     type?: string;
     args: any[];
   }
-
 
   export interface EntityOperationRequest {
     operationKey: string;
