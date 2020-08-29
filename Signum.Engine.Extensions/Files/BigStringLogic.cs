@@ -140,6 +140,17 @@ namespace Signum.Engine.Files
         static PropertyInfo piText = ReflectionTools.GetPropertyInfo((BigStringEmbedded bs) => bs.Text);
         static PropertyInfo piFile = ReflectionTools.GetPropertyInfo((BigStringMixin bs) => bs.File);
 
+        public static void RegisterAll<T>(SchemaBuilder sb, BigStringConfiguration config)
+        where T : Entity
+        {
+            var routes = PropertyRoute.GenerateRoutes(typeof(T)).Where(a => a.PropertyRouteType == PropertyRouteType.FieldOrProperty && a.Type == typeof(BigStringEmbedded)).ToList();
+
+            foreach (var route in routes)
+            {
+                Register(sb, route, config);
+            }
+        }
+
         public static void Register<T>(SchemaBuilder sb, Expression<Func<T, BigStringEmbedded>> expression, BigStringConfiguration config)
             where T : Entity
         {
