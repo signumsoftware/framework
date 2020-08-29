@@ -74,7 +74,9 @@ namespace Signum.Engine.Basics
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
             entity.ApplicationName = Schema.Current.ApplicationName;
             entity.HResult = ex.HResult;
-
+            entity.Form = new BigStringEmbedded();
+            entity.QueryString = new BigStringEmbedded();
+            entity.Session = new BigStringEmbedded();
 
             entity.Environment = CurrentEnvironment;
             try
