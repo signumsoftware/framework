@@ -51,7 +51,7 @@ namespace Signum.React.Selenium
 
                     return false;
 
-                }, () => "popup {0} to disapear with or without confirmation".FormatWith());
+                }, () => "popup {0} to disapear with or without confirmation".FormatWith(this.Element));
 
                 if (confirmationMessage != null)
                     throw new InvalidOperationException(confirmationMessage);

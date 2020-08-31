@@ -1,3 +1,4 @@
+using Signum.Entities.Basics;
 using System;
 
 namespace Signum.Entities.DiffLog
@@ -8,13 +9,14 @@ namespace Signum.Entities.DiffLog
         protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
             : base(mainEntity, next)
         {
+            this.RebindEvents();
         }
 
-        [DbType(Size = int.MaxValue)]
-        public string? InitialState { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded InitialState { get; set; } = new BigStringEmbedded();
 
-        [DbType(Size = int.MaxValue)]
-        public string? FinalState { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded FinalState { get; set; } = new BigStringEmbedded();
 
         public bool Cleaned { get; set; }
     }

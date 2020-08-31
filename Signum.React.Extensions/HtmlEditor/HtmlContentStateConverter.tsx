@@ -29,11 +29,11 @@ export class HtmlContentStateConverter implements IContentStateConverter {
   }
 
   textToContentState(html: string): draftjs.ContentState {
-    console.log("Parsing: " + html);
+    //console.log("Parsing: " + html);
     const { customChunkRenderer } = this.htmlToDraftOptions;
     const { contentBlocks, entityMap } = htmlToDraft(html, customChunkRenderer);
     const result = draftjs.ContentState.createFromBlockArray(contentBlocks, entityMap);
-    console.log("Parsed: " + JSON.stringify(draftjs.convertToRaw(result), undefined, 2));
+    //console.log("Parsed: " + JSON.stringify(draftjs.convertToRaw(result), undefined, 2));
     return result;
   }
 }

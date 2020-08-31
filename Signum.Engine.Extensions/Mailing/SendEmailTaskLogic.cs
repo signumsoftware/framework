@@ -37,10 +37,10 @@ namespace Signum.Engine.Mailing
                 
                 Validator.PropertyValidator((SendEmailTaskEntity er) => er.UniqueTarget).StaticPropertyValidation += (er, pi) =>
                 {
-                    if (er.UniqueTarget != null)
+                    if (er.UniqueTarget != null && er.EmailTemplate != null)
                     {
-                        Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
-                        if (!implementations.Value.Types.Contains(er.UniqueTarget.EntityType))
+                        Implementations? implementations = GetImplementations(er.EmailTemplate.InDB(a => a.Query));
+                        if (!implementations!.Value.Types.Contains(er.UniqueTarget.EntityType))
                             return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
                     }
 
@@ -49,11 +49,11 @@ namespace Signum.Engine.Mailing
 
                 Validator.PropertyValidator((SendEmailTaskEntity er) => er.TargetsFromUserQuery).StaticPropertyValidation += (SendEmailTaskEntity er, PropertyInfo pi) =>
                 {
-                    if (er.TargetsFromUserQuery != null)
+                    if (er.TargetsFromUserQuery != null && er.EmailTemplate != null)
                     {
-                        Implementations? emailImplementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
+                        Implementations? emailImplementations = GetImplementations(er.EmailTemplate.InDB(a => a.Query));
                         var uqImplementations = GetImplementations(er.TargetsFromUserQuery.InDB(a => a.Query));
-                        if (!emailImplementations.Value.Types.Intersect(uqImplementations.Value.Types).Any())
+                        if (!emailImplementations!.Value.Types.Intersect(uqImplementations!.Value.Types).Any())
                             return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), emailImplementations.Value.Types.CommaOr(t => t.NiceName()));
                     }
 
@@ -128,7 +128,7 @@ namespace Signum.Engine.Mailing
                 return null;
 
             var entityColumn = QueryLogic.Queries.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
-            var implementations = entityColumn.Implementations.Value;
+            var implementations = entityColumn.Implementations!.Value;
 
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ByAll implementations not supported");

@@ -60,7 +60,7 @@ namespace Signum.Engine.Workflow
                 }
                 else
                 {
-                    var conns = GetAllConnections(gr, from, to, path => IsValidPath(prev.DoneType.Value, path));
+                    var conns = GetAllConnections(gr, from, to, path => IsValidPath(prev.DoneType!.Value, path));
 
                     if (conns.Any())
                         return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));

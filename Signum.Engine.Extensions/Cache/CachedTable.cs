@@ -361,7 +361,7 @@ namespace Signum.Engine.Cache
                     {
                         return this.rows.Value.Values
                         .Where(a => backReferenceGetter(a) != null)
-                        .GroupToDictionary(a => backReferenceGetter(a).Value, a => idGetter(a));
+                        .GroupToDictionary(a => backReferenceGetter(a)!.Value, a => idGetter(a));
                     }, LazyThreadSafetyMode.ExecutionAndPublication);
                 }
                 else

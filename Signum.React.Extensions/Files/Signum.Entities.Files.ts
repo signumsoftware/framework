@@ -30,6 +30,12 @@ export interface FilePathEmbedded extends IFilePath {
   rootType: string;
 }
 
+export const BigStringMixin = new Type<BigStringMixin>("BigStringMixin");
+export interface BigStringMixin extends Entities.MixinEntity {
+  Type: "BigStringMixin";
+  file: FilePathEmbedded | null;
+}
+
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
   Type: "FileEmbedded";
