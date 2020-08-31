@@ -1506,6 +1506,7 @@ export class CellFormatter {
 export interface CellFormatterContext {
   refresh?: () => void;
   systemTime?: SystemTime;
+  columns: string[];
   row: ResultRow;
   rowIndex: number;
 }
