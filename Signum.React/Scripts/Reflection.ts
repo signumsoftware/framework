@@ -800,31 +800,16 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   if (ti) {
 
     var e = result as Entity;
-
     var pr = PropertyRoute.root(ti);
-
-    const mixins = Dic.getKeys(ti.members)
-      .filter(a => a.startsWith("["))
-      .groupBy(a => a.after("[").before("]"))
-      .forEach(gr => {
-
-        var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
-
-        initializeCollections(m, pr.addMember("Mixin", gr.key, true)!);
-
-        if (!e.mixins)
-          e.mixins = {};
-
-        e.mixins[gr.key] = m;
-      });
-
+    initializeMixins(e, pr);
     initializeCollections(e, pr);
   }
   else {
     if (propertyRoute) {
       initializeCollections(result, propertyRoute);
+      initializeMixins(result, propertyRoute);
     } else {
-      //Collections not initialized, but since Embedded typically don't have then, it's not worth the hassle 
+      //Collections or mixins not initialized, but since Embedded typically don't have then, it's not worth the hassle 
     }
   }
 
@@ -838,10 +823,29 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   return result;
 }
 
-function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
+function initializeMixins(mod: ModifiableEntity, pr: PropertyRoute) {
+  var subMembers = pr.subMembers();
+  Dic.getKeys(subMembers)
+    .filter(a => a.startsWith("["))
+    .groupBy(a => a.after("[").before("]"))
+    .forEach(gr => {
+
+      var mixin = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+      initializeCollections(mixin, pr.addMember("Mixin", gr.key, true)!);
+
+      if (!mod.mixins)
+        mod.mixins = {};
+
+      mod.mixins[gr.key] = mixin;
+    });
+
+}
+
+function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
     .filter(t => t.memberInfo.type.isCollection && !t.key.startsWith("["))
-    .forEach(t => (m as any)[t.key.firstLower()] = []);
+    .forEach(t => (mod as any)[t.key.firstLower()] = []);
 }
 
 
@@ -1395,16 +1399,44 @@ export class PropertyRoute {
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     let result = PropertyRoute.root(rootType);
-    const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): { type: MemberType, name: string } => {
-      if (p == "&&")
-        return { type: "Indexer", name: "0" };
 
+    function splitMixin(text: string): LambdaMember[] {
 
-      if (p.startsWith("[") && p.endsWith("]"))
-        return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+      if (text.length == 0)
+        return [];
 
-      return { type: "Member", name: p };
-    });
+      if (text.contains("["))
+        return [
+          ...splitMixin(text.before("[")),
+          { type: "Mixin" as MemberType, name: text.between("[", "]") },
+          ...splitMixin(text.after("]")),
+        ];
+
+      return [{ type: "Member", name: text }];
+    }
+
+    function splitDot(text: string): LambdaMember[] {
+      if (text.contains("."))
+        return [
+          ...splitMixin(text.before(".")),
+          ...splitDot(text.after("."))
+        ];
+
+      return splitMixin(text);
+    }
+
+    function splitIndexer(text: string): LambdaMember[] {
+      if (text.contains("/"))
+        return [
+          ...splitDot(text.before("/")),
+          { type: "Indexer", name: "0" },
+          ...splitIndexer(text.after("/"))
+        ];
+
+      return splitDot(text);
+    }
+
+    const parts = splitIndexer(propertyString);
 
     parts.forEach(m => result = result.addMember(m.type, m.name, true));
 
@@ -1474,17 +1506,7 @@ export class PropertyRoute {
   propertyPath(): string {
     switch (this.propertyRouteType) {
       case "Root": throw new Error("Root has no PropertyString");
-      case "Field": {
-        switch (this.parent!.propertyRouteType) {
-          case "Root": return this.member!.name;
-          case "Field":
-          case "Mixin":
-            return this.parent!.propertyPath() + "." + this.member!.name;
-          case "MListItem":
-            return this.parent!.propertyPath() + this.member!.name;
-          default: throw new Error("Unexpected parent propertyRouteType");
-        }
-      }
+      case "Field": return this.member!.name;
       case "Mixin": return (this.parent!.propertyRouteType == "Root" ? "" : this.parent!.propertyPath()) + "[" + this.mixinName + "]";
       case "MListItem": return this.parent!.propertyPath() + "/";
       case "LiteEntity": return this.parent!.propertyPath() + ".entity";
@@ -1605,8 +1627,11 @@ export class PropertyRoute {
           if (m.name == path || !m.name.startsWith(path))
             return false;
 
-          var name = m.name.substring(path.length);
-          if (name.contains(".") || name.contains("/"))
+          var suffix = m.name.substring(path.length);
+          if (suffix.contains("/"))
+            return false;
+
+          if (suffix.startsWith("[") ? suffix.after("].").contains("."): suffix.contains("."))
             return false;
 
           return true;

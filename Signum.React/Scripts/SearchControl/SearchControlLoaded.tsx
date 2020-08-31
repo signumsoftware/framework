@@ -25,7 +25,7 @@ import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
-import { MaxHeightProperty } from 'csstype';
+import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
@@ -45,7 +45,7 @@ export interface SearchControlLoadedProps {
   entityFormatter?: EntityFormatter;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  maxResultsHeight?: MaxHeightProperty<string | number> | any;
+  maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
 
   defaultIncudeDefaultFilters: boolean;
@@ -71,7 +71,7 @@ export interface SearchControlLoadedProps {
   largeToolbarButtons: boolean;
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
-  refreshKey: string | number | undefined;
+  refreshKey: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;

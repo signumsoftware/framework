@@ -195,6 +195,9 @@ namespace Signum.Entities.DynamicQuery
     public class QueryValueRequest : BaseQueryRequest
     {
         public QueryToken? ValueToken { get; set; }
+
+        public bool MultipleValues { get; set; }
+
         public SystemTime? SystemTime { get; set; }
 
         public List<CollectionElementToken> Multiplications

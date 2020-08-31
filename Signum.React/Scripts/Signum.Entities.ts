@@ -388,9 +388,7 @@ export module OperationMessage {
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
-  export const PleaseConfirmYouDLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDelete0FromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
+  export const PleaseConfirmYouWantLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWantLikeToDelete0FromTheSystem");
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
@@ -575,6 +573,8 @@ export module ValidationMessage {
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
   export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
+  export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
+  export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
 }
 
 export module VoidEnumMessage {

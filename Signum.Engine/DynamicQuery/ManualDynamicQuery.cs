@@ -61,7 +61,7 @@ namespace Signum.Engine.DynamicQuery
                      .Where(aggregateFilters)
                      .OrderBy(request.Orders);
 
-            var cols = groupCollection.TryPaginate(request.Pagination);
+            var cols = groupCollection.TryPaginate(request.Pagination, request.SystemTime);
 
             return cols.ToResultTable(request);
         }
@@ -92,6 +92,12 @@ namespace Signum.Engine.DynamicQuery
                 req.Columns.Add(new Column(parent, parent.NiceName()));
                 var result = await Execute(req, GetQueryDescription(), cancellationToken);
                 return result.SimpleAggregate((AggregateToken)request.ValueToken);
+            }
+            else if(request.MultipleValues)
+            {
+                req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
+                var result = await Execute(req, GetQueryDescription(), cancellationToken);
+                return result.SelectOne(request.ValueToken).ToList();
             }
             else
             {

@@ -1,14 +1,17 @@
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -39,19 +42,21 @@ namespace Signum.Entities
         }
 
         [ForceEagerEvaluation]
-        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
+        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
             where T : IRootEntity
         {
-            return Root(typeof(T)).Continue(propertyRoute);
+            return Root(typeof(T)).Continue(lambda, avoidLastCasting);
         }
-                                
 
-        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
+
+        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
         {
             if (typeof(T) != this.Type)
                 throw new InvalidOperationException("Type mismatch between {0} and {1}".FormatWith(typeof(T).TypeName(), this.Type.TypeName()));
 
-            var list = Reflector.GetMemberList(propertyRoute);
+            var list = avoidLastCasting && lambda.Body is UnaryExpression u && u.NodeType == ExpressionType.Convert ?
+                Reflector.GetMemberListUntyped(Expression.Lambda(u.Operand, lambda.Parameters)) :
+                Reflector.GetMemberList(lambda);
 
             return Continue(list);
         }
@@ -74,21 +79,21 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo? mi = 
-                (MemberInfo?)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
-                (MemberInfo?)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (mi == null && Type.IsEntity())
+            if (fieldOrProperty.StartsWith("["))
             {
-                string? name = ExtractMixin(fieldOrProperty);
+                var mixinName = ExtractMixin(fieldOrProperty);
 
-                mi = MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == name);
+                return MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == mixinName) ??
+                    throw new InvalidOperationException("{0}{1} does not exist".FormatWith(this, fieldOrProperty));
             }
+            else
+            {
+                var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-            if (mi == null)
-                throw new InvalidOperationException("{0}.{1} does not exist".FormatWith(this, fieldOrProperty));
-
-            return mi;
+                return (MemberInfo?)Type.GetProperty(fieldOrProperty, flags, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
+                    (MemberInfo?)Type.GetField(fieldOrProperty, flags) ??
+                    throw new InvalidOperationException("{0}.{1} does not exist".FormatWith(this, fieldOrProperty));
+            }
         }
 
         private bool IsCollection()
@@ -117,7 +122,7 @@ namespace Signum.Entities
                 {
                     Implementations imp = GetImplementations();
 
-                    Type only;
+                    Type? only;
                     if (imp.IsByAll || (only = imp.Types.Only()) == null)
                         throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
 
@@ -335,9 +340,52 @@ namespace Signum.Entities
 
         public static PropertyRoute Parse(Type rootType, string propertyString)
         {
-            PropertyRoute result = PropertyRoute.Root(rootType);
+            Sequence<string> splitMixin(string text)
+            {
+                if (text.Length == 0)
+                    return new Sequence<string>();
 
-            foreach (var part in propertyString.Replace("/", ".Item.").TrimEnd('.').Split('.'))
+                if (text.Contains("["))
+                    return new Sequence<string>
+                    {
+                        splitMixin(text.Before("[")),
+                        "[" + text.Between("[", "]") + "]",
+                        splitMixin(text.After("]")),
+                    };
+
+                return new Sequence<string> { text };
+            }
+
+            Sequence<string> splitDot(string text)
+            {
+                if (text.Contains("."))
+                    return new Sequence<string>
+                    {
+                        splitMixin(text.Before(".")),
+                        splitDot(text.After("."))
+                    };
+
+                return splitMixin(text);
+            }
+
+            Sequence<string> splitIndexer(string text) 
+            {
+                if (text.Contains("/"))
+                    return new Sequence<string>
+                    {
+                        splitDot(text.Before("/")),
+                        "Item",
+                        splitIndexer(text.After("/")),
+                    };
+
+                return splitDot(text);
+            }
+
+
+
+            PropertyRoute result = PropertyRoute.Root(rootType);
+            var parts = splitIndexer(propertyString);
+            foreach (var part in parts)
             {
                 result = result.Add(part);
             }

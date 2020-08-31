@@ -214,8 +214,7 @@ function isDecimal(e: React.KeyboardEvent<any>): boolean {
 
 function isDuration(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
-  return (isNumber(e) ||
-    (c == 190) /*. Colon*/);
+  return isNumber(e) || e.key == ":";
 }
 
 ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {

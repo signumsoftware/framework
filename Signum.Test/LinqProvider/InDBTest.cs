@@ -46,7 +46,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            Assert.Equal(Sex.Female, female.InDBEntity(a => a.Sex));
+            Assert.Equal(Sex.Female, female.InDB(a => a.Sex));
             Assert.Equal(Sex.Female, female.ToLite().InDB(a => a.Sex));
         }
 
@@ -55,7 +55,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var friends = female.InDBEntity(a => a.Friends.ToList());
+            var friends = female.InDB(a => a.Friends.ToList());
             friends = female.ToLite().InDB(a => a.Friends.ToList());
         }
 
@@ -88,7 +88,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.InDBEntity(a2 => a2.Sex)).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.InDB(a2 => a2.Sex)).ToList();
             Assert.True(list.Count > 0);
             list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.ToLite().InDB(a2 => a2.Sex)).ToList();
             Assert.True(list.Count > 0);
@@ -99,7 +99,7 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistEntity>().Where(a => female.InDBEntity(a2 => a2.Friends).Contains(a.ToLite())).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a => female.InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.True(list.Count > 0);
             list = Database.Query<ArtistEntity>().Where(a => female.ToLite().InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.True(list.Count > 0);
@@ -112,7 +112,7 @@ namespace Signum.Test.LinqProvider
                                   from a in b.Members
                                   select new
                                   {
-                                      MaxAlbum = a.InDBEntity(ar => ar.IsMale)
+                                      MaxAlbum = a.InDB(ar => ar.IsMale)
                                   }).ToList();
         }
     }

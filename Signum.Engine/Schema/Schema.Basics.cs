@@ -719,9 +719,18 @@ namespace Signum.Engine.Maps
             if (predicate(this))
                 return new[] { this };
 
-            return EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
                 f is IFieldFinder ff ? ff.FindFields(predicate) :
                 Enumerable.Empty<Field>()).ToList();
+
+            if (Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -933,9 +942,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
-                 IsLite = IsLite,
-                 IsCollection = false,
-                 IsNullable = Nullable.ToBool()
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable.ToBool(),
+                PropertyRoute = this.Route
             });
         }
 
@@ -998,12 +1008,14 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
+
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
                 IsNullable = Nullable.ToBool(),
                 IsEnum = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -1042,7 +1054,8 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = a.Value.Nullable.ToBool()
+                IsNullable = a.Value.Nullable.ToBool(),
+                PropertyRoute = this.Route
             }));
         }
 
@@ -1096,9 +1109,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
-                 IsNullable = this.ColumnType.Nullable.ToBool(),
-                 IsLite = this.IsLite,
-                 IsImplementedByAll = true,
+                IsNullable = this.ColumnType.Nullable.ToBool(),
+                IsLite = this.IsLite,
+                IsImplementedByAll = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -1547,7 +1561,9 @@ namespace Signum.Engine.Maps
                     case SqlDbType.NText:
                     case SqlDbType.NVarChar:
                     case SqlDbType.Text:
-                    case SqlDbType.VarChar: 
+                    case SqlDbType.VarChar:
+                    case SqlDbType.Char:
+                    case SqlDbType.NChar:
                         return true;
                     default: 
                         return false;
