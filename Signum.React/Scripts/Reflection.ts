@@ -800,31 +800,16 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   if (ti) {
 
     var e = result as Entity;
-
     var pr = PropertyRoute.root(ti);
-
-    const mixins = Dic.getKeys(ti.members)
-      .filter(a => a.startsWith("["))
-      .groupBy(a => a.after("[").before("]"))
-      .forEach(gr => {
-
-        var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
-
-        initializeCollections(m, pr.addMember("Mixin", gr.key, true)!);
-
-        if (!e.mixins)
-          e.mixins = {};
-
-        e.mixins[gr.key] = m;
-      });
-
+    initializeMixins(e, pr);
     initializeCollections(e, pr);
   }
   else {
     if (propertyRoute) {
       initializeCollections(result, propertyRoute);
+      initializeMixins(result, propertyRoute);
     } else {
-      //Collections not initialized, but since Embedded typically don't have then, it's not worth the hassle 
+      //Collections or mixins not initialized, but since Embedded typically don't have then, it's not worth the hassle 
     }
   }
 
@@ -838,10 +823,29 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   return result;
 }
 
-function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
+function initializeMixins(mod: ModifiableEntity, pr: PropertyRoute) {
+  var subMembers = pr.subMembers();
+  Dic.getKeys(subMembers)
+    .filter(a => a.startsWith("["))
+    .groupBy(a => a.after("[").before("]"))
+    .forEach(gr => {
+
+      var mixin = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+      initializeCollections(mixin, pr.addMember("Mixin", gr.key, true)!);
+
+      if (!mod.mixins)
+        mod.mixins = {};
+
+      mod.mixins[gr.key] = mixin;
+    });
+
+}
+
+function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
     .filter(t => t.memberInfo.type.isCollection && !t.key.startsWith("["))
-    .forEach(t => (m as any)[t.key.firstLower()] = []);
+    .forEach(t => (mod as any)[t.key.firstLower()] = []);
 }
 
 
@@ -1627,8 +1631,11 @@ export class PropertyRoute {
           if (m.name == path || !m.name.startsWith(path))
             return false;
 
-          var name = m.name.substring(path.length);
-          if (name.contains(".") || name.contains("/"))
+          var suffix = m.name.substring(path.length);
+          if (suffix.contains("/"))
+            return false;
+
+          if (suffix.startsWith("[") ? suffix.after("].").contains("."): suffix.contains("."))
             return false;
 
           return true;

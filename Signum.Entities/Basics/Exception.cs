@@ -46,7 +46,7 @@ namespace Signum.Entities.Basics
 
         public int ExceptionMessageHash { get; private set; }
 
-        BigStringEmbedded stackTrace;
+        BigStringEmbedded stackTrace = new BigStringEmbedded();
         [NotifyChildProperty]
         public BigStringEmbedded StackTrace
         {
@@ -98,16 +98,16 @@ namespace Signum.Entities.Basics
         public string? UserHostName { get; set; }
 
         [NotifyChildProperty]
-        public BigStringEmbedded Form { get; set; }
-        
-        [NotifyChildProperty]
-        public BigStringEmbedded QueryString { get; set; }
-        
-        [NotifyChildProperty]
-        public BigStringEmbedded Session { get; set; }
+        public BigStringEmbedded Form { get; set; } = new BigStringEmbedded();
 
         [NotifyChildProperty]
-        public BigStringEmbedded Data { get; set; }
+        public BigStringEmbedded QueryString { get; set; } = new BigStringEmbedded();
+
+        [NotifyChildProperty]
+        public BigStringEmbedded Session { get; set; } = new BigStringEmbedded();
+
+        [NotifyChildProperty]
+        public BigStringEmbedded Data { get; set; } = new BigStringEmbedded();
 
         public int HResult { get; internal set; }
 
