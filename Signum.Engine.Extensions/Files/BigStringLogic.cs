@@ -20,9 +20,21 @@ namespace Signum.Engine.Files
 {
     public enum BigStringMode 
     {
-        Database,
+        /// <summary>
+        /// Only Text column in database
+        /// </summary>
+        Database, 
+        /// <summary>
+        /// Only File column in database pointing to a path in the file system / blob storage
+        /// </summary>
         FileSystem, 
+        /// <summary>
+        /// Migrating from Text -> File
+        /// </summary>
         Migrating_FromDatabase_ToFileSystem,
+        /// <summary>
+        /// Migrating from File -> Text
+        /// </summary>
         Migrating_FromFileSystem_ToDatabase,
     }
 
