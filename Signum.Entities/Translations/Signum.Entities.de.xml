@@ -512,6 +512,7 @@
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl der {0} wird mit {1} multipliziert" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />
     <Member Name="ThereAre0InState1" Description="Es gibt {0} im Status {1}" />
+    <Member Name="ThereAre0ThatReferenceThis1" Description="Es gibt {0}, die darauf verweisen {1}" />
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Die Zeilen werden nach {0} gruppiert" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
   </Type>
