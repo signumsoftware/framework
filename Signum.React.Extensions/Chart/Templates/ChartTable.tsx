@@ -119,6 +119,7 @@ export default function ChartTableComponent(p : ChartTableProps){
           resultTable.rows.map((row, i) => {
             const ctx: Finder.CellFormatterContext = {
               refresh: undefined,
+              columns: resultTable.columns,
               row: row,
               rowIndex : i,
             }
