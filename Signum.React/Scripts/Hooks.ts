@@ -109,6 +109,14 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   return { size, setContainer: setContainerMemo };
 }
 
+export function useDocumentEvent(type: string, handler: (e: Event) => void, deps: any[]) {
+  React.useEffect(() => {
+    document.addEventListener(type, handler);
+    return () => {
+      document.removeEventListener(type, handler);
+    }
+  }, deps);
+}
 
 export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>] {
   const [state, setState] = React.useState({ value: defaultValue, resolve: (val: T) => { } });
