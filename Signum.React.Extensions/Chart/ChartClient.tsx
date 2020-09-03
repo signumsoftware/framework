@@ -305,9 +305,10 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
       }
       else {
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token))
+        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
           cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-        cp.modified = true;
+          cp.modified = true;
+        }
       }
 
       chart.parameters!.push({ rowId: null, element: cp });

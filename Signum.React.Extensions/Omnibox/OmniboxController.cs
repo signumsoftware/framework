@@ -16,12 +16,15 @@ namespace Signum.React.Omnibox
         {
             OmniboxPermission.ViewOmnibox.AssertAuthorized();
 
-            ReactSpecialOmniboxGenerator.ClientGenerator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
+            var generator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
             {
                 Actions = request.specialActions.ToDictionary(a => a, a => new ReactSpecialOmniboxAction { Key = a })
             };
 
-            return OmniboxParser.Results(request.query, new System.Threading.CancellationToken());
+            using (ReactSpecialOmniboxGenerator.OverrideClientGenerator(generator))
+            {
+                return OmniboxParser.Results(request.query, new System.Threading.CancellationToken());
+            }
         }
 
         public class OmniboxRequest
