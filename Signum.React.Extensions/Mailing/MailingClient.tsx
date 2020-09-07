@@ -103,13 +103,18 @@ export function start(options: {
 
   API.getAllTypes().then(types => {
     allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("emailMessages",
-      () => EmailMessageEntity.nicePluralName(),
-      e => getEmailMessages(ctx.lite),
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
+      {
+        queryName: EmailMessageEntity,
+        parentToken: "Target",
+        parentValue: ctx.lite,
+      },
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),
         icon: "envelope",
-        iconColor: "orange"
+        iconColor: "orange",
+        color: "warning",
+        group: null,
       }));
   }).done();
 
@@ -118,16 +123,6 @@ export function start(options: {
 
 }
 
-function getEmailMessages(target: Lite<IEmailOwnerEntity>) {
-  return Finder.find(
-    {
-      queryName: EmailMessageEntity,
-      parentToken: "Target",
-      parentValue: target,
-      columnOptionsMode: "Remove",
-      columnOptions: [{ token: "Target" }],
-    }).done();
-}
 
 
 export interface EmailModelSettings<T extends ModelEntity> {

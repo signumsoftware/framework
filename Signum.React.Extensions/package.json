@@ -17,7 +17,7 @@
     "@types/codemirror": "0.0.95",
     "@types/draft-js": "0.10.40",
     "@types/googlemaps": "3.39.6",
-    "@types/react": "^16.9.41",
+    "@types/react": "16.9.49",
     "draft-js": "0.11.5",
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0",

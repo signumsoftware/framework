@@ -4,15 +4,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <TypeScriptBuildMode>true</TypeScriptBuildMode>
     <OutputType>Library</OutputType>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <StartupObject></StartupObject>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x64;x86;AnyCPU;linux64;win64;win86</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>1701;1702;8618;NU1605</NoWarn>
+    <NoWarn>8618</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)'=='win64'">
@@ -37,7 +36,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.7.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.7.1" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.9.7">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -178,7 +178,8 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToOmniboxPascalDictionary(qn => QueryUtils.GetNiceName(qn), qn => qn));
+                 GetAllQueryNames().ToOmniboxPascalDictionary(qn =>
+                  qn is Type t ? (EnumEntity.Extract(t) ?? t).NiceName() : QueryUtils.GetNiceName(qn), qn => qn));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -188,7 +189,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NicePluralName(), t => t));
+               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
         }
     }
 

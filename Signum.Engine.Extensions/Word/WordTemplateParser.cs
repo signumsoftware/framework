@@ -140,12 +140,12 @@ namespace Signum.Engine.Word
             if (!nodeProvider.IsText(only))
                 return;
 
-            var text = nodeProvider.GetText(only);
+            var text = nodeProvider.GetText(only!);
             if (!TemplateUtils.KeywordsRegex.IsMatch(text))
                 return;
 
             par.RemoveChild(only);
-            par.AppendChild(nodeProvider.WrapInRun(only));
+            par.AppendChild(nodeProvider.WrapInRun(only!));
         }
 
         private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)

@@ -3,15 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Signum.Entities</RootNamespace>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <Platforms>x64;x86;AnyCPU</Platforms>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <NoWarn>1701;1702;8618;NU1605</NoWarn>
+    <NoWarn>8618</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
@@ -22,10 +18,10 @@
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="Unofficial.Microsoft.SqlServer.Types" Version="1.2.0" />
   </ItemGroup>

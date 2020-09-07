@@ -247,7 +247,7 @@ namespace Signum.Engine.MachineLearning
 
         public override PredictorColumnUsage Usage => PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
         public override QueryToken Token => PredictorSubQueryColumn.Token.Token;
-        public override PredictorColumnNullHandling NullHandling => PredictorSubQueryColumn.NullHandling.Value;
+        public override PredictorColumnNullHandling NullHandling => PredictorSubQueryColumn.NullHandling!.Value;
         public override PredictorColumnEncodingSymbol Encoding => PredictorSubQueryColumn.Encoding;
 
         public override string ToString()

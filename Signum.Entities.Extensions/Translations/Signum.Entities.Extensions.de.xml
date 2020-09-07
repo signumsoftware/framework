@@ -1432,36 +1432,6 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
-  <Type Name="NewsletterDeliveryEntity" Description="Newsletter-Versand" Gender="m">
-    <Member Name="Newsletter" Description="Newsletter" />
-    <Member Name="Recipient" Description="Empfänger" />
-    <Member Name="SendDate" Description="Sendedatum" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
-  <Type Name="NewsletterEntity" Description="Newsletter" Gender="m">
-    <Member Name="DisplayFrom" Description="Anzeigen aus" />
-    <Member Name="From" Description="Von" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="Query" Description="Abfrage" />
-    <Member Name="State" Description="Status" />
-    <Member Name="Subject" Description="Betreff" />
-    <Member Name="Text" Description="Text" />
-  </Type>
-  <Type Name="NewsletterOperation">
-    <Member Name="AddRecipients" Description="Empfänger hinzufügen" />
-    <Member Name="Clone" Description="Klonen" />
-    <Member Name="RemoveRecipients" Description="Empfänger entfernen" />
-    <Member Name="Save" Description="Speichern" />
-    <Member Name="Send" Description="Senden" />
-  </Type>
-  <Type Name="NewsletterProcess">
-    <Member Name="SendNewsletter" Description="Newsletter senden" />
-  </Type>
-  <Type Name="NewsletterState" Description="Newsletter-Status">
-    <Member Name="Created" Description="Erstellt" />
-    <Member Name="Saved" Description="Gespeichert" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
   <Type Name="NoteEntity" Description="Notiz" PluralDescription="Notizen" Gender="f">
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -2163,6 +2133,7 @@
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
   <Type Name="TimeMachineMessage">
+    <Member Name="CompareVersions" Description="Versionen vergleichen" />
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
     <Member Name="TimeMachine" Description="Zeitmaschine" />
   </Type>
@@ -2472,6 +2443,7 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
