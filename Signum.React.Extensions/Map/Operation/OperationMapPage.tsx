@@ -14,9 +14,6 @@ import { useAPI, useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
-interface OperationMapPageProps extends RouteComponentProps<{ type: string }> {
-
-}
 
 interface OperationMapPropsState {
   operationMapInfo?: OperationMapInfo;
@@ -58,7 +55,7 @@ function getParsedQuery(loc: Location): ParsedQueryString {
   return result;
 }
 
-export default function OperationMapPage(p: OperationMapPageProps) {
+export default function OperationMapPage(p: RouteComponentProps<{ type: string }>) {
 
   useExpand();
 
@@ -139,14 +136,14 @@ export interface OperationMapRendererProps {
 
 export function OperationMapRenderer(p: OperationMapRendererProps) {
 
-  const svg = React.useRef<SVGSVGElement>(null);
+  const svgRef = React.useRef<SVGSVGElement>(null);
   const mapD3 = React.useRef<OperationMapD3 | null>(null);
 
   React.useEffect(() => {
     fixSchemaMap(p.operationMapInfo, p.nodes);
-    mapD3.current = new OperationMapD3(svg.current!, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
+    mapD3.current = new OperationMapD3(svgRef.current!, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
     return () => mapD3.current!.stop();
-  });
+  }, []);
 
   React.useEffect(() => {
     mapD3.current!.setColor(p.color);
@@ -193,13 +190,10 @@ export function OperationMapRenderer(p: OperationMapRendererProps) {
     });
   }
 
-  function componentWillReceiveProps(newProps: OperationMapRendererProps) {
-  }
-
 
   return (
     <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: p.height + "px" }}>
-      <svg id="svgMap" ref={svg => svg = svg!}>
+      <svg id="svgMap" ref={svgRef}>
         <defs>
           <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
