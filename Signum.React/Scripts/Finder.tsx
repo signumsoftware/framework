@@ -512,18 +512,17 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
     systemTime: fo.systemTime,
   } as FindOptions;
 
-  if (!findOptions.groupResults && findOptions.orderOptions && findOptions.orderOptions.length == 1) {
-    var onlyOrder = findOptions.orderOptions[0]
+  if (!findOptions.groupResults && findOptions.orderOptions) {
     var defaultOrder = getDefaultOrder(qd, qs);
 
-    if (defaultOrder && onlyOrder.token == defaultOrder.token && onlyOrder.orderType == defaultOrder.orderType)
-      findOptions.orderOptions.remove(onlyOrder);
+    if (equalOrders(defaultOrder, findOptions.orderOptions))
+      findOptions.orderOptions = undefined;
   }
 
   if (findOptions.filterOptions) {
     var defaultFilters = getDefaultFilter(qd, qs);
     if (defaultFilters && defaultFilters.length <= findOptions.filterOptions.length) {
-      if (isEqual(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
+      if (equalFilters(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
         findOptions.filterOptions = findOptions.filterOptions.slice(defaultFilters.length);
         findOptions.includeDefaultFilters = true;
       }
@@ -538,7 +537,22 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
   return findOptions;
 }
 
-function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined): boolean {
+function equalOrders(as: OrderOption[] | undefined, bs: OrderOption[] | undefined): boolean {
+  if (as == undefined && bs == undefined)
+    return true;
+
+  if (as == undefined || bs == undefined)
+    return true;
+
+  return as.length == bs.length && as.every((a, i) => {
+    var b = bs![i];
+
+    return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
+      a.orderType == b.orderType;
+  });
+}
+
+function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undefined): boolean {
 
   if (as == undefined && bs == undefined)
     return true;
@@ -554,23 +568,25 @@ function isEqual(as: FilterOption[] | undefined, bs: FilterOption[] | undefined)
       ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
-      isEqual((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
+      equalFilters((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
   });
 }
 
 export const defaultOrderColumn: string = "Id";
 
-export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefined): OrderOption | undefined {
-  const defaultOrder = qs?.defaultOrderColumn ?? defaultOrderColumn;
+export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefined): OrderOption[] | undefined {
+  if (qs?.defaultOrders)
+    return qs.defaultOrders;
+
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
-  if (defaultOrder == defaultOrderColumn && !qd.columns[defaultOrderColumn])
+  if (!qd.columns[defaultOrderColumn])
     return undefined;
 
-  return {
-    token: defaultOrder,
-    orderType: qs?.defaultOrderType ?? (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
-  } as OrderOption;
+  return [{
+    token: defaultOrderColumn,
+    orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" : "Ascending"
+  }];
 }
 
 export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
@@ -651,7 +667,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     var defaultOrder = getDefaultOrder(qd, qs);
 
     if (defaultOrder)
-      fo.orderOptions = [defaultOrder];
+      fo.orderOptions = defaultOrder;
   }
 
   if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
@@ -1468,8 +1484,7 @@ export interface QuerySettings {
   queryName: PseudoType | QueryKey;
   pagination?: Pagination;
   allowSystemTime?: boolean;
-  defaultOrderColumn?: string | QueryTokenString<any>;
-  defaultOrderType?: OrderType;
+  defaultOrders?: OrderOption[];
   defaultFilters?: FilterOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
