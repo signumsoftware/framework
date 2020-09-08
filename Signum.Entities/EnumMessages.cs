@@ -39,6 +39,9 @@ namespace Signum.Entities
         BulkModifications, 
         [Description("Please confirm that you'd like to apply the above changes and execute {0} over {1} {2}")]
         PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12,
+
+        Predictate, 
+        Setters,
     }
 
     public enum SynchronizerMessage

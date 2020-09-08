@@ -18,6 +18,8 @@ import { getTypeNiceName } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
+import './MultiPropertySetter.css';
+import SelectorModal from '../SelectorModal'
 
 
 
@@ -57,7 +59,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
       </div>
       <div className="modal-body">
         <ErrorBoundary>
-          <MultiPropertySetter setters={p.setters} typeInfo={p.typeInfo} onChange={forceUpdate} />
+          <MultiPropertySetter setters={p.setters} root={PropertyRoute.root(p.typeInfo)} onChange={forceUpdate} />
         </ErrorBoundary>
       </div>
       <div className="modal-footer">
@@ -89,8 +91,7 @@ MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], oper
   return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
 };
 
-export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo: TypeInfo, setters: API.PropertySetter[], onChange: () => void }) {
-
+export function MultiPropertySetter({ root, setters, onChange }: { root: PropertyRoute, setters: API.PropertySetter[], onChange: () => void }) {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -118,7 +119,7 @@ export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo:
           <PropertySetterComponent
             key={i} setter={ps} onDeleteSetter={handleDeletePropertySetter}
             prefixRoute={undefined}
-            typeInfo={typeInfo}
+            root={root}
             isPredicate={false}
             onSetterChanged={() => onChange()} />
         )}
@@ -138,14 +139,6 @@ export function MultiPropertySetter({ typeInfo, setters, onChange }: { typeInfo:
   );
 }
 
-export interface PropertySetterComponentProps {
-  typeInfo: TypeInfo;
-  setter: API.PropertySetter;
-  prefixRoute: PropertyRoute | undefined;
-  onDeleteSetter: (pi: API.PropertySetter) => void;
-  isPredicate: boolean;
-  onSetterChanged: () => void;
-}
 
 export function getPropertyOperations(type: TypeReference): PropertyOperation[] {
   if (type.isCollection)
@@ -158,11 +151,24 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
     return ["Set"];
 
   var typeInfos = tryGetTypeInfos(type.name);
-  if (typeInfos.length > 0)
-    return ["Set", "CreateNewEntiy", "ModifyEntity"];
+  if (typeInfos.length == 0)
+    return [];
 
-  return ["Set"];
+  if (typeInfos[0] == null)
+    return ["Set"];
+
+  return ["Set", "CreateNewEntiy", "ModifyEntity"];
 }
+
+export interface PropertySetterComponentProps {
+  root: PropertyRoute;
+  setter: API.PropertySetter;
+  prefixRoute: PropertyRoute | undefined;
+  onDeleteSetter: (pi: API.PropertySetter) => void;
+  isPredicate: boolean;
+  onSetterChanged: () => void;
+}
+
 
 export function PropertySetterComponent(p: PropertySetterComponentProps) {
 
@@ -174,29 +180,62 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   }
 
   function handlePropertyChanged(newProperty: PropertyRoute | null | undefined) {
-
     const s = p.setter;
-
-    s.value = undefined;
     s.property = newProperty?.propertyPath() ?? undefined!;
     s.operation = newProperty == null ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
-    
-    fixOperation();
-
-    p.onSetterChanged();
-
-    forceUpdate();
+    s.value = undefined;
+    fixOperation(s, newProperty).then(() => {
+      p.onSetterChanged();
+      forceUpdate();
+    }).done();
   }
 
-  function fixOperation() {
-    const f = p.setter;
-
+  function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
+    const operation = (event.currentTarget as HTMLSelectElement).value as PropertyOperation;
+    const s = p.setter;
+    s.operation = operation;
+    fixOperation(s, pr!).then(() => {
+      p.onSetterChanged();
+      forceUpdate();
+    }).done();
   }
 
-  const pr = React.useMemo(() => p.setter.property == null ? null : PropertyRoute.parse(p.typeInfo, p.setter.property),
-    [p.typeInfo, p.setter.property]);
+  function fixOperation(p: API.PropertySetter, pr: PropertyRoute | null | undefined): Promise<void> {
+
+    p.value = undefined;
+    p.predicate = showPredicate(p.operation) ? [] : undefined;
+    p.setters = showSetters(p.operation) ? [] : undefined;
+    if (pr && (p.setters || p.predicate)) {
+      var infos = tryGetTypeInfos(pr.typeReference());
+      var promise = infos.length == 1 && infos[0] ? Promise.resolve(undefined) :
+        SelectorModal.chooseType(infos.notNull().filter(tr => tr!.entityKind == "Part" || tr!.entityKind == "SharedPart"));
+
+      return promise.then(type => { p.entityType = type?.name; });
+    }
+
+    p.entityType = undefined;
+    return Promise.resolve(undefined);
+  }
+
+  function showValue(o: PropertyOperation) {
+    return o == "Set";
+  }
+
+  function showPredicate(o: PropertyOperation) {
+    return o == "ChangeElements" || o == "RemoveElements";
+  }
+
+  function showSetters(o: PropertyOperation) {
+    return o == "AddElement" || o == "ChangeElements" || o == "CreateNewEntiy" || o == "ModifyEntity";
+  }
+
+  const pr = React.useMemo(() => p.setter.property == null ? null : PropertyRoute.parse(p.root.findRootType(), p.setter.property),
+    [p.root, p.setter.property]);
 
   var operations = pr == null ? [] : getPropertyOperations(pr.typeReference());
+
+  var subRoot = pr && (pr.typeReference().isEmbedded ? (pr.typeReference().isCollection ? pr.addMember("Indexer", "Item", true) :  pr) :
+    p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null); 
 
   return (
     <>
@@ -213,12 +252,30 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
             <PropertySelector
               property={pr}
               prefixRoute={p.prefixRoute}
-              typeInfo={p.typeInfo}
+              root={p.root}
               onPropertyChanged={handlePropertyChanged} />
           </div>
         </td>
+        <td>
+          {
+            operations.length == 0 ? null :
+              <select className="form-control form-control-xs" value={p.setter.operation} disabled={operations.length == 1} onChange={handleChangeOperation}>
+                {operations.map((op, i) => <option key={i} value={op}>{PropertyOperation.niceToString(op)}</option>)}
+              </select>
+          }
+        </td>
         <td className="sf-filter-value">
-          {p.setter.property && renderValue()}
+          {p.setter.property && showValue(p.setter.operation) && renderValue()}
+          {subRoot && showPredicate(p.setter.operation) && pr && <div>
+            <h3>{OperationMessage.Predictate.niceToString()}</h3>
+            <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} root={subRoot} />
+          </div>
+          }
+          {subRoot && showSetters(p.setter.operation) && pr && <div>
+            <h3>{OperationMessage.Setters.niceToString()}</h3>
+            <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} root={subRoot} />
+          </div>
+          }
         </td>
       </tr>
     </>
@@ -269,7 +326,7 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
 }
 
 interface PropertySelectorProps {
-  typeInfo: TypeInfo;
+  root: PropertyRoute;
   prefixRoute?: PropertyRoute | undefined;
   property: PropertyRoute | undefined | null;
   onPropertyChanged: (newProperty: PropertyRoute | undefined) => void;
@@ -278,7 +335,9 @@ interface PropertySelectorProps {
 export default function PropertySelector(p: PropertySelectorProps) {
   var lastTokenChanged = React.useRef<string | undefined>(undefined);
 
-  let propertyList: (PropertyRoute | undefined)[] = p.property ? p.property.allParents().filter((pr, i) => i > 0) : [];
+  var rootList = p.root.allParents();
+
+  let propertyList: (PropertyRoute | undefined)[] = p.property ? p.property.allParents().filter((pr, i) => i >= rootList.length) : [];
 
   propertyList.push(undefined);
 
@@ -290,7 +349,7 @@ export default function PropertySelector(p: PropertySelectorProps) {
           p.onPropertyChanged && p.onPropertyChanged(pr);
         }}
         defaultOpen={lastTokenChanged.current && i > 0 && lastTokenChanged.current == propertyList[i - 1]!.propertyPath() ? true : false}
-        parentRoute={i == 0 ? PropertyRoute.root(p.typeInfo) : propertyList[i - 1]!}
+        parentRoute={i == 0 ? p.root : propertyList[i - 1]!}
         selectedRoute={a} />)}
     </div>
   );
@@ -305,15 +364,22 @@ interface PropertyPartProps {
 
 export function PropertyPart(p: PropertyPartProps) {
 
-  const subMembers =
-    p.parentRoute.typeReference().name.contains(",") ||
-      p.parentRoute.typeReference().name == IsByAll ? [] : Dic.getValues(p.parentRoute.subMembers());
+  var tr = p.parentRoute.typeReference();
+
+  if (tr.name.contains(",") || tr.name == IsByAll)
+    return null;
+
+  var ti = tryGetTypeInfo(tr.name);
+  if (p.parentRoute.propertyRouteType != "Root" && ti != null && (ti.entityKind == "Part" || ti?.entityKind != "SharedPart"))
+    return null;
+
+  const subMembers = Dic.getValues(p.parentRoute.subMembers());
 
   if (subMembers.length == 0)
     return null;
 
   return (
-    <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
+    <div className="sf-property-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
       <DropdownList
         filter="contains"
         data={subMembers}
@@ -330,7 +396,7 @@ export function PropertyPart(p: PropertyPartProps) {
 
 
   function handleOnChange(value: MemberInfo) {
-    p.onRouteSelected(p.parentRoute.addMember("Member", value.name, true));
+    p.onRouteSelected(PropertyRoute.parse(p.parentRoute.findRootType(), value.name));
   }
 
   function handleKeyUp(e: React.KeyboardEvent<any>) {

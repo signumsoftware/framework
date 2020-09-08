@@ -396,6 +396,8 @@ export module OperationMessage {
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
   export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
   export const PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12");
+  export const Predictate = new MessageKey("OperationMessage", "Predictate");
+  export const Setters = new MessageKey("OperationMessage", "Setters");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
