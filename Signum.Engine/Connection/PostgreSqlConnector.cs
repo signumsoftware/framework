@@ -48,9 +48,9 @@ namespace Signum.Engine
     {
         public override ParameterBuilder ParameterBuilder { get; protected set; }
 
-        public Version PostgresVersion { get; set; }
+        public Version? PostgresVersion { get; set; }
 
-        public PostgreSqlConnector(string connectionString, Schema schema, Version postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
+        public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
         {
             this.ConnectionString = connectionString;
             this.ParameterBuilder = new PostgreSqlParameterBuilder();
