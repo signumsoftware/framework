@@ -407,7 +407,7 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
         private bool IsEquals(object? newValue, object? oldValue)
         {
             if (newValue is byte[] nba && oldValue is byte[] oba)
-                return MemComparer.Equals(nba, oba);
+                return MemoryExtensions.SequenceEqual<byte>(nba, oba);
 
             if (newValue is DateTime ndt && oldValue is DateTime odt)
                 return Math.Abs(ndt.Subtract(odt).TotalMilliseconds) < 10; //Json dates get rounded
