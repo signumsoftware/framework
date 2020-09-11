@@ -174,7 +174,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
+      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant={currentUserQuery ? "info" : "light"} >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
