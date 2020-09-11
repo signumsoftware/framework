@@ -298,6 +298,8 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Show group")]
+        ShowGroup,
         [Description("Acivate Time Machine")]
         activateTimeMachine,
         [Description("Deactivate Time Machine")]
