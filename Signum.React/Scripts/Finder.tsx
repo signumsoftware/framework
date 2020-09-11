@@ -819,11 +819,16 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroupOptionParsed(fop)) {
 
-      if (fop.pinned!.active == "WhenHasValue" && fop.value == null) {
+      if (fop.pinned.active == "WhenHasValue" && fop.value == null) {
         return undefined;
       }
 
-      return toFilterRequest(fop, { value: fop.value });
+      if (fop.pinned.active == "Checkbox_StartChecked") {
+
+      } else {
+        return toFilterRequest(fop, { value: fop.value });
+      }
+
     }
   }
 
