@@ -94,8 +94,8 @@ SelectorModal.chooseType = (options: TypeInfo[]): Promise<TypeInfo | undefined> 
     });
 };
 
-SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, title?: React.ReactNode, message?: React.ReactNode): Promise<T | undefined> => {
-    return SelectorModal.chooseElement(enumType.values(),
+SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, title?: React.ReactNode, message?: React.ReactNode, values?: T[]): Promise<T | undefined> => {
+    return SelectorModal.chooseElement(values ?? enumType.values(),
       {
         buttonDisplay: a => enumType.niceToString(a),
         buttonName: a => a,

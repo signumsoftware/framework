@@ -7,6 +7,9 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Summe" />
   </Type>
+  <Type Name="BigStringEmbedded" Description="Große Saite">
+    <Member Name="Text" Description="Text" />
+  </Type>
   <Type Name="BooleanEnum">
     <Member Name="False" Description="Nein" />
     <Member Name="True" Description="Ja" />

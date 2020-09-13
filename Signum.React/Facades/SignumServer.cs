@@ -52,6 +52,7 @@ namespace Signum.React.Facades
 
         public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)
         {
+            options.Filters.Add(new SignumInitializeFilterAttribute());
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new CleanThreadContextAndAssertFilter());
             options.Filters.Add(new SignumEnableBufferingFilter());

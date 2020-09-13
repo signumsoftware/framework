@@ -222,27 +222,31 @@ ul.nav-tabs {
 
 
 /*buton colors*/
-.sf-create:hover {
+.sf-create:not(.disabled):hover {
     color: #22BA00;
 }
 
-.sf-remove:hover {
+.sf-remove:not(.disabled):hover {
     color: #CF0000;
 }
 
-.sf-find:hover {
+.sf-find:not(.disabled):hover {
     color: #FFCC00;
 }
 
-.sf-view:hover {
+.sf-view:not(.disabled):hover {
     color: #007CE8;
 }
 
-.sf-move:hover {
+.sf-extra:not(.disabled):hover {
+    color: #9900E0;
+}
+
+.sf-move:not(.disabled):hover {
     color: #9900E0;
     cursor: move;
 }
-.sf-move.sf-move-step:hover {
+.sf-move:not(.disabled).sf-move-step:hover {
     cursor: pointer;
 }
 

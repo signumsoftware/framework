@@ -23,8 +23,10 @@ namespace Signum.Entities.Basics
 
         public Lite<IUserEntity> User { get; set; }
 
+        [Format("G")]
         public DateTime Start { get; set; }
 
+        [Format("G")]
         public DateTime? End { get; set; }
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =

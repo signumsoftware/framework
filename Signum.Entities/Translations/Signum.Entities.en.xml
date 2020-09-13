@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction" />
+  <Type Name="BigStringEmbedded" />
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
   <Type Name="CollectionAnyAllType" />
