@@ -60,7 +60,7 @@ export class HtmlEditorController {
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
-      if (this.binding.getValue() ?? "" == this.lastSave ?? "")
+      if ((this.binding.getValue() ?? "") == (this.lastSave ?? ""))
         this.lastSave = undefined;
       else
         this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));

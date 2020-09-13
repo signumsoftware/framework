@@ -7,7 +7,7 @@ namespace Signum.React.Scheduler
 {
     public static class SystemEventServer
     {
-        public static void Start(IApplicationBuilder app, IHostApplicationLifetime lifetime)
+        public static void LogStartStop(IApplicationBuilder app, IHostApplicationLifetime lifetime)
         {
             SystemEventLogLogic.Log("Application Start");
 

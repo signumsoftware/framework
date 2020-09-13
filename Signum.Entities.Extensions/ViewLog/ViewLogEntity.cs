@@ -21,8 +21,10 @@ namespace Signum.Entities.ViewLog
         [StringLengthValidator(Min = 3, Max = 100)]
         public string ViewAction { get; set; }
 
+        [Format("G")]
         public DateTime StartDate { get; private set; } = TimeZoneManager.Now;
 
+        [Format("G")]
         public DateTime EndDate { get; set; }
 
         [NotifyChildProperty]

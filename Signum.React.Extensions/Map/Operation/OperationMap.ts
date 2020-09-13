@@ -83,8 +83,7 @@ export class OperationMapD3 {
       .force("repulsion", d3.forceManyBody().strength(-200))
       .force("collide", d3.forceCollide(30))
       .force("links", d3.forceLink(map.allLinks))
-      .force("fainInOut", forceFanInOut())
-      ;
+      .force("fainInOut", forceFanInOut());
 
 
     const svg = d3.select(svgElement)

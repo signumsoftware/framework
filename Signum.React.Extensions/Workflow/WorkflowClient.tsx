@@ -162,7 +162,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
       "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
     },
-    defaultOrderColumn: "StartDate",
+    defaultOrders: [{
+      token: "StartDate",
+      orderType: "Ascending"
+    }],
     simpleFilterBuilder: sfbc => {
       var model = InboxFilter.extract(sfbc.initialFilterOptions);
 

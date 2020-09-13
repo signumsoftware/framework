@@ -455,7 +455,7 @@ namespace Signum.Engine.Help
                     var newBytes = new MemoryStream().Do(ms => xml.Save(ms)).ToArray();
                     var oldBytes = File.ReadAllBytes(fullName);
 
-                    if (!MemComparer.Equals(newBytes, oldBytes))
+                    if (!MemoryExtensions.SequenceEqual<byte>(newBytes, oldBytes))
                     {
                         if (SafeConsole.Ask(ref replaceLocal, " Override {0}?".FormatWith(fileName)))
                         {
