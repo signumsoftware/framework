@@ -162,6 +162,9 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
   if (typeInfos[0] == null)
     return ["Set"];
 
+  if (!typeInfos.some(a => a?.entityKind == "Part" || a?.entityKind == "SharedPart"))
+    return ["Set"];
+
   return ["Set", "CreateNewEntiy", "ModifyEntity"];
 }
 
