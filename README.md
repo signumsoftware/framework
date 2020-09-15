@@ -46,6 +46,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2020.09.16 Introducing MultiSetter](https://github.com/signumsoftware/framework/commit/e11a04d81947b89e1b732f4f88f350cbf690010f)
 * [2020.09.10 Adding SignumInitializeFilterAttribute](https://github.com/signumsoftware/framework/commit/8af868d10231629c8f045eb5b86f8431df427811#comments)
 * [2020.08.31 Introducing BigStringEmbedded (move logs to FileSystem/Azure Blob Storage)](https://github.com/signumsoftware/framework/commit/726165e34c9323bb17ba2e006d1e7b128fbde8ba#comments)
 * [2020.08.30 Update to Typescript 4.0 and clean csproj](https://github.com/signumsoftware/framework/commit/98922089a40eb140a372be7e4d8b28c4327df48d#comments)
