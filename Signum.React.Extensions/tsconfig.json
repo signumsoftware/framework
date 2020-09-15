@@ -14,12 +14,12 @@
     "baseUrl": ".",
     "declarationMap": true,
     "paths": {
+      "@framework/*": [ "../../Framework/Signum.React/Scripts/*" ],
       "*": [
         "../../Framework/Signum.React/node_modules/@types/*",
         "../../Framework/Signum.React/node_modules/*",
         "*"
-      ],
-      "@framework/*": [ "../../Framework/Signum.React/Scripts/*" ]
+      ]
     },
     "lib": [
       "es2017",
