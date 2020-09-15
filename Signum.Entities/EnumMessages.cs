@@ -70,7 +70,7 @@ namespace Signum.Entities
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unauthorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
-        [Description("There's already a {0} with {1} equals to '{2}'")]
+        [Description("There is already a {0} with {1} equals to {2}")]
         TheresAlreadyA0With1EqualsTo2_G
     }
 
@@ -307,6 +307,8 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Show group")]
+        ShowGroup,
         [Description("Acivate Time Machine")]
         activateTimeMachine,
         [Description("Deactivate Time Machine")]

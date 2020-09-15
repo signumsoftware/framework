@@ -307,6 +307,7 @@ export module JavascriptMessage {
   export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
   export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
   export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
+  export const ShowGroup = new MessageKey("JavascriptMessage", "ShowGroup");
   export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
   export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
   export const showRecords = new MessageKey("JavascriptMessage", "showRecords");

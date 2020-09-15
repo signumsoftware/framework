@@ -16,7 +16,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -35,6 +35,7 @@ import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -818,11 +819,16 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroupOptionParsed(fop)) {
 
-      if (fop.pinned!.active == "WhenHasValue" && fop.value == null) {
+      if (fop.pinned.active == "WhenHasValue" && fop.value == null) {
         return undefined;
       }
 
-      return toFilterRequest(fop, { value: fop.value });
+      if (fop.pinned.active == "Checkbox_StartChecked") {
+
+      } else {
+        return toFilterRequest(fop, { value: fop.value });
+      }
+
     }
   }
 
@@ -1682,5 +1688,18 @@ export const entityFormatRules: EntityFormatRule[] = [
           {EntityBaseController.viewIcon}
         </span>
       </EntityLink>, "centered-cell")
+  },
+  {
+    name: "View",
+    isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
+    formatter: new EntityFormatter((row, columns, sc) => 
+      <a href="#"
+        className="sf-line-button sf-view"
+        onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+      >
+        <span title={JavascriptMessage.ShowGroup.niceToString()}>
+          <FontAwesomeIcon icon="layer-group"/>
+        </span>
+      </a>, "centered-cell")
   },
 ];
