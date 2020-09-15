@@ -42,6 +42,8 @@ namespace Signum.Entities
 
         Predictate, 
         Setters,
+        [Description("Add setter")]
+        AddSetter,
     }
 
     public enum SynchronizerMessage

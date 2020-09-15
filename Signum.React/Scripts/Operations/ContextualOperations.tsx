@@ -88,7 +88,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       coc.entityOperationSettings = eos;
 
       const visibleByDefault =
-        (!oi.canBeModified || (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(oi)) != "No") &&
+        (!oi.canBeModified || (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc)) != "No") &&
         (oi.operationType != OperationType.ConstructorFrom || ctx.lites.length == 1);
 
       if (eos == undefined ? visibleByDefault :
@@ -335,7 +335,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
     if (!coc.operationInfo.canBeModified)
       return Promise.resolve([]);
 
-    var settersConfig = coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc.operationInfo);
+    var settersConfig = coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc);
 
     if (settersConfig == "No")
       return Promise.resolve([]);
@@ -345,7 +345,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
     if (!onlyType)
       return Promise.resolve([]);
 
-    return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo);
+    return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
   }
 }
 

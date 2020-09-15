@@ -6,6 +6,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.React.Facades;
 using Signum.React.Filters;
@@ -258,7 +259,8 @@ namespace Signum.React.ApiControllers
         public class PropertySetter
         {
             public string Property;
-            public PropertyOperation Operation;
+            public PropertyOperation? Operation;
+            public FilterOperation? FilterOperation;
             public object? Value;
             public string? EntityType;
             public List<PropertySetter>? Predicate;
@@ -338,8 +340,8 @@ namespace Signum.React.ApiControllers
                     {
                         case PropertyOperation.AddElement:
                             {
-                                var item = (ModifiableEntity)Activator.CreateInstance(pr.Type.ElementType()!)!;
-                                SetSetters(item, setter.Setters!, pr);
+                                var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
+                                SetSetters(item, setter.Setters!, elementPr);
                                 ((IList)mlist).Add(item);
                             }
                             break;
@@ -359,7 +361,7 @@ namespace Signum.React.ApiControllers
                                 var toRemove = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
                                 foreach (var item in toRemove)
                                 {
-                                    ((IList)mlist).Add(item);
+                                    ((IList)mlist).Remove(item);
                                 }
                             }
                             break;
@@ -407,7 +409,6 @@ namespace Signum.React.ApiControllers
             return pr.PropertyInfo!.GetValue(subEntity);
         }
 
-        static MethodInfo miEquals = ReflectionTools.GetMethodInfo(() => object.Equals(null, null));
 
         static Expression<Func<object, bool>> GetPredicate(List<PropertySetter> predicate, PropertyRoute mainRoute, JsonSerializer serializer)
         {
@@ -422,7 +423,7 @@ namespace Signum.React.ApiControllers
                 var left = Expression.Invoke(lambda, param);
                 object? objClean = ConvertObject(p.Value, pr, serializer);
 
-                return (Expression)Expression.Call(null, miEquals, left, Expression.Constant(objClean));
+                return (Expression)QueryUtils.GetCompareExpression(p.FilterOperation!.Value, left, Expression.Constant(objClean), inMemory: true);
 
             }).Aggregate((a, b) => Expression.AndAlso(a, b));
 

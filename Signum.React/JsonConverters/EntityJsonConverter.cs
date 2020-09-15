@@ -182,6 +182,17 @@ namespace Signum.React.Json
                     WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, tup.pr);
                 }
 
+                var readonlyProps = PropertyConverter.GetPropertyConverters(value!.GetType())
+                    .Where(kvp => kvp.Value.PropertyValidator?.IsPropertyReadonly(mod) == true)
+                    .Select(a => a.Key)
+                    .ToList();
+
+                if (readonlyProps.Any())
+                {
+                    writer.WritePropertyName("readonlyProperties");
+                    serializer.Serialize(writer, readonlyProps);
+                }
+
                 if (mod.Mixins.Any())
                 {
                     writer.WritePropertyName("mixins");

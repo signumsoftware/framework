@@ -20,6 +20,7 @@ import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
 import './MultiPropertySetter.css';
 import SelectorModal from '../SelectorModal'
+import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
 
 
 
@@ -28,6 +29,7 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   lites: Lite<Entity>[];
   operationInfo: OperationInfo;
   setters: API.PropertySetter[];
+  mandatory: boolean;
 }
 
 export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
@@ -59,7 +61,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
       </div>
       <div className="modal-body">
         <ErrorBoundary>
-          <MultiPropertySetter setters={p.setters} root={PropertyRoute.root(p.typeInfo)} onChange={forceUpdate} />
+          <MultiPropertySetter setters={p.setters} root={PropertyRoute.root(p.typeInfo)} isPredicate={false} onChange={forceUpdate} />
         </ErrorBoundary>
       </div>
       <div className="modal-footer">
@@ -71,7 +73,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || Defaults.defaultSetterConfig(p.operationInfo) == "Mandatory" && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
@@ -86,12 +88,12 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
   }
 }
 
-MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, setters?: API.PropertySetter[]): Promise<API.PropertySetter[] | undefined> => {
+MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: API.PropertySetter[]): Promise<API.PropertySetter[] | undefined> => {
   var settersOrDefault = setters ?? [];
-  return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
+  return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
 };
 
-export function MultiPropertySetter({ root, setters, onChange }: { root: PropertyRoute, setters: API.PropertySetter[], onChange: () => void }) {
+export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: API.PropertySetter[], isPredicate: boolean, onChange: () => void }) {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -103,6 +105,10 @@ export function MultiPropertySetter({ root, setters, onChange }: { root: Propert
     setters.remove(ps);
     onChange();
   }
+
+  var addElement = isPredicate ?
+    SearchMessage.AddFilter.niceToString() :
+    OperationMessage.AddSetter.niceToString()
 
   return (
     <table className="table-sm">
@@ -118,18 +124,17 @@ export function MultiPropertySetter({ root, setters, onChange }: { root: Propert
         {setters.map((ps, i) =>
           <PropertySetterComponent
             key={i} setter={ps} onDeleteSetter={handleDeletePropertySetter}
-            prefixRoute={undefined}
             root={root}
-            isPredicate={false}
+            isPredicate={isPredicate}
             onSetterChanged={() => onChange()} />
         )}
         {
           <tr className="sf-property-create">
             <td colSpan={4}>
-              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+              <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
+                <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{addElement}
               </a>
             </td>
           </tr>
@@ -163,7 +168,6 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
 export interface PropertySetterComponentProps {
   root: PropertyRoute;
   setter: API.PropertySetter;
-  prefixRoute: PropertyRoute | undefined;
   onDeleteSetter: (pi: API.PropertySetter) => void;
   isPredicate: boolean;
   onSetterChanged: () => void;
@@ -181,8 +185,16 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
 
   function handlePropertyChanged(newProperty: PropertyRoute | null | undefined) {
     const s = p.setter;
-    s.property = newProperty?.propertyPath() ?? undefined!;
-    s.operation = newProperty == null ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
+    s.property = newProperty == null ? undefined! :
+      p.root.propertyRouteType == "Root" ? newProperty.propertyPath() :
+        newProperty.propertyPath().after(p.root.propertyPath()).trimStart('.');
+
+    s.operation = newProperty == null || p.isPredicate ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
+
+
+    const filterType = newProperty && getFilterType(newProperty.typeReference());
+    s.filterOperation = newProperty == null || !p.isPredicate || filterType == null ? null! : filterOperations[filterType].firstOrNull()!;
+
     s.value = undefined;
     fixOperation(s, newProperty).then(() => {
       p.onSetterChanged();
@@ -200,11 +212,17 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     }).done();
   }
 
+  function handleChangeFilterOperation(event: React.FormEvent<HTMLSelectElement>) {
+    const fOperation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;
+    const s = p.setter;
+    s.filterOperation = fOperation;
+  }
+
   function fixOperation(p: API.PropertySetter, pr: PropertyRoute | null | undefined): Promise<void> {
 
     p.value = undefined;
-    p.predicate = showPredicate(p.operation) ? [] : undefined;
-    p.setters = showSetters(p.operation) ? [] : undefined;
+    p.predicate = p.operation && showPredicate(p.operation) ? [] : undefined;
+    p.setters = p.operation && showSetters(p.operation) ? [] : undefined;
     if (pr && (p.setters || p.predicate)) {
       var infos = tryGetTypeInfos(pr.typeReference());
       var promise = infos.length == 1 && infos[0] ? Promise.resolve(undefined) :
@@ -229,10 +247,13 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     return o == "AddElement" || o == "ChangeElements" || o == "CreateNewEntiy" || o == "ModifyEntity";
   }
 
-  const pr = React.useMemo(() => p.setter.property == null ? null : PropertyRoute.parse(p.root.findRootType(), p.setter.property),
+  const pr = React.useMemo(() => p.setter.property == null ? null : p.root.addMembers(p.setter.property),
     [p.root, p.setter.property]);
 
-  var operations = pr == null ? [] : getPropertyOperations(pr.typeReference());
+  var operations = pr == null || p.isPredicate ? undefined : getPropertyOperations(pr.typeReference());
+
+  var filterType = p.isPredicate && pr ? getFilterType(pr.typeReference()) : null;
+  var fOperations = filterType ? filterOperations[filterType] : null;
 
   var subRoot = pr && (pr.typeReference().isEmbedded ? (pr.typeReference().isCollection ? pr.addMember("Indexer", "Item", true) :  pr) :
     p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null); 
@@ -251,30 +272,43 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
           <div className="rw-widget-xs">
             <PropertySelector
               property={pr}
-              prefixRoute={p.prefixRoute}
               root={p.root}
               onPropertyChanged={handlePropertyChanged} />
           </div>
         </td>
         <td>
           {
-            operations.length == 0 ? null :
+            operations &&
               <select className="form-control form-control-xs" value={p.setter.operation} disabled={operations.length == 1} onChange={handleChangeOperation}>
                 {operations.map((op, i) => <option key={i} value={op}>{PropertyOperation.niceToString(op)}</option>)}
               </select>
           }
+
+          {
+            fOperations &&
+            <select className="form-control form-control-xs" value={p.setter.filterOperation} disabled={fOperations.length == 1} onChange={handleChangeFilterOperation}>
+              {fOperations.map((op, i) => <option key={i} value={op}>{FilterOperation.niceToString(op)}</option>)}
+            </select>
+          }
         </td>
         <td className="sf-filter-value">
-          {p.setter.property && showValue(p.setter.operation) && renderValue()}
-          {subRoot && showPredicate(p.setter.operation) && pr && <div>
-            <h3>{OperationMessage.Predictate.niceToString()}</h3>
-            <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} root={subRoot} />
-          </div>
-          }
-          {subRoot && showSetters(p.setter.operation) && pr && <div>
-            <h3>{OperationMessage.Setters.niceToString()}</h3>
-            <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} root={subRoot} />
-          </div>
+          {p.isPredicate ?
+            <>
+              {p.setter.property && renderValue()}
+            </> :
+            <>
+              {p.setter.property && p.setter.operation && showValue(p.setter.operation) && renderValue()}
+              {subRoot && p.setter.operation && showPredicate(p.setter.operation) && pr && <div>
+                <h5>{OperationMessage.Predictate.niceToString()}</h5>
+                <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.predicate!} isPredicate={true} root={subRoot} />
+              </div>
+              }
+              {subRoot && p.setter.operation && showSetters(p.setter.operation) && pr && <div>
+                <h5>{OperationMessage.Setters.niceToString()}</h5>
+                <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.setters!} isPredicate={false} root={subRoot} />
+              </div>
+              }
+            </>
           }
         </td>
       </tr>
@@ -301,10 +335,10 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
     return <ValueLine ctx={ctx} onChange={handleValueChange} />;
 
   if (tr.isEmbedded)
-    return <EntityLine ctx={ctx} autocomplete={null} onChange={handleValueChange} />;
+    return <EntityLine ctx={ctx} autocomplete={null} onChange={handleValueChange} create={false} />;
 
   if (tr.isLite)
-    return <EntityLine ctx={ctx} onChange={handleValueChange} />;
+    return <EntityLine ctx={ctx} onChange={handleValueChange} create={false}/>;
 
   var tis = tryGetTypeInfos(tr.name);
 
@@ -327,7 +361,6 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
 
 interface PropertySelectorProps {
   root: PropertyRoute;
-  prefixRoute?: PropertyRoute | undefined;
   property: PropertyRoute | undefined | null;
   onPropertyChanged: (newProperty: PropertyRoute | undefined) => void;
 }

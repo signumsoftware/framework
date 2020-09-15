@@ -19,6 +19,7 @@ import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
+import { FilterOperation } from "./Signum.Entities.DynamicQuery";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -454,11 +455,14 @@ export namespace Defaults {
     return oi.key.endsWith(".Save");
   }
 
-  export function defaultSetterConfig(oi: OperationInfo): SettersConfig {
-    if (!oi.canBeModified)
+  export function defaultSetterConfig(coc: ContextualOperationContext<Entity>): SettersConfig {
+    if (!coc.operationInfo.canBeModified)
       return "No";
 
-    return isSave(oi) ? "Mandatory" : "Optional";
+    if (coc.context.lites.length == 1) //Will create too much noise
+      return "No";
+
+    return isSave(coc.operationInfo) ? "Mandatory" : "Optional";
   }
 
   export function getColor(oi: OperationInfo): BsColor {
@@ -580,7 +584,8 @@ export namespace API {
 
   export interface PropertySetter {
     property: string;
-    operation: PropertyOperation; 
+    operation?: PropertyOperation;
+    filterOperation?: FilterOperation;
     value?: any;
     entityType?: string;
     predicate?: PropertySetter[];

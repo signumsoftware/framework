@@ -11,6 +11,7 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
@@ -398,6 +399,7 @@ export module OperationMessage {
   export const PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12");
   export const Predictate = new MessageKey("OperationMessage", "Predictate");
   export const Setters = new MessageKey("OperationMessage", "Setters");
+  export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
