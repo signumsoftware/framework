@@ -227,7 +227,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
     const text = coc.settings && coc.settings.text ? coc.settings.text() :
       coc.entityOperationSettings?.text ? coc.entityOperationSettings.text() :
-        simplifyName(coc.operationInfo.niceName);
+        <>{simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
 
     const color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
     const icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);

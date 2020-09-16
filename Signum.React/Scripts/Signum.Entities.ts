@@ -401,6 +401,7 @@ export module OperationMessage {
   export const Predictate = new MessageKey("OperationMessage", "Predictate");
   export const Setters = new MessageKey("OperationMessage", "Setters");
   export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
+  export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

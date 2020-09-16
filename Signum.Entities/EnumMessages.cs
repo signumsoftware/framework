@@ -44,6 +44,8 @@ namespace Signum.Entities
         Setters,
         [Description("Add setter")]
         AddSetter,
+        [Description("multi setter")]
+        MultiSetter,
     }
 
     public enum SynchronizerMessage
