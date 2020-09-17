@@ -229,7 +229,7 @@ export function autoLogin(): Promise<UserEntity | undefined> {
       return u;
     });
 
-  return new Promise<UserEntity>((resolve) => {
+  return new Promise<UserEntity | undefined>((resolve) => {
     setTimeout(() => {
       if (getAuthToken()) {
         API.fetchCurrentUser()
