@@ -152,6 +152,9 @@
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
   </Type>
+  <Type Name="BigStringMixin">
+    <Member Name="File" Description="Datei" />
+  </Type>
   <Type Name="BpmnEntityPairEmbedded" Description="Bpmn Entitätenpaar">
     <Member Name="BpmnElementId" Description="Bpmn Elemente Id" />
     <Member Name="Model" Description="Modell" />

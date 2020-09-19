@@ -24,7 +24,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
 
   var message = result?.totalTypes == 0 ? TranslationMessage._0AlreadySynchronized.niceToString(namespace ?? assembly) :
     TranslationMessage.Synchronize0In1.niceToString(namespace ?? assembly, cultures ? cultures[culture].toStr : culture) +
-    (result ? ` [${Dic.getKeys(result.types).length}/${result.totalTypes}]` : null);
+    (result ? ` [${Dic.getKeys(result.types).length}/${result.totalTypes}]` : " …");
 
   useTitle(message);
 

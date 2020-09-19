@@ -23,6 +23,7 @@
   <Type Name="AutoconfigureNeuralNetworkEntity" />
   <Type Name="BaseRulePack`1" />
   <Type Name="BasicPermission" />
+  <Type Name="BigStringMixin" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
   <Type Name="CalendarDayEntity" />

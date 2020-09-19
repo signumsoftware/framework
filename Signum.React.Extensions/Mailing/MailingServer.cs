@@ -66,7 +66,7 @@ namespace Signum.React.Mailing
                     CustomWriteJsonProperty = ctx => { },
                     CustomReadJsonProperty = ctx =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
                         var password = (string)ctx.JsonReader.Value!;
 
@@ -86,7 +86,7 @@ namespace Signum.React.Mailing
                     CustomWriteJsonProperty = ctx => { },
                     CustomReadJsonProperty = ctx =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
                         var password = (string)ctx.JsonReader.Value!;
 
@@ -106,7 +106,7 @@ namespace Signum.React.Mailing
                     CustomWriteJsonProperty = ctx => { },
                     CustomReadJsonProperty = ctx =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword));
+                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
                         var password = (string)ctx.JsonReader.Value!;
 
