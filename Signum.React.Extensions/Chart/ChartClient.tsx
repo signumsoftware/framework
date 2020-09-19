@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import numbro from 'numbro'
 import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
@@ -22,7 +22,7 @@ import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
-import { toMomentFormat } from '@framework/Reflection';
+import { toLuxonFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
@@ -636,10 +636,10 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
-          token.format ? toMomentFormat(token.format) :
-            undefined;
-        return date == null ? String(null) : moment(date).format(format);
+        var format = chartColumn.format ? toLuxonFormat(chartColumn.format) :
+          token.format ? toLuxonFormat(token.format) :
+            "F";
+        return date == null ? String(null) : DateTime.fromISO(date).toFormat(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))

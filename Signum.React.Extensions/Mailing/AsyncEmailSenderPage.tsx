@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { RouteComponentProps } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
@@ -47,7 +47,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
         <br />
         AsyncSenderPeriod: {state.asyncSenderPeriod} sec
         <br />
-        NextPlannedExecution: {state.nextPlannedExecution} ({state.nextPlannedExecution == undefined ? "-None-" : moment(state.nextPlannedExecution).fromNow()})
+        NextPlannedExecution: {state.nextPlannedExecution} ({state.nextPlannedExecution == undefined ? "-None-" : DateTime.fromISO(state.nextPlannedExecution).toRelative()})
         <br />
         IsCancelationRequested: {state.isCancelationRequested}
         <br />

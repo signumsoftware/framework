@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { RouteComponentProps } from 'react-router'
 import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Entities.Workflow'
@@ -27,7 +27,7 @@ export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
             {prev == null ? JavascriptMessage.loading.niceToString() :
               CaseActivityMessage.From0On1.niceToString().formatHtml(
                 <strong>{prev.doneBy!.toStr}</strong>,
-                <strong>{moment(prev.doneDate!).format("L LT")} ({moment(prev.doneDate!).fromNow()})</strong>)
+                <strong>{DateTime.fromISO(prev.doneDate!).toFormat("FFF")} ({DateTime.fromISO(prev.doneDate!).toRelative()})</strong>)
             }
           </div>
       }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -64,7 +64,7 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
         <br />
         SchedulerMargin: {s.schedulerMargin}
         <br />
-        NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : moment(s.nextExecution).fromNow()})
+        NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : DateTime.fromISO(s.nextExecution).toRelative()})
         <br />
         <InMemoryQueue queue={s.queue} onReload={reloadState} />
         <RunningTasks runningTasks={s.runningTask} onReload={reloadState} />
@@ -111,7 +111,7 @@ function InMemoryQueue({ queue, onReload }: { queue: SchedulerItemState[], onRel
               <tr key={i}>
                 <td><EntityLink lite={item.scheduledTask} inSearch={true} onNavigated={onReload} /></td>
                 <td>{item.rule} </td>
-                <td>{item.nextDate} ({moment(item.nextDate).fromNow()})</td>
+                <td>{item.nextDate} ({DateTime.fromISO(item.nextDate).toRelative()})</td>
               </tr>)
             }
           </tbody>
@@ -147,7 +147,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunni
             {runningTasks.map((item, i) =>
               <tr key={i}>
                 <td><EntityLink lite={item.schedulerTaskLog} inSearch={true} onNavigated={onReload} /></td>
-                <td>{item.startTime} ({moment(item.startTime).fromNow()})</td>
+                <td>{item.startTime} ({DateTime.fromISO(item.startTime).toRelative()})</td>
                 <td><pre>{item.remarks}</pre></td>
                 <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
               </tr>)

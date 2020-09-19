@@ -1,12 +1,11 @@
+import { DateTime, DurationUnit } from "luxon"
 import * as d3 from "d3"
-import * as moment from "moment"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
-import { formatAsDate } from "@framework/Lines/ValueLine";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 
@@ -129,14 +128,14 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     };
   }
 
-  function momentUnit(lastPart: string): moment.unitOfTime.Base {
+  function durationUnit(lastPart: string): DurationUnit {
     switch (lastPart) {
-      case "SecondStart": return "s";
-      case "MinuteStart": return "m";
-      case "HourStart": return "h";
-      case "Date": return "d";
-      case "WeekStart": return "w";
-      case "MonthStart": return "M";
+      case "SecondStart": return "second";
+      case "MinuteStart": return "minute";
+      case "HourStart": return "hour";
+      case "Date": return "day";
+      case "WeekStart": return "week";
+      case "MonthStart": return "month";
       default: throw new Error("Unexpected " + lastPart);
     }
   }
@@ -163,8 +162,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Date" || column.type == "DateTime") {
 
-    const unit: moment.unitOfTime.Base | null = columnNomalized.lastPart != null ? momentUnit(columnNomalized.lastPart.key) :
-      columnNomalized.normalized.type.name == "Date" ? "d" : null;
+    const unit: DurationUnit | null = columnNomalized.lastPart != null ? durationUnit(columnNomalized.lastPart.key) :
+      columnNomalized.normalized.type.name == "Date" ? "day" : null;
 
     if (unit == null)
       return values;
@@ -173,7 +172,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       .map(f => {
         const pair = normalizeToken(f.token!);
 
-        const value = moment(f.value);
+        let value = DateTime.fromISO(f.value);
 
         //Date.MonthStart >  1.4.2000
         //             Min-> 1.5.2000
@@ -182,16 +181,16 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //Date.MonthStart == 1.4.2000
         //             Min-> 1.4.2000
         if (f.operation == "GreaterThan" && pair.lastPart != null) {
-          value.add(1, momentUnit(pair.lastPart.key));
+          value = value.plus({ [durationUnit(pair.lastPart.key)]: 1 });
         }
 
-        return value.startOf(unit).format();
+        return value.startOf(unit).toISO();
       })) ?? d3.min(values as string[]);
 
     const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(a => {
         const pair = normalizeToken(a.token!);
-        let value = moment(a.value);
+        let value = DateTime.fromISO(a.value);
 
         //Date.MonthStart <  1.4.2000
         //             Max   1.4.2000
@@ -200,16 +199,16 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //Date.MonthStart == 1.4.2000
         //             Max   1.5.2000
         if ((a.operation == "LessThanOrEqual" || a.operation == "EqualTo"))
-          value.startOf(unit).add(1, pair.lastPart ? momentUnit(pair.lastPart.key) : unit);
+          value = value.startOf(unit).plus({ [pair.lastPart ? durationUnit(pair.lastPart.key) : unit]: 1 });
 
         var aligned = value.startOf(unit);
 
         if (value != aligned)
           value = aligned;
         else
-          value.add(-1, unit);
+          value = value.plus({ [unit]: -1 });
 
-        return value.format();
+        return value.toISO();
       }
       )) ?? d3.min(values as string[]);
 
@@ -217,8 +216,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (min == undefined  || max == undefined)
       return values; 
 
-    const minMoment = moment(min).startOf(unit);
-    const maxMoment = moment(max).endOf(unit);
+    let minMoment = DateTime.fromISO(min).startOf(unit);
+    const maxMoment = DateTime.fromISO(max).endOf(unit);
 
 
     if (unit == null)
@@ -231,8 +230,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
-      minMoment.add(1, unit);
+      allValues.push(column.token!.type.name == "Date" ? minMoment.toISODate() : minMoment.toISO());
+      minMoment = minMoment.plus({ [unit]: 1 });
     }
 
     return complete(values, allValues, column, insertPoint);

@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import { DateTime, Duration } from 'luxon'
 import numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -115,5 +115,5 @@ function formatDuration(duration: number | undefined, unit: string | undefined) 
     return undefined;
 
   var unit = WorkflowActivityEntity.memberInfo(a => a.estimatedDuration).unit;
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({WorkflowClient.durationFormat(moment.duration(duration, "minutes"))})</mark></span>
+  return <span>{numbro(duration).format("0.00")} {unit} <mark>({WorkflowClient.durationFormat(Duration.fromObject({ minutes: duration }))})</mark></span>
 }

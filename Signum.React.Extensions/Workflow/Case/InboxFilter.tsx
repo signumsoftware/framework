@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime, Settings } from 'luxon'
 import { newMListElement } from '@framework/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState, CaseActivityEntity, CaseNotificationEntity } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EnumCheckboxList } from '@framework/Lines'
@@ -65,28 +65,22 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
     if (val.range) {
       var fromDate: string | undefined;
       var toDate: string | undefined;
-      var startOfYear: Date;
-      var isPersian = moment.locale() == "fa";
-      var monthUnit = isPersian ? "jMonth" : "month";
-      var yearUnit = isPersian ? "jYear" : "year";
-      var now: Date = moment(Date.now()).toDate();
 
-      startOfYear = moment(now).startOf(yearUnit as any).toDate();
       switch (val.range) {
         case "All":
           break;
 
         case "LastWeek":
-          fromDate = moment(now).add(-7, "day").toDate().toISOString();
+          fromDate = DateTime.local().plus({ day: -7 }).toISO();
           break;
 
         case "LastMonth":
-          fromDate = moment(now).add(-30, "day").toDate().toISOString();
+          fromDate = DateTime.local().plus({ day: -30 }).toISO();
           break;
 
         case "CurrentYear":
           {
-            fromDate = startOfYear.toISOString();
+            fromDate = DateTime.local().startOf("year").toISO();
             break;
           }
       }
