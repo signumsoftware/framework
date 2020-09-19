@@ -525,6 +525,7 @@ export interface IBinding<T> {
   getValue(): T;
   setValue(val: T): void;
   suffix: string;
+  getIsReadonly(): boolean;
   getError(): string | undefined;
   setError(value: string | undefined): void;
 }
@@ -590,6 +591,11 @@ export class Binding<T> implements IBinding<T> {
     return parentErrors && parentErrors[this.member];
   }
 
+  getIsReadonly(): boolean {
+    const readonlyProperties = (this.parentObject as ModifiableEntity).readonlyProperties;
+    return readonlyProperties != null && readonlyProperties.contains(this.member as string);
+  }
+
   setError(value: string | undefined) {
     const parent = this.parentObject as ModifiableEntity;
 
@@ -619,6 +625,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
   }
   setValue(val: T) {
     throw new Error("Readonly Binding");
+  }
+
+  getIsReadonly() {
+    return true;
   }
 
   getError(): string | undefined {
@@ -658,6 +668,10 @@ export class MListElementBinding<T> implements IBinding<T>{
     mle.rowId = null;
     mle.element = val;
     this.mListBinding.setValue(mlist);
+  }
+
+  getIsReadonly() {
+    return false; //Not sure
   }
 
   getError(): string | undefined {
@@ -1397,8 +1411,8 @@ export class PropertyRoute {
     return PropertyRoute.parse(fullPropertyRoute.substring(1, endPseudoTypeIndex), propertyString);
   }
 
-  static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
-    let result = PropertyRoute.root(rootType);
+  addMembers(propertyString: string): PropertyRoute {
+    let result: PropertyRoute = this;
 
     function splitMixin(text: string): LambdaMember[] {
 
@@ -1443,6 +1457,10 @@ export class PropertyRoute {
     return result;
   }
 
+  static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
+    return PropertyRoute.root(rootType).addMembers(propertyString);
+  }
+
   constructor(
     parent: PropertyRoute | undefined,
     propertyRouteType: PropertyRouteType,
@@ -1455,6 +1473,10 @@ export class PropertyRoute {
     this.rootType = rootType;
     this.member = member;
     this.mixinName = mixinName;
+  }
+
+  allParents(): PropertyRoute[] {
+    return [...this.parent == null ? [] : this.parent.allParents(), this];
   }
 
   addLambda(property: ((val: any) => any) | string): PropertyRoute {

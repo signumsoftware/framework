@@ -11,6 +11,7 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
@@ -306,6 +307,7 @@ export module JavascriptMessage {
   export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
   export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
   export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
+  export const ShowGroup = new MessageKey("JavascriptMessage", "ShowGroup");
   export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
   export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
   export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
@@ -394,6 +396,12 @@ export module OperationMessage {
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
+  export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
+  export const PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12");
+  export const Predictate = new MessageKey("OperationMessage", "Predictate");
+  export const Setters = new MessageKey("OperationMessage", "Setters");
+  export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
+  export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
@@ -412,6 +420,15 @@ export type OperationType =
 export module PaginationMessage {
   export const All = new MessageKey("PaginationMessage", "All");
 }
+
+export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperation");
+export type PropertyOperation =
+  "Set" |
+  "AddElement" |
+  "ChangeElements" |
+  "RemoveElements" |
+  "ModifyEntity" |
+  "CreateNewEntiy";
 
 export module QuickLinkMessage {
   export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");

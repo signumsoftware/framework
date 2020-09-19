@@ -29,7 +29,7 @@ namespace Signum.React.Json
             if (lite.EntityOrNull != null)
             {
                 writer.WritePropertyName("entity");
-                using (JsonSerializerExtensions.SetCurrentPropertyRoute(PropertyRoute.Root(lite.Entity.GetType())))
+                using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((PropertyRoute.Root(lite.Entity.GetType()), lite.EntityOrNull)))
                     serializer.Serialize(writer, lite.Entity);
             }
 

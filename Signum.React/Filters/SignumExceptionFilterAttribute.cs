@@ -154,4 +154,28 @@ namespace Signum.React.Filters
         public string? StackTrace;
         public HttpError? InnerException;
     }
+
+    public class SignumInitializeFilterAttribute : IAsyncResourceFilter
+    {
+        public static Action InitializeDatabase = () => throw new InvalidOperationException("SignumInitializeFilterAttribute.InitializeDatabase should be set in Startup");
+        static object lockKey = new object();
+        public bool Initialized = false;
+
+        public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
+        {
+            if (!Initialized)
+            {
+                lock (lockKey)
+                {
+                    if (!Initialized)
+                    {
+                        InitializeDatabase();
+                        Initialized = true;
+                    }
+                }
+            }
+            
+            return next();
+        }
+    }
 }

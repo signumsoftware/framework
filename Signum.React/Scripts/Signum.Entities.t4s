@@ -4,6 +4,7 @@
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 

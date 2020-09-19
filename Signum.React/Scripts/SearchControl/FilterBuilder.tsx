@@ -314,7 +314,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
                     lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
                     showPinnedFilters={p.showPinnedFilters}
-                    disableValue={p.disableValue || Boolean(fg.pinned)}
+                    disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   /> :
 
                   <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
@@ -322,7 +322,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
                     showPinnedFilters={p.showPinnedFilters}
-                    disableValue={p.disableValue || Boolean(fg.pinned)}
+                    disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   />
                 )}
                 {!p.readOnly &&

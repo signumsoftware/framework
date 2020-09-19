@@ -154,11 +154,12 @@ interface OperationButtonProps extends ButtonProps {
   variant?: BsColor;
   canExecute?: string | null;
   className?: string;
-  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  outline?: boolean;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
   children?: React.ReactNode
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -200,7 +201,10 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     );
   }    
 
-  var button = <Button variant={(eoc.outline ? ("outline-" + eoc.color) as OutlineBsColor: eoc.color)}
+  if (outline == null)
+    outline = eoc.outline;
+
+  var button = <Button variant={(outline? ("outline-" + eoc.color) as OutlineBsColor: eoc.color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
@@ -288,7 +292,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     event.persist();
 
     if (onOperationClick)
-      onOperationClick(eoc);
+      onOperationClick(eoc, event);
     else
       eoc.click();
   }

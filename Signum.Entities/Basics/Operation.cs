@@ -246,4 +246,15 @@ namespace Signum.Entities
         ConstructorFrom,
         ConstructorFromMany
     }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum PropertyOperation
+    {
+        Set,
+        AddElement,
+        ChangeElements,
+        RemoveElements,
+        ModifyEntity,
+        CreateNewEntiy,
+    }
 }

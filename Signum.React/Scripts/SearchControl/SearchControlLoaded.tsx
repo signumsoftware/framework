@@ -815,7 +815,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const rt = this.state.resultTable;
 
     fo.filterOptions.push({
-      token: token,
+      token: token!,
       operation: op,
       value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
       frozen: false
@@ -913,32 +913,34 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (menuItems.length)
         menuItems.push(<Dropdown.Divider />);
 
-      menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}>
-        <span className="fa-layers fa-fw icon">
+      if (cm.columnIndex != null) {
+        menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}>
+          <span className="fa-layers fa-fw icon">
+            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
+          </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+        </Dropdown.Item>);
+
+        menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
           <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
-        </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
-      </Dropdown.Item>);
+          <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
+        </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
+        </Dropdown.Item>);
 
-      menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
-      </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
-      </Dropdown.Item>);
+        menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
+        </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        </Dropdown.Item>);
 
-      menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
-      </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
-      </Dropdown.Item>);
+        menuItems.push(<Dropdown.Divider />);
 
-      menuItems.push(<Dropdown.Divider />);
-
-      menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRemoveOthersColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="times-circle" transform="shrink-4 up-8 right-8" color="black" />
-      </span>&nbsp;{JavascriptMessage.removeOtherColumns.niceToString()}
-      </Dropdown.Item>);
+        menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRemoveOthersColumn}><span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="times-circle" transform="shrink-4 up-8 right-8" color="black" />
+        </span>&nbsp;{JavascriptMessage.removeOtherColumns.niceToString()}
+        </Dropdown.Item>);
+      }
 
       menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
         <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
@@ -1098,7 +1100,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
         </th>
         }
-        {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {(this.props.navigate || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {this.props.findOptions.columnOptions.map((co, i) =>
           <th key={i}
             draggable={true}
@@ -1195,6 +1197,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return [...originalFilters, ...keyFilters];
   }
 
+  openRowGroup(row: ResultRow) {
+
+    var resFo = this.state.resultFindOptions!;
+
+    var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
+      .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
+
+    var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+
+    return Finder.explore({
+      queryName: resFo.queryKey,
+      filterOptions: filters,
+      columnOptions: extraColumns,
+      columnOptionsMode: "Add",
+      systemTime: resFo.systemTime && { ...resFo.systemTime },
+      includeDefaultFilters: false,
+    }).then(() => {
+      this.doSearch(true);
+    });
+  }
+
   handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
 
     if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
@@ -1216,21 +1239,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var resFo = this.state.resultFindOptions;
     if (resFo?.groupResults) {
 
-      var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
-        .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
-
-      var filters = SearchControlLoaded.getGroupFilters(row, resFo);
-
-      Finder.explore({
-        queryName: resFo.queryKey,
-        filterOptions: filters,
-        columnOptions: extraColumns,
-        columnOptionsMode: "Add",
-        systemTime: resFo.systemTime && { ...resFo.systemTime },
-        includeDefaultFilters: false,
-      }).then(() => {
-        this.doSearch(true);
-      }).done();
+      this.openRowGroup(row).done();
 
       return;
     }
@@ -1307,6 +1316,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       const ctx: Finder.CellFormatterContext = {
         refresh: () => this.doSearch(true).done(),
         systemTime: this.props.findOptions.systemTime,
+        columns: resultTable.columns,
         row: row,
         rowIndex : i,
       };
@@ -1322,7 +1332,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             </td>
           }
 
-          {this.props.navigate && !this.props.findOptions.groupResults &&
+          {(this.props.findOptions.groupResults || this.props.navigate) &&
             <td className={entityFormatter.cellClass}>
               {entityFormatter.formatter(row, resultTable.columns, this)}
             </td>
