@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { BigStringEmbedded, ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, EntityLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
@@ -14,7 +14,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <div className="row">
         <div className="col-sm-6">
           <ValueLine ctx={sc.subCtx(f => f.environment)} />
-          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={moment(sc.value.creationDate!).toUserInterface().fromNow()} />
+          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
           <EntityLine ctx={sc.subCtx(f => f.user)} />
           <ValueLine ctx={sc.subCtx(f => f.version)} />
           <ValueLine ctx={sc.subCtx(f => f.threadId)} />

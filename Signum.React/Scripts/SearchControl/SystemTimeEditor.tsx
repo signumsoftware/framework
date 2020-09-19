@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
@@ -115,8 +115,8 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     let st = this.props.findOptions.systemTime!;
     st.mode = e.currentTarget.value as SystemTimeMode;
 
-    st.startDate = st.mode == "All" ? undefined : (st.startDate || asUTC(moment().format()));
-    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || asUTC(moment().format()));
+    st.startDate = st.mode == "All" ? undefined : (st.startDate || asUTC(DateTime.local().toISO()));
+    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || asUTC(DateTime.local().toISO()));
 
     this.forceUpdate();
   }
@@ -136,18 +136,18 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     var systemTime = this.props.findOptions.systemTime!;
 
     const handleDatePickerOnChange = (date?: Date, str?: string) => {
-      const m = moment(date);
-      systemTime[field] = m.isValid() ? asUTC(m.format()) : undefined;
+      const m = date && DateTime.fromJSDate(date);
+      systemTime[field] = m ? asUTC(m.toISO()) : undefined;
     };
 
     var utcDate = systemTime[field]
 
-    var m = moment(utcDate && asLocal(utcDate));
-    var momentFormat = "YYYY-MM-DDTHH:mm:ss";
+    var m = utcDate == null ? null : DateTime.fromISO(asLocal(utcDate));
+    var luxonFormat = "yyyy-MM-dd'T'HH:mm:ss";
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
-        <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange}
-          format={momentFormat} time={true} />
+        <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
+          format={luxonFormat} time={true} />
       </div>
     );
   }

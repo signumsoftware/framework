@@ -1,9 +1,9 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -588,30 +588,30 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
-  const momentFormat = toMomentFormat(s.formatText);
+  const luxonFormat = toLuxonFormat(s.formatText);
 
-  const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
+  const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
+  const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.format(momentFormat)}
+          {m?.toFormat(luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
 
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
-    const m = moment(date);
-    vl.setValue(!m.isValid() ? null :
-      vl.props.type!.name == "Date" ? formatAsDate(m):
-        !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
-          m.format());
+    const m = date && DateTime.fromJSDate(date);
+    vl.setValue(m == null || m.isValid ? null :
+      vl.props.type!.name == "Date" ? m.toISODate():
+        !showTime ? m.toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
+          m.toISO());
   };
 
-  let currentDate = moment(s.ctx.value || undefined);
-  if (!showTime)
+  let currentDate = s.ctx.value == null ? null : DateTime.fromISO(s.ctx.value);
+  if (!showTime && currentDate)
     currentDate = currentDate.startOf("day");
 
   const htmlAttributes = {
@@ -623,16 +623,12 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
-            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
+          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+            format={luxonFormat} time={showTime} defaultCurrentDate={currentDate?.toJSDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}
     </FormGroup>
   );
-}
-
-export function formatAsDate(m: moment.Moment) {
-  return m.format("YYYY-MM-DD");
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {

@@ -1,39 +1,29 @@
-import * as moment from "moment"
+import { DateTime } from 'luxon';
 
 import * as ReactWidgets from 'react-widgets';
 
 export function configure() {
 
-  if (typeof moment !== 'function') throw new TypeError('You must provide a valid moment object');
-
-  const localField = (m: moment.Moment) => m.locale || m.lang,
-    hasLocaleData = !!moment.localeData;
-
-  if (!hasLocaleData) throw new TypeError('The Moment localizer depends on the `localeData` api, please provide a moment object v2.2.0 or higher');
-
-  function getMoment(culture: string, value: any, format: string | undefined) {
-    return culture ? localField(moment(value, format))(culture) : moment(value, format);
-  }
 
   function endOfDecade(date: Date) {
-    return moment(date).add(10, 'year').add(-1, 'millisecond').toDate();
+    return DateTime.fromJSDate(date).plus({ years: 10 }).minus({ millisecond: 1 }).toJSDate();
   }
 
   function endOfCentury(date: Date) {
-    return moment(date).add(100, 'year').add(-1, 'millisecond').toDate();
+    return DateTime.fromJSDate(date).plus({ years: 100 }).minus({ millisecond: 1 }).toJSDate();
   }
 
   const localizer = {
     formats: {
-      date: 'L',
-      time: 'LT',
-      'default': 'lll',
-      header: 'MMMM YYYY',
-      footer: 'LL',
-      weekday: 'dd',
-      dayOfMonth: 'DD',
+      date: 'D',
+      time: 't',
+      'default': 'FF',
+      header: 'MMMM yyyy',
+      footer: 'DDD',
+      weekday: 'EEE',
+      dayOfMonth: 'dd',
       month: 'MMM',
-      year: 'YYYY',
+      year: 'yyyy',
 
       decade: function decade(date: Date, culture: string, localizer: any) {
         return localizer.format(date, 'YYYY', culture) + ' - ' + localizer.format(endOfDecade(date), 'YYYY', culture);
@@ -45,16 +35,24 @@ export function configure() {
     },
 
     firstOfWeek: function firstOfWeek(culture: string) {
-      return (moment.localeData(culture) as any).firstDayOfWeek();
+      var day = fistDay[culture?.tryAfter("-") ?? "ES"];
+
+      switch (day) {
+        case "sun": return 0;
+        case "mon": return 1;
+        case "fri": return 5;
+        case "sat": return 6;
+        default: throw new Error("Unexpected " + day);
+      }
     },
 
     parse: function parse(value: string, format: string, culture: string) {
       if (value == undefined || value == "")
         return undefined;
 
-      var moment = getMoment(culture, value, format);
-      if (moment.isValid())
-        return moment.toDate();
+      var t = DateTime.fromFormat(value, format ?? "F", { locale: culture })
+      if (t.isValid)
+        return t.toJSDate();
 
       return undefined;
     },
@@ -63,33 +61,165 @@ export function configure() {
       if (value == undefined)
         return "";
 
-      return getMoment(culture, value, undefined).format(_format);
+      return DateTime.fromJSDate(value, { locale: culture }).toFormat(_format);
     }
   };
   (ReactWidgets as any).setDateLocalizer(localizer);
 
 }
 
-declare module "moment" {
+//https://github.com/unicode-cldr/cldr-core/blob/master/supplemental/weekData.json#L61
+const fistDay: { [isoCode: string]: "mon" | "sat" | "sun" | "fri" } = {
+  "001": "mon",
+  "AD": "mon",
+  "AE": "sat",
+  "AF": "sat",
+  "AG": "sun",
+  "AI": "mon",
+  "AL": "mon",
+  "AM": "mon",
+  "AN": "mon",
+  "AR": "mon",
+  "AS": "sun",
+  "AT": "mon",
+  "AU": "sun",
+  "AX": "mon",
+  "AZ": "mon",
+  "BA": "mon",
+  "BD": "sun",
+  "BE": "mon",
+  "BG": "mon",
+  "BH": "sat",
+  "BM": "mon",
+  "BN": "mon",
+  "BR": "sun",
+  "BS": "sun",
+  "BT": "sun",
+  "BW": "sun",
+  "BY": "mon",
+  "BZ": "sun",
+  "CA": "sun",
+  "CH": "mon",
+  "CL": "mon",
+  "CM": "mon",
+  "CN": "sun",
+  "CO": "sun",
+  "CR": "mon",
+  "CY": "mon",
+  "CZ": "mon",
+  "DE": "mon",
+  "DJ": "sat",
+  "DK": "mon",
+  "DM": "sun",
+  "DO": "sun",
+  "DZ": "sat",
+  "EC": "mon",
+  "EE": "mon",
+  "EG": "sat",
+  "ES": "mon",
+  "ET": "sun",
+  "FI": "mon",
+  "FJ": "mon",
+  "FO": "mon",
+  "FR": "mon",
+  "GB": "mon",
+  "GB-alt-variant": "sun",
+  "GE": "mon",
+  "GF": "mon",
+  "GP": "mon",
+  "GR": "mon",
+  "GT": "sun",
+  "GU": "sun",
+  "HK": "sun",
+  "HN": "sun",
+  "HR": "mon",
+  "HU": "mon",
+  "ID": "sun",
+  "IE": "mon",
+  "IL": "sun",
+  "IN": "sun",
+  "IQ": "sat",
+  "IR": "sat",
+  "IS": "mon",
+  "IT": "mon",
+  "JM": "sun",
+  "JO": "sat",
+  "JP": "sun",
+  "KE": "sun",
+  "KG": "mon",
+  "KH": "sun",
+  "KR": "sun",
+  "KW": "sat",
+  "KZ": "mon",
+  "LA": "sun",
+  "LB": "mon",
+  "LI": "mon",
+  "LK": "mon",
+  "LT": "mon",
+  "LU": "mon",
+  "LV": "mon",
+  "LY": "sat",
+  "MC": "mon",
+  "MD": "mon",
+  "ME": "mon",
+  "MH": "sun",
+  "MK": "mon",
+  "MM": "sun",
+  "MN": "mon",
+  "MO": "sun",
+  "MQ": "mon",
+  "MT": "sun",
+  "MV": "fri",
+  "MX": "sun",
+  "MY": "mon",
+  "MZ": "sun",
+  "NI": "sun",
+  "NL": "mon",
+  "NO": "mon",
+  "NP": "sun",
+  "NZ": "mon",
+  "OM": "sat",
+  "PA": "sun",
+  "PE": "sun",
+  "PH": "sun",
+  "PK": "sun",
+  "PL": "mon",
+  "PR": "sun",
+  "PT": "sun",
+  "PY": "sun",
+  "QA": "sat",
+  "RE": "mon",
+  "RO": "mon",
+  "RS": "mon",
+  "RU": "mon",
+  "SA": "sun",
+  "SD": "sat",
+  "SE": "mon",
+  "SG": "sun",
+  "SI": "mon",
+  "SK": "mon",
+  "SM": "mon",
+  "SV": "sun",
+  "SY": "sat",
+  "TH": "sun",
+  "TJ": "mon",
+  "TM": "mon",
+  "TR": "mon",
+  "TT": "sun",
+  "TW": "sun",
+  "UA": "mon",
+  "UM": "sun",
+  "US": "sun",
+  "UY": "mon",
+  "UZ": "mon",
+  "VA": "mon",
+  "VE": "sun",
+  "VI": "sun",
+  "VN": "mon",
+  "WS": "sun",
+  "XK": "mon",
+  "YE": "sun",
+  "ZA": "sun",
+  "ZW": "sun"
+};
 
-  interface Moment {
-    fromUserInterface(this: moment.Moment): moment.Moment;
-    toUserInterface(this: moment.Moment): moment.Moment;
-  }
-
-  function smartNow(this: moment.Moment): moment.Moment;
-}
-
-export function asumeGlobalUtcMode(m: typeof moment, utcMode: boolean) {
-  if (utcMode) {
-    m.fn.fromUserInterface = function (this: moment.Moment) { return this.utc(); };
-    m.fn.toUserInterface = function (this: moment.Moment) { return this.local(); };
-    m.smartNow = function () { return moment.utc(); };
-  }
-
-  else {
-    m.fn.fromUserInterface = function (this: moment.Moment) { return this; };
-    m.fn.toUserInterface = function (this: moment.Moment) { return this; };
-    m.smartNow = function () { return moment(); };
-  }
-}

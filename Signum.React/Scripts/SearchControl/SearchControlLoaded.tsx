@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { DomUtils, classes, Dic, softCast } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
@@ -483,7 +483,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
 
     if (fo.systemTime == null)
-      fo.systemTime = { mode: "AsOf", startDate: asUTC(moment().format()) };
+      fo.systemTime = { mode: "AsOf", startDate: asUTC(DateTime.local().toISO()) };
     else
       fo.systemTime = undefined;
 

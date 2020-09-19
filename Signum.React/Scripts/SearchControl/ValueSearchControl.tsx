@@ -1,12 +1,12 @@
 import * as React from 'react'
 import numbro from 'numbro'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName } from '../Reflection'
+import { getQueryKey, toNumbroFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
@@ -285,8 +285,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         const numbroFormat = toNumbroFormat(this.props.format ?? token.format);
         return numbro(value).format(numbroFormat);
       case "DateTime":
-        const momentFormat = toMomentFormat(this.props.format ?? token.format);
-        return moment(value).format(momentFormat);
+        const momentFormat = toLuxonFormat(this.props.format ?? token.format);
+        return DateTime.fromISO(value).toFormat(momentFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);

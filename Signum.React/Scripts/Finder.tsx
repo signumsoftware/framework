@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as moment from "moment"
+import { DateTime } from 'luxon'
 import numbro from "numbro"
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
@@ -21,7 +21,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, tryGetTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumbroFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions
 } from './Reflection';
 
@@ -1602,8 +1602,8 @@ export const formatRules: FormatRule[] = [
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
-      const momentFormat = toMomentFormat(col.token!.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      const luxonFormat = toLuxonFormat(col.token!.format);
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1618,7 +1618,7 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },
@@ -1634,7 +1634,7 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{moment(cell).format("YYYY-MM-DDTHH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },
