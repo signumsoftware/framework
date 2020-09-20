@@ -1,9 +1,8 @@
 import { DateTime, Duration } from 'luxon'
-import numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
-import { durationToString } from '@framework/Reflection';
+import { durationToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -154,5 +153,7 @@ function formatDuration(duration: number | undefined) {
 
   var unit = CaseActivityEntity.memberInfo(a => a.duration).unit;
 
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({durationFormat(Duration.fromObject({ minute: duration }))})</mark></span>
+  var formatNumber = toNumberFormat("0.00");
+
+  return <span>{formatNumber.format(duration)} {unit} <mark>({durationFormat(Duration.fromObject({ minute: duration }))})</mark></span>
 }

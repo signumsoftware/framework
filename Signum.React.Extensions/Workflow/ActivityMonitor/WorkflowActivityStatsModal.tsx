@@ -1,5 +1,4 @@
 import { DateTime, Duration } from 'luxon'
-import numbro from 'numbro'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
@@ -108,12 +107,4 @@ const [show, setShow] = React.useState<boolean>(true);
 
 WorkflowActivityStatsModal.show = (stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> => {
   return openModal<any>(<WorkflowActivityStatsModal stats={stats} config={config} activity={activity} />);
-}
-
-function formatDuration(duration: number | undefined, unit: string | undefined) {
-  if (duration == undefined)
-    return undefined;
-
-  var unit = WorkflowActivityEntity.memberInfo(a => a.estimatedDuration).unit;
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({WorkflowClient.durationFormat(Duration.fromObject({ minutes: duration }))})</mark></span>
 }

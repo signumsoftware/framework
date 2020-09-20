@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as numbro from 'numbro'
 import * as luxon from 'luxon'
 import * as Entities from '@framework/Signum.Entities'
 import * as Operations from '@framework/Operations'
@@ -18,7 +17,6 @@ import * as SelectorModal from '@framework/SelectorModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const globalModules: any = {
-  numbro,
   luxon,
   React,
   Components,

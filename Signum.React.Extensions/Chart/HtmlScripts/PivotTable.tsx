@@ -1,12 +1,11 @@
 import * as React from 'react'
-import numbro from 'numbro'
 import * as Navigator from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
-import { toNumbroFormat } from '@framework/Reflection';
+import { toNumberFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
@@ -262,7 +261,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Values"));
 
-  const numbroFormat = toNumbroFormat(valueColumn.token?.format);
+  const numbroFormat = toNumberFormat(valueColumn.token?.format);
 
   function Cell(p:
     {
@@ -296,7 +295,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbro(val).format(numbroFormat)}</a>;
+    const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbroFormat.format(val)}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :

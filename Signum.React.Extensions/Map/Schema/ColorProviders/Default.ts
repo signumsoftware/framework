@@ -1,9 +1,9 @@
 import * as d3 from 'd3'
-import numbro from 'numbro'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { colorScaleLog } from '../../Utils'
 import { MapMessage } from '../../Signum.Entities.Map'
 import { bytesToSize } from '@framework/Globals'
+import { toNumberFormat } from '@framework/Reflection'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
   const namespaceColor = d3.scaleOrdinal(d3.schemePaired);
@@ -49,7 +49,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   const rows: ClientColorProvider = {
     name: "rows",
     getFill: t => t.rows == null ? "gray" : <any>rowsColor(t.rows),
-    getTooltip: t => numbro(t.rows).format("0a") + " " + MapMessage.Rows.niceToString()
+    getTooltip: t => (t.rows == null ? "" : roundValue(t.rows, scientificUnits)) + " " + MapMessage.Rows.niceToString()
   };
 
   const tableSizeColor = colorScaleLog(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max()!);
@@ -66,7 +66,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
     const rowsHistory: ClientColorProvider = {
       name: "rows_history",
       getFill: t => t.rows_history == null ? "gray" : <any>rowsColorHistory(t.rows_history),
-      getTooltip: t => t.rows_history == null ? "No history table" : numbro(t.rows_history).format("0a") + " " + MapMessage.Rows.niceToString()
+      getTooltip: t => t.rows_history == null ? "No history table" : roundValue(t.rows_history, scientificUnits) + " " + MapMessage.Rows.niceToString()
     };
 
     result.push(rowsHistory);
@@ -84,6 +84,25 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
   }
 
   return result;
+}
+
+const scientificUnits = [ "", "k", "m", "b", "t" ];
+const computerUnitsAbrev = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" ];
+const computerUnits = ["Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" ];
+
+export function roundValue(value: number, units: string[]) {
+
+  let valor = value;
+  let i;
+
+  var base = units == scientificUnits ? 1000 : 1024;
+
+  for (i = 0; i < units.length && valor >= base; i++)
+    valor /= base;
+
+  var numberFormat = toNumberFormat("N2");
+
+  return numberFormat.format(valor) + " " + units[i];
 }
 
 
