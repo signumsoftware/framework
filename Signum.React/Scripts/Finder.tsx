@@ -1,6 +1,5 @@
 import * as React from "react";
 import { DateTime } from 'luxon'
-import numbro from "numbro"
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
 import { Dic, classes } from './Globals'
@@ -21,7 +20,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumbroFormat, PseudoType, EntityData,
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions
 } from './Reflection';
 
@@ -1642,16 +1641,16 @@ export const formatRules: FormatRule[] = [
     name: "Number",
     isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
     formatter: col => {
-      const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
+      const numberFormat = toNumberFormat(col.token!.format);
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell)}</span>, "numeric-cell");
     }
   },
   {
     name: "Number with Unit",
     isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
     formatter: col => {
-      const numbroFormat = toNumbroFormat(col.token!.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+      const numberFormat = toNumberFormat(col.token!.format);
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
     }
   },
   {

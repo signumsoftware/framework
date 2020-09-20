@@ -5,7 +5,7 @@ import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, fil
 import { SearchMessage } from '../Signum.Entities'
 import { isNumber } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos } from '../Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -582,8 +582,10 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     if (p.readonly)
       return <span className="numeric form-control form-control-xs" style={{ width: "60px" }}>{val}</span>;
 
+    var numberFormat = toNumberFormat("0");
+
     return (
-      <NumericTextBox value={val == undefined ? null : val} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
+      <NumericTextBox value={val == undefined ? null : val} format={numberFormat} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
         validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "60px" } }} />
     );
   }

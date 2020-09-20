@@ -1,5 +1,4 @@
 import { DateTime} from 'luxon';
-import numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -120,38 +119,80 @@ export function toDurationFormat(format: string | undefined): string | undefined
   return format.replace("\\:", ":");
 }
 
-export function toNumbroFormat(format: string | undefined) {
+export namespace NumberFormatSettings {
+  export let defaultNumberFormatLocale: string = null!;
+}
+
+//https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
+export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
+  return new Intl.NumberFormat(locale ?? NumberFormatSettings.defaultNumberFormatLocale, toNumberFormatOptions(format));
+}
+
+export function toNumberFormatOptions(format: string | undefined): Intl.NumberFormatOptions | undefined {
 
   if (format == undefined)
     return undefined;
 
   const f = format.toUpperCase();
 
-  if (f.startsWith("C"))
-    return "0." + "0".repeat(parseInt(f.after("C") || "2"));
+  if (f.startsWith("C")) //unit comes separated
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("C")) || 2,
+      maximumFractionDigits: parseInt(f.after("C")) || 2,
+      useGrouping: true,
+    }
 
   if (f.startsWith("N"))
-    return "0,0." + "0".repeat(parseInt(f.after("N") || "2"));
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("N")) || 2,
+      maximumFractionDigits: parseInt(f.after("N")) || 2,
+      useGrouping: true,
+    }
 
   if (f.startsWith("D"))
-    return "0".repeat(parseInt(f.after("D") || "1"));
+    return {
+      style: "decimal",
+      maximumFractionDigits: 0,
+      minimumIntegerDigits: parseInt(f.after("D")) || 1,
+      useGrouping: false,
+    }
 
   if (f.startsWith("F"))
-    return "0." + "0".repeat(parseInt(f.after("F") || "2"));
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("F")) || 2,
+      maximumFractionDigits: parseInt(f.after("F")) || 2,
+      useGrouping: false,
+    }
 
   if (f.startsWith("E"))
-    return "0." + "0".repeat(parseInt(f.after("E") || "2"));
+    return {
+      style: "decimal",
+      notation: "scientific",
+      minimumFractionDigits: parseInt(f.after("E")) || 6,
+      maximumFractionDigits: parseInt(f.after("E")) || 6,
+      useGrouping: false,
+    } as any;
 
   if (f.startsWith("P"))
-    return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
+    return {
+      style: "percent",
+      minimumFractionDigits: parseInt(f.after("P")) || 2,
+      maximumFractionDigits: parseInt(f.after("P")) || 2,
+      useGrouping: false,
+    }
 
-  if (f.contains("#"))
-    format = format
-      .replaceAll(".#", "[.]0")
-      .replaceAll(",#", "[,]0")
-      .replaceAll("#", "0");
 
-  return format;
+  //simple euristic
+  var afterDot = f.tryAfter(".") ?? "";
+  return {
+    style: "decimal",
+    minimumFractionDigits: afterDot.trimStart("#").length,
+    maximumFractionDigits: afterDot.length,
+    useGrouping: f.contains(","),
+  }
 }
 
 export function valToString(val: any) {
@@ -165,7 +206,7 @@ export function numberToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  return numbro(val).format(toNumbroFormat(format));
+  return toNumberFormat(format).format(val);
 }
 
 export function dateToString(val: any, format?: string) {

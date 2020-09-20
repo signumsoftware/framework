@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import numbro from 'numbro'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -12,6 +11,7 @@ import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
+import { isPrefix } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -455,14 +455,14 @@ ValueLineRenderers.renderers["Decimal" as ValueLineType] = (vl) => {
 function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
 
-  const numbroFormat = toNumbroFormat(s.formatText);
+  const numberFormat = toNumberFormat(s.formatText);
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.inputElement}>
-            {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
+            {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
     );
@@ -498,7 +498,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
           onChange={handleOnChange}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
-          format={numbroFormat}
+          format={numberFormat}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>}
         />
       )}
@@ -510,7 +510,7 @@ export interface NumericTextBoxProps {
   value: number | null;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
-  format?: string;
+  format: Intl.NumberFormat;
   formControlClass?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
@@ -522,7 +522,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
 
   const value = text != undefined ? text :
-    p.value != undefined ? numbro(p.value).format(p.format) :
+    p.value != undefined ? p.format?.format(p.value) :
       "";
 
   return <input ref={p.innerRef} {...p.htmlAttributes}
@@ -552,21 +552,39 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
     let value = ValueLineController.autoFixString(input.value, false);
 
-    if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-      value = value + ",00";
+    //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
+    //  value = value + ",00";
 
-    if (p.format && p.format.endsWith("%")) {
-      if (value && !value.endsWith("%"))
-        value += "%";
-    }
-
-    const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, p.format);
+    const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
     setText(undefined);
     if (result != p.value)
       p.onChange(result);
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
+  }
+
+  function unformat(format: Intl.NumberFormat, str: string): number {
+    var isPercentage = format.resolvedOptions().style == "percent";
+    if (isPercentage) {
+      format = new Intl.NumberFormat(format.resolvedOptions().locale);
+    }
+
+    const thousandSeparator = format.format(1111).replace(/1/g, '');
+    const decimalSeparator = format.format(1.1).replace(/1/g, '');
+
+    if (thousandSeparator)
+      str = str.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
+
+    if (decimalSeparator)
+      str = str.replace(new RegExp('\\' + decimalSeparator), '.');
+
+    var result =  parseFloat(str);
+
+    if (isPercentage)
+      return result / 100;
+
+    return result;
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
