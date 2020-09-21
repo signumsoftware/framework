@@ -46,6 +46,9 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2020.09.21 Switch to core-js for polyfills](https://github.com/signumsoftware/framework/commit/c7b5c44af40eafd3325f76cb74b39e4a7d712404#comments)
+* [2020.09.21 Replace numbro.js by Intl.NumberFormat](https://github.com/signumsoftware/framework/commit/e2de807e055f68e359949d1c6e2c21b5d093ed7f#commitcomment-42575661)
+* [2020.09.21 Replace moment.js by luxon](https://github.com/signumsoftware/framework/commit/b2096177de9f84c91d226e1a6080386c55566d2a#commitcomment-42575134)
 * [2020.09.16 Introducing MultiPropertySetter](https://github.com/signumsoftware/framework/commit/e11a04d81947b89e1b732f4f88f350cbf690010f)
 * [2020.09.10 Adding SignumInitializeFilterAttribute](https://github.com/signumsoftware/framework/commit/8af868d10231629c8f045eb5b86f8431df427811#comments)
 * [2020.08.31 Introducing BigStringEmbedded (move logs to FileSystem/Azure Blob Storage)](https://github.com/signumsoftware/framework/commit/726165e34c9323bb17ba2e006d1e7b128fbde8ba#comments)
