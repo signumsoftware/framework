@@ -62,7 +62,7 @@ export function LinkContainer(p: LinkContainerProps) {
         var path = typeof to === 'object' ? to.pathname : to;
 
         const match = path ? matchPath(path, { exact, strict }) : null;
-        const isActive = !!(getIsActive ? getIsActive(match, context.location) : match);
+        const isActive = !!(getIsActive ? getIsActive(match, context.location as any) : match);
 
         return React.cloneElement(
           child,
