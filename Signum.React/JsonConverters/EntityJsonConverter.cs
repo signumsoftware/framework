@@ -308,7 +308,8 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                     using (JsonSerializerExtensions.SetAllowDirectMListChanges(markedAsModified))
                         while (reader.TokenType == JsonToken.PropertyName)
                         {
-                            if ((string)reader.Value! == "mixins")
+                            var propertyName = (string)reader.Value!;
+                            if (propertyName == "mixins")
                             {
                                 reader.Read();
                                 reader.Assert(JsonToken.StartObject);
@@ -329,12 +330,16 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
                                 reader.Assert(JsonToken.EndObject);
                                 reader.Read();
                             }
+                            else if (propertyName == "readonlyProperties")
+                            {
+                                reader.Read();
+                                serializer.Deserialize(reader, typeof(List<string>));
+                                reader.Read();
+                            }
                             else
                             {
-                                var propertyName = (string)reader.Value!;
-                                
                                 PropertyConverter? pc = dic.TryGetC(propertyName);
-                                if(pc == null)
+                                if (pc == null)
                                 {
                                     if (specialProps.Contains(propertyName))
                                         throw new InvalidOperationException($"Property '{propertyName}' is a special property like {specialProps.ToString(a => $"'{a}'", ", ")}, and they can only be at the beginning of the Json object for performance reasons");

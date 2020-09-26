@@ -509,14 +509,18 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.EqualTo:
                     {
                         if (inMemory)
-                            return Expression.Call(null, miEquals, left, right);
+                            return Expression.Call(null, miEquals, 
+                                Expression.Convert(left, typeof(object)), 
+                                Expression.Convert(right, typeof(object)));
 
                         return Expression.Equal(left, right);
                     }
                 case FilterOperation.DistinctTo:
                     {
                         if (inMemory)
-                            return Expression.Not(Expression.Call(null, miEquals, left, right));
+                            return Expression.Not(Expression.Call(null, miEquals,
+                                Expression.Convert(left, typeof(object)),
+                                Expression.Convert(right, typeof(object))));
 
                         var t = left.Type.UnNullify();
                         var mi = t.IsValueType ? miDistinctNullable : miDistinct;
