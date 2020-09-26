@@ -991,6 +991,19 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
 
+
+        public static void DeleteTry<T>(this Lite<T> lite)
+       where T : class, IEntity
+        {
+            if (lite == null)
+                throw new ArgumentNullException(nameof(lite));
+
+            if (lite.IsNew)
+                throw new ArgumentNullException("lite is New");
+
+            giDeleteTryId.GetInvoker(lite.EntityType)(lite.Id);
+        }
+
         public static void Delete<T>(this T ident)
             where T : class, IEntity
         {
@@ -1001,6 +1014,18 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException("ident is New");
 
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
+        }
+
+        public static void DeleteTry<T>(this T ident)
+        where T : class, IEntity
+        {
+            if (ident == null)
+                throw new ArgumentNullException(nameof(ident));
+
+            if (ident.IsNew)
+                throw new ArgumentNullException("ident is New");
+
+            giDeleteTryId.GetInvoker(ident.GetType())(ident.Id);
         }
 
         static readonly GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<Entity>(id));
@@ -1015,6 +1040,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             }
         }
 
+        static readonly GenericInvoker<Action<PrimaryKey>> giDeleteTryId = new GenericInvoker<Action<PrimaryKey>>(id => DeleteTry<Entity>(id));
+        public static void DeleteTry<T>(PrimaryKey id)
+       where T : Entity
+        {
+            using (HeavyProfiler.Log("DBDelete", () => typeof(T).TypeName()))
+            {
+                int result = Database.Query<T>().Where(a => a.Id == id).UnsafeDelete();
+            }
+        }
 
         public static void DeleteList<T>(IList<T> collection)
             where T : IEntity
