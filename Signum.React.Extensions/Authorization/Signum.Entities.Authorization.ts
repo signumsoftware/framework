@@ -414,4 +414,24 @@ export interface UserTicketEntity extends Entities.Entity {
   device: string;
 }
 
+export const WebAuthnCredentialEntity = new Type<WebAuthnCredentialEntity>("WebAuthnCredential");
+export interface WebAuthnCredentialEntity extends Entities.Entity {
+  Type: "WebAuthnCredential";
+  user: Entities.Lite<UserEntity>;
+  creationDate: string;
+  credentialId: string;
+  counter: number;
+  credType: string;
+  aaguid: string;
+  publicKey: string;
+}
+
+export const WebAuthnCredentialsCreateOptionsEntity = new Type<WebAuthnCredentialsCreateOptionsEntity>("WebAuthnCredentialsCreateOptions");
+export interface WebAuthnCredentialsCreateOptionsEntity extends Entities.Entity {
+  Type: "WebAuthnCredentialsCreateOptions";
+  user: Entities.Lite<UserEntity>;
+  creationDate: string;
+  json: string;
+}
+
 

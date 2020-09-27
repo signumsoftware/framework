@@ -34,6 +34,8 @@
 
 
   <ItemGroup>
+    <PackageReference Include="Fido2" Version="1.1.0" />
+    <PackageReference Include="Fido2.Models" Version="1.1.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.7.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.7.1" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.2">

@@ -33,8 +33,6 @@ namespace Signum.React.Authorization
             PermissionAuthLogic.SetPermissionRules(rules);
         }
 
-
-
         [HttpGet("api/authAdmin/typeRules/{roleId}")]
         public TypeRulePack GetTypeRules(string roleId)
         {
