@@ -14,11 +14,15 @@ namespace Signum.Engine.Authorization
 {
     public static class WebAuthnLogic
     {
-        public static void Start(SchemaBuilder sb)
+        public static Func<WebAuthnConfigurationEmbedded> GetConfig = null!;
+
+        public static void Start(SchemaBuilder sb, Func<WebAuthnConfigurationEmbedded> getConfig)
         {
             if (sb.NotDefined(MethodBase.GetCurrentMethod()))
             {
+                GetConfig = getConfig;
                 sb.Include<WebAuthnCredentialEntity>()
+                    .WithDelete(WebAuthnCredentialOperation.Delete)
                     .WithQuery(() => e => new
                     {
                         Entity = e,
@@ -30,12 +34,22 @@ namespace Signum.Engine.Authorization
                         e.Counter,
                     });
 
-                sb.Include<WebAuthnCredentialsCreateOptionsEntity>()
+                sb.Include<WebAuthnMakeCredentialsOptionsEntity>()
                     .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.User,
+                        e.CreationDate,
+                        e.Json,
+                    });
+
+
+                sb.Include<WebAuthnAssertionOptionsEntity>()
+                    .WithQuery(() => e => new
+                    {
+                        Entity = e,
+                        e.Id,
                         e.CreationDate,
                         e.Json,
                     });

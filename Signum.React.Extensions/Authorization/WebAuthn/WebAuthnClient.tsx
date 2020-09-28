@@ -1,12 +1,14 @@
 import * as React from "react";
+import { NavDropdown } from "react-bootstrap";
 import * as Services from '@framework/Services';
 import * as AuthClient from '../AuthClient';
 import { ImportRoute } from "@framework/AsyncImport";
-import Login, { LoginWithWindowsButton } from "../Login/Login";
+import { LoginContext } from "../Login/Login";
 import * as AppContext from "@framework/AppContext";
-import { UserEntity, PermissionSymbol } from "../Signum.Entities.Authorization";
+import { UserEntity, PermissionSymbol, LoginAuthMessage } from "../Signum.Entities.Authorization";
 import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
-import { is, Lite, toLite } from "@framework/Signum.Entities";
+import { getToString, is, JavascriptMessage, Lite, toLite } from "@framework/Signum.Entities";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
@@ -22,29 +24,64 @@ export function start(options: { routes: JSX.Element[], applicationName: string 
   applicationName = options.applicationName;
 }
 
+export function webAuthnDisplayName() {
+
+  if (typeof (PublicKeyCredential) == "undefined")
+    return undefined;
+
+  if (navigator.platform.contains("Win"))
+    return "Windows Hello / PIN";
+
+  if (navigator.platform.contains("iPhone") ||
+    navigator.platform.contains("iPad") ||
+    navigator.platform.contains("iPod") || 
+    navigator.platform.contains("Mac"))
+    return "Apple Face ID / Touch ID";
+
+  if (navigator.platform.contains("Android") || 
+    navigator.platform.contains("Linux"))
+    return "Android Fingerprint";
+
+  return "WebAuthn / FIDO2 device";
+}
+
+export function WebAuthnRegisterMenuItem() {
+  var displayName = webAuthnDisplayName();
+
+  if (displayName == null)
+    return null;
+
+  return (
+    <NavDropdown.Item onClick={() => register()}>
+      <FontAwesomeIcon icon="fingerprint" fixedWidth className="mr-2" /> {LoginAuthMessage.Register0.niceToString(displayName)}
+    </NavDropdown.Item>
+  );
+}
 
 export function register() {
   var user = AuthClient.currentUser();
-  API.makeCredentialOptions({ user: toLite(user) })
+  API.makeCredentialOptions()
     .then(response => {
 
       const options = response.credentialCreateOptions;
       // Turn the challenge back into the accepted format of padded base64
-      options.challenge = coerceToArrayBuffer(options.challenge, "challenge");
+      options.challenge = toArrayBuffer(options.challenge, "challenge");
       // Turn ID into a UInt8Array Buffer for some reason
-      options.user.id = coerceToArrayBuffer(options.user.id, "user.id");
+      options.user.id = toArrayBuffer(options.user.id, "user.id");
 
       options.excludeCredentials?.forEach((c) => {
-        c.id = coerceToArrayBuffer(c.id, "excludeCredentials/id");
+        c.id = toArrayBuffer(c.id, "excludeCredentials/id");
         return c;
       });
 
       if (options.authenticatorSelection?.authenticatorAttachment === null)
         options.authenticatorSelection.authenticatorAttachment = undefined;
 
-      navigator.credentials.create({
+      debugger;
+      return navigator.credentials.create({
         publicKey: options
       }).then(credential => {
+        debugger;
         if (credential == null)
           return;
 
@@ -54,32 +91,120 @@ export function register() {
         const clientDataJSON = new Uint8Array(newCredential.response.clientDataJSON);
         const rawId = new Uint8Array(newCredential.rawId);
 
-        API.makeCredential({
+        return API.makeCredential({
           createOptionsId: response.createOptionsId,
           attestationRawResponse: {
             id: newCredential.id,
-            rawId: coerceToBase64Url(rawId),
+            rawId: toBase64Url(rawId),
             type: newCredential.type,
             extensions: newCredential.getClientExtensionResults(),
             response: {
-              attestationObject: coerceToBase64Url(attestationObject),
-              clientDataJson: coerceToBase64Url(clientDataJSON)
+              attestationObject: toBase64Url(attestationObject),
+              clientDataJson: toBase64Url(clientDataJSON)
             }
           }
         })
-          .then(() => MessageModal.show({ title: "Success", message: "WebAuthn Credentials created sucessfully!", buttons: "ok" }))
-          .done();
-
+          .then(() => MessageModal.show({
+            title: "Success",
+            message: <>
+              <p>
+                {LoginAuthMessage._0HasBeenSucessfullyAssociatedWithUser1InThisDevice.niceToString().formatHtml(
+                  <strong>{webAuthnDisplayName()}</strong>,
+                  <strong>{getToString(user)}</strong>)
+                }
+              </p>
+              <p>{LoginAuthMessage.TryToLogInWithIt.niceToString()}</p>
+            </>,
+            buttons: "ok"
+          }));
       });
     }).done();
 }
 
-export function login() {
+export function WebAuthnLoginButton({ ctx }: { ctx: LoginContext }) {
+  var displayName = webAuthnDisplayName();
+
+  if (displayName == null)
+    return null;
+
+  return (
+
+    <div className="row" style={{ paddingTop: "1rem" }}>
+      <div className="col-md-6 offset-md-3">
+        <button id="loginWebAuthn" className="btn btn-info" disabled={ctx.loading != null} onClick={() => login(ctx)}>
+          {ctx.loading == "webauthn" ? <FontAwesomeIcon icon="cog" fixedWidth style={{ fontSize: "larger" }} spin /> : <FontAwesomeIcon icon="fingerprint" />}
+      &nbsp;
+      {ctx.loading == "webauthn" ? JavascriptMessage.loading.niceToString() : LoginAuthMessage.LoginWith0.niceToString(displayName)}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function fromBase64UrlToUint8Array(base64Url: string): Uint8Array {
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+}
+
+export function login(ctx: LoginContext) {
+
+  ctx.setLoading("webathn");
+
+  API.assertionOptions({ userName: ctx.userName.current!.value! })
+    .then(aor => {
+
+      var options = aor.assertionOptions;
+
+      // todo: switch this to coercebase64
+      options.challenge = fromBase64UrlToUint8Array(options.challenge as any as string);
+
+      // fix escaping. Change this to coerce
+      options.allowCredentials!.forEach(credDescr => {
+        credDescr.id = fromBase64UrlToUint8Array(credDescr.id as any as string);
+      });
+
+      return navigator.credentials.get({ publicKey: aor.assertionOptions })
+        .then(credential => {
+
+          const assertedCredential = credential as PublicKeyCredential;
+
+          const response = assertedCredential.response as AuthenticatorAssertionResponse;
+
+          let authData = new Uint8Array(response.authenticatorData);
+          let clientDataJSON = new Uint8Array(response.clientDataJSON);
+          let rawId = new Uint8Array(assertedCredential.rawId);
+          let sig = new Uint8Array(response.signature);
+
+          return API.makeAssertion({
+            assertionOptionsId: aor.assertionOptionsId,
+            assertionRawResponse: {
+              id: assertedCredential.id,
+              rawId: toBase64Url(rawId),
+              type: assertedCredential.type,
+              extensions: assertedCredential.getClientExtensionResults(),
+              response: {
+                authenticatorData: toBase64Url(authData),
+                clientDataJson: toBase64Url(clientDataJSON),
+                signature: toBase64Url(sig)
+              }
+            }
+          }).then(lr => {
+            AuthClient.setAuthToken(lr.token, lr.authenticationType);
+            AuthClient.setCurrentUser(lr.userEntity);
+            AuthClient.Options.onLogin();
+          })
+        }); 
+    })
+    .catch(e => {
+      ctx.setLoading(undefined);
+      throw e;
+    })
+    .done();
 
 }
 
 
-function coerceToArrayBuffer(thing: unknown, name: string): ArrayBuffer{
+function toArrayBuffer(thing: unknown, name: string): ArrayBuffer{
   if (typeof thing === "string") {
     // base64url to base64
     thing = thing.replace(/-/g, "+").replace(/_/g, "/");
@@ -112,7 +237,7 @@ function coerceToArrayBuffer(thing: unknown, name: string): ArrayBuffer{
 };
 
 
-function coerceToBase64Url(thing: unknown) : string {
+function toBase64Url(thing: unknown) : string {
   // Array or ArrayBuffer to Uint8Array
   if (Array.isArray(thing)) {
     thing = Uint8Array.from(thing);
@@ -144,18 +269,23 @@ function coerceToBase64Url(thing: unknown) : string {
   return thing as string;
 }
 
-
 export module API {
 
-  export function makeCredentialOptions(request: { user: Lite<UserEntity> }): Promise<MakeCredentialOptionsResponse> {
-    return ajaxPost({ url: "~/api/webauthn/makeCredentialOptions" }, request);
+  export function makeCredentialOptions(): Promise<MakeCredentialOptionsResponse> {
+    return ajaxPost({ url: "~/api/webauthn/makeCredentialOptions" }, null);
   }
 
   export function makeCredential(request: { createOptionsId: string, attestationRawResponse: AuthenticatorAttestationRawResponse }): Promise<MakeCredentialOptionsResponse> {
     return ajaxPost({ url: "~/api/webauthn/makeCredential" }, request);
   }
 
+  export function assertionOptions(request: { userName: string }): Promise<AssertionOptionsResponse> {
+    return ajaxPost({ url: "~/api/webauthn/assertionOptions" }, request);
+  }
 
+  export function makeAssertion(request: { assertionOptionsId: string, assertionRawResponse: AuthenticatorAssertionRawResponse }): Promise<AuthClient.API.LoginResponse> {
+    return ajaxPost({ url: "~/api/webauthn/makeAssertion" }, request);
+  }
 }
 
 export interface MakeCredentialOptionsResponse {
@@ -174,3 +304,20 @@ export interface AuthenticatorAttestationRawResponse {
   extensions: AuthenticationExtensionsClientOutputs;
 }
 
+export interface AssertionOptionsResponse {
+  assertionOptions: PublicKeyCredentialRequestOptions;
+  assertionOptionsId: string;
+}
+
+export interface AuthenticatorAssertionRawResponse {
+  id: string;
+  rawId: string;
+  type: string;
+  response: {
+    authenticatorData: string;
+    signature: string;
+    clientDataJson: string;
+    userHandle?: string;
+  },
+  extensions: AuthenticationExtensionsClientOutputs;
+}

@@ -147,6 +147,11 @@ export module LoginAuthMessage {
   export const InvalidPassword = new MessageKey("LoginAuthMessage", "InvalidPassword");
   export const AnErrorOccurredRequestNotProcessed = new MessageKey("LoginAuthMessage", "AnErrorOccurredRequestNotProcessed");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("LoginAuthMessage", "TheUserIsNotLongerInTheDatabase");
+  export const Register0 = new MessageKey("LoginAuthMessage", "Register0");
+  export const Success = new MessageKey("LoginAuthMessage", "Success");
+  export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
+  export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
+  export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
@@ -414,6 +419,22 @@ export interface UserTicketEntity extends Entities.Entity {
   device: string;
 }
 
+export const WebAuthnAssertionOptionsEntity = new Type<WebAuthnAssertionOptionsEntity>("WebAuthnAssertionOptions");
+export interface WebAuthnAssertionOptionsEntity extends Entities.Entity {
+  Type: "WebAuthnAssertionOptions";
+  creationDate: string;
+  json: string;
+}
+
+export const WebAuthnConfigurationEmbedded = new Type<WebAuthnConfigurationEmbedded>("WebAuthnConfigurationEmbedded");
+export interface WebAuthnConfigurationEmbedded extends Entities.EmbeddedEntity {
+  Type: "WebAuthnConfigurationEmbedded";
+  serverDomain: string;
+  serverName: string;
+  origin: string;
+  timestampDriftTolerance: number;
+}
+
 export const WebAuthnCredentialEntity = new Type<WebAuthnCredentialEntity>("WebAuthnCredential");
 export interface WebAuthnCredentialEntity extends Entities.Entity {
   Type: "WebAuthnCredential";
@@ -426,9 +447,13 @@ export interface WebAuthnCredentialEntity extends Entities.Entity {
   publicKey: string;
 }
 
-export const WebAuthnCredentialsCreateOptionsEntity = new Type<WebAuthnCredentialsCreateOptionsEntity>("WebAuthnCredentialsCreateOptions");
-export interface WebAuthnCredentialsCreateOptionsEntity extends Entities.Entity {
-  Type: "WebAuthnCredentialsCreateOptions";
+export module WebAuthnCredentialOperation {
+  export const Delete : Entities.DeleteSymbol<WebAuthnCredentialEntity> = registerSymbol("Operation", "WebAuthnCredentialOperation.Delete");
+}
+
+export const WebAuthnMakeCredentialsOptionsEntity = new Type<WebAuthnMakeCredentialsOptionsEntity>("WebAuthnMakeCredentialsOptions");
+export interface WebAuthnMakeCredentialsOptionsEntity extends Entities.Entity {
+  Type: "WebAuthnMakeCredentialsOptions";
   user: Entities.Lite<UserEntity>;
   creationDate: string;
   json: string;

@@ -12,7 +12,7 @@ import "./Login.css"
 export default function Login() {
 
   const [modelState, setModelState] = React.useState<ModelState | undefined>(undefined);
-  const [loading, setLoading] = React.useState<boolean | undefined>(undefined);
+  const [loading, setLoading] = React.useState<string | undefined>(undefined);
   const userName = React.useRef<HTMLInputElement>(null);
   const password = React.useRef<HTMLInputElement>(null);
   const rememberMe = React.useRef<HTMLInputElement>(null);
@@ -32,17 +32,20 @@ export default function Login() {
       rememberMe: rememberMe.current ? rememberMe.current.checked : undefined,
     };
 
+    setLoading("password");
     AuthClient.API.login(request)
       .then(lr => {
-        setLoading(true);
         setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
         AuthClient.Options.onLogin();
       })
       .catch((e: ValidationError) => {
-        if (e.modelState)
+        if (e.modelState) {
           setModelState(e.modelState);
+        }
+        setLoading(undefined);
+        throw e;
       })
       .done();
   }
@@ -70,7 +73,7 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
                 </div>
-                <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} disabled={loading} />
+                <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} disabled={loading != null} />
               </div>
               {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
             </div>
@@ -84,7 +87,7 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
                 </div>
-                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={loading} />
+                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={loading != null} />
               </div>
               {error("password") && <span className="help-block text-danger">{error("password")}</span>}
             </div>
@@ -95,7 +98,7 @@ export default function Login() {
             <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
               <div className="form-check mb-2 mr-sm-2 mb-sm-0">
                 <label className="sf-remember-me">
-                  <input ref={rememberMe} name="remember" type="checkbox" disabled={loading} /> {LoginAuthMessage.RememberMe.niceToString()}
+                  <input ref={rememberMe} name="remember" type="checkbox" disabled={loading != null} /> {LoginAuthMessage.RememberMe.niceToString()}
                 </label>
               </div>
             </div>
@@ -104,11 +107,11 @@ export default function Login() {
 
         <div className="row" style={{ paddingTop: "1rem" }}>
           <div className="col-md-6 offset-md-3">
-            <button type="submit" id="login" className="btn btn-success" disabled={loading}>
-              {loading ?
+            <button type="submit" id="login" className="btn btn-success" disabled={loading != null}>
+              {loading == "password" ?
                 <FontAwesomeIcon icon="cog" fixedWidth style={{ fontSize: "larger" }} spin /> :  < FontAwesomeIcon icon="sign-in-alt" />}
               &nbsp;
-            {loading ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
+            {loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
             </button>
             {error("login") && <span className="help-block text-danger" style={{ color: "red" }}>{error("login")}</span>}
             {AuthClient.Options.resetPassword && !loading &&
@@ -120,13 +123,19 @@ export default function Login() {
             }
           </div>
         </div>
-        {!loading && Login.customLoginButtons && Login.customLoginButtons()}
+        {!loading && Login.customLoginButtons && Login.customLoginButtons({ loading, setLoading, userName })}
       </form>
     </div>
   );
 }
 
-Login.customLoginButtons = null as (null | (() => React.ReactElement<any>));
+export interface LoginContext {
+  loading: string | undefined;
+  setLoading: (loading: string | undefined) => void;
+  userName: React.RefObject<HTMLInputElement>;
+}
+
+Login.customLoginButtons = null as (null | ((ctx: LoginContext) => React.ReactElement<any>));
 
 export function LoginWithWindowsButton() {
 

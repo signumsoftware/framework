@@ -20,6 +20,7 @@ using static Fido2NetLib.Fido2;
 using Signum.Utilities.ExpressionTrees;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using static Signum.React.Authorization.AuthController;
 
 namespace Signum.React.Authorization
 {
@@ -28,21 +29,18 @@ namespace Signum.React.Authorization
     {
 
 
-        Fido2 fido2; 
+        Fido2 fido2;
         public WebAuthnController()
         {
+            var config = WebAuthnLogic.GetConfig();
+
             fido2 = new Fido2(new Fido2Configuration
             {
-                ServerDomain = "localhost",
-                ServerName = "FIDO2 Test",
-                Origin = "http://localhost",
+                ServerDomain = config.ServerDomain,
+                ServerName = config.ServerName,
+                Origin = config.Origin,
                 TimestampDriftTolerance = 300000,
             });
-        }
-
-        public class MakeCredentialOptionsRequest
-        {
-            public Lite<UserEntity> User { get; set; }
         }
 
         public class MakeCredentialOptionsResponse
@@ -52,63 +50,66 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/webauthn/makeCredentialOptions")]
-        public MakeCredentialOptionsResponse MakeCredentialOptions([Required, FromBody] MakeCredentialOptionsRequest request)
+        public MakeCredentialOptionsResponse MakeCredentialOptions()
         {
-            var existingKeys = Database.Query<WebAuthnCredentialEntity>()
-                .Where(a => a.User.Is(request.User))
-                .Select(a => new PublicKeyCredentialDescriptor(a.CredentialId))
-                .ToList();
-
-            var authenticatorSelection = new AuthenticatorSelection
+            using (AuthLogic.Disable())
             {
-                RequireResidentKey = false, //For usernameless will be true
-                UserVerification = UserVerificationRequirement.Preferred
-            };
+                var existingKeys = Database.Query<WebAuthnCredentialEntity>()
+                    .Where(a => a.User.Is(UserEntity.Current))
+                    .Select(a => new PublicKeyCredentialDescriptor(a.CredentialId))
+                    .ToList();
 
-            var exts = new AuthenticationExtensionsClientInputs()
-            {
-                Extensions = true,
-                UserVerificationIndex = true,
-                Location = true,
-                UserVerificationMethod = true,
-                BiometricAuthenticatorPerformanceBounds = new AuthenticatorBiometricPerfBounds
+                var authenticatorSelection = new AuthenticatorSelection
                 {
-                    FAR = float.MaxValue,
-                    FRR = float.MaxValue
-                }
-            };
+                    RequireResidentKey = false, //For usernameless will be true
+                    UserVerification = UserVerificationRequirement.Preferred
+                };
 
-            var user = request.User.RetrieveAndForget();
+                var exts = new AuthenticationExtensionsClientInputs()
+                {
+                    Extensions = true,
+                    UserVerificationIndex = true,
+                    Location = true,
+                    UserVerificationMethod = true,
+                    BiometricAuthenticatorPerformanceBounds = new AuthenticatorBiometricPerfBounds
+                    {
+                        FAR = float.MaxValue,
+                        FRR = float.MaxValue
+                    }
+                };
 
-            var fido2User = new Fido2User
-            {
-                DisplayName = user.UserName,
-                Name = user.UserName,
-                Id = Encoding.UTF8.GetBytes(user.Id.ToString())
-            };
+                var user = UserEntity.Current;
 
-            var options = fido2.RequestNewCredential(fido2User, existingKeys, authenticatorSelection, AttestationConveyancePreference.None, exts);
+                var fido2User = new Fido2User
+                {
+                    DisplayName = user.UserName,
+                    Name = user.UserName,
+                    Id = Encoding.UTF8.GetBytes(user.Id.ToString())
+                };
 
-            if (options.Status != "ok")
-                throw new InvalidOperationException(options.ErrorMessage);
+                var options = fido2.RequestNewCredential(fido2User, existingKeys, authenticatorSelection, AttestationConveyancePreference.None, exts);
 
-            Database.Query<WebAuthnCredentialsCreateOptionsEntity>().Where(a => a.CreationDate < DateTime.Now.AddMonths(-1)).UnsafeDelete();
+                if (options.Status != "ok")
+                    throw new InvalidOperationException(options.ErrorMessage);
 
-            var optionsEntity = new WebAuthnCredentialsCreateOptionsEntity
-            {
-                User = user.ToLite(),
-                Json = options.ToJson()
-            }.Save();
+                Database.Query<WebAuthnMakeCredentialsOptionsEntity>().Where(a => a.CreationDate < DateTime.Now.AddMonths(-1)).UnsafeDelete();
 
-            return new MakeCredentialOptionsResponse 
-            {
-                CredentialCreateOptions = options,
-                CreateOptionsId = (Guid)optionsEntity.Id,
-            };
+                var optionsEntity = new WebAuthnMakeCredentialsOptionsEntity
+                {
+                    User = user.ToLite(),
+                    Json = options.ToJson()
+                }.Save();
+
+                return new MakeCredentialOptionsResponse
+                {
+                    CredentialCreateOptions = options,
+                    CreateOptionsId = (Guid)optionsEntity.Id,
+                };
+            }
         }
 
 
-        public class  MakeCredentialsRequest
+        public class MakeCredentialsRequest
         {
             public Guid CreateOptionsId;
             public AuthenticatorAttestationRawResponse AttestationRawResponse;
@@ -117,81 +118,142 @@ namespace Signum.React.Authorization
         [HttpPost("api/webauthn/makeCredential")]
         public async Task<CredentialMakeResult> MakeCredential([Required, FromBody] MakeCredentialsRequest request)
         {
-            var optionsEntity = Database.Retrieve<WebAuthnCredentialsCreateOptionsEntity>(request.CreateOptionsId);
-
-            var options = CredentialCreateOptions.FromJson(optionsEntity.Json);
-
-            var result = await fido2.MakeNewCredentialAsync(request.AttestationRawResponse, options, async (args) =>
+            using (AuthLogic.Disable())
             {
-                return !(await Database.Query<WebAuthnCredentialEntity>().AnyAsync(c => c.CredentialId == args.CredentialId));
-            });
+                var optionsEntity = Database.Retrieve<WebAuthnMakeCredentialsOptionsEntity>(request.CreateOptionsId);
 
-            if (result.Status != "ok")
-                throw new InvalidOperationException(options.ErrorMessage);
+                var options = CredentialCreateOptions.FromJson(optionsEntity.Json);
 
-            new WebAuthnCredentialEntity
-            {
-                CredentialId = result.Result.CredentialId,
-                PublicKey = result.Result.PublicKey,
-                User = Lite.ParsePrimaryKey<UserEntity>(Encoding.UTF8.GetString(result.Result.User.Id)),
-                Counter = (int)result.Result.Counter,
-                CredType = result.Result.CredType,
-                Aaguid = result.Result.Aaguid,
-            }.Save();
+                var result = await fido2.MakeNewCredentialAsync(request.AttestationRawResponse, options, async (args) =>
+                {
+                    return !(await Database.Query<WebAuthnCredentialEntity>().AnyAsync(c => c.CredentialId == args.CredentialId));
+                });
 
-            return result;
+                if (result.Status != "ok")
+                    throw new InvalidOperationException(options.ErrorMessage);
+
+                new WebAuthnCredentialEntity
+                {
+                    CredentialId = result.Result.CredentialId,
+                    PublicKey = result.Result.PublicKey,
+                    User = Lite.ParsePrimaryKey<UserEntity>(Encoding.UTF8.GetString(result.Result.User.Id)),
+                    Counter = (int)result.Result.Counter,
+                    CredType = result.Result.CredType,
+                    Aaguid = result.Result.Aaguid,
+                }.Save();
+
+                return result;
+            }
         }
 
 
         public class AssertionOptionsRequest
         {
-            public string UserName; 
+            public string UserName;
         }
 
-        [HttpPost]
-        [Route("api/webauthn/assertionOptions")]
-        public AssertionOptions AssertionOptionsPost([FromBody][Required] AssertionOptionsRequest request)
+        public class AssertionOptionsResponse
         {
-
-
-            var existingCredentials = new List<PublicKeyCredentialDescriptor>();
-
-            if (!string.IsNullOrEmpty(request.UserName))
-            {
-                existingCredentials = Database.Query<WebAuthnCredentialEntity>()
-                    .Where(a => a.User.Entity.UserName == request.UserName)
-                    .Select(a => new PublicKeyCredentialDescriptor(a.CredentialId))
-                    .ToList();
-            }
-
-            var exts = new AuthenticationExtensionsClientInputs()
-            {
-                SimpleTransactionAuthorization = "FIDO",
-                GenericTransactionAuthorization = new TxAuthGenericArg
-                {
-                    ContentType = "text/plain",
-                    Content = new byte[] { 0x46, 0x49, 0x44, 0x4F }
-                },
-                UserVerificationIndex = true,
-                Location = true,
-                UserVerificationMethod = true
-            };
-
-            // 3. Create options
-            var uv = string.IsNullOrEmpty(userVerification) ? UserVerificationRequirement.Discouraged : userVerification.ToEnum<UserVerificationRequirement>();
-            var options = fido2.GetAssertionOptions(
-                existingCredentials,
-                uv,
-                exts
-            );
-
-            // 4. Temporarily store options, session/in-memory cache/redis/db
-            HttpContext.Session.SetString("fido2.assertionOptions", options.ToJson());
-
-            // 5. Return options to client
-            return options;
-
+            public AssertionOptions AssertionOptions;
+            public Guid AssertionOptionsId;
         }
 
+        [HttpPost("api/webauthn/assertionOptions"), SignumAllowAnonymous]
+        public AssertionOptionsResponse GetAssertionOptions([FromBody][Required] AssertionOptionsRequest request)
+        {
+            using (AuthLogic.Disable())
+            {
+                var existingCredentials = new List<PublicKeyCredentialDescriptor>();
+
+                if (!string.IsNullOrEmpty(request.UserName))
+                {
+                    existingCredentials = Database.Query<WebAuthnCredentialEntity>()
+                        .Where(a => a.User.Entity.UserName == request.UserName)
+                        .Select(a => new PublicKeyCredentialDescriptor(a.CredentialId))
+                        .ToList();
+                }
+
+                var exts = new AuthenticationExtensionsClientInputs()
+                {
+                    SimpleTransactionAuthorization = "FIDO",
+                    GenericTransactionAuthorization = new TxAuthGenericArg
+                    {
+                        ContentType = "text/plain",
+                        Content = new byte[] { 0x46, 0x49, 0x44, 0x4F }
+                    },
+                    UserVerificationIndex = true,
+                    Location = true,
+                    UserVerificationMethod = true
+                };
+
+                // 3. Create options
+                var uv = UserVerificationRequirement.Discouraged;
+                var options = fido2.GetAssertionOptions(
+                    existingCredentials,
+                    uv,
+                    exts
+                );
+
+                if (options.Status != "ok")
+                    throw new InvalidOperationException(options.ErrorMessage);
+
+                Database.Query<WebAuthnAssertionOptionsEntity>().Where(a => a.CreationDate < DateTime.Now.AddMonths(-1)).UnsafeDelete();
+
+                var optionsEntity = new WebAuthnAssertionOptionsEntity
+                {
+                    Json = options.ToJson()
+                }.Save();
+
+                return new AssertionOptionsResponse
+                {
+                    AssertionOptions = options,
+                    AssertionOptionsId = (Guid)optionsEntity.Id
+                };
+            }
+        }
+
+        public class MakeAssertionRequest
+        {
+            public Guid AssertionOptionsId;
+            public AuthenticatorAssertionRawResponse AssertionRawResponse;
+        }
+
+        [HttpPost("api/webauthn/makeAssertion"), SignumAllowAnonymous]
+        public async Task<LoginResponse> MakeAssertion([FromBody][Required] MakeAssertionRequest request)
+        {
+            using (AuthLogic.Disable())
+            using (Transaction tr = new Transaction())
+            {
+                var assertionOptions = Database.Retrieve<WebAuthnAssertionOptionsEntity>(request.AssertionOptionsId);
+                var options = AssertionOptions.FromJson(assertionOptions.Json);
+
+                var cred = Database.Query<WebAuthnCredentialEntity>().SingleEx(cred => cred.CredentialId == request.AssertionRawResponse.Id);
+
+                var res = await fido2.MakeAssertionAsync(request.AssertionRawResponse, options, cred.PublicKey, (uint)cred.Counter, async (args) =>
+                {
+                    if (!MemoryExtensions.SequenceEqual<byte>(cred.CredentialId, args.CredentialId))
+                        return false;
+
+                    var userId = Encoding.UTF8.GetBytes(cred.User.Id.ToString());
+                    if (!MemoryExtensions.SequenceEqual<byte>(userId, args.UserHandle))
+                        return false;
+
+                    return true;
+                });
+
+                cred.Counter++;
+                cred.Save();
+
+                var user = cred.User.RetrieveAndForget();
+
+                AuthServer.OnUserPreLogin(ControllerContext, user);
+
+                AuthServer.AddUserSession(ControllerContext, user);
+
+                var token = AuthTokenServer.CreateToken(user);
+
+                return tr.Commit(new LoginResponse { userEntity = user, token = token, authenticationType = "webauthn" });
+            }
+        }
     }
 }
