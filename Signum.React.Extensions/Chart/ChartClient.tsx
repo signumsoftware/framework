@@ -359,6 +359,7 @@ export interface ChartOptions {
 export interface ChartColumnOption {
   token?: string | QueryTokenString<any>;
   displayName?: string;
+  format?: string;
   orderByIndex?: number;
   orderByType?: OrderType;
 }
@@ -453,7 +454,8 @@ export module Encoder {
       columns.forEach((co, i) => query["column" + i] =
         (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
         (co.token ?? "") +
-        (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+        (co.displayName || co.format ? ("~" + (co.displayName == null ? "" : scapeTilde(co.displayName))) : "") +
+        (co.format ? "~" + scapeTilde(co.format) : ""));
   }
 
   export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
@@ -516,12 +518,15 @@ export module Decoder {
 
       var parts = val.split("~");
 
-      let order, token, displayName: string | null;
+      let order: string | undefined;
+      let token: string;
+      let displayName: string | null;
+      let format: string | null;
 
-      if (parts.length == 3 || parts.length == 2 && /\d+[AD]/.test(parts[0]))
-        [order, token, displayName] = parts;
+      if (parts.length >= 2 && /\d+[AD]/.test(parts[0]))
+        [order, token, displayName, format] = parts;
       else
-        [token, displayName] = parts;
+        [token, displayName, format] = parts;
  
       return ({
         rowId: null,
@@ -531,6 +536,7 @@ export module Decoder {
           }) : undefined,
           orderByType: order == null ? null : (order.charAt(order.length -1) == "A" ? "Ascending" : "Descending"),
           orderByIndex: order == null ? null : (parseInt(order.substr(0, order.length - 1))),
+          format: unscapeTildes(format),
           displayName: unscapeTildes(displayName),
         })
       });
