@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -761,28 +761,6 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     if (!p.validateKey(e))
       e.preventDefault();
   }
-}
-
-export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
-  var valParts = timeStampToStr.split(":");
-  var formatParts = format.split(":");
-
-  if (valParts.length > formatParts.length)
-    throw new Error("Invalid Format")
-
-  const result: DurationObjectUnits = {};
-
-  for (let i = 0; i < formatParts.length; i++) {
-    const formP = formatParts[i];
-    const value = parseInt(valParts[i] || "0");
-    switch (formP) {
-      case "hh": result.hour = value; break;
-      case "mm": result.minute = value; break;
-      case "ss": result.second = value; break;
-      default: throw new Error("Unexpected " + formP);
-    }
-  }
-  return Duration.fromObject(result);
 }
 
 export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
