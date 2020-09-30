@@ -60,7 +60,6 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 200)]
         public string Origin { get; set; } = "https://localhost";
 
-        [DateInPastValidator]
         public int TimestampDriftTolerance { get; set; } = 300000;
     }
 
