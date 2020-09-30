@@ -20,7 +20,7 @@ export function configure() {
       'default': 'FF',
       header: 'MMMM yyyy',
       footer: 'DDD',
-      weekday: 'EEE',
+      weekday: 'EE',
       dayOfMonth: 'dd',
       month: 'MMM',
       year: 'yyyy',
@@ -60,6 +60,9 @@ export function configure() {
     format: function format(value: Date, _format: string, culture: string) {
       if (value == undefined)
         return "";
+
+      if (_format == "EE")
+        return DateTime.fromJSDate(value, { locale: culture }).toFormat("EEE").substr(0, 2);
 
       return DateTime.fromJSDate(value, { locale: culture }).toFormat(_format);
     }

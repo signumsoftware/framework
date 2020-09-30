@@ -1,4 +1,4 @@
-import { DateTime} from 'luxon';
+import { DateTime, Duration, DurationObjectUnits } from 'luxon';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -100,11 +100,8 @@ export function toLuxonFormat(format: string | undefined): string {
       .replaceAll("f", "S")
       .replaceAll("tt", "A")
       .replaceAll("t", "a")
-      .replaceAll("dddd", "ßßßß")
-      .replaceAll("ddd", "ßßß")
-      .replaceAll("d", "D") //replace only d -> D and dd -> DD
-      .replaceAll("ßßßß", "cccc")
-      .replaceAll("ßßß", "ccc");
+      .replaceAll("dddd", "cccc")
+      .replaceAll("ddd", "ccc");
   }
 }
 
@@ -221,18 +218,30 @@ export function durationToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var momentDurationFormat = toDurationFormat(format);
+  var duration = parseDuration(val);
+  return duration.toFormat(format ?? "hh:mm:ss");
+}
 
-  var result = /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(val);
+export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
+  var valParts = timeStampToStr.split(":");
+  var formatParts = format.split(":");
 
-  if (result == undefined)
-    throw new Error("Invalid date");
+  if (valParts.length > formatParts.length)
+    throw new Error("Invalid Format")
 
-  var hh = result[1];
-  var mm = result[2];
-  var ss = result[3];
+  const result: DurationObjectUnits = {};
 
-  return (format || "hh:mm:ss").replace("hh", hh).replace("mm", mm).replace("ss", ss);
+  for (let i = 0; i < formatParts.length; i++) {
+    const formP = formatParts[i];
+    const value = parseInt(valParts[i] || "0");
+    switch (formP) {
+      case "hh": result.hour = value; break;
+      case "mm": result.minute = value; break;
+      case "ss": result.second = value; break;
+      default: throw new Error("Unexpected " + formP);
+    }
+  }
+  return Duration.fromObject(result);
 }
 
 
