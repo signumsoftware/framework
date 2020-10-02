@@ -140,6 +140,34 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     }
   }
 
+  function tryCeil(date: string | null | undefined, unit: DurationUnit) {
+    if (date == null)
+      return undefined;
+
+    return ceil(DateTime.fromISO(date), unit).toISO();
+  }
+
+
+  function ceil(date: DateTime, unit: DurationUnit) {
+
+    if (date.toMillis() == date.startOf(unit).toMillis())
+      return date;
+
+    return date.startOf(unit).plus({ [unit]: 1 });
+  }
+ 
+  function tryFloor(date: string | null | undefined, unit: DurationUnit) {
+    if (date == null)
+      return undefined;
+
+    return floor(DateTime.fromISO(date), unit).toISO();
+  }
+
+  function floor(date: DateTime, unit: DurationUnit) {
+
+    return date.startOf(unit);
+  }
+
   const columnNomalized = normalizeToken(column.token!);  
 
   const machingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
@@ -172,7 +200,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       .map(f => {
         const pair = normalizeToken(f.token!);
 
-        let value = DateTime.fromISO(f.value);
+        const value = DateTime.fromISO(f.value);
 
         //Date.MonthStart >  1.4.2000
         //             Min-> 1.5.2000
@@ -180,12 +208,13 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //             Min-> 1.4.2000
         //Date.MonthStart == 1.4.2000
         //             Min-> 1.4.2000
-        if (f.operation == "GreaterThan" && pair.lastPart != null) {
-          value = value.plus({ [durationUnit(pair.lastPart.key)]: 1 });
-        }
 
-        return value.startOf(unit).toISO();
-      })) ?? d3.min(values as string[]);
+        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
+
+        const newValue = f.operation == "GreaterThan" ? floor(value, newUnit).plus({ [newUnit]: 1 }) : floor(value, newUnit);
+
+        return newValue.toISO();
+      })) ?? tryFloor(d3.min(values as string[]), unit);
 
     const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(a => {
@@ -198,40 +227,31 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //                   1.5.2000
         //Date.MonthStart == 1.4.2000
         //             Max   1.5.2000
-        if ((a.operation == "LessThanOrEqual" || a.operation == "EqualTo"))
-          value = value.startOf(unit).plus({ [pair.lastPart ? durationUnit(pair.lastPart.key) : unit]: 1 });
 
-        var aligned = value.startOf(unit);
+        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
 
-        if (value != aligned)
-          value = aligned;
-        else
-          value = value.plus({ [unit]: -1 });
+        const newValue = a.operation == "LessThan" ? ceil(value, newUnit) : floor(value, newUnit).plus({ [newUnit]: 1 }); 
 
-        return value.toISO();
-      }
-      )) ?? d3.min(values as string[]);
+        return newValue.toISO();
+      })) ?? tryCeil(d3.max(values as string[]), unit);
 
 
     if (min == undefined  || max == undefined)
       return values; 
 
-    let minMoment = DateTime.fromISO(min).startOf(unit);
-    const maxMoment = DateTime.fromISO(max).endOf(unit);
-
-
-    if (unit == null)
-      return values;
+    const minDate = DateTime.fromISO(min);
+    const maxDate = DateTime.fromISO(max);
+    let date = minDate;
 
     const allValues: string[] = [];
     const limit = isAuto ? values.length * 2 : null;
-    while (minMoment <= maxMoment) {
+    while (date < maxDate) {
 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "Date" ? minMoment.toISODate() : minMoment.toISO());
-      minMoment = minMoment.plus({ [unit]: 1 });
+      allValues.push(column.token!.type.name == "Date" ? date.toISODate() : date.toISO());
+      date = date.plus({ [unit]: 1 });
     }
 
     return complete(values, allValues, column, insertPoint);

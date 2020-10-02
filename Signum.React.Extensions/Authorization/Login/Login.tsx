@@ -41,11 +41,12 @@ export default function Login() {
         AuthClient.Options.onLogin();
       })
       .catch((e: ValidationError) => {
+        setLoading(undefined);
         if (e.modelState) {
           setModelState(e.modelState);
+        } else {
+          throw e;
         }
-        setLoading(undefined);
-        throw e;
       })
       .done();
   }
