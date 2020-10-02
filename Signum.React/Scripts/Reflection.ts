@@ -190,7 +190,8 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
 
   //simple euristic
-  var afterDot = f.tryAfter(".") ?? "";
+  var style = f.endsWith("%") ? "percent" : "decimal";
+  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
   return {
     style: "decimal",
     minimumFractionDigits: afterDot.trimStart("#").length,
