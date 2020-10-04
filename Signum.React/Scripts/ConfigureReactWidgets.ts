@@ -2,8 +2,9 @@ import { DateTime } from 'luxon';
 
 import * as ReactWidgets from 'react-widgets';
 
-export function configure() {
+export function configure(maxTwoDigitYear?: number) {
 
+  var maxTwoDigitYearDefault = maxTwoDigitYear ?? DateTime.local().year + 10;
 
   function endOfDecade(date: Date) {
     return DateTime.fromJSDate(date).plus({ years: 10 }).minus({ millisecond: 1 }).toJSDate();
@@ -50,9 +51,22 @@ export function configure() {
       if (value == undefined || value == "")
         return undefined;
 
-      var t = DateTime.fromFormat(value, format ?? "F", { locale: culture })
+      let t = DateTime.fromFormat(value, format ?? "F", { locale: culture })
       if (t.isValid)
         return t.toJSDate();
+
+      t = DateTime.fromFormat(value, "D", { locale: culture })
+      if (t.isValid)
+        return t.toJSDate();
+
+      t = DateTime.fromFormat(value, "ddMMyy", { locale: culture })
+      if (t.isValid) {
+        if (value.length == 6) {
+          var twoDigitYear = parseInt(value.substr(4, 2));
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? 1900 + twoDigitYear : 2000 + twoDigitYear });
+        }
+        return t.toJSDate();
+      }
 
       return undefined;
     },

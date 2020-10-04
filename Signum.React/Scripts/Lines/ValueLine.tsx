@@ -516,6 +516,24 @@ export interface NumericTextBoxProps {
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
 }
 
+const cachedLocaleSeparators: {
+  [locale: string]: { group: string, decimal: string }
+} = {};
+
+function getLocaleSeparators(locale: string) {
+  var result = cachedLocaleSeparators[locale];
+  if (result)
+    return result;
+
+  var format = new Intl.NumberFormat(locale, { minimumFractionDigits: 0 });
+  result = {
+    group: format.format(1111).replace(/1/g, ''),
+    decimal: format.format(1.1).replace(/1/g, ''),
+  };
+  return cachedLocaleSeparators[locale] = result;
+}
+
+
 export function NumericTextBox(p: NumericTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
@@ -564,20 +582,20 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       p.htmlAttributes.onBlur(e);
   }
 
+ 
   function unformat(format: Intl.NumberFormat, str: string): number {
-    var isPercentage = format.resolvedOptions().style == "percent";
-    if (isPercentage) {
-      format = new Intl.NumberFormat(format.resolvedOptions().locale);
-    }
 
-    const thousandSeparator = format.format(1111).replace(/1/g, '');
-    const decimalSeparator = format.format(1.1).replace(/1/g, '');
+    var options = format.resolvedOptions();
 
-    if (thousandSeparator)
-      str = str.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
+    var isPercentage = options.style == "percent";
 
-    if (decimalSeparator)
-      str = str.replace(new RegExp('\\' + decimalSeparator), '.');
+    var separators = getLocaleSeparators(options.locale);
+
+    if (separators.group)
+      str = str.replace(new RegExp('\\' + separators.group, 'g'), '');
+
+    if (separators.decimal)
+      str = str.replace(new RegExp('\\' + separators.decimal), '.');
 
     var result =  parseFloat(str);
 

@@ -96,12 +96,19 @@ export function toLuxonFormat(format: string | undefined): string {
     case "T": return "tt";
     case "y": return "LTS";
     case "Y": return "LLLL yyyy";
-    default: return format
-      .replaceAll("f", "S")
-      .replaceAll("tt", "A")
-      .replaceAll("t", "a")
-      .replaceAll("dddd", "cccc")
-      .replaceAll("ddd", "ccc");
+    default: {
+      const result = format
+        .replaceAll("f", "S")
+        .replaceAll("tt", "A")
+        .replaceAll("t", "a")
+        .replaceAll("YYYY", "yyyy")
+        .replaceAll("YY", "yy")
+        .replaceAll("dddd", "cccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("T", "'T'");
+      return result;
+    }
   }
 }
 
@@ -183,7 +190,8 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
 
   //simple euristic
-  var afterDot = f.tryAfter(".") ?? "";
+  var style = f.endsWith("%") ? "percent" : "decimal";
+  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
   return {
     style: "decimal",
     minimumFractionDigits: afterDot.trimStart("#").length,
