@@ -84,6 +84,9 @@ namespace Signum.Engine.Basics
         public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition)
             where T : Entity
         {
+            if (Schema.Current.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             if (typeCondition == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(TypeConditionSymbol), nameof(typeCondition));
 
