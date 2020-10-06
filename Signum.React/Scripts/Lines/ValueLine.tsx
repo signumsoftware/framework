@@ -633,7 +633,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.toFormat(luxonFormat)}
+          {m?.toFormatFixed(luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );

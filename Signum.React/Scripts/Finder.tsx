@@ -1602,7 +1602,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
       const luxonFormat = toLuxonFormat(col.token!.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {

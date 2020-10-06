@@ -75,10 +75,7 @@ export function configure(maxTwoDigitYear?: number) {
       if (value == undefined)
         return "";
 
-      if (_format == "EE")
-        return DateTime.fromJSDate(value, { locale: culture }).toFormat("EEE").substr(0, 2);
-
-      return DateTime.fromJSDate(value, { locale: culture }).toFormat(_format);
+      return DateTime.fromJSDate(value, { locale: culture }).toFormatFixed(_format);
     }
   };
   (ReactWidgets as any).setDateLocalizer(localizer);
