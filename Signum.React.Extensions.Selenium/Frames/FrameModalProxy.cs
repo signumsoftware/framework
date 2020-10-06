@@ -90,4 +90,13 @@ namespace Signum.React.Selenium
             return this;
         }
     }
+
+    public static class FrameModalProxyExtension
+    {
+        public static FrameModalProxy<T> AsFrameModal<T>(this IWebElement element) 
+            where T: ModifiableEntity
+        {
+            return new FrameModalProxy<T>(element);
+        }
+    }
 }
