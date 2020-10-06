@@ -367,7 +367,7 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
 function parseDate(str: string) {
   const parsed = DateTime.fromFormat(str, serverFormat).toISO();
 
-  return parsed == "Invalid date" ? undefined : parsed;
+  return parsed ?? undefined;
 }
 
 function toStringValue(value: string | number | boolean | null | undefined, filterType: FilterType | undefined): string | null {
