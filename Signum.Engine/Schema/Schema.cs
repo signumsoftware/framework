@@ -505,7 +505,7 @@ namespace Signum.Engine.Maps
 
         public void OnBeforeDatabaseAccess()
         {
-            if (SchemaCompleted != null)
+            if (IsCompleted == false)
                 throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
 
             if (BeforeDatabaseAccess == null)
