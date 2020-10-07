@@ -194,10 +194,11 @@ namespace Signum.React.Authorization
             if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
+            var error = UserEntity.OnValidatePassword(request.newPassword);
+            if (error != null)
+                return ModelError("newPassword", error);
+            
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
-
-
-
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
