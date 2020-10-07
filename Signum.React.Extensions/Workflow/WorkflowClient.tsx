@@ -1,6 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment';
-import * as QueryString from 'query-string';
+import { DateTime, Duration } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -52,6 +51,7 @@ import { EntityLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -162,7 +162,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
       "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
     },
-    defaultOrderColumn: "StartDate",
+    defaultOrders: [{
+      token: "StartDate",
+      orderType: "Ascending"
+    }],
     simpleFilterBuilder: sfbc => {
       var model = InboxFilter.extract(sfbc.initialFilterOptions);
 
@@ -570,7 +573,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
             .then(entity => {
               if (mainEntityStrategy == "Clone") {
                 return Operations.API.constructFromEntity(entity, coi.key)
-                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack!.entity));
               }
               else
                 return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
@@ -632,8 +635,8 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   return viewPromise.promise;
 }
 
-export function durationFormat(d: moment.Duration) {
-  return `${d.days()}d ${d.hours()}h ${d.minutes()}m ${d.seconds()}s`;
+export function durationFormat(d: Duration) {
+  return `${d.days}d ${d.hours}h ${d.minutes}m ${d.seconds}s`;
 }
 
 export namespace API {

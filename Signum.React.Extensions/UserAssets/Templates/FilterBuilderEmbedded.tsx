@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { classes, Dic } from '@framework/Globals'
 import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
@@ -352,7 +352,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   }
 }
 
-const serverFormat = "YYYY/MM/DD hh:mm:ss";
+const serverFormat = "yyyy/MM/dd HH:mm:ss";
 
 function parseValue(str: string | null | undefined, filterType: FilterType | undefined): string | number | boolean | null | undefined {
   return str == null ? null :
@@ -365,9 +365,9 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
 }
 
 function parseDate(str: string) {
-  const parsed = moment(str, serverFormat, true).format();
+  const parsed = DateTime.fromFormat(str, serverFormat).toISO();
 
-  return parsed == "Invalid date" ? undefined : parsed;
+  return parsed ?? undefined;
 }
 
 function toStringValue(value: string | number | boolean | null | undefined, filterType: FilterType | undefined): string | null {
@@ -375,7 +375,7 @@ function toStringValue(value: string | number | boolean | null | undefined, filt
     filterType == "Integer" ? value.toString() :
       filterType == "Decimal" ? value.toString() :
         filterType == "Boolean" ? (value ? "True" : "False") :
-          filterType == "DateTime" ? moment(value as string).format(serverFormat) :
+          filterType == "DateTime" ? DateTime.fromISO(value as string).toFormat(serverFormat) :
             filterType == "Enum" || filterType == "Guid" || filterType == "String" ? value as string :
               null;
 

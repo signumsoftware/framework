@@ -1,5 +1,5 @@
 /// <reference path="../bpmn-js.d.ts" />
-import * as moment from 'moment'
+import { Duration } from 'luxon'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Entities.Workflow'
 import { Color, Gradient } from '../../Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
@@ -75,7 +75,7 @@ function formatDuration(minutes: number | undefined, token: QueryToken) {
   if (minutes == undefined)
     return "";
 
-  return durationFormat(moment.duration(minutes, "minutes"));
+  return durationFormat(Duration.fromObject({ minutes }));
 }
 
 export const __init__ = ['workflowActivityMonitorRenderer'];

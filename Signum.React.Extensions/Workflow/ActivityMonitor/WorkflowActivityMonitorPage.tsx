@@ -12,7 +12,7 @@ import { newLite } from '@framework/Reflection';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
 import { toFilterRequests } from '@framework/Finder';
-import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
 
 export interface WorkflowActivityMonitorConfig {
   workflow: Lite<WorkflowEntity>;

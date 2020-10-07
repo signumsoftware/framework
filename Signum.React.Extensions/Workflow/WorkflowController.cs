@@ -130,7 +130,7 @@ namespace Signum.React.Workflow
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
             try
             {
-                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, (request.args.EmptyIfNull()).And(issuesContainer).ToArray());
+                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, (request.Args.EmptyIfNull()).And(issuesContainer).ToArray());
             }
             catch (IntegrityCheckException ex)
             {

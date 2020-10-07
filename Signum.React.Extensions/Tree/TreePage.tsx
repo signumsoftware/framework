@@ -5,16 +5,11 @@ import * as Finder from '@framework/Finder'
 import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
-import { FilterOption } from "@framework/FindOptions";
-import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { QueryString } from '@framework/QueryString'
 
-interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
-}
-
-export default function TreePage(p: TreePageProps) {
+export default function TreePage(p: RouteComponentProps<{ typeName: string }>) {
   var query = QueryString.parse(p.location.search);
 
   const filterOptions = React.useMemo(() => Finder.Decoder.decodeFilters(query), [query]);

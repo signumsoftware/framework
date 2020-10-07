@@ -166,7 +166,7 @@ namespace Signum.Engine.Templating
             if (Type == null)
                 return;
 
-            var result = FilterValueConverter.TryParse(valueString, Type, Operation.Value.IsList());
+            var result = FilterValueConverter.TryParse(valueString, Type, Operation!.Value.IsList());
 
             if (result is Result<object>.Error e)
                 addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));

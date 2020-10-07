@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { RouteComponentProps } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -9,7 +9,7 @@ import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { Tabs, Tab } from 'react-bootstrap';
-import { useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPIWithReload } from '@framework/Hooks'
 
 export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
   function componentWillMount() {
@@ -80,7 +80,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
         <br />
         ScriptRunnerPeriod: {srs.scriptRunnerPeriod} sec
                   <br />
-        NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : moment(srs.nextPlannedExecution).fromNow()})
+        NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : DateTime.fromISO(srs.nextPlannedExecution).toRelative()})
                   <br />
         IsCancelationRequested: {srs.isCancelationRequested}
         <br />

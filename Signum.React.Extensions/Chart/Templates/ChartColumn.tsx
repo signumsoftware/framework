@@ -11,7 +11,7 @@ import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { External } from '@framework/Signum.Entities';
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
 
 export interface ChartColumnProps {

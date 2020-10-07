@@ -24,7 +24,6 @@ namespace Signum.Engine.Authorization
     public static class AuthLogic
     {
         public static event Action<UserEntity>? UserLogingIn;
-        public static event Func<string?>? LoginMessage;
         public static ICustomAuthorizer? Authorizer;
 
         public static string? SystemUserName { get; private set; }
@@ -650,14 +649,6 @@ namespace Signum.Engine.Authorization
             }.Choose();
 
             action?.Invoke();
-        }
-
-        public static string? OnLoginMessage()
-        {
-            if (AuthLogic.LoginMessage != null)
-                return AuthLogic.LoginMessage();
-
-            return null;
         }
 
         public static bool IsLogged()

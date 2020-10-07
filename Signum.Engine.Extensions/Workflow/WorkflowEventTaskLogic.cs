@@ -224,7 +224,7 @@ namespace Signum.Engine.Workflow
             var workflow = wet.GetWorkflow();
 
             if (workflow.HasExpired())
-                throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+                throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate!.Value.ToString()));
 
             using (Transaction tr = new Transaction())
             {

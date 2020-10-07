@@ -14,6 +14,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Entities.Templating;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -73,7 +74,7 @@ namespace Signum.Engine.Mailing
                                 From = m.From,
                                 Recipients = m.Recipients.ToMList(),
                                 Target = m.Target,
-                                Body = m.Body,
+                                Body = new BigStringEmbedded(m.Body.Text),
                                 IsBodyHtml = m.IsBodyHtml,
                                 Subject = m.Subject,
                                 Template = m.Template,

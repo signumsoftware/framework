@@ -318,7 +318,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   handleAddRoot = () => {
     Operations.API.construct(this.props.typeName, TreeOperation.CreateRoot)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;
@@ -331,7 +331,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   handleAddChildren = () => {
     var parent = this.state.selectedNode!;
     Operations.API.constructFromLite(parent.lite, TreeOperation.CreateChild)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;
@@ -349,7 +349,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     var sibling = this.state.selectedNode!;
 
     Operations.API.constructFromLite(sibling.lite, TreeOperation.CreateNextSibling)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { BsColor } from '@framework/Components/Basic';
 import { classes } from '@framework/Globals'
-import numbro from 'numbro';
+import { toNumberFormat } from '@framework/Reflection';
 
 interface ProgressBarProps {
   value?: number | null; /*0...1*/
@@ -9,24 +9,24 @@ interface ProgressBarProps {
   message?: string | null;
   color?: BsColor | null;
   striped?: boolean;
-  active?: boolean;
+  animated?: boolean;
 }
 
 export default function ProgressBar(p : ProgressBarProps){
-  let { value, showPercentageInMessage, message, color, striped, active } = p;
+  let { value, showPercentageInMessage, message, color, striped, animated } = p;
 
   if (striped == null)
     striped = value == null;
 
-  if (active == null)
-    active = value == null;
-
-  const progressContainerClass = value == null ? " active" : "";
+  if (animated == null)
+    animated = value == null;
 
   const progressStyle = color != null ? "bg-" + color : "";
 
+  var numberFormat = toNumberFormat("P2");
+
   const fullMessage = [
-    (value == null || showPercentageInMessage === false ? undefined : `${numbro(value * 100).format("0.00")}%`),
+    (value == null || showPercentageInMessage === false ? undefined : numberFormat.format(value)),
     (message ? message : undefined)
   ].filter(a => a != null).join(" - ");
 
@@ -36,14 +36,14 @@ export default function ProgressBar(p : ProgressBarProps){
         "progress-bar",
         progressStyle,
         striped && "progress-bar-striped",
-        active && "active"
+        animated && "progress-bar-animated"
       )}
         role="progressbar" id="progressBar"
         aria-valuenow={value == null ? undefined : value * 100}
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
         style={{ width: value == null ? "100%" : (value * 100) + "%" }}>
-        <span style={{ color: (value != null && value < 0.5) ? "black" : undefined }}>{fullMessage}</span>
+        <span>{fullMessage}</span>
       </div>
     </div>
   );

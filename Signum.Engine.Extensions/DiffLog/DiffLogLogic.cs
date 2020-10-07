@@ -48,8 +48,12 @@ namespace Signum.Engine.DiffLog
 
                 using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                 {
-                    log.Mixin<DiffLogMixin>().InitialState = entity.Dump();
+                    log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded(entity.Dump());
                 }
+            }
+            else
+            {
+                log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded();
             }
 
             return new Disposable(() =>
@@ -60,8 +64,12 @@ namespace Signum.Engine.DiffLog
                 {
                     using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                     {
-                        log.Mixin<DiffLogMixin>().FinalState = target.Dump();
+                        log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded(target.Dump());
                     }
+                }
+                else
+                {
+                    log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded();
                 }
             });
         }
@@ -77,8 +85,8 @@ namespace Signum.Engine.DiffLog
             var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target == log.Target);
 
             return new MinMax<OperationLogEntity?>(
-                 log.Mixin<DiffLogMixin>().InitialState == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
-                 log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
+                 log.Mixin<DiffLogMixin>().InitialState.Text == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
+                 log.Mixin<DiffLogMixin>().FinalState.Text == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }
     }
 }

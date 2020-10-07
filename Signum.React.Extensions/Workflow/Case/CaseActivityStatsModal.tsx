@@ -1,9 +1,8 @@
-import * as moment from 'moment'
-import numbro from 'numbro'
+import { DateTime, Duration } from 'luxon'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
-import { durationToString } from '@framework/Reflection';
+import { durationToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -48,7 +47,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
                 {
                   caseActivityStats.map(a =>
                     <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!}
-                      title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.doneBy.toStr} {DoneType.niceToString(a.doneType!)} <mark>({moment(a.doneDate).fromNow()})</mark></span> as any}>
+                      title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.doneBy.toStr} {DoneType.niceToString(a.doneType!)} <mark>({DateTime.fromISO(a.doneDate).toRelative()})</mark></span> as any}>
                       <CaseActivityStatsComponent stats={a} caseEntity={p.case} />
                     </Tab>)
                 }
@@ -145,7 +144,7 @@ function formatDate(date: string | undefined) {
   if (date == undefined)
     return undefined;
 
-  return <span>{moment(date).format("L LT")} <mark>({moment(date).fromNow()})</mark></span>
+  return <span>{DateTime.fromISO(date).toFormat("FFF")} <mark>({DateTime.fromISO(date).toRelative()})</mark></span>
 }
 
 function formatDuration(duration: number | undefined) {
@@ -154,5 +153,7 @@ function formatDuration(duration: number | undefined) {
 
   var unit = CaseActivityEntity.memberInfo(a => a.duration).unit;
 
-  return <span>{numbro(duration).format("0.00")} {unit} <mark>({durationFormat(moment.duration(duration, "minutes"))})</mark></span>
+  var formatNumber = toNumberFormat("0.00");
+
+  return <span>{formatNumber.format(duration)} {unit} <mark>({durationFormat(Duration.fromObject({ minute: duration }))})</mark></span>
 }

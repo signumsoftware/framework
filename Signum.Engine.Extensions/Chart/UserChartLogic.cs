@@ -82,17 +82,9 @@ namespace Signum.Engine.Chart
 
         static void ChartLogic_Retrieved(UserChartEntity userChart, PostRetrievingContext ctx)
         {
-            object queryName;
-            try
-            {
-                queryName = QueryLogic.ToQueryName(userChart.Query.Key);
-            }
-            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
-            {
-                StartParameters.IgnoredCodeErrors.Add(ex);
-
+            object? queryName = userChart.Query.ToQueryNameCatch();
+            if (queryName == null)
                 return;
-            }
 
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
@@ -260,7 +252,7 @@ namespace Signum.Engine.Chart
                     {
                         retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);

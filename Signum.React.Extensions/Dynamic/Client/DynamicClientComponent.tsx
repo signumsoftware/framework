@@ -6,7 +6,7 @@ import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal';
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useForceUpdate } from '@framework/Hooks';
 import { ModulesHelp } from '../View/ModulesHelp';
 
 

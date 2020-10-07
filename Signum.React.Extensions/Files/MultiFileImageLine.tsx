@@ -11,13 +11,13 @@ import { FileUploader } from './FileUploader'
 import { Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
-import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
-import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
+import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
+import { FetchAndRemember } from '@framework/Lines'
 import { FileImage } from './FileImage';
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { useController } from '@framework/Lines/LineBase'
 import { center, wrap } from '../Map/Utils'
-import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals'
-import { useForceUpdate } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { openModal, IModalProps } from '@framework/Modals'
+import { useForceUpdate } from '@framework/Hooks'
 import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };

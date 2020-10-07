@@ -1,11 +1,10 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import { WebApiHttpError } from '@framework/Services'
 import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -17,14 +16,13 @@ import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import { RouteComponentProps } from "react-router";
-import * as QueryString from 'query-string';
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
-import { validate } from './View/NodeUtils';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -37,7 +35,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
 
   const startErrors = useAPI(() => API.getStartErrors(), [count]);
   const panelInformation = useAPI(() => API.getPanelInformation(), [count]);
-  const [restarting, setRestarting] = React.useState<moment.Moment | null>(null);
+  const [restarting, setRestarting] = React.useState<DateTime | null>(null);
 
 
   function handleSelect(key: any /*string*/) {
@@ -169,28 +167,28 @@ export function CompileStep(p: DynamicCompileStepProps) {
     const validStyle = { color: "green" } as React.CSSProperties;
     const invalidStyle = { color: "red", fontWeight: "bold" } as React.CSSProperties;
 
-    const isValidCompile = lastChange && lastCompile && moment(lastCompile).isBefore(moment(lastChange)) ? false : true;
-    const isValidAssembly = lastChange && loadedAssembly && moment(loadedAssembly).isBefore(moment(lastChange)) ? false : true;
-    const isValidControllerAssembly = lastChange && loadedControllerAssembly && moment(loadedControllerAssembly).isBefore(moment(lastChange)) ? false : true;
+    const isValidCompile = lastChange && lastCompile && DateTime.fromISO(lastCompile) < DateTime.fromISO(lastChange) ? false : true;
+    const isValidAssembly = lastChange && loadedAssembly && DateTime.fromISO(loadedAssembly) < DateTime.fromISO(lastChange) ? false : true;
+    const isValidControllerAssembly = lastChange && loadedControllerAssembly && DateTime.fromISO(loadedControllerAssembly) < DateTime.fromISO(lastChange) ? false : true;
 
     return (
       <table className="table table-condensed form-vertical table-sm">
         <tbody>
           <tr>
             <th>Last Dynamic Change</th>
-            <td>{lastChange ? moment(lastChange).format("L LT") : "-"}</td>
+            <td>{lastChange ? DateTime.fromISO(lastChange).toFormat("FFF") : "-"}</td>
           </tr>
           <tr>
             <th>Last Dynamic Compilation</th>
-            <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? moment(lastCompile).format("L LT") : "-"}</td>
+            <td style={isValidCompile ? validStyle : invalidStyle}>{lastCompile ? DateTime.fromISO(lastCompile).toFormat("FFF") : "-"}</td>
           </tr>
           <tr>
             <th>Loaded CodeGen Assembly</th>
-            <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? moment(loadedAssembly).format("L LT") : "-"}</td>
+            <td style={isValidAssembly ? validStyle : invalidStyle}>{loadedAssembly ? DateTime.fromISO(loadedAssembly).toFormat("FFF") : "-"}</td>
           </tr>
           <tr>
             <th>Loaded CodeGen Controller Assembly</th>
-            <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? moment(loadedControllerAssembly).format("L LT") : "-"}</td>
+            <td style={isValidControllerAssembly ? validStyle : invalidStyle}>{loadedControllerAssembly ? DateTime.fromISO(loadedControllerAssembly).toFormat("FFF") : "-"}</td>
           </tr>
         </tbody>
       </table>
@@ -279,8 +277,8 @@ export function CompileStep(p: DynamicCompileStepProps) {
 interface RestartServerAppStepProps {
   startErrors?: WebApiHttpError[];
   refreshView: () => void;
-  setRestarting: (time: moment.Moment | null) => void;
-  restarting: moment.Moment | null;
+  setRestarting: (time: DateTime | null) => void;
+  restarting: DateTime | null;
 }
 
 
@@ -292,7 +290,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
 
     API.restartServer()
       .then(() => {
-        p.setRestarting(moment());
+        p.setRestarting(DateTime.local());
         return Promise.all([refreshScreen(), reconnectWithServer()]);
       })
       .done();
@@ -329,7 +327,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
     return (
       <div className="progress">
         <div className="progress-bar progress-bar-striped bg-warning active" role="progressbar" style={{ width: "100%" }}>
-          <span>Restarting...({moment().diff(p.restarting, "s")}s)</span>
+          <span>Restarting...({DateTime.local().diff(p.restarting, "second").as("second")}s)</span>
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
@@ -73,7 +73,7 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
                 <tr>
                   <td>Max</td>
                   <td className="leftBorder">
-                    <span className="max" style={{ width: (pair.maxTime * ratio) + "px" }}></span> {pair.maxTime} ms ({moment(pair.maxDate).fromNow()})
+                    <span className="max" style={{ width: (pair.maxTime * ratio) + "px" }}></span> {pair.maxTime} ms ({DateTime.fromISO(pair.maxDate).toRelative()})
                     </td>
                 </tr>
                 <tr>
@@ -85,13 +85,13 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
                 <tr>
                   <td>Min</td>
                   <td className="leftBorder">
-                    <span className="min" style={{ width: (pair.minTime * ratio) + "px" }}></span> {pair.minTime} ms ({moment(pair.minDate).fromNow()})
+                    <span className="min" style={{ width: (pair.minTime * ratio) + "px" }}></span> {pair.minTime} ms ({DateTime.fromISO(pair.minDate).toRelative()})
                   </td>
                 </tr>
                 <tr>
                   <td>Last</td>
                   <td className="leftBorder">
-                    <span className="last" style={{ width: (pair.lastTime * ratio) + "px" }}></span> {pair.lastTime} ms ({moment(pair.lastDate).fromNow()})
+                    <span className="last" style={{ width: (pair.lastTime * ratio) + "px" }}></span> {pair.lastTime} ms ({DateTime.fromISO(pair.lastDate).toRelative()})
                   </td>
                 </tr>
               </table>

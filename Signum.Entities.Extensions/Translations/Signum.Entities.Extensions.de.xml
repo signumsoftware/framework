@@ -152,6 +152,9 @@
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
   </Type>
+  <Type Name="BigStringMixin">
+    <Member Name="File" Description="Datei" />
+  </Type>
   <Type Name="BpmnEntityPairEmbedded" Description="Bpmn Entitätenpaar">
     <Member Name="BpmnElementId" Description="Bpmn Elemente Id" />
     <Member Name="Model" Description="Modell" />
@@ -292,6 +295,7 @@
   </Type>
   <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="Format" Description="Format" />
     <Member Name="OrderByIndex" Description="Sortieren nach index" />
     <Member Name="OrderByType" Description="Sortieren nach typ" />
     <Member Name="Token" Description="Token" />
@@ -336,9 +340,12 @@
     <Member Name="DeletePalette" Description="Palette löschen" />
     <Member Name="DrawChart" Description="Diagramm chart" />
     <Member Name="EditUserChart" Description="Benutzerdiagramm bearbeiten" />
+    <Member Name="Maximize" Description="Maximieren" />
+    <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
     <Member Name="NewPalette" Description="Neue Palette" />
     <Member Name="Preview" Description="Vorschau" />
+    <Member Name="Reload" Description="Neu laden" />
     <Member Name="SavePalette" Description="Palette speichern" />
     <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
@@ -1035,10 +1042,15 @@
   <Type Name="FilePathEmbedded" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
+    <Member Name="EntityId" Description="EntityId" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße string" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="MListRowId" Description="MListRowId" />
+    <Member Name="PropertyRoute" Description="PropertyRoute" />
+    <Member Name="RootType" Description="RootType" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathEntity" Description="Dateipfad" PluralDescription="Dateipfade" Gender="m">
@@ -1049,6 +1061,7 @@
     <Member Name="FileLengthString" Description="Dateigröße" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
+    <Member Name="Hash" Description="Hash" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
@@ -1159,6 +1172,9 @@
   <Type Name="HolidayEmbedded" Description="Feiertag">
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Pivot-Tabelle" />
   </Type>
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
@@ -1419,36 +1435,6 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
-  <Type Name="NewsletterDeliveryEntity" Description="Newsletter-Versand" Gender="m">
-    <Member Name="Newsletter" Description="Newsletter" />
-    <Member Name="Recipient" Description="Empfänger" />
-    <Member Name="SendDate" Description="Sendedatum" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
-  <Type Name="NewsletterEntity" Description="Newsletter" Gender="m">
-    <Member Name="DisplayFrom" Description="Anzeigen aus" />
-    <Member Name="From" Description="Von" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="Query" Description="Abfrage" />
-    <Member Name="State" Description="Status" />
-    <Member Name="Subject" Description="Betreff" />
-    <Member Name="Text" Description="Text" />
-  </Type>
-  <Type Name="NewsletterOperation">
-    <Member Name="AddRecipients" Description="Empfänger hinzufügen" />
-    <Member Name="Clone" Description="Klonen" />
-    <Member Name="RemoveRecipients" Description="Empfänger entfernen" />
-    <Member Name="Save" Description="Speichern" />
-    <Member Name="Send" Description="Senden" />
-  </Type>
-  <Type Name="NewsletterProcess">
-    <Member Name="SendNewsletter" Description="Newsletter senden" />
-  </Type>
-  <Type Name="NewsletterState" Description="Newsletter-Status">
-    <Member Name="Created" Description="Erstellt" />
-    <Member Name="Saved" Description="Gespeichert" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
   <Type Name="NoteEntity" Description="Notiz" PluralDescription="Notizen" Gender="f">
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -2150,6 +2136,7 @@
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
   <Type Name="TimeMachineMessage">
+    <Member Name="CompareVersions" Description="Versionen vergleichen" />
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
     <Member Name="TimeMachine" Description="Zeitmaschine" />
   </Type>
@@ -2394,6 +2381,7 @@
   </Type>
   <Type Name="UserChartPartEntity" Description="Benutzerdiagramm Teil" PluralDescription="Benutzerdiagramm Teilen" Gender="n">
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
@@ -2458,6 +2446,7 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />

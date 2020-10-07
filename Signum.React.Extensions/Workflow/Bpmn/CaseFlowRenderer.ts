@@ -1,6 +1,6 @@
 /// <reference path="../bpmn-js.d.ts" />
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
-import * as moment from 'moment'
+import { DateTime, Duration } from 'luxon'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
@@ -30,7 +30,7 @@ export class CaseFlowRenderer extends CustomRenderer {
     else {
       const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
       const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-      title.textContent = stats.filter(con => con.doneDate != null).map(con => `${DoneType.niceToString(con.doneType)} (${con.doneBy.toStr} ${moment(con.doneDate).fromNow()})`).join("\n");
+      title.textContent = stats.filter(con => con.doneDate != null).map(con => `${DoneType.niceToString(con.doneType)} (${con.doneBy.toStr} ${DateTime.fromISO(con.doneDate).toRelative()})`).join("\n");
     }
 
     return path;
@@ -148,7 +148,7 @@ export class CaseFlowRenderer extends CustomRenderer {
             const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() ||
               pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
-            title.textContent = `${DoneType.niceToString(jump.doneType)} (${jump.doneBy.toStr} ${moment(jump.doneDate).fromNow()})`;
+            title.textContent = `${DoneType.niceToString(jump.doneType)} (${jump.doneBy.toStr} ${DateTime.fromISO(jump.doneDate).toRelative()})`;
           });
         }
       }
@@ -173,11 +173,11 @@ function getDoneColor(doneType: DoneType) {
 
 function getTitle(stats: CaseActivityStats) {
   let result = `${stats.workflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.notifications})
-${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.startDate).format("L LT")} (${moment(stats.startDate).fromNow()})`;
+${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${DateTime.fromISO(stats.startDate).toFormat("FFF")} (${DateTime.fromISO(stats.startDate).toRelative()})`;
 
   if (stats.doneDate != null)
     result += `
-${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${moment(stats.doneDate).format("L LT")} (${moment(stats.doneDate).fromNow()})
+${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${DateTime.fromISO(stats.doneDate).toFormat("FFF")} (${DateTime.fromISO(stats.doneDate).toRelative()})
 ${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.doneBy && stats.doneBy.toStr} (${DoneType.niceToString(stats.doneType!)})
 ${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.duration)}`;
 
@@ -194,7 +194,7 @@ function formatDuration(minutes: number | undefined) {
   if (minutes == undefined)
     return "";
 
-  return durationFormat(moment.duration(minutes, "minutes"));
+  return durationFormat(Duration.fromObject({ minutes }));
 }
 
 export const __init__ = ['caseFlowRenderer'];

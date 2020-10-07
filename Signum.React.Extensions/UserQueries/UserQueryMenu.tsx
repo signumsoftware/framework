@@ -13,25 +13,19 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
-import { FilterOptionParsed } from '../../../Framework/Signum.React/Scripts/Search'
+import { useAPI } from '@framework/Hooks'
+import { FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-interface UserQueryMenuState {
-  currentUserQuery?: Lite<UserQueryEntity>;
-  userQueries?: Lite<UserQueryEntity>[];
-  isOpen: boolean;
-}
-
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
-    let uq = window.location.search.tryAfter("userQuery=");
+    let uq = p.searchControl.props.tag == "SearchPage" ? window.location.search.tryAfter("userQuery=") : null;
     uq = uq && decodeURIComponent(uq.tryBefore("&") || uq);
     return uq ? parseLite(uq) as Lite<UserQueryEntity> : undefined;
   });
@@ -174,7 +168,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
+      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant={currentUserQuery ? "info" : "light"} >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

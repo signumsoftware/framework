@@ -7,6 +7,7 @@ import { UserEntity, PermissionSymbol } from "./Signum.Entities.Authorization";
 import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
 import { is } from "@framework/Signum.Entities";
 import { ifError } from "@framework/Globals";
+import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
@@ -72,19 +73,26 @@ var notifyLogout: boolean;
 
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
+const cookieName = "sfUser";
+
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
-  var myCookie = getCookie("sfUser");
+
+  var myCookie = Cookies.get(cookieName);
 
   if (!myCookie) {
-    return new Promise<undefined>(resolve => resolve());
+    return Promise.resolve(undefined);
   }
-  else {
-    return API.loginFromCookie().then(au => {
-      au && console.log("loginFromCookie");
-      return au;
-    });
-  }
+
+  return API.loginFromCookie().then(au => {
+    if (au) {
+      console.log("loginFromCookie");
+    }
+    else {
+      Cookies.remove(cookieName);
+    }
+    return au;
+  });
 }
 
 export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
@@ -97,25 +105,6 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
     return au;
   }).catch(() => undefined);
 }
-
-function getCookie(name: string) {
-  var dc = document.cookie;
-  var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
-
-  if (begin == -1) {
-    begin = dc.indexOf(prefix);
-    if (begin != 0) return null;
-  }
-
-  var end = document.cookie.indexOf(";", begin + 2);
-  if (end == -1) {
-    end = dc.length;
-  }
-
-  return decodeURI(dc.substring(begin + prefix.length, end));
-}
-
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
 
@@ -142,6 +131,8 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
+
+  Cookies.remove(cookieName)
 
   API.logout().then(() => {
     logoutInternal();
@@ -238,7 +229,7 @@ export function autoLogin(): Promise<UserEntity | undefined> {
       return u;
     });
 
-  return new Promise<UserEntity>((resolve) => {
+  return new Promise<UserEntity | undefined>((resolve) => {
     setTimeout(() => {
       if (getAuthToken()) {
         API.fetchCurrentUser()

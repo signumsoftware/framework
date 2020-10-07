@@ -70,7 +70,22 @@ namespace Signum.Entities.Authorization
         [Description("An error occurred, request not processed.")]
         AnErrorOccurredRequestNotProcessed,
 
-        TheUserIsNotLongerInTheDatabase
+        TheUserIsNotLongerInTheDatabase,
+
+        [Description("Register {0}")]
+        Register0,
+
+        [Description("Success")]
+        Success,
+
+        [Description("{0} has been successfully associated with user {1} in this device.")]
+        _0HasBeenSucessfullyAssociatedWithUser1InThisDevice,
+
+        [Description("Try to log-in with it!")]
+        TryToLogInWithIt,
+
+        [Description("Login with {0}")]
+        LoginWith0,
     }
 
     public enum AuthMessage
