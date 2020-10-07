@@ -218,9 +218,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
   );
 });
 
-(SearchControl as any).defaultProps = {
+(SearchControl ).defaultProps = {
   allowSelection: true,
-  avoidFullScreenButton: false,
   maxResultsHeight: "400px",
   defaultIncludeDefaultFilters: false,
 };
