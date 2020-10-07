@@ -71,7 +71,7 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
 
     const pag: Pagination = {
       mode: mode,
-      elementsPerPage: mode != "All" ? Finder.defaultPagination.elementsPerPage : undefined,
+      elementsPerPage: mode != "All" ? Finder.Settings.defaultPagination.elementsPerPage : undefined,
       currentPage: mode == "Paginate" ? 1 : undefined
     };
 
