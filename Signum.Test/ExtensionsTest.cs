@@ -99,7 +99,7 @@ namespace Signum.Test
             if (a == null && b == null)
                 return;
 
-            if (b == null || Math.Abs(a.Value - b.Value) > epsilon)
+            if (b == null || a == null || Math.Abs(a.Value - b.Value) > epsilon)
                 Assert.True(false, "Values {0} and {1} are too different".FormatWith(a, b));
         }
 

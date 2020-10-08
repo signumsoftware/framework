@@ -478,16 +478,18 @@ namespace Signum.Engine.Maps
 
         public event Action? SchemaCompleted;
 
+        public bool IsCompleted { get; private set; }
         public void OnSchemaCompleted()
         {
-            if (SchemaCompleted == null)
-                return;
-
-            using (ExecutionMode.Global())
-                foreach (var item in SchemaCompleted.GetInvocationListTyped())
-                    item();
-
+            if (SchemaCompleted != null)
+            {
+                using (ExecutionMode.Global())
+                    foreach (var item in SchemaCompleted.GetInvocationListTyped())
+                        item();
+            }
+               
             SchemaCompleted = null;
+            IsCompleted = true;
         }
 
         public void WhenIncluded<T>(Action action) where T : Entity
@@ -503,7 +505,7 @@ namespace Signum.Engine.Maps
 
         public void OnBeforeDatabaseAccess()
         {
-            if (SchemaCompleted != null)
+            if (IsCompleted == false)
                 throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
 
             if (BeforeDatabaseAccess == null)
@@ -790,6 +792,8 @@ namespace Signum.Engine.Maps
         public bool IsCollection { get; set; }
         public bool IsEnum { get; set; }
         public bool IsImplementedByAll { get; set; }
+
+        public PropertyRoute PropertyRoute { get; set; } = null!;
     }
 
 

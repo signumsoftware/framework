@@ -221,10 +221,11 @@ namespace Signum.Engine.Maps
             return Include(type, null);
         }
 
-
-
         internal protected virtual Table Include(Type type, PropertyRoute? route)
         {
+            if (this.Schema.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             if (schema.Tables.TryGetValue(type, out var result))
                 return result;
 
@@ -313,10 +314,10 @@ namespace Signum.Engine.Maps
             return new SystemVersionedInfo(tn, att.StartDateColumnName, att.EndDateColumnName);
         }
 
-        private Dictionary<Type, FieldMixin>? GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
+        private Dictionary<Type, FieldMixin>? GenerateMixins(PropertyRoute propertyRoute, ITable table, NameSequence nameSequence)
         {
             Dictionary<Type, FieldMixin>? mixins = null;
-            foreach (var t in MixinDeclarations.GetMixinDeclarations(table.Type))
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(propertyRoute.Type))
             {
                 if (mixins == null)
                     mixins = new Dictionary<Type, FieldMixin>();
@@ -776,11 +777,11 @@ namespace Signum.Engine.Maps
             var hasValue = nullable.ToBool() ? new FieldEmbedded.EmbeddedHasValueColumn(name.Add("HasValue").ToString()) : null;
 
             var embeddedFields = GenerateFields(route, table, name, forceNull: nullable.ToBool() || forceNull, inMList: inMList);
-
-            return new FieldEmbedded(route, hasValue, embeddedFields);
+            var mixins = GenerateMixins(route, table, name);
+            return new FieldEmbedded(route, hasValue, embeddedFields, mixins);
         }
 
-        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
+        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, ITable table)
         {
             return new FieldMixin(route, table, GenerateFields(route, table, name, forceNull: false, inMList: false));
         }

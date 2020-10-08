@@ -26,7 +26,7 @@ export function useForceUpdatePromise(): () => Promise<void> {
   return () => setCount(c => c + 1) as Promise<any>;
 }
 
-export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T) {
+export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>) {
   const [val, setVal] = React.useState(initialState);
 
   React.useEffect(() => {
@@ -36,7 +36,7 @@ export function useInterval<T>(interval: number | undefined | null, initialState
       }, interval);
       return () => clearInterval(handler);
     }
-  }, [interval]);
+  }, [interval, ...(deps ?? [])]);
 
   return val;
 }
@@ -109,6 +109,14 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   return { size, setContainer: setContainerMemo };
 }
 
+export function useDocumentEvent(type: string, handler: (e: Event) => void, deps: any[]) {
+  React.useEffect(() => {
+    document.addEventListener(type, handler);
+    return () => {
+      document.removeEventListener(type, handler);
+    }
+  }, deps);
+}
 
 export function useStateWithPromise<T>(defaultValue: T): [T, (newValue: React.SetStateAction<T>) => Promise<T>] {
   const [state, setState] = React.useState({ value: defaultValue, resolve: (val: T) => { } });

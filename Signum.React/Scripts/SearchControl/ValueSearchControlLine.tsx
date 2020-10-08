@@ -19,10 +19,12 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   ctx: StyleContext;
   findOptions?: FindOptions;
   valueToken?: string | QueryTokenString<any>;
+  multipleValues?: { vertical?: boolean, showType?: boolean };
   labelText?: React.ReactChild;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   unitText?: React.ReactChild;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  helpText?: React.ReactChild;
   initialValue?: any;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -33,7 +35,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   findButton?: boolean;
   viewEntityButton?: boolean;
   avoidAutoRefresh?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
   create?: boolean;
   onCreate?: () => Promise<void>;
@@ -139,18 +141,21 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
       <FormGroup ctx={this.props.ctx}
         labelText={this.props.labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
-        htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName)}}}>
+        htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
+        helpText={this.props.helpText}
+      >
         <div className={isFormControl ? ((unit || view || extra || find || create) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>
           <ValueSearchControl
             ref={this.handleValueSearchControlLoaded}
             findOptions={fo}
             initialValue={this.props.initialValue}
+            multipleValues={this.props.multipleValues}
             isBadge={isBadge}
-            customClass={this.props.customClass}
+            customClass={this.props.customClass ?? (this.props.multipleValues ? this.props.ctx.labelClass : undefined)}
             customStyle={this.props.customStyle}
             badgeColor={this.props.badgeColor}
-            isLink={this.props.isLink}
-            formControlClass={isFormControl ? this.props.ctx.formControlClass : undefined}
+            isLink={this.props.isLink ?? Boolean(this.props.multipleValues)}
+            formControlClass={isFormControl && !this.props.multipleValues ? this.props.ctx.formControlClass + " readonly" : undefined}
             valueToken={this.props.valueToken}
             onValueChange={v => { this.forceUpdate(); this.props.onValueChanged && this.props.onValueChanged(v); }}
             onTokenLoaded={() => this.forceUpdate()}

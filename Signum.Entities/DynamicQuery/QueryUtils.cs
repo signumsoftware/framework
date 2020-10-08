@@ -500,14 +500,28 @@ namespace Signum.Entities.DynamicQuery
         static readonly MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
         static readonly MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
         static readonly MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miEquals = ReflectionTools.GetMethodInfo(() => object.Equals(null, null));
 
         public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
         {
             switch (operation)
             {
-                case FilterOperation.EqualTo: return Expression.Equal(left, right);
+                case FilterOperation.EqualTo:
+                    {
+                        if (inMemory)
+                            return Expression.Call(null, miEquals, 
+                                Expression.Convert(left, typeof(object)), 
+                                Expression.Convert(right, typeof(object)));
+
+                        return Expression.Equal(left, right);
+                    }
                 case FilterOperation.DistinctTo:
                     {
+                        if (inMemory)
+                            return Expression.Not(Expression.Call(null, miEquals,
+                                Expression.Convert(left, typeof(object)),
+                                Expression.Convert(right, typeof(object))));
+
                         var t = left.Type.UnNullify();
                         var mi = t.IsValueType ? miDistinctNullable : miDistinct;
                         return Expression.Call(mi.MakeGenericMethod(t), left.Nullify(), right.Nullify());

@@ -156,16 +156,25 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     var filters = [...fo.filterOptions ?? []];
 
     /*When overriden in Finder very often uses not seen columns (like Telephone) that are not seen in autocomplete, better to use false by default and you can opt-in by adding includeDefaultFilters if needed */
-    if (fo.includeDefaultFilters ?? false) { 
+    if (fo.includeDefaultFilters ?? false) {
       var defaultFilters = Finder.getDefaultFilter(qd, qs);
       if (defaultFilters)
         filters = [...defaultFilters, ...filters];
-    } 
+    }
+
+    if (/^id[: ]/.test(subStr)) {
+      filters.insertAt(0, {
+        token: "Entity.Id",
+        operation: "EqualTo",
+        value: subStr.substr(3)
+      });
+      return filters;
+    }
 
     var searchBox = filters.firstOrNull(a => a.pinned != null && a.pinned.splitText == true);
 
     if (searchBox == null) {
-      filters.insertAt(0, searchBox = {
+      filters.insertAt(0, {
         groupOperation: "Or",
         pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
         filters: [
@@ -177,6 +186,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     } else {
       filters[filters.indexOf(searchBox)] = { ...searchBox, value: subStr }
     }
+
 
     return filters;
   }

@@ -207,15 +207,13 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
-            if (member is MethodInfo mi)
+            Type? mixinType = member as Type ?? GetMixinType(member);
+            if (mixinType != null)
             {
-                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
-                {
-                    if (Mixins == null)
-                        throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
+                if (Mixins == null)
+                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
-                    return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
-                }
+                return Mixins.GetOrThrow(mixinType);
             }
             
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
@@ -230,19 +228,10 @@ namespace Signum.Engine.Maps
 
         public Field? TryGetField(MemberInfo member)
         {
-            if (member is MethodInfo mi)
+            Type? mixinType = member as Type ?? GetMixinType(member);
+            if (mixinType!= null)
             {
-                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
-                {
-                    return Mixins?.TryGetC(mi.GetGenericArguments().Single());
-                }
-
-                return null;
-            }
-
-            if (member is Type)
-            {
-                return Mixins?.TryGetC((Type)member);
+                return Mixins?.TryGetC(mixinType);
             }
 
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
@@ -256,6 +245,19 @@ namespace Signum.Engine.Maps
                 return null;
 
             return field.Field;
+        }
+
+
+        internal static Type? GetMixinType(MemberInfo member)
+        {
+            if (member is MethodInfo mi)
+            {
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    return mi.GetGenericArguments().SingleEx();
+                }
+            }
+            return null;
         }
 
 
@@ -352,6 +354,7 @@ namespace Signum.Engine.Maps
         {
             return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
         }
+
     }
 
     public class EntityField
@@ -650,21 +653,36 @@ namespace Signum.Engine.Maps
         public EmbeddedHasValueColumn? HasValue { get; set; }
 
         public Dictionary<string, EntityField> EmbeddedFields { get; set; }
-        
-        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields)
+        public Dictionary<Type, FieldMixin>? Mixins { get; set; }
+
+        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields, Dictionary<Type, FieldMixin>? mixins)
             : base(route)
         {
             this.HasValue = hasValue;
             this.EmbeddedFields = embeddedFields;
+            this.Mixins = mixins;
         }
 
         public override string ToString()
         {
-            return "Embebed\r\n{0}".FormatWith(EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
+            return "\r\n".Combine(
+                "Embedded",
+                EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
+                Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
+                );
         }
 
         public Field GetField(MemberInfo member)
         {
+            Type? mixinType = member as Type ?? Table.GetMixinType(member);
+            if (mixinType != null)
+            {
+                if (Mixins == null)
+                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Route.Type.Name));
+
+                return Mixins.GetOrThrow(mixinType);
+            }
+
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
@@ -675,9 +693,15 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public Field? TryGetField(MemberInfo value)
+        public Field? TryGetField(MemberInfo member)
         {
-            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
+            Type? mixinType = member as Type ?? Table.GetMixinType(member);
+            if (mixinType != null)
+            {
+                return Mixins?.TryGetC(mixinType);
+            }
+
+            FieldInfo fi = member as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)member)!;
 
             if (fi == null)
                 return null;
@@ -695,9 +719,18 @@ namespace Signum.Engine.Maps
             if (predicate(this))
                 return new[] { this };
 
-            return EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
                 f is IFieldFinder ff ? ff.FindFields(predicate) :
                 Enumerable.Empty<Field>()).ToList();
+
+            if (Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -709,21 +742,40 @@ namespace Signum.Engine.Maps
 
             result.AddRange(EmbeddedFields.Values.SelectMany(c => c.Field.Columns()));
 
+            if (Mixins != null)
+                result.AddRange(Mixins.Values.SelectMany(c => c.Columns()));
+
             return result;
         }
 
         public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table));
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table))
+                .Concat((this.Mixins?.Values.SelectMany(a => a.Fields.Values).SelectMany(f => f.Field.GenerateIndexes(table))).EmptyIfNull());
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
+
             foreach (var f in EmbeddedFields.Values)
             {
                 foreach (var kvp in f.Field.GetTables())
                 {
                     yield return kvp;
+                }
+            }
+
+            if (Mixins != null)
+            {
+                foreach (var mi in Mixins.Values)
+                {
+                    foreach (var f in mi.Fields.Values)
+                    {
+                        foreach (var kvp in f.Field.GetTables())
+                        {
+                            yield return kvp;
+                        }
+                    }
                 }
             }
         }
@@ -735,9 +787,15 @@ namespace Signum.Engine.Maps
 
         internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
         {
-            var subHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            var enbeddedHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            if (enbeddedHasValue != null)
+                return enbeddedHasValue;
 
-            return subHasValue ?? (this.Columns().Contains(column) ? this.HasValue : null);
+            var mixinHasValue = this.Mixins?.Select(a => a.Value).Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            if (mixinHasValue != null)
+                return mixinHasValue;
+
+            return this.Columns().Contains(column) ? this.HasValue : null;
         }
     }
 
@@ -745,9 +803,9 @@ namespace Signum.Engine.Maps
     {
         public Dictionary<string, EntityField> Fields { get; set; }
 
-        public Table MainEntityTable;
+        public ITable MainEntityTable;
 
-        public FieldMixin(PropertyRoute route, Table mainEntityTable, Dictionary<string, EntityField> fields)
+        public FieldMixin(PropertyRoute route, ITable mainEntityTable, Dictionary<string, EntityField> fields)
             : base(route)
         {
             this.MainEntityTable = mainEntityTable;
@@ -830,6 +888,11 @@ namespace Signum.Engine.Maps
         {
             return ((Entity)ident).GetMixin(FieldType);
         }
+
+        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            return Fields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+        }
     }
 
     public partial class FieldReference : Field, IColumn, IFieldReference
@@ -879,9 +942,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
-                 IsLite = IsLite,
-                 IsCollection = false,
-                 IsNullable = Nullable.ToBool()
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable.ToBool(),
+                PropertyRoute = this.Route
             });
         }
 
@@ -944,12 +1008,14 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
+
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
                 IsNullable = Nullable.ToBool(),
                 IsEnum = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -988,7 +1054,8 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = a.Value.Nullable.ToBool()
+                IsNullable = a.Value.Nullable.ToBool(),
+                PropertyRoute = this.Route
             }));
         }
 
@@ -1042,9 +1109,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
-                 IsNullable = this.ColumnType.Nullable.ToBool(),
-                 IsLite = this.IsLite,
-                 IsImplementedByAll = true,
+                IsNullable = this.ColumnType.Nullable.ToBool(),
+                IsLite = this.IsLite,
+                IsImplementedByAll = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -1493,7 +1561,9 @@ namespace Signum.Engine.Maps
                     case SqlDbType.NText:
                     case SqlDbType.NVarChar:
                     case SqlDbType.Text:
-                    case SqlDbType.VarChar: 
+                    case SqlDbType.VarChar:
+                    case SqlDbType.Char:
+                    case SqlDbType.NChar:
                         return true;
                     default: 
                         return false;

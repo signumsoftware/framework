@@ -1,9 +1,8 @@
 import * as React from 'react'
-import * as moment from 'moment'
-import numbro from 'numbro'
+import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -12,6 +11,7 @@ import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
+import { isPrefix } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -214,8 +214,7 @@ function isDecimal(e: React.KeyboardEvent<any>): boolean {
 
 function isDuration(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
-  return (isNumber(e) ||
-    (c == 190) /*. Colon*/);
+  return isNumber(e) || e.key == ":";
 }
 
 ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {
@@ -456,14 +455,14 @@ ValueLineRenderers.renderers["Decimal" as ValueLineType] = (vl) => {
 function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
 
-  const numbroFormat = toNumbroFormat(s.formatText);
+  const numberFormat = toNumberFormat(s.formatText);
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.inputElement}>
-            {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
+            {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
     );
@@ -499,7 +498,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
           onChange={handleOnChange}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
-          format={numbroFormat}
+          format={numberFormat}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>}
         />
       )}
@@ -511,11 +510,29 @@ export interface NumericTextBoxProps {
   value: number | null;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
-  format?: string;
+  format: Intl.NumberFormat;
   formControlClass?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
 }
+
+const cachedLocaleSeparators: {
+  [locale: string]: { group: string, decimal: string }
+} = {};
+
+function getLocaleSeparators(locale: string) {
+  var result = cachedLocaleSeparators[locale];
+  if (result)
+    return result;
+
+  var format = new Intl.NumberFormat(locale, { minimumFractionDigits: 0 });
+  result = {
+    group: format.format(1111).replace(/1/g, ''),
+    decimal: format.format(1.1).replace(/1/g, ''),
+  };
+  return cachedLocaleSeparators[locale] = result;
+}
+
 
 export function NumericTextBox(p: NumericTextBoxProps) {
 
@@ -523,7 +540,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
 
   const value = text != undefined ? text :
-    p.value != undefined ? numbro(p.value).format(p.format) :
+    p.value != undefined ? p.format?.format(p.value) :
       "";
 
   return <input ref={p.innerRef} {...p.htmlAttributes}
@@ -553,21 +570,39 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
     let value = ValueLineController.autoFixString(input.value, false);
 
-    if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-      value = value + ",00";
+    //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
+    //  value = value + ",00";
 
-    if (p.format && p.format.endsWith("%")) {
-      if (value && !value.endsWith("%"))
-        value += "%";
-    }
-
-    const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, p.format);
+    const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
     setText(undefined);
     if (result != p.value)
       p.onChange(result);
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
+  }
+
+ 
+  function unformat(format: Intl.NumberFormat, str: string): number {
+
+    var options = format.resolvedOptions();
+
+    var isPercentage = options.style == "percent";
+
+    var separators = getLocaleSeparators(options.locale);
+
+    if (separators.group)
+      str = str.replace(new RegExp('\\' + separators.group, 'g'), '');
+
+    if (separators.decimal)
+      str = str.replace(new RegExp('\\' + separators.decimal), '.');
+
+    var result =  parseFloat(str);
+
+    if (isPercentage)
+      return result / 100;
+
+    return result;
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
@@ -589,30 +624,30 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
-  const momentFormat = toMomentFormat(s.formatText);
+  const luxonFormat = toLuxonFormat(s.formatText);
 
-  const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : momentFormat != "L" && momentFormat != "LL";
+  const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
+  const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.format(momentFormat)}
+          {m?.toFormatFixed(luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
 
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
-    const m = moment(date);
-    vl.setValue(!m.isValid() ? null :
-      vl.props.type!.name == "Date" ? formatAsDate(m):
-        !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
-          m.format());
+    const m = date && DateTime.fromJSDate(date);
+    vl.setValue(m == null || !m.isValid ? null :
+      vl.props.type!.name == "Date" ? m.toISODate():
+        !showTime ? m.toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
+          m.toISO());
   };
 
-  let currentDate = moment(s.ctx.value || undefined);
-  if (!showTime)
+  let currentDate = s.ctx.value == null ? null : DateTime.fromISO(s.ctx.value);
+  if (!showTime && currentDate)
     currentDate = currentDate.startOf("day");
 
   const htmlAttributes = {
@@ -624,16 +659,12 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
-            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
+          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+            format={luxonFormat} time={showTime} defaultCurrentDate={currentDate?.toJSDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
         </div>
       )}
     </FormGroup>
   );
-}
-
-export function formatAsDate(m: moment.Moment) {
-  return m.format("YYYY-MM-DD");
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
@@ -730,58 +761,11 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
     var format = p.format!;
 
-    function fixNumber(val: string) {
-      var valParts = val.split(":");
-      var formatParts = format.split(":");
-      if (valParts.length == 1 && formatParts.length > 1) {
-        const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
-
-        var inferedFormat = validFormats.firstOrNull(f => f.length >= val.length);
-        if (inferedFormat == null)
-          return null;
-
-        var fixedVal = val.padStart(inferedFormat.length, '0');
-
-        const getPart = (part: string) => {
-          var index = inferedFormat!.indexOf(part);
-          if (index == -1)
-            return "".padStart(part.length, '0');
-
-          return fixedVal.substr(index, part.length);
-        }
-
-        return format
-          .replace("hh", getPart("hh"))
-          .replace("mm", getPart("mm"))
-          .replace("ss", getPart("ss"));
-
-      } else {
-
-        var result = format;
-        for (var i = 0; i < formatParts.length; i++) {
-          var formP = formatParts[i];
-          var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
-          result = result.replace(formP, valP);
-        }
-        return result;
-      }
-    }
-
-    function normalize(val: string | null) {
-      if (val == null)
-        return null;
-
-      if (!"hh:mm:ss".contains(format))
-        throw new Error("not implemented");
-
-      return "hh:mm:ss".replace(format, val).replace("hh", "00").replace("mm", "00").replace("ss", "00")
-    }
-
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
+    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
     setText(undefined);
     if (p.value != result)
-      p.onChange(result);;
+      p.onChange(result);
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
   }
@@ -797,6 +781,36 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
+export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
+  var valParts = timeStampOrHumanStr.split(":");
+  var formatParts = format.split(":");
+  if (valParts.length == 1 && formatParts.length > 1) {
+    const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+
+    var inferedFormat = validFormats.firstOrNull(f => f.length >= timeStampOrHumanStr.length);
+    if (inferedFormat == null)
+      return null;
+
+    var fixedVal = timeStampOrHumanStr.padStart(inferedFormat.length, '0');
+
+    const getPart = (part: string) => {
+      var index = inferedFormat!.indexOf(part);
+      if (index == -1)
+        return 0;
+
+      return parseInt(fixedVal.substr(index, part.length));
+    }
+
+    return Duration.fromObject({
+      hour: getPart("hh"),
+      minute: getPart("mm"),
+      second: getPart("ss"),
+    });
+
+  } else {
+    return parseDuration(timeStampOrHumanStr, format);
+  }
+}
 
 DurationTextBox.defaultProps = {
   format: "hh:mm:ss"

@@ -1,11 +1,11 @@
 import * as React from 'react'
-import numbro from 'numbro'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { classes } from '../Globals'
+import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumbroFormat, toMomentFormat, getEnumInfo, QueryTokenString } from '../Reflection'
+import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
@@ -14,6 +14,7 @@ import { toFilterRequests } from '../Finder';
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
   valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
+  multipleValues?: { vertical?: boolean, showType?: boolean };
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
   badgeColor?: BsColor | ((value: any | undefined) => BsColor);
@@ -28,7 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   format?: string;
   throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   searchControlProps?: Partial<SearchControlProps>;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
@@ -39,10 +40,11 @@ export interface ValueSearchControlState {
   token?: QueryToken;
 }
 
-function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryTokenString<any>): QueryValueRequest {
+function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryTokenString<any>, multipleValues?: boolean): QueryValueRequest {
 
   return {
     queryKey: fo.queryKey,
+    multipleValues: multipleValues,
     filters: toFilterRequests(fo.filterOptions),
     valueToken: valueToken?.toString(),
     systemTime: fo.systemTime && { ...fo.systemTime }
@@ -107,11 +109,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     this.abortableQuery.abort();
   }
 
-  abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, avoidNotify: boolean | undefined }, number>(
+  abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, multipleValues: boolean | undefined, avoidNotify: boolean | undefined }, number>(
     (abortSignal, a) =>
       Finder.getQueryDescription(a.findOptions.queryName)
         .then(qd => Finder.parseFindOptions(a.findOptions, qd, false))
-        .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken), a.avoidNotify, abortSignal)));
+        .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken, a.multipleValues), a.avoidNotify, abortSignal)));
 
   refreshValue(props?: ValueSearchControlProps) {
     if (!props)
@@ -128,7 +130,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (Finder.validateNewEntities(fo))
       return;
 
-    this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest })
+    this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest, multipleValues: Boolean(props.multipleValues) })
       .then(value => {
         const fixedValue = value === undefined ? null : value;
         this.setState({ value: fixedValue });
@@ -165,6 +167,51 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (this.props.onRender)
       return this.props.onRender(this.state.value, this);
 
+   
+
+    if (p.multipleValues) {
+      var value = this.state.value;
+      if (value == null)
+        return null;
+
+      let token = this.state.token;
+      if (!token)
+        return null;
+
+      if (token.filterType == "Lite") {
+        var showType = p.multipleValues.showType ?? token.type.name.contains(",");
+        return (
+          <div className="sf-entity-strip sf-control-container">
+            <ul className={classes("sf-strip", p.multipleValues.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass)}>
+              {(value as Lite<Entity>[]).map((lite, i) => {
+                const toStr = getToString(lite);
+                var tag = !showType ? toStr :
+                  <span style={{ wordBreak: "break-all" }} title={toStr}>
+                    <span className="sf-type-badge">{getTypeInfo(lite.EntityType).niceName}</span>&nbsp;{toStr}
+                  </span>;
+
+                var link = p.isLink && Navigator.isViewable(lite.EntityType) ?
+                  <a key={i} href={Navigator.navigateRoute(lite)}
+                    className="sf-entitStrip-link" onClick={e => this.onClickLite(e, lite)} {...p.htmlAttributes}>
+                    {tag}
+                  </a> :
+                  <span key={i} className="sf-entitStrip-link"{...p.htmlAttributes}>
+                    {tag}
+                  </span>;
+
+                return (
+                  <li className="sf-strip-element">
+                    {link }
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      } else {
+        return <div className="alert alert-danger">Not implemented</div>
+      }
+    }
 
     let className = classes(
       p.valueToken == undefined && "count-search",
@@ -186,23 +233,37 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (p.formControlClass)
       return (
         <div className={className} style={p.customStyle} {...p.htmlAttributes}>
-          {this.renderValue()}
+          {this.renderValue(this.state.value)}
         </div>
       );
 
     if (p.isLink) {
       return (
         <a className={className} onClick={this.handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
-          {this.renderValue()}
+          {this.renderValue(this.state.value)}
         </a>
       );
     }
 
-    return <span className={className} style={p.customStyle} {...p.htmlAttributes}>{this.renderValue()}</span>
+    return <span className={className} style={p.customStyle} {...p.htmlAttributes}>{this.renderValue(this.state.value)}</span>
   }
 
-  renderValue() {
-    let value = this.state.value;
+  onClickLite(e: React.MouseEvent<any>, lite: Lite<Entity>) {
+    e.preventDefault();
+    const s = Navigator.getSettings(lite.EntityType)
+    const avoidPopup = s != undefined && s.avoidPopup;
+
+    if (e.ctrlKey || e.button == 1 || avoidPopup) {
+      window.open(Navigator.navigateRoute(lite));
+      return;
+    }
+
+    Navigator.navigate(lite)
+      .then(() => this.refreshValue())
+      .done();
+  }
+
+  renderValue(value : any) {
 
     if (value === undefined)
       return "…";
@@ -211,7 +272,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       return null;
 
     if (!this.props.valueToken)
-      return this.state.value;
+      return value;
 
     let token = this.state.token;
     if (!token)
@@ -220,11 +281,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     switch (token.filterType) {
       case "Integer":
       case "Decimal":
-        const numbroFormat = toNumbroFormat(this.props.format ?? token.format);
-        return numbro(value).format(numbroFormat);
+        const numbroFormat = toNumberFormat(this.props.format ?? token.format);
+        return numbroFormat.format(value);
       case "DateTime":
-        const momentFormat = toMomentFormat(this.props.format ?? token.format);
-        return moment(value).format(momentFormat);
+        const momentFormat = toLuxonFormat(this.props.format ?? token.format);
+        return DateTime.fromISO(value).toFormatFixed(momentFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);

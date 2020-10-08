@@ -304,7 +304,7 @@ function typeIsCreable(typeName: string, isEmbedded?: boolean): EntityWhen {
 }
 
 
-export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
+export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>, options?: IsReadonlyOptions) => boolean> = [];
 
 export interface IsReadonlyOptions {
   ignoreTypeIsReadonly?: boolean;
@@ -319,7 +319,7 @@ export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
   const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName, options?.isEmbedded);
 
-  return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
+  return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack, options));
 }
 
 function typeIsReadOnly(typeName: string, isEmbedded: boolean | undefined): boolean {
@@ -632,7 +632,7 @@ export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) : Promise<void> {
+export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event: React.MouseEvent<any>): Promise<void> {
   if (!pack || !pack.entity)
     return Promise.resolve();
 

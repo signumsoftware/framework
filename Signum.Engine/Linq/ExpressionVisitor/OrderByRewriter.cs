@@ -228,7 +228,7 @@ namespace Signum.Engine.Linq
 
         private bool IsCountSumOrAvg(SelectExpression select)
         {
-            ColumnDeclaration col = select.Columns.Only();
+            ColumnDeclaration? col = select.Columns.Only();
             if (col == null)
                 return false;
 

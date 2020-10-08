@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -336,6 +336,7 @@ export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
 export interface QueryValueRequest {
   queryKey: string;
   filters: FilterRequest[];
+  multipleValues?: boolean;
   valueToken?: string;
   systemTime?: SystemTime;
 }
@@ -419,6 +420,34 @@ export function isList(fo: FilterOperation) {
     fo == "IsNotIn";
 }
 
+
+export function getFilterType(tr: TypeReference): FilterType | null {
+  if (tr.name == "number")
+    return "Integer";
+
+  if (tr.name == "decmial")
+    return "Decimal";
+
+  if (tr.name == "boolean")
+    return "Boolean";
+
+  if (tr.name == "string")
+    return "String";
+
+  if (tr.name == "dateTime")
+    return "DateTime";
+
+  if (tr.name == "Guid")
+    return "Guid";
+
+  if (tr.isEmbedded)
+    return "Embedded";
+
+  if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
+    return "Lite";
+
+  return null;
+}
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
 filterOperations["String"] = [

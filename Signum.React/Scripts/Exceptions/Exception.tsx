@@ -1,6 +1,6 @@
 import * as React from 'react'
-import * as moment from 'moment'
-import { ExceptionEntity } from '../Signum.Entities.Basics'
+import { DateTime } from 'luxon'
+import { BigStringEmbedded, ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, EntityLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +14,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <div className="row">
         <div className="col-sm-6">
           <ValueLine ctx={sc.subCtx(f => f.environment)} />
-          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={moment(sc.value.creationDate!).toUserInterface().fromNow()} />
+          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
           <EntityLine ctx={sc.subCtx(f => f.user)} />
           <ValueLine ctx={sc.subCtx(f => f.version)} />
           <ValueLine ctx={sc.subCtx(f => f.threadId)} />
@@ -43,18 +43,18 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
     </div>
   );
 
-  function codeTab(tabId: number, property: (ex: ExceptionEntity) => any, formatJson?: boolean) {
+  function codeTab(tabId: number, property: (ex: ExceptionEntity) => BigStringEmbedded, formatJson?: boolean) {
     const tc = p.ctx.subCtx(property);
 
-    if (tc.propertyRoute == null || !tc.value || tc.value == "")
+    if (tc.propertyRoute == null || !tc.value.text || tc.value.text == "")
       return undefined;
 
     return (
       <Tab title={tc.propertyRoute.member!.niceName} eventKey={tabId}>
         {formatJson ?
-          <FormatJson code={tc.value} /> :
+          <FormatJson code={tc.value.text} /> :
           <pre>
-            <code>{tc.value}</code>
+            <code>{tc.value.text}</code>
           </pre>
         }
       </Tab>
@@ -62,7 +62,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   }
 }
 
-function FormatJson(p: { code: string | undefined }) {
+function FormatJson(p: { code: string | undefined | null }) {
 
   const [formatJson, setFormatJson] = React.useState<boolean>(false);
 

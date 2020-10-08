@@ -258,21 +258,21 @@ namespace Signum.Test.LinqProvider
 
             var durations = Database.MListQuery((AlbumEntity a) => a.Songs).Select(mle => mle.Element.Duration).Where(d => d != null);
 
-            Debug.WriteLine(durations.Select(d => d.Value.Hours.InSql()).ToString(", "));
-            Debug.WriteLine(durations.Select(d => d.Value.Minutes.InSql()).ToString(", "));
-            Debug.WriteLine(durations.Select(d => d.Value.Seconds.InSql()).ToString(", "));
-            Debug.WriteLine(durations.Select(d => d.Value.Milliseconds.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d!.Value.Hours.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d!.Value.Minutes.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d!.Value.Seconds.InSql()).ToString(", "));
+            Debug.WriteLine(durations.Select(d => d!.Value.Milliseconds.InSql()).ToString(", "));
 
 
             Debug.WriteLine((from n in Database.Query<NoteWithDateEntity>()
                              from d in Database.MListQuery((AlbumEntity a) => a.Songs)
                              where d.Element.Duration != null
-                             select (n.CreationTime + d.Element.Duration.Value).InSql()).ToString(", "));
+                             select (n.CreationTime + d.Element.Duration!.Value).InSql()).ToString(", "));
 
             Debug.WriteLine((from n in Database.Query<NoteWithDateEntity>()
                              from d in Database.MListQuery((AlbumEntity a) => a.Songs)
                              where d.Element.Duration != null
-                             select (n.CreationTime - d.Element.Duration.Value).InSql()).ToString(", "));
+                             select (n.CreationTime - d.Element.Duration!.Value).InSql()).ToString(", "));
         }
 
 

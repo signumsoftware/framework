@@ -40,11 +40,11 @@ namespace Signum.React.Json
             };
 
             writer.WriteStartArray();
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute!;
+            var tup = JsonSerializerExtensions.CurrentPropertyRouteAndEntity!.Value;
 
-            var elementPr = pr.Add("Item");
+            var elementPr = tup.pr.Add("Item");
 
-            using (JsonSerializerExtensions.SetCurrentPropertyRoute(elementPr))
+            using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod)))
             {
                 foreach (var item in ((IMListPrivate<T>)value).InnerList)
                 {
@@ -92,18 +92,17 @@ namespace Signum.React.Json
 
             var newList = new List<MList<T>.RowIdElement>();
 
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute!;
+            var tup = JsonSerializerExtensions.CurrentPropertyRouteAndEntity!.Value;
 
-            var elementPr = pr.Add("Item");
+            var elementPr = tup.pr.Add("Item");
 
-            var rowIdType = GetRowIdTypeFromAttribute(pr);
-
+            var rowIdType = GetRowIdTypeFromAttribute(tup.pr);
 
             reader.Assert(JsonToken.StartArray);
 
             reader.Read();
 
-            using (JsonSerializerExtensions.SetCurrentPropertyRoute(elementPr))
+            using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod)))
             {
                 while (reader.TokenType == JsonToken.StartObject)
                 {
@@ -168,14 +167,14 @@ namespace Signum.React.Json
                     existingValue = new MList<T>();
             }
 
-            bool orderMatters = GetPreserveOrderFromAttribute(pr);
+            bool orderMatters = GetPreserveOrderFromAttribute(tup.pr);
 
             if (!existingValue.IsEqualTo(newList, orderMatters))
             {
                 if (!JsonSerializerExtensions.AllowDirectMListChanges)
                     return new MList<T>(newList);
 
-                EntityJsonConverter.AssertCanWrite(pr);
+                EntityJsonConverter.AssertCanWrite(tup.pr, tup.mod);
 
                 existingValue.AssignMList(newList);
             }

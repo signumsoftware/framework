@@ -1,11 +1,10 @@
-import * as moment from 'moment';
-import numbro from 'numbro';
+import { DateTime, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
-import QueryTokenBuilder from './SearchControl/QueryTokenBuilder';
-import { AggregateType } from './FindOptions';
+import * as AppContext from './AppContext';
+import { QueryString } from './QueryString';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -74,40 +73,163 @@ export enum OperationType {
   ConstructorFromMany = "ConstructorFromMany" as any
 }
 
-//https://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
-//http://momentjs.com/docs/#/displaying/format/
-export function toMomentFormat(format: string | undefined): string | undefined {
+//https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
+//https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
+export function toLuxonFormat(format: string | undefined): string {
 
   if (!format)
-    return undefined;
+    return "F";
   
   switch (format) {
-    case "d": return "L"; // or "l"
-    case "D": return "LL";
-    case "f":
-    case "F": return "LLLL";
-    case "g": return "L LT";
-    case "G": return "L LTS";
+    case "d": return "D"; // toFormatWithFixes
+    case "D": return "DDDD";
+    case "f": return "fff"
+    case "F": return "FFF";
+    case "g": return "f";
+    case "G": return "F";
     case "M":
-    case "m": return "D MMM";
-    case "u":
-    case "s": return "YYYY-MM-DDTHH:mm:ss";
-    case "o":
-    case "t": return "LT";
-    case "T": return "LTS";
-    case "y": return "LTS";
-    case "Y": return "L";
-    default: return format
-      .replaceAll("y", "Y")
-      .replaceAll("f", "S")
-      .replaceAll("tt", "A")
-      .replaceAll("t", "a")
-      .replaceAll("dddd", "ßßßß")
-      .replaceAll("ddd", "ßßß")
-      .replaceAll("d", "D") //replace only d -> D and dd -> DD
-      .replaceAll("ßßßß", "dddd")
-      .replaceAll("ßßß", "ddd");
+    case "m": return "dd LLLL";
+    case "u": return "yyyy-MM-dd'T'HH:mm:ss";
+    case "s": return "yyyy-MM-dd'T'HH:mm:ss";
+    case "o": return "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    case "t": return "t";
+    case "T": return "tt";
+    case "y": return "LLLL yyyy";
+    case "Y": return "LLLL yyyy";
+    default: {
+      const result = format
+        .replaceAll("f", "S")
+        .replaceAll("tt", "A")
+        .replaceAll("t", "a")
+        .replaceAll("YYYY", "yyyy")
+        .replaceAll("YY", "yy")
+        .replaceAll("dddd", "cccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("T", "'T'");
+      return result;
+    }
   }
+}
+
+
+declare module "luxon" {
+  interface DateTime {
+    toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
+  }
+}
+
+const oneDigitCulture = new Set([
+  "agq", "agq-CM",
+  "ar-001", "ar-DJ", "ar-ER", "ar-IL", "ar-KM", "ar-MR", "ar-PS", "ar-SD", "ar-SO", "ar-SS", "ar-TD",
+  "ast", "ast-ES",
+  "bas", "bas-CM",
+  "bg", "bg-BG",
+  "bin", "bin-NG",
+  "bm", "bm-Latn", "bm-Latn-ML",
+  "bn", "bn-BD",
+  "bo", "bo-CN",
+  "brx", "brx-IN",
+  "bs", "bs-Cyrl", "bs-Cyrl-BA", "bs-Latn", "bs-Latn-BA",
+  "ca", "ca-AD", "ca-ES", "ca-ES-valencia", "ca-FR", "ca-IT",
+  "ccp", "ccp-Cakm", "ccp-Cakm-BD", "ccp-Cakm-IN",
+  "ceb", "ceb-Latn", "ceb-Latn-PH",
+  "chr", "chr-Cher", "chr-Cher-US",
+  "dje", "dje-NE",
+  "dsb", "dsb-DE",
+  "dua", "dua-CM",
+  "dyo", "dyo-SN",
+  "ee", "ee-GH", "ee-TG",
+  "el", "el-CY", "el-GR",
+  "en", "en-AS", "en-AU", "en-BI", "en-GU", "en-HK", "en-JM", "en-MH", "en-MP", "en-MY", "en-NZ", "en-PR", "en-SG", "en-UM", "en-US", "en-VI", "en-ZW",
+  "es-419", "es-AR", "es-BO", "es-BR", "es-BZ", "es-CO", "es-CR", "es-CU", "es-DO", "es-EC", "es-GQ", "es-GT", "es-HN", "es-NI", "es-PE", "es-PH", "es-PY", "es-SV", "es-US", "es-UY", "es-VE",
+  "eu", "eu-ES",
+  "ewo", "ewo-CM",
+  "ff-Latn-BF", "ff-Latn-CM", "ff-Latn-GH", "ff-Latn-GM", "ff-Latn-GN", "ff-Latn-GW", "ff-Latn-LR", "ff-Latn-MR", "ff-Latn-NE", "ff-Latn-NG", "ff-Latn-SL",
+  "fi", "fi-FI",
+  "fil", "fil-PH",
+  "ha", "ha-Latn", "ha-Latn-GH", "ha-Latn-NE", "ha-Latn-NG",
+  "haw", "haw-US",
+  "hr", "hr-BA", "hr-HR",
+  "hsb", "hsb-DE",
+  "ibb", "ibb-NG",
+  "ig", "ig-NG",
+  "ii", "ii-CN",
+  "is", "is-IS",
+  "iu", "iu-Cans", "iu-Cans-CA", "iu-Latn", "iu-Latn-CA",
+  "kab", "kab-DZ",
+  "kea", "kea-CV",
+  "khq", "khq-ML",
+  "ko-KP",
+  "kr", "kr-Latn", "kr-Latn-NG",
+  "ks", "ks-Arab", "ks-Arab-IN",
+  "ksf", "ksf-CM",
+  "ksh", "ksh-DE",
+  "ky", "ky-KG",
+  "lkt", "lkt-US",
+  "ln", "ln-AO", "ln-CD", "ln-CF", "ln-CG",
+  "lo", "lo-LA",
+  "lu", "lu-CD",
+  "mfe", "mfe-MU",
+  "ml", "ml-IN",
+  "mn-Mong", "mn-Mong-CN", "mn-Mong-MN",
+  "moh", "moh-CA",
+  "ms", "ms-BN", "ms-MY", "ms-SG",
+  "mua", "mua-CM",
+  "nds", "nds-DE", "nds-NL",
+  "ne", "ne-IN", "ne-NP",
+  "nl", "nl-BE", "nl-NL",
+  "nmg", "nmg-CM",
+  "nus", "nus-SS",
+  "pap", "pap-029",
+  "prs", "prs-AF",
+  "ps", "ps-AF", "ps-PK",
+  "rn", "rn-BI",
+  "se-FI",
+  "seh", "seh-MZ",
+  "ses", "ses-ML",
+  "sg", "sg-CF",
+  "shi", "shi-Latn", "shi-Latn-MA", "shi-Tfng", "shi-Tfng-MA",
+  "sk", "sk-SK",
+  "sl", "sl-SI",
+  "smn", "smn-FI",
+  "sms", "sms-FI",
+  "sq", "sq-AL", "sq-MK", "sq-XK",
+  "sr", "sr-Cyrl-BA", "sr-Cyrl-ME", "sr-Cyrl-XK", "sr-Latn", "sr-Latn-BA", "sr-Latn-ME", "sr-Latn-RS", "sr-Latn-XK",
+  "ta-LK", "ta-MY", "ta-SG",
+  "th", "th-TH",
+  "to", "to-TO",
+  "tr", "tr-CY", "tr-TR",
+  "twq", "twq-NE",
+  "tzm-Arab", "tzm-Arab-MA",
+  "ug", "ug-CN",
+  "ur-IN",
+  "yav", "yav-CM",
+  "yo", "yo-BJ", "yo-NG",
+  "zgh", "zgh-Tfng", "zgh-Tfng-MA",
+  "zh", "zh-CN", "zh-Hans", "zh-Hans-HK", "zh-Hans-MO", "zh-Hant", "zh-HK", "zh-MO", "zh-SG", "zh-TW",
+  "zu", "zu-ZA"
+]);
+
+DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+
+  if (!oneDigitCulture.has(this.locale)) {
+
+    if (format == "D")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
+
+    if (format == "f")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
+
+    if (format == "f")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
+  }
+
+  if (format == "EE") //missing
+    return this.toFormat("EEE", options).substr(0, 2);
+
+  return this.toFormat(format, options)
+
 }
 
 
@@ -121,38 +243,81 @@ export function toDurationFormat(format: string | undefined): string | undefined
   return format.replace("\\:", ":");
 }
 
-export function toNumbroFormat(format: string | undefined) {
+export namespace NumberFormatSettings {
+  export let defaultNumberFormatLocale: string = null!;
+}
+
+//https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
+export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
+  return new Intl.NumberFormat(locale ?? NumberFormatSettings.defaultNumberFormatLocale, toNumberFormatOptions(format));
+}
+
+export function toNumberFormatOptions(format: string | undefined): Intl.NumberFormatOptions | undefined {
 
   if (format == undefined)
     return undefined;
 
   const f = format.toUpperCase();
 
-  if (f.startsWith("C"))
-    return "0." + "0".repeat(parseInt(f.after("C") || "2"));
+  if (f.startsWith("C")) //unit comes separated
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("C")) || 2,
+      maximumFractionDigits: parseInt(f.after("C")) || 2,
+      useGrouping: true,
+    }
 
   if (f.startsWith("N"))
-    return "0,0." + "0".repeat(parseInt(f.after("N") || "2"));
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("N")) || 2,
+      maximumFractionDigits: parseInt(f.after("N")) || 2,
+      useGrouping: true,
+    }
 
   if (f.startsWith("D"))
-    return "0".repeat(parseInt(f.after("D") || "1"));
+    return {
+      style: "decimal",
+      maximumFractionDigits: 0,
+      minimumIntegerDigits: parseInt(f.after("D")) || 1,
+      useGrouping: false,
+    }
 
   if (f.startsWith("F"))
-    return "0." + "0".repeat(parseInt(f.after("F") || "2"));
+    return {
+      style: "decimal",
+      minimumFractionDigits: parseInt(f.after("F")) || 2,
+      maximumFractionDigits: parseInt(f.after("F")) || 2,
+      useGrouping: false,
+    }
 
   if (f.startsWith("E"))
-    return "0." + "0".repeat(parseInt(f.after("E") || "2"));
+    return {
+      style: "decimal",
+      notation: "scientific",
+      minimumFractionDigits: parseInt(f.after("E")) || 6,
+      maximumFractionDigits: parseInt(f.after("E")) || 6,
+      useGrouping: false,
+    } as any;
 
   if (f.startsWith("P"))
-    return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
+    return {
+      style: "percent",
+      minimumFractionDigits: parseInt(f.after("P")) || 2,
+      maximumFractionDigits: parseInt(f.after("P")) || 2,
+      useGrouping: false,
+    }
 
-  if (f.contains("#"))
-    format = format
-      .replaceAll(".#", "[.]0")
-      .replaceAll(",#", "[,]0")
-      .replaceAll("#", "0");
 
-  return format;
+  //simple euristic
+  var style = f.endsWith("%") ? "percent" : "decimal";
+  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
+  return {
+    style: style,
+    minimumFractionDigits: afterDot.trimStart("#").length,
+    maximumFractionDigits: afterDot.length,
+    useGrouping: f.contains(","),
+  }
 }
 
 export function valToString(val: any) {
@@ -166,33 +331,45 @@ export function numberToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  return numbro(val).format(toNumbroFormat(format));
+  return toNumberFormat(format).format(val);
 }
 
 export function dateToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var m = moment(val);
-  return m.format(toMomentFormat(format));
+  var m = DateTime.fromISO(val);
+  return m.toFormat(toLuxonFormat(format));
 }
 
 export function durationToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var momentDurationFormat = toDurationFormat(format);
+  var duration = parseDuration(val);
+  return duration.toFormat(format ?? "hh:mm:ss");
+}
 
-  var result = /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(val);
+export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
+  var valParts = timeStampToStr.split(":");
+  var formatParts = format.split(":");
 
-  if (result == undefined)
-    throw new Error("Invalid date");
+  if (valParts.length > formatParts.length)
+    throw new Error("Invalid Format")
 
-  var hh = result[1];
-  var mm = result[2];
-  var ss = result[3];
+  const result: DurationObjectUnits = {};
 
-  return (format || "hh:mm:ss").replace("hh", hh).replace("mm", mm).replace("ss", ss);
+  for (let i = 0; i < formatParts.length; i++) {
+    const formP = formatParts[i];
+    const value = parseInt(valParts[i] || "0");
+    switch (formP) {
+      case "hh": result.hour = value; break;
+      case "mm": result.minute = value; break;
+      case "ss": result.second = value; break;
+      default: throw new Error("Unexpected " + formP);
+    }
+  }
+  return Duration.fromObject(result);
 }
 
 
@@ -427,7 +604,12 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 }
 
 export function reloadTypes(): Promise<void> {
-  return ajaxGet<TypeInfoDictionary>({ url: "~/api/reflection/types" })
+  return ajaxGet<TypeInfoDictionary>({
+    url: "~/api/reflection/types?" + QueryString.stringify({
+      user: AppContext.currentUser?.id,
+      culture: AppContext.currentCulture
+    })
+  })
     .then(types => {
       setTypes(types);
       onReloadTypes();
@@ -520,6 +702,7 @@ export interface IBinding<T> {
   getValue(): T;
   setValue(val: T): void;
   suffix: string;
+  getIsReadonly(): boolean;
   getError(): string | undefined;
   setError(value: string | undefined): void;
 }
@@ -585,6 +768,11 @@ export class Binding<T> implements IBinding<T> {
     return parentErrors && parentErrors[this.member];
   }
 
+  getIsReadonly(): boolean {
+    const readonlyProperties = (this.parentObject as ModifiableEntity).readonlyProperties;
+    return readonlyProperties != null && readonlyProperties.contains(this.member as string);
+  }
+
   setError(value: string | undefined) {
     const parent = this.parentObject as ModifiableEntity;
 
@@ -614,6 +802,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
   }
   setValue(val: T) {
     throw new Error("Readonly Binding");
+  }
+
+  getIsReadonly() {
+    return true;
   }
 
   getError(): string | undefined {
@@ -653,6 +845,10 @@ export class MListElementBinding<T> implements IBinding<T>{
     mle.rowId = null;
     mle.element = val;
     this.mListBinding.setValue(mlist);
+  }
+
+  getIsReadonly() {
+    return false; //Not sure
   }
 
   getError(): string | undefined {
@@ -712,6 +908,7 @@ const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(ret
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
+const getMixinRegex = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
@@ -733,7 +930,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Mixin" });
       body = m[1];
     }
-    else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+    else if (m = getMixinRegex.exec(body)) {
+      result.push({ name: m[2], type: "Mixin" });
+      body = m[1];
+    }
+    else if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
@@ -790,31 +991,16 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   if (ti) {
 
     var e = result as Entity;
-
     var pr = PropertyRoute.root(ti);
-
-    const mixins = Dic.getKeys(ti.members)
-      .filter(a => a.startsWith("["))
-      .groupBy(a => a.after("[").before("]"))
-      .forEach(gr => {
-
-        var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
-
-        initializeCollections(m, pr.addMember("Mixin", gr.key, true)!);
-
-        if (!e.mixins)
-          e.mixins = {};
-
-        e.mixins[gr.key] = m;
-      });
-
+    initializeMixins(e, pr);
     initializeCollections(e, pr);
   }
   else {
     if (propertyRoute) {
       initializeCollections(result, propertyRoute);
+      initializeMixins(result, propertyRoute);
     } else {
-      //Collections not initialized, but since Embedded typically don't have then, it's not worth the hassle 
+      //Collections or mixins not initialized, but since Embedded typically don't have then, it's not worth the hassle 
     }
   }
 
@@ -828,10 +1014,29 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
   return result;
 }
 
-function initializeCollections(m: ModifiableEntity, pr: PropertyRoute) {
+function initializeMixins(mod: ModifiableEntity, pr: PropertyRoute) {
+  var subMembers = pr.subMembers();
+  Dic.getKeys(subMembers)
+    .filter(a => a.startsWith("["))
+    .groupBy(a => a.after("[").before("]"))
+    .forEach(gr => {
+
+      var mixin = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+      initializeCollections(mixin, pr.addMember("Mixin", gr.key, true)!);
+
+      if (!mod.mixins)
+        mod.mixins = {};
+
+      mod.mixins[gr.key] = mixin;
+    });
+
+}
+
+function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
   Dic.map(pr.subMembers(), (key, memberInfo) => ({ key, memberInfo }))
     .filter(t => t.memberInfo.type.isCollection && !t.key.startsWith("["))
-    .forEach(t => (m as any)[t.key.firstLower()] = []);
+    .forEach(t => (mod as any)[t.key.firstLower()] = []);
 }
 
 
@@ -1383,22 +1588,54 @@ export class PropertyRoute {
     return PropertyRoute.parse(fullPropertyRoute.substring(1, endPseudoTypeIndex), propertyString);
   }
 
-  static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
-    let result = PropertyRoute.root(rootType);
-    const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): { type: MemberType, name: string } => {
-      if (p == "&&")
-        return { type: "Indexer", name: "0" };
+  addMembers(propertyString: string): PropertyRoute {
+    let result: PropertyRoute = this;
 
+    function splitMixin(text: string): LambdaMember[] {
 
-      if (p.startsWith("[") && p.endsWith("]"))
-        return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+      if (text.length == 0)
+        return [];
 
-      return { type: "Member", name: p };
-    });
+      if (text.contains("["))
+        return [
+          ...splitMixin(text.before("[")),
+          { type: "Mixin" as MemberType, name: text.between("[", "]") },
+          ...splitMixin(text.after("]")),
+        ];
+
+      return [{ type: "Member", name: text }];
+    }
+
+    function splitDot(text: string): LambdaMember[] {
+      if (text.contains("."))
+        return [
+          ...splitMixin(text.before(".")),
+          ...splitDot(text.after("."))
+        ];
+
+      return splitMixin(text);
+    }
+
+    function splitIndexer(text: string): LambdaMember[] {
+      if (text.contains("/"))
+        return [
+          ...splitDot(text.before("/")),
+          { type: "Indexer", name: "0" },
+          ...splitIndexer(text.after("/"))
+        ];
+
+      return splitDot(text);
+    }
+
+    const parts = splitIndexer(propertyString);
 
     parts.forEach(m => result = result.addMember(m.type, m.name, true));
 
     return result;
+  }
+
+  static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
+    return PropertyRoute.root(rootType).addMembers(propertyString);
   }
 
   constructor(
@@ -1413,6 +1650,10 @@ export class PropertyRoute {
     this.rootType = rootType;
     this.member = member;
     this.mixinName = mixinName;
+  }
+
+  allParents(): PropertyRoute[] {
+    return [...this.parent == null ? [] : this.parent.allParents(), this];
   }
 
   addLambda(property: ((val: any) => any) | string): PropertyRoute {
@@ -1465,7 +1706,7 @@ export class PropertyRoute {
     switch (this.propertyRouteType) {
       case "Root": throw new Error("Root has no PropertyString");
       case "Field": return this.member!.name;
-      case "Mixin": return "[" + this.mixinName + "]";
+      case "Mixin": return (this.parent!.propertyRouteType == "Root" ? "" : this.parent!.propertyPath()) + "[" + this.mixinName + "]";
       case "MListItem": return this.parent!.propertyPath() + "/";
       case "LiteEntity": return this.parent!.propertyPath() + ".entity";
       default: throw new Error("Unexpected propertyRouteType");
@@ -1494,7 +1735,7 @@ export class PropertyRoute {
 
     var getErrorContext = () => ` (adding ${memberType} ${memberName} to ${this.toString()})`;
 
-    if (memberType == "Member") {
+    if (memberType == "Member" || memberType == "Mixin") {
 
       if (this.propertyRouteType == "Field" ||
         this.propertyRouteType == "MListItem" ||
@@ -1502,47 +1743,48 @@ export class PropertyRoute {
         const ref = this.typeReference();
 
         if (ref.isLite) {
-          if (memberName != "Entity")
-            throw new Error("Entity expected");
-
-          return PropertyRoute.liteEntity(this);
+          if (memberType == "Member" && memberName == "Entity")
+            return PropertyRoute.liteEntity(this);
+          
+          throw new Error("Entity expected");
         }
 
         const ti = tryGetTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
-          const m = ti.members[memberName];
-          if (!m) {
-            if (throwIfNotFound)
-              throw new Error(`member '${memberName}' not found` + getErrorContext());
-            return undefined;
+          if (memberType == "Mixin")
+            return PropertyRoute.mixin(this, memberName);
+          else {
+            const m = ti.members[memberName];
+            if (!m) {
+              if (throwIfNotFound)
+                throw new Error(`member '${memberName}' not found` + getErrorContext());
+              return undefined;
+            }
+            return PropertyRoute.member(PropertyRoute.root(ti), m);
           }
-
-          return PropertyRoute.member(PropertyRoute.root(ti), m);
         } else if (this.propertyRouteType == "LiteEntity") {
           throw Error("Unexpected lite case" + getErrorContext());
         }
       }
 
-      const fullMemberName = this.propertyRouteType == "Root" ? memberName :
-        this.propertyRouteType == "MListItem" ? this.propertyPath() + memberName :
-          this.propertyPath() + "." + memberName;
+      if (memberType == "Mixin")
+        return PropertyRoute.mixin(this, memberName);
+      else {
+        const fullMemberName =
+          this.propertyRouteType == "Root" ? memberName :
+            this.propertyRouteType == "MListItem" ? this.propertyPath() + memberName :
+              this.propertyPath() + "." + memberName;
 
-      const m = this.findRootType().members[fullMemberName];
-      if (!m) {
-        if (throwIfNotFound)
-          throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
+        const m = this.findRootType().members[fullMemberName];
+        if (!m) {
+          if (throwIfNotFound)
+            throw new Error(`member '${fullMemberName}' not found` + getErrorContext());
 
-        return undefined;
+          return undefined;
+        }
+        return PropertyRoute.member(this, m);
       }
-      return PropertyRoute.member(this, m);
-    }
-
-    if (memberType == "Mixin") {
-      if (this.propertyRouteType != "Root")
-        throw new Error("invalid mixin at this stage" + getErrorContext());
-
-      return PropertyRoute.mixin(this, memberName);
     }
 
     if (memberType == "Indexer") {
@@ -1584,8 +1826,11 @@ export class PropertyRoute {
           if (m.name == path || !m.name.startsWith(path))
             return false;
 
-          var name = m.name.substring(path.length);
-          if (name.contains(".") || name.contains("/"))
+          var suffix = m.name.substring(path.length);
+          if (suffix.contains("/"))
+            return false;
+
+          if (suffix.startsWith("[") ? suffix.after("].").contains("."): suffix.contains("."))
             return false;
 
           return true;

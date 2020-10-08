@@ -70,7 +70,7 @@
     <Member Name="TheEntity0IsNew" Description="La entidad {0} es nueva" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Hay '{0}' que refieren a esta entidad" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Ya hay [m:un|f:una] {0} con {1} igual a '{2}'" />
+    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Ya hay [m:un|f:una] {0} con {1} igual a {2}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
   </Type>
   <Type Name="Entity" Description="Entidad">

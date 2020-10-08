@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { classes } from '../Globals'
 import { VersionFilter } from '../Services'
 import { ConnectionMessage } from '../Signum.Entities';
@@ -54,13 +54,13 @@ export function VersionInfo() {
 
 function VersionInfoTooltip(p: {}) {
 
-  var bt = moment(VersionFilter.initialBuildTime!);
+  var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
 
   return (
     <div style={{ whiteSpace: "nowrap" }}>
-      {bt.format("llll")}
+      {bt.toFormat("FFFF")}
       <br />
-      ({bt.fromNow()})
+      ({bt.toRelative()})
     </div>
   );
 }

@@ -31,14 +31,14 @@ namespace Signum.React.Json
         }
 
 
-        static readonly ThreadVariable<PropertyRoute?> currentPropertyRoute = Statics.ThreadVariable<PropertyRoute?>("jsonPropertyRoute");
+        static readonly ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?> currentPropertyRoute = Statics.ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?>("jsonPropertyRoute");
 
-        public static PropertyRoute? CurrentPropertyRoute
+        public static (PropertyRoute pr, ModifiableEntity? mod)? CurrentPropertyRouteAndEntity
         {
             get { return currentPropertyRoute.Value; }
         }
 
-        public static IDisposable SetCurrentPropertyRoute(PropertyRoute? route)
+        public static IDisposable SetCurrentPropertyRouteAndEntity((PropertyRoute, ModifiableEntity?)? route)
         {
             var old = currentPropertyRoute.Value;
 

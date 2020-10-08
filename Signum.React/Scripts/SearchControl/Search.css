@@ -270,6 +270,10 @@ span.guid {
     white-space: nowrap;
 }
 
+.dropdown-item.active span.guid {
+    color: lightblue;
+}
+
 bdi.date {
     white-space: nowrap;
 }

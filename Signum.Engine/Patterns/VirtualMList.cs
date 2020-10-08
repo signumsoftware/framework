@@ -1,4 +1,5 @@
 using Signum.Engine.Basics;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -13,10 +14,10 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
-
     public static class VirtualMList
     {
-        public static Dictionary<Type, Dictionary<Type, PropertyRoute>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, PropertyRoute>>();
+        //Order, OrderLine, Order.Lines
+        public static Dictionary<Type, Dictionary<PropertyRoute, VirtualMListInfo>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<PropertyRoute, VirtualMListInfo>>();
 
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
@@ -28,7 +29,7 @@ namespace Signum.Engine
 
         public static bool IsVirtualMList(this PropertyRoute pr)
         {
-            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType()!)?.Equals(pr) ?? false);
+            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.ContainsKey(pr) ?? false);
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -88,10 +89,11 @@ namespace Signum.Engine
             fi.SchemaBuilder.Include<L>();
 
             var mListPropertRoute = PropertyRoute.Construct(mListField);
+            var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
             if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
                 throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
 
-            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 
             var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
             var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
@@ -378,6 +380,18 @@ namespace Signum.Engine
             where T : Entity
         {
             return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
+        }
+    }
+
+    public class VirtualMListInfo
+    {
+        public readonly PropertyRoute MListRoute;
+        public readonly PropertyRoute BackReferenceRoute;
+
+        public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute)
+        {
+            MListRoute = mListRoute;
+            BackReferenceRoute = backReferenceRoute;
         }
     }
 }

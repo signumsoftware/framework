@@ -74,9 +74,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
           .done();
         e.preventDefault();
       }
-
     }
-
   }
 }
 
@@ -94,7 +92,6 @@ interface QueryTokenPartProps{
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
 export function QueryTokenPart(p: QueryTokenPartProps) {
-
 
   const subTokens = useAPI(() => {
     if (p.readOnly)

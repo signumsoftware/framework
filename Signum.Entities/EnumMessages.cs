@@ -25,13 +25,8 @@ namespace Signum.Entities
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
         Confirm,
-        [Description("Please confirm you'd like to delete {0} from the system")]
-        PleaseConfirmYouDLikeToDelete0FromTheSystem,
-        [Description("Please confirm you'd like to delete the entity from the system")]
-        PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem,
-        [Description("Please confirm you'd like to delete the selected entities from the system")]
-        PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
-
+        [Description("Please confirm you want like to delete {0} from the system")]
+        PleaseConfirmYouWantLikeToDelete0FromTheSystem,
         [Description("{0} didn't return an entity")]
         TheOperation0DidNotReturnAnEntity,
         Logs,
@@ -40,6 +35,17 @@ namespace Signum.Entities
         _0AndClose,
         [Description("{0} & New")]
         _0AndNew,
+
+        BulkModifications, 
+        [Description("Please confirm that you'd like to apply the above changes and execute {0} over {1} {2}")]
+        PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12,
+
+        Predictate, 
+        Setters,
+        [Description("Add setter")]
+        AddSetter,
+        [Description("multi setter")]
+        MultiSetter,
     }
 
     public enum SynchronizerMessage
@@ -66,7 +72,7 @@ namespace Signum.Entities
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unauthorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
-        [Description("There's already a {0} with {1} equals to '{2}'")]
+        [Description("There is already a {0} with {1} equals to {2}")]
         TheresAlreadyA0With1EqualsTo2_G
     }
 
@@ -303,6 +309,8 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Show group")]
+        ShowGroup,
         [Description("Acivate Time Machine")]
         activateTimeMachine,
         [Description("Deactivate Time Machine")]

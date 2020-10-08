@@ -4,7 +4,7 @@ import {
   isList, isFilterGroupOptionParsed
 } from '../FindOptions'
 import { ValueLine, FormGroup } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toMomentFormat } from '../Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
 import { createFilterValueControl, MultiValue } from './FilterBuilder';

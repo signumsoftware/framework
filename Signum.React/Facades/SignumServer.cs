@@ -52,6 +52,7 @@ namespace Signum.React.Facades
 
         public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)
         {
+            options.Filters.Add(new SignumInitializeFilterAttribute());
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new CleanThreadContextAndAssertFilter());
             options.Filters.Add(new SignumEnableBufferingFilter());
@@ -92,6 +93,21 @@ namespace Signum.React.Facades
             ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
             ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
             ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
+            EntityJsonConverter.CanWritePropertyRoute += EntityJsonConverter_CanWritePropertyRoute;
+
+        }
+
+        private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
+        {
+            var val = Validator.TryGetPropertyValidator(arg);
+
+            if (val == null || mod == null)
+                return null;
+
+            if (val.IsPropertyReadonly(mod))
+                return $"Property {arg} is readonly";
+
+            return null;
         }
 
         public static EntityPackTS GetEntityPack(Entity entity)

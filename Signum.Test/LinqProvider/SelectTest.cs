@@ -331,7 +331,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistEntity>()
                 .Where(a => a.Status != null)
-                .Select(a => (a.Status ?? a.Status).Value)
+                .Select(a => (a.Status ?? a.Status)!.Value)
                 .ToArray();
         }
 
@@ -377,7 +377,7 @@ namespace Signum.Test.LinqProvider
             var durations = (from a in Database.Query<AlbumEntity>()
                              from s in a.Songs
                              where s.Seconds.HasValue
-                             select s.Seconds.Value).ToArray();
+                             select s.Seconds!.Value).ToArray();
         }
 
         [Fact]
@@ -687,7 +687,7 @@ namespace Signum.Test.LinqProvider
                 .Select(a => ((decimal?)a).InSql()) //Avoid Cast( as decimal) in SQL because of https://stackoverflow.com/questions/4169520/casting-as-decimal-and-rounding
                 .ToList();
 
-            Assert.Contains(list, a => a.Value != Math.Round(a.Value)); //Decimal places are preserved
+            Assert.Contains(list, a => a!.Value != Math.Round(a!.Value)); //Decimal places are preserved
 
         }
     }

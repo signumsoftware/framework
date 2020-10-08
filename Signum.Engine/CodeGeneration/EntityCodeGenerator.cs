@@ -470,7 +470,7 @@ namespace Signum.Engine.CodeGeneration
             return false;
         }
 
-        protected virtual DiffColumn GetMListTrivialElementColumn(DiffTable table, DiffColumn parentColumn, DiffColumn? orderColumn)
+        protected virtual DiffColumn? GetMListTrivialElementColumn(DiffTable table, DiffColumn parentColumn, DiffColumn? orderColumn)
         {
             return table.Columns.Values.Where(c => c != parentColumn && c != orderColumn && !c.PrimaryKey).Only();
         }

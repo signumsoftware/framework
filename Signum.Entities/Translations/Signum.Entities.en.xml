@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction" />
+  <Type Name="BigStringEmbedded" />
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
   <Type Name="CollectionAnyAllType" />
@@ -20,7 +21,6 @@
   <Type Name="EngineMessage" />
   <Type Name="Entity" />
   <Type Name="EntityControlMessage" />
-  <Type Name="EntityMessage" />
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" />
   <Type Name="FilterGroupOperation" />
@@ -49,7 +49,6 @@
   <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage" />
   <Type Name="LiteMessage" />
-  <Type Name="LockableEntity" />
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" />
   <Type Name="ModifiableEntity" />

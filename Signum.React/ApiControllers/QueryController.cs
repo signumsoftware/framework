@@ -134,6 +134,7 @@ namespace Signum.React.ApiControllers
         public string querykey;
         public List<FilterTS> filters;
         public string valueToken;
+        public bool? multipleValues;
         public SystemTimeTS/*?*/ systemTime;
 
         public QueryValueRequest ToQueryValueRequest()
@@ -146,6 +147,7 @@ namespace Signum.React.ApiControllers
             return new QueryValueRequest
             {
                 QueryName = qn,
+                MultipleValues = multipleValues ?? false,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
                 ValueToken = value,
                 SystemTime = this.systemTime?.ToSystemTime(),

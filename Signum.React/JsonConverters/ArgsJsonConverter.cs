@@ -35,12 +35,12 @@ namespace Signum.React.Json
         {
             var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType)!;
             serializer.Populate(reader, request);
-            var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
-            if (request.args != null)
-                for (int i = 0; i < request.args.Length; i++)
+            var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(request.OperationKey);
+            if (request.Args != null)
+                for (int i = 0; i < request.Args.Length; i++)
                 {
-                    if (request.args[i] is JToken jtoken)
-                        request.args[i] = ConvertObject(jtoken, serializer, operationSymbol);
+                    if (request.Args[i] is JToken jtoken)
+                        request.Args[i] = ConvertObject(jtoken, serializer, operationSymbol);
                 }
 
             return request;
