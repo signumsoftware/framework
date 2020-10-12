@@ -13,7 +13,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
   React.useEffect(() => {
     AppContext.Expander.onGetExpanded = () => fluid;
     AppContext.Expander.onSetExpanded = (isExpanded: boolean) => setFluid(isExpanded);
-  });
+  }, []);
 
   const forceUpdate = useForceUpdate();
 
