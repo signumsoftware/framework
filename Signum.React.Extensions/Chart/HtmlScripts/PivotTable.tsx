@@ -279,7 +279,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var gr = p.gor instanceof RowGroup ? p.gor : undefined;
     var style = p.style ?? gr?.style;
 
-    function handleMumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    function handleNumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
       e.preventDefault();
       var filters = p.filters ?? gr?.getFilters();
 
@@ -295,7 +295,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbroFormat.format(val)}</a>;
+    const link = p.gor == null ? null : <a href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
