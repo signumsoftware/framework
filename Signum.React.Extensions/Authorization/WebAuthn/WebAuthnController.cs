@@ -229,16 +229,16 @@ namespace Signum.React.Authorization
 
                 var cred = Database.Query<WebAuthnCredentialEntity>().SingleEx(cred => cred.CredentialId == request.AssertionRawResponse.Id);
 
-                var res = await fido2.MakeAssertionAsync(request.AssertionRawResponse, options, cred.PublicKey, (uint)cred.Counter, async (args) =>
+                var res = await fido2.MakeAssertionAsync(request.AssertionRawResponse, options, cred.PublicKey, (uint)cred.Counter, (args) =>
                 {
                     if (!MemoryExtensions.SequenceEqual<byte>(cred.CredentialId, args.CredentialId))
-                        return false;
+                        return Task.FromResult(false);
 
                     var userId = Encoding.UTF8.GetBytes(cred.User.Id.ToString());
                     if (!MemoryExtensions.SequenceEqual<byte>(userId, args.UserHandle))
-                        return false;
+                        return Task.FromResult(false);
 
-                    return true;
+                    return Task.FromResult(true);
                 });
 
                 cred.Counter++;
