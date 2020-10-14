@@ -1,4 +1,4 @@
-import { DateTime} from 'luxon';
+import { DateTime, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -81,31 +81,155 @@ export function toLuxonFormat(format: string | undefined): string {
     return "F";
   
   switch (format) {
-    case "d": return "D"; // or "l"
-    case "D": return "DDD";
+    case "d": return "D"; // toFormatWithFixes
+    case "D": return "DDDD";
     case "f": return "fff"
-    case "F": return "LLLL";
+    case "F": return "FFF";
     case "g": return "f";
     case "G": return "F";
     case "M":
-    case "m": return "dd LLLL"; //No one without year
+    case "m": return "dd LLLL";
     case "u": return "yyyy-MM-dd'T'HH:mm:ss";
     case "s": return "yyyy-MM-dd'T'HH:mm:ss";
     case "o": return "yyyy-MM-dd'T'HH:mm:ss.SSS";
     case "t": return "t";
     case "T": return "tt";
-    case "y": return "LTS";
+    case "y": return "LLLL yyyy";
     case "Y": return "LLLL yyyy";
-    default: return format
-      .replaceAll("f", "S")
-      .replaceAll("tt", "A")
-      .replaceAll("t", "a")
-      .replaceAll("dddd", "ßßßß")
-      .replaceAll("ddd", "ßßß")
-      .replaceAll("d", "D") //replace only d -> D and dd -> DD
-      .replaceAll("ßßßß", "cccc")
-      .replaceAll("ßßß", "ccc");
+    default: {
+      const result = format
+        .replaceAll("f", "S")
+        .replaceAll("tt", "A")
+        .replaceAll("t", "a")
+        .replaceAll("YYYY", "yyyy")
+        .replaceAll("YY", "yy")
+        .replaceAll("dddd", "cccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("ddd", "ccc")
+        .replaceAll("T", "'T'");
+      return result;
+    }
   }
+}
+
+
+declare module "luxon" {
+  interface DateTime {
+    toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
+  }
+}
+
+const oneDigitCulture = new Set([
+  "agq", "agq-CM",
+  "ar-001", "ar-DJ", "ar-ER", "ar-IL", "ar-KM", "ar-MR", "ar-PS", "ar-SD", "ar-SO", "ar-SS", "ar-TD",
+  "ast", "ast-ES",
+  "bas", "bas-CM",
+  "bg", "bg-BG",
+  "bin", "bin-NG",
+  "bm", "bm-Latn", "bm-Latn-ML",
+  "bn", "bn-BD",
+  "bo", "bo-CN",
+  "brx", "brx-IN",
+  "bs", "bs-Cyrl", "bs-Cyrl-BA", "bs-Latn", "bs-Latn-BA",
+  "ca", "ca-AD", "ca-ES", "ca-ES-valencia", "ca-FR", "ca-IT",
+  "ccp", "ccp-Cakm", "ccp-Cakm-BD", "ccp-Cakm-IN",
+  "ceb", "ceb-Latn", "ceb-Latn-PH",
+  "chr", "chr-Cher", "chr-Cher-US",
+  "dje", "dje-NE",
+  "dsb", "dsb-DE",
+  "dua", "dua-CM",
+  "dyo", "dyo-SN",
+  "ee", "ee-GH", "ee-TG",
+  "el", "el-CY", "el-GR",
+  "en", "en-AS", "en-AU", "en-BI", "en-GU", "en-HK", "en-JM", "en-MH", "en-MP", "en-MY", "en-NZ", "en-PR", "en-SG", "en-UM", "en-US", "en-VI", "en-ZW",
+  "es-419", "es-AR", "es-BO", "es-BR", "es-BZ", "es-CO", "es-CR", "es-CU", "es-DO", "es-EC", "es-GQ", "es-GT", "es-HN", "es-NI", "es-PE", "es-PH", "es-PY", "es-SV", "es-US", "es-UY", "es-VE",
+  "eu", "eu-ES",
+  "ewo", "ewo-CM",
+  "ff-Latn-BF", "ff-Latn-CM", "ff-Latn-GH", "ff-Latn-GM", "ff-Latn-GN", "ff-Latn-GW", "ff-Latn-LR", "ff-Latn-MR", "ff-Latn-NE", "ff-Latn-NG", "ff-Latn-SL",
+  "fi", "fi-FI",
+  "fil", "fil-PH",
+  "ha", "ha-Latn", "ha-Latn-GH", "ha-Latn-NE", "ha-Latn-NG",
+  "haw", "haw-US",
+  "hr", "hr-BA", "hr-HR",
+  "hsb", "hsb-DE",
+  "ibb", "ibb-NG",
+  "ig", "ig-NG",
+  "ii", "ii-CN",
+  "is", "is-IS",
+  "iu", "iu-Cans", "iu-Cans-CA", "iu-Latn", "iu-Latn-CA",
+  "kab", "kab-DZ",
+  "kea", "kea-CV",
+  "khq", "khq-ML",
+  "ko-KP",
+  "kr", "kr-Latn", "kr-Latn-NG",
+  "ks", "ks-Arab", "ks-Arab-IN",
+  "ksf", "ksf-CM",
+  "ksh", "ksh-DE",
+  "ky", "ky-KG",
+  "lkt", "lkt-US",
+  "ln", "ln-AO", "ln-CD", "ln-CF", "ln-CG",
+  "lo", "lo-LA",
+  "lu", "lu-CD",
+  "mfe", "mfe-MU",
+  "ml", "ml-IN",
+  "mn-Mong", "mn-Mong-CN", "mn-Mong-MN",
+  "moh", "moh-CA",
+  "ms", "ms-BN", "ms-MY", "ms-SG",
+  "mua", "mua-CM",
+  "nds", "nds-DE", "nds-NL",
+  "ne", "ne-IN", "ne-NP",
+  "nl", "nl-BE", "nl-NL",
+  "nmg", "nmg-CM",
+  "nus", "nus-SS",
+  "pap", "pap-029",
+  "prs", "prs-AF",
+  "ps", "ps-AF", "ps-PK",
+  "rn", "rn-BI",
+  "se-FI",
+  "seh", "seh-MZ",
+  "ses", "ses-ML",
+  "sg", "sg-CF",
+  "shi", "shi-Latn", "shi-Latn-MA", "shi-Tfng", "shi-Tfng-MA",
+  "sk", "sk-SK",
+  "sl", "sl-SI",
+  "smn", "smn-FI",
+  "sms", "sms-FI",
+  "sq", "sq-AL", "sq-MK", "sq-XK",
+  "sr", "sr-Cyrl-BA", "sr-Cyrl-ME", "sr-Cyrl-XK", "sr-Latn", "sr-Latn-BA", "sr-Latn-ME", "sr-Latn-RS", "sr-Latn-XK",
+  "ta-LK", "ta-MY", "ta-SG",
+  "th", "th-TH",
+  "to", "to-TO",
+  "tr", "tr-CY", "tr-TR",
+  "twq", "twq-NE",
+  "tzm-Arab", "tzm-Arab-MA",
+  "ug", "ug-CN",
+  "ur-IN",
+  "yav", "yav-CM",
+  "yo", "yo-BJ", "yo-NG",
+  "zgh", "zgh-Tfng", "zgh-Tfng-MA",
+  "zh", "zh-CN", "zh-Hans", "zh-Hans-HK", "zh-Hans-MO", "zh-Hant", "zh-HK", "zh-MO", "zh-SG", "zh-TW",
+  "zu", "zu-ZA"
+]);
+
+DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+
+  if (!oneDigitCulture.has(this.locale)) {
+
+    if (format == "D")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
+
+    if (format == "f")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
+
+    if (format == "f")
+      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
+  }
+
+  if (format == "EE") //missing
+    return this.toFormat("EEE", options).substr(0, 2);
+
+  return this.toFormat(format, options)
+
 }
 
 
@@ -186,9 +310,10 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
 
   //simple euristic
-  var afterDot = f.tryAfter(".") ?? "";
+  var style = f.endsWith("%") ? "percent" : "decimal";
+  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
   return {
-    style: "decimal",
+    style: style,
     minimumFractionDigits: afterDot.trimStart("#").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
@@ -221,18 +346,30 @@ export function durationToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var momentDurationFormat = toDurationFormat(format);
+  var duration = parseDuration(val);
+  return duration.toFormat(format ?? "hh:mm:ss");
+}
 
-  var result = /(\d{1,2}):(\d{1,2}):(\d{1,2})/.exec(val);
+export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
+  var valParts = timeStampToStr.split(":");
+  var formatParts = format.split(":");
 
-  if (result == undefined)
-    throw new Error("Invalid date");
+  if (valParts.length > formatParts.length)
+    throw new Error("Invalid Format")
 
-  var hh = result[1];
-  var mm = result[2];
-  var ss = result[3];
+  const result: DurationObjectUnits = {};
 
-  return (format || "hh:mm:ss").replace("hh", hh).replace("mm", mm).replace("ss", ss);
+  for (let i = 0; i < formatParts.length; i++) {
+    const formP = formatParts[i];
+    const value = parseInt(valParts[i] || "0");
+    switch (formP) {
+      case "hh": result.hour = value; break;
+      case "mm": result.minute = value; break;
+      case "ss": result.second = value; break;
+      default: throw new Error("Unexpected " + formP);
+    }
+  }
+  return Duration.fromObject(result);
 }
 
 

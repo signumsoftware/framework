@@ -1,8 +1,8 @@
 import * as React from 'react'
-import { DateTime } from 'luxon'
+import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -516,6 +516,24 @@ export interface NumericTextBoxProps {
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
 }
 
+const cachedLocaleSeparators: {
+  [locale: string]: { group: string, decimal: string }
+} = {};
+
+function getLocaleSeparators(locale: string) {
+  var result = cachedLocaleSeparators[locale];
+  if (result)
+    return result;
+
+  var format = new Intl.NumberFormat(locale, { minimumFractionDigits: 0 });
+  result = {
+    group: format.format(1111).replace(/1/g, ''),
+    decimal: format.format(1.1).replace(/1/g, ''),
+  };
+  return cachedLocaleSeparators[locale] = result;
+}
+
+
 export function NumericTextBox(p: NumericTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
@@ -564,20 +582,20 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       p.htmlAttributes.onBlur(e);
   }
 
+ 
   function unformat(format: Intl.NumberFormat, str: string): number {
-    var isPercentage = format.resolvedOptions().style == "percent";
-    if (isPercentage) {
-      format = new Intl.NumberFormat(format.resolvedOptions().locale);
-    }
 
-    const thousandSeparator = format.format(1111).replace(/1/g, '');
-    const decimalSeparator = format.format(1.1).replace(/1/g, '');
+    var options = format.resolvedOptions();
 
-    if (thousandSeparator)
-      str = str.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
+    var isPercentage = options.style == "percent";
 
-    if (decimalSeparator)
-      str = str.replace(new RegExp('\\' + decimalSeparator), '.');
+    var separators = getLocaleSeparators(options.locale);
+
+    if (separators.group)
+      str = str.replace(new RegExp('\\' + separators.group, 'g'), '');
+
+    if (separators.decimal)
+      str = str.replace(new RegExp('\\' + separators.decimal), '.');
 
     var result =  parseFloat(str);
 
@@ -615,14 +633,14 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.toFormat(luxonFormat)}
+          {m?.toFormatFixed(luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
 
   const handleDatePickerOnChange = (date?: Date, str?: string) => {
     const m = date && DateTime.fromJSDate(date);
-    vl.setValue(m == null || m.isValid ? null :
+    vl.setValue(m == null || !m.isValid ? null :
       vl.props.type!.name == "Date" ? m.toISODate():
         !showTime ? m.toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
           m.toISO());
@@ -743,58 +761,11 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
     var format = p.format!;
 
-    function fixNumber(val: string) {
-      var valParts = val.split(":");
-      var formatParts = format.split(":");
-      if (valParts.length == 1 && formatParts.length > 1) {
-        const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
-
-        var inferedFormat = validFormats.firstOrNull(f => f.length >= val.length);
-        if (inferedFormat == null)
-          return null;
-
-        var fixedVal = val.padStart(inferedFormat.length, '0');
-
-        const getPart = (part: string) => {
-          var index = inferedFormat!.indexOf(part);
-          if (index == -1)
-            return "".padStart(part.length, '0');
-
-          return fixedVal.substr(index, part.length);
-        }
-
-        return format
-          .replace("hh", getPart("hh"))
-          .replace("mm", getPart("mm"))
-          .replace("ss", getPart("ss"));
-
-      } else {
-
-        var result = format;
-        for (var i = 0; i < formatParts.length; i++) {
-          var formP = formatParts[i];
-          var valP = (valParts[i] || "").substr(0, formP.length).padStart(formP.length, '0');
-          result = result.replace(formP, valP);
-        }
-        return result;
-      }
-    }
-
-    function normalize(val: string | null) {
-      if (val == null)
-        return null;
-
-      if (!"hh:mm:ss".contains(format))
-        throw new Error("not implemented");
-
-      return "hh:mm:ss".replace(format, val).replace("hh", "00").replace("mm", "00").replace("ss", "00")
-    }
-
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
+    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
     setText(undefined);
     if (p.value != result)
-      p.onChange(result);;
+      p.onChange(result);
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
   }
@@ -810,6 +781,36 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
+export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
+  var valParts = timeStampOrHumanStr.split(":");
+  var formatParts = format.split(":");
+  if (valParts.length == 1 && formatParts.length > 1) {
+    const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+
+    var inferedFormat = validFormats.firstOrNull(f => f.length >= timeStampOrHumanStr.length);
+    if (inferedFormat == null)
+      return null;
+
+    var fixedVal = timeStampOrHumanStr.padStart(inferedFormat.length, '0');
+
+    const getPart = (part: string) => {
+      var index = inferedFormat!.indexOf(part);
+      if (index == -1)
+        return 0;
+
+      return parseInt(fixedVal.substr(index, part.length));
+    }
+
+    return Duration.fromObject({
+      hour: getPart("hh"),
+      minute: getPart("mm"),
+      second: getPart("ss"),
+    });
+
+  } else {
+    return parseDuration(timeStampOrHumanStr, format);
+  }
+}
 
 DurationTextBox.defaultProps = {
   format: "hh:mm:ss"

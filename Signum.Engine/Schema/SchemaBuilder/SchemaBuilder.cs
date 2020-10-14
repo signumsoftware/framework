@@ -221,10 +221,11 @@ namespace Signum.Engine.Maps
             return Include(type, null);
         }
 
-
-
         internal protected virtual Table Include(Type type, PropertyRoute? route)
         {
+            if (this.Schema.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             if (schema.Tables.TryGetValue(type, out var result))
                 return result;
 

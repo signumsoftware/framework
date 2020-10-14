@@ -248,6 +248,9 @@ Consider the following options:
 
         public static void Register(this IOperation operation, bool replace = false)
         {
+            if (Schema.Current.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             if (!operation.OverridenType.IsIEntity())
                 throw new InvalidOperationException("Type '{0}' has to implement at least {1}".FormatWith(operation.OverridenType.Name));
 

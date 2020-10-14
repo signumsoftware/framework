@@ -122,7 +122,7 @@ export default function ErrorModal(p: ErrorModalProps) {
 }
 
 ErrorModal.showAppropriateError = (error: any): Promise<void> => {
-  if (error.code === 20) //abort
+  if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
   if (new RegExp(/^Loading chunk?/i).test(error.message))
