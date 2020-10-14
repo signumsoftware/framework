@@ -35,10 +35,10 @@ export default function TimesPage(p: TimesPageProps) {
       <br />
       <Tabs id="timeMachineTabs">
         <Tab eventKey="bars" title="Bars">
-          <TimesBars times={times}/>
+          <TimesBars times={times} />
         </Tab>
         <Tab eventKey="table" title="Table">
-          <TimesTable times={times}/>
+          <TimesTable times={times} />
         </Tab>
       </Tabs>
     </div>
@@ -55,49 +55,51 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
 
   return (
     <table className="table">
-      {
-        times.orderByDescending(a => a.totalTime).map((pair, i) =>
-          <tr className="task" key={i}>
-            <td>
-              <div>
-                <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
-                {pair.key.tryAfter(' ') != undefined && <span className="entityName"> {pair.key.after(' ')} </span>}
-              </div>
-              <div>
-                <span className="numTimes">Executed {pair.count} {pair.count == 1 ? "time" : "times"} Total {pair.totalTime} ms </span>
-              </div>
-              <div className="sum" style={{ width: (100 * pair.totalTime / maxTotal) + "%" }}></div>
-            </td>
-            <td>
-              <table>
-                <tr>
-                  <td>Max</td>
-                  <td className="leftBorder">
-                    <span className="max" style={{ width: (pair.maxTime * ratio) + "px" }}></span> {pair.maxTime} ms ({DateTime.fromISO(pair.maxDate).toRelative()})
+      <tbody>
+        {
+          times.orderByDescending(a => a.totalTime).map((pair, i) =>
+            <tr className="task" key={i}>
+              <td>
+                <div>
+                  <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
+                  {pair.key.tryAfter(' ') != undefined && <span className="entityName"> {pair.key.after(' ')} </span>}
+                </div>
+                <div>
+                  <span className="numTimes">Executed {pair.count} {pair.count == 1 ? "time" : "times"} Total {pair.totalTime} ms </span>
+                </div>
+                <div className="sum" style={{ width: (100 * pair.totalTime / maxTotal) + "%" }}></div>
+              </td>
+              <td>
+                <table>
+                  <tr>
+                    <td>Max</td>
+                    <td className="leftBorder">
+                      <span className="max" style={{ width: (pair.maxTime * ratio) + "px" }}></span> {pair.maxTime} ms ({DateTime.fromISO(pair.maxDate).toRelative()})
                     </td>
-                </tr>
-                <tr>
-                  <td>Average</td>
-                  <td className="leftBorder">
-                    <span className="med" style={{ width: (pair.averageTime * ratio) + "px" }}></span> {pair.averageTime} ms
+                  </tr>
+                  <tr>
+                    <td>Average</td>
+                    <td className="leftBorder">
+                      <span className="med" style={{ width: (pair.averageTime * ratio) + "px" }}></span> {pair.averageTime} ms
                   </td>
-                </tr>
-                <tr>
-                  <td>Min</td>
-                  <td className="leftBorder">
-                    <span className="min" style={{ width: (pair.minTime * ratio) + "px" }}></span> {pair.minTime} ms ({DateTime.fromISO(pair.minDate).toRelative()})
+                  </tr>
+                  <tr>
+                    <td>Min</td>
+                    <td className="leftBorder">
+                      <span className="min" style={{ width: (pair.minTime * ratio) + "px" }}></span> {pair.minTime} ms ({DateTime.fromISO(pair.minDate).toRelative()})
                   </td>
-                </tr>
-                <tr>
-                  <td>Last</td>
-                  <td className="leftBorder">
-                    <span className="last" style={{ width: (pair.lastTime * ratio) + "px" }}></span> {pair.lastTime} ms ({DateTime.fromISO(pair.lastDate).toRelative()})
+                  </tr>
+                  <tr>
+                    <td>Last</td>
+                    <td className="leftBorder">
+                      <span className="last" style={{ width: (pair.lastTime * ratio) + "px" }}></span> {pair.lastTime} ms ({DateTime.fromISO(pair.lastDate).toRelative()})
                   </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        )}
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          )}
+      </tbody>
     </table>
   );
 }
