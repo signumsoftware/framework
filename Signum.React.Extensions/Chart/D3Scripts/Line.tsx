@@ -10,8 +10,10 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
-export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
-  
+export default function renderLine(props: ChartScriptProps): React.ReactElement<any> {
+
+  const { data, width, height, parameters, loading, chartRequest } = props;
+
   var xRule = Rule.create({
     _1: 5,
     title: 15,
@@ -49,8 +51,6 @@ export default function renderLine({ data, width, height, parameters, loading, o
   var keyColumn = data.columns.c0! as ChartColumn<unknown>;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
-
-  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
   var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
@@ -58,6 +58,40 @@ export default function renderLine({ data, width, height, parameters, loading, o
     .range([0, xRule.size('content')]);
 
   var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["Scale"]);
+
+  return (
+    <svg direction="ltr" width={width} height={height}>
+
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} />
+      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
+
+      {paintMain({ props, xRule, yRule, x, y, keyValues })}
+
+      <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
+      <XAxis xRule={xRule} yRule={yRule} />
+      <YAxis xRule={xRule} yRule={yRule} />
+    </svg>
+  );
+}
+
+export interface ChartScriptHorizontalProps {
+  props: ChartScriptProps;
+  xRule: Rule<"content">;
+  yRule: Rule<"content" | "labels">;
+  x: d3.ScaleBand<string>;
+  y: d3.ScaleContinuousNumeric<number, number>;
+  keyValues: unknown[]
+}
+
+export function paintMain({ xRule, yRule, props, x, y, keyValues }: ChartScriptHorizontalProps) {
+
+  const data = props.data!;
+  const parameters = props.parameters;
+
+  var keyColumn = data.columns.c0! as ChartColumn<unknown>;
+  var valueColumn = data.columns.c1! as ChartColumn<number>;
+
+  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
 
   var rowByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
@@ -67,17 +101,14 @@ export default function renderLine({ data, width, height, parameters, loading, o
     .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
-  var color = parameters["Color"]!;// 'steelblue'
+
+  var color = props.parameters["Color"]!;// 'steelblue'
 
   return (
-    <svg direction="ltr" width={width} height={height}>
-
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} />
-      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
-
+    <>
       {/*PAINT CHART'*/}
       <g className="shape" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
-        <path className="shape sf-transition" stroke={color} fill="none" strokeWidth={3} shapeRendering="initial" d={line(keyValues)!} transform={initialLoad ? scale(1, 0) : scale(1, 1)} />
+        <path className="shape sf-transition" stroke={color} fill="none" strokeWidth={3} shapeRendering="initial" d={line(keyValues)!} transform={props.initialLoad ? scale(1, 0) : scale(1, 1)} />
       </g>
 
       {/*paint graph - hover area trigger*/}
@@ -91,7 +122,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
             stroke="none"
             cursor="pointer"
             r={15}
-            onClick={e => onDrillDown(r, e)}>
+            onClick={e => props.onDrillDown(r, e)}>
             <title>
               {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
             </title>
@@ -99,7 +130,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
       </g>
 
       {/*paint graph - points*/}
-      <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
+      <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (props.initialLoad ? scale(1, 0) : scale(1, 1))}>
         {orderedRows
           .map(r => <circle key={keyColumn.getValueKey(r)}
             transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r)))}
@@ -108,7 +139,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
             strokeWidth={2}
             fill="white"
             r={5}
-            onClick={e => onDrillDown(rowByKey[keyColumn.getValueKey(r)], e)}
+            onClick={e => props.onDrillDown(rowByKey[keyColumn.getValueKey(r)], e)}
             cursor="pointer"
             shapeRendering="initial">
             <title>
@@ -126,17 +157,13 @@ export default function renderLine({ data, width, height, parameters, loading, o
               r={5}
               opacity={parseFloat(parameters["NumberOpacity"]!)}
               textAnchor="middle"
-              onClick={e => onDrillDown(r, e)}
+              onClick={e => props.onDrillDown(r, e)}
               cursor="pointer"
               shapeRendering="initial">
               {valueColumn.getValueNiceName(r)}
             </text>)}
         </g>
       }
-
-      <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
-    </svg>
+    </>
   );
 }

@@ -8,9 +8,12 @@ import { XKeyTicks, YScaleTicks, XTitle } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import type { ChartScriptHorizontalProps } from './Line';
 
 
-export default function renderColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
+export default function renderColumns(props: ChartScriptProps): React.ReactElement<any> {
+
+  const { data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest } = props;
 
   var xRule = Rule.create({
     _1: 5,
@@ -58,11 +61,7 @@ export default function renderColumns({ data, width, height, parameters, loading
 
   var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["Scale"]);
   
-  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
-
-  var size = yRule.size('content');
-  var labelMargin = 10;
+ 
 
   return (
     <svg direction="ltr" width={width} height={height}>
@@ -70,17 +69,40 @@ export default function renderColumns({ data, width, height, parameters, loading
       <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
-      {/*PAINT CHART*/}
+      {paintMain({ props, xRule, yRule, x, y, keyValues })}
 
+      <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
+      <XAxis xRule={xRule} yRule={yRule} />
+      <YAxis xRule={xRule} yRule={yRule} />
+    </svg>
+  );
+}
+
+export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalProps) {
+
+  const data = props.data!;
+  const parameters = props.parameters;
+
+  var keyColumn = data.columns.c0!;
+  var valueColumn = data.columns.c1! as ChartColumn<number>;
+
+  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
+  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
+
+  var size = yRule.size('content');
+  var labelMargin = 10;
+
+  return (
+    <>
       <g className="shape" transform={translate(xRule.start('content'), yRule.end('content'))}>
         {orderedRows.map(r => <rect key={keyColumn.getValueKey(r)} className="shape sf-transition"
-          transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
+          transform={(props.initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
           height={y(valueColumn.getValue(r))}
           width={x.bandwidth()}
           fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           cursor="pointer"
           stroke={x.bandwidth() > 4 ? '#fff' : undefined}
-          onClick={e => onDrillDown(r, e)}>
+          onClick={e => props.onDrillDown(r, e)}>
           <title>
             {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
           </title>
@@ -97,7 +119,7 @@ export default function renderColumns({ data, width, height, parameters, loading
               fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
               textAnchor="end"
               cursor="pointer"
-              onClick={e => onDrillDown(r, e)}>
+              onClick={e => props.onDrillDown(r, e)}>
               {keyColumn.getValueNiceName(r)}
             </TextEllipsis>)}
           </g> :
@@ -113,7 +135,7 @@ export default function renderColumns({ data, width, height, parameters, loading
                     fill={y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dx={y(valueColumn.getValue(r)) >= size / 2 ? -labelMargin : labelMargin}
                     textAnchor={y(valueColumn.getValue(r)) >= size / 2 ? 'end' : 'start'}
-                    onClick={e => onDrillDown(r, e)}
+                    onClick={e => props.onDrillDown(r, e)}
                     cursor="pointer">
                     {keyColumn.getValueNiceName(r)}
                   </TextEllipsis>);
@@ -133,14 +155,11 @@ export default function renderColumns({ data, width, height, parameters, loading
               textAnchor="middle"
               fontWeight="bold"
               cursor="pointer"
-              onClick={e => onDrillDown(r, e)}>
+              onClick={e => props.onDrillDown(r, e)}>
               {valueColumn.getValueNiceName(r)}
             </text>)}
         </g>}
 
-      <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
-    </svg>
+    </>
   );
 }
