@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as Services from '@framework/Services';
 import { ImportRoute } from "@framework/AsyncImport";
-import Login, { LoginWithWindowsButton } from "./Login/Login";
+import LoginPage, { LoginWithWindowsButton } from "./Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
 import { UserEntity, PermissionSymbol } from "./Signum.Entities.Authorization";
 import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
@@ -24,14 +24,14 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     if (!authenticators.contains(loginWindowsAuthentication))
       throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
 
-    Login.customLoginButtons = () => <LoginWithWindowsButton />;
+    LoginPage.customLoginButtons = () => <LoginWithWindowsButton />;
   }
 
-  options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
-  options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccess")} />);
+  options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/LoginPage")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePasswordPage")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccessPage")} />);
   options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
+  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmailPage")} />);
 
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;

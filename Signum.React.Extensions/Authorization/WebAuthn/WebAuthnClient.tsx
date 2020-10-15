@@ -3,7 +3,7 @@ import { NavDropdown } from "react-bootstrap";
 import * as Services from '@framework/Services';
 import * as AuthClient from '../AuthClient';
 import { ImportRoute } from "@framework/AsyncImport";
-import { LoginContext } from "../Login/Login";
+import { LoginContext } from "../Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
 import { UserEntity, PermissionSymbol, LoginAuthMessage } from "../Signum.Entities.Authorization";
 import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
@@ -150,7 +150,7 @@ export function login(ctx: LoginContext) {
 
   ctx.setLoading("webathn");
 
-  API.assertionOptions({ userName: ctx.userName.current!.value! })
+  API.assertionOptions({ userName: ctx.userName?.current!.value! })
     .then(aor => {
 
       var options = aor.assertionOptions;
@@ -279,7 +279,7 @@ export module API {
     return ajaxPost({ url: "~/api/webauthn/makeCredential" }, request);
   }
 
-  export function assertionOptions(request: { userName: string }): Promise<AssertionOptionsResponse> {
+  export function assertionOptions(request: { userName?: string }): Promise<AssertionOptionsResponse> {
     return ajaxPost({ url: "~/api/webauthn/assertionOptions" }, request);
   }
 

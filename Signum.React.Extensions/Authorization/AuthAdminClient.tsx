@@ -17,7 +17,6 @@ import * as Operations from '@framework/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
 

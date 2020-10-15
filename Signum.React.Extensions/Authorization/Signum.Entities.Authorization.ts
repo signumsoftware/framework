@@ -123,6 +123,7 @@ export module LoginAuthMessage {
   export const Username = new MessageKey("LoginAuthMessage", "Username");
   export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
+  export const ShowLoginForm = new MessageKey("LoginAuthMessage", "ShowLoginForm");
   export const LoginWithWindowsUser = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
   export const NoWindowsUserFound = new MessageKey("LoginAuthMessage", "NoWindowsUserFound");
   export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("LoginAuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
