@@ -622,7 +622,9 @@ namespace Signum.Engine.Authorization
                 doc.Save(fileName);
                 Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
 
-                if (SafeConsole.Ask("Publish to Load?"))
+                var info = new DirectoryInfo("../../../");
+
+                if (info.Exists && SafeConsole.Ask($"Publish to '{info.Name}' directory (source code)?"))
                     File.Copy(fileName, "../../../" + Path.GetFileName(fileName), overwrite: true);
             }
 
