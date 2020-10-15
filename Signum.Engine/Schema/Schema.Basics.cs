@@ -163,12 +163,12 @@ namespace Signum.Engine.Maps
 
         public List<TableIndex>? MultiColumnIndexes { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Table(Type type)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             this.Type = type;
         }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public override string ToString()
         {
@@ -1311,7 +1311,7 @@ namespace Signum.Engine.Maps
             this.PrimaryKey = primaryKey;
             this.BackReference = backReference;
             this.CollectionType = collectionType;
-            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
