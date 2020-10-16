@@ -20,6 +20,7 @@ export interface EntityComboProps extends EntityBaseProps {
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   delayLoadData?: boolean;
+  toStringFromData?: boolean;
 }
 
 export class EntityComboController extends EntityBaseController<EntityComboProps> {
@@ -105,6 +106,8 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
             mandatoryClass={c.mandatoryClass}
             refreshKey={p.refreshKey}
+            delayLoadData={p.delayLoadData}
+            toStringFromData={p.toStringFromData}
             selectHtmlAttributes={p.selectHtmlAttributes}
             liteToString={p.liteToString}
           />
@@ -127,6 +130,7 @@ export interface EntityComboSelectProps {
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   liteToString?: (e: Entity) => string;
   delayLoadData?: boolean;
+  toStringFromData?: boolean;
 }
 
 
@@ -242,8 +246,10 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       var index = elements.findIndex(a => is(a, lite));
       if (index == -1)
         elements.insertAt(1, lite);
-      else
-        elements[index] = lite;
+      else {
+        if (!p.toStringFromData)
+          elements[index] = lite;
+      }
     }
 
     return (

@@ -1262,6 +1262,13 @@ export class Type<T extends ModifiableEntity> implements IType {
     return obj && (obj as ModifiableEntity).Type == this.typeName;
   }
 
+  cast(obj: any): T {
+    if (this.isInstance(obj))
+      return obj;
+
+    throw new Error("Unable to cast object to " + this.typeName);
+  }
+
   isLite(obj: any): obj is Lite<T & Entity> {
     return obj && (obj as Lite<Entity>).EntityType == this.typeName;
   }
