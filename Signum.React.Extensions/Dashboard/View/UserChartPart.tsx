@@ -69,6 +69,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+  const handleOnCreateNew = p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined;
 
   function handleCreateNew(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -91,8 +92,15 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         </label>}
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
-          <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
-            resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
+          <ChartTableComponent
+            chartRequest={chartRequest}
+            lastChartRequest={chartRequest}
+            resultTable={result.resultTable!}
+            onOrderChanged={() => makeQuery()}
+            onReload={handleReload}
+            typeInfos={typeInfos}
+            onCreateNew={handleOnCreateNew}
+          />) :
         <ChartRenderer
           chartRequest={chartRequest}
           lastChartRequest={chartRequest}
@@ -100,7 +108,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           loading={result === null}
           onReload={handleReload}
           typeInfos={typeInfos}
-          onCreateNew={p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined}
+          onCreateNew={handleOnCreateNew}
         />
       }
     </div>
