@@ -3,13 +3,10 @@ import { IFile, IFilePath } from "./Signum.Entities.Files";
 import { configurtions } from "./FileDownloader";
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
+import { PropertyRoute } from '@framework/Lines';
 
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | null;
-}
-
-interface FileImageState {
-  objectUrl: string | undefined;
 }
 
 export function FileImage(p: FileImageProps) {
@@ -20,7 +17,6 @@ export function FileImage(p: FileImageProps) {
   React.useEffect(() => {
     if (file && !file.fullWebPath && !file.binaryFile) {
       var url = configurtions[file.Type].fileUrl!(file);
-      var oldFile = file;
 
       Services.ajaxGetRaw({ url: url })
         .then(resp => resp.blob())

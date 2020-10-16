@@ -1,5 +1,4 @@
 import * as React from 'react'
-import numbro from 'numbro'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -7,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, toLite } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { symbolNiceName } from '@framework/Reflection'
+import { symbolNiceName, toNumberFormat } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import {
   PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
@@ -30,7 +29,8 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(PredictSimpleResultEntity, e => import('./Templates/PredictSimpleResult')));
 
   function numbericCellFormatter(color: string) {
-    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numbro(cell).format("0.000")}</span>, "numeric-cell");
+    var numberFormat = toNumberFormat("0.000");
+    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, "numeric-cell");
   }
 
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));

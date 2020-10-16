@@ -17,7 +17,7 @@ import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 
 
@@ -57,7 +57,10 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
 
-  Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: DashboardEntity.token(d => d.dashboardPriority), defaultOrderType: "Descending" });
+  Finder.addSettings({
+    queryName: DashboardEntity,
+    defaultOrders: [{ token: DashboardEntity.token(d => d.dashboardPriority), orderType: "Descending" }]
+  });
 
   options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
 

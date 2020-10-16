@@ -24,7 +24,6 @@ namespace Signum.Engine.Authorization
     public static class AuthLogic
     {
         public static event Action<UserEntity>? UserLogingIn;
-        public static event Func<string?>? LoginMessage;
         public static ICustomAuthorizer? Authorizer;
 
         public static string? SystemUserName { get; private set; }
@@ -623,7 +622,9 @@ namespace Signum.Engine.Authorization
                 doc.Save(fileName);
                 Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
 
-                if (SafeConsole.Ask("Publish to Load?"))
+                var info = new DirectoryInfo("../../../");
+
+                if (info.Exists && SafeConsole.Ask($"Publish to '{info.Name}' directory (source code)?"))
                     File.Copy(fileName, "../../../" + Path.GetFileName(fileName), overwrite: true);
             }
 
@@ -650,14 +651,6 @@ namespace Signum.Engine.Authorization
             }.Choose();
 
             action?.Invoke();
-        }
-
-        public static string? OnLoginMessage()
-        {
-            if (AuthLogic.LoginMessage != null)
-                return AuthLogic.LoginMessage();
-
-            return null;
         }
 
         public static bool IsLogged()

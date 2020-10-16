@@ -12,11 +12,11 @@ using System.Linq;
 using System.Linq.Expressions;
 
 namespace Signum.Engine.Tree
-{  
+{
     public static class TreeLogic
     {
         public class DescendatsMethodExpander<T> : GenericMethodExpander
-            where T: TreeEntity
+            where T : TreeEntity
         {
             public static Expression<Func<T, IQueryable<T>>> Expression =
                 cp => Database.Query<T>().Where(cc => (bool)cc.Route.IsDescendantOf(cp.Route));
@@ -29,9 +29,9 @@ namespace Signum.Engine.Tree
             return DescendatsMethodExpander<T>.Expression.Evaluate(e);
         }
 
-     
+
         public class ChildrensMethodExpander<T> : GenericMethodExpander
-            where T: TreeEntity
+            where T : TreeEntity
         {
             public static Expression<Func<T, IQueryable<T>>> Expression =
                 cp => Database.Query<T>().Where(cc => (bool)(cc.Route.GetAncestor(1) == cp.Route));
@@ -44,9 +44,9 @@ namespace Signum.Engine.Tree
             return ChildrensMethodExpander<T>.Expression.Evaluate(e);
         }
 
-       
+
         public class AscendantsMethodExpander<T> : GenericMethodExpander
-            where T: TreeEntity
+            where T : TreeEntity
         {
             public static Expression<Func<T, IQueryable<T>>> Expression =
                 cc => Database.Query<T>().Where(cp => (bool)cc.Route.IsDescendantOf(cp.Route)).OrderBy(cp => (Int16)cp.Route.GetLevel());
@@ -59,11 +59,11 @@ namespace Signum.Engine.Tree
             return AscendantsMethodExpander<T>.Expression.Evaluate(e);
         }
 
-     
+
         public class ParentMethodExpander<T> : GenericMethodExpander
             where T : TreeEntity
         {
-            public static Expression<Func<T, T?>> Expression = 
+            public static Expression<Func<T, T?>> Expression =
                 cc => Database.Query<T>().SingleOrDefaultEx(cp => (bool)(cp.Route == cc.Route.GetAncestor(1)));
             public ParentMethodExpander() : base(Expression) { }
         }
@@ -73,9 +73,9 @@ namespace Signum.Engine.Tree
         {
             return ParentMethodExpander<T>.Expression.Evaluate(e);
         }
-       
+
         [AutoExpressionField]
-        public static short Level(this TreeEntity t) => 
+        public static short Level(this TreeEntity t) =>
             As.Expression(() => (short)t.Route.GetLevel());
 
         public static void CalculateFullName<T>(T tree)
@@ -90,7 +90,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
-                    .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
+                    .Where(n => (bool)((SqlHierarchyId)n!.Value.GetAncestor(1) == node))
                     .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
-                    .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
+                    .Where(n => (bool)((SqlHierarchyId)n!.Value.GetAncestor(1) == node))
                     .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -110,7 +110,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
-                    .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
+                    .Where(n => (bool)(n!.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
                     .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -120,7 +120,7 @@ namespace Signum.Engine.Tree
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
-                    .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
+                    .Where(n => (bool)(n!.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
                     .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
@@ -164,7 +164,7 @@ namespace Signum.Engine.Tree
             var list = t.Descendants().Where(c => c != t).ToList();
 
             var oldNode = t.Route;
-         
+
             t.Route = GetNewPosition<T>(model, t);
 
             t.Save();
@@ -184,26 +184,26 @@ namespace Signum.Engine.Tree
             where T : TreeEntity
         {
             var newParentRoute = model.NewParent == null ? SqlHierarchyId.GetRoot() : model.NewParent.InDB(a => a.Route);
-            
+
             if (newParentRoute.IsDescendantOf(entity.Route))
                 throw new Exception(TreeMessage.ImpossibleToMove0InsideOf1.NiceToString(entity, model.NewParent));
 
             if (model.InsertPlace == InsertPlace.FirstNode)
                 return newParentRoute.GetDescendant(SqlHierarchyId.Null, FirstChild<T>(newParentRoute));
 
-            if(model.InsertPlace == InsertPlace.LastNode)
+            if (model.InsertPlace == InsertPlace.LastNode)
                 return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), SqlHierarchyId.Null);
 
             var newSiblingRoute = model.Sibling!.InDB(a => a.Route);
 
-            if (!newSiblingRoute.IsDescendantOf(newParentRoute) || 
-                newSiblingRoute.GetLevel() != newParentRoute.GetLevel() + 1 || 
+            if (!newSiblingRoute.IsDescendantOf(newParentRoute) ||
+                newSiblingRoute.GetLevel() != newParentRoute.GetLevel() + 1 ||
                 newSiblingRoute == entity.Route)
                 throw new Exception(TreeMessage.ImpossibleToMove01Of2.NiceToString(entity, model.InsertPlace.NiceToString(), model.NewParent));
 
             if (model.InsertPlace == InsertPlace.After)
                 return newParentRoute.GetDescendant(newSiblingRoute, Next<T>(newSiblingRoute));
-            
+
             if (model.InsertPlace == InsertPlace.Before)
                 return newParentRoute.GetDescendant(Previous<T>(newSiblingRoute), newSiblingRoute);
 
@@ -246,7 +246,7 @@ namespace Signum.Engine.Tree
                 c.Construct = (t, _) => new T
                 {
                     ParentOrSibling = t.ToLite(),
-                    Level = (short)(t.Level + 1),
+                    Level = (short)(t.Level! + 1),
                     IsSibling = false
                     //                    
                 };
@@ -299,7 +299,7 @@ namespace Signum.Engine.Tree
                 }
             }.Register();
 
-            if(copy != null)
+            if (copy != null)
             {
                 Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.Copy).Do(c =>
                 {
@@ -311,7 +311,7 @@ namespace Signum.Engine.Tree
                          var descendants = t.Descendants().OrderBy(a => a.Route).ToList();
 
                          var hasDisabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
-                         var isParentDisabled = hasDisabledMixin  && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled);
+                         var isParentDisabled = hasDisabledMixin && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled);
 
                          var list = descendants.Select(oldNode =>
                          {

@@ -7,7 +7,7 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '@framework/Signum.Entities'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, OperationMessage } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { GraphExplorer, OperationType } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
@@ -79,10 +79,9 @@ function monkeyPatchCreateContextualMenuItem() {
         return base(coc, defaultClick);
     }
 
-
     const text = coc.settings && coc.settings.text ? coc.settings.text() :
       coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
-        coc.operationInfo.niceName;
+        <>{ContextualOperations.MenuItemConstructor.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2 text-muted">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
 
     const color = coc.settings?.color || coc.entityOperationSettings?.color || Operations.Defaults.getColor(coc.operationInfo);
     const icon = coc.settings?.icon;

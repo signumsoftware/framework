@@ -312,8 +312,11 @@ namespace Signum.Engine.Authorization
         {
             return key =>
             {
+                if (AuthLogic.GetDefaultAllowed(role))
+                    return OperationAllowed.Allow;
+
                 if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
+                    return OperationAllowed.None;
 
                 var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
 

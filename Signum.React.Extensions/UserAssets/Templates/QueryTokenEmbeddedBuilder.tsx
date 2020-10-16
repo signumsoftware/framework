@@ -4,7 +4,7 @@ import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useForceUpdate } from '@framework/Hooks'
 
 interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null | undefined>;

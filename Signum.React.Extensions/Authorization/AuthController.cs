@@ -68,21 +68,17 @@ namespace Signum.React.Authorization
                 UserTicketServer.SaveCookie(ControllerContext);
             }
 
-            string? message = AuthLogic.OnLoginMessage();
-
             var token = AuthTokenServer.CreateToken(user);
 
-            return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
+            return new LoginResponse { userEntity = user, token = token, authenticationType = authenticationType };
         }
 
         [HttpGet("api/auth/loginFromApiKey")]
         public LoginResponse LoginFromApiKey(string apiKey)
         {
-            string? message = AuthLogic.OnLoginMessage();
-
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "api-key" };
+            return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "api-key" };
         }
 
         [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
@@ -91,11 +87,9 @@ namespace Signum.React.Authorization
             if (!UserTicketServer.LoginFromCookie(ControllerContext))
                 return null;
 
-            string? message = AuthLogic.OnLoginMessage();
-
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
+            return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
         }
 
         [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
@@ -112,7 +106,7 @@ namespace Signum.React.Authorization
 
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
+            return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
@@ -123,7 +117,7 @@ namespace Signum.React.Authorization
 
             var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
+            return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
         }
 
         [HttpGet("api/auth/currentUser")]
@@ -220,7 +214,6 @@ namespace Signum.React.Authorization
         public class LoginResponse
         {
             public string authenticationType { get; set; }
-            public string? message { get; set; }
             public string token { get; set; }
             public UserEntity userEntity { get; set; }
         }

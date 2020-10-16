@@ -23,6 +23,7 @@
   <Type Name="AutoconfigureNeuralNetworkEntity" />
   <Type Name="BaseRulePack`1" />
   <Type Name="BasicPermission" />
+  <Type Name="BigStringMixin" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
   <Type Name="CalendarDayEntity" />
@@ -188,6 +189,7 @@
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
   <Type Name="HolidayEmbedded" />
+  <Type Name="HtmlChartScript" />
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity" />
@@ -242,11 +244,6 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
-  <Type Name="NewsletterDeliveryEntity" />
-  <Type Name="NewsletterEntity" />
-  <Type Name="NewsletterOperation" />
-  <Type Name="NewsletterProcess" />
-  <Type Name="NewsletterState" />
   <Type Name="NoteEntity" />
   <Type Name="NoteMessage" />
   <Type Name="NoteOperation" />

@@ -1,9 +1,6 @@
 import * as React from 'react'
-import * as moment from 'moment'
-import numbro from 'numbro'
-import * as QueryString from 'query-string'
+import { DateTime } from 'luxon'
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
@@ -24,9 +21,10 @@ import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
-import { toMomentFormat } from '@framework/Reflection';
-import { toNumbroFormat } from '@framework/Reflection';
+import { toLuxonFormat } from '@framework/Reflection';
+import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
 
@@ -306,9 +304,10 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
       }
       else {
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token))
+        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
           cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-        cp.modified = true;
+          cp.modified = true;
+        }
       }
 
       chart.parameters!.push({ rowId: null, element: cp });
@@ -341,7 +340,7 @@ export function cleanedChartRequest(request: ChartRequestModel): ChartRequestMod
   const clone = { ...request };
   
   clone.filters = toFilterRequests(clone.filterOptions);
-  delete clone.filterOptions;
+  delete (clone as any).filterOptions;
 
   return clone;
 }
@@ -360,6 +359,7 @@ export interface ChartOptions {
 export interface ChartColumnOption {
   token?: string | QueryTokenString<any>;
   displayName?: string;
+  format?: string;
   orderByIndex?: number;
   orderByType?: OrderType;
 }
@@ -454,7 +454,8 @@ export module Encoder {
       columns.forEach((co, i) => query["column" + i] =
         (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
         (co.token ?? "") +
-        (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+        (co.displayName || co.format ? ("~" + (co.displayName == null ? "" : scapeTilde(co.displayName))) : "") +
+        (co.format ? "~" + scapeTilde(co.format) : ""));
   }
 
   export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
@@ -517,12 +518,15 @@ export module Decoder {
 
       var parts = val.split("~");
 
-      let order, token, displayName: string | null;
+      let order: string | undefined;
+      let token: string;
+      let displayName: string | null;
+      let format: string | null;
 
-      if (parts.length == 3 || parts.length == 2 && /\d+[AD]/.test(parts[0]))
-        [order, token, displayName] = parts;
+      if (parts.length >= 2 && /\d+[AD]/.test(parts[0]))
+        [order, token, displayName, format] = parts;
       else
-        [token, displayName] = parts;
+        [token, displayName, format] = parts;
  
       return ({
         rowId: null,
@@ -532,6 +536,7 @@ export module Decoder {
           }) : undefined,
           orderByType: order == null ? null : (order.charAt(order.length -1) == "A" ? "Ascending" : "Descending"),
           orderByIndex: order == null ? null : (parseInt(order.substr(0, order.length - 1))),
+          format: unscapeTildes(format),
           displayName: unscapeTildes(displayName),
         })
       });
@@ -636,19 +641,17 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
-          token.format ? toMomentFormat(token.format) :
-            undefined;
-        return date == null ? String(null) : moment(date).format(format);
+        var format = chartColumn.format ? toLuxonFormat(chartColumn.format) :
+          token.format ? toLuxonFormat(token.format) :
+            "F";
+        return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = chartColumn.format ? toNumbroFormat(chartColumn.format) :
-          token.format ? toNumbroFormat(token.format) :
-            undefined;
-        return number == null ? String(null) : numbro(number).format(format);
+        var format = toNumberFormat(chartColumn.format ?? token.format ?? "0")
+        return number == null ? String(null) : format.format(number);
       };
 
     return v => String(v);

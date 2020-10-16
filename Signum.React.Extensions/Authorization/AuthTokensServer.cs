@@ -58,7 +58,7 @@ namespace Signum.React.Authorization
 
         static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
-            var authHeader = ctx.HttpContext.Request.Headers["Signum_Authorization"].FirstOrDefault();
+            var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             if (authHeader == null)
             {
                 return null;

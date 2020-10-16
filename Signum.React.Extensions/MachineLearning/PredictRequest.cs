@@ -44,7 +44,7 @@ namespace Signum.React.MachineLearning
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
                 .Where(a => a.col!.Usage == PredictorColumnUsage.Input)
-                .Select(a => KeyValuePair.Create(a.col!, a.value))
+                .Select(a => KeyValuePair.Create(a.col!, (object?)a.value))
                 .ToDictionaryEx(),
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>

@@ -34,12 +34,16 @@ namespace Signum.Engine.ViewLog
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
         public static Func<BaseQueryRequest, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
-      
+
+
+        public static bool IsStarted = false;
 
         public static void Start(SchemaBuilder sb, HashSet<Type> registerExpression)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                IsStarted = true;
+
                 sb.Include<ViewLogEntity>()
                     .WithQuery(() => e => new
                     {
@@ -52,7 +56,7 @@ namespace Signum.Engine.ViewLog
                         e.StartDate,
                         e.EndDate,
                     });
-                
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
@@ -109,7 +113,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                         viewLog.Data = GetData(request!, sw);
+                        viewLog.Data = new BigStringEmbedded(GetData(request!, sw));
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();
@@ -132,6 +136,8 @@ namespace Signum.Engine.ViewLog
 
         public static IDisposable? LogView(Lite<IEntity> entity, string viewAction)
         {
+            if (!IsStarted)
+                return null;
 
             if (entity == null || !LogType(entity.EntityType) || UserHolder.Current == null)
                 return null;
@@ -142,6 +148,7 @@ namespace Signum.Engine.ViewLog
                 Target = (Lite<Entity>)entity.Clone(),
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
+                Data = new BigStringEmbedded(),
             };
 
             return new Disposable(() =>

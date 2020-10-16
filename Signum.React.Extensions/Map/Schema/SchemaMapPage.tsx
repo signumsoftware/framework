@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as History from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as QueryString from 'query-string'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -12,6 +11,7 @@ import { RouteComponentProps } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
+import { QueryString } from '@framework/QueryString'
 
 interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;
@@ -258,6 +258,10 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps) {
 
           <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
+          </marker>
+
+          <marker id="virtual_mlist_arrow" viewBox="-10 -5 20 10" refX="-10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
+            <path fill="gray" d="M0,0 L0,-8 L-10,0 L0,8 L0,0 L10,8 L10,-8 L0,0" />
           </marker>
           {
             React.Children.map(Dic.getValues(p.providers).map(a => a.defs).filter(defs => !!defs).flatMap(defs => defs!),

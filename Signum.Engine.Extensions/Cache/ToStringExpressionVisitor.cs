@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 
@@ -15,6 +16,14 @@ namespace Signum.Engine.Cache
     class ToStringExpressionVisitor : ExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
+
+        CachedEntityExpression root;
+
+        public ToStringExpressionVisitor(ParameterExpression param, CachedEntityExpression root)
+        {
+            this.root = root;
+            this.replacements = new Dictionary<ParameterExpression, Expression> { { param, root } };
+        }
 
         public static Expression<Func<PrimaryKey, string>> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
         {
@@ -27,10 +36,9 @@ namespace Signum.Engine.Cache
 
             var pk = Expression.Parameter(typeof(PrimaryKey), "pk");
 
-            var visitor = new ToStringExpressionVisitor
-            {
-                replacements = { { param, new CachedEntityExpression(pk, typeof(T), constructor, null, null) } }
-            };
+            var root = new CachedEntityExpression(pk, typeof(T), constructor, null, null);
+
+            var visitor = new ToStringExpressionVisitor(param, root);
 
             var result = visitor.Visit(lambda.Body);
 
@@ -163,12 +171,41 @@ namespace Signum.Engine.Cache
         }
 
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
-
+        
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            var obj = base.Visit(node.Object);
+            if (node.Method.DeclaringType == typeof(string) && node.Method.Name == nameof(string.Format) ||
+              node.Method.DeclaringType == typeof(StringExtensions) && node.Method.Name == nameof(StringExtensions.FormatWith))
+            {
+                var formatStr = Visit(node.Arguments[0]);
+                var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
 
+
+                return node.Update(null, new Sequence<Expression> { formatStr, remainging });
+            }
+
+            var obj = base.Visit(node.Object);
             var args = base.Visit(node.Arguments);
+
+            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce && ce.Type.IsEntity())
+            {
+                var table = (Table)ce.Constructor.table;
+
+                if (table.ToStrColumn != null)
+                {
+                    return BindMember(ce, (FieldValue)table.ToStrColumn, null);
+                }
+                else if(this.root != ce)
+                {
+                    var cachedTableType = typeof(CachedTable<>).MakeGenericType(table.Type);
+
+                    ConstantExpression tab = Expression.Constant(ce.Constructor.cachedTable, cachedTableType);
+
+                    var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString));
+
+                    return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
+                }
+            }
 
             LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
@@ -179,17 +216,7 @@ namespace Signum.Engine.Cache
                 return this.Visit(replace);
             }
 
-            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce)
-            {
-                var table = (Table)ce.Constructor.table;
-
-                if (table.ToStrColumn == null)
-                    throw new InvalidOperationException("Impossible to get ToStrColumn from " + ce.ToString());
-
-                return BindMember(ce, (FieldValue)table.ToStrColumn, null);
-            }
-
-            if(node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
+            if (node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
             {
                 var mixin = ((Table)cee.Constructor.table).GetField(node.Method);
 

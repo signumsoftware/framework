@@ -39,7 +39,7 @@ namespace Signum.Entities.Word
 
         public Lite<FileEntity>? Template { get; set; }
 
-        [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
+        [StringLengthValidator(Min = 3, Max = 200), FileNameValidator]
         public string FileName { get; set; }
 
         public WordTransformerSymbol? WordTransformer { get; set; }
@@ -64,7 +64,7 @@ namespace Signum.Entities.Word
             }
         }
 
-        internal void ParseData(QueryDescription description)
+        public void ParseData(QueryDescription description)
         {
             var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
 

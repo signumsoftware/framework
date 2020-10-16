@@ -17,9 +17,9 @@ namespace Signum.React.Processes
         [HttpPost("api/processes/constructFromMany")]
         public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
         {
-            var type = request.type == null ? null : TypeLogic.GetType(request.type);
+            var type = request.Type == null ? null : TypeLogic.GetType(request.Type);
 
-            var entity = PackageLogic.CreatePackageOperation(request.lites, request.GetOperationSymbol(type!), request.args);
+            var entity = PackageLogic.CreatePackageOperation(request.Lites, request.GetOperationSymbol(type!), request.Args);
 
             return SignumServer.GetEntityPack(entity);
         }

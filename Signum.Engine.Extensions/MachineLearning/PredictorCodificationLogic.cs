@@ -14,10 +14,10 @@ namespace Signum.Engine.MachineLearning
     {
         public static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
-            var isValueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.IsValue)).Size.Value;
-            var groupKey0Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey0)).Size.Value;
-            var groupKey1Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey1)).Size.Value;
-            var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size.Value;
+            var isValueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.IsValue)).Size!.Value;
+            var groupKey0Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey0)).Size!.Value;
+            var groupKey1Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey1)).Size!.Value;
+            var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size!.Value;
 
             ctx.ReportProgress($"Saving Codifications");
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type. CSBUG
@@ -123,7 +123,7 @@ namespace Signum.Engine.MachineLearning
             Dictionary<int, Dictionary<int, PredictorColumnSubQuery>> subColumns = new Dictionary<int, Dictionary<int, PredictorColumnSubQuery>>();
             PredictorColumnSubQuery GetPredictorColumnSubQuery(PredictorCodificationEntity cod)
             {
-                return subColumns.GetOrCreate(cod.SubQueryIndex.Value).GetOrCreate(cod.OriginalColumnIndex, () => {
+                return subColumns.GetOrCreate(cod.SubQueryIndex!.Value).GetOrCreate(cod.OriginalColumnIndex, () => {
 
                     var sq = predictor.SubQueries[cod.SubQueryIndex.Value];
                     var col = sq.Columns[cod.OriginalColumnIndex];

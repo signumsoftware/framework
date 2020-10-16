@@ -17,7 +17,6 @@ import * as Operations from '@framework/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
 
@@ -38,6 +37,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User')));
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
+
+  Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {
+    order: 6,
+    button: <button className="btn btn-info"
+      onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
+      <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+      </button>
+  } : undefined)
 
   if (options.properties) {
     tasks.push(taskAuthorizeProperties);
@@ -235,5 +242,4 @@ declare module '@framework/Signum.Entities' {
     typeAllowed?: TypeAllowedBasic;
   }
 }
-
 

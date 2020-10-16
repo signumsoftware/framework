@@ -445,7 +445,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
                     }
@@ -502,7 +502,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Save);
                     }
@@ -558,7 +558,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (!e.IsNew) {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Save);
                     }
@@ -615,7 +615,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
                     }
@@ -747,7 +747,7 @@ namespace Signum.Engine.Workflow
 
                 new Execute(WorkflowOperation.Deactivate)
                 {
-                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : 
+                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()) : 
                         w.Cases().SelectMany(c => c.CaseActivities()).Any(ca => ca.DoneDate == null) ? CaseActivityMessage.ThereAreInprogressActivities.NiceToString() : null,
                     Execute = (w, args) =>
                     {

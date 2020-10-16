@@ -1,7 +1,6 @@
 import { PredictorEntity } from "../Signum.Entities.MachineLearning";
 import { Modal } from "react-bootstrap";
 import * as React from "react";
-import numbro from "numbro";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
@@ -9,7 +8,7 @@ import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, Alternat
 import { Lite, Entity, EntityControlMessage } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
-import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos } from "@framework/Reflection";
+import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos, toNumberFormatOptions, toNumberFormat } from "@framework/Reflection";
 import { IsByAll } from "@framework/Reflection";
 import { Dic } from "@framework/Globals";
 import { Binding } from "@framework/Reflection";
@@ -94,11 +93,10 @@ export function AlternativesCheckBox(p : { binding: Binding<number | null>, onCh
   }
   var val = p.binding.getValue();
   return (
-    <label><input type="checkbox" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} /> alternative predictions </label>
+    <label>
+      <input type="checkbox" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions </label>
   );
 }
-
-
 
 interface PredictLineProps {
   binding: Binding<any>;
@@ -145,12 +143,12 @@ export default function PredictLine(p : PredictLineProps){
       return <PredictValue token={p.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={getColor(pctx.value, originalValue)} />} />
     } else {
       const predictions = pctx.value as AlternativePrediction[];
-
+      const numberFormat = toNumberFormat("P2");
       return (
         <div>
           {predictions.map((a, i) => <PredictValue key={i} token={p.token}
             ctx={new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.value, p.sctx + "_" + i))}
-            label={<i style={{ color: getColor(a.value, originalValue) }}>{numbro(a.probability).format("0.00 %")}</i>}
+            label={<i style={{ color: getColor(a.value, originalValue) }}>{numberFormat.format(a.probability)}</i>}
             labelHtmlAttributes={{ style: { textAlign: "right", whiteSpace: "nowrap" } }}
           />)}
         </div>

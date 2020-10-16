@@ -122,11 +122,10 @@ namespace Signum.React.Selenium
             return Operation(symbolContainer).WaitVisible().GetAttribute("disabled").HasText();
         }
 
-        public FrameModalProxy<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
-            where T : Entity
+        public IWebElement OperationClickCapture(IOperationSymbolContainer symbolContainer)
         {
             var popup = Operation(symbolContainer).WaitVisible().CaptureOnClick();
-            return new FrameModalProxy<T>(popup);
+            return popup;
         }
 
         private FramePageProxy<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity

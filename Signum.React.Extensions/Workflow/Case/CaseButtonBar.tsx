@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { TypeContext, EntityFrame } from '@framework/TypeContext'
 import { PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import { ValueLine } from '@framework/Lines'
@@ -22,7 +22,7 @@ export default function CaseButtonBar(p : CaseButtonBarProps){
       <div className="workflow-buttons">
         {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
           <strong>{ca.doneBy && ca.doneBy.toStr}</strong>,
-          ca.doneDate && <strong>{moment(ca.doneDate).format("L LT")} ({moment(ca.doneDate).fromNow()})</strong>)
+          ca.doneDate && <strong>{DateTime.fromISO(ca.doneDate).toFormat("FFF")} ({DateTime.fromISO(ca.doneDate).toRelative()})</strong>)
         }
       </div>
     );

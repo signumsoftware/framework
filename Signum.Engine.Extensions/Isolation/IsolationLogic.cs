@@ -182,7 +182,7 @@ namespace Signum.Engine.Isolation
             return collection.Where(a => a.Isolation().Is(curr));
         }
 
-        public static Lite<IsolationEntity> GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
+        public static Lite<IsolationEntity>? GetOnlyIsolation(List<Lite<Entity>> selectedEntities)
         {
             return selectedEntities.GroupBy(a => a.EntityType)
                 .Select(gr => strategies[gr.Key] == IsolationStrategy.None ? null : giGetOnlyIsolation.GetInvoker(gr.Key)(gr))
@@ -191,11 +191,11 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>> giGetOnlyIsolation =
-            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>>(list => GetOnlyIsolation<Entity>(list));
+        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>?>> giGetOnlyIsolation =
+            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>?>>(list => GetOnlyIsolation<Entity>(list));
 
 
-        public static Lite<IsolationEntity> GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
+        public static Lite<IsolationEntity>? GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
         {
             return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
                 Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()

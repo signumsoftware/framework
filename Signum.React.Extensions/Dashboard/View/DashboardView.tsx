@@ -9,7 +9,7 @@ import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { parseIcon } from '../Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 
@@ -18,7 +18,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
     const ctx = TypeContext.root(db);
 
     return (
-      <div>
+      <div className="sf-dashboard-view">
         {
           mlistItemContext(ctx.subCtx(a => a.parts))
             .groupBy(c => c.value.row!.toString())
@@ -61,7 +61,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
     var combinedRows = combineRows(rows);
 
     return (
-      <div>
+      <div className="sf-dashboard-view">
         {combinedRows.map((r, i) =>
           <div className="row row-control-panel" key={"row" + i}>
             {r.columns.orderBy(ctx => ctx.startColumn).map((c, j, list) => {
@@ -80,21 +80,10 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
   }
 
 
-  function render() {
-
-    if (p.dashboard.combineSimilarRows)
-      return renderCombinedRows();
-    else
-      return renderBasic();
-
-
-  }
-
-
-
-
-  return render();
-
+  if (p.dashboard.combineSimilarRows)
+    return renderCombinedRows();
+  else
+    return renderBasic();
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {
@@ -217,7 +206,7 @@ export function PanelPart(p: PanelPartProps) {
   var style = part.style == undefined ? undefined : part.style.toLowerCase();
 
   return (
-    <div className={classes("card", style && ("border-" + style), "mb-4")}>
+    <div className={classes("card", style && ("border-" + style), "shadow-sm", "mb-4")}>
       <div className={classes("card-header", "sf-show-hover",
         style && style != "light" && "text-white",
         style && ("bg-" + style)

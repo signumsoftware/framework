@@ -1,17 +1,15 @@
 import * as React from 'react'
-import { TextAlignProperty, VerticalAlignProperty } from 'csstype'
-import numbro from 'numbro'
 import * as Navigator from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
-import { toNumbroFormat } from '@framework/Reflection';
+import { toNumberFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
-import { FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search';
+import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';
 
@@ -215,12 +213,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
     }
   }
 
-  function getRowGroups(gor: RowDictionary | ChartRow[] | undefined, styles: CellStyle[], level: number, filters: FilterConditionOptionParsed[]): RowGroup[] | ChartRow[] {
+  function getRowGroups(gor: RowDictionary | ChartRow[] | undefined, styles: CellStyle[], level: number, filters: FilterConditionOptionParsed[]): RowGroup[] | ChartRow[] | undefined {
     if (Array.isArray(gor)) {
       if (styles.length == level)
         return gor;
 
       throw new Error("Unexpected Array in variable 'gor' at this level");
+    }
+
+    if (gor == undefined && styles.length == level) {
+      return gor;
     }
 
     const style = styles[level];
@@ -259,7 +261,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Values"));
 
-  const numbroFormat = toNumbroFormat(valueColumn.token?.format);
+  const numbroFormat = toNumberFormat(valueColumn.token?.format);
 
   function Cell(p:
     {
@@ -277,7 +279,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var gr = p.gor instanceof RowGroup ? p.gor : undefined;
     var style = p.style ?? gr?.style;
 
-    function handleMumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    function handleNumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
       e.preventDefault();
       var filters = p.filters ?? gr?.getFilters();
 
@@ -293,7 +295,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleMumberClick(e)}>{numbro(val).format(numbroFormat)}</a>;
+    const link = p.gor == null ? null : <a href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :

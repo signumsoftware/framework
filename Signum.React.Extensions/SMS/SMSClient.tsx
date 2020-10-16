@@ -20,7 +20,7 @@ import { QueryRequest, ColumnOption } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
-import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
+import { TypeEntity } from '@framework/Signum.Entities.Basics';
 
 export var allTypes: string[] = [];
 

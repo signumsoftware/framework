@@ -72,7 +72,7 @@ namespace Signum.Engine.Word
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
-            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations!.Value;
 
             if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
                 return new List<Filter>
@@ -219,6 +219,7 @@ namespace Signum.Engine.Word
 
             template.Model = wordModel;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
+            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
 
             return template;
         }

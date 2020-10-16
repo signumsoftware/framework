@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using OpenQA.Selenium;
 using Signum.Engine.Basics;
 using Signum.Utilities;
@@ -12,20 +13,35 @@ namespace Signum.React.Selenium
 
         public void Select(string value)
         {
-            Select(this.Element, value);
+            SelectPrivate(value);
             this.WaitNotVisible();
         }
 
         public void Select(Enum enumValue)
         {
-            Select(this.Element, enumValue.ToString());
+            SelectPrivate(enumValue.ToString());
             this.WaitNotVisible();
         }
 
         public void Select<T>()
         {
-            Select(this.Element, TypeLogic.GetCleanName(typeof(T)));
+            SelectPrivate(TypeLogic.GetCleanName(typeof(T)));
             this.WaitNotVisible();
+        }
+
+        public IWebElement SelectAndCapture(string value)
+        {
+            return this.Element.GetDriver().CapturePopup(() => SelectPrivate(value));
+        }
+
+        public IWebElement SelectAndCapture(Enum enumValue)
+        {
+            return this.Element.GetDriver().CapturePopup(() => SelectPrivate(enumValue.ToString()));
+        }
+
+        public IWebElement SelectAndCapture<T>()
+        {
+            return this.Element.GetDriver().CapturePopup(() => SelectPrivate(TypeLogic.GetCleanName(typeof(T))));
         }
 
         public static bool IsSelector(IWebElement element)
@@ -33,16 +49,18 @@ namespace Signum.React.Selenium
             return element.IsElementPresent(By.CssSelector(".sf-selector-modal"));
         }
 
-        public static void Select(IWebElement element, Type type)
+        void SelectPrivate(string name)
         {
-            Select(element, TypeLogic.GetCleanName(type));
-        }
-
-        public static void Select(IWebElement element, string name)
-        {
-            var button = element.WaitElementVisible(By.CssSelector("button[name={0}]".FormatWith(name)));
-            Thread.Sleep(500);
+            var button = this.Element.WaitElementVisible(By.CssSelector("button[name={0}]".FormatWith(name)));
             button.Click();
+        }
+    }
+
+    public static class SelectorModalExtensions
+    {
+        public static SelectorModalProxy AsSelectorModal(this IWebElement modal)
+        {
+            return new SelectorModalProxy(modal);
         }
     }
 }

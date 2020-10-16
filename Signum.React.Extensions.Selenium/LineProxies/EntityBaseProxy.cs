@@ -31,7 +31,7 @@ namespace Signum.React.Selenium
                 if (imp != null && imp.Value.Types.Count() != 1)
                 {
                     var popup = this.CreateButton.Find().CaptureOnClick();
-                    ChooseType(typeof(T), popup);
+                    ChooseType(popup, typeof(T));
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace Signum.React.Selenium
 
             var popup = this.CreateButton.WaitVisible().CaptureOnClick();
 
-            popup = ChooseTypeCapture(typeof(T), popup);
+            popup = ChooseTypeCapture(popup, typeof(T));
 
             var itemRoute = this.ItemRoute.Type == typeof(T) ? this.ItemRoute : PropertyRoute.Root(typeof(T));
 
@@ -93,7 +93,7 @@ namespace Signum.React.Selenium
             string changes = GetChanges();
             var popup = FindButton.Find().CaptureOnClick();
 
-            popup = ChooseTypeCapture(selectType, popup);
+            popup = ChooseTypeCapture(popup, selectType);
 
             return new SearchModalProxy(popup)
             {
@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
             };
         }
 
-        private void ChooseType(Type selectType, IWebElement element)
+        private void ChooseType(IWebElement element, Type selectType)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return;
@@ -109,10 +109,10 @@ namespace Signum.React.Selenium
             if (selectType == null)
                 throw new InvalidOperationException("No type to choose from selected");
 
-            SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType));
+            element.AsSelectorModal().Select(TypeLogic.GetCleanName(selectType));
         }
 
-        private IWebElement ChooseTypeCapture(Type? selectType, IWebElement element)
+        private IWebElement ChooseTypeCapture(IWebElement element, Type? selectType)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return element;
@@ -120,10 +120,7 @@ namespace Signum.React.Selenium
             if (selectType == null)
                 throw new InvalidOperationException("No type to choose from selected");
 
-            var newElement = element.GetDriver().CapturePopup(() =>
-                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType!)));
-
-            return newElement;
+            return element.AsSelectorModal().SelectAndCapture(TypeLogic.GetCleanName(selectType));
         }
 
         public void WaitChanges(Action action, string actionDescription)
@@ -174,6 +171,15 @@ namespace Signum.React.Selenium
             }, "autocomplete selection");
         }
 
+        public void AutoCompleteWaitChanges(IWebElement input, IWebElement container, string beginning)
+        {
+            WaitChanges(() =>
+            {
+                AutoCompleteBasic(input, container, beginning);
+
+            }, "autocomplete selection");
+        }
+
         public static void AutoCompleteBasic(IWebElement input, IWebElement container, Lite<IEntity> lite)
         {
             input.SafeSendKeys("id:" + lite.Id.ToString());
@@ -182,6 +188,18 @@ namespace Signum.React.Selenium
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
 
             itemElement.Click();
+        }
+
+        public static void AutoCompleteBasic(IWebElement input, IWebElement container, string beginning)
+        {
+            input.SafeSendKeys(beginning);
+
+            var list = container.WaitElementVisible(By.CssSelector(".typeahead.dropdown-menu"));
+            var elem = input.GetDriver().Wait(() =>
+            {
+                return list.FindElements(By.CssSelector("[data-entity-key]")).SingleEx(a => a.ContainsText(beginning));
+            });
+            elem.Click();
         }
     }
 

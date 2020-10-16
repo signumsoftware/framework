@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Mailing;
+using Signum.Entities.Workflow;
 
 namespace Signum.Entities.UserAssets
 {
@@ -71,6 +72,8 @@ namespace Signum.Entities.UserAssets
 
         string QueryToName(Lite<QueryEntity> query);
         string PermissionToName(Lite<PermissionSymbol> symbol);
+
+        public XElement GetFullWorkflowElement(WorkflowEntity workflow);
     }
 
     public interface IFromXmlContext
@@ -92,6 +95,9 @@ namespace Signum.Entities.UserAssets
 
         EmailModelEntity GetEmailModel(string fullClassName);
         CultureInfoEntity GetCultureInfoEntity(string cultureName);
+
+        T SaveMaybe<T>(T entity) where T : Entity;
+        void DeleteMaybe<T>(T entity) where T : Entity;
     }
 
     public interface IUserAssetEntity : IEntity

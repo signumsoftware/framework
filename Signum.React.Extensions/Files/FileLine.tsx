@@ -10,7 +10,7 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from '
 import { FileUploader }  from './FileUploader'
 
 import "./Files.css"
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { useController } from '@framework/Lines/LineBase'
 
 export { FileTypeSymbol };
 
