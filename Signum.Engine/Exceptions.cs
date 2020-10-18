@@ -130,7 +130,7 @@ namespace Signum.Engine
             }
         }
 
-        static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
+        static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
         static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
             new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
 

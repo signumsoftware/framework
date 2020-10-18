@@ -98,7 +98,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal object[] BulkInsertDataRow(object/*Entity or IView*/ entity)
+        internal object?[] BulkInsertDataRow(object/*Entity or IView*/ entity)
         {
             List<DbParameter> parameters = GetInsertParameters(entity);
 
@@ -850,7 +850,7 @@ END $$;"); ;
             void RelationalInserts(List<EntityForbidden> entities);
             void RelationalUpdates(List<EntityForbidden> entities);
 
-            object[] BulkInsertDataRow(Entity entity, object value, int order);
+            object?[] BulkInsertDataRow(Entity entity, object value, int order);
         }
 
         internal class TableMListCache<T> : IMListCache
@@ -1006,7 +1006,7 @@ END $$;"); ;
                 }
             }
 
-            public object[] BulkInsertDataRow(Entity entity, object value, int order)
+            public object?[] BulkInsertDataRow(Entity entity, object value, int order)
             {
                 List<DbParameter> paramList = new List<DbParameter>();
                 InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);

@@ -1,8 +1,9 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Signum.Utilities
 {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
     public static class Serialization
     {
         //Binary
@@ -39,4 +40,5 @@ namespace Signum.Utilities
             }
         }
     }
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 }

@@ -292,7 +292,7 @@ namespace Signum.Engine.Maps
             if (result.OfType<UniqueTableIndex>().Any())
             {
                 var s = Schema.Current.Settings;
-                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo)).OfType<AttachToUniqueIndexesAttribute>().Any())
+                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
                    .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
                    .ToList();
 
@@ -1409,7 +1409,7 @@ namespace Signum.Engine.Maps
 
         public bool IdentityBehaviour => true; //For now
 
-        internal object[] BulkInsertDataRow(Entity entity, object value, int order)
+        internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
         {
             return this.cache.Value.BulkInsertDataRow(entity, value, order);
         }

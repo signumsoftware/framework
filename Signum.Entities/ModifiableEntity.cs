@@ -52,7 +52,7 @@ namespace Signum.Entities
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = GetPropertyInfo(automaticPropertyName!);
+            PropertyInfo? pi = GetPropertyInfo(automaticPropertyName!);
 
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
@@ -120,9 +120,9 @@ namespace Signum.Entities
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
-        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
+        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo?> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo?>();
 
-        protected PropertyInfo GetPropertyInfo(string propertyName)
+        protected PropertyInfo? GetPropertyInfo(string propertyName)
         {
             return PropertyCache.GetOrAdd(new PropertyKey(this.GetType(), propertyName), key =>
                 key.Type.GetProperty(propertyName, flags) ??
@@ -178,9 +178,9 @@ namespace Signum.Entities
         //    RebindEvents();
         //}
 
-        protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        protected virtual void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         {
-            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
+            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender!);
             if (propertyName != null)
                 NotifyPrivate(propertyName);
 
@@ -404,6 +404,7 @@ namespace Signum.Entities
         #region ICloneable Members
         object ICloneable.Clone()
         {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             BinaryFormatter bf = new BinaryFormatter();
             using (MemoryStream stream = new MemoryStream())
             {
@@ -411,6 +412,7 @@ namespace Signum.Entities
                 stream.Seek(0, SeekOrigin.Begin);
                 return bf.Deserialize(stream);
             }
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
         }
 
         #endregion

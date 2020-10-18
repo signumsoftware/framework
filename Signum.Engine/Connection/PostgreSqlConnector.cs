@@ -534,17 +534,17 @@ END; $$;");
                             Expression.Constant(DBNull.Value, typeof(object)),
                             valueExpr);
 
-            NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) }), parameterName, valueExpr);
+            NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
 
             List<MemberBinding> mb = new List<MemberBinding>()
             {
-                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable)), Expression.Constant(nullable)),
-                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType)), Expression.Constant(dbType.PostgreSql)),
+                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
+                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
             };
 
             if (udtTypeName != null)
-                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName)), Expression.Constant(udtTypeName)));
+                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));
 
             return Expression.MemberInit(newExpr, mb);
         }

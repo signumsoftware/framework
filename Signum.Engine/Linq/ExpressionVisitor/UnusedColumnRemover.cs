@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
             }).NotNull().ToReadOnly();
 
             ReadOnlyCollection<OrderExpression> orderbys = Visit(select.OrderBy, VisitOrderBy);
-            Expression where = this.Visit(select.Where);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.Select(e => IsConstant(e) ? null : Visit(e)).NotNull().ToReadOnly();
 
             SourceExpression? from = this.VisitSource(select.From!);
@@ -125,7 +125,7 @@ namespace Signum.Engine.Linq
             }
 
             // visit join in reverse order
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
             SourceExpression right = this.VisitSource(join.Right);
             SourceExpression left = this.VisitSource(join.Left);
             if (left != join.Left || right != join.Right || condition != join.Condition)

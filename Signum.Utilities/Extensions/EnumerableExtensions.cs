@@ -21,10 +21,10 @@ namespace Signum.Utilities
     {
         class UniqueExExpander : IMethodExpander
         {
-            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false)).GetGenericMethodDefinition();
-            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false)).GetGenericMethodDefinition();
+            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null!, a => false)).GetGenericMethodDefinition();
+            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null!, a => false)).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
 
@@ -158,8 +158,7 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
-        [return: MaybeNull]
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        public static T? SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -185,14 +184,12 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
-        [return: MaybeNull]
-        public static T SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        public static T? SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
             return query.Where(predicate).SingleOrDefaultEx();
         }
 
-        [return: MaybeNull]
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
+        public static T? SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -211,8 +208,7 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
         }
 
-        [return: MaybeNull]
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
+        public static T? SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -284,21 +280,18 @@ namespace Signum.Utilities
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
-        [return: MaybeNull]
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        public static T? SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             return collection.Where(predicate).FirstEx();
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
-        [return: MaybeNull]
         public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
             return query.Where(predicate).FirstEx();
         }
 
-        [return: MaybeNull]
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
+        public static T? SingleOrManyEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -317,8 +310,7 @@ namespace Signum.Utilities
             }
         }
 
-        [return: MaybeNull]
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
+        public static T? SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -338,8 +330,7 @@ namespace Signum.Utilities
         }
 
         //returns default if 0 or many, returns if one
-        [return: MaybeNull]
-        public static T Only<T>(this IEnumerable<T> collection)
+        public static T? Only<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
@@ -383,7 +374,7 @@ namespace Signum.Utilities
         {
             static readonly MethodInfo miAny = ReflectionTools.GetMethodInfo((int[] a) => a.Any()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Not(Expression.Call(miAny.MakeGenericMethod(mi.GetGenericArguments()), arguments));
             }
@@ -1185,6 +1176,7 @@ namespace Signum.Utilities
            Func<C, K> currentKeySelector,
            Func<S, K> shouldKeySelector,
            Func<C, S, R> resultSelector, string action)
+            where K : notnull
         {
 
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
@@ -1209,6 +1201,7 @@ namespace Signum.Utilities
           Func<C, K> currentKeySelector,
           Func<S, K> shouldKeySelector,
           Func<C, S, R> resultSelector, string action)
+            where K : notnull
         {
 
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
@@ -1264,6 +1257,7 @@ Consider Synchronize.");
             Func<C, K> currentKeySelector,
             Func<S, K> shouldKeySelector,
             Func<C, S, R> resultSelector)
+            where K : notnull
         {
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
             var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);

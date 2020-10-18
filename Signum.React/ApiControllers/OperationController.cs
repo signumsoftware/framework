@@ -66,7 +66,8 @@ namespace Signum.React.ApiControllers
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRootVirtual(request.entity), ex);
                 this.TryValidateModel(request, "request");
                 if (this.ModelState.IsValid)
-                    throw ex;
+                    throw;
+
                 return BadRequest(this.ModelState);
             }
 

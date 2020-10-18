@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
-            var externalPeriod = (IntervalExpression)Visit(ml.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(ml.ExternalPeriod);
             if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
                 return new MListExpression(ml.Type, newBackID, externalPeriod, ml.TableMList);
             return ml;
@@ -162,7 +162,7 @@ namespace Signum.Engine.Linq
             var parent = (EntityExpression)Visit(mle.Parent);
             var order = Visit(mle.Order);
             var element = Visit(mle.Element);
-            var period = (IntervalExpression)Visit(mle.TablePeriod);
+            var period = (IntervalExpression?)Visit(mle.TablePeriod);
             if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
                 return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
             return mle;
@@ -172,7 +172,7 @@ namespace Signum.Engine.Linq
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
             var mlistRowId = (PrimaryKeyExpression?)Visit(ml.MListRowId);
-            var externalPeriod = (IntervalExpression)Visit(ml.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(ml.ExternalPeriod);
             if (newBackID != ml.BackID || mlistRowId != ml.MListRowId || externalPeriod != ml.ExternalPeriod)
                 return new AdditionalFieldExpression(ml.Type, newBackID, mlistRowId, externalPeriod, ml.Route);
             return ml;
@@ -205,7 +205,7 @@ namespace Signum.Engine.Linq
         {
             var id = Visit(iba.Id);
             var typeId = (TypeImplementedByAllExpression)Visit(iba.TypeId);
-            var externalPeriod = (IntervalExpression)Visit(iba.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(iba.ExternalPeriod);
 
             if (id != iba.Id || typeId != iba.TypeId || externalPeriod != iba.ExternalPeriod)
                 return new ImplementedByAllExpression(iba.Type, id, typeId, externalPeriod);
@@ -223,13 +223,13 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitEntity(EntityExpression ee)
         {
-            var bindings = Visit(ee.Bindings, VisitFieldBinding);
-            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+            var bindings = Visit(ee.Bindings!, VisitFieldBinding);
+            var mixins = Visit(ee.Mixins!, VisitMixinEntity);
 
             var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
-            var externalPeriod = (IntervalExpression)Visit(ee.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(ee.ExternalPeriod);
 
-            var period = (IntervalExpression)Visit(ee.TablePeriod);
+            var period = (IntervalExpression?)Visit(ee.TablePeriod);
 
             if (ee.Bindings != bindings || ee.ExternalId != externalId || ee.ExternalPeriod != externalPeriod || ee.Mixins != mixins || ee.TablePeriod != period)
                 return new EntityExpression(ee.Type, externalId, externalPeriod, ee.TableAlias, bindings, mixins, period, ee.AvoidExpandOnRetrieving);
@@ -295,7 +295,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitScalar(ScalarExpression scalar)
         {
-            var select = (SelectExpression)this.Visit(scalar.Select);
+            var select = (SelectExpression)this.Visit(scalar.Select)!;
             if (select != scalar.Select)
                 return new ScalarExpression(scalar.Type, select);
             return scalar;
@@ -303,7 +303,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitExists(ExistsExpression exists)
         {
-            var select = (SelectExpression)this.Visit(exists.Select);
+            var select = (SelectExpression)this.Visit(exists.Select)!;
             if (select != exists.Select)
                 return new ExistsExpression(select);
             return exists;
@@ -312,7 +312,7 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitIn(InExpression @in)
         {
             var expression = this.Visit(@in.Expression);
-            var select = (SelectExpression)this.Visit(@in.Select);
+            var select = (SelectExpression?)this.Visit(@in.Select);
             if (expression != @in.Expression || select != @in.Select)
             {
                 if (select != null)
@@ -366,9 +366,9 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitSelect(SelectExpression select)
         {
-            Expression top = this.Visit(select.Top);
+            Expression? top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From!);
-            Expression where = this.Visit(select.Where);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
@@ -383,7 +383,7 @@ namespace Signum.Engine.Linq
         {
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
                 return new JoinExpression(join.JoinType, left, right, condition);
@@ -432,7 +432,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            Expression obj = Visit(sqlFunction.Object);
+            Expression? obj = Visit(sqlFunction.Object);
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
@@ -524,9 +524,9 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitInterval(IntervalExpression interval)
         {
-            Expression min = Visit(interval.Min);
-            Expression max = Visit(interval.Max);
-            Expression postgresRange = Visit(interval.PostgresRange);
+            Expression? min = Visit(interval.Min);
+            Expression? max = Visit(interval.Max);
+            Expression? postgresRange = Visit(interval.PostgresRange);
             if (min != interval.Min || max != interval.Max || postgresRange != interval.PostgresRange)
                 return new IntervalExpression(interval.Type, min, max, postgresRange, interval.AsUtc);
             return interval;
