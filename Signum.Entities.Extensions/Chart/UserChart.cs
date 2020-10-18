@@ -133,26 +133,26 @@ namespace Signum.Entities.Chart
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
-                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 new XAttribute("HideQuickLink", HideQuickLink),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", this.ChartScript.Key),
-                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-                Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
+                Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            DisplayName = element.Attribute("DisplayName").Value;
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            DisplayName = element.Attribute("DisplayName")!.Value;
+            Query = ctx.GetQuery(element.Attribute("Query")!.Value);
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
             Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));
-            ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
+            ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
             ParseData(ctx.GetQueryDescription(Query));
         }
 

@@ -28,7 +28,7 @@ namespace Signum.Engine.SMS
 
     public static class SMSLogic
     {
-        public static SMSTemplateMessageEmbedded GetCultureMessage(this SMSTemplateEntity template, CultureInfo ci)
+        public static SMSTemplateMessageEmbedded? GetCultureMessage(this SMSTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }

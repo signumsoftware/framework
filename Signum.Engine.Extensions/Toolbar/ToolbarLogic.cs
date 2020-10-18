@@ -140,7 +140,7 @@ namespace Signum.Engine.Toolbar
             }
         }
 
-        public static ToolbarEntity GetCurrent(ToolbarLocation location)
+        public static ToolbarEntity? GetCurrent(ToolbarLocation location)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 

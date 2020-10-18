@@ -50,7 +50,7 @@ namespace Signum.Engine.Workflow
               new XAttribute("Name", workflow.Name),
               new XAttribute("MainEntityType", ctx.TypeToName(workflow.MainEntityType.ToLite())),
               new XAttribute("MainEntityStrategies", workflow.MainEntityStrategies.ToString(",")),
-              workflow.ExpirationDate == null ? null : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
+              workflow.ExpirationDate == null ? null! : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
               this.pools.Values.Select(p => new XElement("Pool",
                 new XAttribute("BpmnElementId", p.BpmnElementId),
                 new XAttribute("Name", p.Name),
@@ -60,22 +60,22 @@ namespace Signum.Engine.Workflow
                 new XAttribute("BpmnElementId", la.BpmnElementId),
                 new XAttribute("Name", la.Name),
                 new XAttribute("Pool", la.Pool.BpmnElementId),
-                la.Actors.IsEmpty() ? null : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()))),
-                la.ActorsEval == null ? null : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
+                la.Actors.IsEmpty() ? null! : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()!))),
+                la.ActorsEval == null ? null! : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
                 la.Xml.ToXCData())),
 
                this.activities.Values.Select(a => new XElement("Activity",
                 new XAttribute("BpmnElementId", a.BpmnElementId),
                 new XAttribute("Lane", a.Lane.BpmnElementId),
                 new XAttribute("Name", a.Name),
-                a.Comments == null ? null : new XAttribute("Comments", a.Comments),
-                a.RequiresOpen == false ? null : new XAttribute("RequiresOpen", a.RequiresOpen),
-                a.EstimatedDuration == null ? null : new XAttribute("EstimatedDuration", a.EstimatedDuration),
-                a.ViewName == null ? null : new XAttribute("ViewName", a.ViewName),
-                !a.ViewNameProps.Any() ? null : new XElement("ViewNameProps", a.ViewNameProps
-                .Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression)))),
-                a.UserHelp == null ? null : new XElement("UserHelp", new XCData(a.UserHelp)),
-                a.SubWorkflow == null ? null : new XElement("SubWorkflow",
+                a.Comments == null ? null! : new XAttribute("Comments", a.Comments),
+                a.RequiresOpen == false ? null! : new XAttribute("RequiresOpen", a.RequiresOpen),
+                a.EstimatedDuration == null ? null! : new XAttribute("EstimatedDuration", a.EstimatedDuration),
+                a.ViewName == null ? null! : new XAttribute("ViewName", a.ViewName),
+                !a.ViewNameProps.Any() ? null! : new XElement("ViewNameProps", a.ViewNameProps
+                .Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))),
+                a.UserHelp == null ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
+                a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
                 new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
                 new XAttribute("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
                 )
@@ -90,7 +90,7 @@ namespace Signum.Engine.Workflow
         public IDisposable Sync<T>(Dictionary<string, T> entityDic, IEnumerable<XElement> elements, IFromXmlContext ctx, Action<T, XElement> setXml)
             where T : Entity, new()
         {
-            var xmlDic = elements.ToDictionaryEx(a => a.Attribute("BpmnElementId").Value);
+            var xmlDic = elements.ToDictionaryEx(a => a.Attribute("BpmnElementId")!.Value);
 
             Synchronizer.Synchronize(
               xmlDic,
@@ -123,26 +123,26 @@ namespace Signum.Engine.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            this.workflow.Name = element.Attribute("Name").Value;
-            this.workflow.MainEntityType = ctx.GetType(element.Attribute("MainEntityType").Value).RetrieveAndForget();
-            this.workflow.MainEntityStrategies.AssignMList(element.Attribute("MainEntityStrategies").Value.Split(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToMList());
+            this.workflow.Name = element.Attribute("Name")!.Value;
+            this.workflow.MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value).RetrieveAndForget();
+            this.workflow.MainEntityStrategies.AssignMList(element.Attribute("MainEntityStrategies")!.Value.Split(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToMList());
             this.workflow.ExpirationDate = element.Attribute("ExpirationDate")?.Let(ed => DateTime.ParseExact(ed.Value, "o", CultureInfo.InvariantCulture));
 
             ctx.SaveMaybe(this.workflow);
 
             using (Sync(this.pools, element.Elements("Pool"), ctx, (pool, xml) =>
              {
-                 pool.BpmnElementId = xml.Attribute("bpmnElementId").Value;
-                 pool.Name = xml.Attribute("Name").Value;
+                 pool.BpmnElementId = xml.Attribute("bpmnElementId")!.Value;
+                 pool.Name = xml.Attribute("Name")!.Value;
                  pool.Workflow = this.workflow;
                  SetXmlDiagram(pool, xml);
              }))
             {
                 using (Sync(this.lanes, element.Elements("Lane"), ctx, (lane, xml) =>
                 {
-                    lane.BpmnElementId = xml.Attribute("bpmnElementId").Value;
-                    lane.Name = xml.Attribute("Name").Value;
-                    lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value);
+                    lane.BpmnElementId = xml.Attribute("bpmnElementId")!.Value;
+                    lane.Name = xml.Attribute("Name")!.Value;
+                    lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
                     lane.Actors = (xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList();
                     lane.ActorsEval = xml.Element("ActorsEval")?.Let(ae => (lane.ActorsEval ?? new WorkflowLaneActorsEval()).Do(wal => wal.Script = ae.Value));
                     SetXmlDiagram(lane, xml);

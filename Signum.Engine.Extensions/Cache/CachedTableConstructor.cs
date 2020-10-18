@@ -213,7 +213,7 @@ namespace Signum.Engine.Cache
 
                 cachedTable.subTables.Add(ctb);
 
-                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList)), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
+                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList))!, NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
             }
 
             throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
@@ -250,7 +250,7 @@ namespace Signum.Engine.Cache
 
                             ctb.ParentColumn = column;
 
-                            lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), NewPrimaryKey(id.UnNullify()), retriever);
+                            lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite")!, NewPrimaryKey(id.UnNullify()), retriever);
 
                             break;
                         }
@@ -282,7 +282,7 @@ namespace Signum.Engine.Cache
 
                             var entity = Expression.Parameter(type);
                             LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(type),
-                                Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
+                                Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete")!, entity, retriever),
                                 entity);
 
                             return Expression.Call(retriever, miComplete.MakeGenericMethod(type), WrapPrimaryKey(id.Nullify()), lambda);

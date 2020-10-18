@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                 //Remove old previous requests
                 var rpr = Database.Query<ResetPasswordRequestEntity>()
                      .Where(r => r.Code == code && !r.Lapsed)
-                     .SingleOrDefault();
+                     .SingleEx();
 
                 using (UserHolder.UserSession(rpr.User))
                 {
@@ -94,12 +94,12 @@ namespace Signum.Engine.Authorization
 
         public static ResetPasswordRequestEntity SendResetPasswordRequestEmail(string email)
         {
-            UserEntity user;
+            UserEntity? user;
             using (AuthLogic.Disable())
             {
                 user = Database.Query<UserEntity>()
                   .Where(u => u.Email == email && u.State != UserState.Disabled)
-                .SingleOrDefault();
+                  .SingleOrDefault();
 
                 if (user == null)
                     throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());

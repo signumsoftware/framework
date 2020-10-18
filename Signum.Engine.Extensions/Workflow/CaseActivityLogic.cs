@@ -31,7 +31,7 @@ namespace Signum.Engine.Workflow
             As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e));
 
         [AutoExpressionField]
-        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e) => 
+        public static CaseActivityEntity? LastCaseActivity(this ICaseMainEntity e) => 
             As.Expression(() => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault());
 
         [AutoExpressionField]

@@ -43,7 +43,7 @@ namespace Signum.React.Translation
 
         public static string? ReadLanguageCookie(ActionContext ac)
         {
-            return ac.HttpContext.Request.Cookies.TryGetValue("language", out string value) ? value : null;
+            return ac.HttpContext.Request.Cookies.TryGetValue("language", out string? value) ? value : null;
         }
     }
 }

@@ -138,7 +138,7 @@ namespace Signum.Engine.UserAssets
 
                     string remainging = parts.Skip(i).ToString(".");
 
-                    string old = dic.Keys.OrderByDescending(a => a.Length).FirstOrDefault(s => remainging.StartsWith(s));
+                    string? old = dic.Keys.OrderByDescending(a => a.Length).FirstOrDefault(s => remainging.StartsWith(s));
 
                     if (old == null)
                         return false;
@@ -239,7 +239,7 @@ namespace Signum.Engine.UserAssets
             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
             SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
-            string answer = Console.ReadLine();
+            string answer = Console.ReadLine()!;
 
             if (answer == null)
                 throw new InvalidOperationException("Impossible to synchronize interactively without Console");
@@ -291,7 +291,7 @@ namespace Signum.Engine.UserAssets
 
                 while (true)
                 {
-                    string answer = Console.ReadLine();
+                    string answer = Console.ReadLine()!;
 
                     if (answer == null)
                         throw new InvalidOperationException("Impossible to synchronize interactively without Console");
@@ -447,7 +447,7 @@ namespace Signum.Engine.UserAssets
 
                 while (true)
                 {
-                    string answer = Console.ReadLine();
+                    string answer = Console.ReadLine()!;
 
                     if (answer == null)
                         throw new InvalidOperationException("Impossible to synchronize interactively without Console");

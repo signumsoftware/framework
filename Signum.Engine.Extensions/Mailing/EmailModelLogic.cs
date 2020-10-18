@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
                         dbModels,
                         registeredModels.Keys,
                         entity => entity.FullClassName,
-                        type => type.FullName,
+                        type => type.FullName!,
                         (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(EmailModelEntity))
                         .ToDictionary();

@@ -26,7 +26,7 @@ namespace Signum.Engine.Mailing
         public static bool AvoidSynchronizeTokens = false;
         public static bool AvoidSynchronizeDefaultTemplates = true;
 
-        public static EmailTemplateMessageEmbedded GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
+        public static EmailTemplateMessageEmbedded? GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }

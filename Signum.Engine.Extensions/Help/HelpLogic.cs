@@ -404,7 +404,7 @@ namespace Signum.Engine.Help
 
             List<(XmlSchemaException exception, string filename)> exceptions = new List<(XmlSchemaException exception, string filename)>();
 
-            document.Document.Validate(Schemas.Value, (s, e) => exceptions.Add((e.Exception, fileName)));
+            document.Document!.Validate(Schemas.Value, (s, e) => exceptions.Add((e.Exception, fileName)));
 
             if (exceptions.Any())
                 throw new InvalidOperationException("Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".FormatWith(

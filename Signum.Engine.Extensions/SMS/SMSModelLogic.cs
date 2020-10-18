@@ -119,7 +119,7 @@ namespace Signum.Engine.SMS
                         dbModels,
                         registeredModels.Keys,
                         entity => entity.FullClassName,
-                        type => type.FullName,
+                        type => type.FullName!,
                         (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(SMSModelEntity))
                         .ToDictionary();

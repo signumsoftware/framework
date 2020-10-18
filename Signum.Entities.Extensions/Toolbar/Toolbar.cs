@@ -41,18 +41,18 @@ namespace Signum.Entities.Toolbar
                 new XAttribute("Guid", Guid),
                 new XAttribute("Name", Name),
                 new XAttribute("Location", Location),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                Priority == null ? null : new XAttribute("Priority", Priority.Value.ToString()),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+                Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
                 new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Attribute("Name").Value;
-            Location = element.Attribute("Location").Value.ToEnum<ToolbarLocation>();
+            Name = element.Attribute("Name")!.Value;
+            Location = element.Attribute("Location")!.Value.ToEnum<ToolbarLocation>();
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
-            Elements.Synchronize(element.Element("Elements").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+            Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
 
@@ -104,21 +104,21 @@ namespace Signum.Entities.Toolbar
         {
             return new XElement("ToolbarElement",
                 new XAttribute("Type", Type),
-                string.IsNullOrEmpty(Label) ? null : new XAttribute("Label", Label),
-                string.IsNullOrEmpty(IconName) ? null : new XAttribute("IconName", IconName),
-                string.IsNullOrEmpty(IconColor) ? null :  new XAttribute("IconColor", IconColor),
-                OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
-                AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-                this.Content == null ? null : new XAttribute("Content",
+                string.IsNullOrEmpty(Label) ? null! : new XAttribute("Label", Label),
+                string.IsNullOrEmpty(IconName) ? null! : new XAttribute("IconName", IconName),
+                string.IsNullOrEmpty(IconColor) ? null! :  new XAttribute("IconColor", IconColor),
+                OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null!,
+                AutoRefreshPeriod == null ? null! : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
+                this.Content == null ? null! : new XAttribute("Content",
                 this.Content is Lite<QueryEntity> ?  ctx.QueryToName((Lite<QueryEntity>)this.Content) :
                 this.Content is Lite<PermissionSymbol> ?  ctx.PermissionToName((Lite<PermissionSymbol>)this.Content) :
                 (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
-                string.IsNullOrEmpty(this.Url) ? null : new XAttribute("Url", this.Url));
+                string.IsNullOrEmpty(this.Url) ? null! : new XAttribute("Url", this.Url));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Type = x.Attribute("Type").Value.ToEnum<ToolbarElementType>();
+            Type = x.Attribute("Type")!.Value.ToEnum<ToolbarElementType>();
             Label = x.Attribute("Label")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
@@ -196,15 +196,15 @@ namespace Signum.Entities.Toolbar
             return new XElement("ToolbarMenu",
                 new XAttribute("Guid", Guid),
                 new XAttribute("Name", Name),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
                 new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
         }
 
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Attribute("Name").Value;
-            Elements.Synchronize(element.Element("Elements").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+            Name = element.Attribute("Name")!.Value;
+            Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
         }
 

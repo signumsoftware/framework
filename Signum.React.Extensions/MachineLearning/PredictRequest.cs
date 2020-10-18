@@ -249,7 +249,7 @@ namespace Signum.React.MachineLearning
             if(jt is JArray ja)
             {
                 var list = ja.ToObject<List<AlternativePrediction>>();
-                var result = list.Select(val => ReflectionTools.ChangeType(val, token.Type));
+                var result = list!.Select(val => ReflectionTools.ChangeType(val, token.Type));
                 return result;
             }
 

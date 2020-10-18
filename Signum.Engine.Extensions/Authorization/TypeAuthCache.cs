@@ -323,7 +323,7 @@ namespace Signum.Entities.Authorization
                 (from r in AuthLogic.RolesInOrder()
                  let rac = rules.GetOrThrow(r)
                  select new XElement("Role",
-                     new XAttribute("Name", r.ToString()),
+                     new XAttribute("Name", r.ToString()!),
                          from k in allTypes ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
@@ -332,7 +332,7 @@ namespace Signum.Entities.Authorization
                          orderby resource
                          select new XElement("Type",
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", allowed.Fallback.ToString()),
+                            new XAttribute("Allowed", allowed.Fallback.ToString()!),
                             from c in allowed.Conditions
                             select new XElement("Condition",
                                 new XAttribute("Name", c.TypeCondition.Key),
@@ -349,16 +349,16 @@ namespace Signum.Entities.Authorization
         {
             var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element("Types")?.Elements("Role")).EmptyIfNull();
-            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
+            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name")!.Value));
 
             Table table = Schema.Current.Table(typeof(RuleTypeEntity));
 
             replacements.AskForReplacements(
-                xRoles.SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource").Value).ToHashSet(),
+                xRoles.SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource")!.Value).ToHashSet(),
                 TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeReplacementKey);
 
             replacements.AskForReplacements(
-                xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),
+                xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name")!.Value).ToHashSet(),
                 SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
                 typeConditionReplacementKey);
 
@@ -377,11 +377,11 @@ namespace Signum.Entities.Authorization
                 createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements("Type")
-                               let t = getResource(xr.Attribute("Resource").Value)
+                               let t = getResource(xr.Attribute("Resource")!.Value)
                                where t != null
                                select KeyValuePair.Create(t, new
                                {
-                                   Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
+                                   Allowed = xr.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
                                    Condition = Conditions(xr, replacements)
                                })).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
@@ -399,7 +399,7 @@ namespace Signum.Entities.Authorization
                 mergeBoth: (role, x, list) =>
                 {
                     var dic = (from xr in x.Elements("Type")
-                               let t = getResource(xr.Attribute("Resource").Value)
+                               let t = getResource(xr.Attribute("Resource")!.Value)
                                where t != null && !t.ToType().IsEnumEntity()
                                select KeyValuePair.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
@@ -409,7 +409,7 @@ namespace Signum.Entities.Authorization
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                         createNew: (r, xr) =>
                         {
-                            var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
+                            var a = xr.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr, replacements);
 
                             return table.InsertSqlSync(new RuleTypeEntity { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a));
@@ -418,7 +418,7 @@ namespace Signum.Entities.Authorization
                         mergeBoth: (r, xr, pr) =>
                         {
                             var oldA = pr.Allowed;
-                            pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
+                            pr.Allowed = xr.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr, replacements);
 
                             if (!pr.Conditions.SequenceEqual(conditions))
@@ -434,12 +434,12 @@ namespace Signum.Entities.Authorization
         private static MList<RuleTypeConditionEmbedded> Conditions(XElement xr, Replacements replacements)
         {
             return (from xc in xr.Elements("Condition")
-                    let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name").Value))
+                    let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name")!.Value))
                     where cn != null
                     select new RuleTypeConditionEmbedded
                     {
                         Condition = cn,
-                        Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+                        Allowed = xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()
                     }).ToMList();
         }
 
