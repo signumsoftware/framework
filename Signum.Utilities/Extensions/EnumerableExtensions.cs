@@ -597,7 +597,7 @@ namespace Signum.Utilities
         {
             DataTable table = new DataTable();
 
-            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
+            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Default);
             foreach (var m in members)
             {
                 var name = withDescriptions ? m.MemberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? m.Name : m.Name;
@@ -643,7 +643,7 @@ namespace Signum.Utilities
         #region String Tables
         public static string[,] ToStringTable<T>(this IEnumerable<T> collection)
         {
-            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
+            List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Default);
 
             string[,] result = new string[members.Count, collection.Count() + 1];
 

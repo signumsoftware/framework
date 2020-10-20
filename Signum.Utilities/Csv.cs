@@ -363,7 +363,7 @@ namespace Signum.Utilities
         {
             static CsvMemberCache()
             {
-                var memberEntries = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter);
+                var memberEntries = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Setters | MemberOptions.Getter);
                 Members = memberEntries.Select((me, i) =>
                 {
                     var type = me.MemberInfo.ReturningType();
