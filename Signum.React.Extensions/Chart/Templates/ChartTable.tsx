@@ -8,7 +8,7 @@ import { toFilterOptions } from '@framework/Finder';
 import { ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
 import { TypeInfo } from '@framework/Reflection'
-import { FullscreenComponent } from './ChartRenderer'
+import { FullscreenComponent } from './FullscreenComponent'
 
 interface ChartTableProps {
   resultTable: ResultTable;
