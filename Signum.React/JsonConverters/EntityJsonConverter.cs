@@ -52,8 +52,8 @@ namespace Signum.React.Json
         }
 
         public readonly IPropertyValidator? PropertyValidator;
-        public readonly Func<object, object?>? GetValue;
-        public readonly Action<object, object?>? SetValue;
+        public readonly Func<ModifiableEntity, object?>? GetValue;
+        public readonly Action<ModifiableEntity, object?>? SetValue;
 
 
         public Action<ReadJsonPropertyContext>? CustomReadJsonProperty { get; set; }
@@ -68,8 +68,8 @@ namespace Signum.React.Json
         public PropertyConverter(Type type, IPropertyValidator pv)
         {
             this.PropertyValidator = pv;
-            GetValue = ReflectionTools.CreateGetterUntyped(type, pv.PropertyInfo);
-            SetValue = ReflectionTools.CreateSetterUntyped(type, pv.PropertyInfo);
+            GetValue = ReflectionTools.CreateGetter<ModifiableEntity, object?>(pv.PropertyInfo)!;
+            SetValue = ReflectionTools.CreateSetter<ModifiableEntity, object?>(pv.PropertyInfo)!;
         }
 
         public override string ToString()
