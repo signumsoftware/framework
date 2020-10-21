@@ -221,7 +221,7 @@ DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, fo
     if (format == "f")
       return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
 
-    if (format == "f")
+    if (format == "F")
       return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
   }
 
@@ -312,12 +312,17 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   //simple euristic
   var style = f.endsWith("%") ? "percent" : "decimal";
   var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
-  return {
+  const result: Intl.NumberFormatOptions = {
     style: style,
     minimumFractionDigits: afterDot.trimStart("#").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
-  }
+  };
+
+  if (f.startsWith("+"))
+    (result as any).signDisplay = "always";
+
+  return result;
 }
 
 export function valToString(val: any) {
