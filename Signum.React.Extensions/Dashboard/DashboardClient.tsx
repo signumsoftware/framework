@@ -175,6 +175,13 @@ export function start(options: { routes: JSX.Element[] }) {
       }).done()));
 }
 
+export function home(): Promise<Lite<DashboardEntity> | null> {
+  if (!Navigator.isViewable(DashboardEntity))
+    return Promise.resolve(null);
+
+  return API.home();
+}
+
 export function defaultIcon<T extends IPartEntity>(part: T) {
   return partRenderers[part.Type].defaultIcon(part);
 }
