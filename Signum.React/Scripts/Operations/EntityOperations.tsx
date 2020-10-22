@@ -458,7 +458,7 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
 
   //eoc.settings.confirmMessage === undefined
   if (eoc.operationInfo.operationType == OperationType.Delete)
-    return OperationMessage.PleaseConfirmYouWantLikeToDelete0FromTheSystem.niceToString().formatHtml(
+    return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
       <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
     );
 
