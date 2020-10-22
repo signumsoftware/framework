@@ -1339,6 +1339,7 @@
     <Member Name="Start" Description="Start" />
   </Type>
   <Type Name="LoginAuthMessage">
+    <Member Name="_0HasBeenSucessfullyAssociatedWithUser1InThisDevice" Description="{0} wurde erfolgreich mit benutzerdefinierten {1} in diesem Gerät verknüpft." />
     <Member Name="AnErrorOccurredRequestNotProcessed" Description="Es ist ein Fehler aufgetreten, anfrage nicht verarbeitet." />
     <Member Name="ChangePassword" Description="Passwort ändern" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
@@ -1355,6 +1356,7 @@
     <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
+    <Member Name="LoginWith0" Description="Login mit {0}" />
     <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
@@ -1366,12 +1368,16 @@
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
     <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
     <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
+    <Member Name="Register0" Description="{0} registrieren" />
     <Member Name="RememberMe" Description="Auf diesem Computer merken" />
     <Member Name="RequestAccepted" Description="Anfrage angenommen" />
     <Member Name="SendEmail" Description="E-Mail senden" />
+    <Member Name="ShowLoginForm" Description="Anmeldeformular anzeigen" />
+    <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
+    <Member Name="TryToLogInWithIt" Description="Versuchen Sie, sich damit anzumelden!" />
     <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
     <Member Name="Username" Description="Benutzername" />
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
@@ -2496,6 +2502,33 @@
     <Member Name="ViewLogMyLast" Description="Zeige mein letztes log" />
   </Type>
   <Type Name="ViewNamePropEmbedded" />
+  <Type Name="WebAuthnAssertionOptionsEntity" Description="WebAuthnMakeCredentialsOptions" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Json" Description="Json" />
+  </Type>
+  <Type Name="WebAuthnConfigurationEmbedded" Description="Web-Authn-Konfiguration">
+    <Member Name="Origin" Description="Origin" />
+    <Member Name="ServerDomain" Description="Serverdomäne" />
+    <Member Name="ServerName" Description="Servername" />
+    <Member Name="TimestampDriftTolerance" Description="Timestamp drift tolerance" />
+  </Type>
+  <Type Name="WebAuthnCredentialEntity" Description="WebAuthnCredential" PluralDescription="WebAuthnCredentials" Gender="n">
+    <Member Name="Aaguid" Description="Aaguid" />
+    <Member Name="Counter" Description="Zähler" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="CredentialId" Description="CredentialId" />
+    <Member Name="CredType" Description="Cred-Typ" />
+    <Member Name="PublicKey" Description="Public key" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="WebAuthnCredentialOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="WebAuthnMakeCredentialsOptionsEntity" Description="WebAuthnMakeCredentialsOptions" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Json" Description="Json" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
   <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="ModelConverter" Description="Modell-Konverter" />
