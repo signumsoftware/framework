@@ -488,6 +488,7 @@ export module SearchMessage {
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
   export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
+  export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
 }
 
 export module SelectorMessage {

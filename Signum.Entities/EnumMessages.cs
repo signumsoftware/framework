@@ -224,6 +224,8 @@ Lose changes?")]
         [Description("{0} filters collapsed")]
         _0FiltersCollapsed,
         DisplayName,
+        [Description("To prevent performance issues automatic search is disabled, check your filters first and then click [Search] button.")]
+        ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton
     }
 
     public enum SelectorMessage

@@ -403,6 +403,7 @@
     <Member Name="SearchControl_Pagination_All" Description="Alle" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
+    <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />
