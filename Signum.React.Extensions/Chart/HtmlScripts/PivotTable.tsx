@@ -182,7 +182,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (params.scale && params.gradient != "None") {
       const scaleFunc = ChartUtils.scaleFor(valueColumn, values, 0, 1, params.scale);
       const gradient = ChartUtils.getColorInterpolation(params.gradient)!;
-      color = (num: number) => gradient(scaleFunc(num));
+      color = (num: number) => gradient(scaleFunc(num)!);
     }
 
     return ({

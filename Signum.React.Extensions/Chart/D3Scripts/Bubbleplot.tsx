@@ -68,7 +68,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(r => colorKeyColumn.getValue(r) as number), 0, 1, parameters["ColorScale"]);
     var colorInterpolate = parameters["ColorInterpolate"];
     var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
-    color = r => colorInterpolation(scaleFunc(colorKeyColumn.getValue(r) as number))
+    color = r => colorInterpolation(scaleFunc(colorKeyColumn.getValue(r) as number)!)
   }
   var sizeList = data.rows.map(r => sizeColumn.getValue(r));
 
@@ -89,7 +89,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
       <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
         {orderRows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
           className="shape-serie sf-transition"
-          transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r))) + (initialLoad ? scale(0, 0) : scale(1, 1))}
+          transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
           cursor="pointer"
           onClick={e => onDrillDown(r, e)}
         >
@@ -98,11 +98,11 @@ export default function renderBubbleplot({ data, width, height, parameters, load
             strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
             fillOpacity={parseFloat(parameters["FillOpacity"])}
             shapeRendering="initial"
-            r={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI)} />
+            r={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI)} />
 
           {
             parameters["ShowLabel"] == 'Yes' &&
-            <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI) * 2}
+            <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI) * 2}
               padding={0} etcText=""
               className="number-label"
               fill={parameters["LabelColor"] ?? colorKeyColumn.getValueColor(r) ?? color(r)}

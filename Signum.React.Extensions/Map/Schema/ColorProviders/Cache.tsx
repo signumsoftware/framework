@@ -22,7 +22,7 @@ function getColorProvider(info: SchemaMapInfo, name: string, title: string, with
 
   return {
     name: name,
-    getFill: t => t.extra["cache-semi"] == undefined ? "lightgray" : color(t.extra[name]),
+    getFill: t => t.extra["cache-semi"] == undefined ? "lightgray" : color(t.extra[name])!,
     getMask: t => t.extra["cache-semi"] == undefined ? undefined :
       t.extra["cache-semi"] ? "url(#mask-stripe)" : undefined,
     getTooltip: t => t.extra["cache-semi"] == undefined ? "NO Cached" :
