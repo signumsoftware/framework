@@ -186,6 +186,7 @@
     <Member Name="selectOnlyOneElement" Description="Wählen Sie nur ein Element" />
     <Member Name="selectToken" Description="Wählen Sie einen Token" />
     <Member Name="showFilters" Description="Filter anzeigen" />
+    <Member Name="ShowGroup" Description="Gruppe anzeigen" />
     <Member Name="showPeriod" Description="Zeit zeigen" />
     <Member Name="showPreviousOperation" Description="Vorherige Operation zeigen" />
     <Member Name="showRecords" Description="Datensätze anzeigen" />
@@ -242,14 +243,20 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} &amp; Schließen" />
     <Member Name="_0AndNew" Description="{0} &amp; Neu" />
+    <Member Name="AddSetter" Description="Setter hinzufügen" />
+    <Member Name="BulkModifications" Description="Massenänderungen" />
+    <Member Name="Condition" Description="Bedingung" />
     <Member Name="Confirm" Description="Bestätigen" />
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
+    <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
-    <Member Name="PleaseConfirmYouWantLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
+    <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Bitte bestätigen Sie, dass Sie die obigen Änderungen anwenden und {0} über {1} {2} ausführen möchten" />
+    <Member Name="PleaseConfirmYouWouldLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PreviousOperationLog" Description="Vorheriges Operationsprotokoll" />
+    <Member Name="Setters" Description="Setters" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0} (statt {1}) sein" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} hat keine Enität zurückgegeben" />
   </Type>
@@ -271,6 +278,14 @@
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
     <Member Name="WhenHasValue" Description="Wann hat Wert" />
+  </Type>
+  <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
+    <Member Name="AddElement" Description="Element hinzufügen" />
+    <Member Name="ChangeElements" Description="Elemente ändern" />
+    <Member Name="CreateNewEntity" Description="Neue Entität erstellen" />
+    <Member Name="ModifyEntity" Description="Entität modifizieren" />
+    <Member Name="RemoveElements" Description="Elemente löschen" />
+    <Member Name="Set" Description="Setzen" />
   </Type>
   <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute">
     <Member Name="Path" Description="Pfad" />
@@ -388,6 +403,7 @@
     <Member Name="SearchControl_Pagination_All" Description="Alle" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
+    <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />

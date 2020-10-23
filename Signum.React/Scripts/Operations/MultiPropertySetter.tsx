@@ -66,7 +66,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
       </div>
       <div className="modal-footer">
           <p>
-            {OperationMessage.PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12.niceToString().formatHtml(
+            {OperationMessage.PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12.niceToString().formatHtml(
               <strong>{p.operationInfo.niceName}</strong>,
               <strong>{p.lites.length}</strong>,
               <strong>{p.lites.length == 1 ? p.typeInfo.niceName : p.typeInfo.nicePluralName}</strong>
@@ -150,7 +150,7 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
     return ["AddElement", "ChangeElements", "RemoveElements"];
 
   if (type.isEmbedded)
-    return ["Set", "CreateNewEntiy", "ModifyEntity"]
+    return ["Set", "CreateNewEntity", "ModifyEntity"]
 
   if (type.name == IsByAll)
     return ["Set"];
@@ -165,7 +165,7 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
   if (!typeInfos.some(a => a?.entityKind == "Part" || a?.entityKind == "SharedPart"))
     return ["Set"];
 
-  return ["Set", "CreateNewEntiy", "ModifyEntity"];
+  return ["Set", "CreateNewEntity", "ModifyEntity"];
 }
 
 export interface PropertySetterComponentProps {
@@ -247,7 +247,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   }
 
   function showSetters(o: PropertyOperation) {
-    return o == "AddElement" || o == "ChangeElements" || o == "CreateNewEntiy" || o == "ModifyEntity";
+    return o == "AddElement" || o == "ChangeElements" || o == "CreateNewEntity" || o == "ModifyEntity";
   }
 
   const pr = React.useMemo(() => p.setter.property == null ? null : p.root.addMembers(p.setter.property),
@@ -302,7 +302,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
             <>
               {p.setter.property && p.setter.operation && showValue(p.setter.operation) && renderValue()}
               {subRoot && p.setter.operation && showPredicate(p.setter.operation) && pr && <div>
-                <h5>{OperationMessage.Predictate.niceToString()}</h5>
+                <h5>{OperationMessage.Condition.niceToString()}</h5>
                 <MultiPropertySetter onChange={p.onSetterChanged} setters={p.setter.predicate!} isPredicate={true} root={subRoot} />
               </div>
               }

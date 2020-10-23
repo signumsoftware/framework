@@ -390,15 +390,15 @@ export module OperationMessage {
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
-  export const PleaseConfirmYouWantLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWantLikeToDelete0FromTheSystem");
+  export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
   export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
-  export const PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12");
-  export const Predictate = new MessageKey("OperationMessage", "Predictate");
+  export const PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12");
+  export const Condition = new MessageKey("OperationMessage", "Condition");
   export const Setters = new MessageKey("OperationMessage", "Setters");
   export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
   export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
@@ -428,7 +428,7 @@ export type PropertyOperation =
   "ChangeElements" |
   "RemoveElements" |
   "ModifyEntity" |
-  "CreateNewEntiy";
+  "CreateNewEntity";
 
 export module QuickLinkMessage {
   export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
@@ -488,6 +488,7 @@ export module SearchMessage {
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
   export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
+  export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
 }
 
 export module SelectorMessage {
