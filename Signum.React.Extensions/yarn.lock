@@ -32,18 +32,10 @@
   resolved "https://artifactory.controlexpert.com:443/artifactory/api/npm/npm-all/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
   integrity sha1-KrDV2i5YFflLC51LldHl8kOrLKc=
 
-"@types/react@*":
+"@types/react@*", "@types/react@16.9.53":
   version "16.9.53"
   resolved "https://artifactory.controlexpert.com:443/artifactory/api/npm/npm-all/@types/react/-/react-16.9.53.tgz#40cd4f8b8d6b9528aedd1fff8fcffe7a112a3d23"
   integrity sha1-QM1Pi41rlSiu3R//j8/+ehEqPSM=
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^3.0.2"
-
-"@types/react@16.9.49":
-  version "16.9.49"
-  resolved "https://artifactory.controlexpert.com:443/artifactory/api/npm/npm-all/@types/react/-/react-16.9.49.tgz#09db021cf8089aba0cdb12a49f8021a69cce4872"
-  integrity sha1-CdsCHPgImroM2xKkn4AhppzOSHI=
   dependencies:
     "@types/prop-types" "*"
     csstype "^3.0.2"
