@@ -13,7 +13,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   innerRef?: (e: any) => void;
   strict?: boolean;
   exact?: boolean;
-  isActive?: (m: match<any> | null, l: H.Location) => boolean;
+  isActive?: (m: match<any> | null, l: H.Location<any>) => boolean;
 }
 
 export function LinkContainer(p: LinkContainerProps) {
