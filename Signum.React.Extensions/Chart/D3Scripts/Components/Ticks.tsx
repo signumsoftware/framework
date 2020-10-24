@@ -91,7 +91,7 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
   );
 }
 
-export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines }: { xRule: Rule<"content">, yRule: Rule<"title" | "content" | "labels0" | "labels1" | "ticks">, keyValues: unknown[], keyColumn: ChartColumn<unknown>, x: d3.ScaleBand<string>, showLines?: boolean }) {
+export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines }: { xRule: Rule<"content">, yRule: Rule<"content" | "ticks" | "labels" | "title">, keyValues: unknown[], keyColumn: ChartColumn<unknown>, x: d3.ScaleBand<string>, showLines?: boolean }) {
 
   var orderedKeys = keyValues.orderBy(keyColumn.getKey);
   return (
@@ -108,15 +108,15 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines }: 
       <g className="x-key-tick-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks'))}>
         {orderedKeys.map((t, i) => <line key={keyColumn.getKey(t)} className="x-key-tick sf-transition"
           transform={translate(x(keyColumn.getKey(t))!, 0)}
-          y2={yRule.start('labels' + (i % 2) as "labels0" | "labels1") - yRule.start('ticks')}
+          y2={(i % 2) * yRule.size('labels') / 2}
           stroke="Black" />)}
       </g>
       {
         (x.bandwidth() * 2) > 60 &&
-        <g className="x-key-label-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0'))}>
+        <g className="x-key-label-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('ticks'))}>
           {orderedKeys.map((t, i) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={x.bandwidth() * 2} className="x-key-label sf-transition"
             transform={translate(x(keyColumn.getKey(t))!, 0)}
-            y={yRule.middle('labels' + (i % 2) as "labels0" | "labels1") - yRule.middle('labels0')}
+            y={yRule.size('labels') / 2 + (i % 2) * yRule.size('labels') / 4}
             dominantBaseline="middle"
             textAnchor="middle">
             {keyColumn.getNiceName(t)}
