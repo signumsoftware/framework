@@ -101,7 +101,7 @@ namespace Signum.Engine.Dynamic
                         catch (Exception e)
                         {
                             e.Data["DynamicValidation"] = val.Name;
-                            throw e;
+                            throw;
                         }
                     }
                 }

@@ -492,7 +492,7 @@ namespace Signum.Engine.Mailing.Pop3
                             });
                         }
 
-                        Lite<EmailMessageEntity> duplicate = Database.Query<EmailMessageEntity>()
+                        Lite<EmailMessageEntity>? duplicate = Database.Query<EmailMessageEntity>()
                             .Where(a => a.BodyHash == email.BodyHash)
                             .Select(a => a.ToLite())
                             .FirstOrDefault();

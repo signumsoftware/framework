@@ -31,7 +31,7 @@ namespace Signum.React.Selenium
                 if (imp != null && imp.Value.Types.Count() != 1)
                 {
                     var popup = this.CreateButton.Find().CaptureOnClick();
-                    ChooseType(typeof(T), popup);
+                    ChooseType(popup, typeof(T));
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace Signum.React.Selenium
 
             var popup = this.CreateButton.WaitVisible().CaptureOnClick();
 
-            popup = ChooseTypeCapture(typeof(T), popup);
+            popup = ChooseTypeCapture(popup, typeof(T));
 
             var itemRoute = this.ItemRoute.Type == typeof(T) ? this.ItemRoute : PropertyRoute.Root(typeof(T));
 
@@ -93,7 +93,7 @@ namespace Signum.React.Selenium
             string changes = GetChanges();
             var popup = FindButton.Find().CaptureOnClick();
 
-            popup = ChooseTypeCapture(selectType, popup);
+            popup = ChooseTypeCapture(popup, selectType);
 
             return new SearchModalProxy(popup)
             {
@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
             };
         }
 
-        private void ChooseType(Type selectType, IWebElement element)
+        private void ChooseType(IWebElement element, Type selectType)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return;
@@ -109,10 +109,10 @@ namespace Signum.React.Selenium
             if (selectType == null)
                 throw new InvalidOperationException("No type to choose from selected");
 
-            SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType));
+            element.AsSelectorModal().Select(TypeLogic.GetCleanName(selectType));
         }
 
-        private IWebElement ChooseTypeCapture(Type? selectType, IWebElement element)
+        private IWebElement ChooseTypeCapture(IWebElement element, Type? selectType)
         {
             if (!SelectorModalProxy.IsSelector(element))
                 return element;
@@ -120,10 +120,7 @@ namespace Signum.React.Selenium
             if (selectType == null)
                 throw new InvalidOperationException("No type to choose from selected");
 
-            var newElement = element.GetDriver().CapturePopup(() =>
-                SelectorModalProxy.Select(this.Element, TypeLogic.GetCleanName(selectType!)));
-
-            return newElement;
+            return element.AsSelectorModal().SelectAndCapture(TypeLogic.GetCleanName(selectType));
         }
 
         public void WaitChanges(Action action, string actionDescription)

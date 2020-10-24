@@ -100,7 +100,7 @@ namespace Signum.Engine.UserAssets
 
             public PreviewContext(XDocument doc)
             {
-                elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
+                elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
             }
 
             public QueryEntity GetQuery(string queryKey)
@@ -228,7 +228,7 @@ namespace Signum.Engine.UserAssets
             public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity)
             {
                 this.overrideEntity = overrideEntity;
-                elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
+                elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
             }
 
             QueryEntity IFromXmlContext.GetQuery(string queryKey)

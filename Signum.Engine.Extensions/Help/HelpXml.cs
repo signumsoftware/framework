@@ -34,17 +34,17 @@ namespace Signum.Engine.Help
                            new XAttribute(_Name, entity.UniqueName),
                            new XAttribute(_Culture, entity.Culture.Name),
                            new XAttribute(_Title, entity.Title),
-                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!
                        )
                     );
             }
 
             public static ImportAction Load(XDocument document)
             {
-                XElement element = document.Element(_Appendix);
+                XElement element = document.Element(_Appendix)!;
 
-                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var name = element.Attribute(_Name).Value;
+                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
+                var name = element.Attribute(_Name)!.Value;
 
                 var entity = Database.Query<AppendixHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.UniqueName == name) ??
                     new AppendixHelpEntity
@@ -53,7 +53,7 @@ namespace Signum.Engine.Help
                          UniqueName = name,
                     }; 
              
-                entity.Title = element.Attribute(_Title).Value;
+                entity.Title = element.Attribute(_Title)!.Value;
                 element.Element(_Description)?.Do(d => entity.Description = d.Value);
 
                 return Save(entity);
@@ -75,15 +75,15 @@ namespace Signum.Engine.Help
                        new XElement(_Namespace,
                            new XAttribute(_Name, entity.Name),
                            new XAttribute(_Culture, entity.Culture.Name),
-                           entity.Title.HasText() ? new XAttribute(_Title, entity.Title) : null,
-                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
+                           entity.Title.HasText() ? new XAttribute(_Title, entity.Title) : null!,
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!
                        )
                     );
             }
 
             internal static string GetNamespaceName(XDocument document, string fileName)
             {
-                if (document.Root.Name != _Namespace)
+                if (document.Root!.Name != _Namespace)
                     throw new InvalidOperationException("{0} does not have a {1} root".FormatWith(fileName, _Namespace));
 
                 var result = document.Root.Attribute(_Name)?.Value;
@@ -96,10 +96,10 @@ namespace Signum.Engine.Help
 
             public static ImportAction Load(XDocument document, Dictionary<string, string> namespaces)
             {
-                XElement element = document.Element(_Namespace);
+                XElement element = document.Element(_Namespace)!;
 
-                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var name = SelectInteractive(element.Attribute(_Name).Value, namespaces, "namespaces");
+                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
+                var name = SelectInteractive(element.Attribute(_Name)!.Value, namespaces, "namespaces");
 
                 if (name == null)
                     return ImportAction.Skipped;
@@ -134,13 +134,13 @@ namespace Signum.Engine.Help
                        new XElement(_Query,
                            new XAttribute(_Key, entity.Query.Key),
                            new XAttribute(_Culture, entity.Culture.Name),
-                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null,
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!,
                             entity.Columns.Any() ?
                                new XElement(_Columns,
                                    entity.Columns.Select(c => new XElement(_Column,
                                        new XAttribute(_Name, c.ColumnName),
-                                       c.Description))
-                               ) : null
+                                       c.Description!))
+                               ) : null!
                            )
                        );
             }
@@ -148,9 +148,9 @@ namespace Signum.Engine.Help
 
             public static ImportAction Load(XDocument document)
             {
-                XElement element = document.Element(_Query);
-                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var queryName = SelectInteractive(element.Attribute(_Key).Value, QueryLogic.QueryNames, "queries");
+                XElement element = document.Element(_Query)!;
+                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
+                var queryName = SelectInteractive(element.Attribute(_Key)!.Value, QueryLogic.QueryNames, "queries");
 
                 if (queryName == null)
                     return ImportAction.Skipped;
@@ -173,7 +173,7 @@ namespace Signum.Engine.Help
 
                     foreach (var item in cols.Elements(_Column))
                     {
-                        string? name = item.Attribute(_Name).Value;
+                        string? name = item.Attribute(_Name)!.Value;
                         name = SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(queryName));
 
                         if (name == null)
@@ -224,26 +224,26 @@ namespace Signum.Engine.Help
                     new XElement(_Entity,
                            new XAttribute(_FullName, entity.Type.FullClassName),
                            new XAttribute(_Culture, entity.Culture.Name),
-                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null,
+                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!,
                            entity.Properties.Any() ? new XElement(_Properties,
                                entity.Properties.Select(p => new XElement(_Property,
                                    new XAttribute(_Name, p.Property.Path),
-                                   p.Description))
-                           ) : null,
+                                   p.Description!))
+                           ) : null!,
                            entity.Operations.Any() ? new XElement(_Operations,
                                entity.Operations.Select(o => new XElement(_Operation,
                                    new XAttribute(_Key, o.Operation.Key),
-                                   o.Description))
-                           ) : null
+                                   o.Description!))
+                           ) : null!
                        )
                    );
             }
 
             public static ImportAction Load(XDocument document, Dictionary<string, Type> typesByFullName)
             {
-                XElement element = document.Element(_Entity);
-                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var fullName = element.Attribute(_FullName).Value;
+                XElement element = document.Element(_Entity)!;
+                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
+                var fullName = element.Attribute(_FullName)!.Value;
                 var type = SelectInteractive(fullName, typesByFullName, "types");
 
                 if(type == null)
@@ -267,7 +267,7 @@ namespace Signum.Engine.Help
 
                     foreach (var item in props.Elements(_Property))
                     {
-                        string name = item.Attribute(_Name).Value;
+                        string name = item.Attribute(_Name)!.Value;
 
                         var property = SelectInteractive(name, properties, "properties for {0}".FormatWith(type.Name));
                         if (property == null)
@@ -296,7 +296,7 @@ namespace Signum.Engine.Help
 
                     foreach (var item in opers.Elements(_Operation))
                     {
-                        string name = item.Attribute(_Name).Value;
+                        string name = item.Attribute(_Name)!.Value;
                         var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(type.Name));
 
                         if (operation == null)
@@ -325,7 +325,7 @@ namespace Signum.Engine.Help
 
             public static string GetEntityFullName(XDocument document, string fileName)
             {
-                if (document.Root.Name != _Entity)
+                if (document.Root!.Name != _Entity)
                     throw new InvalidOperationException("{0} does not have a {1} root".FormatWith(fileName, _Entity));
 
                 var result = document.Root.Attribute(_FullName)?.Value;
@@ -486,10 +486,10 @@ namespace Signum.Engine.Help
                     XDocument doc = XDocument.Load(path);
 
                     ImportAction action = 
-                        doc.Root.Name == AppendixXml._Appendix ? AppendixXml.Load(doc):
-                        doc.Root.Name == NamespaceXml._Namespace ? NamespaceXml.Load(doc, namespaces):
-                        doc.Root.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
-                        doc.Root.Name == QueryXml._Query ? QueryXml.Load(doc) :
+                        doc.Root!.Name == AppendixXml._Appendix ? AppendixXml.Load(doc):
+                        doc.Root!.Name == NamespaceXml._Namespace ? NamespaceXml.Load(doc, namespaces):
+                        doc.Root!.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
+                        doc.Root!.Name == QueryXml._Query ? QueryXml.Load(doc) :
                         throw new InvalidOperationException("Unknown Xml root: " + doc.Root.Name);
 
                     ConsoleColor color =
@@ -515,10 +515,10 @@ namespace Signum.Engine.Help
 
         public static void ImportExportHelp(string directoryName)
         {
-            retry:
-             Console.WriteLine("You want to export (e) or import (i) Help? (nothing to exit)");
+        retry:
+            Console.WriteLine("You want to export (e) or import (i) Help? (nothing to exit)");
 
-            switch (Console.ReadLine().ToLower())
+            switch (Console.ReadLine()!.ToLower())
             {
                 case "": return;
                 case "e": ExportAll(directoryName); break;

@@ -247,7 +247,7 @@ namespace Signum.Engine.Disconnected
         {
             using (ExecutionMode.Global())
             {
-                var result = Database.Query<T>().Where(strategy.UploadSubset)
+                var result = Database.Query<T>().Where(strategy.UploadSubset!)
                     .Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine != null)
                     .Select(a => "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine!.Entity.MachineName))
                     .ToString("\r\n");
@@ -257,7 +257,7 @@ namespace Signum.Engine.Disconnected
                         .Set(mle => mle.Element.Errors, mle => result)
                         .Execute();
 
-                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate()
+                return Database.Query<T>().Where(strategy.UploadSubset!).UnsafeUpdate()
                     .Set(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine, a => machine)
                     .Set(a => a.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks, a => a.Ticks)
                     .Execute();
@@ -403,7 +403,7 @@ SELECT {3}
 
         protected virtual SqlPreCommandSimple GetWhere(DisconnectedStrategy<T> pair)
         {
-            var query = Database.Query<T>().Where(pair.DownloadSubset).Select(a => a.Id);
+            var query = Database.Query<T>().Where(pair.DownloadSubset!).Select(a => a.Id);
 
             return Administrator.QueryPreCommand(query);
         }

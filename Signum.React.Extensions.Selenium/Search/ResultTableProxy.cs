@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DocumentFormat.OpenXml.Wordprocessing;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
@@ -35,12 +36,27 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("table.sf-search-results > tbody > tr")); }
         }
 
-        public WebElementLocator RowElement(int rowIndex)
+        public List<ResultRowProxy> AllRows()
+        {
+            return RowsLocator.FindElements().Select(e => new ResultRowProxy(e)).ToList();
+        }
+
+        public ResultRowProxy RowElement(int rowIndex)
+        {
+            return new ResultRowProxy(RowElementLocator(rowIndex).WaitVisible());
+        }
+
+        private WebElementLocator RowElementLocator(int rowIndex)
         {
             return this.Element.WithLocator(By.CssSelector("tr[data-row-index='{0}']".FormatWith(rowIndex)));
         }
 
-        public WebElementLocator RowElement(Lite<IEntity> lite)
+        public ResultRowProxy RowElement(Lite<IEntity> lite)
+        {
+            return new ResultRowProxy(RowElementLocator(lite).WaitVisible());
+        }
+
+        private WebElementLocator RowElementLocator(Lite<IEntity> lite)
         {
             return this.Element.WithLocator(By.CssSelector("tr[data-entity='{0}']".FormatWith(lite.Key())));
         }
@@ -55,19 +71,19 @@ namespace Signum.React.Selenium
 
         public WebElementLocator CellElement(int rowIndex, string token)
         {
-            var index = GetColumnIndex(token);
+            var columnIndex = GetColumnIndex(token);
 
-            return RowElement(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+            return RowElement(rowIndex).CellElement(columnIndex);
         }
 
         public WebElementLocator CellElement(Lite<IEntity> lite, string token)
         {
-            var index = GetColumnIndex(token);
+            var columnIndex = GetColumnIndex(token);
 
-            return RowElement(lite).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+            return RowElement(lite).CellElement(columnIndex);
         }
 
-        private int GetColumnIndex(string token)
+        public int GetColumnIndex(string token)
         {
             var tokens = this.GetColumnTokens();
 
@@ -79,14 +95,10 @@ namespace Signum.React.Selenium
             return index;
         }
 
-        public WebElementLocator RowSelectorElement(int rowIndex)
-        {
-            return this.Element.WithLocator(By.CssSelector("tr[data-row-index='{0}'] .sf-td-selection".FormatWith(rowIndex)));
-        }
 
         public void SelectRow(int rowIndex)
         {
-            RowSelectorElement(rowIndex).Find().Click();
+            RowElement(rowIndex).SelectedCheckbox.Find().Click();
         }
 
         public void SelectRow(params int[] rowIndexes)
@@ -97,7 +109,7 @@ namespace Signum.React.Selenium
 
         public void SelectRow(Lite<IEntity> lite)
         {
-            RowElement(lite).CombineCss(" .sf-td-selection").Find().Click();
+            RowElement(lite).SelectedCheckbox.Find().Click();
         }
 
         public WebElementLocator HeaderElement
@@ -180,18 +192,24 @@ namespace Signum.React.Selenium
         public WebElementLocator EntityLink(Lite<IEntity> lite)
         {
             var entityIndex = GetColumnIndex("Entity");
-            return RowElement(lite).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex + 1));
+            return RowElement(lite).EntityLink(entityIndex);
         }
 
         public WebElementLocator EntityLink(int rowIndex)
         {
             var entityIndex = GetColumnIndex("Entity");
-            return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex + 1));
+            return RowElement(rowIndex).EntityLink(entityIndex);
         }
 
         public FramePageProxy<T> EntityClickInPlace<T>(Lite<T> lite) where T : Entity
         {
             EntityLink(lite).Find().Click();
+            return new FramePageProxy<T>(this.Selenium);
+        }
+
+        public FramePageProxy<T> EntityClickInPlace<T>(int rowIndex) where T : Entity
+        {
+            EntityLink(rowIndex).Find().Click();
             return new FramePageProxy<T>(this.Selenium);
         }
 
@@ -247,9 +265,9 @@ namespace Signum.React.Selenium
             return this.Element.FindElements(By.CssSelector("tbody > tr[data-entity]")).Count;
         }
 
-        public Lite<Entity> EntityInIndex(int index)
+        public Lite<Entity> EntityInIndex(int rowIndex)
         {
-            var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + (index + 1) + ")")).GetAttribute("data-entity");
+            var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + (rowIndex + 1) + ")")).GetAttribute("data-entity");
 
             return Lite.Parse(result);
         }
@@ -304,14 +322,31 @@ namespace Signum.React.Selenium
         public void WaitSuccess(Lite<IEntity> lite) => WaitSuccess(new List<Lite<IEntity>> { lite });
         public void WaitSuccess(List<Lite<IEntity>> lites)
         {
-            lites.ForEach(lite => RowElement(lite).CombineCss(".sf-entity-ctxmenu-success").WaitVisible());
+            lites.ForEach(lite => RowElementLocator(lite).CombineCss(".sf-entity-ctxmenu-success").WaitVisible());
         }
 
         public void WaitNoVisible(Lite<IEntity> lite) => WaitNoVisible(new List<Lite<IEntity>> { lite });
 
         public void WaitNoVisible(List<Lite<IEntity>> lites)
         {
-            lites.ForEach(lite => RowElement(lite).WaitNoVisible());
+            lites.ToList().ForEach(lite => RowElementLocator(lite).WaitNoVisible());
         }
+
+        
+    }
+
+    public class ResultRowProxy
+    {
+        public IWebElement RowElement;
+        public ResultRowProxy(IWebElement rowElement)
+        {
+            this.RowElement = rowElement;
+        }
+
+        public WebElementLocator SelectedCheckbox => new WebElementLocator(RowElement, By.CssSelector("input.sf-td-selection"));
+
+        public WebElementLocator CellElement(int columnIndex) => new WebElementLocator(RowElement, By.CssSelector("td:nth-child({0})".FormatWith(columnIndex + 1)));
+
+        public WebElementLocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).CombineCss("> a");
     }
 }

@@ -199,8 +199,8 @@ namespace Signum.Engine.Migrations
 
         private static void Execute(MigrationInfo mi)
         {
-            string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
-            string text = File.ReadAllText(mi.FileName, Encoding.UTF8);
+            string? title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
+            string text = File.ReadAllText(mi.FileName!, Encoding.UTF8);
             
             using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {

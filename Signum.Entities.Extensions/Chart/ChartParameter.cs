@@ -60,8 +60,8 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Name = x.Attribute("Name").Value;
-            Value = x.Attribute("Value").Value?.DefaultText(null);
+            Name = x.Attribute("Name")!.Value;
+            Value = x.Attribute("Value")!.Value?.DefaultText(null);
         }
 
         public override string ToString()

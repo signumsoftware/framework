@@ -202,7 +202,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static string? ToStringLocal(object val)
+        private static string? ToStringLocal(object? val)
         {
             return val == null ? null :
                 (val is IFormattable) ? ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture) :
@@ -280,7 +280,7 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
         {
-            var userQuery = Database.Query<UserQueryEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
+            var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Guid == Guid.Parse(suffix));
 
             using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
@@ -312,7 +312,7 @@ namespace Signum.Engine.Word
 
         public Data.DataTable GetDataTable(string suffix, Entity entity)
         {
-            var userChart = Database.Query<UserChartEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
+            var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Guid == Guid.Parse(suffix));
 
             using (CurrentEntityConverter.SetCurrentEntity(entity))
             {

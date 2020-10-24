@@ -27,7 +27,7 @@ namespace Signum.Engine.Workflow
 
             public void ApplyChanges(XElement processElement, Locator locator)
             {
-                var sequenceFlows = processElement.Elements(bpmn + "sequenceFlow").ToDictionary(a => a.Attribute("id").Value);
+                var sequenceFlows = processElement.Elements(bpmn + "sequenceFlow").ToDictionary(a => a.Attribute("id")!.Value);
                 var oldSequenceFlows = this.sequenceFlows.ToDictionaryEx(a => a.bpmnElementId, "sequenceFlows");
 
                 Synchronizer.Synchronize(sequenceFlows, oldSequenceFlows,
@@ -40,8 +40,8 @@ namespace Signum.Engine.Workflow
                  (id, sf, osf) =>
                  {
 
-                     var newFrom = locator.FindEntity(sf.Attribute("sourceRef").Value);
-                     var newTo = locator.FindEntity(sf.Attribute("targetRef").Value);
+                     var newFrom = locator.FindEntity(sf.Attribute("sourceRef")!.Value);
+                     var newTo = locator.FindEntity(sf.Attribute("targetRef")!.Value);
 
                      if(!newFrom.Is(osf.Entity.From)  ||
                      !newTo.Is(osf.Entity.To))
@@ -58,7 +58,7 @@ namespace Signum.Engine.Workflow
                  });
 
                 var oldLanes = this.lanes.Values.ToDictionaryEx(a => a.lane.bpmnElementId, "lanes");
-                var lanes = processElement.Element(bpmn + "laneSet").Elements(bpmn + "lane").ToDictionaryEx(a => a.Attribute("id").Value);
+                var lanes = processElement.Element(bpmn + "laneSet")!.Elements(bpmn + "lane").ToDictionaryEx(a => a.Attribute("id")!.Value);
 
                 Synchronizer.Synchronize(lanes, oldLanes,
                     createNew: (id, l) =>
@@ -103,7 +103,7 @@ namespace Signum.Engine.Workflow
                        });
             }
 
-            public IWorkflowNodeEntity FindEntity(string bpmElementId)
+            public IWorkflowNodeEntity? FindEntity(string bpmElementId)
             {
                 return this.lanes.Values.Select(lb => lb.FindEntity(bpmElementId)).NotNull().SingleOrDefault();
             }
@@ -145,7 +145,7 @@ namespace Signum.Engine.Workflow
             {
                 return sequenceFlows.Select(a => new XElement(bpmn + "sequenceFlow",
                     new XAttribute("id", a.bpmnElementId),
-                    a.Entity.Name.HasText() ? new XAttribute("name", a.Entity.Name) : null,
+                    a.Entity.Name.HasText() ? new XAttribute("name", a.Entity.Name) : null!,
                     new XAttribute("sourceRef", GetLaneBuilder(a.Entity.From.Lane.ToLite()).GetBpmnElementId(a.Entity.From)),
                     new XAttribute("targetRef", GetLaneBuilder(a.Entity.To.Lane.ToLite()).GetBpmnElementId(a.Entity.To))
                 )).ToList();

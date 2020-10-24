@@ -644,7 +644,7 @@ export module API {
         var format = chartColumn.format ? toLuxonFormat(chartColumn.format) :
           token.format ? toLuxonFormat(token.format) :
             "F";
-        return date == null ? String(null) : DateTime.fromISO(date).toFormat(format);
+        return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))

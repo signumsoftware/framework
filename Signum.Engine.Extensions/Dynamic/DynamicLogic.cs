@@ -40,7 +40,7 @@ namespace Signum.Engine.Dynamic
         public static Action<StringBuilder, int>? OnWriteDynamicStarter;
         public static Exception? CodeGenError;
 
-        public static FileInfo GetLastCodeGenAssemblyFileInfo()
+        public static FileInfo? GetLastCodeGenAssemblyFileInfo()
         {
             Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
 

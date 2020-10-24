@@ -91,4 +91,12 @@ namespace Signum.React.Selenium
             this.SearchControl.Search();
         }
     }
+
+    public static class SearchModalExtensions
+    {
+        public static SearchModalProxy AsSearchModal(this IWebElement modal, bool waitInitialSearch = true)
+        {
+            return new SearchModalProxy(modal, waitInitialSearch);
+        }
+    }
 }

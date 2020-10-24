@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine;
 using Signum.Engine.Rest;
@@ -17,7 +17,7 @@ namespace Signum.React.Profiler
         }
 
         [HttpGet("api/restApiKey/current")]
-        public string GetAPIKey()
+        public string? GetAPIKey()
         {
             using (ExecutionMode.Global())
                 return Database.Query<RestApiKeyEntity>().Where(a => a.User.Is(UserEntity.Current)).Select(a => a.ApiKey).SingleOrDefault();

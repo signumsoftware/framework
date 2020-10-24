@@ -137,15 +137,15 @@ namespace Signum.Engine.Translation
             if (pack == null)
                 return result;
 
-            return result.Select(s => (string?)pack.Regex.Replace(s, m =>
-           {
-               string replacement = pack.Dictionary.GetOrThrow(m.Value);
+            return result.Select(s => (string?)pack.Regex.Replace(s!, m =>
+            {
+                string replacement = pack.Dictionary.GetOrThrow(m.Value);
 
-               return IsUpper(m.Value) ? replacement.ToUpper() :
-                   IsLower(m.Value) ? replacement.ToLower() :
-                   char.IsUpper(m.Value[0]) ? replacement.FirstUpper() :
-                   replacement.FirstLower();
-           })).ToList();
+                return IsUpper(m.Value) ? replacement.ToUpper() :
+                    IsLower(m.Value) ? replacement.ToLower() :
+                    char.IsUpper(m.Value[0]) ? replacement.FirstUpper() :
+                    replacement.FirstLower();
+            })).ToList();
         }
 
 

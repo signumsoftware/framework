@@ -299,19 +299,19 @@ namespace Signum.Engine.Disconnected
             return stragety;
         }
 
-        public static DisconnectedExportEntity GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine)
+        public static DisconnectedExportEntity? GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
             return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue)
                 .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
-        public static DisconnectedImportEntity GetUploadEstimation(Lite<DisconnectedMachineEntity> machine)
+        public static DisconnectedImportEntity? GetUploadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
             return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue)
                 .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
-        public static Lite<DisconnectedMachineEntity> GetDisconnectedMachine(string machineName)
+        public static Lite<DisconnectedMachineEntity>? GetDisconnectedMachine(string machineName)
         {
             return Database.Query<DisconnectedMachineEntity>().Where(a => a.MachineName == machineName).Select(a => a.ToLite()).SingleOrDefault();
         }

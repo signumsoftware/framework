@@ -44,7 +44,7 @@ namespace Signum.React.MachineLearning
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
                 .Where(a => a.col!.Usage == PredictorColumnUsage.Input)
-                .Select(a => KeyValuePair.Create(a.col!, a.value))
+                .Select(a => KeyValuePair.Create(a.col!, (object?)a.value))
                 .ToDictionaryEx(),
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
@@ -249,7 +249,7 @@ namespace Signum.React.MachineLearning
             if(jt is JArray ja)
             {
                 var list = ja.ToObject<List<AlternativePrediction>>();
-                var result = list.Select(val => ReflectionTools.ChangeType(val, token.Type));
+                var result = list!.Select(val => ReflectionTools.ChangeType(val, token.Type));
                 return result;
             }
 

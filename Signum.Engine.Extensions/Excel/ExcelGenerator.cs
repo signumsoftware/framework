@@ -61,7 +61,7 @@ namespace Signum.Engine.Excel
 
                 List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, results);
 
-                UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1").StyleIndex;
+                UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1")!.StyleIndex;
 
                 //Clear sheetData from the template sample data
                 sheetData.InnerXml = "";
