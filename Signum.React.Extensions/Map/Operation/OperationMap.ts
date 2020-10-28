@@ -111,15 +111,15 @@ export class OperationMapD3 {
 
     const drag = d3.drag<SVGGElement, MapState>()
       .on("start", d => {
-        if (!d3.event.active)
+        if (!d.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
       .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+        d.fx = (d as MouseEvent).x;
+        d.fy = (d as MouseEvent).y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -139,13 +139,13 @@ export class OperationMapD3 {
         this.selectLinks();
         this.selectNodes();
 
-        const event = d3.event;
+        const event = (d as MouseEvent);
         if (event.defaultPrevented)
           return;
 
-        if ((<any>event).ctrlKey && d.token) {
+        if (event.ctrlKey && d.token) {
           window.open(Finder.findOptionsPath({ queryName: this.queryName, filterOptions: [{ token: d.token, value: d.key }] }));
-          d3.event.preventDefault();
+          event.preventDefault();
         }
       }).on("dblclick", d => {
         d.fx = null;
@@ -190,15 +190,15 @@ export class OperationMapD3 {
 
     const drag = d3.drag<SVGGElement, MapOperation>()
       .on("start", d => {
-        if (!d3.event.active)
+        if (!d.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
       .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+        d.fx = d.x;
+        d.fy = d.y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -217,13 +217,13 @@ export class OperationMapD3 {
         this.selectLinks();
         this.selectNodes();
 
-        const event = d3.event;
+        const event = d as MouseEvent;
         if (event.defaultPrevented)
           return;
 
-        if ((<any>event).ctrlKey) {
+        if (event.ctrlKey) {
           window.open(Finder.findOptionsPath({ queryName: OperationLogEntity, filterOptions: [{ token: "Operation.Key", value: d.key }] }));
-          d3.event.preventDefault();
+          event.preventDefault();
         }
       }).on("dblclick", d => {
         d.fx = null;

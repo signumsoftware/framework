@@ -64,7 +64,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
   var line = d3.line<unknown>()
     .defined(key => rowByKey[keyColumn.getKey(key)] != null)
     .x(key => x(keyColumn.getKey(key))!)
-    .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
+    .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))!)
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
   var color = parameters["Color"]!;// 'steelblue'
@@ -84,7 +84,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
       <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
         {orderedRows
           .map(r => <circle key={keyColumn.getValueKey(r)}
-            transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r)))}
+            transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
             className="hover-trigger"
             fill="#fff"
             fillOpacity={0}
@@ -102,7 +102,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
       <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
         {orderedRows
           .map(r => <circle key={keyColumn.getValueKey(r)}
-            transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r)))}
+            transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
             className="point sf-transition"
             stroke={color}
             strokeWidth={2}
@@ -121,7 +121,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
         parseFloat(parameters["NumberOpacity"]!) > 0 &&
         <g className="point-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
           {orderedRows
-            .map(r => <text key={keyColumn.getValueKey(r)} transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r)) - 10)}
+            .map(r => <text key={keyColumn.getValueKey(r)} transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))! - 10)}
               className="point-label sf-transition"
               r={5}
               opacity={parseFloat(parameters["NumberOpacity"]!)}

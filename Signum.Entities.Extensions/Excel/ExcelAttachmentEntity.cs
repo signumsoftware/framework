@@ -44,7 +44,7 @@ namespace Signum.Entities.Excel
         public Lite<UserQueryEntity> UserQuery { get; set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Related { get; set; }
+        public Lite<Entity>? Related { get; set; }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => FileName);

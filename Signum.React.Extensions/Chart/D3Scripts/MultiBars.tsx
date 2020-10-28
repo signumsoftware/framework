@@ -106,10 +106,10 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
         {
           ySubscale.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           rowsInOrder
-            .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value) > 16)
+            .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value)! > 16)
             .map(r => <text key={keyColumn.getKey(r.rowValue)} className="number-label sf-transition"
               transform={translate(
-                x(r.values[s.key]?.value) / 2,
+                x(r.values[s.key]?.value)! / 2,
                 -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
               )}
               opacity={parameters["NumberOpacity"]}
