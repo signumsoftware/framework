@@ -52,8 +52,12 @@ import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
+import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
+
+  UserAssetsClient.start({ routes: options.routes });
+  UserAssetsClient.registerExportAssertLink(WorkflowEntity);
 
   options.routes.push(
     <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,

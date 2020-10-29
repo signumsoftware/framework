@@ -58,8 +58,8 @@ export function UserHelpComponent(p : UserHelpProps){
     <div style={{ marginTop: "10px" }}>
       <a href="#" onClick={handleHelpClick} className="case-help-button">
         {open ?
-          DynamicViewMessage.HideHelp.niceToString() :
-          DynamicViewMessage.ShowHelp.niceToString()}
+          CaseActivityMessage.HideHelp.niceToString() :
+          CaseActivityMessage.ShowHelp.niceToString()}
       </a>
       {open &&
         <div dangerouslySetInnerHTML={{ __html: p.activity.userHelp! }} />}

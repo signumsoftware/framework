@@ -69,6 +69,7 @@ namespace Signum.Entities.UserAssets
         Guid Include(Lite<IUserAssetEntity> content);
 
         string TypeToName(Lite<TypeEntity> type);
+        string TypeToName(TypeEntity type);
 
         string QueryToName(Lite<QueryEntity> query);
         string PermissionToName(Lite<PermissionSymbol> symbol);
@@ -83,7 +84,9 @@ namespace Signum.Entities.UserAssets
 
         PermissionSymbol? TryPermission(string permissionKey);
 
-        Lite<TypeEntity> GetType(string cleanName);
+        Lite<TypeEntity> GetTypeLite(string cleanName);
+
+        TypeEntity GetType(string cleanName);
 
         ChartScriptSymbol ChartScript(string chartScriptName);
 
@@ -98,6 +101,8 @@ namespace Signum.Entities.UserAssets
 
         T SaveMaybe<T>(T entity) where T : Entity;
         void DeleteMaybe<T>(T entity) where T : Entity;
+
+        public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element);
     }
 
     public interface IUserAssetEntity : IEntity
@@ -135,6 +140,17 @@ namespace Signum.Entities.UserAssets
             {
                 entities.RemoveRange(xElements.Count, entities.Count - xElements.Count);
             }
+        }
+
+        public static T? CreateOrAssignEmbedded<T>(this T? embedded, XElement? element, Action<T, XElement> syncAction)
+          where T : EmbeddedEntity, new()
+        {
+            if (element == null)
+                return null;
+
+            embedded ??= new T();
+            syncAction(embedded, element);
+            return embedded;
         }
     }
 }

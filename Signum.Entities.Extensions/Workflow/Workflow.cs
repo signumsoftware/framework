@@ -38,7 +38,7 @@ namespace Signum.Entities.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            throw new NotImplementedException();
+            ctx.SetFullWorkflowElement(this, element);
         }
 
         [AutoExpressionField]

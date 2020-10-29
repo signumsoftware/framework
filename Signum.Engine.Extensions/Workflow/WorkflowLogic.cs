@@ -208,6 +208,9 @@ namespace Signum.Engine.Workflow
 
                 WorkflowLogic.getConfiguration = getConfiguration;
 
+                UserAssets.UserAssetsImporter.RegisterName<WorkflowEntity>("Workflow");
+                UserAssets.UserAssetsImporter.RegisterName<WorkflowScriptEntity>("WorkflowScript");
+
                 sb.Include<WorkflowEntity>()
                     .WithConstruct(WorkflowOperation.Create)
                     .WithQuery(() => DynamicQueryCore.Auto(

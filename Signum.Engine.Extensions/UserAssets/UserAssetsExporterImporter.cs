@@ -48,7 +48,12 @@ namespace Signum.Engine.UserAssets
             {
                 return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.RetrieveAndRemember()));
             }
-            
+
+            public string TypeToName(TypeEntity type)
+            {
+                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type));
+            }
+
             public string QueryToName(Lite<QueryEntity> query)
             {
                 return query.RetrieveAndRemember().Key;
@@ -102,6 +107,9 @@ namespace Signum.Engine.UserAssets
             {
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
+
+          
+
 
             public QueryEntity GetQuery(string queryKey)
             {
@@ -162,8 +170,12 @@ namespace Signum.Engine.UserAssets
                 return part;
             }
 
+            public TypeEntity GetType(string cleanName)
+            {
+                return TypeLogic.GetType(cleanName).ToTypeEntity();
+            }
 
-            public Lite<TypeEntity> GetType(string cleanName)
+            public Lite<TypeEntity> GetTypeLite(string cleanName)
             {
                 return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
             }
@@ -202,6 +214,11 @@ namespace Signum.Engine.UserAssets
             {
                 return;
             }
+
+            public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
+            {
+                return;
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -230,6 +247,12 @@ namespace Signum.Engine.UserAssets
                 this.overrideEntity = overrideEntity;
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
+
+            public TypeEntity GetType(string cleanName)
+            {
+                return TypeLogic.GetType(cleanName).ToTypeEntity();
+            }
+
 
             QueryEntity IFromXmlContext.GetQuery(string queryKey)
             {
@@ -295,7 +318,7 @@ namespace Signum.Engine.UserAssets
                 return part;
             }
 
-            public Lite<TypeEntity> GetType(string cleanName)
+            public Lite<TypeEntity> GetTypeLite(string cleanName)
             {
                 return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
             }
@@ -328,6 +351,12 @@ namespace Signum.Engine.UserAssets
             public void DeleteMaybe<T>(T entity) where T : Entity
             {
                 entity.Delete();
+            }
+
+            public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
+            {
+                var wie = new WorkflowImportExport(workflow);
+                wie.FromXml(element, this);
             }
         }
 
