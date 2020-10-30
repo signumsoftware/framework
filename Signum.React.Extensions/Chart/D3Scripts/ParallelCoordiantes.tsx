@@ -73,7 +73,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
         var scaleType = parameters["Scale" + c.name.after("c")];
         var scale = scaleFor(c, values, 0, yRule.size('content'), scaleType);
         var scaleFunc = scaleFor(c, values, 0, 1, scaleType);
-        var colorScale = (r: ChartRow) => colorInterpolation(scaleFunc(c.getValue(r)));
+        var colorScale = (r: ChartRow) => colorInterpolation(scaleFunc(c.getValue(r))!);
 
         return {
           column: c,
@@ -89,7 +89,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
     var line = d3.line<{ col: ColumnWithScales, row: ChartRow }>()
       .defined(t => t.col.column.getValue(t.row) != undefined)
       .x(t => x(t.col.column.name)!)
-      .y(t => - t.col.scale(t.col.column.getValue(t.row)))
+      .y(t => - t.col.scale(t.col.column.getValue(t.row))!)
       .curve(ChartUtils.getCurveByName(parameters["Interpolate"])!);//"linear"
 
     var boxWidth = 10;

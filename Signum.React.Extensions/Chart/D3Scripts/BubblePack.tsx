@@ -29,7 +29,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
   if (colorScaleColumn) {
     var scaleFunc = scaleFor(colorScaleColumn, data.rows.map(r => colorScaleColumn!.getValue(r)), 0, 1, parameters["ColorScale"]);
     var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorInterpolate"]);
-    color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r)));
+    color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
   }
   else if (colorSchemeColumn) {
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
@@ -52,7 +52,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   var size = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, 1, parameters["Scale"]);
 
-  root.sum(r => r == null ? 0 : size(valueColumn.getValue(r as ChartRow)));
+  root.sum(r => r == null ? 0 : size(valueColumn.getValue(r as ChartRow))!);
 
   var bubble = d3.pack<ChartRow | Folder | Root>()
     .size([width, height])

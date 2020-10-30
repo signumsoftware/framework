@@ -62,8 +62,8 @@ export default function LineChart(p: LineChartProps) {
 
     var line = d3.line<Point>()
       .curve(d3.curveLinear)
-      .x(p => scaleX(p.x))
-      .y(p => scaleY(p.y));
+      .x(p => scaleX(p.x)!)
+      .y(p => scaleY(p.y)!);
 
     return (
       <g key={index}>

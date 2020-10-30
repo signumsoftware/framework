@@ -17,21 +17,21 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
     <>
       <g className="y-line-group" transform={translate(xRule.start('content'), yRule.end('content'))}>
         {yTicks.map(t => <line key={t} className="y-line sf-transition"
-          transform={translate(0, -y(t))}
+          transform={translate(0, -y(t)!)}
           x2={xRule.size('content')}
           stroke="LightGray" />)}
       </g>
 
       <g className="y-tick-group" transform={translate(xRule.start('ticks'), yRule.end('content'))}>
         {yTicks.map(t => <line key={t} className="y-tick sf-transition"
-          transform={translate(0, -y(t))}
+          transform={translate(0, -y(t)!)}
           x2={xRule.size('ticks')}
           stroke="Black" />)}
       </g>
 
       <g className="y-label-group" transform={translate(xRule.end('labels'), yRule.end('content'))}>
         {yTicks.map(t => <text key={t} className="y-label sf-transition"
-          transform={translate(0, -y(t))}
+          transform={translate(0, -y(t)!)}
           dominantBaseline="middle"
           textAnchor="end">
           {yTickFormat(t)}
@@ -60,21 +60,21 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
     <>
       <g className="x-line-group" transform={translate(xRule.start('content'), yRule.start('content'))}>
         {xTicks.map(t => <line key={t} className="y-line-group sf-transition"
-          transform={translate(x(t), 0)}
+          transform={translate(x(t)!, 0)}
           y1={yRule.size('content')}
           stroke="LightGray" />)}
       </g>
 
       <g className="x-tick-group" transform={translate(xRule.start('content'), yRule.start('ticks'))}>
         {xTicks.map(t => <line key={t} className="x-tick-group sf-transition"
-          transform={translate(x(t), 0)}
+          transform={translate(x(t)!, 0)}
           y2={yRule.size('ticks')}
           stroke="Black" />)}
       </g>
 
       <g className="x-label-group" transform={translate(xRule.start('content'), yRule.end('labels'))}>
         {xTicks.map(t => <text key={t} className="x-label sf-transition"
-          transform={translate(x(t), 0)}
+          transform={translate(x(t)!, 0)}
           textAnchor="middle">
           {xTickFormat(t)}
         </text>)}

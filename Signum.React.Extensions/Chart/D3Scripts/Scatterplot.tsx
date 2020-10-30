@@ -64,7 +64,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, parameters["ColorScale"]);
     var colorInterpolate = parameters["ColorInterpolate"];
     var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate);
-    color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
+    color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number)!);
   }
 
   var keyColumns: ChartClient.ChartColumn<any>[]= data.columns.entity ? [data.columns.entity] :
@@ -80,7 +80,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
           data.rows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
-              transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
+              transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!)}
               stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
               fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
@@ -162,8 +162,8 @@ function CanvasScatterplot(p: {
       vctx.strokeStyle = vColor;
       colorToData[vColor] = r;
 
-      var xVal = x(horizontalColumn.getValue(r));
-      var yVal = h - y(verticalColumn.getValue(r));
+      var xVal = x(horizontalColumn.getValue(r))!;
+      var yVal = h - y(verticalColumn.getValue(r))!;
 
       ctx.beginPath();
       ctx.arc(xVal, yVal, pointSize, 0, 2 * Math.PI);
