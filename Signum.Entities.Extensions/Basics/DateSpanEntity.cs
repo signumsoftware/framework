@@ -106,7 +106,7 @@ namespace Signum.Entities.Basics
         }
 
 
-        public void FromXml(XElement element, IFromXmlContext ctx)
+        public void FromXml(XElement element)
         {
             Days = int.Parse(element.Attribute("Days").Value);
             Hours = int.Parse(element.Attribute("Hours").Value);

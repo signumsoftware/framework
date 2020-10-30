@@ -13,6 +13,7 @@ using Signum.Entities.UserAssets;
 using System.Globalization;
 using System.Xml.Schema;
 using Microsoft.Extensions.Azure;
+using System.Reflection.Metadata;
 
 namespace Signum.Engine.Workflow
 {
@@ -81,7 +82,7 @@ namespace Signum.Engine.Workflow
                 string.IsNullOrEmpty(a.UserHelp) ? null : new XElement("UserHelp", new XCData(a.UserHelp)),
                 a.SubWorkflow == null ? null : new XElement("SubWorkflow",
                     new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
-                    new XAttribute("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script)
+                    new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script)
                 ),
                 a.Script == null ? null : new XElement("Script",
                     new XAttribute("Script", ctx.Include(a.Script.Script)),
@@ -127,7 +128,7 @@ namespace Signum.Engine.Workflow
         }
 
         public IDisposable Sync<T>(Dictionary<string, T> entityDic, IEnumerable<XElement> elements, IFromXmlContext ctx, Action<T, XElement> setXml)
-            where T : Entity, new()
+            where T : Entity, IWorkflowObjectEntity, new()
         {
             var xmlDic = elements.ToDictionaryEx(a => a.Attribute("BpmnElementId").Value);
 
@@ -137,6 +138,7 @@ namespace Signum.Engine.Workflow
               createNew: (bpmnId, xml) =>
               {
                   var entity = new T();
+                  entity.BpmnElementId = xml.Attribute("BpmnElementId").Value;
                   setXml(entity, xml);
                   entityDic.Add(bpmnId, ctx.SaveMaybe(entity));
               },
@@ -170,8 +172,7 @@ namespace Signum.Engine.Workflow
             ctx.SaveMaybe(this.workflow);
 
             using (Sync(this.pools, element.Elements("Pool"), ctx, (pool, xml) =>
-            {
-                 pool.BpmnElementId = xml.Attribute("bpmnElementId").Value;
+            { 
                  pool.Name = xml.Attribute("Name").Value;
                  pool.Workflow = this.workflow;
                  SetXmlDiagram(pool, xml);
@@ -179,7 +180,6 @@ namespace Signum.Engine.Workflow
             {
                 using (Sync(this.lanes, element.Elements("Lane"), ctx, (lane, xml) =>
                 {
-                    lane.BpmnElementId = xml.Attribute("bpmnElementId").Value;
                     lane.Name = xml.Attribute("Name").Value;
                     lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value);
                     lane.Actors.AssignMList((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList());
@@ -189,20 +189,87 @@ namespace Signum.Engine.Workflow
                 {
                     using (Sync(this.activities, element.Elements("Activity"), ctx, (activity, xml) =>
                     {
-                        activity.BpmnElementId = xml.Attribute("bpmnElementId").Value;
+                        activity.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
+                        activity.Name = xml.Attribute("Name").Value;
+                        activity.Type = xml.Attribute("Type").Value.ToEnum<WorkflowActivityType>();
+                        activity.Comments = xml.Attribute("Comments")?.Value;
+                        activity.RequiresOpen = (bool?)xml.Attribute("RequiresOpen") ?? false;
+                        activity.EstimatedDuration = (double?)xml.Attribute("EstimatedDuration");
+                        activity.ViewName = (string?)xml.Attribute("ViewName");
+                        activity.ViewNameProps.Synchronize(xml.Element("ViewNameProps")?.Elements("ViewNameProp").ToList(), (vnpe, elem) =>
+                        {
+                            vnpe.Name = elem.Value;
+                        });
+                        activity.UserHelp = xml.Element("UserHelp")?.Value;
+                        activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
+                        {
+                            swe.Workflow = (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow"));
+                            swe.SubEntitiesEval = swe.SubEntitiesEval.CreateOrAssignEmbedded(elem.Element("SubEntitiesEval"), (se, x) =>
+                            {
+                                se.Script = x.Value;
+                            })!;
+                        });
+                        activity.Script = activity.Script.CreateOrAssignEmbedded(xml.Element("Script"), (swe, elem) =>
+                        {
+                            swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script"))).ToLite();
+                            swe.RetryStrategy = elem.Attribute("RetryStrategy")?.Let(a => (WorkflowScriptRetryStrategyEntity)ctx.GetEntity((Guid)a));
+                        });
+                        SetXmlDiagram(activity, xml);
                     }))
                     {
+                        using (Sync(this.events, element.Elements("Event"), ctx, (ev, xml) =>
+                        {
+                            ev.Name = xml.Attribute("Name").Value;
+                            ev.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
+                            ev.Type = xml.Attribute("Type").Value.ToEnum<WorkflowEventType>();
+                            ev.Timer = ev.Timer.CreateOrAssignEmbedded(xml.Element("Timer"), (time, xml) =>
+                            {
+                                time.Duration = time.Duration.CreateOrAssignEmbedded(xml.Element("Duration"), (ts, xml) => ts.FromXml(xml));
+                                time.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowTimerConditionEntity)ctx.GetEntity((Guid)a)).ToLite());
+                            });
+                            ev.BoundaryOf = xml.Attribute("BoundaryOf")?.Let(a =>activities.GetOrThrow(a.Value).ToLite());
 
+                            SetXmlDiagram(ev, xml);
+                        }))
+                        {
+                            using (Sync(this.gateways, element.Elements("Gateway"), ctx, (gw, xml) =>
+                            {
+                                gw.Name = xml.Attribute("Name").Value;
+                                gw.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
+                                gw.Type = xml.Attribute("Type").Value.ToEnum<WorkflowGatewayType>();
+                                gw.Direction = xml.Attribute("Direction").Value.ToEnum<WorkflowGatewayDirection>();
+
+                                SetXmlDiagram(gw, xml);
+                            }))
+                            {
+                                using (Sync(this.connections, element.Elements("Connection"), ctx, (conn, xml) =>
+                                {
+                                    conn.Name = xml.Attribute("Name").Value;
+                                    conn.Type = xml.Attribute("Type").Value.ToEnum<ConnectionType>();
+                                    conn.From = GetNode(xml.Attribute("From").Value);
+                                    conn.To = GetNode(xml.Attribute("To").Value);
+                                    conn.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowConditionEntity)ctx.GetEntity((Guid)a)).ToLite());
+                                    conn.Action = xml.Attribute("Action")?.Let(a => ((WorkflowActionEntity)ctx.GetEntity((Guid)a)).ToLite());
+                                    conn.Order = (int?)xml.Attribute("Order");
+                                    SetXmlDiagram(conn, xml);
+                                }))
+                                {
+                                    //Identation vertigo :)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        //  Workflow <-- Pool <-- Lane <-- Activity                <--- Connection
-        //                                          <-- Event  
-        //                             <-- Gateway
-      
-       
+        public IWorkflowNodeEntity GetNode(string bpmnElementId)
+        {
+            return (IWorkflowNodeEntity?)this.activities.TryGetC(bpmnElementId)
+                ?? (IWorkflowNodeEntity?)this.events.TryGetC(bpmnElementId)
+                ?? (IWorkflowNodeEntity?)this.gateways.TryGetC(bpmnElementId)
+                ?? throw new InvalidOperationException("No Workflow node wound with BpmnElementId: " + bpmnElementId);
+        }
 
         void SetXmlDiagram(IWorkflowObjectEntity entity, XElement xml)
         {
