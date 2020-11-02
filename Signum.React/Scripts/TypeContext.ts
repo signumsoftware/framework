@@ -440,6 +440,13 @@ export interface IHasChanges {
   entityHasChanges?: () => boolean;
 }
 
+export function sameType(frameComponent: React.Component | FunctionalFrameComponent, type: React.ForwardRefExoticComponent<any> | React.FunctionComponent<any> | React.ClassicComponent<any>) {
+  var frameClean = (frameComponent as FunctionalFrameComponent).type ?? frameComponent;
+  var typeClean = (type as React.ForwardRefExoticComponent<any> as any).render ?? type;
+  return frameClean == typeClean;
+}
+
+
 export interface FunctionalFrameComponent {
   forceUpdate(): void;
   createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
