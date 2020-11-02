@@ -137,15 +137,15 @@ export class SchemaMapD3 {
 
     const drag = d3.drag<SVGGElement, ITableInfo>()
       .on("start", d => {
-        if (!d.active)
+        if (!d3.event.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
       .on("drag", d => {
-        d.fx = (d as MouseEvent).x;
-        d.fy = (d as MouseEvent).y;
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -163,13 +163,13 @@ export class SchemaMapD3 {
         this.selectedLinks();
         this.selectedNode();
 
-        const event = d as MouseEvent;
+        const event = d3.event;
         if (event.defaultPrevented)
           return;
 
-        if (d.ctrlKey && (d as TableInfo).typeName) {
+        if ((<any>event).ctrlKey && (d as TableInfo).typeName) {
           window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName }));
-          d.preventDefault();
+          d3.event.preventDefault();
         }
       })
       .on("dblclick", d => {
