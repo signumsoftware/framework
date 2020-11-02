@@ -1,50 +1,62 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using Signum.Engine.Json;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
 using Signum.React.Filters;
 using Signum.React.Json;
 using Signum.React.JsonModelValidators;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Facades
 {
     public static class SignumServer
     {
-        public static JsonSerializerSettings JsonSerializerSettings = null!;
+        public static WebEntityJsonConverterFactory WebEntityJsonConverterFactory = null!;
 
-        public static MvcNewtonsoftJsonOptions AddSignumJsonConverters(this MvcNewtonsoftJsonOptions jsonOptions)
+        static SignumServer()
+        {
+            WebEntityJsonConverterFactory = new WebEntityJsonConverterFactory();
+            WebEntityJsonConverterFactory.CanWritePropertyRoute += EntityJsonConverter_CanWritePropertyRoute;
+        }
+
+        public static JsonSerializerOptions JsonSerializerOptions = null!;
+
+        public static JsonOptions AddSignumJsonConverters(this JsonOptions jsonOptions)
         {
             //Signum converters
-            jsonOptions.SerializerSettings.Do(s =>
+            jsonOptions.JsonSerializerOptions.IncludeFields = true;
+            jsonOptions.JsonSerializerOptions.Do(s =>
             {
-                JsonSerializerSettings = s;
-
-                s.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                s.Formatting = Newtonsoft.Json.Formatting.Indented;
-                s.Converters.Add(new LiteJsonConverter());
-                s.Converters.Add(new EntityJsonConverter());
-                s.Converters.Add(new MListJsonConverter());
-                s.Converters.Add(new StringEnumConverter());
+                JsonSerializerOptions = s;
+                s.WriteIndented = true;
+                s.Converters.Add(WebEntityJsonConverterFactory);
+                s.Converters.Add(new LiteJsonConverterFactory());
+                s.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
+                s.Converters.Add(new JsonStringEnumConverter());
                 s.Converters.Add(new ResultTableConverter());
                 s.Converters.Add(new TimeSpanConverter());
                 s.Converters.Add(new DateConverter());
+
             });
 
             return jsonOptions;
@@ -93,8 +105,6 @@ namespace Signum.React.Facades
             ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
             ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
             ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
-            EntityJsonConverter.CanWritePropertyRoute += EntityJsonConverter_CanWritePropertyRoute;
-
         }
 
         private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
@@ -132,6 +142,41 @@ namespace Signum.React.Facades
                 }
 
             return result;
+        }
+    }
+
+    public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
+    {
+        public override EntityJsonConverterStrategy Strategy => EntityJsonConverterStrategy.WebAPI;
+
+        protected override PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
+        {
+            var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
+            var att =
+                controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+                throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}. 
+            Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
+            Current action: {controller.MethodInfo.MethodSignature()}
+            Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
+
+            return att.PropertyRoute;
+        }
+
+        public override Type ResolveType(string typeStr, Type objectType)
+        {
+            if (Reflector.CleanTypeName(objectType) == typeStr)
+                return objectType;
+
+            var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
+
+            if (type.IsEnum)
+                type = EnumEntity.Generate(type);
+
+            if (!objectType.IsAssignableFrom(type))
+                throw new JsonException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
+
+            return type;
         }
     }
 

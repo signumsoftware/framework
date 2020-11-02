@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -16,6 +17,9 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities.Basics;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Signum.React.Facades
 {
@@ -344,38 +348,24 @@ namespace Signum.React.Facades
         }
     }
 
+
     public class TypeInfoTS
     {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
         public KindOfType Kind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "fullName")]
         public string FullName { get; set; } = null!;
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string? NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
-        public string? NicePluralName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
-        public string? Gender { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
-        public EntityKind? EntityKind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
-        public EntityData? EntityData { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
-        public bool IsLowPopulation { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isSystemVersioned")]
-        public bool IsSystemVersioned { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
-        public string? ToStringFunction { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
-        public bool QueryDefined { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
-        public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "hasConstructorOperation")]
-        public bool HasConstructorOperation { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
-        public Dictionary<string, OperationInfoTS>? Operations { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]
-        public bool RequiresEntityPack { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public string? NiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NicePluralName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Gender { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public EntityKind? EntityKind { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public EntityData? EntityData { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLowPopulation { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsSystemVersioned { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ToStringFunction { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool QueryDefined { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasConstructorOperation { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, OperationInfoTS>? Operations { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool RequiresEntityPack { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -386,33 +376,19 @@ namespace Signum.React.Facades
 
     public class MemberInfoTS
     {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public TypeReferenceTS? Type { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string? NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string? TypeNiceName { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
-        public bool IsReadOnly { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "required")]
-        public bool Required { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
-        public string? Unit { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
-        public string? Format { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnoredEnum")]
-        public bool IsIgnoredEnum { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isVirtualMList")]
-        public bool IsVirtualMList { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
-        public int? MaxLength { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]
-        public bool IsMultiline { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "preserveOrder")]
-        public bool PreserveOrder { get; internal set; }
-
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
-        public object? Id { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public TypeReferenceTS? Type { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsReadOnly { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool Required { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Unit { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Format { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsIgnoredEnum { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsVirtualMList { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? MaxLength { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMultiline { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; internal set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -420,16 +396,11 @@ namespace Signum.React.Facades
 
     public class OperationInfoTS
     {
-        [JsonProperty(PropertyName = "operationType")]
-        private OperationType OperationType;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeNew")]
-        private bool? CanBeNew;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
-        private bool? HasCanExecute;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasStates")]
-        private bool? HasStates;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeModified")]
-        private bool? CanBeModified;
+        public OperationType OperationType;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? CanBeNew;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? HasCanExecute;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? HasStates;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] private bool? CanBeModified;
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -446,18 +417,12 @@ namespace Signum.React.Facades
 
     public class TypeReferenceTS
     {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
-        public bool IsCollection { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
-        public bool IsLite { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNotNullable")]
-        public bool IsNotNullable { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEmbedded")]
-        public bool IsEmbedded { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsCollection { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
         public string Name { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string? TypeNiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public TypeReferenceTS() { }

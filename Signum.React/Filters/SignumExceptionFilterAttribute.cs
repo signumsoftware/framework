@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
@@ -18,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Signum.React.Filters
@@ -75,7 +75,7 @@ namespace Signum.React.Filters
                         var response = context.HttpContext.Response;
                         response.StatusCode = (int)statusCode;
                         response.ContentType = "application/json";
-                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                        await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
                         context.ExceptionHandled = true;
                     }
                 }
