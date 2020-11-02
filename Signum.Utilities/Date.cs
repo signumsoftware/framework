@@ -271,12 +271,8 @@ namespace Signum.Utilities
         }
 
         public string ToString(IFormatProvider provider) => ToString(null, provider);
-        public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
-
-        public string ToString(string? format, IFormatProvider? provider)
-        {
-            return this._dt.ToString(ConvertFormat(format), provider);
-        }
+        public string ToString(string format) => ToString(format, null);
+        public string ToString(string? format, IFormatProvider? provider)  => this._dt.ToString(ConvertFormat(format), provider);
 
         [return: NotNullIfNotNull("format")]
         private static string? ConvertFormat(string? format)
@@ -285,6 +281,9 @@ namespace Signum.Utilities
             {
                 format = "yyyy-MM-dd";
             }
+
+            if (format == null)
+                return "d";
 
             return format;
         }

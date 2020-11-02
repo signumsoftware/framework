@@ -190,7 +190,11 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (this.props.onViewEntity)
       this.props.onViewEntity(entity);
 
-    Navigator.navigate(entity);
+    Navigator.navigate(entity)
+      .then(() => {
+        this.refreshValue();
+        this.props.onExplored && this.props.onExplored();
+      }).done();
   }
 
   handleCreateClick = (e: React.MouseEvent<any>) => {
