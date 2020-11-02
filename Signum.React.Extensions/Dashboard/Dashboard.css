@@ -1,29 +1,24 @@
-﻿.rule
-{
+﻿.rule {
     background-color: #eee;
     border-radius: 4px;
 }
 
-.ruleItem
-{
+.ruleItem {
     height: 16px;
     background-color: #ddd;
     border-radius: 4px;
 }
 
-.sf-grid-element .card
-{
+.sf-grid-element .card {
     margin-bottom: 0px;
-    overflow-x:hidden;
+    overflow-x: hidden;
 }
 
-.sf-grid-element .card-heading
-{
-    cursor:move;
+.sf-grid-element .card-heading {
+    cursor: move;
 }
 
-.sf-rightHandle
-{
+.sf-rightHandle {
     width: 5px;
     right: 3px; /*15 - 5/2*/
     cursor: e-resize;
@@ -35,8 +30,7 @@
     display: block;
 }
 
-.sf-leftHandle
-{
+.sf-leftHandle {
     width: 5px;
     left: 3px; /*15 - 5/2*/
     cursor: e-resize;
@@ -49,23 +43,19 @@
 }
 
 
-.sf-dragging .separator-row
-{
+.sf-dragging .separator-row {
     background-color: #eee;
 }
 
-.sf-dragging .separator-row.sf-over
-{
-    background-color: #aaa;
-}
+    .sf-dragging .separator-row.sf-over {
+        background-color: #aaa;
+    }
 
-.separator-row
-{
+.separator-row {
     height: 20px;
 }
 
-fieldset.sf-grid-repeater-field
-{
+fieldset.sf-grid-repeater-field {
     padding-left: 20px;
     padding-right: 20px;
 }
@@ -93,11 +83,9 @@ div.row-control-panel {
     font-weight: bold;
 }
 
-.sf-dashboard-admin .sf-grid-repeater-field,
-.sf-dashboard-view {
-    background: #fdfdfd;
+.sf-dashboard-admin .sf-grid-repeater-field, .sf-dashboard-view {
 }
 
-.sf-fullscreen-component .sf-search-control{
+.sf-fullscreen-component .sf-search-control {
     width: 100%;
 }
