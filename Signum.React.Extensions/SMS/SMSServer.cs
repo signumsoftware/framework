@@ -6,6 +6,7 @@ using Signum.Entities.SMS;
 using Signum.React.Json;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.React.Facades;
 
 namespace Signum.React.SMS
 {
@@ -15,7 +16,7 @@ namespace Signum.React.SMS
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((SMSTemplateEntity et) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((SMSTemplateEntity et) =>
             {
                 if (et.Query != null)
                 {

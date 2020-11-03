@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Dynamic
 {
@@ -57,7 +58,7 @@ namespace Signum.Entities.Dynamic
             typeof(System.Net.HttpWebRequest),
             typeof(System.Linq.Expressions.Expression),
             typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
-            typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",
+            typeof(JsonConverter), //"System.Text.Json.dll",
             typeof(DocumentFormat.OpenXml.AlternateContent), //"DocumentFormat.OpenXml.dll",
             typeof(System.Text.RegularExpressions.Regex),
         };

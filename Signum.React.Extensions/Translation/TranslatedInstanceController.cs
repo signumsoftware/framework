@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using Signum.Engine.Translation;
 using Signum.React.Filters;
 using Signum.Utilities;

@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.React.Json;
@@ -20,7 +20,7 @@ namespace Signum.React.Dynamic
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             ReflectionServer.RegisterLike(typeof(DynamicViewMessage), () => UserEntity.Current != null);
 
-            EntityJsonConverter.AfterDeserilization.Register((PropertyRouteEntity wc) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
             {
                 var route = PropertyRouteLogic.TryGetPropertyRouteEntity(wc.RootType, wc.Path);
                 if (route != null)

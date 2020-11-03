@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
 using System.ComponentModel;
-using Newtonsoft.Json;
 using Signum.Entities.Authorization;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Omnibox
 {

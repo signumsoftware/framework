@@ -1,10 +1,10 @@
-using Newtonsoft.Json;
 using Signum.Entities.Basics;
 using Signum.Entities.Omnibox;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Map

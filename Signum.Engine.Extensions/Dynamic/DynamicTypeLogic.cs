@@ -482,7 +482,7 @@ namespace Signum.Engine.Dynamic
                 if (property.IsMList != null)
                     atts.Add("NotifyCollectionChanged");
 
-                if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && !property.IsLite)
+                if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && property.IsLite != true)
                     atts.Add("NotifyChildProperty");
             }
 
@@ -587,7 +587,7 @@ namespace Signum.Engine.Dynamic
 
             string result = SimplifyType(property.Type);
 
-            if (property.IsLite)
+            if (property.IsLite == true)
                 result = "Lite<" + result + ">";
 
             if (property.IsMList != null)
