@@ -397,10 +397,10 @@ namespace Signum.React.Facades
     public class OperationInfoTS
     {
         public OperationType OperationType;
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? CanBeNew;
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? HasCanExecute;
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]private bool? HasStates;
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] private bool? CanBeModified;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeNew;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeModified;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasCanExecute;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasStates;
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -408,10 +408,10 @@ namespace Signum.React.Facades
         public OperationInfoTS(OperationInfo oper)
         {
             this.CanBeNew = oper.CanBeNew;
+            this.CanBeModified = oper.CanBeModified;
             this.HasCanExecute = oper.HasCanExecute;
             this.HasStates = oper.HasStates;
             this.OperationType = oper.OperationType;
-            this.CanBeModified = oper.CanBeModified;
         }
     }
 
@@ -420,7 +420,7 @@ namespace Signum.React.Facades
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsCollection { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsEmbedded { get; set; }
         public string Name { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
