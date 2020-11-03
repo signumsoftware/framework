@@ -386,43 +386,52 @@ Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
                 using (JsonSerializerExtensions.SetCurrentPropertyRouteAndEntity((pr, entity)))
                 {
-                    object? newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
-
-                    if (pi.CanWrite)
+                    try
                     {
-                        if (!IsEquals(newValue, oldValue))
+                        object? newValue = serializer.DeserializeValue(reader, pi.PropertyType.Nullify(), oldValue);
+
+                        if (pi.CanWrite)
                         {
-                            if (!markedAsModified && parentRoute.RootType.IsEntity())
+                            if (!IsEquals(newValue, oldValue))
                             {
-                                if (!pi.HasAttribute<IgnoreAttribute>())
+                                if (!markedAsModified && parentRoute.RootType.IsEntity())
                                 {
-                                    try
+                                    if (!pi.HasAttribute<IgnoreAttribute>())
                                     {
-                                        //Call attention of developer
-                                        throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+                                        try
+                                        {
+                                            //Call attention of developer
+                                            throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }
                                     }
-                                    catch (Exception)
-                                    {
-                                    }
-                                }
 
-                            }
-                            else
-                            {
-                                AssertCanWrite(pr, entity);
-                                if (newValue == null && pc.IsNotNull())
+                                }
+                                else
                                 {
-                                    entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
-                                    return;
-                                }
+                                    AssertCanWrite(pr, entity);
+                                    if (newValue == null && pc.IsNotNull())
+                                    {
+                                        entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
+                                        return;
+                                    }
 
-                                pc.SetValue?.Invoke(entity, newValue);
+                                    pc.SetValue?.Invoke(entity, newValue);
+                                }
                             }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        entity.SetTemporalError(pi, ValidationMessage.InvalidFormat.NiceToString() + (SignumExceptionFilterAttribute.IncludeErrorDetails(e) ? (": " + e.Message) : null));
                     }
                 }
             }
         }
+
+        
 
         private bool IsEquals(object? newValue, object? oldValue)
         {
