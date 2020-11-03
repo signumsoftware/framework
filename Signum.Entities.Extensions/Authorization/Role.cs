@@ -67,11 +67,6 @@ namespace Signum.Entities.Authorization
         Intersection,
     }
 
-    public enum RoleQuery
-    {
-        RolesReferedBy
-    }
-
     [AutoInit]
     public static class RoleOperation
     {
