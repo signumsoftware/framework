@@ -192,8 +192,6 @@ Lose changes?")]
         Create,
         [Description("Create new {0}")]
         CreateNew0_G,
-        [Description("All")]
-        SearchControl_Pagination_All,
         [Description("There is no {0}")]
         ThereIsNo0,
         Value,
@@ -225,7 +223,13 @@ Lose changes?")]
         _0FiltersCollapsed,
         DisplayName,
         [Description("To prevent performance issues automatic search is disabled, check your filters first and then click [Search] button.")]
-        ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton
+        ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton,
+        [Description("{0} elements")]
+        PaginationAll_0Elements,
+        [Description("{0} of {1} elements")]
+        PaginationPages_0Of01lements,
+        [Description("{0} {1} elements")]
+        PaginationFirst_01Elements
     }
 
     public enum SelectorMessage
@@ -379,7 +383,8 @@ Lose changes?")]
         [Description("Show Period")]
         showPeriod,
         [Description("Show Previous Operation")]
-        showPreviousOperation
+        showPreviousOperation,
+
     }
 
     public enum QuickLinkMessage
