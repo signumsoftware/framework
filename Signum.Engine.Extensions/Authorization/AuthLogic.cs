@@ -127,18 +127,6 @@ namespace Signum.Engine.Authorization
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
 
-                QueryLogic.Queries.Register(RoleQuery.RolesReferedBy, () =>
-                    from r in Database.Query<RoleEntity>()
-                    from rc in r.Roles
-                    select new
-                    {
-                        Entity = r,
-                        r.Id,
-                        r.Name,
-                        Refered = rc,
-                    });
-
-
                 UserGraph.Register();
             }
         }
