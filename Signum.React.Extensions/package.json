@@ -22,6 +22,7 @@
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "msal": "1.1.1"
   }
 }
