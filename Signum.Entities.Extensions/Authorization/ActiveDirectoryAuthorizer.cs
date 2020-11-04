@@ -24,8 +24,7 @@ namespace Signum.Entities.Authorization
         public bool LoginWithActiveDirectoryRegistry { get; set; } = true;
         public bool LoginWithAzureAD { get; set; } = true;
 
-        public bool AllowSimpleUserNames { get; set; } = true;
-
+        public bool AllowMatchingUsersBySimpleUserName { get; set; } = true;
 
         public bool AutoCreateUsers { get; set; }
 
