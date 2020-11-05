@@ -30,7 +30,7 @@ export default function AlertType(p: { ctx: TypeContext<ActiveDirectoryConfigura
         </div>
       </div>
 
-      <ValueLine ctx={ctx.subCtx(n => n.allowMatchingUsersBySimpleUserName)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
+      <ValueLine ctx={ctx.subCtx(n => n.allowMatchUsersBySimpleUserName)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
       <ValueLine ctx={ctx.subCtx(n => n.autoCreateUsers)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} onChange={forceUpdate} />
       {ctx.value.autoCreateUsers && < div >
         <EntityTable ctx={ctx.subCtx(n => n.roleMapping)} />

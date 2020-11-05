@@ -26,7 +26,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
   loginWithAzureAD: boolean;
-  allowMatchingUsersBySimpleUserName: boolean;
+  allowMatchUsersBySimpleUserName: boolean;
   autoCreateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;

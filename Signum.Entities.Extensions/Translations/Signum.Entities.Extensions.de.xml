@@ -4,7 +4,7 @@
     <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="Der Active Directory-Benutzer '{0}' ist nicht mit einem Benutzer in dieser Anwendung verbunden." />
   </Type>
   <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Active Directory-Konfiguration">
-    <Member Name="AllowSimpleUserNames" Description="Einfache Benutzernamen zulassen" />
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer durch einfachen Benutzernamen zulassen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
@@ -1860,9 +1860,6 @@
   <Type Name="RoleOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="RoleQuery">
-    <Member Name="RolesReferedBy" Description="Abhängige Rollen" />
   </Type>
   <Type Name="RuleEntity`2">
     <Member Name="Allowed" Description="Erlaubt" />

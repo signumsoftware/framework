@@ -41,7 +41,7 @@ namespace Signum.React.Authorization
                     if(user == null)
                     {
                         user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
-                            (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchingUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName.Before("@")) : null);
+                            (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName.Before("@")) : null);
 
                         if (user != null && user.Mixin<UserOIDMixin>().OID == null)
                         {
