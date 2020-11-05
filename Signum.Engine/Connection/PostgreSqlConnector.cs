@@ -358,6 +358,9 @@ namespace Signum.Engine
 
             return ex;
         }
+
+
+        public override string ToString() => $"PostgreSqlConnector({PostgresVersion}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
     }
 
     public static class PostgreSqlConnectorScripts 
