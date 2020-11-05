@@ -490,7 +490,7 @@ export module SearchMessage {
   export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
   export const PaginationAll_0Elements = new MessageKey("SearchMessage", "PaginationAll_0Elements");
   export const PaginationPages_0Of01lements = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
-  export const PaginationFirst_0Elements = new MessageKey("SearchMessage", "PaginationFirst_0Elements");
+  export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
 }
 
 export module SelectorMessage {
