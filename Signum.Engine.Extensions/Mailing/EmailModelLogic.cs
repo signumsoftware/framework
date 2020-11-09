@@ -14,6 +14,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Isolation;
 using Signum.Entities.Templating;
 using Signum.Engine.UserAssets;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Mailing
 {
@@ -312,23 +313,30 @@ namespace Signum.Engine.Mailing
             var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
 
             var templates = EmailModelToTemplates.Value.TryGetC(emailModelEntity.ToLite()).EmptyIfNull();
-            
-            if (templates.IsNullOrEmpty())
-            {
-                using (ExecutionMode.Global())
-                using (OperationLogic.AllowSave<EmailTemplateEntity>())
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    var template = CreateDefaultTemplate(emailModelEntity);
-
-                    template.Save();
-
-                    return tr.Commit(template);
-                }
-            }
-
             templates = templates.Where(isAllowed);
+
+
+            if (templates.IsNullOrEmpty())
+                return CreateDefaultEamilTemplate(emailModelEntity);
+            
+
+         
             return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for EmailModel {0}".FormatWith(emailModelEntity));
+        }
+
+        public static EmailTemplateEntity CreateDefaultEamilTemplate(EmailModelEntity emailModelEntity)
+        {
+            using (ExecutionMode.Global())
+            using (AuthLogic.Disable())
+            using (OperationLogic.AllowSave<EmailTemplateEntity>())
+            using (Transaction tr = Transaction.ForceNew())
+            {
+                var template = CreateDefaultTemplate(emailModelEntity);
+
+                template.Save();
+
+                return tr.Commit(template);
+            }
         }
 
         internal static EmailTemplateEntity CreateDefaultTemplate(EmailModelEntity emailModel)
