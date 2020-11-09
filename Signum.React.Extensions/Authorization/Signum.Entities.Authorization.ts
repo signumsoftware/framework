@@ -278,10 +278,6 @@ export module RoleOperation {
   export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Delete");
 }
 
-export module RoleQuery {
-  export const RolesReferedBy = new QueryKey("RoleQuery", "RolesReferedBy");
-}
-
 export interface RuleEntity<R, A> extends Entities.Entity {
   role: Entities.Lite<RoleEntity>;
   resource: R;
