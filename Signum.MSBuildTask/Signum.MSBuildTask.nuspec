@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Signum.MSBuildTask</id>
-    <version>5.0.0-preview2</version>
+    <version>5.0.0</version>
     <title>IL rewriter for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <projectUrl>http://www.signumframework.com</projectUrl>
@@ -17,8 +17,8 @@
   <files>
     <file src="SignumLogo.png" target="" />
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
-    <file src="bin\Release\net5\*.dll" target="build" />
-    <file src="bin\Release\net5\*.json" target="build" />
+    <file src="bin\Release\net5.0\*.dll" target="build" />
+    <file src="bin\Release\net5.0\*.json" target="build" />
     <file src="Signum.MSBuildTask.targets" target="build" />
   </files>
 </package>
