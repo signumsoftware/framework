@@ -27,13 +27,17 @@ namespace Signum.Upgrade.Upgrades
             {
                 file.Replace(
                     searchFor: @"<TargetFramework>netcoreapp3.1</TargetFramework>",
-                    replaceBy: @"<TargetFramework>net5</TargetFramework>");
+                    replaceBy: @"<TargetFramework>net5.0</TargetFramework>");
 
-                file.UpdateNugetReference(
-                    packageName: @"Signum.MSBuildTask",
-                    version: @"5.0.0-preview2");
+                file.UpdateNugetReference(@"Signum.MSBuildTask", @"5.0.0");
+                file.UpdateNugetReference(@"Signum.TSGenerator", @"5.0.0");
+                file.UpdateNugetReference(@"Swashbuckle.AspNetCore", @"5.6.3");
+                file.UpdateNugetReference(@"Microsoft.Extensions.Configuration", @"5.0.0");
+                file.UpdateNugetReference(@"Microsoft.Extensions.Configuration.Binder", @"5.0.0");
+                file.UpdateNugetReference(@"Microsoft.Extensions.Configuration.Json", @"5.0.0");
+                file.UpdateNugetReference(@"Microsoft.Extensions.Configuration.UserSecrets", @"5.0.0");
+                file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.8.0");
             });
-
 
             uctx.ChangeCodeFile($@"Southwind.React\Startup.cs", file =>
             {
