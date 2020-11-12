@@ -18,7 +18,6 @@ namespace Signum.Upgrade
             ApplicationName = applicationName;
         }
 
-
         public static UpgradeContext CreateFromCurrentDirectory()
         {
             var rootFolder = GetRootFolder();
@@ -30,7 +29,7 @@ namespace Signum.Upgrade
         static string GetRootFolder()
         {
             var directory = Directory.GetCurrentDirectory()!;
-            while (Directory.Exists(Path.Combine(directory, "Framework")))
+            while (!Directory.Exists(Path.Combine(directory, "Framework")))
             {
                 directory = Path.GetDirectoryName(directory);
                 if (directory == null)
@@ -52,69 +51,88 @@ namespace Signum.Upgrade
         public string TerminalDirectory => Path.Combine(RootFolder, ApplicationName + ".Terminal");
         public string ReactDirectory => Path.Combine(RootFolder, ApplicationName + ".React");
 
-        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot" };
+        public bool HasWarnings { get; internal set; }
 
-        public void ForeachCodeFile(string searchPattern, Action<CodeFile> action)
+        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", "Extensions" };
+
+        public void ChangeCodeFile(string fileName, Action<CodeFile> action, bool showWarnings = true)
         {
-            var codeFiles = GetCodeFiles(RootFolder, searchPattern, DefaultIgnoreDirectories);
-            foreach (var codeFile in codeFiles)
+            fileName = fileName.Replace("Southwind", ApplicationName);
+            if (!File.Exists(Path.Combine(this.RootFolder, fileName)))
             {
+                HasWarnings = true;
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "WARNING file " + fileName + " not found");
+            }
+            else
+            {
+                var codeFile = new CodeFile(fileName, this) { ShowWarnings = showWarnings };
                 action(codeFile);
                 codeFile.SafeIfNecessary();
             }
         }
 
-        public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action)
+
+        public void ForeachCodeFile(string searchPattern, Action<CodeFile> action, bool showWarnings = false)
         {
-            var codeFiles = GetCodeFiles(directory, searchPattern, DefaultIgnoreDirectories);
+            var codeFiles = GetCodeFiles(RootFolder, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
             foreach (var codeFile in codeFiles)
             {
+                codeFile.ShowWarnings = showWarnings;
                 action(codeFile);
                 codeFile.SafeIfNecessary();
             }
         }
 
-        public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action)
+        public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, bool showWarnings = false)
         {
+            var codeFiles = GetCodeFiles(directory, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
+            foreach (var codeFile in codeFiles)
+            {
+                codeFile.ShowWarnings = showWarnings;
+                action(codeFile);
+                codeFile.SafeIfNecessary();
+            }
+        }
+
+
+
+    
+
+        public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, bool showWarnings = false)
+        {
+
             foreach (var dir in directories)
             {
-                var codeFiles = GetCodeFiles(dir, searchPattern, DefaultIgnoreDirectories);
+                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a=>a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
+                    codeFile.ShowWarnings = showWarnings;
                     action(codeFile);
                     codeFile.SafeIfNecessary();
                 }
             }
         }
 
-        public void ChangeCodeFile(string fileName, Action<CodeFile> action)
-        {
-            fileName = fileName.Replace("Southwind", ApplicationName);
-            if (!Path.IsPathRooted(fileName))
-                fileName = Path.Combine(RootFolder, fileName);
-
-            var codeFile = new CodeFile(fileName, this);
-            action(codeFile);
-            codeFile.SafeIfNecessary();
-        }
-
-
-        public List<CodeFile> GetCodeFiles(string directory, string searchPattern, string[]? ignoreDirectories = null)
+        public List<CodeFile> GetCodeFiles(string directory, string[] searchPatterns, string[] ignoreDirectories)
         {
             var result = new List<CodeFile>();
 
-            FillSourceCodeFiles(result, directory, searchPattern, ignoreDirectories ?? DefaultIgnoreDirectories);
+            FillSourceCodeFiles(result, directory, searchPatterns, ignoreDirectories);
+
 
             return result;
         }
 
-        private void FillSourceCodeFiles(List<CodeFile> result, string directory, string searchPattern, string[] ignoreDirectories)
+        private void FillSourceCodeFiles(List<CodeFile> result, string directory, string[] searchPatterns, string[] ignoreDirectories)
         {
-            result.AddRange(Directory.GetFiles(directory, searchPattern, SearchOption.TopDirectoryOnly).Select(d => new CodeFile(d, this)));
+            foreach (var sp in searchPatterns)
+            {
+                result.AddRange(Directory.GetFiles(directory, sp, SearchOption.TopDirectoryOnly).Select(d => new CodeFile(Path.GetRelativePath(this.RootFolder, d), this)));
+            }
 
             foreach (var dir in Directory.GetDirectories(directory).Where(d => !ignoreDirectories.Contains(Path.GetFileName(d))))
             {
-                FillSourceCodeFiles(result, dir, searchPattern, ignoreDirectories);
+                FillSourceCodeFiles(result, dir, searchPatterns, ignoreDirectories);
             }
         }
     }

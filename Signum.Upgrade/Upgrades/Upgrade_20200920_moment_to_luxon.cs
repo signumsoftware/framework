@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override string SouthwindCommitHash => "0fd8bcf1397705bc14d76631b631ae17011925ac";
 
-        protected override void ExecuteInternal(UpgradeContext uctx)
+        public override void Execute(UpgradeContext uctx)
         {
             uctx.ChangeCodeFile($@"Southwind.React/App/MainPublic.tsx", file =>
             {
@@ -47,7 +47,6 @@ namespace Signum.Upgrade.Upgrades
                 file.Replace("moment()", "DateTime.local()");
                 file.Replace("moment(", "DateTime.fromISO(");
                 file.Replace(".fromNow(true)", ".toRelative()");
-
             });
 
             uctx.ChangeCodeFile($@"Southwind.React/App/vendors.js", file =>
@@ -57,7 +56,7 @@ namespace Signum.Upgrade.Upgrades
                     "require(\"luxon\");");
             });
 
-            uctx.ChangeCodeFile($@"Southwind.React\package.json", file =>
+            uctx.ChangeCodeFile($@"Southwind.React/package.json", file =>
             {
                 file.ReplaceLine(a => a.Contains("\"moment\""),
 @"""@types/luxon"": ""1.24.4"",

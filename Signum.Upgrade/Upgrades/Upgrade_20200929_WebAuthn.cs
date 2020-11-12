@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override string SouthwindCommitHash => "e7d32021965393f0fb2b46ef4ef58b464b091f93 120693c33e6948ce820cd093fec49b9206fe114f";
 
-        protected override void ExecuteInternal(UpgradeContext uctx)
+        public override void Execute(UpgradeContext uctx)
         {
             uctx.ChangeCodeFile($@"Southwind.Entities\ApplicationConfiguration.cs", file =>
             {
@@ -39,7 +39,7 @@ namespace Signum.Upgrade.Upgrades
             uctx.ChangeCodeFile($@"Southwind.React\App\Layout.tsx", file =>
             {
                 file.InsertAfterLastLine(
-                    l => l.StartsWith("import"),
+                    l => l.Contains("import *"),
                     "import * as WebAuthnClient from '@extensions/Authorization/WebAuthn/WebAuthnClient'");
 
                 file.Replace(
@@ -50,27 +50,27 @@ namespace Signum.Upgrade.Upgrades
             uctx.ChangeCodeFile($@"Southwind.React\App\MainPublic.tsx", file =>
             {
                 file.InsertAfterFirstLine(
-                    l => l.StartsWith("import * as AuthClient"),
+                    l => l.Contains("import * as AuthClient"),
                     "import * as WebAuthnClient from '@extensions/Authorization/WebAuthn/WebAuthnClient'");
 
                 file.InsertAfterFirstLine(
-                    l => l.StartsWith("import NotFound from './NotFound'"),
+                    l => l.Contains("import NotFound from './NotFound'"),
                     "import Login from '@extensions/Authorization/Login/Login'");
 
                 file.InsertBeforeFirstLine(
-              l => l.StartsWith("Services.SessionSharing.setAppNameAndRequestSessionStorage"),
+              l => l.Contains("Services.SessionSharing.setAppNameAndRequestSessionStorage"),
               @"Login.customLoginButtons = ctx => <WebAuthnClient.WebAuthnLoginButton ctx={ctx} />;
 ");
 
                 file.InsertAfterFirstLine(
-                    l => l.StartsWith("AuthClient.startPublic"),
+                    l => l.Contains("AuthClient.startPublic"),
                     @"WebAuthnClient.start({ routes, applicationName: ""Southwind"" });");
             });
 
-            uctx.ChangeCodeFile($@"Southwind\Templates\ApplicationConfiguration.tsx", file =>
+            uctx.ChangeCodeFile($@"Southwind.React/App/Southwind/Templates/ApplicationConfiguration.tsx", file =>
             {
                 file.InsertAfterLastLine(
-                    l => l.StartsWith("</Tab>"),
+                    l => l.Contains("</Tab>"),
 @"<Tab eventKey=""webauthn"" title={ctx.niceName(a => a.webAuthn)}>
   <RenderEntity ctx={ctx.subCtx(a => a.webAuthn)} />
  </Tab>");   
@@ -79,7 +79,17 @@ namespace Signum.Upgrade.Upgrades
             uctx.ChangeCodeFile($@"Southwind.Terminal\SouthwindMigrations.cs", file =>
             {
                 file.InsertBeforeFirstLine(
-                    l => l.StartsWith("}, //Auth"),
+                    l => l.Contains("}, //Auth"),
+@"},
+WebAuthn = new WebAuthnConfigurationEmbedded
+{
+    ServerName = ""Southwind""");
+            });
+
+            uctx.ChangeCodeFile($@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
+            {
+                file.InsertBeforeFirstLine(
+                    l => l.Contains("}, //Auth"),
 @"},
 WebAuthn = new WebAuthnConfigurationEmbedded
 {

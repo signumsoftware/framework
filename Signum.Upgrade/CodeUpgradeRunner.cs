@@ -1,4 +1,5 @@
-﻿using Signum.Utilities;
+using LibGit2Sharp;
+using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,11 +34,17 @@ namespace Signum.Upgrade
 
         void SetExecuted(UpgradeContext uctx, string upgradeFile)
         {
+            Console.WriteLine();
             if (!File.Exists(upgradeFile))
             {
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Creating empty {upgradeFile}...");
+                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"File {upgradeFile} not found... let's create one!");
+                Console.WriteLine();
+                var result = Upgrades.ChooseConsole(a => a.Key, "What do you think is the next upgrade that you should run? (the previous ones will be marked as executed)");
+
+                File.WriteAllLines(upgradeFile, result == null ? new string[0] : Upgrades.TakeWhile(a => a != result).Select(a => a.Key).ToArray());
+                Console.WriteLine();
+                SafeConsole.WriteLineColor(ConsoleColor.Green, $"File {upgradeFile} created!");
                 SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"(this file contains the Upgrades that have been run, and should be commited to git)");
-                File.Create(upgradeFile);
             }
             else
             {
@@ -58,7 +65,7 @@ namespace Signum.Upgrade
 
             if (Upgrades.All(a => a.IsExecuted))
             {
-                SafeConsole.WriteLineColor(ConsoleColor.Green, "All migrations are executed!");
+                SafeConsole.WriteLineColor(ConsoleColor.Green, "All Upgrades are executed!");
 
                 return false;
             }
@@ -66,39 +73,104 @@ namespace Signum.Upgrade
             {
                 var first = Upgrades.FirstEx(a => !a.IsExecuted);
 
-                SafeConsole.WriteLineColor(ConsoleColor.White, first.Key);
-                SafeConsole.WriteLineColor(ConsoleColor.Gray, first.Description);
-
                 if (!SafeConsole.Ask("Run next Upgrade ({0})?".FormatWith(first.Key)))
                     return false;
 
-                try
-                {
-                    first.Execute(uctx);
 
-                    return true;
-
-                }
-                catch (Exception ex)
-                {
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, ex.Message);
-
-                    if (!SafeConsole.Ask("Do you want to skip {0} and mark it as executed?".FormatWith(first.Key)))
-                    {
-                        File.AppendAllLines(signumUpgradeFile, new[] { first.Key });
-                    }
-                        
-                    return true;
-                }
+                return ExecuteUpgrade(first, uctx, signumUpgradeFile);
             }
 
+        }
+
+        public bool IsDirtyExceptSubmodules(string folder)
+        {
+            using (Repository rep = new Repository(folder))
+            {
+                var subModules = rep.Submodules.Select(a => a.Name);
+                var status = rep.RetrieveStatus();
+                return status.Any(a => a.State != FileStatus.Ignored && !subModules.Contains(a.FilePath));
+            }
+        }
+
+        private bool ExecuteUpgrade(CodeUpgradeBase upgrade, UpgradeContext uctx, string signumUpgradeFile)
+        {
+            while (IsDirtyExceptSubmodules(uctx.RootFolder))
+            {
+                Console.WriteLine();
+                Console.WriteLine("There are changes in the git repo. Commit or reset the changes and press [Enter]");
+                Console.ReadLine();
+            }
+
+            Console.WriteLine();
+
+            try
+            {
+                uctx.HasWarnings = false;
+                upgrade.Execute(uctx);
+            }
+            catch (Exception ex)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, ex.Message);
+
+                if (!SafeConsole.Ask("Do you want to skip {0} and mark it as executed?".FormatWith(upgrade.Key)))
+                    return false;
+            }
+
+            File.AppendAllLines(signumUpgradeFile, new[] { upgrade.Key });
+
+            Console.WriteLine();
+            if (uctx.HasWarnings)
+                SafeConsole.WriteColor(ConsoleColor.Yellow, "Upgrade finished with warnings...");
+            else
+                SafeConsole.WriteColor(ConsoleColor.Green, "Upgrade finished sucessfully!");
+
+            Console.WriteLine(" Please review the changes...");
+
+            Console.WriteLine();
+
+            switch (SafeConsole.Ask("What should we do next?", "commit", "retry", "exit"))
+            {
+                case "commit":
+                    using (Repository rep = new Repository(uctx.RootFolder))
+                    {
+                        if (rep.RetrieveStatus().IsDirty)
+                        {
+                            Commands.Stage(rep, "*");
+                            var sign = rep.Config.BuildSignature(DateTimeOffset.Now);
+                            rep.Commit(upgrade.Key, sign, sign);
+                            SafeConsole.WriteLineColor(ConsoleColor.White, "A commit with text message '{0}' has been created".FormatWith(upgrade.Key));
+                        }
+                        else
+                        {
+                            Console.WriteLine("Nothing to commit");
+                        }
+                    }
+                    return true;
+                case "retry":
+                    while (IsDirtyExceptSubmodules(uctx.RootFolder))
+                    {
+                        Console.WriteLine("Revert all the changes in git and press [Enter]");
+                        Console.ReadLine();
+                    }
+                    return true;
+                case "exit":
+                case null:
+                    return false;
+            }
+        
+            Console.ReadLine();
+
+            return true;
         }
 
         private void Draw()
         {
             Console.WriteLine();
             var next = this.Upgrades.FirstOrDefault(a => !a.IsExecuted);
+
+            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Available Upgrades:");
+            Console.WriteLine();
 
             foreach (var upg in this.Upgrades)
             {
@@ -110,6 +182,9 @@ namespace Signum.Upgrade
                     upg.IsExecuted ? "- " :
                     upg == next ? "->" :
                               "  ");
+
+                SafeConsole.WriteColor(color, " " + upg.Key);
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, " " + upg.Description);
 
             }
 

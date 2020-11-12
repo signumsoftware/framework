@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override string SouthwindCommitHash => "905e77fbd6c22a29206ff57ab4d3f034ed4b317b";
 
-        protected override void ExecuteInternal(UpgradeContext uctx)
+        public override void Execute(UpgradeContext uctx)
         {
             uctx.ChangeCodeFile($@"Southwind.React/App/polyfills.js", file =>
             {
@@ -29,7 +29,7 @@ namespace Signum.Upgrade.Upgrades
                 );
             });
 
-            uctx.ChangeCodeFile($@"Southwind.React/App/polyfills.js", file =>
+            uctx.ChangeCodeFile($@"Southwind.React/package.json", file =>
             {
                 file.RemoveAllLines(
                     l => l.Contains("url-search-params-polyfill") ||

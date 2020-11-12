@@ -1,4 +1,5 @@
 using Signum.Upgrade.Upgrades;
+using Signum.Utilities;
 using System;
 using System.Runtime.Intrinsics.Arm;
 
@@ -8,19 +9,27 @@ namespace Signum.Upgrade
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to Signum Upgrade");
+            Console.WriteLine();
+            Console.WriteLine("  ..:: Welcome to Signum Upgrade ::..");
+            Console.WriteLine();
+
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  This application helps you upgrade a Signum Framework application by modifying your source code.");
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  The closer your application resembles Southwind, the better it works.");
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  Review all the changes carefully");
+            Console.WriteLine();
 
             var uctx = UpgradeContext.CreateFromCurrentDirectory();
-            Console.WriteLine(uctx.ToString());
+            Console.Write("  RootFolder = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.RootFolder);
+            Console.Write("  ApplicationName = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.ApplicationName);
 
 
             new CodeUpgradeRunner
             {
+                new Upgrade_20200920_moment_to_luxon(),
+                new Upgrade_20200920_remove_numbro(),
+                new Upgrade_20200921_corejs(),
+                new Upgrade_20200929_WebAuthn(),
                 new Upgrade_20201110_DotNet5(),
-
-
-
-
             }.Run(uctx);
         }
     }

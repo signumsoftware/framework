@@ -14,7 +14,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override string SouthwindCommitHash => "db5736eff63bd240d78f27a6db71ab693c5903f8 5a03b1f37f7aba99013a6d3f9292bd6d631c306b";
 
-        protected override void ExecuteInternal(UpgradeContext uctx)
+        public override void Execute(UpgradeContext uctx)
         {
             uctx.ForeachCodeFile("*.cs", uctx.EntitiesDirectory, file =>
             {

@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override string SouthwindCommitHash => "3b138c66d53d6dce2cd3ee19411eec1f105f5fe4";
 
-        protected override void ExecuteInternal(UpgradeContext uctx)
+        public override void Execute(UpgradeContext uctx)
         {
             uctx.ChangeCodeFile($@"Southwind.React/App/MainPublic.tsx", file =>
             {
@@ -39,9 +39,8 @@ namespace Signum.Upgrade.Upgrades
             {
                 file.Replace(@"import numbro from ""numbro""", "import { toNumberFormat } from '@framework/Reflection'");
                 file.Replace(@"import numbro from 'numbro'", "import { toNumberFormat } from '@framework/Reflection'");
-                file.Replace(new Regex(@"numbro\((?<val>)(?:[^()]|(?<Open>[(])|(?<-Open>[)]))\)\.format\((?<frmt>)(?:[^()]|(?<Open>[(])|(?<-Open>[)]))\)"),
+                file.Replace(new Regex(@"numbro\((?<val>::EXPR::)\)\.format\((?<frmt>::EXPR::)\)").WithMacros(),
                     m => $@"toNumberFormat({m.Groups["frmt"].Value})/*move-to-local-var*/.format({m.Groups["val"].Value})");
-
             });
 
             uctx.ChangeCodeFile($@"Southwind.React/App/vendors.js", file =>
@@ -53,6 +52,20 @@ namespace Signum.Upgrade.Upgrades
             {
                 file.RemoveAllLines(a => a.Contains("\"numbro\""));
             });
+        }
+
+        
+    }
+
+    public static class RegexExpressions
+    {
+        public static Regex WithMacros(this Regex regex)
+        {
+            var pattern = regex.ToString();
+
+            var newPattern = pattern.Replace("::EXPR::", new Regex(@"(?:[^()]|(?<Open>[(])|(?<-Open>[)]))+").ToString()); /*Just for validation and coloring*/
+
+            return new Regex(newPattern, regex.Options);
         }
     }
 }
