@@ -17,7 +17,7 @@ namespace Signum.Utilities
     public static class Csv
     {
         // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
-        public static Encoding DefaultEncoding => Encoding.UTF8; 
+        public static Encoding DefaultEncoding => Encoding.UTF8;
 
         public static CultureInfo? DefaultCulture = null;
 
@@ -163,22 +163,22 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, options, constructor).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, options).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, options, constructor).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -197,7 +197,7 @@ namespace Signum.Utilities
                         sr.ReadLine();
 
                     var line = skipLines;
-                    while(true)
+                    while (true)
                     {
                         string? csvLine = sr.ReadLine();
 
@@ -214,7 +214,7 @@ namespace Signum.Utilities
                                 t = ReadObject<T>(m, members, parsers);
                             }
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             e.Data["row"] = line;
 
@@ -246,7 +246,11 @@ namespace Signum.Utilities
                             T? t = null;
                             try
                             {
-                                t = ReadObject<T>(m, members, parsers);
+
+                                if (constructor != null)
+                                    t = constructor(m);
+                                else
+                                    t = ReadObject<T>(m, members, parsers);
                             }
                             catch (Exception e)
                             {
@@ -347,7 +351,7 @@ namespace Signum.Utilities
             return t;
         }
 
-     
+
 
         static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
@@ -400,7 +404,7 @@ namespace Signum.Utilities
             Type? baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
-                if (!s.HasText()) 
+                if (!s.HasText())
                     return null;
 
                 type = baseType;
@@ -422,7 +426,7 @@ namespace Signum.Utilities
         }
     }
 
-    public class CsvReadOptions<T> where T: class
+    public class CsvReadOptions<T> where T : class
     {
         public Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? ParserFactory;
         public bool AsumeSingleLine = false;
