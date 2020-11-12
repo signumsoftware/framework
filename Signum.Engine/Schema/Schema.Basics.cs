@@ -1311,7 +1311,7 @@ namespace Signum.Engine.Maps
             this.PrimaryKey = primaryKey;
             this.BackReference = backReference;
             this.CollectionType = collectionType;
-            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
