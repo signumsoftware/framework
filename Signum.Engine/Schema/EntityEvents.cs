@@ -247,7 +247,7 @@ namespace Signum.Engine.Maps
                     var mlistGetter = mlistRoute.GetLambdaExpression<T, IMListPrivate>(true).Compile();
                     var partGetter = PropertyRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
 
-                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.PropertyInfo!);
+                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
 
                     return (e, retriever) =>
                     {
@@ -269,7 +269,7 @@ namespace Signum.Engine.Maps
                 {
                     var partGetter = PropertyRoute.Parent!.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
 
-                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.PropertyInfo!);
+                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
 
                     return (e, retriever) =>
                     {

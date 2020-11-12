@@ -22,8 +22,8 @@ namespace Signum.Engine.Json
     public class PropertyConverter
     {
         public readonly IPropertyValidator? PropertyValidator;
-        public readonly Func<object, object?>? GetValue;
-        public readonly Action<object, object?>? SetValue;
+        public readonly Func<ModifiableEntity, object?>? GetValue;
+        public readonly Action<ModifiableEntity, object?>? SetValue;
 
         public ReadJsonPropertyDelegate? CustomReadJsonProperty { get; set; }
         public WriteJsonPropertyDelegate? CustomWriteJsonProperty { get; set; }
@@ -37,8 +37,8 @@ namespace Signum.Engine.Json
         public PropertyConverter(Type type, IPropertyValidator pv)
         {
             this.PropertyValidator = pv;
-            GetValue = ReflectionTools.CreateGetterUntyped(type, pv.PropertyInfo);
-            SetValue = ReflectionTools.CreateSetterUntyped(type, pv.PropertyInfo);
+            GetValue = ReflectionTools.CreateGetter<ModifiableEntity, object?>(pv.PropertyInfo);
+            SetValue = ReflectionTools.CreateSetter<ModifiableEntity, object?>(pv.PropertyInfo);
         }
 
         public override string ToString()
@@ -118,6 +118,7 @@ namespace Signum.Engine.Json
         public Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>();
         public Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
         public Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
+        public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error";
 
         public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
         {
@@ -209,6 +210,8 @@ namespace Signum.Engine.Json
         {
             return (JsonConverter)Activator.CreateInstance(typeof(EntityJsonConverter<>).MakeGenericType(typeToConvert), this)!;
         }
+
+ 
     }
 
     public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
@@ -435,49 +438,56 @@ namespace Signum.Engine.Json
 
                 using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity)))
                 {
-                    var converter = options.GetConverter(pi.PropertyType) as IJsonConverterWithExisting;
-
-                    object? newValue = converter != null ?
-                        converter.Read(ref reader, pi.PropertyType, options, oldValue) :
-                        JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
-
-                    if(Factory.Strategy == EntityJsonConverterStrategy.Full)
+                    try
                     {
-                        pc.SetValue?.Invoke(entity, newValue);
-                    }
-                    else
-                    {
-                        if (pi.CanWrite)
+                        var converter = options.GetConverter(pi.PropertyType) as IJsonConverterWithExisting;
+
+                        object? newValue = converter != null ?
+                            converter.Read(ref reader, pi.PropertyType, options, oldValue) :
+                            JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
+
+                        if (Factory.Strategy == EntityJsonConverterStrategy.Full)
                         {
-                            if (!IsEquals(newValue, oldValue))
+                            pc.SetValue?.Invoke(entity, newValue);
+                        }
+                        else
+                        {
+                            if (pi.CanWrite)
                             {
-                                if (!markedAsModified && parentRoute.RootType.IsEntity())
+                                if (!IsEquals(newValue, oldValue))
                                 {
-                                    if (!pi.HasAttribute<IgnoreAttribute>())
+                                    if (!markedAsModified && parentRoute.RootType.IsEntity())
                                     {
-                                        try
+                                        if (!pi.HasAttribute<IgnoreAttribute>())
                                         {
-                                            //Call attention of developer
-                                            throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
-                                        }
-                                        catch (Exception)
-                                        {
+                                            try
+                                            {
+                                                //Call attention of developer
+                                                throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+                                            }
+                                            catch (Exception)
+                                            {
+                                            }
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    Factory.AssertCanWrite(pr, entity);
-                                    if (newValue == null && pc.IsNotNull())
+                                    else
                                     {
-                                        entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
-                                        return;
-                                    }
+                                        Factory.AssertCanWrite(pr, entity);
+                                        if (newValue == null && pc.IsNotNull())
+                                        {
+                                            entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
+                                            return;
+                                        }
 
-                                    pc.SetValue?.Invoke(entity, newValue);
+                                        pc.SetValue?.Invoke(entity, newValue);
+                                    }
                                 }
                             }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        entity.SetTemporalError(pi, this.Factory.GetErrorMessage(pi, e));
                     }
                 }
             }

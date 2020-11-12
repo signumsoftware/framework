@@ -44,6 +44,7 @@ namespace Signum.Engine
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
+                    con.Open();
                     var sql =
     @"SELECT
     SERVERPROPERTY ('ProductVersion') as ProductVersion,
@@ -519,7 +520,7 @@ namespace Signum.Engine
 
         public override int MaxNameLength => 128;
 
-        public override string ToString() => $"SqlConnector({Version})";
+        public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
     }
 
     public class SqlParameterBuilder : ParameterBuilder

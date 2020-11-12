@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Utilities.Reflection
 {
@@ -285,86 +286,43 @@ namespace Signum.Utilities.Reflection
             return ((MemberExpression)body).Expression!.Type;
         }
 
-        public static Func<T, P>? CreateGetter<T, P>(MemberInfo m)
-        {
-            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                return null;
-
-            ParameterExpression p = Expression.Parameter(typeof(T), "p");
-            var exp = Expression.Lambda(typeof(Func<T, P>), Expression.MakeMemberAccess(p, m), p);
-            return (Func<T, P>)exp.Compile();
-        }
-
-        public static Func<T, object?>? CreateGetter<T>(MemberInfo m)
+        public static Func<T, R>? CreateGetter<T, R>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateGetter"))
             {
-                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
+                if (m is PropertyInfo pi && !pi.CanRead)
                     return null;
 
-                ParameterExpression p = Expression.Parameter(typeof(T), "p");
-                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
-                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
-                return (Func<T, object?>)exp.Compile();
+                ParameterExpression t = Expression.Parameter(typeof(T), "t");
+                var member = Expression.MakeMemberAccess(t.ConvertIfNeeded(m.DeclaringType!), m);
+                var exp = Expression.Lambda(typeof(Func<T, R>), member.ConvertIfNeeded(typeof(R)), t);
+                return (Func<T, R>)exp.Compile();
             }
         }
 
-        public static Func<object, object?>? CreateGetterUntyped(Type type, MemberInfo m)
+        static Expression ConvertIfNeeded(this Expression expression, Type type)
         {
-            using (HeavyProfiler.LogNoStackTrace("CreateGetterUntyped"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                    return null;
+            if (type.IsAssignableFrom(expression.Type) && expression.Type.IsValueType == type.IsValueType)
+                return expression;
 
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
-                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
-                return (Func<object, object?>)exp.Compile();
-            }
+            return Expression.Convert(expression, type);
         }
 
         public static Action<T, P>? CreateSetter<T, P>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
             {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
+                if (m is PropertyInfo pi && !pi.CanWrite)
                     return null;
 
                 ParameterExpression t = Expression.Parameter(typeof(T), "t");
                 ParameterExpression p = Expression.Parameter(typeof(P), "p");
-                var exp = Expression.Lambda(typeof(Action<T, P>),
-                    Expression.Assign(Expression.MakeMemberAccess(t, m), p), t, p);
+                
+                var t2 = t.ConvertIfNeeded(m.DeclaringType!);
+                var p2 = p.ConvertIfNeeded(m.ReturningType());
+
+                var exp = Expression.Lambda(typeof(Action<T, P>), Expression.Assign(Expression.MakeMemberAccess(t2, m), p2), t, p);
                 return (Action<T, P>)exp.Compile();
-            }
-        }
-
-        public static Action<T, object?>? CreateSetter<T>(MemberInfo m)
-        {
-            using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                    return null;
-
-                ParameterExpression t = Expression.Parameter(typeof(T), "t");
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                var exp = Expression.Lambda(typeof(Action<T, object>),
-                    Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<T, object?>)exp.Compile();
-            }
-        }
-        
-        public static Action<object, object?>? CreateSetterUntyped(Type type, MemberInfo m)
-        {
-            using (HeavyProfiler.LogNoStackTrace("CreateSetterUntyped"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                    return null;
-
-                ParameterExpression t = Expression.Parameter(typeof(object), "t");
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                var exp = Expression.Lambda(typeof(Action<object, object>),
-                    Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<object, object?>)exp.Compile();
             }
         }
 

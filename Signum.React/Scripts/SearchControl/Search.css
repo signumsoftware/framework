@@ -339,3 +339,7 @@ ul.sf-context-menu li a:not([disabled]) {
     font-weight: bold;
     color: black;
 }
+
+select.sf-pagination-mode, select.sf-elements-per-page {
+    vertical-align: text-top;
+}

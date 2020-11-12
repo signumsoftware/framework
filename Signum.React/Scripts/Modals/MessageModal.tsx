@@ -16,9 +16,13 @@ export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "ye
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
+interface MessageModalContext {
+  handleButtonClicked(m: MessageModalResult) : void;
+}
+
 interface MessageModalProps extends IModalProps<MessageModalResult | undefined> {
   title: React.ReactChild;
-  message: React.ReactChild;
+  message: React.ReactChild | ((ctx: MessageModalContext) => React.ReactChild);
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
   icon?: MessageModalIcon;
@@ -169,7 +173,11 @@ export default function MessageModal(p: MessageModalProps) {
         {renderTitle()}
       </div>
       <div className="modal-body">
-        {renderText(p.message, p.style)}
+        {
+          typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i} className={dialogTextClass(p.style)}>{line}</p>) :
+            typeof p.message == "function" ? p.message({ handleButtonClicked }) :
+              p.message
+        }
       </div>
       <div className="modal-footer">
         {renderButtons(p.buttons)}
@@ -229,12 +237,3 @@ function dialogTextClass(style?: MessageModalStyle) {
   //        return "text-primary";
   //}
 }
-
-
-function renderText(message: React.ReactChild | null | undefined, style?: MessageModalStyle): React.ReactFragment | null | undefined {
-  if (typeof message == "string")
-    return message.split("\n").map((p, i) => <p key={i} className={dialogTextClass(style)}>{p}</p>);
-
-  return message;
-}
-

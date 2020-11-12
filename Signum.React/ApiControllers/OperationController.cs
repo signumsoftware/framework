@@ -444,7 +444,7 @@ namespace Signum.React.ApiControllers
                             break;
                     }
                 }
-                else if (setter.Operation == PropertyOperation.CreateNewEntiy)
+                else if (setter.Operation == PropertyOperation.CreateNewEntity)
                 {
                     var subPr = pr.Type.IsEmbeddedEntity() ? pr : PropertyRoute.Root(TypeLogic.GetType(setter.EntityType!));
                     var item = (ModifiableEntity)Activator.CreateInstance(subPr.Type)!;

@@ -364,7 +364,7 @@ namespace Signum.Engine.Maps
 
         Type type;
         Func<object, object?>? getter;
-        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo)!);
+        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
 
         public EntityField(Type type, FieldInfo fi, Field field)
         {

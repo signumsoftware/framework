@@ -33,7 +33,7 @@ namespace Signum.Entities.Reflection
 
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
-            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
+            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Getter)
                 .Where(p => !((PropertyInfo)p.MemberInfo).HasAttribute<HiddenPropertyAttribute>())
                .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
                    propertyInfo: (PropertyInfo)a.MemberInfo, a.Getter!, 
@@ -109,7 +109,7 @@ namespace Signum.Entities.Reflection
 
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
-            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
+            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Getter)
               .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
                   propertyInfo: (PropertyInfo)a.MemberInfo,
                   getter: a.Getter!,
