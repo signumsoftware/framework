@@ -122,18 +122,18 @@ namespace Signum.Upgrade
             });
         }
 
-        public void InsertAfterFirstLine(Expression<Predicate<string>> condition, string otherLines)
+        public void InsertAfterFirstLine(Expression<Predicate<string>> condition, string text)
         {
             ProcessLines(lines =>
             {
                 var pos = lines.FindIndex(condition.Compile());
                 if(pos == -1)
                 {
-                    Warning($"Unable to find line where {condition} the insert after {otherLines}");
+                    Warning($"Unable to find line where {condition} the insert after {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
@@ -145,91 +145,90 @@ namespace Signum.Upgrade
 
         /// <param name="fromLine">Not included</param>
         /// <param name="toLine">Not included</param>
-        public void ReplaceBetween(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string otherLines
-            )
+        public void ReplaceBetween(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
         {
             ProcessLines(lines =>
             {
                 var from = lines.FindIndex(fromLine.Compile());
                 if (from == -1)
                 {
-                    Warning($"Unable to find a line where {fromLine} to insert after {otherLines}");
+                    Warning($"Unable to find a line where {fromLine} to insert after {text}");
                     return false;
                 }
                 var to = lines.FindIndex(from + 1, toLine.Compile());
                 if(to == -1)
                 {
-                    Warning($"Unable to find a line where {toLine} after line {to} to insert before {otherLines}");
+                    Warning($"Unable to find a line where {toLine} after line {to} to insert before {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from + 1, to - from - 1);
-                lines.InsertRange(from + 1, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(from + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
 
-        public void ReplaceLine(Expression<Predicate<string>> condition, string otherLines)
+        public void ReplaceLine(Expression<Predicate<string>> condition, string text)
         {
             ProcessLines(lines =>
             {
                 var pos = lines.FindIndex(condition.Compile());
                 if (pos == -1)
                 {
-                    Warning($"Unable to find a line where {condition} to replace it by {otherLines}");
+                    Warning($"Unable to find a line where {condition} to replace it by {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
                 lines.RemoveRange(pos, 1);
-                lines.InsertRange(pos, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
 
-        public void InsertBeforeFirstLine(Expression<Predicate<string>> condition, string otherLines)
+        public void InsertBeforeFirstLine(Expression<Predicate<string>> condition, string text)
         {
             ProcessLines(lines =>
             {
                 var pos = lines.FindIndex(condition.Compile());
                 if (pos == -1)
                 {
-                    Warning($"Unable to find a line where {condition} to insert before {otherLines}");
+                    Warning($"Unable to find a line where {condition} to insert before {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
 
-        public void InsertAfterLastLine(Expression<Predicate<string>> condition, string otherLines)
+        public void InsertAfterLastLine(Expression<Predicate<string>> condition, string text)
         {
             ProcessLines(lines =>
             {
                 var pos = lines.FindLastIndex(condition.Compile());
                 if (pos == -1)
                 {
-                    Warning($"Unable to find a line where {condition} to insert after {otherLines}");
+                    Warning($"Unable to find a line where {condition} to insert after {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
 
-        public void InsertBeforeLastLine(Expression<Predicate<string>> condition, string otherLines)
+        public void InsertBeforeLastLine(Expression<Predicate<string>> condition, string text)
         {
             ProcessLines(lines =>
             {
                 var pos = lines.FindLastIndex(condition.Compile());
                 if (pos == -1)
                 {
-                    Warning($"Unable to find a line where {condition} to insert before {otherLines}");
+                    Warning($"Unable to find a line where {condition} to insert before {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, otherLines.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
@@ -253,7 +252,15 @@ namespace Signum.Upgrade
                 throw new InvalidOperationException("");
         }
 
-        public bool UpdateNugetReference(string packageName, string version)
+        public void UpgradeNpmPackage(string packageName, string version)
+        {
+            AssertExtension(".json");
+
+            this.ReplaceLine(condition: a => a.Contains(@$"""{packageName}"""),
+                text: @$"""{packageName}"": ""{version}""");
+        }
+
+        public void UpdateNugetReference(string packageName, string version)
         {
             AssertExtension(".csproj");
 
@@ -265,17 +272,16 @@ namespace Signum.Upgrade
             if (elem == null)
             {
                 Warning($"Unable to find reference to Nuget {packageName} to update it to {version}");
-                return false;
             }
+            else
+            {
+                elem.Attribute("Version")!.Value = version;
 
-            elem.Attribute("Version")!.Value = version;
-
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
-
-            return true;
+                this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            }
         }
 
-        public bool RemoveNugetReference(string packageName)
+        public void RemoveNugetReference(string packageName)
         {
             AssertExtension(".csproj");
 
@@ -287,17 +293,16 @@ namespace Signum.Upgrade
             if (eleme == null)
             {
                 Warning($"Unable to remove reference to Nuget {packageName} because is not found");
-                return false;
             }
+            else
+            {
+                eleme.Remove();
 
-            eleme.Remove();
-
-            this.Content = doc.ToString(SaveOptions.DisableFormatting);
-
-            return true;
+                this.Content = doc.ToString(SaveOptions.DisableFormatting);
+            }
         }
 
-        public bool AddNugetReference(string packageName, string version)
+        public void AddNugetReference(string packageName, string version)
         {
             AssertExtension(".csproj");
 
@@ -312,7 +317,6 @@ namespace Signum.Upgrade
 
             this.Content = doc.ToString(SaveOptions.DisableFormatting);
 
-            return true;
         }
     }
 
