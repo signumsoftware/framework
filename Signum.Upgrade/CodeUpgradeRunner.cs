@@ -39,9 +39,9 @@ namespace Signum.Upgrade
             {
                 SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"File {upgradeFile} not found... let's create one!");
                 Console.WriteLine();
-                var result = Upgrades.ChooseConsole(a => a.Key, "What do you think is the next upgrade that you should run? (the previous ones will be marked as executed)");
+                var result = Upgrades.Select(a=>a.Key).And("<< Mark ALL upgrades as executed >>").ChooseConsole(a => a.ToString(), "What do you think is the next upgrade that you should run? (the previous ones will be marked as executed)");
 
-                File.WriteAllLines(upgradeFile, result == null ? new string[0] : Upgrades.TakeWhile(a => a != result).Select(a => a.Key).ToArray());
+                File.WriteAllLines(upgradeFile, result == null ? new string[0] : Upgrades.TakeWhile(a => a.Key != result).Select(a => a.Key).ToArray());
                 Console.WriteLine();
                 SafeConsole.WriteLineColor(ConsoleColor.Green, $"File {upgradeFile} created!");
                 SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"(this file contains the Upgrades that have been run, and should be commited to git)");
