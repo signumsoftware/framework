@@ -127,18 +127,6 @@ namespace Signum.Engine.Authorization
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
 
-                QueryLogic.Queries.Register(RoleQuery.RolesReferedBy, () =>
-                    from r in Database.Query<RoleEntity>()
-                    from rc in r.Roles
-                    select new
-                    {
-                        Entity = r,
-                        r.Id,
-                        r.Name,
-                        Refered = rc,
-                    });
-
-
                 UserGraph.Register();
             }
         }
@@ -622,7 +610,9 @@ namespace Signum.Engine.Authorization
                 doc.Save(fileName);
                 Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
 
-                if (SafeConsole.Ask("Publish to Load?"))
+                var info = new DirectoryInfo("../../../");
+
+                if (info.Exists && SafeConsole.Ask($"Publish to '{info.Name}' directory (source code)?"))
                     File.Copy(fileName, "../../../" + Path.GetFileName(fileName), overwrite: true);
             }
 

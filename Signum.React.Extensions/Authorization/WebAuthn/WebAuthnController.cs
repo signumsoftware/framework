@@ -149,7 +149,7 @@ namespace Signum.React.Authorization
 
         public class AssertionOptionsRequest
         {
-            public string UserName;
+            public string? UserName;
         }
 
         public class AssertionOptionsResponse

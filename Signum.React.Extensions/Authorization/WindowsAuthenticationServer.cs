@@ -30,7 +30,7 @@ namespace Signum.React.Authorization
             var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\');
             var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-            if(ada.GetConfig().AllowSimpleUserNames)
+            if(ada.GetConfig().AllowMatchUsersBySimpleUserName)
             {
                 UserEntity? user = AuthLogic.RetrieveUser(localName);
                 if (user != null)

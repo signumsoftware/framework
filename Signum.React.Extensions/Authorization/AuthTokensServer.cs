@@ -22,7 +22,7 @@ namespace Signum.React.Authorization
 {
     public static class AuthTokenServer
     {
-        static Func<AuthTokenConfigurationEmbedded> Configuration;
+        public static Func<AuthTokenConfigurationEmbedded> Configuration;
 
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
@@ -60,7 +60,7 @@ namespace Signum.React.Authorization
 
         static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
-            var authHeader = ctx.HttpContext.Request.Headers["Signum_Authorization"].FirstOrDefault();
+            var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             if (authHeader == null)
             {
                 return null;
@@ -82,7 +82,7 @@ namespace Signum.React.Authorization
             return new SignumAuthenticationResult { User = token.User };
         }
 
-        static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
+        public static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
         {
             var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 

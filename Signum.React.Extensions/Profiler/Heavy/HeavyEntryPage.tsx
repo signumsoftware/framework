@@ -210,9 +210,9 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
       .domain([min, max])
       .range([0, width]);
 
-    let entryHeight = y(1);
+    let entryHeight = y(1)!;
 
-    var filteredData = data.filter(a => a.end > min && a.beforeStart < max && (x(a.end) - x(a.beforeStart)) > 1);
+    var filteredData = data.filter(a => a.end > min && a.beforeStart < max && (x(a.end)! - x(a.beforeStart)!) > 1);
 
     function handleOnClick(e: React.MouseEvent<SVGGElement>, d: HeavyProfilerEntry) {
       if (d == p.selected) {
@@ -238,18 +238,18 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
               y={y(getDepth(d))}
               x={x(Math.max(min, d.beforeStart))}
               height={entryHeight - 1}
-              width={Math.max(0, x(Math.min(max, d.end)) - x(Math.max(min, d.beforeStart)))}
+              width={Math.max(0, x(Math.min(max, d.end))! - x(Math.max(min, d.beforeStart))!)}
               fill={d.color}
               stroke={d == sel ? '#000' : '#ccc'} />
             <rect className="shape-before"
-              y={y(getDepth(d)) + 1}
+              y={y(getDepth(d))! + 1}
               x={x(Math.max(min, d.beforeStart))}
               height={entryHeight - 2}
-              width={Math.max(0, x(Math.min(max, d.start)) - x(Math.max(min, d.beforeStart)))}
+              width={Math.max(0, x(Math.min(max, d.start))! - x(Math.max(min, d.beforeStart))!)}
               fill={d.color} />
             <text className="label label-top"
               y={y(getDepth(d))}
-              x={x(Math.max(min, d.start)) + 3}
+              x={x(Math.max(min, d.start))! + 3}
               dy={fontPadding + fontSize}
               fill={d == sel ? '#000' : '#fff'}>
               {d.elapsed}
@@ -257,7 +257,7 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
             <text className="label label-bottom"
               y={y(getDepth(d))}
               dy={(2 * fontPadding) + (2 * fontSize)}
-              x={x(Math.max(min, d.start)) + 3}
+              x={x(Math.max(min, d.start))! + 3}
               fill={d == sel ? '#000' : '#fff'}>
               {d.role + (d.additionalData ? (" - " + d.additionalData.etc(30)) : "")}
             </text>

@@ -14,12 +14,12 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import Login, { LoginWithWindowsButton } from './Login/Login';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
+import { loginWithAzureAD } from './AzureAD/AzureAD';
 
 export let types: boolean;
 export let properties: boolean;
@@ -37,6 +37,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User')));
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
+  Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {

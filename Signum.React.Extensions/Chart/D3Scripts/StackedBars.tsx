@@ -107,11 +107,11 @@ export default function renderStackedBars({ data, width, height, parameters, loa
         {s.filter(r => r.data.values[s.key] != undefined)
           .orderBy(r => keyColumn.getKey(r.data.rowValue))
           .map(r => <rect key={keyColumn.getKey(r.data.rowValue)} className="shape sf-transition"
-            transform={translate(x(r[0]), y(keyColumn.getKey(r.data.rowValue))!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+            transform={translate(x(r[0])!, y(keyColumn.getKey(r.data.rowValue))!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
             stroke={y.bandwidth() > 4 ? '#fff' : undefined}
             fill={colorByKey[s.key] ?? color(s.key)}
             height={y.bandwidth()}
-            width={x(r[1]) - x(r[0])}
+            width={x(r[1])! - x(r[0])!}
             onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
@@ -121,10 +121,10 @@ export default function renderStackedBars({ data, width, height, parameters, loa
 
         {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           s.orderBy(r => keyColumn.getKey(r.data.rowValue))
-            .filter(r => (x(r[1]) - x(r[0])) > 20)
+            .filter(r => (x(r[1])! - x(r[0])!) > 20)
             .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
               transform={translate(
-                x(r[0]) * 0.5 + x(r[1]) * 0.5,
+                x(r[0])! * 0.5 + x(r[1])! * 0.5,
                 y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
               )}
               fill={parameters["NumberColor"]}
@@ -157,7 +157,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             <g className="y-axis-tick-label" transform={translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2)}>
               {keyValues.map((k, i) => {
                 var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
-                var posx = x(maxValue);
+                var posx = x(maxValue)!;
                 return (<TextEllipsis key={keyColumn.getKey(k)}
                   transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getKey(k))!)}
                   maxWidth={posx >= size / 2 ? posx : size - posx}

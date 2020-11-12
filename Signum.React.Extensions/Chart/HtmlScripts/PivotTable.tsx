@@ -182,7 +182,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (params.scale && params.gradient != "None") {
       const scaleFunc = ChartUtils.scaleFor(valueColumn, values, 0, 1, params.scale);
       const gradient = ChartUtils.getColorInterpolation(params.gradient)!;
-      color = (num: number) => gradient(scaleFunc(num));
+      color = (num: number) => gradient(scaleFunc(num)!);
     }
 
     return ({
@@ -204,10 +204,10 @@ export default function renderPivotTable({ data, width, height, parameters, load
     try {
 
       return cssStyle.split(";").filter(a => Boolean(a)).toObject(a => {
-        var name = a.before(":");
+        var name = a.before(":").trim();
         var camelCased = name.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
         return camelCased;
-      }, a => a.after(":"));
+      }, a => a.after(":").trim());
     } catch (e) {
       throw new Error(`Invalid CSS Style "${cssStyle}": ${(e as Error).message ?? e}`);
     }

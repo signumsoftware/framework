@@ -104,14 +104,14 @@ export default function renderBars({ data, width, height, parameters, loading, o
           parameters["Labels"] == "Inside" ?
             <g className="y-label" transform={translate(xRule.start('content') + labelMargin, yRule.start('content') + y.bandwidth() / 2)}>
               {orderedRows.map(r => {
-                var posx = x(valueColumn.getValue(r));
+                var posx = x(valueColumn.getValue(r))!;
                 return (
                   <TextEllipsis key={keyColumn.getValueKey(r)}
                     transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getValueKey(r))!)}
                     maxWidth={posx >= size / 2 ? posx : size - posx}
                     padding={labelMargin}
                     className="y-label sf-transition"
-                    fill={x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
+                    fill={x(valueColumn.getValue(r))! >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dominantBaseline="middle"
                     fontWeight="bold"
                     onClick={e => onDrillDown(r, e)}
@@ -126,12 +126,12 @@ export default function renderBars({ data, width, height, parameters, loading, o
       {parseFloat(parameters["NumberOpacity"]) > 0 &&
         <g className="numbers-label" transform={translate(xRule.start('content'), yRule.start('content'))}>
           {orderedRows
-            .filter(r => x(valueColumn.getValue(r)) > 20)
+            .filter(r => x(valueColumn.getValue(r))! > 20)
             .map(r => {
-              var posx = x(valueColumn.getValue(r));
+              var posx = x(valueColumn.getValue(r))!;
 
               return (<TextEllipsis key={keyColumn.getValueKey(r)}
-                transform={translate(x(valueColumn.getValue(r)) / 2, y(keyColumn.getValueKey(r))! + y.bandwidth() / 2)}
+                transform={translate(x(valueColumn.getValue(r))! / 2, y(keyColumn.getValueKey(r))! + y.bandwidth() / 2)}
                 maxWidth={posx >= size / 2 ? posx : size - posx}
                 padding={labelMargin}
                 className="number-label sf-transition"
