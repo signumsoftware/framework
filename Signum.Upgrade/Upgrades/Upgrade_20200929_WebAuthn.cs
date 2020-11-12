@@ -55,11 +55,11 @@ namespace Signum.Upgrade.Upgrades
 
                 file.InsertAfterFirstLine(
                     l => l.Contains("import NotFound from './NotFound'"),
-                    "import Login from '@extensions/Authorization/Login/Login'");
+                    "import LoginPage from '@extensions/Authorization/Login/LoginPage'");
 
                 file.InsertBeforeFirstLine(
               l => l.Contains("Services.SessionSharing.setAppNameAndRequestSessionStorage"),
-              @"Login.customLoginButtons = ctx => <WebAuthnClient.WebAuthnLoginButton ctx={ctx} />;
+              @"LoginPage.customLoginButtons = ctx => <WebAuthnClient.WebAuthnLoginButton ctx={ctx} />;
 ");
 
                 file.InsertAfterFirstLine(

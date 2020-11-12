@@ -49,6 +49,7 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ChangeCodeFile($@"Southwind.React/package.json", file =>
             {
+                file.UpgradeNpmPackage("@types/react", "file:../Framework/Signum.React/node_modules/@types/react");
                 file.UpgradeNpmPackage("node-sass", "5.0.0");
                 file.UpgradeNpmPackage("sass-loader", "10.1.0");
             });
@@ -57,6 +58,23 @@ namespace Signum.Upgrade.Upgrades
             {
                 file.ReplaceLine(
                     a=>a.Contains("FROM mcr.microsoft.com/dotnet/core/aspnet"), 
+                    "FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base");
+                file.ReplaceLine(
+                    a => a.Contains("FROM mcr.microsoft.com/dotnet/core/sdk"),
+                    "FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build");
+
+                file.ReplaceBetween(
+                    a => a.Contains("RUN apt-get -y install curl"),
+                    a => a.Contains("RUN apt-get -y install nodejs"),
+@"RUN apt-get -y install curl
+RUN curl -sL https://deb.nodesource.com/setup_15.x | bash -
+RUN apt-get install -y nodejs");
+            });
+
+            uctx.ChangeCodeFile($@"Southwind.React/App/MainPublic.tsx", file =>
+            {
+                file.ReplaceLine(
+                    a => a.Contains("FROM mcr.microsoft.com/dotnet/core/aspnet"),
                     "FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base");
                 file.ReplaceLine(
                     a => a.Contains("FROM mcr.microsoft.com/dotnet/core/sdk"),
