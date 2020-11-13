@@ -46,7 +46,7 @@ namespace Signum.Utilities
             var defEncoding = encoding ?? DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
-            string separator = defCulture.TextInfo.ListSeparator;
+            string separator = GetListSeparator(defCulture).ToString();
 
             if (typeof(IList).IsAssignableFrom(typeof(T)))
             {
@@ -125,7 +125,7 @@ namespace Signum.Utilities
             if (p == null)
                 return null;
 
-            string separator = culture.TextInfo.ListSeparator;
+            char separator = GetListSeparator(culture);
 
             if (p.Contains(separator) || p.Contains("\"") || p.Contains("\r") || p.Contains("\n"))
             {
@@ -353,10 +353,22 @@ namespace Signum.Utilities
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
         static Regex GetRegex(CultureInfo culture, TimeSpan timeout)
         {
-            char separator = culture.TextInfo.ListSeparator.SingleEx();
+            char separator = GetListSeparator(culture);
 
             return regexCache.GetOrAdd(separator, s =>
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
+        }
+
+        private static char GetListSeparator(CultureInfo culture)
+        {
+            //Temp Hack https://github.com/dotnet/runtime/issues/43795
+            if (culture.NumberFormat.NumberDecimalSeparator == ",")
+                return ';';
+
+
+            return ',';
+
+            //return culture.TextInfo.ListSeparator.SingleEx();
         }
 
         static class CsvMemberCache<T>

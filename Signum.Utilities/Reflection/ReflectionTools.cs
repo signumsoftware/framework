@@ -73,22 +73,22 @@ namespace Signum.Utilities.Reflection
                   null;
         }
 
-        public static bool FieldEquals(FieldInfo f1, FieldInfo f2)
+        public static bool FieldEquals(FieldInfo? f1, FieldInfo? f2)
         {
             return MemeberEquals(f1, f2);
         }
 
-        public static bool PropertyEquals(PropertyInfo p1, PropertyInfo p2)
+        public static bool PropertyEquals(PropertyInfo? p1, PropertyInfo? p2)
         {
             return MemeberEquals(p1, p2);
         }
 
-        public static bool MethodEqual(MethodInfo m1, MethodInfo m2)
+        public static bool MethodEqual(MethodInfo? m1, MethodInfo? m2)
         {
             return MemeberEquals(m1, m2);
         }
 
-        public static bool MemeberEquals(MemberInfo m1, MemberInfo m2)
+        public static bool MemeberEquals(MemberInfo? m1, MemberInfo? m2)
         {
             if (m1 == m2)
                 return true;
@@ -172,7 +172,7 @@ namespace Signum.Utilities.Reflection
             if (!(body is NewExpression ex))
                 throw new ArgumentException("The lambda 'constuctor' should be an expression constructing an object");
 
-            return ex.Constructor;
+            return ex.Constructor!;
         }
 
 
@@ -283,7 +283,7 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            return ((MemberExpression)body).Expression.Type;
+            return ((MemberExpression)body).Expression!.Type;
         }
 
         public static Func<T, R>? CreateGetter<T, R>(MemberInfo m)

@@ -83,7 +83,7 @@ namespace Signum.Utilities
             Console.Write(question);
             do
             {
-                var userAnswer = Console.ReadLine();
+                var userAnswer = Console.ReadLine() ?? "";
 
                 string? error = stringValidator == null ? null : stringValidator(userAnswer);
                 if (error == null)
@@ -113,7 +113,7 @@ namespace Signum.Utilities
             Console.Write(question + " ({0}) ".FormatWith(answers.ToString("/")));
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine()?.ToLower();
                 if (!userAnswer.HasText())
                     return null;
 
@@ -146,7 +146,7 @@ namespace Signum.Utilities
 
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine()?.ToLower();
 
                 if (!userAnswer.HasText())
                     return null;
@@ -194,7 +194,7 @@ namespace Signum.Utilities
                 Console.Write(question + " ({0} - use '!' for all) ".FormatWith(answers.ToString("/")));
                 do
                 {
-                    var userAnswer = Console.ReadLine().ToLower();
+                    var userAnswer = (Console.ReadLine() ?? "").ToLower();
                     bool remember = userAnswer.Contains("!");
                     if (remember)
                         userAnswer = userAnswer.Replace("!", "");

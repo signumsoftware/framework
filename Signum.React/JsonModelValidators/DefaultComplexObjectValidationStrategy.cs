@@ -74,11 +74,11 @@ namespace Signum.React.JsonModelValidators
                 if (_model == null)
                 {
                     // Performance: Never create a delegate when container is null.
-                    _entry = new ValidationEntry(property, key, model: null);
+                    _entry = new ValidationEntry(property, key, model: null!);
                 }
                 else if (IsMono)
                 {
-                    _entry = new ValidationEntry(property, key, () => GetModelOnMono(_model, property.PropertyName));
+                    _entry = new ValidationEntry(property, key, () => GetModelOnMono(_model, property.PropertyName!)!);
                 }
                 else
                 {

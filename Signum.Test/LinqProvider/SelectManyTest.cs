@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
@@ -70,7 +70,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectManyDefaultIfEmpty()
         {
-            var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members.DefaultIfEmpty()).Select(a => new { Artist = a.ToLite() }).ToList();
+            var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members.DefaultIfEmpty()).Select(a => new { Artist = a!.ToLite() }).ToList();
         }
 
         [Fact]

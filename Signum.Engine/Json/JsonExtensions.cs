@@ -1,35 +1,36 @@
-using Newtonsoft.Json;
 using Signum.Entities;
 using Signum.Utilities;
 using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
-namespace Signum.React.Json
+namespace Signum.Engine.Json
 {
-    public static class JsonSerializerExtensions
+    public static class EntityJsonContext
     {
-        public static object? DeserializeValue(this JsonSerializer serializer, JsonReader reader, Type valueType, object? oldValue)
+        public static JsonSerializerOptions FullJsonSerializerOptions;
+        static EntityJsonContext()
         {
-            if (oldValue != null)
+            var ejcf = new EntityJsonConverterFactory();
+
+            FullJsonSerializerOptions = new JsonSerializerOptions
             {
-                var conv = serializer.Converters.FirstOrDefault(c => c.CanConvert(valueType));
-
-                if (conv != null)
-                    return conv.ReadJson(reader, valueType, oldValue, serializer);
-            }
-
-            if (valueType == typeof(string)) // string with valid iso datetime get converted otherwise
-                return reader.Value;
-
-            return serializer.Deserialize(reader, valueType);
+                IncludeFields = true,
+                Converters =
+                {
+                    ejcf,
+                    new MListJsonConverterFactory(ejcf.AssertCanWrite),
+                    new LiteJsonConverterFactory(),
+                    new JsonStringEnumConverter(),
+                }
+            };
         }
-
-        public static void Assert(this JsonReader reader, JsonToken expected)
-        {
-            if (reader.TokenType != expected)
-                throw new JsonSerializationException($"Expected '{expected}' but '{reader.TokenType}' found in '{reader.Path}'");
-        }
-
 
         static readonly ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?> currentPropertyRoute = Statics.ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?>("jsonPropertyRoute");
 
@@ -62,5 +63,8 @@ namespace Signum.React.Json
 
             return new Disposable(() => { allowDirectMListChangesVariable.Value = old; });
         }
+
+        
+
     }
 }

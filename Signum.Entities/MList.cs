@@ -123,7 +123,7 @@ namespace Signum.Entities
 
         [NonSerialized]
         NotifyCollectionChangedEventHandler? collectionChanged;
-        public event NotifyCollectionChangedEventHandler CollectionChanged
+        public event NotifyCollectionChangedEventHandler? CollectionChanged
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }

@@ -143,9 +143,9 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
-        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
-        static Lite<Entity> LiteById<T>(PrimaryKey id)
+        static GenericInvoker<Func<PrimaryKey, Lite<Entity>?>> giLiteById =
+            new GenericInvoker<Func<PrimaryKey, Lite<Entity>?>>(id => LiteById<TypeEntity>(id));
+        static Lite<Entity>? LiteById<T>(PrimaryKey id)
             where T : Entity
         {
             return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();

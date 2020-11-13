@@ -372,7 +372,7 @@ namespace Signum.Engine.Linq
         {
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
 
             if(join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
             {

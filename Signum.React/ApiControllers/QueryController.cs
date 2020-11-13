@@ -7,8 +7,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Entities;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
@@ -20,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Json;
 using System.Linq.Expressions;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.React.ApiControllers
 {
@@ -265,8 +265,8 @@ namespace Signum.React.ApiControllers
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
             
-            var val = value is JToken jtok ?
-                 jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
+            var val = value is JsonElement jtok ?
+                 jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
                  value;
 
             return new FilterCondition(parsedToken, operation, val);
@@ -424,9 +424,9 @@ namespace Signum.React.ApiControllers
         public string? format;
         public string displayName;
         public bool isGroupable;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool hasOrderAdapter;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool preferEquals;
         public string? propertyRoute;
 
@@ -507,9 +507,9 @@ namespace Signum.React.ApiControllers
         public string? format;
         public string? unit;
         public bool isGroupable;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool hasOrderAdapter;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool preferEquals;
         public QueryTokenTS? parent;
         public string? propertyRoute;

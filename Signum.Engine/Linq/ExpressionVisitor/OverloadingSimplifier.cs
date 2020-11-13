@@ -41,8 +41,8 @@ namespace Signum.Engine.Linq
         static MethodInfo miJoinQ = ReflectionTools.GetMethodInfo(() => Queryable.Join((IQueryable<string>)null!, (IQueryable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
         static MethodInfo miJoinE = ReflectionTools.GetMethodInfo(() => Enumerable.Join((IEnumerable<string>)null!, (IEnumerable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
 
-        static MethodInfo miDefaultIfEmptyQ = ReflectionTools.GetMethodInfo(() => Queryable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miDefaultIfEmptyQ = ReflectionTools.GetMethodInfo(() => Queryable.DefaultIfEmpty<int>(null!)).GetGenericMethodDefinition();
+        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null!)).GetGenericMethodDefinition();
 
         static MethodInfo miCountE = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null!)).GetGenericMethodDefinition();
         public static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null!, a => false)).GetGenericMethodDefinition();
@@ -141,7 +141,7 @@ namespace Signum.Engine.Linq
                     LambdaExpression newResult =
                         Expression.Lambda(
                             Replacer.Replace(Replacer.Replace(resultSelector.Body,
-                            resultSelector.Parameters[0], Expression.MakeMemberAccess(g, groupingType.GetProperty("Key"))),
+                            resultSelector.Parameters[0], Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")!)),
                              resultSelector.Parameters[1], g),
                         g);
 
@@ -177,7 +177,7 @@ namespace Signum.Engine.Linq
                     LambdaExpression newResult =
                         Expression.Lambda(
                             Replacer.Replace(Replacer.Replace(resultSelector.Body,
-                            resultSelector.Parameters[0], Expression.MakeMemberAccess(g, groupingType.GetProperty("Key"))),
+                            resultSelector.Parameters[0], Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")!)),
                             resultSelector.Parameters[1], g),
                         g);
 
@@ -237,7 +237,7 @@ namespace Signum.Engine.Linq
 
                     return
                         Expression.Call(mij, outer, group, outerKeySelector,
-                            Expression.Lambda(Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")), g),
+                            Expression.Lambda(Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")!), g),
                             newResult);
                 }
 
@@ -276,7 +276,7 @@ namespace Signum.Engine.Linq
                 if (mi.Name.Contains("Last"))
                 {
                     var source = Visit(m.GetArgument("source"));
-                    var predicate = (LambdaExpression)Visit(m.TryGetArgument("predicate")?.StripQuotes());
+                    var predicate = (LambdaExpression?)Visit(m.TryGetArgument("predicate")?.StripQuotes());
 
                     Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source);
 
@@ -356,15 +356,15 @@ namespace Signum.Engine.Linq
                 var types = m.Arguments.Select(e => e.Type).ToArray();
                 if (types.Length < 8)
                 {
-                    return Expression.New(m.Method.ReturnType.GetConstructor(types), m.Arguments.ToArray());
+                    return Expression.New(m.Method.ReturnType.GetConstructor(types)!, m.Arguments.ToArray());
                 }
                 else
                 {
                     Type lastType = types[7];
                     types[7] = typeof(Tuple<>).MakeGenericType(lastType);
 
-                    return Expression.New(m.Method.ReturnType.GetConstructor(types), m.Arguments.Take(7).And(
-                        Expression.New(types[7].GetConstructor(new[] { lastType }), m.Arguments[7])).ToArray());
+                    return Expression.New(m.Method.ReturnType.GetConstructor(types)!, m.Arguments.Take(7).And(
+                        Expression.New(types[7].GetConstructor(new[] { lastType })!, m.Arguments[7])).ToArray());
                 }
             }
 
@@ -497,7 +497,7 @@ namespace Signum.Engine.Linq
             return Expression.Condition(
                 Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
                 Expression.Constant(null, typeof(string)),
-                Visit(visitedToStrExp));
+                Visit(visitedToStrExp)!);
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)

@@ -426,10 +426,10 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACIÓN GENERADO EL {0}" />
   </Type>
   <Type Name="SystemTimeMode">
-    <Member Name="All" Description="todo" />
-    <Member Name="AsOf" Description="A partir de" />
+    <Member Name="All" Description="Todo" />
+    <Member Name="AsOf" Description="A fecha de" />
     <Member Name="Between" Description="Entre" />
-    <Member Name="ContainedIn" Description="Contenida en" />
+    <Member Name="ContainedIn" Description="Contenida entre" />
   </Type>
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="Sistema válido desde" />

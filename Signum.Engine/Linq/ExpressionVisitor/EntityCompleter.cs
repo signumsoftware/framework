@@ -109,7 +109,7 @@ namespace Signum.Engine.Linq
 
             var bindings = VisitBindings(ee.Bindings!);
 
-            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+            var mixins = Visit(ee.Mixins!, VisitMixinEntity);
 
             var id = (PrimaryKeyExpression)Visit(ee.ExternalId);
 
@@ -181,7 +181,7 @@ namespace Signum.Engine.Linq
         {
             var exp = binder.BindAdditionalField(afe, entityCompleter: true);
 
-            var newEx = this.Visit(exp);
+            var newEx = this.Visit(exp)!;
 
             if (newEx is ProjectionExpression newProj && newProj.Projector.Type.IsInstantiationOf(typeof(MList<>.RowIdElement)))
                 return new MListProjectionExpression(afe.Type, newProj);

@@ -77,7 +77,7 @@ namespace Signum.Utilities.ExpressionTrees
                         else
                         {
                             if (call.Arguments.Count == 0)
-                                return GetInstanceMethodCaller(call.Method)(Eval(call.Object));
+                                return GetInstanceMethodCaller(call.Method)(Eval(call.Object!));
                         }
                         break;
                     }
@@ -194,7 +194,7 @@ namespace Signum.Utilities.ExpressionTrees
             return cachedInstanceMethods.GetOrAdd(new MethodKey(mi), (MethodKey _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                return Expression.Lambda<Func<object?, object?>>(Expression.Convert(Expression.Call(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();
+                return Expression.Lambda<Func<object?, object?>>(Expression.Convert(Expression.Call(Expression.Convert(p, mi.DeclaringType!), mi), typeof(object)), p).Compile();
             });
         }
 
@@ -213,7 +213,7 @@ namespace Signum.Utilities.ExpressionTrees
             return cachedInstanceGetters.GetOrAdd((type: mi.DeclaringType!, name: mi.Name), _ =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                return Expression.Lambda<Func<object?, object?>>(Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();
+                return Expression.Lambda<Func<object?, object?>>(Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, mi.DeclaringType!), mi), typeof(object)), p).Compile();
             });
         }
 
@@ -232,7 +232,7 @@ namespace Signum.Utilities.ExpressionTrees
                 var constant = Expression.Constant(Eval(exp), exp.Type);
 
                 if (typeof(LambdaExpression).IsAssignableFrom(constant.Type))
-                    return PartialEval((Expression)constant.Value);
+                    return PartialEval((Expression)constant.Value!);
 
                 return constant;
             }

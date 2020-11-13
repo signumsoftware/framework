@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSelect(SelectExpression select)
         {
             if (this.selectsToRemove.Contains(select))
-                return this.Visit(select.From);
+                return this.Visit(select.From)!;
             else
                 return base.VisitSelect(select);
         }

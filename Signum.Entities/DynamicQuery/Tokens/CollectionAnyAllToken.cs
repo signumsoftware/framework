@@ -125,10 +125,10 @@ namespace Signum.Entities.DynamicQuery
             get { return "#0000FF"; }
         }
 
-        static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static readonly MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
-        static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static readonly MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null!)).GetGenericMethodDefinition();
 
         public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
         {

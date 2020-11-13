@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
@@ -18,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Signum.React.Filters
@@ -53,9 +53,9 @@ namespace Signum.React.Filters
                         e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
                         e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
                         e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
-                        e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
-                        e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                        e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
+                        e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
+                        e.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
+                        e.User = (UserHolder.Current ?? (IUserEntity?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
                         e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
                         e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                         e.Session = new BigStringEmbedded();
@@ -75,7 +75,7 @@ namespace Signum.React.Filters
                         var response = context.HttpContext.Response;
                         response.StatusCode = (int)statusCode;
                         response.ContentType = "application/json";
-                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                        await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
                         context.ExceptionHandled = true;
                     }
                 }

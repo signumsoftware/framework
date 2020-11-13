@@ -494,7 +494,7 @@ namespace Signum.Engine.Linq
         internal bool IsOneRow()
         {
 
-            if (Top is ConstantExpression ce && ((int)ce.Value) == 1)
+            if (Top is ConstantExpression ce && ((int)ce.Value!) == 1)
                 return true;
 
             return false;
@@ -1025,10 +1025,10 @@ namespace Signum.Engine.Linq
                 return new SqlFunctionExpression(typeof(bool), null, "&&", new Expression[] { interval1.PostgresRange!, interval2.PostgresRange! });
             }
 
-            var min1 = interval1.Min;
-            var max1 = interval1.Max;
-            var min2 = interval2.Min;
-            var max2 = interval2.Max;
+            var min1 = interval1.Min!;
+            var max1 = interval1.Max!;
+            var min2 = interval2.Min!;
+            var max2 = interval2.Max!;
 
             return Expression.And(
                  Expression.GreaterThan(max1, min2),

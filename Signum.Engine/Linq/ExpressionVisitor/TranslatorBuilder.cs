@@ -282,7 +282,7 @@ namespace Signum.Engine.Linq
                 ParameterExpression e = Expression.Parameter(entityExpr.Type, entityExpr.Type.Name.ToLower().Substring(0, 1));
 
                 var bindings =
-                    entityExpr.Bindings
+                    entityExpr.Bindings!
                     .Where(a => !ReflectionTools.FieldEquals(EntityExpression.IdField, a.FieldInfo))
                     .Select(b =>
                         {
@@ -497,14 +497,14 @@ namespace Signum.Engine.Linq
 
                 var bindings = new List<MemberAssignment>
                 {
-                    Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId.UnNullify())),
-                    Expression.Bind(type.GetProperty("Parent"), Visit(mle.Parent)),
+                    Expression.Bind(type.GetProperty("RowId")!, Visit(mle.RowId.UnNullify())),
+                    Expression.Bind(type.GetProperty("Parent")!, Visit(mle.Parent)),
                 };
 
                 if (mle.Order != null)
-                    bindings.Add(Expression.Bind(type.GetProperty("Order"), Visit(mle.Order)));
+                    bindings.Add(Expression.Bind(type.GetProperty("Order")!, Visit(mle.Order)));
 
-                bindings.Add(Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
+                bindings.Add(Expression.Bind(type.GetProperty("Element")!, Visit(mle.Element)));
 
                 var init = Expression.MemberInit(Expression.New(type), bindings);
 
@@ -519,7 +519,7 @@ namespace Signum.Engine.Linq
                     typeId = ((UnaryExpression)typeId).Operand;
 
                 if (typeId.NodeType == ExpressionType.Constant)
-                    return (Type)((ConstantExpression)typeId).Value;
+                    return (Type)((ConstantExpression)typeId).Value!;
 
                 return null;
             }
@@ -582,11 +582,11 @@ namespace Signum.Engine.Linq
                 var intervalType = interval.Type.GetGenericArguments()[0];
                 if (Schema.Current.Settings.IsPostgres)
                 {
-                    return Expression.Call(miToInterval.MakeGenericMethod(intervalType), Visit(interval.PostgresRange));
+                    return Expression.Call(miToInterval.MakeGenericMethod(intervalType), Visit(interval.PostgresRange!));
                 }
                 else
                 {
-                    return Expression.New(typeof(Interval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min), Visit(interval.Max));
+                    return Expression.New(typeof(Interval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min!), Visit(interval.Max!));
                 }
             }
 

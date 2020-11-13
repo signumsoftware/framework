@@ -49,7 +49,7 @@ namespace Signum.Engine.PostgresCatalog
 
 
         [AutoExpressionField]
-        public PgNamespace Namespace() =>
+        public PgNamespace? Namespace() =>
             As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.relnamespace));
     }
 
@@ -85,7 +85,7 @@ namespace Signum.Engine.PostgresCatalog
         public char attidentity;
 
         [AutoExpressionField]
-        public PgType Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == this.atttypid));
+        public PgType? Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == this.atttypid));
 
         [AutoExpressionField]
         public PgAttributeDef? Default() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == this.attrelid && d.adnum == this.attnum));
@@ -129,8 +129,7 @@ namespace Signum.Engine.PostgresCatalog
         public byte[] tgargs; 
 
         [AutoExpressionField]
-        public PgProc Proc() =>
-          As.Expression(() => Database.View<PgProc>().SingleOrDefault(p => p.oid == this.tgfoid));
+        public PgProc? Proc() => As.Expression(() => Database.View<PgProc>().SingleOrDefault(p => p.oid == this.tgfoid));
     }
 
     [TableName("pg_catalog.pg_proc")]
@@ -142,8 +141,7 @@ namespace Signum.Engine.PostgresCatalog
         public int pronamespace;
 
         [AutoExpressionField]
-        public PgNamespace Namespace() =>
-            As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.pronamespace));
+        public PgNamespace? Namespace() => As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.pronamespace));
 
         public string proname;
     }
@@ -199,7 +197,7 @@ namespace Signum.Engine.PostgresCatalog
             As.Expression(() => Database.View<PgClass>().Single(t => t.oid == this.confrelid));
 
         [AutoExpressionField]
-        public PgNamespace Namespace() =>
+        public PgNamespace? Namespace() =>
             As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == this.connamespace));
     }
 

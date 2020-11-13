@@ -488,7 +488,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                             }
 
                             if (filter != null)
-                                result = result.Where(filter.InMemoryFunction).ToList();
+                                result = result.Where(filter.InMemoryFunction!).ToList();
 
                             return result;
                         }
@@ -527,7 +527,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                             }
 
                             if (filter != null)
-                                result = result.Where(filter.InMemoryFunction).ToList();
+                                result = result.Where(filter.InMemoryFunction!).ToList();
 
                             return result;
                         }
@@ -704,7 +704,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
 
                     if (filter != null)
-                        result = result.Where(filter.InMemoryFunction).ToList();
+                        result = result.Where(filter.InMemoryFunction!).ToList();
 
                     return result;
                 }
@@ -798,7 +798,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
 
                     if (filter != null)
-                        result = result.Where(filter.InMemoryFunction).ToList();
+                        result = result.Where(filter.InMemoryFunction!).ToList();
 
                     return result;
                 }
@@ -1109,7 +1109,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         class MListQueryExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(mi, arguments)).Compile()();
 
@@ -1134,10 +1134,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         class MListElementsExpander : IMethodExpander
         {
             static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null!)).GetGenericMethodDefinition();
-            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null, a => false)).GetGenericMethodDefinition();
+            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null!, a => false)).GetGenericMethodDefinition();
             static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 Type[] types = mi.GetGenericArguments();
 
@@ -1231,7 +1231,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             static readonly MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).Select(a => a)).GetGenericMethodDefinition();
             static readonly MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).SingleEx()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var entity = arguments[0];
                 var lambda = arguments[1];
@@ -1243,7 +1243,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (partialEntity.NodeType != ExpressionType.Constant)
                     return Expression.Invoke(lambda.StripQuotes(), isLite ? Expression.Property(entity, "Entity") : entity);
 
-                var value = ((ConstantExpression)partialEntity).Value;
+                var value = ((ConstantExpression)partialEntity).Value!;
 
                 var genericArguments = mi.GetGenericArguments();
 

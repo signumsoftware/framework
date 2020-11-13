@@ -75,7 +75,7 @@ namespace Signum.Utilities
             }
             else
             {
-                yield return (null, input.Substring(0, matches.FirstOrDefault().Index));
+                yield return (null, input.Substring(0, matches.FirstEx().Index));
 
                 for (int i = 0; i < matches.Count; i++)
                 {

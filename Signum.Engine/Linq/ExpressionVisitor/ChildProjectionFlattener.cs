@@ -359,6 +359,6 @@ namespace Signum.Engine.Linq
 
         public override int GetHashCode() => hashCode;
         public override bool Equals(object? obj) => obj is ArrayBox<T> a && Equals(a);
-        public bool Equals([AllowNull]ArrayBox<T> other) => other != null && Enumerable.SequenceEqual(Array, other.Array);
+        public bool Equals([AllowNull]ArrayBox<T> other) => other != null && Enumerable.SequenceEqual(Array!, other.Array!);
     }
 }

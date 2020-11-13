@@ -245,7 +245,7 @@ namespace Signum.Utilities
 
                   foreach (var pr in prefixes)
                   {
-                      Capture capture = captures.FirstOrDefault(c => c.Value.StartsWith(pr));
+                      Capture? capture = captures.FirstOrDefault(c => c.Value.StartsWith(pr));
                       if (capture != null)
                           return capture.Value.RemoveStart(pr.Length);
                   }

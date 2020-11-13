@@ -46,6 +46,8 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2020.11.13 Presenting Signum.Upgrade](https://github.com/signumsoftware/framework/commit/a1a37a4a8bd3291dd244daa0db7e113d5ce4f859#comments)
+* [2020.11.13 Switch to .Net 5 and C# 9](https://github.com/signumsoftware/framework/commit/227a8e79aece9d3be5020f2a8dad840c4fba95ad#comments)
 * [2020.09.29 Adding support for WebAuthn](https://github.com/signumsoftware/framework/commit/76c66b8a2416b13b74bc4aeba480369651e09645#comments)
 * [2020.09.21 Switch to core-js for polyfills](https://github.com/signumsoftware/framework/commit/c7b5c44af40eafd3325f76cb74b39e4a7d712404#comments)
 * [2020.09.21 Replace numbro.js by Intl.NumberFormat](https://github.com/signumsoftware/framework/commit/e2de807e055f68e359949d1c6e2c21b5d093ed7f#commitcomment-42575661)
