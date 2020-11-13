@@ -12,7 +12,6 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
-using Newtonsoft.Json;
 using Signum.Utilities;
 using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +19,8 @@ using Signum.React.Filters;
 using static Signum.React.ApiControllers.OperationController;
 using Signum.Entities.Reflection;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Workflow
 {
@@ -130,13 +131,13 @@ namespace Signum.React.Workflow
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
             try
             {
-                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, (request.Args.EmptyIfNull()).And(issuesContainer).ToArray());
+                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, request.ParseArgs(WorkflowOperation.Save.Symbol).EmptyIfNull().And(issuesContainer).ToArray());
             }
             catch (IntegrityCheckException ex)
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
                 this.TryValidateModel(request, "request");
-                this.ModelState.AddModelError("workflowIssues", JsonConvert.SerializeObject(issuesContainer, SignumServer.JsonSerializerSettings));
+                this.ModelState.AddModelError("workflowIssues", JsonSerializer.Serialize(issuesContainer, SignumServer.JsonSerializerOptions));
                 return BadRequest(this.ModelState);
             }
 

@@ -80,7 +80,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             if (column.ColumnModel != null)
                 return (Dictionary<object, int>)column.ColumnModel;
 
-            column.ColumnModel = codifications.ToDictionary(a => a.IsValue, a => a.Index);
+            column.ColumnModel = codifications.ToDictionary(a => a.IsValue!, a => a.Index);
 
             return (Dictionary<object, int>)column.ColumnModel;
         }

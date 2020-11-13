@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
             return SessionLogPermission.TrackSession.IsAuthorized(role);
         }
 
-        public static void SessionStart(string userHostAddress, string userAgent)
+        public static void SessionStart(string userHostAddress, string? userAgent)
         {
             var user = UserEntity.Current;
             if (SessionLogLogic.RoleTracked(user.Role))

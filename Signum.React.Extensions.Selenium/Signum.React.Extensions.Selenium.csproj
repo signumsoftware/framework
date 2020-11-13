@@ -1,23 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
-    <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Platforms>x64;x86;AnyCPU</Platforms>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<Platforms>x64;x86;AnyCPU</Platforms>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
-    <PackageReference Include="Selenium.Support" Version="3.141.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
+		<PackageReference Include="Selenium.Support" Version="3.141.0" />
+		<PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
-    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
-    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
-    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
+		<ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
+		<ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
+		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
+	</ItemGroup>
 </Project>

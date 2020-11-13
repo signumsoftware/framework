@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Engine.Basics;
@@ -6,6 +6,7 @@ using Signum.React.UserAssets;
 using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;
 using Microsoft.AspNetCore.Builder;
+using Signum.React.Facades;
 
 namespace Signum.React.MachineLearning
 {
@@ -17,7 +18,7 @@ namespace Signum.React.MachineLearning
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
             {
                 if (p.Query != null)
                 {
@@ -25,7 +26,7 @@ namespace Signum.React.MachineLearning
                 }
             });
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorSubQueryEntity mc) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PredictorSubQueryEntity mc) =>
             {
                 if (mc.Query != null)
                 {

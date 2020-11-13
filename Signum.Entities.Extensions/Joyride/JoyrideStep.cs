@@ -41,10 +41,10 @@ namespace Signum.Entities.Joyride
         {
             return new XElement("JoyrideStep",
                 new XAttribute("Guid", Guid),
-                Culture == null ? null : new XElement("Culture", Culture.Key()),
+                Culture == null ? null! : new XElement("Culture", Culture.Key()),
                 new XElement("Title", Title),
-                Text == null ? null : new XElement("Text", Text),
-                Style == null ? null : new XElement("Style", ctx.Include(Style).ToString()),
+                Text == null ? null! : new XElement("Text", Text),
+                Style == null ? null! : new XElement("Style", ctx.Include(Style).ToString()),
                 new XElement("Selector", Selector),
                 new XElement("Position", Position.ToString()),
                 new XElement("Type", Type.ToString()),
@@ -55,14 +55,14 @@ namespace Signum.Entities.Joyride
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Culture = element.Element("Culture")?.Let(a => Lite.Parse<CultureInfoEntity>(a.Value));
-            Title = element.Element("Title").Value;
-            Text = element.Element("Text").Value;
+            Title = element.Element("Title")!.Value;
+            Text = element.Element("Text")!.Value;
             Style = element.Element("Style")?.Value.Let(a => (JoyrideStepStyleEntity)ctx.GetEntity(Guid.Parse(a)));
-            Position = element.Element("Position").Value.ToEnum<JoyrideStepPosition>();
-            Selector = element.Element("Selector").Value;
-            Type = element.Element("Type").Value.ToEnum<JoyrideStepType>();
-            AllowClicksThruHole = Boolean.Parse(element.Element("AllowClicksThruHole").Value);
-            IsFixed = Boolean.Parse(element.Element("IsFixed").Value);
+            Position = element.Element("Position")!.Value.ToEnum<JoyrideStepPosition>();
+            Selector = element.Element("Selector")!.Value;
+            Type = element.Element("Type")!.Value.ToEnum<JoyrideStepType>();
+            AllowClicksThruHole = Boolean.Parse(element.Element("AllowClicksThruHole")!.Value);
+            IsFixed = Boolean.Parse(element.Element("IsFixed")!.Value);
         }
     }
 

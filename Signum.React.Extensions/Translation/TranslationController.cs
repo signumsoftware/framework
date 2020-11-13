@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using Signum.Engine.Translation;
 using Signum.React.Filters;
 using Signum.Utilities;
@@ -11,6 +10,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Translation;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Translation
 {
@@ -98,7 +98,7 @@ namespace Signum.React.Translation
                          description = t.Description,
                          pluralDescription = t.PluralDescription,
                      },
-                     members = t.Members.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
+                     members = t.Members!.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
                  select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
@@ -265,13 +265,9 @@ namespace Signum.React.Translation
 
         public class LocalizedDescriptionTS
         {
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string? gender;
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string? description;
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string? translatedDescription;
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string? pluralDescription;
         }
 
@@ -279,7 +275,6 @@ namespace Signum.React.Translation
         {
             public string name;
             public string? description;
-            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string? translatedDescription;
         }
 

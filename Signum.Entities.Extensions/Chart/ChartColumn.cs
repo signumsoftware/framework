@@ -139,11 +139,11 @@ namespace Signum.Entities.Chart
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
-              Token == null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
-              !DisplayName.HasText() ? null : new XAttribute("DisplayName", this.DisplayName),
-              !Format.HasText() ? null : new XAttribute("Format", this.Format),
-              OrderByIndex == null ? null : new XAttribute("OrderByIndex", this.OrderByIndex),
-              OrderByType == null ? null : new XAttribute("OrderByType", this.OrderByType)
+              Token == null ? null! : new XAttribute("Token", this.Token.Token.FullKey()),
+              !DisplayName.HasText() ? null! : new XAttribute("DisplayName", this.DisplayName),
+              !Format.HasText() ? null! : new XAttribute("Format", this.Format),
+              OrderByIndex == null! ? null! : new XAttribute("OrderByIndex", this.OrderByIndex),
+              OrderByType == null! ? null! : new XAttribute("OrderByType", this.OrderByType)
             );
         }
 

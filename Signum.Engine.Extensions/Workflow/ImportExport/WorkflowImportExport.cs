@@ -52,7 +52,7 @@ namespace Signum.Engine.Workflow
               new XAttribute("Name", workflow.Name),
               new XAttribute("MainEntityType", ctx.TypeToName(workflow.MainEntityType.ToLite())),
               new XAttribute("MainEntityStrategies", workflow.MainEntityStrategies.ToString(",")),
-              workflow.ExpirationDate == null ? null : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
+              workflow.ExpirationDate == null ? null! : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
 
                this.pools.Values.Select(p => new XElement("Pool",
                 new XAttribute("BpmnElementId", p.BpmnElementId),
@@ -63,8 +63,8 @@ namespace Signum.Engine.Workflow
                 new XAttribute("BpmnElementId", la.BpmnElementId),
                 new XAttribute("Name", la.Name),
                 new XAttribute("Pool", la.Pool.BpmnElementId),
-                la.Actors.IsEmpty() ? null : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()))),
-                la.ActorsEval == null ? null : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
+                la.Actors.IsEmpty() ? null! : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()!))),
+                la.ActorsEval == null ? null! : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
                 la.Xml.ToXml())),
 
                this.activities.Values.Select(a => new XElement("Activity",
@@ -130,7 +130,7 @@ namespace Signum.Engine.Workflow
         public IDisposable Sync<T>(Dictionary<string, T> entityDic, IEnumerable<XElement> elements, IFromXmlContext ctx, ExecuteSymbol<T> saveOperation, DeleteSymbol<T> deleteOperation, Action<T, XElement> setXml)
             where T : Entity, IWorkflowObjectEntity, new()
         {
-            var xmlDic = elements.ToDictionaryEx(a => a.Attribute("BpmnElementId").Value);
+            var xmlDic = elements.ToDictionaryEx(a => a.Attribute("BpmnElementId")!.Value);
 
             Synchronizer.Synchronize(
               xmlDic,

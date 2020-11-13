@@ -56,7 +56,7 @@ namespace Signum.Engine.Translation
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 XDocument doc = XDocument.Parse(responseBody);
-                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => (string?)r.Element(Ns + "TranslatedText").Value).ToList();
+                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => (string?)r.Element(Ns + "TranslatedText")!.Value).ToList();
                 return result;
             }
         }

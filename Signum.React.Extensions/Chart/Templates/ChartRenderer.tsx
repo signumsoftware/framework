@@ -8,7 +8,7 @@ import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 
 import "../Chart.css"
-import { ChartScript, chartScripts, ChartRow } from '../ChartClient';
+import { ChartScript, ChartRow } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';

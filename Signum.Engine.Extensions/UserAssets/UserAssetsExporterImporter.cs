@@ -49,7 +49,7 @@ namespace Signum.Engine.UserAssets
             {
                 return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.RetrieveAndRemember()));
             }
-
+            
             public string TypeToName(TypeEntity type)
             {
                 return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type));
@@ -112,7 +112,7 @@ namespace Signum.Engine.UserAssets
 
             public PreviewContext(XDocument doc)
             {
-                elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
+                elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
             }
 
           
@@ -252,7 +252,7 @@ namespace Signum.Engine.UserAssets
             {
                 this.overrideEntity = overrideEntity;
                 this.customResolutionModel = customResolution;
-                elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
+                elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
             }
 
             public TypeEntity GetType(string cleanName)
@@ -352,7 +352,7 @@ namespace Signum.Engine.UserAssets
             {
                 var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid").Value));
                 var wie = new WorkflowImportExport(workflow)
-                {
+            {
                     ReplacementModel = model
                 };
                 wie.FromXml(element, this);

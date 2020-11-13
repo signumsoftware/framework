@@ -151,9 +151,9 @@ namespace Signum.Engine.Dashboard
                 return result;
         }
 
-        public static Func<string?, DashboardEntity> GetDashboard = GetDashboardDefault;
+        public static Func<string?, DashboardEntity?> GetDashboard = GetDashboardDefault;
 
-        static DashboardEntity GetDashboardDefault(string? key)
+        static DashboardEntity? GetDashboardDefault(string? key)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
 

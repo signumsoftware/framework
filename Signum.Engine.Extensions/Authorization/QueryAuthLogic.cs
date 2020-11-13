@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
                     string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;
 
                     replacements.AskForReplacements(
-                        x.Element("Queries").Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        x.Element("Queries")!.Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource")!.Value).ToHashSet(),
                         QueryLogic.QueryNames.Keys.ToHashSet(),
                         replacementKey);
 

@@ -27,7 +27,7 @@ namespace Signum.Engine.ViewLog
             As.Expression(() => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a)));
         
         [AutoExpressionField]
-        public static ViewLogEntity ViewLogMyLast(this Entity e) => As.Expression(() => e.ViewLogs()
+        public static ViewLogEntity? ViewLogMyLast(this Entity e) => As.Expression(() => e.ViewLogs()
             .Where(a => a.User.Is(UserEntity.Current))
             .OrderBy(a => a.StartDate).FirstOrDefault());
 

@@ -453,7 +453,7 @@ namespace Signum.Engine.Cache
                     Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)),
                     Expression.Assign(result, ctr.MaterializeField(table.Field))
                 };
-                var ci = typeof(MList<T>.RowIdElement).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
+                var ci = typeof(MList<T>.RowIdElement).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)})!;
 
                 var order = table.Order == null ? Expression.Constant(null, typeof(int?)) :
                      ctr.GetTupleProperty(table.Order).Nullify();

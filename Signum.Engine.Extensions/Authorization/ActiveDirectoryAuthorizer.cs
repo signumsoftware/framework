@@ -8,6 +8,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security.Claims;
 
+#pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Engine.Authorization
 {
     public interface IAutoCreateUserContext

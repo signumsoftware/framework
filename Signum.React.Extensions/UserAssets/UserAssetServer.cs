@@ -10,6 +10,9 @@ using Signum.Entities;
 using Signum.React.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Chart;
+using System.Text.Json;
+using DocumentFormat.OpenXml.Bibliography;
+using Signum.Engine.Json;
 
 namespace Signum.React.UserAssets
 {
@@ -31,45 +34,45 @@ namespace Signum.React.UserAssets
             //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
             //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
 
-            var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEmbedded));
-            pcs.Add("token", new PropertyConverter()
+            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(QueryTokenEmbedded));
+            pcs.Add("token", new PropertyConverter
             {
-                CustomWriteJsonProperty = ctx =>
+                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
                 {
                     var qte = (QueryTokenEmbedded)ctx.Entity;
 
-                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.TryToken == null ? null : new QueryTokenTS(qte.TryToken, true));
+                    writer.WritePropertyName(ctx.LowerCaseName);
+                    JsonSerializer.Serialize(writer, qte.TryToken == null ? null : new QueryTokenTS(qte.TryToken, true), ctx.JsonSerializerOptions);
                 },
                 AvoidValidate = true,
-                CustomReadJsonProperty = ctx =>
+                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                 {
-                    var result = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
+                    var result = JsonSerializer.Deserialize<object>(ref reader, ctx.JsonSerializerOptions);
                     //Discard
                 }
             });
-            pcs.Add("parseException", new PropertyConverter()
+            pcs.Add("parseException", new PropertyConverter
             {
-                CustomWriteJsonProperty = ctx =>
+                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
                 {
                     var qte = (QueryTokenEmbedded)ctx.Entity;
 
-                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.ParseException?.Message);
+                    writer.WritePropertyName(ctx.LowerCaseName);
+                    writer.WriteStringValue(qte.ParseException?.Message);
                 },
                 AvoidValidate = true,
-                CustomReadJsonProperty = ctx =>
+                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                 {
-                    var result = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
+                    var result = reader.GetString();
                     //Discard
                 }
             });
-            pcs.GetOrThrow("tokenString").CustomWriteJsonProperty = ctx =>
+            pcs.GetOrThrow("tokenString").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {
                 var qte = (QueryTokenEmbedded)ctx.Entity;
 
-                ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                ctx.JsonWriter.WriteValue(qte.TryToken?.FullKey() ?? qte.TokenString);
+                writer.WritePropertyName(ctx.LowerCaseName);
+                writer.WriteStringValue(qte.TryToken?.FullKey() ?? qte.TokenString);
             };
         }
     }

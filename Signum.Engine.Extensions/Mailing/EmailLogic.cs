@@ -446,7 +446,7 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = email.IsBodyHtml,
             };
 
-            System.Net.Mail.AlternateView view = System.Net.Mail.AlternateView.CreateAlternateViewFromString(email.Body.Text, null, email.IsBodyHtml ? "text/html" : "text/plain");
+            System.Net.Mail.AlternateView view = System.Net.Mail.AlternateView.CreateAlternateViewFromString(email.Body.Text!, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
                 .Select(a => new System.Net.Mail.LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))

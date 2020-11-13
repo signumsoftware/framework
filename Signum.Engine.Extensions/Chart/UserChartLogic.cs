@@ -296,7 +296,7 @@ namespace Signum.Engine.Chart
                             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
                             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
 
-                            string answer = Console.ReadLine();
+                            string? answer = Console.ReadLine();
 
                             if (answer == null)
                                 throw new InvalidOperationException("Impossible to synchronize interactively without Console");
@@ -335,7 +335,7 @@ namespace Signum.Engine.Chart
             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
             SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
-            string answer = Console.ReadLine();
+            string? answer = Console.ReadLine();
 
             if (answer == null)
                 throw new InvalidOperationException("Impossible to synchronize interactively without Console");

@@ -15,6 +15,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Authorization;
+using Signum.Engine.Json;
+using System.Text.Json;
 
 namespace Signum.React.Authorization
 {
@@ -107,7 +109,6 @@ namespace Signum.React.Authorization
             return result;
         }
 
-        static BinaryFormatter formatter = new BinaryFormatter();
 
         public static Func<string, AuthToken> DeserializeAuthHeaderToken = (string authHeader) => DeserializeToken(authHeader.After("Bearer "));
 
@@ -121,7 +122,9 @@ namespace Signum.React.Authorization
 
                 using (var ms = new MemoryStream(array))
                 using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
-                    return (AuthToken)formatter.Deserialize(ds);
+                {
+                    return JsonExtensions.FromJsonBytes<AuthToken>(ds.ReadAllBytes(), EntityJsonContext.FullJsonSerializerOptions);
+                }
             }
             catch (Exception)
             {
@@ -140,17 +143,24 @@ namespace Signum.React.Authorization
             return SerializeToken(newToken);
         }
 
-        static string SerializeToken(AuthToken entity)
+        static string SerializeToken(AuthToken token)
         {
             using (HeavyProfiler.LogNoStackTrace("SerializeToken"))
             {
                 var array = new MemoryStream().Using(ms =>
                 {
                     using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Compress))
-                        formatter.Serialize(ds, entity);
+                    {
+                        using (Utf8JsonWriter writer = new Utf8JsonWriter(ds))
+                        {
+                            JsonSerializer.Serialize(writer, token, EntityJsonContext.FullJsonSerializerOptions);
+                        }
+                    }
 
                     return ms.ToArray();
                 });
+
+                //var str = Encoding.UTF8.GetString(array);
 
                 array = Encrypt(array);
 

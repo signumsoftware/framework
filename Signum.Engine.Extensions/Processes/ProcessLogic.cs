@@ -30,7 +30,7 @@ namespace Signum.Engine.Processes
             As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p));
 
         [AutoExpressionField]
-        public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p) => 
+        public static ProcessEntity? LastProcess(this ProcessAlgorithmSymbol p) => 
             As.Expression(() => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
         [AutoExpressionField]
@@ -42,15 +42,15 @@ namespace Signum.Engine.Processes
             As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(pl)));
 
         [AutoExpressionField]
-        public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p) =>
-            As.Expression(() => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl)).Exception.Entity);
+        public static ExceptionEntity? Exception(this IProcessLineDataEntity pl, ProcessEntity p) =>
+            As.Expression(() => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl))!.Exception.Entity);
 
         [AutoExpressionField]
         public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e) =>
             As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Data == e));
 
         [AutoExpressionField]
-        public static ProcessEntity LastProcess(this IProcessDataEntity e) => 
+        public static ProcessEntity? LastProcess(this IProcessDataEntity e) => 
             As.Expression(() => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault());
 
         static Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm> registeredProcesses = new Dictionary<ProcessAlgorithmSymbol, IProcessAlgorithm>();

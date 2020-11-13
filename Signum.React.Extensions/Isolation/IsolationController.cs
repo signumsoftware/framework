@@ -12,7 +12,6 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
-using Newtonsoft.Json;
 using Signum.Utilities;
 using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Mvc;

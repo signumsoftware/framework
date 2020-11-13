@@ -147,8 +147,8 @@ namespace Signum.React.Maps
                             new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
                             new RuntimeStats
                             {
-                                rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,
-                                total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
+                                rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered)!.Partition()!.rows) ?? 0,
+                                total_size_kb = t.Indices().SelectMany(i => i.Partition()!.AllocationUnits()).Sum(a => a.total_pages) * 8
                             })).ToDictionary();
 
                         result.AddRange(dic);

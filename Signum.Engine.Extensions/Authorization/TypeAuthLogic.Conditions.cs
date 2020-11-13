@@ -283,7 +283,7 @@ namespace Signum.Engine.Authorization
 
         class IsAllowedForExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
@@ -352,7 +352,7 @@ namespace Signum.Engine.Authorization
 
         class IsAllowedForDebugExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
@@ -385,7 +385,7 @@ namespace Signum.Engine.Authorization
 
             if (body is ConstantExpression ce)
             {
-                if (((bool)ce.Value))
+                if (((bool)ce.Value!))
                     return null;
             }
 
@@ -431,7 +431,7 @@ namespace Signum.Engine.Authorization
 
             if (body is ConstantExpression ce)
             {
-                if (((bool)ce.Value))
+                if (((bool)ce.Value!))
                     return query;
             }
 
@@ -442,7 +442,7 @@ namespace Signum.Engine.Authorization
 
         class WhereAllowedExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return miCallWhereAllowed.GetInvoker(mi.GetGenericArguments()).Invoke(arguments[0]);
             }
@@ -459,7 +459,7 @@ namespace Signum.Engine.Authorization
 
         class WhereIsAllowedForExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
                 bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2])!;

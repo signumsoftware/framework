@@ -7,7 +7,8 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.UserAssets;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -484,45 +485,33 @@ namespace Signum.Entities.Omnibox
     //FVL N="hola"
 
 
-    public class QueryNameJsonConverter : JsonConverter
+    public class QueryNameJsonConverter : JsonConverter<object>
     {
         public static Func<object, string> GetQueryKey;
-        public override bool CanConvert(Type objectType)
-        {
-            return true;
-        }
 
-        public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-        {
-            writer.WriteValue(GetQueryKey(value!));
-        }
-
-        public override bool CanRead => false;
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(GetQueryKey(value!));
         }
     }
 
-    public class QueryTokenJsonConverter : JsonConverter
+    public class QueryTokenJsonConverter : JsonConverter<QueryToken>
     {
         public static Func<QueryToken, object> GetQueryTokenTS;
-        public override bool CanConvert(Type objectType)
-        {
-            return true;
-        }
 
-        public override bool CanWrite => true;
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-        {
-            serializer.Serialize(writer, GetQueryTokenTS((QueryToken)value!));
-        }
-
-        public override bool CanRead => false;
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override QueryToken? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, QueryToken value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, GetQueryTokenTS((QueryToken)value!), options);
         }
     }
 }

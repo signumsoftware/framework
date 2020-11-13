@@ -104,7 +104,7 @@ namespace Signum.Engine.Basics
 
         class InConditionExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression entity = arguments[0];
                 TypeConditionSymbol typeCondition = (TypeConditionSymbol)ExpressionEvaluator.Eval(arguments[1])!;
@@ -127,9 +127,9 @@ namespace Signum.Engine.Basics
 
         class WhereConditionExpander : IMethodExpander
         {
-            static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
+            static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null!, i => i == 0)).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 Type type = mi.GetGenericArguments()[0];
 

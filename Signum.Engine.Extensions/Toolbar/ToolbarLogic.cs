@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Chart;
@@ -20,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Toolbar
 {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Toolbar
             }
         }
 
-        public static ToolbarEntity GetCurrent(ToolbarLocation location)
+        public static ToolbarEntity? GetCurrent(ToolbarLocation location)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 
@@ -288,9 +288,10 @@ namespace Signum.Engine.Toolbar
         public string? iconName;
         public string? iconColor;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? autoRefreshPeriod;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool openInPopup;
 
         public override string ToString() => $"{type} {label} {content} {url}";

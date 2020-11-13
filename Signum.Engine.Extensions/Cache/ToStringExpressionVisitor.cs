@@ -181,7 +181,7 @@ namespace Signum.Engine.Cache
                 var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
 
 
-                return node.Update(null, new Sequence<Expression> { formatStr, remainging });
+                return node.Update(null!, new Sequence<Expression> { formatStr, remainging });
             }
 
             var obj = base.Visit(node.Object);
@@ -201,7 +201,7 @@ namespace Signum.Engine.Cache
 
                     ConstantExpression tab = Expression.Constant(ce.Constructor.cachedTable, cachedTableType);
 
-                    var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString));
+                    var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString))!;
 
                     return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
                 }
@@ -223,7 +223,7 @@ namespace Signum.Engine.Cache
                 return GetField(mixin, cee.Constructor, cee.PrimaryKey);
             }
 
-            return node.Update(obj, args);
+            return node.Update(obj!, args);
         }
 
         protected override Expression VisitParameter(ParameterExpression node)
