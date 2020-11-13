@@ -56,8 +56,8 @@ namespace Signum.Engine.Toolbar
                         e.Name
                     });
 
-                UserAssetsImporter.RegisterName<ToolbarEntity>("Toolbar");
-                UserAssetsImporter.RegisterName<ToolbarMenuEntity>("ToolbarMenu");
+                UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
+                UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
 
                 RegisterDelete<UserQueryEntity>(sb);
                 RegisterDelete<UserChartEntity>(sb);

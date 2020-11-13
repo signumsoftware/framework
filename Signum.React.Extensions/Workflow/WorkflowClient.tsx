@@ -471,7 +471,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
   let wf = FunctionalAdapter.innerRef(eoc.frame.entityComponent) as WorkflowHandle;
   wf.getXml()
     .then(xml => {
-      var model = WorkflowModel.New({
+      var wfModel = WorkflowModel.New({
         diagramXml: xml,
         entities: Dic.map(wf.workflowState!.entities, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
           bpmnElementId: bpmnId,
@@ -480,18 +480,18 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       });
 
       var promise = eoc.entity.isNew ?
-        Promise.resolve<PreviewResult | undefined>(undefined) :
-        API.previewChanges(toLite(eoc.entity), model);
+        Promise.resolve < WorkflowReplacementModel | undefined> (undefined) :
+        API.previewChanges(toLite(eoc.entity), wfModel);
 
-      promise.then(pr => {
-        if (!pr || pr.model.replacements.length == 0)
-          saveAndSetErrors(eoc.entity, model, undefined);
+      promise.then(repoModel => {
+        if (!repoModel || repoModel.replacements.length == 0)
+          saveAndSetErrors(eoc.entity, wfModel, undefined);
         else
-          Navigator.view(pr.model, { extraProps: { previewTasks: pr.newTasks } }).then(replacementModel => {
+          Navigator.view(repoModel).then(replacementModel => {
             if (!replacementModel)
               return;
 
-            saveAndSetErrors(eoc.entity, model, replacementModel);
+            saveAndSetErrors(eoc.entity, wfModel, replacementModel);
           }).done();
       }).done();
     }).done();
@@ -669,7 +669,7 @@ export namespace API {
     issues: Array<WorkflowIssue>;
   }
 
-  export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
+  export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<WorkflowReplacementModel> {
     return ajaxPost({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
   }
 
@@ -753,11 +753,6 @@ export interface WorkflowConditionTestResponse {
 }
 
 export const DecisionResultValues = ["Approve", "Decline"];
-
-export interface PreviewResult {
-  model: WorkflowReplacementModel;
-  newTasks: PreviewTask[];
-}
 
 export interface PreviewTask {
   bpmnId: string;

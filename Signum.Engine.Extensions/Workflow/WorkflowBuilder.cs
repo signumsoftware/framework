@@ -252,7 +252,7 @@ namespace Signum.Engine.Workflow
             return this.pools.GetOrThrow(node.Lane.Pool.ToLite()).GetLaneBuilder(node.Lane.ToLite()).GetBpmnElementId(node);
         }
 
-        public PreviewResult PreviewChanges(XDocument document, WorkflowModel model)
+        public WorkflowReplacementModel PreviewChanges(XDocument document, WorkflowModel model)
         {
             var oldTasks = this.pools.Values.SelectMany(p => p.GetAllActivities()).Select(a=>a.Entity);
             var oldIntermediateEvents = this.pools.Values.SelectMany(p => p.GetLanes().SelectMany(l => l.GetEvents().Where(e => e.Entity.Type == WorkflowEventType.IntermediateTimer))).Select(a => a.Entity);
@@ -263,24 +263,22 @@ namespace Signum.Engine.Workflow
 
             var entities = model.Entities.ToDictionaryEx(a => a.BpmnElementId);
 
-            return new PreviewResult
+            return new WorkflowReplacementModel
             {
-                Model = new WorkflowReplacementModel
+                Replacements = oldNodes.Where(kvp => !newNodes.ContainsKey(kvp.Key) && kvp.Value.CaseActivities().Any())
+                .Select(a => new WorkflowReplacementItemEmbedded
                 {
-                    Replacements = oldNodes.Where(kvp => !newNodes.ContainsKey(kvp.Key) && kvp.Value.CaseActivities().Any())
-                    .Select(a => new WorkflowReplacementItemEmbedded
-                    {
-                        OldNode = a.Value.ToLite(),
-                        SubWorkflow = (a.Value as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite()
-                    })
-                    .ToMList(),
-                },
-                NewTasks = newNodes.Select(kvp => new PreviewTask
+                    OldNode = a.Value.ToLite(),
+                    SubWorkflow = (a.Value as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite()
+                })
+                .ToMList(),
+
+                NewTasks = newNodes.Select(kvp => new NewTasksEmbedded
                 {
                     BpmnId = kvp.Key,
                     Name = kvp.Value.Attribute("name")?.Value!,
                     SubWorkflow = (entities.GetOrThrow(kvp.Key).Model as WorkflowActivityModel)?.SubWorkflow?.Workflow.ToLite()
-                }).ToList(),
+                }).ToMList(),
             };
         }
 
@@ -380,21 +378,6 @@ namespace Signum.Engine.Workflow
             });
         }
     }
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    public class PreviewResult
-    {
-        public WorkflowReplacementModel Model;
-        public List<PreviewTask> NewTasks;
-    }
-
-    public class PreviewTask
-    {
-        public string BpmnId;
-        public string Name;
-        public Lite<WorkflowEntity>? SubWorkflow;
-    }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class Locator
     {

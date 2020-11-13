@@ -30,7 +30,7 @@ namespace Signum.Engine.Dashboard
             {
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
-                UserAssetsImporter.RegisterName<DashboardEntity>("Dashboard");
+                UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
 
                 UserAssetsImporter.PartNames.AddRange(new Dictionary<string, Type>
                 {

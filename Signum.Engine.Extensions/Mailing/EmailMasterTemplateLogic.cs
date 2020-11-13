@@ -43,7 +43,7 @@ namespace Signum.Engine.Mailing
                     return null;
                 };
 
-                UserAssetsImporter.RegisterName<EmailMasterTemplateEntity>("EmailMasterTemplate");
+                UserAssetsImporter.Register<EmailMasterTemplateEntity>("EmailMasterTemplate", EmailMasterTemplateOperation.Save);
 
             }
         }

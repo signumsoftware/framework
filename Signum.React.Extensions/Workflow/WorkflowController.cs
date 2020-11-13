@@ -115,7 +115,7 @@ namespace Signum.React.Workflow
         }
 
         [HttpPost("api/workflow/previewChanges/{workflowId}")]
-        public PreviewResult PreviewChanges(string workflowId, [Required, FromBody]WorkflowModel model)
+        public WorkflowReplacementModel PreviewChanges(string workflowId, [Required, FromBody]WorkflowModel model)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
             var wf = Database.Retrieve<WorkflowEntity>(id);

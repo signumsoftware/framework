@@ -22,6 +22,7 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
+using Signum.Engine.Operations.Internal;
 
 namespace Signum.Engine.UserAssets
 {
@@ -94,6 +95,7 @@ namespace Signum.Engine.UserAssets
     public static class UserAssetsImporter
     {
         public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
+        public static Polymorphic<Action<Entity>> SaveEntity = new Polymorphic<Action<Entity>>();
         public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
         public static Func<XDocument, XDocument>? PreImport = null;
 
@@ -101,7 +103,12 @@ namespace Signum.Engine.UserAssets
         {
             public Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
             public Dictionary<Guid, XElement> elements;
+
+            public Dictionary<Guid, ModelEntity?> customResolutionModel = new Dictionary<Guid, ModelEntity?>();
+
             public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new Dictionary<Guid, UserAssetPreviewLineEmbedded>();
+
+            public bool IsPreview => true;
 
             public PreviewContext(XDocument doc)
             {
@@ -146,8 +153,10 @@ namespace Signum.Engine.UserAssets
                         Type = entity.GetType().ToTypeEntity(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
+                                 customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
                                  GraphExplorer.FromRoot((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                                  EntityAction.Identical,
+                        CustomResolution = customResolutionModel.TryGetCN(entity.Guid),
                     });
 
                     return entity;
@@ -205,19 +214,13 @@ namespace Signum.Engine.UserAssets
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
 
-            public T SaveMaybe<T>(T entity) where T : Entity
-            {
-                return entity;
-            }
-
-            public void DeleteMaybe<T>(T entity) where T : Entity
-            {
-                return;
-            }
-
             public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
             {
-                return;
+                var wie = new WorkflowImportExport(workflow);
+                wie.FromXml(element, this);
+
+                if (wie.HasChanges)
+                    this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid").Value), wie.ReplacementModel);
             }
         }
 
@@ -239,12 +242,16 @@ namespace Signum.Engine.UserAssets
         {
             Dictionary<Guid, bool> overrideEntity;
             Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
+            Dictionary<Guid, ModelEntity?> customResolutionModel = new Dictionary<Guid, ModelEntity?>();
             public List<IPartEntity> toRemove = new List<IPartEntity>();
             public Dictionary<Guid, XElement> elements;
 
-            public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity)
+            public bool IsPreview => false;
+
+            public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution)
             {
                 this.overrideEntity = overrideEntity;
+                this.customResolutionModel = customResolution;
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
@@ -285,9 +292,7 @@ namespace Signum.Engine.UserAssets
                     {
                         entity.FromXml(element, this);
 
-                        using (OperationLogic.AllowSave<DashboardEntity>())
-                        using (OperationLogic.AllowSave(entity.GetType()))
-                            entity.Save();
+                        SaveEntity.Invoke((Entity)entity);
                     }
 
                     return entity;
@@ -343,19 +348,13 @@ namespace Signum.Engine.UserAssets
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
 
-            public T SaveMaybe<T>(T entity) where T : Entity
-            {
-                return entity.Save();
-            }
-
-            public void DeleteMaybe<T>(T entity) where T : Entity
-            {
-                entity.Delete();
-            }
-
             public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
             {
-                var wie = new WorkflowImportExport(workflow);
+                var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid").Value));
+                var wie = new WorkflowImportExport(workflow)
+                {
+                    ReplacementModel = model
+                };
                 wie.FromXml(element, this);
             }
         }
@@ -400,7 +399,10 @@ namespace Signum.Engine.UserAssets
                 ImporterContext importer = new ImporterContext(doc,
                     preview.Lines
                     .Where(a => a.Action == EntityAction.Different)
-                    .ToDictionary(a => a.Guid, a => a.OverrideEntity));
+                    .ToDictionary(a => a.Guid, a => a.OverrideEntity),
+                    preview.Lines
+                    .Where(a => a.Action == EntityAction.Different)
+                    .ToDictionary(a => a.Guid, a => a.CustomResolution));
 
                 foreach (var item in importer.elements)
                     importer.GetEntity(item.Key);
@@ -424,10 +426,15 @@ namespace Signum.Engine.UserAssets
             return new T { Guid = guid };
         }
 
-        public static void RegisterName<T>(string userAssetName) where T : IUserAssetEntity
+
+        public static void Register<T>(string userAssetName, ExecuteSymbol<T> saveOperation) where T : Entity, IUserAssetEntity =>
+            Register<T>(userAssetName, e => e.Execute(saveOperation));
+
+        public static void Register<T>(string userAssetName, Action<T> saveEntity) where T : Entity, IUserAssetEntity
         {
             PermissionAuthLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
             UserAssetNames.Add(userAssetName, typeof(T));
+            UserAssetsImporter.SaveEntity.Register(saveEntity);
         }
     }
 }

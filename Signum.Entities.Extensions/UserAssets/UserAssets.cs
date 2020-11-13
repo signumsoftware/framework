@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
+using DocumentFormat.OpenXml.Bibliography;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
@@ -28,6 +30,8 @@ namespace Signum.Entities.UserAssets
         public bool OverrideEntity { get; set; }
 
         public Guid Guid { get; set; }
+
+        public ModelEntity? CustomResolution { get; set; }
 
         [HiddenProperty]
         public bool OverrideVisible
@@ -79,6 +83,8 @@ namespace Signum.Entities.UserAssets
 
     public interface IFromXmlContext
     {
+        public bool IsPreview { get; }
+
         QueryEntity? TryGetQuery(string queryKey);
         QueryEntity GetQuery(string queryKey);
 
@@ -98,9 +104,6 @@ namespace Signum.Entities.UserAssets
 
         EmailModelEntity GetEmailModel(string fullClassName);
         CultureInfoEntity GetCultureInfoEntity(string cultureName);
-
-        T SaveMaybe<T>(T entity) where T : Entity;
-        void DeleteMaybe<T>(T entity) where T : Entity;
 
         public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element);
     }
@@ -140,6 +143,15 @@ namespace Signum.Entities.UserAssets
             {
                 entities.RemoveRange(xElements.Count, entities.Count - xElements.Count);
             }
+        }
+
+        public static void Synchronize<T>(this MList<T> oldElements, IEnumerable<T> newElements)
+        {
+            if (Enumerable.SequenceEqual(oldElements, newElements))
+                return;
+
+            oldElements.Clear();
+            oldElements.AddRange(newElements);
         }
 
         public static T? CreateOrAssignEmbedded<T>(this T? embedded, XElement? element, Action<T, XElement> syncAction)

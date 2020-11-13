@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
                         se.FullClassName,
                     });
 
-                UserAssetsImporter.RegisterName<EmailTemplateEntity>("EmailTemplate");
+                UserAssetsImporter.Register<EmailTemplateEntity>("EmailTemplate", EmailTemplateOperation.Save);
 
 
                 new Graph<EmailTemplateEntity>.ConstructFrom<EmailModelEntity>(EmailTemplateOperation.CreateEmailTemplateFromModel)

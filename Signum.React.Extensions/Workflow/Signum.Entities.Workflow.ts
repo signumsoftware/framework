@@ -265,6 +265,14 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
   bpmnElementId: string;
 }
 
+export const NewTasksEmbedded = new Type<NewTasksEmbedded>("NewTasksEmbedded");
+export interface NewTasksEmbedded extends Entities.EmbeddedEntity {
+  Type: "NewTasksEmbedded";
+  bpmnId: string;
+  name: string;
+  subWorkflow: Entities.Lite<WorkflowEntity> | null;
+}
+
 export const ScriptExecutionEmbedded = new Type<ScriptExecutionEmbedded>("ScriptExecutionEmbedded");
 export interface ScriptExecutionEmbedded extends Entities.EmbeddedEntity {
   Type: "ScriptExecutionEmbedded";
@@ -690,6 +698,7 @@ export const WorkflowReplacementModel = new Type<WorkflowReplacementModel>("Work
 export interface WorkflowReplacementModel extends Entities.ModelEntity {
   Type: "WorkflowReplacementModel";
   replacements: Entities.MList<WorkflowReplacementItemEmbedded>;
+  newTasks: Entities.MList<NewTasksEmbedded>;
 }
 
 export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScript");
