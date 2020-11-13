@@ -116,7 +116,7 @@ namespace Signum.Entities.Omnibox
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value == null ? null : ((PrimaryKey)value).Object);
+            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)((PrimaryKey)value).Object);
         }
 
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
