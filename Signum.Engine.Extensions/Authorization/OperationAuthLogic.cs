@@ -60,7 +60,7 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    var allResources = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet();
+                    var allResources = x.Element("Operations")!.Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource")!.Value).ToHashSet();
 
                     replacements.AskForReplacements(
                       allResources.Select(a => a.TryBefore("/") ?? a).ToHashSet(),

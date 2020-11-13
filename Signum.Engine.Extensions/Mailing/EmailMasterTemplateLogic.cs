@@ -15,7 +15,7 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailMasterTemplateLogic
     {
-        public static EmailMasterTemplateMessageEmbedded GetCultureMessage(this EmailMasterTemplateEntity template, CultureInfo ci)
+        public static EmailMasterTemplateMessageEmbedded? GetCultureMessage(this EmailMasterTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }

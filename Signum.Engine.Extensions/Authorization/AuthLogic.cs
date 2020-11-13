@@ -363,10 +363,10 @@ namespace Signum.Engine.Authorization
                 new XElement("Auth",
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
-                            new XAttribute("Name", r.ToString()),
-                            GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null,
+                            new XAttribute("Name", r.ToString()!),
+                            GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null!,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
-                     ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
+                     ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())!));
         }
 
         public static SqlPreCommand? ImportRulesScript(XDocument doc, bool interactive)
@@ -374,7 +374,7 @@ namespace Signum.Engine.Authorization
             Replacements replacements = new Replacements { Interactive = interactive };
 
             Dictionary<string, Lite<RoleEntity>> rolesDic = roles.Value.ToDictionary(a => a.ToString()!);
-            Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+            Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
             replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
 
@@ -398,9 +398,9 @@ namespace Signum.Engine.Authorization
 
                     EnumerableExtensions.JoinStrict(
                         roles.Value.RelatedTo(r),
-                        kvp.Value.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries),
-                        sr => sr.ToString(),
-                        s => rolesDic[s].ToString(),
+                        kvp.Value.Attribute("Contains")!.Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries),
+                        sr => sr.ToString()!,
+                        s => rolesDic[s].ToString()!,
                         (sr, s) => 0,
                         "subRoles of {0}".FormatWith(r));
                 }
@@ -436,11 +436,11 @@ namespace Signum.Engine.Authorization
 
         public static void LoadRoles(XDocument doc)
         {
-            var roleInfos = doc.Root.Element("Roles").Elements("Role").Select(x => new
+            var roleInfos = doc.Root!.Element("Roles")!.Elements("Role").Select(x => new
             {
-                Name = x.Attribute("Name").Value,
+                Name = x.Attribute("Name")!.Value,
                 MergeStrategy = x.Attribute("MergeStrategy")?.Let(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
-                SubRoles = x.Attribute("Contains").Value.SplitNoEmpty(',' )
+                SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(',' )
             }).ToList();
 
             var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy }); /*CSBUG*/
@@ -459,7 +459,7 @@ namespace Signum.Engine.Authorization
             Table table = Schema.Current.Table(typeof(RoleEntity));
             TableMList relationalTable = table.TablesMList().Single();
 
-            Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+            Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
             {
                 Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToString());
@@ -510,7 +510,7 @@ namespace Signum.Engine.Authorization
                  removeOld: (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
                  mergeBoth: (name, xElement, role) =>
                  {
-                     var should = xElement.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
+                     var should = xElement.Attribute("Contains")!.Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
                      var current = role.Roles.Select(a => a.ToString()!);
 
                      if(should.OrderBy().SequenceEqual(current.OrderBy()))

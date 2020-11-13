@@ -40,7 +40,7 @@ namespace Signum.Engine.Translation
                 var ltt = target.Types.TryGetC(kvp.Key);
 
                 var count = ((ltm.IsTypeCompleted() && ltt?.IsTypeCompleted() != true) ? 1 : 0) +
-                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
+                ltm.Members!.Count(kvp2 => kvp2.Value != null && ltt?.Members!.TryGetC(kvp2.Key) == null);
 
                 return new { Type = kvp.Key, count };
             })
@@ -60,7 +60,7 @@ namespace Signum.Engine.Translation
             List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups =
                 (from t in types
                  where t.TypeConflict != null
-                 from tc in t.TypeConflict
+                 from tc in t.TypeConflict!
                  select tc).GroupBy(a => a.Key, a => a.Value).ToList();
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)

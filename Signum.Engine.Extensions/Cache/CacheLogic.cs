@@ -343,7 +343,7 @@ namespace Signum.Engine.Cache
 
                             SqlDependency.Start(sub.ConnectionString);
                         }
-                        else throw e;
+                        else throw;
                     }
                 }
 

@@ -13,6 +13,8 @@ using Signum.Engine.Basics;
 
 namespace Signum.React.Authorization
 {
+#pragma warning disable CA1416 // Validate platform compatibility
+
     public class WindowsAuthenticationServer
     {
         public static Func<WindowsPrincipal, UserEntity?>? AutoCreateUser = DefaultAutoCreateUser;

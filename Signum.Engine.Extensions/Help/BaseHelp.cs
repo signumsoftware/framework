@@ -12,10 +12,10 @@ using System.Globalization;
 using Signum.Engine.Operations;
 using Signum.Entities.Help;
 using Signum.Engine.Basics;
-using Newtonsoft.Json;
 using DocumentFormat.OpenXml.EMMA;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Help
 {

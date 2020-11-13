@@ -42,7 +42,7 @@ namespace Signum.Entities.Joyride
             return new XElement("Joyride",
                 new XAttribute("Guid", Guid),
                 new XElement("Name", Name),
-                Culture == null ? null : new XElement("Culture", Culture.Key()),
+                Culture == null ? null! : new XElement("Culture", Culture.Key()),
                 new XElement("Type", Type.ToString()),
                 new XElement("Steps", Steps.Select(p => p.ToXml(ctx))),
                 new XElement("ShowSkipButton", ShowSkipButton),
@@ -53,14 +53,14 @@ namespace Signum.Entities.Joyride
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Element("Name").Value;
+            Name = element.Element("Name")!.Value;
             Culture = element.Element("Culture")?.Let(a => Lite.Parse<CultureInfoEntity>(a.Value));
-            Type = element.Element("Type").Value.ToEnum<JoyrideType>();
-            Steps.Synchronize(element.Element("Steps").Elements().ToList(), (s, x) => s.FromXml(x, ctx));
-            ShowSkipButton = Boolean.Parse(element.Element("ShowSkipButton").Value);
-            ShowStepsProgress = Boolean.Parse(element.Element("ShowStepsProgress").Value);
-            KeyboardNavigation = Boolean.Parse(element.Element("KeyboardNavigation").Value);
-            Debug = Boolean.Parse(element.Element("Debug").Value);
+            Type = element.Element("Type")!.Value.ToEnum<JoyrideType>();
+            Steps.Synchronize(element.Element("Steps")!.Elements().ToList(), (s, x) => s.FromXml(x, ctx));
+            ShowSkipButton = Boolean.Parse(element.Element("ShowSkipButton")!.Value);
+            ShowStepsProgress = Boolean.Parse(element.Element("ShowStepsProgress")!.Value);
+            KeyboardNavigation = Boolean.Parse(element.Element("KeyboardNavigation")!.Value);
+            Debug = Boolean.Parse(element.Element("Debug")!.Value);
         }
     }
 

@@ -86,18 +86,18 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("Row", Row),
                 new XAttribute("StartColumn", StartColumn),
                 new XAttribute("Columns", Columns),
-                Title == null ? null : new XAttribute("Title", Title),
-                IconName == null ? null : new XAttribute("IconName", IconName),
-                IconColor == null ? null : new XAttribute("IconColor", IconColor),
+                Title == null ? null! : new XAttribute("Title", Title),
+                IconName == null ? null! : new XAttribute("IconName", IconName),
+                IconColor == null ? null! : new XAttribute("IconColor", IconColor),
                 new XAttribute("Style", Style),
                 Content.ToXml(ctx));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Row = int.Parse(x.Attribute("Row").Value);
-            StartColumn = int.Parse(x.Attribute("StartColumn").Value);
-            Columns = int.Parse(x.Attribute("Columns").Value);
+            Row = int.Parse(x.Attribute("Row")!.Value);
+            StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
+            Columns = int.Parse(x.Attribute("Columns")!.Value);
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
@@ -185,7 +185,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
             RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
             AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
             ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
@@ -230,7 +230,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
         }
     }
 
@@ -268,7 +268,7 @@ namespace Signum.Entities.Dashboard
             return new XElement("UserChartPart",
                 new XAttribute("ShowData", ShowData),
                 new XAttribute("AllowChangeShowData", AllowChangeShowData),
-                CreateNew ? new XAttribute("CreateNew", CreateNew) : null,
+                CreateNew ? new XAttribute("CreateNew", CreateNew) : null!,
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
@@ -277,7 +277,7 @@ namespace Signum.Entities.Dashboard
             ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
             AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
-            UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
+            UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
         }
     }
 
@@ -340,8 +340,8 @@ namespace Signum.Entities.Dashboard
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("ValueUserQueryElement",
-                Label == null ? null : new XAttribute("Label", Label),
-                Href == null ? null : new XAttribute("Href", Href),
+                Label == null ? null! : new XAttribute("Label", Label),
+                Href == null ? null! : new XAttribute("Href", Href),
                 new XAttribute("UserQuery", ctx.Include(UserQuery)));
         }
 
@@ -349,7 +349,7 @@ namespace Signum.Entities.Dashboard
         {
             Label = element.Attribute("Label")?.Value;
             Href = element.Attribute("Href")?.Value;
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
         }
     }
 
@@ -417,8 +417,8 @@ namespace Signum.Entities.Dashboard
 
         internal void FromXml(XElement element)
         {
-            Label = element.Attribute("Label").Value;
-            Link = element.Attribute("Link").Value;
+            Label = element.Attribute("Label")!.Value;
+            Link = element.Attribute("Link")!.Value;
         }
     }
 }

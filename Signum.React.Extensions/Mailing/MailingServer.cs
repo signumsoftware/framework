@@ -18,6 +18,8 @@ using Signum.Entities.Authorization;
 using System.Net.Mail;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Mailing.Pop3;
+using System.Text.Json;
+using Signum.Engine.Json;
 
 namespace Signum.React.Mailing
 {
@@ -33,7 +35,7 @@ namespace Signum.React.Mailing
 
             TemplatingServer.Start(app);
 
-            EntityJsonConverter.AfterDeserilization.Register((EmailTemplateEntity et) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((EmailTemplateEntity et) =>
             {
                 if (et.Query != null)
                 {
@@ -58,17 +60,17 @@ namespace Signum.React.Mailing
             if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
-                var pcs = PropertyConverter.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
-                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
                 pcs.Add("newPassword", new PropertyConverter
                 {
                     AvoidValidate = true,
-                    CustomWriteJsonProperty = ctx => { },
-                    CustomReadJsonProperty = ctx =>
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                        var password = (string)ctx.JsonReader.Value!;
+                        var password = reader.GetString()!;
 
                         ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
                     }
@@ -78,17 +80,17 @@ namespace Signum.React.Mailing
             if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((ExchangeWebServiceEmbedded e) => e.Password);
-                var pcs = PropertyConverter.GetPropertyConverters(typeof(ExchangeWebServiceEmbedded));
-                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(ExchangeWebServiceEmbedded));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
                 pcs.Add("newPassword", new PropertyConverter
                 {
                     AvoidValidate = true,
-                    CustomWriteJsonProperty = ctx => { },
-                    CustomReadJsonProperty = ctx =>
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                        var password = (string)ctx.JsonReader.Value!;
+                        var password = reader.GetString()!;
 
                         ((ExchangeWebServiceEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
                     }
@@ -98,17 +100,17 @@ namespace Signum.React.Mailing
             if (Schema.Current.Tables.ContainsKey(typeof(Pop3ConfigurationEntity)))
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3ConfigurationEntity e) => e.Password);
-                var pcs = PropertyConverter.GetPropertyConverters(typeof(Pop3ConfigurationEntity));
-                pcs.GetOrThrow("password").CustomWriteJsonProperty = ctx => { };
+                var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3ConfigurationEntity));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
                 pcs.Add("newPassword", new PropertyConverter
                 {
                     AvoidValidate = true,
-                    CustomWriteJsonProperty = ctx => { },
-                    CustomReadJsonProperty = ctx =>
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                     {
-                        EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                        var password = (string)ctx.JsonReader.Value!;
+                        var password = reader.GetString()!;
 
                         ((Pop3ConfigurationEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
                     }

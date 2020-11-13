@@ -1,6 +1,3 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -9,6 +6,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Dynamic
 {
@@ -38,12 +37,12 @@ namespace Signum.Entities.Dynamic
         DynamicTypeDefinition? definition;
         public DynamicTypeDefinition GetDefinition()
         {
-            return definition ?? JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
+            return definition ?? JsonSerializer.Deserialize<DynamicTypeDefinition>(this.TypeDefinition)!;
         }
 
         public void SetDefinition(DynamicTypeDefinition definition)
         {
-            this.TypeDefinition = JsonConvert.SerializeObject(definition);
+            this.TypeDefinition = JsonSerializer.Serialize(definition, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull } );
             this.definition = definition;
         }
 
@@ -92,155 +91,105 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypePrimaryKeyDefinition
     {
-        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
-        public string Name;
-
-        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
-        public string Type;
-
-        [JsonProperty(PropertyName = "identity", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string? Name;
+        public string? Type;
         public bool Identity;
     }
 
     public class DynamicTypeTicksDefinition
     {
-        [JsonProperty(PropertyName = "hasTicks", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool HasTicks;
-
-        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
-        public string Name;
-
-        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
-        public string Type;
+        public string? Name;
+        public string? Type;
     }
 
     public class DynamicTypeBackMListDefinition
     {
-        //TableNameAttribute
-        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
-        public string TableName;
+        public string? TableName;
 
-        //PreserveOrderAttribute
-        [JsonProperty(PropertyName = "preserveOrder")]
         public bool PreserveOrder;
 
-        [JsonProperty(PropertyName = "orderName", NullValueHandling = NullValueHandling.Ignore)]
-        public string OrderName;
-        //
+        public string? OrderName;
 
-        //BackReferenceColumnNameAttribute
-        [JsonProperty(PropertyName = "backReferenceName", NullValueHandling = NullValueHandling.Ignore)]
-        public string BackReferenceName;
+        public string? BackReferenceName;
     }
 
     public class DynamicTypeDefinition
     {
-        [JsonProperty(PropertyName = "entityKind", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EntityKind? EntityKind;
 
-        [JsonProperty(PropertyName = "entityData", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EntityData? EntityData;
 
-        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
-        public string TableName;
+        public string? TableName;
 
-        [JsonProperty(PropertyName = "primaryKey", NullValueHandling = NullValueHandling.Ignore)]
-        public DynamicTypePrimaryKeyDefinition PrimaryKey;
+        public DynamicTypePrimaryKeyDefinition? PrimaryKey;
 
-        [JsonProperty(PropertyName = "ticks", NullValueHandling = NullValueHandling.Ignore)]
-        public DynamicTypeTicksDefinition Ticks;
+        public DynamicTypeTicksDefinition? Ticks;
 
-        [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "operationCreate")]
-        public OperationConstruct OperationCreate;
+        public OperationConstruct? OperationCreate;
 
-        [JsonProperty(PropertyName = "operationSave")]
-        public OperationExecute OperationSave;
+        public OperationExecute? OperationSave;
 
-        [JsonProperty(PropertyName = "operationDelete")]
-        public OperationDelete OperationDelete;
+        public OperationDelete? OperationDelete;
 
-        [JsonProperty(PropertyName = "operationClone")]
-        public OperationConstructFrom OperationClone;
+        public OperationConstructFrom? OperationClone;
 
-        [JsonProperty(PropertyName = "customInheritance")]
-        public DynamicTypeCustomCode CustomInheritance;
+        public DynamicTypeCustomCode? CustomInheritance;
 
-        [JsonProperty(PropertyName = "customEntityMembers")]
-        public DynamicTypeCustomCode CustomEntityMembers;
+        public DynamicTypeCustomCode? CustomEntityMembers;
 
-        [JsonProperty(PropertyName = "customStartCode")]
-        public DynamicTypeCustomCode CustomStartCode;
+        public DynamicTypeCustomCode? CustomStartCode;
 
-        [JsonProperty(PropertyName = "customLogicMembers")]
-        public DynamicTypeCustomCode CustomLogicMembers;
+        public DynamicTypeCustomCode? CustomLogicMembers;
 
-        [JsonProperty(PropertyName = "customTypes")]
-        public DynamicTypeCustomCode CustomTypes;
+        public DynamicTypeCustomCode? CustomTypes;
 
-        [JsonProperty(PropertyName = "customBeforeSchema")]
-        public DynamicTypeCustomCode CustomBeforeSchema;
+        public DynamicTypeCustomCode? CustomBeforeSchema;
 
-        [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
 
-        [JsonProperty(PropertyName = "multiColumnUniqueIndex")]
-        public MultiColumnUniqueIndex MultiColumnUniqueIndex;
+        public MultiColumnUniqueIndex? MultiColumnUniqueIndex;
 
-        [JsonProperty(PropertyName = "toStringExpression", NullValueHandling = NullValueHandling.Ignore)]
-        public string ToStringExpression;
+        public string? ToStringExpression;
     }
 
     public class MultiColumnUniqueIndex
     {
-        [JsonProperty(PropertyName = "fields")]
         public List<string> Fields;
 
-        [JsonProperty(PropertyName = "where")]
-        public string Where;
+        public string? Where;
 
     }
 
     public class OperationConstruct
     {
-        [JsonProperty(PropertyName = "construct")]
         public string Construct;
     }
 
     public class OperationExecute
     {
-        [JsonProperty(PropertyName = "canExecute")]
-        public string CanExecute;
-
-        [JsonProperty(PropertyName = "execute")]
+        public string? CanExecute;
         public string Execute;
     }
 
     public class OperationDelete
     {
-        [JsonProperty(PropertyName = "canDelete")]
-        public string CanDelete;
-
-        [JsonProperty(PropertyName = "delete")]
+        public string? CanDelete;
         public string Delete;
     }
 
     public class OperationConstructFrom
     {
-        [JsonProperty(PropertyName = "canConstruct")]
-        public string CanConstruct;
-
-        [JsonProperty(PropertyName = "construct")]
+        public string? CanConstruct;
         public string Construct;
     }
 
     public class DynamicTypeCustomCode
     {
-        [JsonProperty(PropertyName = "code")]
         public string Code;
     }
 
@@ -255,56 +204,39 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicProperty
     {
-        [JsonProperty(PropertyName = "uid")]
         public string UID;
 
-        [JsonProperty(PropertyName = "name")]
         public string Name;
 
-        [JsonProperty(PropertyName = "columnName", NullValueHandling = NullValueHandling.Ignore)]
-        public string ColumnName;
+        public string? ColumnName;
 
-        [JsonProperty(PropertyName = "type")]
         public string Type;
 
-        [JsonProperty(PropertyName = "columnType", NullValueHandling = NullValueHandling.Ignore)]
-        public string ColumnType;
+        public string? ColumnType;
 
-        [JsonProperty(PropertyName = "isNullable")]
         public IsNullable IsNullable;
 
-        [JsonProperty(PropertyName = "uniqueIndex", DefaultValueHandling = DefaultValueHandling.Include)]
         public UniqueIndex UniqueIndex;
 
-        [JsonProperty(PropertyName = "isLite", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool IsLite;
+        public bool? IsLite;
 
-        [JsonProperty(PropertyName = "isMList", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DynamicTypeBackMListDefinition IsMList;
 
-        [JsonProperty(PropertyName = "size", NullValueHandling = NullValueHandling.Ignore)]
         public int? Size;
 
-        [JsonProperty(PropertyName = "scale", NullValueHandling = NullValueHandling.Ignore)]
         public int? Scale;
 
-        [JsonProperty(PropertyName = "unit", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Unit;
+        public string? Unit;
 
-        [JsonProperty(PropertyName = "format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Format;
+        public string? Format;
 
-        [JsonProperty(PropertyName = "notifyChanges", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool NotifyChanges;
+        public bool? NotifyChanges;
 
-        [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
-        public List<DynamicValidator> Validators;
+        public List<DynamicValidator>? Validators;
 
-        [JsonProperty(PropertyName = "customFieldAttributes", NullValueHandling = NullValueHandling.Ignore)]
-        public string CustomFieldAttributes;
+        public string? CustomFieldAttributes;
 
-        [JsonProperty(PropertyName = "customPropertyAttributes", NullValueHandling = NullValueHandling.Ignore)]
-        public string CustomPropertyAttributes;
+        public string? CustomPropertyAttributes;
     }
 
 
@@ -323,35 +255,34 @@ namespace Signum.Entities.Dynamic
     }
 
 
-    class DynamicValidatorConverter : JsonConverter
+    class DynamicValidatorConverter : JsonConverter<DynamicValidator>
     {
         public override bool CanConvert(Type objectType)
         {
             return (objectType == typeof(DynamicValidator));
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override DynamicValidator? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            JObject obj = JObject.Load(reader);
-            var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type")!.Value.Value<string>());
+            using(JsonDocument doc = JsonDocument.ParseValue(ref reader))
+            {
+                var typeName = doc.RootElement.GetProperty("Type").GetString()!;
+                var type = DynamicValidator.GetDynamicValidatorType(typeName);
 
-            object target = Activator.CreateInstance(type)!;
-            serializer.Populate(obj.CreateReader(), target);
-            return target;
+                return (DynamicValidator)doc.RootElement.ToObject(type, options);
+            }
         }
 
-        public override bool CanWrite { get { return false; } }
-
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, DynamicValidator value, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
+
     }
 
     [JsonConverter(typeof(DynamicValidatorConverter))]
     public class DynamicValidator
     {
-        [JsonProperty(PropertyName = "type")]
         public string Type;
 
         public static Type GetDynamicValidatorType(string type)
@@ -386,7 +317,6 @@ namespace Signum.Entities.Dynamic
 
         public class NotNull : DynamicValidator
         {
-            [JsonProperty(PropertyName = "disabled", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool Disabled;
 
             public override string? ExtraArguments()
@@ -400,19 +330,14 @@ namespace Signum.Entities.Dynamic
 
         public class StringLength : DynamicValidator
         {
-            [JsonProperty(PropertyName = "multiLine", DefaultValueHandling = DefaultValueHandling.Ignore)]
             public bool MultiLine;
 
-            [JsonProperty(PropertyName = "min", NullValueHandling = NullValueHandling.Ignore)]
             public int? Min;
 
-            [JsonProperty(PropertyName = "max", NullValueHandling = NullValueHandling.Ignore)]
             public int? Max;
 
-            [JsonProperty(PropertyName = "allowLeadingSpaces", NullValueHandling = NullValueHandling.Ignore)]
             public bool? AllowLeadingSpaces;
 
-            [JsonProperty(PropertyName = "allowTrailingSpaces", NullValueHandling = NullValueHandling.Ignore)]
             public bool? AllowTrailingSpaces;
 
             public override string? ExtraArguments()
@@ -430,7 +355,6 @@ namespace Signum.Entities.Dynamic
 
         public class Decimals : DynamicValidator
         {
-            [JsonProperty(PropertyName = "decimalPlaces")]
             public int DecimalPlaces;
 
             public override string? ExtraArguments()
@@ -441,10 +365,8 @@ namespace Signum.Entities.Dynamic
 
         public class NumberIs : DynamicValidator
         {
-            [JsonProperty(PropertyName = "comparisonType")]
             public ComparisonType ComparisonType;
 
-            [JsonProperty(PropertyName = "number")]
             public decimal Number;
 
             public override string? ExtraArguments()
@@ -455,10 +377,8 @@ namespace Signum.Entities.Dynamic
 
         public class CountIs : DynamicValidator
         {
-            [JsonProperty(PropertyName = "comparisonType")]
             public ComparisonType ComparisonType;
 
-            [JsonProperty(PropertyName = "number")]
             public decimal Number;
 
             public override string? ExtraArguments()
@@ -469,10 +389,8 @@ namespace Signum.Entities.Dynamic
 
         public class NumberBetween : DynamicValidator
         {
-            [JsonProperty(PropertyName = "min")]
             public decimal Min;
 
-            [JsonProperty(PropertyName = "max")]
             public decimal Max;
 
             public override string? ExtraArguments()
@@ -483,7 +401,6 @@ namespace Signum.Entities.Dynamic
 
         public class DateTimePrecision : DynamicValidator
         {
-            [JsonProperty(PropertyName = "precision")]
             public Signum.Utilities.DateTimePrecision Precision;
 
             public override string? ExtraArguments()
@@ -494,7 +411,6 @@ namespace Signum.Entities.Dynamic
 
         public class TimeSpanPrecision : DynamicValidator
         {
-            [JsonProperty(PropertyName = "precision")]
             public Signum.Utilities.DateTimePrecision Precision;
 
             public override string? ExtraArguments()
@@ -505,7 +421,6 @@ namespace Signum.Entities.Dynamic
 
         public class StringCase : DynamicValidator
         {
-            [JsonProperty(PropertyName = "textCase")]
             public Signum.Entities.StringCase TextCase;
 
             public override string? ExtraArguments()

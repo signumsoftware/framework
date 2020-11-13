@@ -42,17 +42,17 @@ namespace Signum.Entities.Joyride
             return new XElement("JoyrideStepStyle",
                 new XAttribute("Guid", Guid),
                 new XElement("Name", Name),
-                BackgroundColor.IsNullOrEmpty() ? null : new XElement("BackgroundColor", BackgroundColor),
-                MainColor.IsNullOrEmpty() ? null : new XElement("MainColor", MainColor),
-                Color.IsNullOrEmpty() ? null : new XElement("Color", Color),
-                BorderRadius.IsNullOrEmpty() ? null : new XElement("BorderRadius", BorderRadius),
-                TextAlign.IsNullOrEmpty() ? null : new XElement("TextAlign", TextAlign),
-                Width.IsNullOrEmpty() ? null : new XElement("Width", Width));
+                BackgroundColor.IsNullOrEmpty() ? null! : new XElement("BackgroundColor", BackgroundColor),
+                MainColor.IsNullOrEmpty() ? null! : new XElement("MainColor", MainColor),
+                Color.IsNullOrEmpty() ? null! : new XElement("Color", Color),
+                BorderRadius.IsNullOrEmpty() ? null! : new XElement("BorderRadius", BorderRadius),
+                TextAlign.IsNullOrEmpty() ? null! : new XElement("TextAlign", TextAlign),
+                Width.IsNullOrEmpty() ? null! : new XElement("Width", Width));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Element("Name").Value;
+            Name = element.Element("Name")!.Value;
             BackgroundColor = element.Element("BackgroundColor")?.Value;
             MainColor = element.Element("MainColor")?.Value;
             Color = element.Element("Color")?.Value;

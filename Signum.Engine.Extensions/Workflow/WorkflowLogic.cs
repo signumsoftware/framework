@@ -46,7 +46,7 @@ namespace Signum.Engine.Workflow
             As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow == e));
 
         [AutoExpressionField]
-        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e) => 
+        public static WorkflowEventEntity? WorkflowStartEvent(this WorkflowEntity e) => 
             As.Expression(() => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault());
 
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
@@ -763,7 +763,7 @@ namespace Signum.Engine.Workflow
         {
             workflow.WorkflowEvents()
                 .Where(a => a.Type == WorkflowEventType.ScheduledStart)
-                .Select(a => a.ScheduledTask())
+                .Select(a => a.ScheduledTask()!)
                 .UnsafeUpdate()
                 .Set(a => a.Suspended, a => value)
                 .Execute();

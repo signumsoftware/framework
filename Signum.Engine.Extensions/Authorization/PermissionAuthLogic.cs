@@ -95,7 +95,7 @@ namespace Signum.Engine.Authorization
                     string replacementKey = "AuthRules:" + typeof(PermissionSymbol).Name;
 
                     replacements.AskForReplacements(
-                        x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
+                        x.Element("Permissions")!.Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource")!.Value).ToHashSet(),
                         SymbolLogic<PermissionSymbol>.Symbols.Select(s=>s.Key).ToHashSet(),
                         replacementKey);
 

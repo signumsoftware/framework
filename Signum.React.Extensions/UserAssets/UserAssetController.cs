@@ -16,9 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using Signum.Entities.UserQueries;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using Signum.React.Facades;
+using System.Text.Json;
 
 namespace Signum.React.UserAssets
 {
@@ -121,8 +120,8 @@ namespace Signum.React.UserAssets
 
                 var expectedValueType = filter.operation!.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
                 
-                var val = filter.value is JToken jtok ?
-                     jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
+                var val = filter.value is JsonElement jtok ?
+                     jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
                      filter.value;
                 
                 yield return new QueryFilterItem

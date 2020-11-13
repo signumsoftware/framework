@@ -28,7 +28,7 @@ namespace Signum.Entities.Authorization
         [NotifyCollectionChanged]
         public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
 
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         {
             Notify(() => StrategyHint);
         }

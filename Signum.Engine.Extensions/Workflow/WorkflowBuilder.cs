@@ -149,7 +149,7 @@ namespace Signum.Engine.Workflow
             return messageFlows.Select(a =>
                 new XElement(bpmn + "messageFlow",
                     new XAttribute("id", a.bpmnElementId),
-                    a.Entity.Name.HasText() ? new XAttribute("name", a.Entity.Name) : null,
+                    a.Entity.Name.HasText() ? new XAttribute("name", a.Entity.Name) : null!,
                     new XAttribute("sourceRef", GetBpmnElementId(a.Entity.From)),
                     new XAttribute("targetRef", GetBpmnElementId(a.Entity.To))
                 )
@@ -174,16 +174,16 @@ namespace Signum.Engine.Workflow
             var document =  WorkflowBuilder.ParseDocument(model.DiagramXml);
 
 
-            var participants = document.Descendants(bpmn + "collaboration").Elements(bpmn + "participant").ToDictionaryEx(a => a.Attribute("id").Value);
-            var processElements = document.Descendants(bpmn + "process").ToDictionaryEx(a => a.Attribute("id").Value);
-            var diagramElements = document.Descendants(bpmndi + "BPMNPlane").Elements().ToDictionaryEx(a => a.Attribute("bpmnElement").Value, "bpmnElement");
+            var participants = document.Descendants(bpmn + "collaboration").Elements(bpmn + "participant").ToDictionaryEx(a => a.Attribute("id")!.Value);
+            var processElements = document.Descendants(bpmn + "process").ToDictionaryEx(a => a.Attribute("id")!.Value);
+            var diagramElements = document.Descendants(bpmndi + "BPMNPlane").Elements().ToDictionaryEx(a => a.Attribute("bpmnElement")!.Value, "bpmnElement");
 
             if (participants.Count != processElements.Count)
                 throw new InvalidOperationException(WorkflowValidationMessage.ParticipantsAndProcessesAreNotSynchronized.NiceToString());
 
             Locator locator = new Workflow.Locator(this, diagramElements, model, replacements);
             
-            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id").Value);
+            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id")!.Value);
             var oldMessageFlows = this.messageFlows.ToDictionaryEx(a => a.bpmnElementId, "messageFlows");
 
             Synchronizer.Synchronize(messageFlows, oldMessageFlows,
@@ -205,13 +205,13 @@ namespace Signum.Engine.Workflow
                     var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEmbedded(), Workflow = this.workflow }.ApplyXml(pa, locator);
                     var pb = new PoolBuilder(wp, Enumerable.Empty<LaneBuilder>(), Enumerable.Empty<XmlEntity<WorkflowConnectionEntity>>());
                     this.pools.Add(wp.ToLite(), pb);
-                    pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
+                    pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef")!.Value), locator);
                 },
                 removeOld: null,
                 merge: (id, pa, pb) =>
                 {
                     var wp = pb.pool.Entity.ApplyXml(pa, locator);
-                    pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
+                    pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef")!.Value), locator);
                 });
 
             Synchronizer.Synchronize(participants, oldPools, 
@@ -259,7 +259,7 @@ namespace Signum.Engine.Workflow
             var oldNodes = oldTasks.Cast<IWorkflowNodeEntity>().Concat(oldIntermediateEvents.Cast<IWorkflowNodeEntity>()).ToDictionary(node => node.BpmnElementId);
 
             var newNodes = document.Descendants().Where(a => LaneBuilder.WorkflowActivityTypes.Values.Contains(a.Name.LocalName) || a.Name.LocalName == LaneBuilder.WorkflowEventTypes[WorkflowEventType.IntermediateTimer])
-                .ToDictionary(a => a.Attribute("id").Value);
+                .ToDictionary(a => a.Attribute("id")!.Value);
 
             var entities = model.Entities.ToDictionaryEx(a => a.BpmnElementId);
 
@@ -454,12 +454,12 @@ namespace Signum.Engine.Workflow
     {
         public static WorkflowPoolEntity ApplyXml(this WorkflowPoolEntity wp, XElement participant, Locator locator)
         {
-            var bpmnElementId = participant.Attribute("id").Value;
+            var bpmnElementId = participant.Attribute("id")!.Value;
             var model = locator.GetModelEntity<WorkflowPoolModel>(bpmnElementId);
             if (model != null)
                 wp.SetModel(model);
             wp.BpmnElementId = bpmnElementId;
-            wp.Name = participant.Attribute("name").Value;
+            wp.Name = participant.Attribute("name")!.Value;
             wp.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wp))
                 wp.Execute(WorkflowPoolOperation.Save);
@@ -468,12 +468,12 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowLaneEntity ApplyXml(this WorkflowLaneEntity wl, XElement lane, Locator locator)
         {
-            var bpmnElementId = lane.Attribute("id").Value;
+            var bpmnElementId = lane.Attribute("id")!.Value;
             var model = locator.GetModelEntity<WorkflowLaneModel>(bpmnElementId);
             if (model != null)
                 wl.SetModel(model);
             wl.BpmnElementId = bpmnElementId;
-            wl.Name = lane.Attribute("name").Value;
+            wl.Name = lane.Attribute("name")!.Value;
             wl.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wl))
                 wl.Execute(WorkflowLaneOperation.Save);
@@ -483,7 +483,7 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowEventEntity ApplyXml(this WorkflowEventEntity we, XElement @event, Locator locator)
         {
-            var bpmnElementId = @event.Attribute("id").Value;
+            var bpmnElementId = @event.Attribute("id")!.Value;
             we.BpmnElementId = bpmnElementId;
             var model = locator.GetModelEntity<WorkflowEventModel>(bpmnElementId);
             if (model != null)
@@ -507,7 +507,7 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowActivityEntity ApplyXml(this WorkflowActivityEntity wa, XElement activity, Locator locator, Dictionary<string, XmlEntity<WorkflowEventEntity>> currentEvents)
         {
-            var bpmnElementId = activity.Attribute("id").Value;
+            var bpmnElementId = activity.Attribute("id")!.Value;
             var model = locator.GetModelEntity<WorkflowActivityModel>(bpmnElementId);
             if (model != null)
             {
@@ -555,7 +555,7 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowGatewayEntity ApplyXml(this WorkflowGatewayEntity wg, XElement gateway, Locator locator)
         {
-            var bpmnElementId = gateway.Attribute("id").Value;
+            var bpmnElementId = gateway.Attribute("id")!.Value;
             wg.BpmnElementId = bpmnElementId;
             wg.Name = gateway.Attribute("name")?.Value;
             wg.Type = WorkflowBuilder.LaneBuilder.WorkflowGatewayTypes.Single(kvp => kvp.Value == gateway.Name.LocalName).Key;
@@ -568,10 +568,10 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowConnectionEntity ApplyXml(this WorkflowConnectionEntity wc, XElement flow, Locator locator)
         {
-            wc.From = locator.FindEntity(flow.Attribute("sourceRef").Value)!;
-            wc.To = locator.FindEntity(flow.Attribute("targetRef").Value)!;
+            wc.From = locator.FindEntity(flow.Attribute("sourceRef")!.Value)!;
+            wc.To = locator.FindEntity(flow.Attribute("targetRef")!.Value)!;
 
-            var bpmnElementId = flow.Attribute("id").Value;
+            var bpmnElementId = flow.Attribute("id")!.Value;
             var model = locator.GetModelEntity<WorkflowConnectionModel>(bpmnElementId);
             if (model != null)
                 wc.SetModel(model);
@@ -620,8 +620,8 @@ namespace Signum.Engine.Workflow
 
             Entity = entity;
             Document = XDocument.Parse(finalXml);
-            this.Element = Document.Root.Element(WorkflowBuilder.bpmndi + "BPMNDiagram").Elements().First();
-            bpmnElementId = Element.Attribute("bpmnElement").Value;
+            this.Element = Document.Root!.Element(WorkflowBuilder.bpmndi + "BPMNDiagram")!.Elements().First();
+            bpmnElementId = Element.Attribute("bpmnElement")!.Value;
         }
 
         public XDocument Document;

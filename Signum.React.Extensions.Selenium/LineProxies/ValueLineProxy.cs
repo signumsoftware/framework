@@ -17,14 +17,14 @@ namespace Signum.React.Selenium
 
         public void SetStringValue(string? value)
         {
-            IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
+            IWebElement? checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
             if (checkBox != null)
             {
                 checkBox.SetChecked(bool.Parse(value!));
                 return;
             }
 
-            IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetime-picker input[type=text]"));
+            IWebElement? dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetime-picker input[type=text]"));
             if(dateTimePicker != null)
             {
                 dateTimePicker.SafeSendKeys(value);
@@ -43,14 +43,14 @@ namespace Signum.React.Selenium
                 return;
             }
 
-            IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector(" input[type=text], textarea"));
+            IWebElement? textOrTextArea = this.Element.TryFindElement(By.CssSelector(" input[type=text], textarea"));
             if (textOrTextArea != null)
             {
                 textOrTextArea.SafeSendKeys(value);
                 return;
             }
 
-            IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+            IWebElement? select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
             {
                 select.SelectElement().SelectByValue(value);
@@ -62,21 +62,21 @@ namespace Signum.React.Selenium
 
         private string GetStringValue()
         {
-            IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
+            IWebElement? checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
             if (checkBox != null)
                 return checkBox.Selected.ToString();
 
-            IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
+            IWebElement? textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
             if (textOrTextArea != null)
             {
                 return textOrTextArea.GetAttribute("data-value")  ?? textOrTextArea.GetAttribute("value");
             }
 
-            IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+            IWebElement? select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
                 return select.SelectElement().SelectedOption.GetAttribute("value").ToString();
 
-            IWebElement readonlyField =
+            IWebElement? readonlyField =
                 this.Element.TryFindElement(By.CssSelector("input.form-control")) ??
                 this.Element.TryFindElement(By.CssSelector("div.form-control")) ??
                 this.Element.TryFindElement(By.CssSelector("input.form-control-plaintext")) ??
