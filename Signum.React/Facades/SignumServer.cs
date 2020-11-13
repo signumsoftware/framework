@@ -196,4 +196,18 @@ namespace Signum.React.Facades
             this.canExecute = canExecute;
         }
     }
+
+    [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public class EmbeddedPropertyRouteAttribute : Attribute
+    {
+
+        public Type EmbeddedType { get; private set; }
+        public PropertyRoute PropertyRoute { get; private set; }
+        // This is a positional argument
+        public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText)
+        {
+            this.EmbeddedType = embeddedType;
+            this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
+        }
+    }
 }
