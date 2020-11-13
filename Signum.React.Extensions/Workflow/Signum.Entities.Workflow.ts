@@ -269,7 +269,7 @@ export const NewTasksEmbedded = new Type<NewTasksEmbedded>("NewTasksEmbedded");
 export interface NewTasksEmbedded extends Entities.EmbeddedEntity {
   Type: "NewTasksEmbedded";
   bpmnId: string;
-  name: string;
+  name: string | null;
   subWorkflow: Entities.Lite<WorkflowEntity> | null;
 }
 

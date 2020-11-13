@@ -28,6 +28,9 @@ namespace Signum.Engine.Workflow
         Dictionary<string, WorkflowLaneEntity> lanes;
         Dictionary<string, WorkflowPoolEntity> pools;
 
+        public IEnumerable<IWorkflowNodeEntity> Activities => activities.Values.Cast<IWorkflowNodeEntity>()
+            .Concat(events.Values.Where(a => a.Type == WorkflowEventType.IntermediateTimer));
+
 
         public WorkflowImportExport(WorkflowEntity wf)
         {
@@ -153,7 +156,11 @@ namespace Signum.Engine.Workflow
                    xmlDic,
                    entityDic,
                    createNew: null,
-                   removeOld: (bpmnId, entity) => DeleteOrMark<T>(entity, deleteOperation,  ctx),
+                   removeOld: (bpmnId, entity) => 
+                   {
+                       entityDic.Remove(bpmnId);
+                       DeleteOrMark<T>(entity, deleteOperation, ctx);
+                    },
                    merge: (bpmnId, xml, entity) =>
                    {
                        setXml(entity, xml);
@@ -372,7 +379,7 @@ namespace Signum.Engine.Workflow
 
             var newValue = xml.Element("DiagramXml")!.Value;
 
-            if (!Enumerable.SequenceEqual(entity.Xml.DiagramXml.Lines(), newValue.Lines()))
+            if (!Enumerable.SequenceEqual((entity.Xml.DiagramXml ?? "").Lines(), newValue.Lines()))
                 entity.Xml.DiagramXml = newValue;
         }
     }

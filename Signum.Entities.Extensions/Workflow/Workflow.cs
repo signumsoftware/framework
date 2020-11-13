@@ -164,13 +164,18 @@ namespace Signum.Entities.Workflow
         public MList<WorkflowReplacementItemEmbedded> Replacements { get; set; } = new MList<WorkflowReplacementItemEmbedded>();
 
         public MList<NewTasksEmbedded> NewTasks { get; set; } = new MList<NewTasksEmbedded>();
+
+        public override string ToString()
+        {
+            return NicePropertyName(()=> Replacements) + ": " + Replacements.Count;
+        }
     }
 
     [Serializable]
     public class NewTasksEmbedded : EmbeddedEntity
     {
         public string BpmnId { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public Lite<WorkflowEntity>? SubWorkflow { get; set; }
     }
 

@@ -220,7 +220,18 @@ namespace Signum.Engine.UserAssets
                 wie.FromXml(element, this);
 
                 if (wie.HasChanges)
+                {
+                    if (wie.ReplacementModel != null)
+                    {
+                        wie.ReplacementModel.NewTasks = wie.Activities.Select(a => new NewTasksEmbedded
+                        {
+                            BpmnId = a.BpmnElementId,
+                            Name = a.GetName()!,
+                            SubWorkflow = (a as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite(),
+                        }).ToMList();
+                    }
                     this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid")!.Value), wie.ReplacementModel);
+                }
             }
         }
 
@@ -352,7 +363,7 @@ namespace Signum.Engine.UserAssets
             {
                 var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid")!.Value));
                 var wie = new WorkflowImportExport(workflow)
-            {
+                {
                     ReplacementModel = model
                 };
                 wie.FromXml(element, this);
