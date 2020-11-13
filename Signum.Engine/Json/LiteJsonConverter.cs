@@ -80,9 +80,12 @@ namespace Signum.Engine.Json
                         }
                     case "EntityType": reader.Read(); typeStr = reader.GetString(); break;
                     case "entity":
-                        reader.Read();
-                        var converter = (JsonConverterWithExisting<Entity>)options.GetConverter(typeof(Entity));
-                        converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
+                        using (EntityJsonConverterFactory.SetPath(".entity"))
+                        {
+                            reader.Read();
+                            var converter = (JsonConverterWithExisting<Entity>)options.GetConverter(typeof(Entity));
+                            converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
+                        }
                         break;
                     default: throw new JsonException("unexpected property " + propName);
                 }

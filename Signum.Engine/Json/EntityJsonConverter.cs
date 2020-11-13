@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace Signum.Engine.Json
 {
@@ -211,7 +212,15 @@ namespace Signum.Engine.Json
             return (JsonConverter)Activator.CreateInstance(typeof(EntityJsonConverter<>).MakeGenericType(typeToConvert), this)!;
         }
 
- 
+        static AsyncLocal<string?> path = new AsyncLocal<string?>();
+
+        public static string? CurrentPath => path.Value;
+        public static  IDisposable SetPath(string newPart)
+        {
+            var oldPart = path.Value;
+            path.Value = oldPart + newPart;
+            return new Disposable(() => path.Value = oldPart);
+        }
     }
 
     public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
@@ -361,49 +370,52 @@ namespace Signum.Engine.Json
                         while (reader.TokenType == JsonTokenType.PropertyName)
                         {
                             var propertyName = reader.GetString()!;
-                            if (propertyName == "mixins")
+                            using (EntityJsonConverterFactory.SetPath("." + propertyName))
                             {
-                                reader.Read();
-                                reader.Assert(JsonTokenType.StartObject);
-
-                                reader.Read();
-                                while (reader.TokenType == JsonTokenType.PropertyName)
+                                if (propertyName == "mixins")
                                 {
-                                    var mixin = mod[reader.GetString()!];
+                                    reader.Read();
+                                    reader.Assert(JsonTokenType.StartObject);
 
                                     reader.Read();
+                                    while (reader.TokenType == JsonTokenType.PropertyName)
+                                    {
+                                        var mixin = mod[reader.GetString()!];
 
-                                    var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
-                                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin)))
-                                        converter.Read(ref reader, mixin.GetType(), options, mixin);
+                                        reader.Read();
+
+                                        var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
+                                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin)))
+                                            converter.Read(ref reader, mixin.GetType(), options, mixin);
+
+                                        reader.Read();
+                                    }
+
+                                    reader.Assert(JsonTokenType.EndObject);
+                                    reader.Read();
+                                }
+                                else if (propertyName == "readonlyProperties")
+                                {
+                                    reader.Read();
+                                    JsonSerializer.Deserialize(ref reader, typeof(List<string>), options);
+                                    reader.Read();
+                                }
+                                else
+                                {
+                                    PropertyConverter? pc = dic.TryGetC(propertyName);
+                                    if (pc == null)
+                                    {
+                                        if (specialProps.Contains(propertyName))
+                                            throw new InvalidOperationException($"Property '{propertyName}' is a special property like {specialProps.ToString(a => $"'{a}'", ", ")}, and they can only be at the beginning of the Json object for performance reasons");
+
+                                        throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(propertyName, propertyName.GetType().TypeName(), dic.GetType().TypeName()));
+                                    }
+
+                                    reader.Read();
+                                    ReadJsonProperty(ref reader, options, mod, pc, tup.pr, markedAsModified);
 
                                     reader.Read();
                                 }
-
-                                reader.Assert(JsonTokenType.EndObject);
-                                reader.Read();
-                            }
-                            else if (propertyName == "readonlyProperties")
-                            {
-                                reader.Read();
-                                JsonSerializer.Deserialize(ref reader, typeof(List<string>), options);
-                                reader.Read();
-                            }
-                            else
-                            {
-                                PropertyConverter? pc = dic.TryGetC(propertyName);
-                                if (pc == null)
-                                {
-                                    if (specialProps.Contains(propertyName))
-                                        throw new InvalidOperationException($"Property '{propertyName}' is a special property like {specialProps.ToString(a => $"'{a}'", ", ")}, and they can only be at the beginning of the Json object for performance reasons");
-
-                                    throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(propertyName, propertyName.GetType().TypeName(), dic.GetType().TypeName()));
-                                }
-
-                                reader.Read();
-                                ReadJsonProperty(ref reader, options, mod, pc, tup.pr, markedAsModified);
-
-                                reader.Read();
                             }
                         }
 
@@ -507,10 +519,6 @@ namespace Signum.Engine.Json
             return object.Equals(newValue, oldValue);
         }
 
-
-      
-       
-   
 
         public ModifiableEntity GetEntity(ref Utf8JsonReader reader, Type objectType, IModifiableEntity? existingValue, out bool isModified)
         {
@@ -628,24 +636,26 @@ namespace Signum.Engine.Json
 
         static readonly string[] specialProps = new string[] { "toStr", "id", "isNew", "Type", "ticks", "modified" };
 
-        public struct IdentityInfo
+      
+    }
+
+    public struct IdentityInfo
+    {
+        public string? Id;
+        public bool? IsNew;
+        public bool? Modified;
+        public string Type;
+        public string ToStr;
+        public long? Ticks;
+
+        public override string ToString()
         {
-            public string? Id;
-            public bool? IsNew;
-            public bool? Modified;
-            public string Type;
-            public string ToStr;
-            public long? Ticks;
+            var newOrId = IsNew == true ? "New" : Id;
 
-            public override string ToString()
-            {
-                var newOrId = IsNew == true ? "New" : Id;
+            if (Ticks != null)
+                newOrId += $" (Ticks {Ticks})";
 
-                if (Ticks != null)
-                    newOrId += $" (Ticks {Ticks})";
-
-                return $"{Type} {newOrId}: {ToStr}";
-            }
+            return $"{Type} {newOrId}: {ToStr}";
         }
     }
 }
