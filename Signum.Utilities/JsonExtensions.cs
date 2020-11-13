@@ -33,6 +33,16 @@ namespace Signum.Utilities
                 throw new JsonException($"Expected '{expected}' but '{reader.TokenType}' found in '{reader.CurrentState}'");
         }
 
+        public static object? GetLiteralValue(this ref Utf8JsonReader reader)
+        {
+            return reader.TokenType == JsonTokenType.Null ? null! :
+                   reader.TokenType == JsonTokenType.String ? reader.GetString() :
+                   reader.TokenType == JsonTokenType.Number ? reader.GetInt64() :
+                   reader.TokenType == JsonTokenType.True ? true :
+                   reader.TokenType == JsonTokenType.False ? false :
+                   throw new UnexpectedValueException(reader.TokenType);
+        }
+
         //Binary
         public static string ToJsonString(object obj, JsonSerializerOptions? options = null)
         {

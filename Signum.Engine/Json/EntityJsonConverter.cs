@@ -185,7 +185,7 @@ namespace Signum.Engine.Json
 
         public virtual Type ResolveType(string typeStr, Type objectType)
         {
-            if (Reflector.CleanTypeName(objectType) == typeStr)
+            if (objectType.Name == typeStr || Reflector.CleanTypeName(objectType) == typeStr)
                 return objectType;
 
             var type = TypeLogic.GetType(typeStr);
@@ -357,7 +357,7 @@ namespace Signum.Engine.Json
                     var tup = Factory.GetCurrentPropertyRoute(mod);
 
                     var dic = Factory.GetPropertyConverters(mod.GetType());
-                    using (EntityJsonContext.SetAllowDirectMListChanges(markedAsModified))
+                    using (EntityJsonContext.SetAllowDirectMListChanges(Factory.Strategy == EntityJsonConverterStrategy.Full || markedAsModified))
                         while (reader.TokenType == JsonTokenType.PropertyName)
                         {
                             var propertyName = reader.GetString()!;
@@ -606,14 +606,7 @@ namespace Signum.Engine.Json
                     case "id": 
                         {
                             reader.Read();
-                            info.Id = 
-                                reader.TokenType == JsonTokenType.Null ? null! :
-                                reader.TokenType == JsonTokenType.String ? reader.GetString() :
-                                reader.TokenType == JsonTokenType.Number ? reader.GetInt64().ToString() :
-                                reader.TokenType == JsonTokenType.True ? true.ToString() :
-                                reader.TokenType == JsonTokenType.False ? false.ToString() :
-                                throw new UnexpectedValueException(reader.TokenType);
-
+                            info.Id = reader.GetLiteralValue()?.ToString();
                         }
                         break;
                     case "isNew": reader.Read(); info.IsNew = reader.GetBoolean(); break;

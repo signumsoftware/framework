@@ -115,7 +115,7 @@ namespace Signum.Engine.Json
                         throw new JsonException($"member 'rowId' expected in {reader.CurrentState}");
 
                     reader.Read();
-                    var rowIdValue = JsonSerializer.Deserialize(ref reader, typeof(object), options);
+                    var rowIdValue = reader.GetLiteralValue();
 
                     reader.Read();
                     reader.Assert(JsonTokenType.PropertyName);
