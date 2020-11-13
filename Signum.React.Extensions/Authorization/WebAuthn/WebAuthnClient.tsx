@@ -14,16 +14,6 @@ import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 import MessageModal from "@framework/Modals/MessageModal";
 
-let applicationName: string;
-
-export namespace Settings {
-   
-}
-
-export function start(options: { routes: JSX.Element[], applicationName: string }) {
-  applicationName = options.applicationName;
-}
-
 export function webAuthnDisplayName() {
 
   if (typeof (PublicKeyCredential) == "undefined")
@@ -81,7 +71,6 @@ export function register() {
       return navigator.credentials.create({
         publicKey: options
       }).then(credential => {
-        debugger;
         if (credential == null)
           return;
 
