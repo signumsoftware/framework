@@ -61,10 +61,6 @@ namespace Signum.Upgrade.Upgrades
               l => l.Contains("Services.SessionSharing.setAppNameAndRequestSessionStorage"),
               @"LoginPage.customLoginButtons = ctx => <WebAuthnClient.WebAuthnLoginButton ctx={ctx} />;
 ");
-
-                file.InsertAfterFirstLine(
-                    l => l.Contains("AuthClient.startPublic"),
-                    @"WebAuthnClient.start({ routes, applicationName: ""Southwind"" });");
             });
 
             uctx.ChangeCodeFile($@"Southwind.React/App/Southwind/Templates/ApplicationConfiguration.tsx", file =>
