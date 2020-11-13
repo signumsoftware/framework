@@ -72,28 +72,28 @@ namespace Signum.Engine.Workflow
                 new XAttribute("Lane", a.Lane.BpmnElementId),
                 new XAttribute("Name", a.Name),
                 new XAttribute("Type", a.Type.ToString()),
-                a.RequiresOpen == false ? null : new XAttribute("RequiresOpen", a.RequiresOpen),
-                a.EstimatedDuration == null ? null : new XAttribute("EstimatedDuration", a.EstimatedDuration),
-                string.IsNullOrEmpty(a.ViewName) ? null : new XAttribute("ViewName", a.ViewName),
-                string.IsNullOrEmpty(a.Comments) ? null : new XElement("Comments", a.Comments),
-                !a.ViewNameProps.Any() ? null : new XElement("ViewNameProps",
-                    a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression)))
+                a.RequiresOpen == false ? null! : new XAttribute("RequiresOpen", a.RequiresOpen),
+                a.EstimatedDuration == null ? null! : new XAttribute("EstimatedDuration", a.EstimatedDuration),
+                string.IsNullOrEmpty(a.ViewName) ? null! : new XAttribute("ViewName", a.ViewName),
+                string.IsNullOrEmpty(a.Comments) ? null! : new XElement("Comments", a.Comments),
+                !a.ViewNameProps.Any() ? null! : new XElement("ViewNameProps",
+                    a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))
                 ),
-                string.IsNullOrEmpty(a.UserHelp) ? null : new XElement("UserHelp", new XCData(a.UserHelp)),
-                a.SubWorkflow == null ? null : new XElement("SubWorkflow",
+                string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
+                a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
                     new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
                     new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
                 ),
-                a.Script == null ? null : new XElement("Script",
+                a.Script == null ? null! : new XElement("Script",
                     new XAttribute("Script", ctx.Include(a.Script.Script)),
-                    a.Script.RetryStrategy == null ? null : new XAttribute("RetryStrategy", ctx.Include(a.Script.RetryStrategy))
+                    a.Script.RetryStrategy == null ? null! : new XAttribute("RetryStrategy", ctx.Include(a.Script.RetryStrategy))
                 ),
                 a.Xml.ToXml()
                )),
 
                this.gateways.Values.Select(g => new XElement("Gateway",
                    new XAttribute("BpmnElementId", g.BpmnElementId),
-                   g.Name.HasText() ? new XAttribute("Name", g.Name) : null,
+                   g.Name.HasText() ? new XAttribute("Name", g.Name) : null!,
                    new XAttribute("Lane", g.Lane.BpmnElementId),
                    new XAttribute("Type", g.Type.ToString()),
                    new XAttribute("Direction", g.Direction.ToString()),
@@ -102,25 +102,25 @@ namespace Signum.Engine.Workflow
 
                this.events.Values.Select(e => new XElement("Event",
                     new XAttribute("BpmnElementId", e.BpmnElementId),
-                    e.Name.HasText() ? new XAttribute("Name", e.Name) : null,
+                    e.Name.HasText() ? new XAttribute("Name", e.Name) : null!,
                     new XAttribute("Lane", e.Lane.BpmnElementId),
                     new XAttribute("Type", e.Type.ToString()),
-                    e.Timer == null ? null : new XElement("Timer",
-                        e.Timer.Duration?.ToXml("Duration"),
-                        e.Timer.Condition == null ? null : new XAttribute("Condition", ctx.Include(e.Timer.Condition))),
-                    e.BoundaryOf == null ? null : new XAttribute("BoundaryOf", this.activities.Values.SingleEx(a => a.Is(e.BoundaryOf)).BpmnElementId),
+                    e.Timer == null ? null! : new XElement("Timer",
+                        e.Timer.Duration?.ToXml("Duration")!,
+                        e.Timer.Condition == null ? null! : new XAttribute("Condition", ctx.Include(e.Timer.Condition))),
+                    e.BoundaryOf == null ? null! : new XAttribute("BoundaryOf", this.activities.Values.SingleEx(a => a.Is(e.BoundaryOf)).BpmnElementId),
                      e.Xml.ToXml())
                 ),
 
                this.connections.Values.Select(c => new XElement("Connection",
                     new XAttribute("BpmnElementId", c.BpmnElementId),
-                    c.Name.HasText() ? new XAttribute("Name", c.Name) : null,
+                    c.Name.HasText() ? new XAttribute("Name", c.Name) : null!,
                     new XAttribute("Type", c.Type.ToString()),
                     new XAttribute("From", c.From.BpmnElementId),
                     new XAttribute("To", c.To.BpmnElementId),
-                    c.Condition == null ? null : new XAttribute("Condition", ctx.Include(c.Condition)),
-                    c.Action == null ? null : new XAttribute("Action", ctx.Include(c.Action)),
-                    c.Order == null ? null : new XAttribute("Order", c.Order),
+                    c.Condition == null ? null! : new XAttribute("Condition", ctx.Include(c.Condition)),
+                    c.Action == null ? null! : new XAttribute("Action", ctx.Include(c.Action)),
+                    c.Order == null ? null! : new XAttribute("Order", c.Order),
                     c.Xml.ToXml()))
                );
          
@@ -138,7 +138,7 @@ namespace Signum.Engine.Workflow
               createNew: (bpmnId, xml) =>
               {
                   var entity = new T();
-                  entity.BpmnElementId = xml.Attribute("BpmnElementId").Value;
+                  entity.BpmnElementId = xml.Attribute("BpmnElementId")!.Value;
                   setXml(entity, xml);
                   SaveOrMark<T>(entity, saveOperation, ctx);
                   entityDic.Add(bpmnId, entity);
@@ -243,9 +243,9 @@ namespace Signum.Engine.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            this.workflow.Name = element.Attribute("Name").Value;
-            this.workflow.MainEntityType = ctx.GetType(element.Attribute("MainEntityType").Value);
-            this.workflow.MainEntityStrategies.Synchronize(element.Attribute("MainEntityStrategies").Value.Split(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToList());
+            this.workflow.Name = element.Attribute("Name")!.Value;
+            this.workflow.MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
+            this.workflow.MainEntityStrategies.Synchronize(element.Attribute("MainEntityStrategies")!.Value.Split(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToList());
             this.workflow.ExpirationDate = element.Attribute("ExpirationDate")?.Let(ed => DateTime.ParseExact(ed.Value, "o", CultureInfo.InvariantCulture));
 
             if(!ctx.IsPreview)
@@ -264,15 +264,15 @@ namespace Signum.Engine.Workflow
 
             using (Sync(this.pools, element.Elements("Pool"), ctx, WorkflowPoolOperation.Save, WorkflowPoolOperation.Delete, (pool, xml) =>
             { 
-                 pool.Name = xml.Attribute("Name").Value;
+                 pool.Name = xml.Attribute("Name")!.Value;
                  pool.Workflow = this.workflow;
                  SetXmlDiagram(pool, xml);
              }))
             {
                 using (Sync(this.lanes, element.Elements("Lane"), ctx, WorkflowLaneOperation.Save, WorkflowLaneOperation.Delete, (lane, xml) =>
                 {
-                    lane.Name = xml.Attribute("Name").Value;
-                    lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool").Value);
+                    lane.Name = xml.Attribute("Name")!.Value;
+                    lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
                     lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList());
                     lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
                     SetXmlDiagram(lane, xml);
@@ -280,9 +280,9 @@ namespace Signum.Engine.Workflow
                 {
                     using (Sync(this.activities, element.Elements("Activity"), ctx, WorkflowActivityOperation.Save, WorkflowActivityOperation.Delete, (activity, xml) =>
                     {
-                        activity.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
-                        activity.Name = xml.Attribute("Name").Value;
-                        activity.Type = xml.Attribute("Type").Value.ToEnum<WorkflowActivityType>();
+                        activity.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane")!.Value);
+                        activity.Name = xml.Attribute("Name")!.Value;
+                        activity.Type = xml.Attribute("Type")!.Value.ToEnum<WorkflowActivityType>();
                         activity.Comments = xml.Element("Comments")?.Value;
                         activity.RequiresOpen = (bool?)xml.Attribute("RequiresOpen") ?? false;
                         activity.EstimatedDuration = (double?)xml.Attribute("EstimatedDuration");
@@ -294,7 +294,7 @@ namespace Signum.Engine.Workflow
                         activity.UserHelp = xml.Element("UserHelp")?.Value;
                         activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
                         {
-                            swe.Workflow = (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow"));
+                            swe.Workflow = (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
                             swe.SubEntitiesEval = swe.SubEntitiesEval.CreateOrAssignEmbedded(elem.Element("SubEntitiesEval"), (se, x) =>
                             {
                                 se.Script = x.Value;
@@ -302,7 +302,7 @@ namespace Signum.Engine.Workflow
                         });
                         activity.Script = activity.Script.CreateOrAssignEmbedded(xml.Element("Script"), (swe, elem) =>
                         {
-                            swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script"))).ToLite();
+                            swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script")!)).ToLite();
                             swe.RetryStrategy = elem.Attribute("RetryStrategy")?.Let(a => (WorkflowScriptRetryStrategyEntity)ctx.GetEntity((Guid)a));
                         });
                         SetXmlDiagram(activity, xml);
@@ -311,8 +311,8 @@ namespace Signum.Engine.Workflow
                         using (Sync(this.events, element.Elements("Event"), ctx, WorkflowEventOperation.Save, WorkflowEventOperation.Delete, (ev, xml) =>
                         {
                             ev.Name = xml.Attribute("Name")?.Value;
-                            ev.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
-                            ev.Type = xml.Attribute("Type").Value.ToEnum<WorkflowEventType>();
+                            ev.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane")!.Value);
+                            ev.Type = xml.Attribute("Type")!.Value.ToEnum<WorkflowEventType>();
                             ev.Timer = ev.Timer.CreateOrAssignEmbedded(xml.Element("Timer"), (time, xml) =>
                             {
                                 time.Duration = time.Duration.CreateOrAssignEmbedded(xml.Element("Duration"), (ts, xml) => ts.FromXml(xml));
@@ -326,9 +326,9 @@ namespace Signum.Engine.Workflow
                             using (Sync(this.gateways, element.Elements("Gateway"), ctx, WorkflowGatewayOperation.Save, WorkflowGatewayOperation.Delete, (gw, xml) =>
                             {
                                 gw.Name = xml.Attribute("Name")?.Value;
-                                gw.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane").Value);
-                                gw.Type = xml.Attribute("Type").Value.ToEnum<WorkflowGatewayType>();
-                                gw.Direction = xml.Attribute("Direction").Value.ToEnum<WorkflowGatewayDirection>();
+                                gw.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane")!.Value);
+                                gw.Type = xml.Attribute("Type")!.Value.ToEnum<WorkflowGatewayType>();
+                                gw.Direction = xml.Attribute("Direction")!.Value.ToEnum<WorkflowGatewayDirection>();
 
                                 SetXmlDiagram(gw, xml);
                             }))
@@ -336,9 +336,9 @@ namespace Signum.Engine.Workflow
                                 using (Sync(this.connections, element.Elements("Connection"), ctx, WorkflowConnectionOperation.Save, WorkflowConnectionOperation.Delete, (conn, xml) =>
                                 {
                                     conn.Name = xml.Attribute("Name")?.Value;
-                                    conn.Type = xml.Attribute("Type").Value.ToEnum<ConnectionType>();
-                                    conn.From = GetNode(xml.Attribute("From").Value);
-                                    conn.To = GetNode(xml.Attribute("To").Value);
+                                    conn.Type = xml.Attribute("Type")!.Value.ToEnum<ConnectionType>();
+                                    conn.From = GetNode(xml.Attribute("From")!.Value);
+                                    conn.To = GetNode(xml.Attribute("To")!.Value);
                                     conn.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowConditionEntity)ctx.GetEntity((Guid)a)).ToLite());
                                     conn.Action = xml.Attribute("Action")?.Let(a => ((WorkflowActionEntity)ctx.GetEntity((Guid)a)).ToLite());
                                     conn.Order = (int?)xml.Attribute("Order");
@@ -370,7 +370,7 @@ namespace Signum.Engine.Workflow
             if (entity.Xml == null)
                 entity.Xml = new WorkflowXmlEmbedded();
 
-            var newValue = xml.Element("DiagramXml").Value;
+            var newValue = xml.Element("DiagramXml")!.Value;
 
             if (!Enumerable.SequenceEqual(entity.Xml.DiagramXml.Lines(), newValue.Lines()))
                 entity.Xml.DiagramXml = newValue;

@@ -38,21 +38,21 @@ namespace Signum.Entities.Workflow
                  new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
                  new XElement("Eval",
                    new XElement("Script", new XCData(Eval.Script)),
-                   string.IsNullOrEmpty(Eval.CustomTypes) ? null : new XElement("CustomTypes", new XCData(Eval.Script)))
+                   string.IsNullOrEmpty(Eval.CustomTypes) ? null! : new XElement("CustomTypes", new XCData(Eval.Script)))
                  );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Attribute("Name").Value;
-            MainEntityType = ctx.GetType(element.Attribute("MainEntityType").Value);
+            Name = element.Attribute("Name")!.Value;
+            MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
 
             if (Eval == null)
                 Eval = new WorkflowScriptEval();
 
-            var xEval = element.Element("Eval");
+            var xEval = element.Element("Eval")!;
 
-            Eval.Script = xEval.Element("Script").Value;
+            Eval.Script = xEval.Element("Script")!.Value;
             Eval.CustomTypes = xEval.Element("CustomTypes")?.Value;
         }
     }

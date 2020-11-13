@@ -108,10 +108,10 @@ namespace Signum.Entities.Basics
 
         public void FromXml(XElement element)
         {
-            Days = int.Parse(element.Attribute("Days").Value);
-            Hours = int.Parse(element.Attribute("Hours").Value);
-            Minutes = int.Parse(element.Attribute("Minutes").Value);
-            Seconds = int.Parse(element.Attribute("Seconds").Value);
+            Days = int.Parse(element.Attribute("Days")!.Value);
+            Hours = int.Parse(element.Attribute("Hours")!.Value);
+            Minutes = int.Parse(element.Attribute("Minutes")!.Value);
+            Seconds = int.Parse(element.Attribute("Seconds")!.Value);
         }
     }
 }

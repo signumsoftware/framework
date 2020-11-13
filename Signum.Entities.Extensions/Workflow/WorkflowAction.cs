@@ -40,15 +40,15 @@ namespace Signum.Entities.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Name = element.Attribute("Name").Value;
-            MainEntityType = ctx.GetType(element.Attribute("MainEntityType").Value);
+            Name = element.Attribute("Name")!.Value;
+            MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
 
             if (Eval == null)
                 Eval = new WorkflowActionEval();
 
-            var xEval = element.Element("Eval");
+            var xEval = element.Element("Eval")!;
 
-            Eval.Script = xEval.Element("Script").Value;
+            Eval.Script = xEval.Element("Script")!.Value;
         }
     }
 

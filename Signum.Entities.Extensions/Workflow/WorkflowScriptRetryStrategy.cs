@@ -64,7 +64,7 @@ namespace Signum.Entities.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Rule = element.Attribute("Rule").Value;
+            Rule = element.Attribute("Rule")!.Value;
         }
     }
 

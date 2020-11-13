@@ -220,7 +220,7 @@ namespace Signum.Engine.UserAssets
                 wie.FromXml(element, this);
 
                 if (wie.HasChanges)
-                    this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid").Value), wie.ReplacementModel);
+                    this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid")!.Value), wie.ReplacementModel);
             }
         }
 
@@ -350,7 +350,7 @@ namespace Signum.Engine.UserAssets
 
             public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
             {
-                var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid").Value));
+                var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid")!.Value));
                 var wie = new WorkflowImportExport(workflow)
             {
                     ReplacementModel = model
