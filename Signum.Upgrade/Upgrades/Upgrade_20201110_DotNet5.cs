@@ -70,24 +70,6 @@ namespace Signum.Upgrade.Upgrades
 RUN curl -sL https://deb.nodesource.com/setup_15.x | bash -
 RUN apt-get install -y nodejs");
             });
-
-            uctx.ChangeCodeFile($@"Southwind.React/App/MainPublic.tsx", file =>
-            {
-                file.ReplaceLine(
-                    a => a.Contains("FROM mcr.microsoft.com/dotnet/core/aspnet"),
-                    "FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base");
-                file.ReplaceLine(
-                    a => a.Contains("FROM mcr.microsoft.com/dotnet/core/sdk"),
-                    "FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build");
-
-                file.ReplaceBetween(
-                    a => a.Contains("RUN apt-get -y install curl"),
-                    a => a.Contains("RUN apt-get -y install nodejs"),
-@"RUN apt-get -y install curl
-RUN curl -sL https://deb.nodesource.com/setup_15.x | bash -
-RUN apt-get install -y nodejs");
-            });
-
         }
     }
 }

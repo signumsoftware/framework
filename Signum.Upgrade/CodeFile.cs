@@ -255,9 +255,8 @@ namespace Signum.Upgrade
         public void UpgradeNpmPackage(string packageName, string version)
         {
             AssertExtension(".json");
-
             this.ReplaceLine(condition: a => a.Contains(@$"""{packageName}"""),
-                text: @$"""{packageName}"": ""{version}""");
+                text: @$"""{packageName}"": ""{version}"",");
         }
 
         public void UpdateNugetReference(string packageName, string version)
