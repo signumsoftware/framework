@@ -97,7 +97,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId.Object}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId?.Object })}`)
+  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId })}`)
 });
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {

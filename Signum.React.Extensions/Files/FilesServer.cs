@@ -45,8 +45,8 @@ namespace Signum.React.Files
             }
 
             RegisterFilePathEmbeddedProperty("fullWebPath", fpe => fpe.FullWebPath());
-            RegisterFilePathEmbeddedProperty("entityId", fpe => fpe.EntityId);
-            RegisterFilePathEmbeddedProperty("mListRowId", fpe => fpe.MListRowId);
+            RegisterFilePathEmbeddedProperty("entityId", fpe => fpe.EntityId.Object);
+            RegisterFilePathEmbeddedProperty("mListRowId", fpe => fpe.MListRowId?.Object);
             RegisterFilePathEmbeddedProperty("propertyRoute", fpe => fpe.PropertyRoute);
             RegisterFilePathEmbeddedProperty("rootType", fpe => fpe.RootType);
 
