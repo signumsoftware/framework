@@ -124,34 +124,37 @@ namespace Signum.Engine.Json
 
                     reader.Read();
 
-                    if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
+                    using (EntityJsonConverterFactory.SetPath($"[{newList.Count}].element"))
                     {
-                        var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
-
-                        var oldValue = dic.TryGetS(rowId);
-
-                        if (oldValue == null)
+                        if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
                         {
-                            T newValue = (T)converter.Read(ref reader, typeof(T), options)!;
+                            var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
 
-                            newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                            var oldValue = dic.TryGetS(rowId);
+
+                            if (oldValue == null)
+                            {
+                                T newValue = (T)converter.Read(ref reader, typeof(T), options)!;
+
+                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                            }
+                            else
+                            {
+                                T newValue = converter is JsonConverterWithExisting<T> jcwe ?
+                                    (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!)! :
+                                    (T)converter.Read(ref reader, typeof(T), options)!;
+
+                                if (oldValue.Value.Element!.Equals(newValue))
+                                    newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
+                                else
+                                    newList.Add(new MList<T>.RowIdElement(newValue));
+                            }
                         }
                         else
                         {
-                            T newValue = converter is JsonConverterWithExisting<T> jcwe ?
-                                (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!)! :
-                                (T)converter.Read(ref reader, typeof(T), options)!;
-
-                            if (oldValue.Value.Element!.Equals(newValue))
-                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
-                            else
-                                newList.Add(new MList<T>.RowIdElement(newValue));
+                            var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
+                            newList.Add(new MList<T>.RowIdElement(newValue));
                         }
-                    }
-                    else
-                    {
-                        var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
-                        newList.Add(new MList<T>.RowIdElement(newValue));
                     }
 
                     reader.Read();
