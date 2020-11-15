@@ -92,6 +92,8 @@ export module CaseActivityMessage {
   export const NoNewOrOpenedOrInProgressNotificationsFound = new MessageKey("CaseActivityMessage", "NoNewOrOpenedOrInProgressNotificationsFound");
   export const NoActorsFoundToInsertCaseActivityNotifications = new MessageKey("CaseActivityMessage", "NoActorsFoundToInsertCaseActivityNotifications");
   export const ThereAreInprogressActivities = new MessageKey("CaseActivityMessage", "ThereAreInprogressActivities");
+  export const ShowHelp = new MessageKey("CaseActivityMessage", "ShowHelp");
+  export const HideHelp = new MessageKey("CaseActivityMessage", "HideHelp");
 }
 
 export const CaseActivityMixin = new Type<CaseActivityMixin>("CaseActivityMixin");
@@ -263,6 +265,14 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
   bpmnElementId: string;
 }
 
+export const NewTasksEmbedded = new Type<NewTasksEmbedded>("NewTasksEmbedded");
+export interface NewTasksEmbedded extends Entities.EmbeddedEntity {
+  Type: "NewTasksEmbedded";
+  bpmnId: string;
+  name: string | null;
+  subWorkflow: Entities.Lite<WorkflowEntity> | null;
+}
+
 export const ScriptExecutionEmbedded = new Type<ScriptExecutionEmbedded>("ScriptExecutionEmbedded");
 export interface ScriptExecutionEmbedded extends Entities.EmbeddedEntity {
   Type: "ScriptExecutionEmbedded";
@@ -297,9 +307,10 @@ export interface ViewNamePropEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
-export interface WorkflowActionEntity extends Entities.Entity {
+export interface WorkflowActionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowAction";
   name: string;
+  guid: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowActionEval;
 }
@@ -321,8 +332,8 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
   lane: WorkflowLaneEntity;
   name: string;
   bpmnElementId: string;
-  comments: string | null;
   type: WorkflowActivityType;
+  comments: string | null;
   requiresOpen: boolean;
   boundaryTimers: Entities.MList<WorkflowEventEntity>;
   estimatedDuration: number | null;
@@ -388,9 +399,10 @@ export type WorkflowActivityType =
   "Script";
 
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
-export interface WorkflowConditionEntity extends Entities.Entity {
+export interface WorkflowConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowCondition";
   name: string;
+  guid: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowConditionEval;
 }
@@ -686,11 +698,13 @@ export const WorkflowReplacementModel = new Type<WorkflowReplacementModel>("Work
 export interface WorkflowReplacementModel extends Entities.ModelEntity {
   Type: "WorkflowReplacementModel";
   replacements: Entities.MList<WorkflowReplacementItemEmbedded>;
+  newTasks: Entities.MList<NewTasksEmbedded>;
 }
 
 export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScript");
-export interface WorkflowScriptEntity extends Entities.Entity {
+export interface WorkflowScriptEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScript";
+  guid: string;
   name: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowScriptEval;
@@ -711,14 +725,15 @@ export module WorkflowScriptOperation {
 export const WorkflowScriptPartEmbedded = new Type<WorkflowScriptPartEmbedded>("WorkflowScriptPartEmbedded");
 export interface WorkflowScriptPartEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowScriptPartEmbedded";
-  script: Entities.Lite<WorkflowScriptEntity> | null;
+  script: Entities.Lite<WorkflowScriptEntity>;
   retryStrategy: WorkflowScriptRetryStrategyEntity | null;
 }
 
 export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy");
-export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity {
+export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScriptRetryStrategy";
   rule: string;
+  guid: string;
 }
 
 export module WorkflowScriptRetryStrategyOperation {
@@ -727,9 +742,10 @@ export module WorkflowScriptRetryStrategyOperation {
 }
 
 export const WorkflowTimerConditionEntity = new Type<WorkflowTimerConditionEntity>("WorkflowTimerCondition");
-export interface WorkflowTimerConditionEntity extends Entities.Entity {
+export interface WorkflowTimerConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowTimerCondition";
   name: string;
+  guid: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowTimerConditionEval;
 }

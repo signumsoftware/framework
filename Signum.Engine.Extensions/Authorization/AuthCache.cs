@@ -357,7 +357,9 @@ namespace Signum.Entities.Authorization
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed")!.Value);
-                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            if (rt.IsGraphModified)
+                                return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            return null;
                         })?.Do(p => p.GoBefore = true);
 
                     return restSql;

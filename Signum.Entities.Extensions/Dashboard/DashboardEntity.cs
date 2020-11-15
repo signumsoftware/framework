@@ -153,7 +153,7 @@ namespace Signum.Entities.Dashboard
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName")!.Value;
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
             EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());

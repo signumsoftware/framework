@@ -125,7 +125,7 @@ namespace Signum.Engine.Templating
                 return Cache.GetOrAdd(type, t =>
                     t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(f => !f.HasAttribute<IgnoreAttribute>())
-                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)!).ToList());
+                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetter<object, object?>(fi)!).ToList());
             }
 
             bool IEqualityComparer<object?>.Equals(object? x, object? y)

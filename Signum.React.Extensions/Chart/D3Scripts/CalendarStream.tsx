@@ -41,7 +41,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var colorInterpolate = parameters["ColorInterpolate"];
   var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
-  var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r)));
+  var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r))!);
 
   var minDate = d3.min(data.rows, r => new Date(dateColumn.getValue(r)))!;
   var maxDate = d3.max(data.rows, r => new Date(dateColumn.getValue(r)))!;

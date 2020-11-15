@@ -129,7 +129,7 @@ namespace Signum.Entities.UserQueries
         {
             Query = ctx.GetQuery(element.Attribute("Query")!.Value);
             DisplayName = element.Attribute("DisplayName")!.Value;
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));

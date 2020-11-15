@@ -35,6 +35,7 @@ export function start(options: {
   sendEmailTask: boolean,
   contextual: boolean,
   queryButton: boolean,
+  quickLinkInDefaultGroup?: boolean
 }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
@@ -114,7 +115,7 @@ export function start(options: {
         icon: "envelope",
         iconColor: "orange",
         color: "warning",
-        group: null,
+        group: options.quickLinkInDefaultGroup ? undefined : null,
       }));
   }).done();
 

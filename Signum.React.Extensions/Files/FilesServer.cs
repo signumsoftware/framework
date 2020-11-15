@@ -10,6 +10,9 @@ using Signum.Engine;
 using Signum.Engine.Files;
 using Signum.React.Filters;
 using System;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Signum.Engine.Json;
 
 namespace Signum.React.Files
 {
@@ -23,27 +26,27 @@ namespace Signum.React.Files
 
             void RegisterFilePathEmbeddedProperty(string propertyName, Func<FilePathEmbedded, object?> getter)
             {
-                PropertyConverter.GetPropertyConverters(typeof(FilePathEmbedded)).Add(propertyName, new PropertyConverter()
+                SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(FilePathEmbedded)).Add(propertyName, new PropertyConverter()
                 {
-                    CustomWriteJsonProperty = ctx =>
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
                     {
                         var fpe = (FilePathEmbedded)ctx.Entity;
 
-                        ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                        ctx.JsonSerializer.Serialize(ctx.JsonWriter, getter(fpe));
+                        writer.WritePropertyName(ctx.LowerCaseName);
+                        JsonSerializer.Serialize(writer, getter(fpe), ctx.JsonSerializerOptions);
                     },
                     AvoidValidate = true,
-                    CustomReadJsonProperty = ctx =>
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                     {
-                        var list = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
+                        var obj = JsonSerializer.Deserialize<object>(ref reader);
                         //Discard
                     }
                 });
             }
 
             RegisterFilePathEmbeddedProperty("fullWebPath", fpe => fpe.FullWebPath());
-            RegisterFilePathEmbeddedProperty("entityId", fpe => fpe.EntityId);
-            RegisterFilePathEmbeddedProperty("mListRowId", fpe => fpe.MListRowId);
+            RegisterFilePathEmbeddedProperty("entityId", fpe => fpe.EntityId.Object);
+            RegisterFilePathEmbeddedProperty("mListRowId", fpe => fpe.MListRowId?.Object);
             RegisterFilePathEmbeddedProperty("propertyRoute", fpe => fpe.PropertyRoute);
             RegisterFilePathEmbeddedProperty("rootType", fpe => fpe.RootType);
 

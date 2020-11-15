@@ -48,17 +48,17 @@ namespace Signum.Engine.Excel
                     CellFormatCount = document.WorkbookPart.WorkbookStylesPart.Stylesheet.CellFormats.Count,
                     DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                     {
-                        { DefaultStyle.Title, worksheet.FindCell("A1")!.StyleIndex },
-                        { DefaultStyle.Header, worksheet.FindCell("A2")!.StyleIndex },
-                        { DefaultStyle.Date, worksheet.FindCell("B3")!.StyleIndex },
-                        { DefaultStyle.DateTime, worksheet.FindCell("C3")!.StyleIndex },
-                        { DefaultStyle.Text, worksheet.FindCell("D3")!.StyleIndex },
-                        { DefaultStyle.General, worksheet.FindCell("E3")!.StyleIndex },
-                        { DefaultStyle.Boolean, worksheet.FindCell("E3")!.StyleIndex },
-                        { DefaultStyle.Enum, worksheet.FindCell("E3")!.StyleIndex },
-                        { DefaultStyle.Number, worksheet.FindCell("F3")!.StyleIndex },
-                        { DefaultStyle.Decimal, worksheet.FindCell("G3")!.StyleIndex },
-                        { DefaultStyle.Percentage, worksheet.FindCell("H3")!.StyleIndex },
+                        { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex },
+                        { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex },
+                        { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex },
+                        { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex },
+                        { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex },
+                        { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex },
+                        { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex },
+                        { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex },
                     }
                 };
             }
@@ -174,7 +174,7 @@ namespace Signum.Engine.Excel
             if (results == null)
                 throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
             
-            var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter);
+            var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Getter);
             var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format);
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))

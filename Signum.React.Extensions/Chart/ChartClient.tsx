@@ -158,12 +158,9 @@ export interface StringValue {
 }
 
 
-export let chartScripts: ChartScript[];
+let chartScripts: Promise<ChartScript[]>;
 export function getChartScripts(): Promise<ChartScript[]> {
-  if (chartScripts)
-    return Promise.resolve(chartScripts);
-
-  return API.fetchScripts().then(cs => chartScripts = cs);
+  return chartScripts ?? (chartScripts = API.fetchScripts());
 }
 
 export function getChartScript(symbol: ChartScriptSymbol): Promise<ChartScript> {

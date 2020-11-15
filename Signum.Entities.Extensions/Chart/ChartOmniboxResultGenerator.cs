@@ -5,7 +5,7 @@ using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Entities.Omnibox;
 using Signum.Entities.DynamicQuery;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Chart
 {

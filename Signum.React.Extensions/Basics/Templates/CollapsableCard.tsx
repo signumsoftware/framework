@@ -72,8 +72,10 @@ export default function CollapsableCard(p: CollapsableCardProps) {
         {p.header}
       </div>
       <Collapse in={isOpen}>
-        <div className={classes("card-body", cardStyleClasses(p.bodyStyle))}>
-          {p.children}
+        <div>
+          <div className={classes("card-body", cardStyleClasses(p.bodyStyle))}>
+            {p.children}
+          </div>
         </div>
       </Collapse>
     </div>

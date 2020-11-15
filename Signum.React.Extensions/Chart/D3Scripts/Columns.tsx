@@ -126,15 +126,15 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
           parameters["Labels"] == "Inside" ?
             <g className="x-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
               {orderedRows.map(r => {
-                var posy = y(valueColumn.getValue(r));
+                var posy = y(valueColumn.getValue(r))!;
                 return (
                   <TextEllipsis key={keyColumn.getValueKey(r)} maxWidth={posy >= size / 2 ? posy : size - posy} padding={labelMargin} className="x-label sf-transition"
-                    transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))) + rotate(-90)}
+                    transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))!) + rotate(-90)}
                     dominantBaseline="middle"
                     fontWeight="bold"
-                    fill={y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
-                    dx={y(valueColumn.getValue(r)) >= size / 2 ? -labelMargin : labelMargin}
-                    textAnchor={y(valueColumn.getValue(r)) >= size / 2 ? 'end' : 'start'}
+                    fill={y(valueColumn.getValue(r))! >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
+                    dx={y(valueColumn.getValue(r))! >= size / 2 ? -labelMargin : labelMargin}
+                    textAnchor={y(valueColumn.getValue(r))! >= size / 2 ? 'end' : 'start'}
                     onClick={e => props.onDrillDown(r, e)}
                     cursor="pointer">
                     {keyColumn.getValueNiceName(r)}
@@ -146,9 +146,9 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
       {parseFloat(parameters["NumberOpacity"]) > 0 &&
         <g className="numbers-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
           {orderedRows
-            .filter(r => y(valueColumn.getValue(r)) > 10)
+            .filter(r => y(valueColumn.getValue(r))! > 10)
             .map(r => <text key={keyColumn.getValueKey(r)} className="number-label sf-transition"
-              transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r)) / 2) + rotate(-90)}
+              transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))! / 2) + rotate(-90)}
               fill={parameters["NumberColor"] ?? "#000"}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}

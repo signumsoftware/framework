@@ -29,7 +29,7 @@ namespace Signum.Entities.Chart
         public string Name { get; set; }
 
         string? value;
-        [StringLengthValidator(Max = 50)]
+        [StringLengthValidator(Max = 500)]
         public string? Value
         {
             get { return value; }

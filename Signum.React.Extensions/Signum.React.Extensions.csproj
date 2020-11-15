@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net5</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<TypeScriptBuildMode>true</TypeScriptBuildMode>
 		<OutputType>Library</OutputType>
 		<StartupObject></StartupObject>
@@ -36,9 +36,9 @@
 	<ItemGroup>
 		<PackageReference Include="Fido2" Version="1.1.0" />
 		<PackageReference Include="Fido2.Models" Version="1.1.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.7.1" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.7.1" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.2">
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.8.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.0.3">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
@@ -46,8 +46,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Signum.TSGenerator" Version="3.0.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+		<PackageReference Include="Signum.TSGenerator" Version="5.0.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
 	</ItemGroup>
 
 	<ItemGroup>

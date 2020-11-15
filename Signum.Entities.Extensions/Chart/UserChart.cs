@@ -146,7 +146,7 @@ namespace Signum.Entities.Chart
         {
             DisplayName = element.Attribute("DisplayName")!.Value;
             Query = ctx.GetQuery(element.Attribute("Query")!.Value);
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));

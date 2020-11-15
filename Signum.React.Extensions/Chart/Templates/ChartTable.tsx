@@ -7,15 +7,20 @@ import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 import { ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
+import { TypeInfo } from '@framework/Reflection'
+import { FullscreenComponent } from './FullscreenComponent'
 
 interface ChartTableProps {
   resultTable: ResultTable;
   chartRequest: ChartRequestModel;
   lastChartRequest: ChartRequestModel;
   onOrderChanged: () => void;
+  onReload?: (e: React.MouseEvent<any>) => void;
+  onCreateNew?: (e: React.MouseEvent<any>) => void;
+  typeInfos?: TypeInfo[];
 }
 
-export default function ChartTableComponent(p : ChartTableProps){
+export default function ChartTableComponent(p: ChartTableProps) {
   function handleHeaderClick(e: React.MouseEvent<any>, col: ColumnOptionParsed) {
     var chartCol = p.chartRequest.columns.map(mle => mle.element)
       .firstOrNull(a => a.token != null && a.token.token != null && a.token.token.fullKey == col.token!.fullKey);
@@ -102,46 +107,47 @@ export default function ChartTableComponent(p : ChartTableProps){
   var entityFormatter = qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(undefined)).last("EntityFormatRules").formatter;
 
   return (
-    <table className="sf-search-results table table-hover table-sm">
-      <thead>
-        <tr>
-          {hasEntity && <th></th>}
-          {columns.map((col, i) =>
-            <th key={i} data-column-name={col.column.token!.fullKey}
-              onClick={e=>handleHeaderClick(e, col.column)}>
-              <span className={"sf-header-sort " + orderClassName(col.column)} />
-              <span> {col.column.displayName || col.column.token!.niceName}</span>
-            </th>)}
-        </tr>
-      </thead>
-      <tbody>
-        {
-          resultTable.rows.map((row, i) => {
-            const ctx: Finder.CellFormatterContext = {
-              refresh: undefined,
-              columns: resultTable.columns,
-              row: row,
-              rowIndex : i,
-            }
-            return (
-              <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
-                {hasEntity &&
-                  <td className={entityFormatter.cellClass}>
-                    {entityFormatter.formatter(row, resultTable.columns, undefined)}
-                  </td>
-                }
-                {columns.map((c, j) =>
-                  <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                    {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
-                  </td>)
-                }
-              </tr>
-            );
-          })
-        }
-      </tbody>
-    </table>
-
+    <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
+      <table className="sf-search-results table table-hover table-sm">
+        <thead>
+          <tr>
+            {hasEntity && <th></th>}
+            {columns.map((col, i) =>
+              <th key={i} data-column-name={col.column.token!.fullKey}
+                onClick={e => handleHeaderClick(e, col.column)}>
+                <span className={"sf-header-sort " + orderClassName(col.column)} />
+                <span> {col.column.displayName || col.column.token!.niceName}</span>
+              </th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {
+            resultTable.rows.map((row, i) => {
+              const ctx: Finder.CellFormatterContext = {
+                refresh: undefined,
+                columns: resultTable.columns,
+                row: row,
+                rowIndex: i,
+              }
+              return (
+                <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
+                  {hasEntity &&
+                    <td className={entityFormatter.cellClass}>
+                      {entityFormatter.formatter(row, resultTable.columns, undefined)}
+                    </td>
+                  }
+                  {columns.map((c, j) =>
+                    <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+                      {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+                    </td>)
+                  }
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </FullscreenComponent>
   );
 }
 

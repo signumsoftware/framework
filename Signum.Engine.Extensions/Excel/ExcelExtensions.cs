@@ -81,16 +81,14 @@ namespace Signum.Engine.Excel
             wbPart.DeletePart(worksheetPart);
         }
 
-        public static Cell? FindCell(this Worksheet worksheet, string addressName)
+        public static Cell FindCell(this Worksheet worksheet, string addressName)
         {
-            return worksheet.Descendants<Cell>().
-              Where(c => c.CellReference == addressName).FirstOrDefault();
+            return worksheet.Descendants<Cell>().FirstEx(c => c.CellReference == addressName);
         }
 
-        public static Cell? FindCell(this SheetData sheetData, string addressName)
+        public static Cell FindCell(this SheetData sheetData, string addressName)
         {
-            return sheetData.Descendants<Cell>().
-              Where(c => c.CellReference == addressName).FirstOrDefault();
+            return sheetData.Descendants<Cell>().FirstEx(c => c.CellReference == addressName);
         }
 
         public static string GetCellValue(this SpreadsheetDocument document, Worksheet worksheet, string addressName)

@@ -59,7 +59,6 @@ namespace Signum.Entities.Mailing
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Name = element.Attribute("Name")!.Value;
-            Guid = Guid.Parse(element.Attribute("Guid")!.Value);
             Messages = new MList<EmailMasterTemplateMessageEmbedded>();
             Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailMasterTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
             {

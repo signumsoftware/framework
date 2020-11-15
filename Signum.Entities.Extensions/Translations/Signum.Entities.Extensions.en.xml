@@ -445,6 +445,11 @@
   <Type Name="ViewLogEntity" />
   <Type Name="ViewLogMessage" />
   <Type Name="ViewNamePropEmbedded" />
+  <Type Name="WebAuthnAssertionOptionsEntity" />
+  <Type Name="WebAuthnConfigurationEmbedded" />
+  <Type Name="WebAuthnCredentialEntity" />
+  <Type Name="WebAuthnCredentialOperation" />
+  <Type Name="WebAuthnMakeCredentialsOptionsEntity" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordModelEntity" />

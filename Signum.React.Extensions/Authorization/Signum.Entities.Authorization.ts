@@ -26,7 +26,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
   loginWithAzureAD: boolean;
-  allowSimpleUserNames: boolean;
+  allowMatchUsersBySimpleUserName: boolean;
   autoCreateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;
@@ -123,6 +123,7 @@ export module LoginAuthMessage {
   export const Username = new MessageKey("LoginAuthMessage", "Username");
   export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
+  export const ShowLoginForm = new MessageKey("LoginAuthMessage", "ShowLoginForm");
   export const LoginWithWindowsUser = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
   export const NoWindowsUserFound = new MessageKey("LoginAuthMessage", "NoWindowsUserFound");
   export const LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication = new MessageKey("LoginAuthMessage", "LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication");
@@ -275,10 +276,6 @@ export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
 export module RoleOperation {
   export const Save : Entities.ExecuteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Save");
   export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Delete");
-}
-
-export module RoleQuery {
-  export const RolesReferedBy = new QueryKey("RoleQuery", "RolesReferedBy");
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {

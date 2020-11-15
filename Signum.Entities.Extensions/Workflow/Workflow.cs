@@ -1,3 +1,4 @@
+using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
@@ -38,13 +39,11 @@ namespace Signum.Entities.Workflow
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            throw new NotImplementedException();
+            ctx.SetFullWorkflowElement(this, element);
         }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
-
-   
     }
 
     [AutoInit]
@@ -141,9 +140,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = int.MaxValue, MultiLine = true)]
         public string DiagramXml { get; set; }
 
-        public XCData ToXCData()
+        public XElement ToXml()
         {
-            return new XCData(this.DiagramXml);
+            return new XElement("DiagramXml", new XCData(this.DiagramXml));
         }
     }
 
@@ -163,6 +162,21 @@ namespace Signum.Entities.Workflow
     public class WorkflowReplacementModel: ModelEntity
     {
         public MList<WorkflowReplacementItemEmbedded> Replacements { get; set; } = new MList<WorkflowReplacementItemEmbedded>();
+
+        public MList<NewTasksEmbedded> NewTasks { get; set; } = new MList<NewTasksEmbedded>();
+
+        public override string ToString()
+        {
+            return NicePropertyName(()=> Replacements) + ": " + Replacements.Count;
+        }
+    }
+
+    [Serializable]
+    public class NewTasksEmbedded : EmbeddedEntity
+    {
+        public string BpmnId { get; set; }
+        public string? Name { get; set; }
+        public Lite<WorkflowEntity>? SubWorkflow { get; set; }
     }
 
     [Serializable]

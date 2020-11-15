@@ -9,8 +9,6 @@ using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Signum.Entities.Authorization;
-using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.UserQueries
 {
@@ -22,7 +20,7 @@ namespace Signum.React.UserQueries
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((UserQueryEntity uq) =>
+            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>
             {
                 if (uq.Query != null)
                 {

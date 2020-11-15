@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Engine;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Workflow
 {
@@ -207,6 +208,12 @@ namespace Signum.Engine.Workflow
                 PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
 
                 WorkflowLogic.getConfiguration = getConfiguration;
+
+                UserAssetsImporter.Register<WorkflowEntity>("Workflow", WorkflowOperation.Save);
+                UserAssetsImporter.Register<WorkflowScriptEntity>("WorkflowScript", WorkflowScriptOperation.Save);
+                UserAssetsImporter.Register<WorkflowTimerConditionEntity>("WorkflowTimerCondition", WorkflowTimerConditionOperation.Save);
+                UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
+                UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
 
                 sb.Include<WorkflowEntity>()
                     .WithConstruct(WorkflowOperation.Create)
@@ -694,7 +701,7 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (e, args) =>
                     {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
+                        WorkflowLogic.ApplyDocument(e, args.TryGetArgC<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
                         DynamicCode.OnInvalidated?.Invoke();
                     }
                 }.Register();
@@ -793,7 +800,7 @@ namespace Signum.Engine.Workflow
             return wb.GetWorkflowModel();
         }
 
-        public static PreviewResult PreviewChanges(WorkflowEntity workflow, WorkflowModel model)
+        public static WorkflowReplacementModel PreviewChanges(WorkflowEntity workflow, WorkflowModel model)
         {
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
@@ -803,19 +810,19 @@ namespace Signum.Engine.Workflow
             return wb.PreviewChanges(document, model);
         }
 
-        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel? replacements, List<WorkflowIssue> issuesContainer)
+        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel? model, WorkflowReplacementModel? replacements, List<WorkflowIssue> issuesContainer)
         {
             if (issuesContainer.Any())
                 throw new InvalidOperationException("issuesContainer should be empty");
-
-            if (model == null)
-                throw new ArgumentNullException(nameof(model));
             
             var wb = new WorkflowBuilder(workflow);
             if (workflow.IsNew)
                 workflow.Save();
 
-            wb.ApplyChanges(model, replacements);
+            if (model != null)
+            {
+                wb.ApplyChanges(model, replacements);
+            }
             wb.ValidateGraph(issuesContainer);
 
             if (issuesContainer.Any(a => a.Type == WorkflowIssueType.Error))

@@ -53,6 +53,7 @@ export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   action: EntityAction;
   overrideEntity: boolean;
   guid: string;
+  customResolution: Entities.ModelEntity | null;
 }
 
 export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");

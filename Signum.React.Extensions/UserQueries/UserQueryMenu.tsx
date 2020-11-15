@@ -76,7 +76,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.groupResults = nfo.groupResults;
         ofo.pagination = nfo.pagination;
         ofo.systemTime = nfo.systemTime;
-        sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
+        if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
+          sc.setState({ showFilters: false });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -91,7 +92,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
-          sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
+          if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
+            sc.setState({ showFilters: false });
           setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();

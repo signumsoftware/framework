@@ -33,7 +33,7 @@ namespace Signum.Engine.UserQueries
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
-                UserAssetsImporter.RegisterName<UserQueryEntity>("UserQuery");
+                UserAssetsImporter.Register<UserQueryEntity>("UserQuery", UserQueryOperation.Save);
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>

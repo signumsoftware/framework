@@ -173,6 +173,8 @@ namespace Signum.Entities.Workflow
         NoNewOrOpenedOrInProgressNotificationsFound,
         NoActorsFoundToInsertCaseActivityNotifications,
         ThereAreInprogressActivities,
+        ShowHelp,
+        HideHelp,
     }
 
 

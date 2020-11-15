@@ -30,7 +30,7 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserAssetsImporter.RegisterName<UserChartEntity>("UserChart");
+                UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 

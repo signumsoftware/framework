@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation } from '../Signum.Entities.Workflow'
+import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, NewTasksEmbedded } from '../Signum.Entities.Workflow'
 import { TypeContext } from '@framework/Lines'
 import { ValueSearchControlLine } from '@framework/Search'
 import { symbolNiceName } from '@framework/Reflection'
@@ -7,8 +7,9 @@ import { PreviewTask } from '../WorkflowClient'
 import { is } from "@framework/Signum.Entities";
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function WorkflowReplacementComponent(p : { ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }){
+export default function WorkflowReplacementComponent(p : { ctx: TypeContext<WorkflowReplacementModel> }){
   var ctx = p.ctx;
+  var newTasks = ctx.value.newTasks.map(a => a.element);
   return (
     <div>
       {ctx.value.replacements.length > 0 &&
@@ -36,7 +37,7 @@ export default function WorkflowReplacementComponent(p : { ctx: TypeContext<Work
                 <td>
                   <WorkflowReplacementItemCombo
                     ctx={ectx}
-                    previewTasks={p.previewTasks} />
+                    previewTasks={newTasks} />
                 </td>
               </tr>)
             }
@@ -46,7 +47,7 @@ export default function WorkflowReplacementComponent(p : { ctx: TypeContext<Work
   );
 }
 
-export function WorkflowReplacementItemCombo(p : { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: PreviewTask[] }){
+export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: NewTasksEmbedded[] }){
   const forceUpdate = useForceUpdate();
   function handleChange(e: React.FormEvent<any>) {
     p.ctx.subCtx(a => a.newNode).value = (e.currentTarget as HTMLSelectElement).value;

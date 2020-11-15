@@ -28,6 +28,8 @@ namespace Signum.Entities.Authorization
         RememberMe,
         IHaveForgottenMyPassword,
 
+        [Description("Show login form")]
+        ShowLoginForm,
 
         [Description("Login with Windows user")]
         LoginWithWindowsUser,

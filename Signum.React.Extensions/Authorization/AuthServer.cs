@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Builder;
 using Signum.React.ApiControllers;
 using Signum.Engine;
 using Signum.Engine.Maps;
+using System.Text.Json;
+using Signum.Engine.Json;
 
 namespace Signum.React.Authorization
 {
@@ -151,14 +153,14 @@ namespace Signum.React.Authorization
                     return mi;
                 };
 
-                EntityJsonConverter.CanReadPropertyRoute += (pr, mod) =>
+                SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
                 {
                     var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
                     return allowed == PropertyAllowed.None ? "Not allowed" : null;
                 };
 
-                EntityJsonConverter.CanWritePropertyRoute += (pr, mod) =>
+                SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
                 {
                     var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
 
@@ -199,17 +201,17 @@ namespace Signum.React.Authorization
             }
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);
-            var pcs = PropertyConverter.GetPropertyConverters(typeof(UserEntity));
-            pcs.GetOrThrow("passwordHash").CustomWriteJsonProperty = ctx => { };
+            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(UserEntity));
+            pcs.GetOrThrow("passwordHash").CustomWriteJsonProperty = (writer, ctx) => { };
             pcs.Add("newPassword", new PropertyConverter
             {
                 AvoidValidate = true,
-                CustomWriteJsonProperty = ctx => { },
-                CustomReadJsonProperty = ctx =>
+                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                 {
-                    EntityJsonConverter.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
+                    SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
 
-                    var password = (string)ctx.JsonReader.Value!;
+                    var password = reader.GetString()!;
 
                     var error = UserEntity.OnValidatePassword(password);
                     if (error != null)

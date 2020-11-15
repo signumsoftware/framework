@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Help
 {
