@@ -15,8 +15,6 @@ export interface ModifiableEntity {
   mixins?: { [name: string]: MixinEntity }
 }
 
-export type PrimaryKey = { Object: number | string | undefined }
-
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value

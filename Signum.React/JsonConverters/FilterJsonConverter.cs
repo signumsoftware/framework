@@ -34,7 +34,7 @@ namespace Signum.React.Json
                     {
                         token = elem.GetProperty("token").GetString()!,
                         operation = oper.GetString()!.ToEnum<FilterOperation>(),
-                        value = elem.GetProperty("value").ToObject<object>(options),
+                        value = elem.TryGetProperty("value", out var val) ? val.ToObject<object>(options) : null,
                     };
                 }  
 
