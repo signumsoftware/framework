@@ -650,6 +650,7 @@ namespace Signum.Engine.Linq
         CONVERT,
         STUFF,
         COLLATE,
+        CONCAT,
     }
 
     internal enum PostgresFunction

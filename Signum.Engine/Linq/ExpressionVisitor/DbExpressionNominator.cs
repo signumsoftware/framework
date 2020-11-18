@@ -936,45 +936,27 @@ namespace Signum.Engine.Linq
             return Add(new SqlFunctionExpression(b.Type, null, SqlFunction.COALESCE.ToString(), expressions));
         }
 
-        private BinaryExpression ConvertToSqlAddition(BinaryExpression b)
+        private Expression ConvertToSqlAddition(BinaryExpression b)
         {
             Expression left = b.Left;
             Expression right = b.Right;
 
             if (left.Type == typeof(string) || right.Type == typeof(string))
             {
-                b = Expression.Add(
-                    left.Type == typeof(string) ? NullToStringEmpty(left) : new SqlCastExpression(typeof(string), left),
-                    right.Type == typeof(string) ? NullToStringEmpty(right) : new SqlCastExpression(typeof(string), right),
-                    miSimpleConcat);
+                var arguments = new List<Expression>();
+                if (left is SqlFunctionExpression sleft && sleft.SqlFunction == SqlFunction.CONCAT.ToString())
+                    arguments.AddRange(sleft.Arguments);
+                else
+                    arguments.Add(left);
+
+                if (right is SqlFunctionExpression sright && sright.SqlFunction == SqlFunction.CONCAT.ToString())
+                    arguments.AddRange(sright.Arguments);
+                else
+                    arguments.Add(right);
+
+                return new SqlFunctionExpression(typeof(string), null, SqlFunction.CONCAT.ToString(), arguments);
             }
             return b;
-        }
-
-        private Expression NullToStringEmpty(Expression exp)
-        {
-            if (exp is ConstantExpression)
-            {
-                if (((ConstantExpression)exp).Value == null)
-                    return Expression.Constant("", typeof(string));
-                else
-                    return exp;
-            }
-
-            if (exp is SqlConstantExpression)
-            {
-                if (((SqlConstantExpression)exp).Value == null)
-                    return new SqlConstantExpression("", typeof(string));
-                else
-                    return exp;
-            }
-
-            if (AlwaysHasValue(exp))
-            {
-                return exp;
-            }
-
-            return new SqlFunctionExpression(typeof(string), null, SqlFunction.COALESCE.ToString(), new[] { exp, new SqlConstantExpression("") });
         }
 
         private static bool AlwaysHasValue(Expression exp)
@@ -1694,7 +1676,9 @@ namespace Signum.Engine.Linq
 
             var firsStr = strFormat.Substring(0, matches.FirstEx().Index);
 
-            Expression? acum = firsStr.HasText() ? new SqlConstantExpression(firsStr) : null;
+            List<Expression> arguments = new List<Expression>();
+            if (firsStr.HasText())
+                arguments.Add(new SqlConstantExpression(firsStr));
 
             for (int i = 0; i < matches.Count; i++)
             {
@@ -1708,18 +1692,17 @@ namespace Signum.Engine.Linq
                 if (!Has(exp))
                     return null;
 
-                var coallesceExp = new SqlFunctionExpression(typeof(string), null, SqlFunction.COALESCE.ToString(), new[] { exp, new SqlConstantExpression("", typeof(string)) }); 
-
-                acum = acum == null ? (Expression)coallesceExp : Expression.Add(acum, coallesceExp, miSimpleConcat);
+                arguments.Add(exp);
 
                 var nextStr = i == matches.Count - 1 ?
                     strFormat.Substring(match.EndIndex()) :
                     strFormat.Substring(match.EndIndex(), matches[i + 1].Index - match.EndIndex());
 
-                acum = string.IsNullOrEmpty(nextStr) ? acum : Expression.Add(acum, new SqlConstantExpression(nextStr), miSimpleConcat);
+                if (nextStr.HasText())
+                    arguments.Add(new SqlConstantExpression(nextStr));
             }
 
-            return Add(acum);
+            return Add(new SqlFunctionExpression(typeof(string), null, SqlFunction.CONCAT.ToString(), arguments));
         }
 
         private Expression? TryEtc(Expression str, Expression max, Expression? etcString)

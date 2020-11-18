@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Test.Environment;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -52,6 +53,16 @@ namespace Signum.Test.LinqProvider
         public void WhereImplicitConvert()
         {
             Database.Query<AlbumEntity>().Where(a => ("C" + a.Id) == "C1").Any();
+        }
+
+        [Fact]
+        public void WhereCombineConvert()
+        {
+            var query = Database.Query<AlbumEntity>().Where(a => ("C" + a.Id) + "B" == "C1B").Select(a => a.Id);
+
+            Assert.Equal(1, new Regex("CONCAT").Matches(query.QueryText()).Count);
+
+            query.ToList();
         }
 
 
