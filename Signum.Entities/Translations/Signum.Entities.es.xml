@@ -7,6 +7,9 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Suma" />
   </Type>
+  <Type Name="BigStringEmbedded" Description="Big string">
+    <Member Name="Text" Description="Texto" />
+  </Type>
   <Type Name="BooleanEnum">
     <Member Name="False" Description="No" />
     <Member Name="True" Description="Sí" />
@@ -25,9 +28,6 @@
     <Member Name="Element2" Description="Elemento (2)" />
     <Member Name="Element3" Description="Elemento (3)" />
   </Type>
-  <Type Name="ColorEmbedded" Description="Color">
-    <Member Name="Argb" Description="Argb" />
-  </Type>
   <Type Name="ColumnOptionsMode" Description="Modo de las columnas">
     <Member Name="Add" Description="Añadir" />
     <Member Name="InsertStart" Description="Insertar Inicio" />
@@ -44,7 +44,9 @@
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
+    <Member Name="ANewVersionHasJustBeenDeployedConsiderReload" Description="¡Parece que se acaba de publicar una nueva versión! Si no tiene cambios que deban guardarse, considere recargar la página" />
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="¡Se acaba de desplegar una nueva versión! Guarde los cambios y {0}" />
+    <Member Name="OutdatedClientApplication" Description="Aplicación cliente obsoleta" />
     <Member Name="Refresh" Description="Actualizar" />
     <Member Name="SessionExpired" Description="Sesión caducada" />
   </Type>
@@ -87,10 +89,6 @@
     <Member Name="Navigate" Description="Navegar" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="View" Description="Ver" />
-  </Type>
-  <Type Name="EntityMessage">
-    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Trate de añadir/quitar {0} en entidad bloqueada {1}" />
-    <Member Name="AttemptToSet0InLockedEntity1" Description="Intento de establecer {0} en entidad bloqueada {1}" />
   </Type>
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" Description="Excepción">
@@ -158,7 +156,6 @@
     <Member Name="create" Description="Crear" />
     <Member Name="deactivateTimeMachine" Description="Desactivar Máquina del tiempo" />
     <Member Name="editColumn" Description="Editar columna" />
-    <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
     <Member Name="find" Description="Buscar" />
@@ -179,9 +176,8 @@
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
     <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
-    <Member Name="renameColumn" Description="Cambiar el nombre de columna" />
-    <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
-    <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
+    <Member Name="removeOtherColumns" Description="Eliminar otras columnas" />
+    <Member Name="restoreDefaultColumns" Description="Restaurar columnas predeterminadas" />
     <Member Name="saveChangesBeforeOrPressCancel" Description="Guardar los cambios antes o pulse Cancelar" />
     <Member Name="saved" Description="Guardado" />
     <Member Name="search" Description="Búsqueda" />
@@ -190,6 +186,7 @@
     <Member Name="selectOnlyOneElement" Description="Seleccione sólo un elemento" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
+    <Member Name="ShowGroup" Description="Mostrar grupo" />
     <Member Name="showPeriod" Description="Mostrar período" />
     <Member Name="showPreviousOperation" Description="Mostrar operación anterior" />
     <Member Name="showRecords" Description="Mostrar registros" />
@@ -202,9 +199,6 @@
     <Member Name="New_G" Description="Nuev[m:o|f:a]" />
     <Member Name="ToStr" Description="Texto" />
     <Member Name="Type0NotFound" Description="Tipo {0} no encontrado" />
-  </Type>
-  <Type Name="LockableEntity" Description="Entidad bloqueable">
-    <Member Name="Locked" Description="Bloqueado" />
   </Type>
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Entidad modelo" />
@@ -224,6 +218,7 @@
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="No se puede guardar porque existen errores de integridad:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="Cargando {0}..." />
     <Member Name="LoseChanges" Description="Hay cambios que no se han guardado. &#xD;&#xA;¿Perder cambios?" />
+    <Member Name="Main" Description="Principal" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="New0_G" Description="Nuevo {0}" />
     <Member Name="NoDirectErrors" Description="No hay errores directos" />
@@ -248,16 +243,20 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} y cerrar" />
     <Member Name="_0AndNew" Description="{0} y nuevo" />
+    <Member Name="AddSetter" Description="Añadir establecedor" />
+    <Member Name="BulkModifications" Description="Modificaciones masivas" />
     <Member Name="Confirm" Description="Confirmar" />
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
+    <Member Name="MultiSetter" Description="Establecedor múltiple" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
-    <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Por favor confirme que desea eliminar {0} del sistema" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
+    <Member Name="PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12" Description="Confirme que desea aplicar los cambios anteriores y ejecutar {0} sobre {1} {2}" />
+    <Member Name="PleaseConfirmYouWantLikeToDelete0FromTheSystem" Description="Confirme que desea eliminar {0} del sistema" />
+    <Member Name="Predictate" Description="Predecir" />
     <Member Name="PreviousOperationLog" Description="Registro de operación anterior" />
+    <Member Name="Setters" Description="Establecedor" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
@@ -279,6 +278,14 @@
     <Member Name="Checkbox_StartChecked" Description="Checkbox (iniciar marcado)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (iniciar desmarcado)" />
     <Member Name="WhenHasValue" Description="Cuando tiene valor" />
+  </Type>
+  <Type Name="PropertyOperation" Description="Operación de propiedad">
+    <Member Name="AddElement" Description="Añadir elemento" />
+    <Member Name="ChangeElements" Description="Cambiar elementos" />
+    <Member Name="CreateNewEntiy" Description="Crear nueva entidad" />
+    <Member Name="ModifyEntity" Description="Modificar entidad" />
+    <Member Name="RemoveElements" Description="Quitar elementos" />
+    <Member Name="Set" Description="Establecer" />
   </Type>
   <Type Name="PropertyRouteEntity" Description="Ruta de la propiedad">
     <Member Name="Path" Description="Ruta" />
@@ -330,6 +337,10 @@
     <Member Name="SecondStart" Description="Segundo de inicio" />
     <Member Name="Step0" Description="Paso {0}" />
     <Member Name="Text" Description="texto" />
+    <Member Name="TotalDays" Description="Total días" />
+    <Member Name="TotalHours" Description="Total horas" />
+    <Member Name="TotalMilliseconds" Description="Total milisegundos" />
+    <Member Name="TotalSeconds" Description="Total segundos" />
     <Member Name="WeekNumber" Description="Número semana" />
     <Member Name="WeekStart" Description="Semana de inicio" />
     <Member Name="Year" Description="Año" />
@@ -357,6 +368,7 @@
     <Member Name="Column" Description="Columna" />
     <Member Name="Create" Description="Crear" />
     <Member Name="CreateNew0_G" Description="Crear nuev[m:o|f:a] {0}" />
+    <Member Name="DeleteAllFilter" Description="Eliminar todos los filtros" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
     <Member Name="DisplayName" Description="Nombre para mostrar" />
     <Member Name="Explore" Description="Explorar" />
@@ -445,6 +457,7 @@
   <Type Name="ValidationMessage">
     <Member Name="_0And1And2CanNotBeSetAtTheSameTime" Description="{0} y {1} y {2} no se pueden establecer al mismo tiempo" />
     <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} y {1} pueden no ajustarse al mismo tiempo" />
+    <Member Name="_0AreNotSet" Description="{0} no están establecidos" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
     <Member Name="_0DoesNotHaveAValid1IdentifierFormat" Description="'{0}' no tiene un formato de identificador {1} válido" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
@@ -471,6 +484,7 @@
     <Member Name="_0ShouldBe12" Description="{0} debe ser {1} {2}" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} debe ser {1} en lugar de {2}" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} debe ser una fecha pasada" />
+    <Member Name="_0ShouldBeEmpty" Description="{0} debe ser vacío" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} debe ser mayor que {1}" />
     <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} debe ser  mayor o igual que {1}" />
     <Member Name="_0ShouldBeLessThan1" Description="{0} debe ser menor que {1}" />
@@ -515,6 +529,8 @@
     <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="La longitud de {0} tiene que ser menor o igual a {1}" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="El número de {0} está siendo multiplicado por {1}" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="El número de elementos de {0} ha de ser {0} {1}" />
+    <Member Name="ThereAre0InState1" Description="Hay {0} en estado {1}" />
+    <Member Name="ThereAre0ThatReferenceThis1" Description="Hay {0} que hacen referencia a este {1}" />
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Las filas se agrupan por {0}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
