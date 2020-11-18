@@ -29,16 +29,6 @@ namespace Signum.React.Json
 
         static void WriteJsonInternal<T>(JsonWriter writer, MList<T> value, JsonSerializer serializer)
         {
-            var errors = new List<string>();
-            serializer.Error += delegate (object? sender, ErrorEventArgs args)
-            {
-                // only log an error once
-                if (args.CurrentObject == args.ErrorContext.OriginalObject)
-                {
-                    errors.Add(args.ErrorContext.Error.Message);
-                }
-            };
-
             writer.WriteStartArray();
             var tup = JsonSerializerExtensions.CurrentPropertyRouteAndEntity!.Value;
 
@@ -60,9 +50,6 @@ namespace Signum.React.Json
                 }
             }
 
-            if (errors.Any())
-                throw new JsonSerializationException(errors.ToString("\r\n"));
-
             writer.WriteEndArray();
         }
 
@@ -77,16 +64,6 @@ namespace Signum.React.Json
 
         static MList<T> ReadJsonInternal<T>(JsonReader reader, IMListPrivate<T> existingValue, JsonSerializer serializer)
         {
-            var errors = new List<string>();
-            serializer.Error += delegate (object? sender, ErrorEventArgs args)
-            {
-                // only log an error once
-                if (args.CurrentObject == args.ErrorContext.OriginalObject)
-                {
-                    errors.Add(args.ErrorContext.Error.Message);
-                }
-            };
-
             var dic = existingValue == null ? new Dictionary<PrimaryKey, MList<T>.RowIdElement>() :
                  existingValue.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId!.Value, a => a);
 
@@ -147,9 +124,6 @@ namespace Signum.React.Json
                         var newValue = (T)serializer.DeserializeValue(reader, typeof(T), null)!;
                         newList.Add(new MList<T>.RowIdElement(newValue));
                     }
-
-                    if (errors.Any())
-                        throw new JsonSerializationException(errors.ToString("\r\n"));
 
                     reader.Read();
                     reader.Assert(JsonToken.EndObject);
