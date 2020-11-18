@@ -223,11 +223,11 @@ namespace Signum.Engine.Maps
 
         internal protected virtual Table Include(Type type, PropertyRoute? route)
         {
-            if (this.Schema.IsCompleted)
-                throw new InvalidOperationException("Schema already completed");
-
             if (schema.Tables.TryGetValue(type, out var result))
                 return result;
+
+            if (this.Schema.IsCompleted) //Below for nop includes of Views referencing lites or entities
+                throw new InvalidOperationException("Schema already completed");
 
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
