@@ -110,9 +110,9 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-        public LoginResponse? LoginWithAzureAD([FromBody, Required]string jwt)
+        public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery]bool throwErrors = true)
         {
-            if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
+            if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
                 return null;
 
             var token = AuthTokenServer.CreateToken(UserEntity.Current);

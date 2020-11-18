@@ -126,6 +126,7 @@ namespace Signum.Entities.Authorization
         {
         }
 
+        [UniqueIndex(AllowMultipleNulls = true)]
         public Guid? OID { get; set; }
     }
 }
