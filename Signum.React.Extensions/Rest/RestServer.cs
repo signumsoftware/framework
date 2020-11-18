@@ -22,7 +22,7 @@ namespace Signum.React.Rest
         private static SignumAuthenticationResult? ApiKeyAuthenticator(FilterContext ctx)
         {
             ctx.HttpContext.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
-            ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeaderParameter, out var headerKeys);
+            ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeader, out var headerKeys);
 
             var keys = val.Distinct().Union(headerKeys.Distinct()).ToList();
 
