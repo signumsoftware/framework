@@ -87,10 +87,12 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
+  var color = parameters["ForceColor"] ? ()=>  parameters["ForceColor"] :
+    ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
 
   var size = yRule.size('content');
   var labelMargin = 10;
+  debugger;
 
   return (
     <>
@@ -143,7 +145,7 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
             </g> : null
         )}
 
-      {parseFloat(parameters["NumberOpacity"]) > 0 &&
+      {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
         <g className="numbers-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
           {orderedRows
             .filter(r => y(valueColumn.getValue(r))! > 10)

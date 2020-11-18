@@ -11,6 +11,13 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
+export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
+  Type: "CombinedUserChartPart";
+  userCharts: Entities.MList<Chart.UserChartEntity>;
+  requiresTitle: boolean;
+}
+
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
   "None" |

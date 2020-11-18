@@ -37,6 +37,7 @@ namespace Signum.Entities.Dashboard
 
         [ImplementedBy(
             typeof(UserChartPartEntity),
+            typeof(CombinedUserChartPartEntity),
             typeof(UserQueryPartEntity),
             typeof(ValueUserQueryListPartEntity),
             typeof(LinkListPartEntity))]
@@ -280,6 +281,44 @@ namespace Signum.Entities.Dashboard
             UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
         }
     }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class CombinedUserChartPartEntity : Entity, IPartEntity
+    {
+        public MList<UserChartEntity> UserCharts { get; set; }
+
+        public override string ToString()
+        {
+            return UserCharts.ToString(", ");
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
+        public IPartEntity Clone()
+        {
+            return new CombinedUserChartPartEntity
+            {
+                UserCharts = this.UserCharts.ToMList(),
+            };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("CombinedUserChartPart",
+                UserCharts.Select(uc => new XElement("UserChart", new XAttribute("Guid", ctx.Include(uc)))));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value))).ToList();
+
+            UserCharts.Synchronize(newUserCharts);
+        }
+    }
+
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
