@@ -304,8 +304,8 @@ export module API {
     return ajaxPost({ url: `~/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
   }
 
-  export function loginWithAzureAD(jwt: string): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
+  export function loginWithAzureAD(jwt: string, throwErrors: boolean): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: "~/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
   }
 
   export function refreshToken(oldToken: string): Promise<LoginResponse | undefined> {
