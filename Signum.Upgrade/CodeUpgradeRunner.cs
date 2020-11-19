@@ -105,7 +105,7 @@ namespace Signum.Upgrade
 
             try
             {
-                uctx.HasWarnings = false;
+                uctx.HasWarnings = WarningLevel.None;
                 upgrade.Execute(uctx);
             }
             catch (Exception ex)

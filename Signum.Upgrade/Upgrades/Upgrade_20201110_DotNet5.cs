@@ -63,7 +63,7 @@ namespace Signum.Upgrade.Upgrades
                     a => a.Contains("FROM mcr.microsoft.com/dotnet/core/sdk"),
                     "FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build");
 
-                file.ReplaceBetween(
+                file.ReplaceBetweenExcluded(
                     a => a.Contains("RUN apt-get -y install curl"),
                     a => a.Contains("RUN apt-get -y install nodejs"),
 @"RUN apt-get -y install curl
