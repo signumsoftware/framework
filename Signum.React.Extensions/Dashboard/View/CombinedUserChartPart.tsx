@@ -12,13 +12,15 @@ import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { CombinedUserChartPartEntity, UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useAPIWithReload, useForceUpdate, useSize, useThrottle } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
 import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
+import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import ReactChart from '../../Chart/D3Scripts/Components/ReactChart'
 
 interface CombinedUserChartInfo {
   userChart: UserChartEntity;
@@ -30,18 +32,18 @@ interface CombinedUserChartInfo {
 
 export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedUserChartPartEntity>) {
 
-  const parts = React.useRef<CombinedUserChartInfo[]>([]);
+  const infos = React.useRef<CombinedUserChartInfo[]>([]);
   const forceUpdate = useForceUpdate();
 
   const [invalidate, setInvalidate] = React.useState<number>(0)
 
   React.useEffect(() => {
 
-    parts.current = p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfo));
+    infos.current = p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfo));
 
     var abortController = new AbortController();
 
-    parts.current.forEach(c => {
+    infos.current.forEach(c => {
 
       Finder.getQueryDescription(c.userChart.query.key)
         .then(qd => {
@@ -74,32 +76,32 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   }, [p.part, invalidate]);
 
- 
-  function renderError(e: any) {
+
+  function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
     if (se == undefined)
-      return <p className="text-danger"> {e.message ? e.message : e}</p>;
+      return <p className="text-danger" key={key}> {e.message ? e.message : e}</p>;
 
     return (
       <div>
-        {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
+        {se.httpError.exceptionMessage && <p className="text-danger" key={key}>{se.httpError.exceptionMessage}</p>}
       </div>
     );
 
   }
 
-  if (!parts.current.every(a => a.chartRequest != null))
+  if (!infos.current.every(a => a.chartRequest != null))
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  if (parts.current.some(a => a.error != null)) {
+  if (infos.current.some(a => a.error != null)) {
     return (
       <div>
         <h4>Error!</h4>
         {
-          parts.current
+          infos.current
             .filter(m => m.error != null)
-            .map((m, i) => renderError(m.error))
+            .map((m, i) => renderError(m.error, i))
         }
       </div>
     );
@@ -113,9 +115,9 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
   return (
     <div>
       <FullscreenComponent onReload={handleReload}>
-        <ErrorBoundary refreshKey={parts.current}>
+        <ErrorBoundary refreshKey={infos.current}>
           {cs && parameters &&
-            <ReactChart
+            <CombinedReactChart
               chartRequest={p.chartRequest}
               data={p.data}
               loading={p.loading}
@@ -125,6 +127,34 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
           }
         </ErrorBoundary>
       </FullscreenComponent>
+    </div>
+  );
+}
+
+
+export function CombinedReactChart(p: { infos: CombinedUserChartInfo[] }) {
+
+  const isSimple = p.infos.every(a => a.result == null || a.result.resultTable.rows.length < ReactChart.maxRowsForAnimation);
+  const allData = p.infos.every(a => a.result != null);
+  const oldAllData = useThrottle(allData, 200, { enabled: isSimple });
+  const initialLoad = oldAllData == false && allData && isSimple;
+
+  const { size, setContainer } = useSize();
+
+  return (
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
+      {size &&
+        p.onRenderChart({
+          chartRequest: p.chartRequest,
+          data: p.data,
+          parameters: p.parameters,
+          loading: p.loading,
+          onDrillDown: p.onDrillDown,
+          height: size.height,
+          width: size.width,
+          initialLoad: initialLoad,
+        })
+      }
     </div>
   );
 }
