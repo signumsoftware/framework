@@ -32,6 +32,8 @@ namespace Signum.React.Facades
             return ci != CultureInfo.InvariantCulture ? ci : CultureInfo.GetCultureInfo("en");
         }
 
+        public static DateTimeOffset LastModified { get; private set; } = DateTimeOffset.UtcNow;
+
         public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
@@ -53,14 +55,20 @@ namespace Signum.React.Facades
 
         internal static void Start()
         {
-            DescriptionManager.Invalidated += () => cache.Clear();
-            Schema.Current.OnMetadataInvalidated += () => cache.Clear();
+            DescriptionManager.Invalidated += InvalidateCache;
+            Schema.Current.OnMetadataInvalidated += InvalidateCache;
 
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
             var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
 
             EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
+        }
+
+        private static void InvalidateCache()
+        {
+            cache.Clear();
+            LastModified = DateTimeOffset.UtcNow;
         }
 
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
