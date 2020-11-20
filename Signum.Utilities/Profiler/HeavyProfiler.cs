@@ -57,7 +57,7 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer? Log(string role, Func<string> additionalData)
+        public static Tracer? Log(string role, Func<string?> additionalData)
         {
             if (!enabled)
                 return null;
@@ -109,7 +109,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Tracer? CreateNewEntry(string role, Func<string>? additionalData, bool stackTrace)
+        private static Tracer? CreateNewEntry(string role, Func<string?>? additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
@@ -126,7 +126,7 @@ namespace Signum.Utilities
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AdditionalData = additionalData == null ? null : additionalData(),
+                AdditionalData = additionalData?.Invoke(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
                 Parent = parent,
                 Depth = parent == null ? 0 : (parent.Depth + 1),
