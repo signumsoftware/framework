@@ -3,6 +3,7 @@ import * as Msal from "msal";
 import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
+import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
@@ -39,9 +40,9 @@ export function signIn(ctx: LoginContext) {
   ctx.setLoading("azureAD");
   myMSALObj.loginPopup(requestObj)
     .then(a => {
-      return AuthClient.API.loginWithAzureAD(a.idToken.rawIdToken);
+      return AuthClient.API.loginWithAzureAD(a.idToken.rawIdToken, true);
     }).then(r => {
-      AuthClient.setAuthToken(r!.token, r!.authenticationType);
+           AuthClient.setAuthToken(r!.token, r!.authenticationType);
       AuthClient.setCurrentUser(r!.userEntity);
       AuthClient.Options.onLogin()
     })
@@ -61,7 +62,7 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
   if (!rawIdToken)
     return Promise.resolve(undefined);
 
-  return AuthClient.API.loginWithAzureAD(rawIdToken);
+  return AuthClient.API.loginWithAzureAD(rawIdToken, false);
 }
 
 export function signOut() {
