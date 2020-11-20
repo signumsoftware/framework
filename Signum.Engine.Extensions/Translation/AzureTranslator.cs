@@ -13,9 +13,9 @@ namespace Signum.Engine.Translation
     public class AzureTranslator : ITranslator
     {
         public string AzureKey;
-        public string? Proxy { get; }
+        public Func<string?>? Proxy { get; }
 
-        public AzureTranslator(string azureKey, string? proxy = null)
+        public AzureTranslator(string azureKey, Func<string?>? proxy = null)
         {
             this.AzureKey = azureKey;
             this.Proxy = proxy;
@@ -28,7 +28,7 @@ namespace Signum.Engine.Translation
 
         public async Task<List<string?>> TranslateBatchAsync(List<string> list, string from, string to)
         {
-            string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy);
+            string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy?.Invoke());
             
             var body =
                 new XElement("TranslateArrayRequest",
@@ -43,7 +43,7 @@ namespace Signum.Engine.Translation
                     new XElement("To", to)
                 );
 
-            using (var client = ExtendedHttpClient.GetClientWithProxy(Proxy))
+            using (var client = ExtendedHttpClient.GetClientWithProxy(Proxy?.Invoke()))
             using (var request = new HttpRequestMessage())
             {
                 request.Method = HttpMethod.Post;
