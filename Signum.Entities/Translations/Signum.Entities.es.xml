@@ -243,20 +243,20 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} y cerrar" />
     <Member Name="_0AndNew" Description="{0} y nuevo" />
-    <Member Name="AddSetter" Description="Añadir establecedor" />
+    <Member Name="AddSetter" Description="Añadir propiedad" />
     <Member Name="BulkModifications" Description="Modificaciones masivas" />
     <Member Name="Confirm" Description="Confirmar" />
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
-    <Member Name="MultiSetter" Description="Establecedor múltiple" />
+    <Member Name="MultiSetter" Description="Edición múltiple" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
     <Member Name="PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12" Description="Confirme que desea aplicar los cambios anteriores y ejecutar {0} sobre {1} {2}" />
     <Member Name="PleaseConfirmYouWantLikeToDelete0FromTheSystem" Description="Confirme que desea eliminar {0} del sistema" />
     <Member Name="Predictate" Description="Predecir" />
     <Member Name="PreviousOperationLog" Description="Registro de operación anterior" />
-    <Member Name="Setters" Description="Establecedor" />
+    <Member Name="Setters" Description="Propiedad" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
