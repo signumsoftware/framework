@@ -36,7 +36,6 @@ var requestObj = {
 
 var myMSALObj = new Msal.UserAgentApplication(msalConfig);
 
-
 export function signIn(ctx: LoginContext) {
   ctx.setLoading("azureAD");
   myMSALObj.loginPopup(requestObj)
