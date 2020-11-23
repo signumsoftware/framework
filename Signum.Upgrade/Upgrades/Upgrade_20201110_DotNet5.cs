@@ -23,6 +23,8 @@ namespace Signum.Upgrade.Upgrades
                     replaceBy: @"protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)");
             });
 
+
+
             uctx.ForeachCodeFile("*.csproj", file =>
             {
                 file.Replace(
@@ -37,6 +39,18 @@ namespace Signum.Upgrade.Upgrades
                 file.UpdateNugetReference(@"Microsoft.Extensions.Configuration.Json", @"5.0.0");
                 file.UpdateNugetReference(@"Microsoft.Extensions.Configuration.UserSecrets", @"5.0.0");
                 file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.8.0");
+            });
+
+            uctx.ChangeCodeFile("Southwind.Terminal/Program.cs", file =>
+            {
+                file.WarningLevel = WarningLevel.Warning;
+                file.Replace("BigStringMode.FileSystem", "BigStringMode.File");
+            });
+
+            uctx.ChangeCodeFile("Southwind.Logic/Starter.cs", file =>
+            {
+                file.WarningLevel = WarningLevel.Warning;
+                file.Replace("BigStringMode.FileSystem", "BigStringMode.File");
             });
 
             uctx.ChangeCodeFile($@"Southwind.React\Startup.cs", file =>

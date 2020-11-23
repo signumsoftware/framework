@@ -179,7 +179,7 @@ namespace Signum.Upgrade
             foreach (var upg in this.Upgrades)
             {
                 ConsoleColor color = upg.IsExecuted ? ConsoleColor.DarkGreen :
-                                     upg == next ? ConsoleColor.Green :
+                                     upg == next ? ConsoleColor.Blue :
                                      ConsoleColor.White;
 
                 SafeConsole.WriteColor(color,
