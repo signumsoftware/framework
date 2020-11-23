@@ -30,7 +30,6 @@ export default function TextArea(p: TextAreaProps) {
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);
 
-  var prevValue = usePrevious(p.value);
   React.useEffect(() => {
     if (p.autoResize && textAreaRef.current && p.value != null)
       handleResize(textAreaRef.current);
