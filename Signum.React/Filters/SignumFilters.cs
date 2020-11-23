@@ -164,4 +164,22 @@ namespace Signum.React.Filters
                 await next();
         }
     }
+
+    public class SignumHeavyProfilerResultFilter : IAsyncAlwaysRunResultFilter
+    {
+        public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+        {
+            using (HeavyProfiler.Log("Result", () => context.Result?.GetType().ToString()))
+                return next();
+        }
+    }
+
+    public class SignumHeavyProfilerActionFilter : IAsyncActionFilter
+    {
+        public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            using (HeavyProfiler.Log("Action", () => context.ActionDescriptor.DisplayName))
+                return next();
+        }
+    }
 }
