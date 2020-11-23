@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
 import * as Finder from '@framework/Finder'
@@ -14,58 +13,69 @@ import { CombinedUserChartPartEntity, UserChartPartEntity } from '../Signum.Enti
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI, useAPIWithReload, useForceUpdate, useSize, useThrottle } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
-import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
-import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import ReactChart from '../../Chart/D3Scripts/Components/ReactChart'
+import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
 
-interface CombinedUserChartInfo {
+
+export interface CombinedUserChartInfoTemp {
   userChart: UserChartEntity;
-  qd?: QueryDescription;
+  chartScript?: ChartClient.ChartScript;
+  parameters?: { [parameter: string]: string } | undefined;
   chartRequest?: ChartRequestModel;
-  error?: any;
   result?: ChartClient.API.ExecuteChartResult;
+  makeQuery?: () => Promise<void>;
+  error?: any;
 }
 
 export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedUserChartPartEntity>) {
 
-  const infos = React.useRef<CombinedUserChartInfo[]>([]);
   const forceUpdate = useForceUpdate();
 
-  const [invalidate, setInvalidate] = React.useState<number>(0)
+  const infos = React.useRef<CombinedUserChartInfoTemp[] | undefined>(undefined);
+
+  const [showData, setShowData] = React.useState(p.part.showData);
+
 
   React.useEffect(() => {
 
-    infos.current = p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfo));
+    infos.current = p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfoTemp));
 
     var abortController = new AbortController();
+    const signal = abortController.signal;
 
     infos.current.forEach(c => {
-
-      Finder.getQueryDescription(c.userChart.query.key)
-        .then(qd => {
-          c.qd = qd;
-          forceUpdate();
-        }).done();
 
       UserChartClient.Converter.toChartRequest(c.userChart, p.entity)
         .then(chartRequest => {
           c.chartRequest = chartRequest;
           forceUpdate();
-          if (!abortController.signal.aborted) {
-            ChartClient.getChartScript(chartRequest.chartScript)
-              .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
-              .then(result => {
-                c.result = result;
+          if (!signal.aborted) {
+
+            ChartClient.getChartScript(c.chartRequest.chartScript)
+              .then(cr => {
+                c.chartScript = cr;
                 forceUpdate();
-              })
-              .catch(error => {
-                c.error = error;
-                forceUpdate();
-              });
+
+                c.makeQuery = () => {
+                  return ChartClient.API.executeChart(chartRequest!, c.chartScript!, signal)
+                    .then(result => {
+                      if (!signal.aborted) {
+                        c.result = result;
+                        forceUpdate();
+                      }
+                    })
+                    .catch(error => {
+                      if (!signal.aborted) {
+                        c.error = error;
+                        forceUpdate();
+                      }
+                    });
+                };
+
+                return c.makeQuery();
+              }).done();
           }
         }).done();
     });
@@ -74,7 +84,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part, invalidate]);
+  }, [p.part]);
 
 
   function renderError(e: any, key: number) {
@@ -91,7 +101,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   }
 
-  if (!infos.current.every(a => a.chartRequest != null))
+  if (infos.current == null || infos.current.some(a => a.chartRequest == null || a.chartScript == null))
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
   if (infos.current.some(a => a.error != null)) {
@@ -107,54 +117,33 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
     );
   }
 
-  function handleReload(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    setInvalidate(a => a + 1);
-  }
-
   return (
     <div>
-      <FullscreenComponent onReload={handleReload}>
-        <ErrorBoundary refreshKey={infos.current}>
-          {cs && parameters &&
-            <CombinedReactChart
-              chartRequest={p.chartRequest}
-              data={p.data}
-              loading={p.loading}
-              onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!)}
-              parameters={parameters}
-              onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
-          }
-        </ErrorBoundary>
-      </FullscreenComponent>
-    </div>
-  );
-}
-
-
-export function CombinedReactChart(p: { infos: CombinedUserChartInfo[] }) {
-
-  const isSimple = p.infos.every(a => a.result == null || a.result.resultTable.rows.length < ReactChart.maxRowsForAnimation);
-  const allData = p.infos.every(a => a.result != null);
-  const oldAllData = useThrottle(allData, 200, { enabled: isSimple });
-  const initialLoad = oldAllData == false && allData && isSimple;
-
-  const { size, setContainer } = useSize();
-
-  return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
-      {size &&
-        p.onRenderChart({
-          chartRequest: p.chartRequest,
-          data: p.data,
-          parameters: p.parameters,
-          loading: p.loading,
-          onDrillDown: p.onDrillDown,
-          height: size.height,
-          width: size.width,
-          initialLoad: initialLoad,
-        })
+      {infos.current.map((info, i) => <PinnedFilterBuilder key={i}
+        filterOptions={info.chartRequest!.filterOptions}
+        onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
+      )}
+      {p.part.allowChangeShowData &&
+        <label>
+        <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
+        {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
+        </label>}
+      {showData ?
+        infos.current.map((c, i) => c.result == null ? <span key={i}>{JavascriptMessage.loading.niceToString()}</span> :
+          <ChartTableComponent
+            chartRequest={c.chartRequest!}
+            lastChartRequest={c.chartRequest!}
+            resultTable={c.result.resultTable!}
+            onOrderChanged={() => c.makeQuery!()}
+            onReload={e => { e.preventDefault(); c.makeQuery!(); }}
+          />) :
+        <ChartRendererCombined
+          infos={infos.current.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript! }))}
+          onReload={e => { infos.current!.forEach(a => a.makeQuery!()) }}
+          useSameScale={p.part.useSameScale}
+        />
       }
     </div>
   );
 }
+

@@ -20,3 +20,11 @@ export function YAxis({ xRule, yRule }: { xRule: Rule<"content">, yRule: Rule<"c
     </g>
   );
 }
+
+export function YAxisEnd({ xRule, yRule }: { xRule: Rule<"content">, yRule: Rule<"content"> }) {
+  return (
+    <g className="y-axis" transform={translate(xRule.end('content'), yRule.start('content'))}>
+      <line className="y-axis" y2={yRule.size('content')} stroke="Black" />
+    </g>
+  );
+}

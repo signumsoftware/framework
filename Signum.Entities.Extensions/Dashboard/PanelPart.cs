@@ -285,7 +285,16 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class CombinedUserChartPartEntity : Entity, IPartEntity
     {
-        public MList<UserChartEntity> UserCharts { get; set; }
+        [PreserveOrder, NoRepeatValidator]
+        public MList<UserChartEntity> UserCharts { get; set; } = new MList<UserChartEntity>();
+
+        public bool ShowData { get; set; } = false;
+
+        public bool AllowChangeShowData { get; set; } = false;
+
+        public bool CombinePinnedFiltersWithSameLabel { get; set; } = true;
+
+        public bool UseSameScale { get; set; }
 
         public override string ToString()
         {

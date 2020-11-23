@@ -42,7 +42,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
 
   return (
     <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
-      <ErrorBoundary refreshKey={p.data}>
+      <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
             chartRequest={p.chartRequest}

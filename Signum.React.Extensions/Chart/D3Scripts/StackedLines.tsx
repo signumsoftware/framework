@@ -28,7 +28,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 5,
     content: '*',

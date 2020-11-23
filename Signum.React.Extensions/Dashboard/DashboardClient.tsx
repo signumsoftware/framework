@@ -104,7 +104,7 @@ export function start(options: { routes: JSX.Element[] }) {
           title: SelectorMessage.SelectAnElement.niceToString(),
           message: SelectorMessage.PleaseSelectAnElement.niceToString()
         })
-          .then(lite => AppContext.pushOrOpenInTab(Navigator.navigateRoute(lite!), ev))
+          .then(lite => lite && AppContext.pushOrOpenInTab(Navigator.navigateRoute(lite!), ev))
           .done();
       },
     handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :

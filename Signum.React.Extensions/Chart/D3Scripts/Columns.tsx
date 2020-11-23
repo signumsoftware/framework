@@ -28,7 +28,7 @@ export default function renderColumns(props: ChartScriptProps): React.ReactEleme
   //xRule.debugX(chart)
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 5,
     content: '*',
@@ -69,7 +69,7 @@ export default function renderColumns(props: ChartScriptProps): React.ReactEleme
       <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
-      {paintMain({ props, xRule, yRule, x, y, keyValues })}
+      {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters: props.parameters, initialLoad: props.initialLoad, onDrillDown: props.onDrillDown, colIndex: 0, colCount: 1 })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <XAxis xRule={xRule} yRule={yRule} />
@@ -78,10 +78,10 @@ export default function renderColumns(props: ChartScriptProps): React.ReactEleme
   );
 }
 
-export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalProps) {
 
-  const data = props.data!;
-  const parameters = props.parameters;
+export function paintColumns({ xRule, yRule, x, y, data, parameters, initialLoad, onDrillDown, colIndex, colCount }: ChartScriptHorizontalProps & {
+  colIndex: number, colCount: number
+}) {
 
   var keyColumn = data.columns.c0!;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
@@ -92,52 +92,56 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
 
   var size = yRule.size('content');
   var labelMargin = 10;
-  debugger;
+
+  const bandMargin = x.bandwidth() > 20 ? 2 : 0; 
+
+  const bandwidth = ((x.bandwidth() - bandMargin * 2) / colCount);
+  const bandOffset = bandwidth * colIndex + bandMargin;
 
   return (
     <>
-      <g className="shape" transform={translate(xRule.start('content'), yRule.end('content'))}>
+      <g className="shape" transform={translate(xRule.start('content') + bandOffset, yRule.end('content'))}>
         {orderedRows.map(r => <rect key={keyColumn.getValueKey(r)} className="shape sf-transition"
-          transform={(props.initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
+          transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
           height={y(valueColumn.getValue(r))}
-          width={x.bandwidth()}
+          width={bandwidth}
           fill={keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r))}
           cursor="pointer"
-          stroke={x.bandwidth() > 4 ? '#fff' : undefined}
-          onClick={e => props.onDrillDown(r, e)}>
+          stroke={bandwidth > 4 ? '#fff' : undefined}
+          onClick={e => onDrillDown(r, e)}>
           <title>
             {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
           </title>
         </rect>)}
       </g>
 
-      {x.bandwidth() > 15 &&
+      {bandwidth > 15 &&
         (parameters["Labels"] == "Margin" ?
-          <g className="x-label" transform={translate(xRule.start('content'), yRule.start('labels'))}>
+        <g className="x-label" transform={translate(xRule.start('content') + bandOffset, yRule.start('labels'))}>
             {orderedRows.map(r => <TextEllipsis key={keyColumn.getValueKey(r)} maxWidth={yRule.size('labels')} padding={labelMargin} className="x-label sf-transition"
-              transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, 0) + rotate(-90)}
+              transform={translate(x(keyColumn.getValueKey(r))! + bandwidth / 2, 0) + rotate(-90)}
               dominantBaseline="middle"
               fontWeight="bold"
               fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
               textAnchor="end"
               cursor="pointer"
-              onClick={e => props.onDrillDown(r, e)}>
+              onClick={e => onDrillDown(r, e)}>
               {keyColumn.getValueNiceName(r)}
             </TextEllipsis>)}
           </g> :
           parameters["Labels"] == "Inside" ?
-            <g className="x-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
+          <g className="x-label" transform={translate(xRule.start('content') + bandOffset, yRule.end('content'))}>
               {orderedRows.map(r => {
                 var posy = y(valueColumn.getValue(r))!;
                 return (
                   <TextEllipsis key={keyColumn.getValueKey(r)} maxWidth={posy >= size / 2 ? posy : size - posy} padding={labelMargin} className="x-label sf-transition"
-                    transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))!) + rotate(-90)}
+                    transform={translate(x(keyColumn.getValueKey(r))! + bandwidth / 2, -y(valueColumn.getValue(r))!) + rotate(-90)}
                     dominantBaseline="middle"
                     fontWeight="bold"
                     fill={y(valueColumn.getValue(r))! >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
                     dx={y(valueColumn.getValue(r))! >= size / 2 ? -labelMargin : labelMargin}
                     textAnchor={y(valueColumn.getValue(r))! >= size / 2 ? 'end' : 'start'}
-                    onClick={e => props.onDrillDown(r, e)}
+                    onClick={e => onDrillDown(r, e)}
                     cursor="pointer">
                     {keyColumn.getValueNiceName(r)}
                   </TextEllipsis>);
@@ -145,19 +149,19 @@ export function paintMain({ props, xRule, yRule, x, y }: ChartScriptHorizontalPr
             </g> : null
         )}
 
-      {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
-        <g className="numbers-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
+      {parseFloat(parameters["NumberOpacity"]) > 0 && bandwidth > 15 &&
+        <g className="numbers-label" transform={translate(xRule.start('content') + bandOffset, yRule.end('content'))}>
           {orderedRows
             .filter(r => y(valueColumn.getValue(r))! > 10)
             .map(r => <text key={keyColumn.getValueKey(r)} className="number-label sf-transition"
-              transform={translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r))! / 2) + rotate(-90)}
+              transform={translate(x(keyColumn.getValueKey(r))! + bandwidth / 2, -y(valueColumn.getValue(r))! / 2) + rotate(-90)}
               fill={parameters["NumberColor"] ?? "#000"}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}
               textAnchor="middle"
               fontWeight="bold"
               cursor="pointer"
-              onClick={e => props.onDrillDown(r, e)}>
+              onClick={e => onDrillDown(r, e)}>
               {valueColumn.getValueNiceName(r)}
             </text>)}
         </g>}

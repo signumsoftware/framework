@@ -15,6 +15,10 @@ export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>
 export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "CombinedUserChartPart";
   userCharts: Entities.MList<Chart.UserChartEntity>;
+  showData: boolean;
+  allowChangeShowData: boolean;
+  combinePinnedFiltersWithSameLabel: boolean;
+  useSameScale: boolean;
   requiresTitle: boolean;
 }
 

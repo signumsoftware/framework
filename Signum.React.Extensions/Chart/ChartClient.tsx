@@ -762,7 +762,6 @@ export module API {
 
   export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
     return Navigator.API.validateEntity(cleanedChartRequest(request)).then(cr => {
-
       const queryRequest = getRequest(request);
 
       var allTypes = request.columns

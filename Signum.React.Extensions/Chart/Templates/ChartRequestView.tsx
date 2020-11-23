@@ -46,7 +46,8 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       chartRequest: ChartRequestModel; //Use to check validity of results
       lastChartRequest: ChartRequestModel; 
       chartResult: ChartClient.API.ExecuteChartResult;
-    } | undefined, loading: boolean;
+    } | undefined,
+    loading: boolean;
   } | undefined>(undefined);
 
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),

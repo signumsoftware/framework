@@ -48,5 +48,7 @@ export default function ReactChart(p: ReactChartProps) {
   );
 }
 
-
 ReactChart.maxRowsForAnimation = 500;
+
+
+

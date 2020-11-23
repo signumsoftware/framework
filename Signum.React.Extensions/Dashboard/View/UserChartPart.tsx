@@ -42,7 +42,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
       </div>
     );
-
   }
 
   if (!chartRequest)
