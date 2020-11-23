@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject>Signum.MSBuildTask.Program</StartupObject>
@@ -10,11 +10,11 @@
     <LangVersion>latest</LangVersion>
     <Platforms>x64;AnyCPU</Platforms>
     <NuSpecFile>Signum.MSBuildTask.nuspec</NuSpecFile>
-    <Version>2.0.1</Version>
+    <Version>5.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mono.Cecil" Version="0.11.1" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.3" />
   </ItemGroup>
 
 </Project>

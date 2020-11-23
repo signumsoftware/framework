@@ -271,7 +271,7 @@
   <Type Name="PaginationMode">
     <Member Name="All" Description="Alle" />
     <Member Name="Firsts" Description="Erste" />
-    <Member Name="Paginate" Description="Paginieren" />
+    <Member Name="Paginate" Description="Seiten" />
   </Type>
   <Type Name="PinnedFilterActive" Description="Vorgewahlter Filter aktiv">
     <Member Name="Always" Description="Immer" />
@@ -387,6 +387,9 @@
     <Member Name="Of" Description="von" />
     <Member Name="Operation" Description="Operation" />
     <Member Name="Operations" Description="Operationen" />
+    <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
+    <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
+    <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
     <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie ein[m:en|f:e|n:] {0}" />
@@ -400,7 +403,6 @@
     <Member Name="Rename" Description="Umbenennen" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
-    <Member Name="SearchControl_Pagination_All" Description="Alle" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />

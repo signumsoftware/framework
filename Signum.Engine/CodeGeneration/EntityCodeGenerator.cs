@@ -967,7 +967,7 @@ namespace Signum.Engine.CodeGeneration
             return sb.ToString();
         }
 
-        protected virtual DiffColumn GetToStringColumn(DiffTable table)
+        protected virtual DiffColumn? GetToStringColumn(DiffTable table)
         {
             return table.Columns.TryGetC("Name") ?? table.Columns.Values.FirstOrDefault(a => a.PrimaryKey);
         }

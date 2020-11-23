@@ -51,12 +51,12 @@ namespace Signum.Utilities
                 {
                     result = Disposable.Combine(result, invoke(func));
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     if (result != null)
                         result.Dispose();
 
-                    throw e;
+                    throw;
                 }
             }
 

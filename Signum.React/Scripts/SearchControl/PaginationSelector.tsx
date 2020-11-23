@@ -96,20 +96,28 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
   }
 
   function renderCenter() {
+
     return (
       <div className="sf-pagination-center">
         <div className="form-inline">
-          <select value={p.pagination.mode} onChange={handleMode} className="form-control form-control-xs sf-pagination-mode">
-            {["Paginate" as PaginationMode,
-            "Firsts" as PaginationMode,
-            "All" as PaginationMode].map(mode =>
-              <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
-          </select>
-          {p.pagination.mode != "All" &&
-            <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-control form-control-xs sf-elements-per-page">
-              {[5, 10, 20, 50, 100, 200].map(elem =>
-                <option key={elem} value={elem.toString()}>{elem}</option>)}
-            </select>
+          {(p.pagination.mode == "All" ? SearchMessage.PaginationAll_0Elements :
+            p.pagination.mode == "Firsts" ? SearchMessage.PaginationFirst_01Elements :
+              SearchMessage.PaginationPages_0Of01lements)
+            .niceToString().formatHtml(
+
+                <select value={p.pagination.mode} onChange={handleMode} className="form-control form-control-xs sf-pagination-mode">
+                  {["Paginate" as PaginationMode,
+                  "Firsts" as PaginationMode,
+                  "All" as PaginationMode].map(mode =>
+                    <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
+                </select>,
+
+                p.pagination.mode != "All" &&
+                <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-control form-control-xs sf-elements-per-page">
+                  {[5, 10, 20, 50, 100, 200].map(elem =>
+                    <option key={elem} value={elem.toString()}>{elem}</option>)}
+                </select>
+              )
           }
         </div>
       </div>

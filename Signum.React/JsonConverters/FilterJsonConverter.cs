@@ -1,45 +1,55 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Signum.Engine.Json;
 using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
+using Signum.Utilities;
 using System;
+using System.Buffers;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Json
 {
-    public class FilterJsonConverter : JsonConverter
+    public class FilterJsonConverter : JsonConverter<FilterTS>
     {
         public override bool CanConvert(Type objectType)
         {
             return typeof(FilterTS).IsAssignableFrom(objectType);
         }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, FilterTS value, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override FilterTS? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var obj = JObject.Load(reader);
+            using (var doc = JsonDocument.ParseValue(ref reader))
+            {
+                var elem = doc.RootElement;
 
-            if (obj.Property("operation") != null)
-                return new FilterConditionTS
+                if (elem.TryGetProperty("operation", out var oper))
                 {
-                    token = obj.Property("token")!.Value.Value<string>(),
-                    operation = obj.Property("operation")!.Value.ToObject<FilterOperation>(),
-                    value = obj.Property("value")?.Value,
-                };
+                    return new FilterConditionTS
+                    {
+                        token = elem.GetProperty("token").GetString()!,
+                        operation = oper.GetString()!.ToEnum<FilterOperation>(),
+                        value = elem.TryGetProperty("value", out var val) ? val.ToObject<object>(options) : null,
+                    };
+                }  
 
-            if (obj.Property("groupOperation") != null)
-                return new FilterGroupTS
-                {
-                    groupOperation = obj.Property("groupOperation")!.Value.ToObject<FilterGroupOperation>(),
-                    token = obj.Property("token")?.Value.Value<string>(),
-                    filters = obj.Property("filters")!.Value.Select(a => a.ToObject<FilterTS>()!).ToList()
-                };
+                if (elem.TryGetProperty("groupOperation", out var groupOper))
+                    return new FilterGroupTS
+                    {
+                        groupOperation = groupOper.GetString()!.ToEnum<FilterGroupOperation>(),
+                        token = elem.TryGetProperty("token", out var token)? token.GetString() : null,
+                        filters = elem.GetProperty("filters").EnumerateArray().Select(a => a.ToObject<FilterTS>()!).ToList()
+                    };
 
-            throw new InvalidOperationException("Impossible to determine type of filter");
+                throw new InvalidOperationException("Impossible to determine type of filter");
+            }
         }
     }
+
+   
 }

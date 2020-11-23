@@ -1,32 +1,21 @@
-using Newtonsoft.Json;
 using Signum.Utilities;
 using System;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Json
 {
-    public class DateConverter : JsonConverter
+    public class DateConverter : JsonConverter<Date>
     {
-        public override bool CanConvert(Type objectType)
+        public override Date Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return typeof(Date).IsAssignableFrom(objectType.UnNullify());
+            return Date.ParseExact((string)reader.GetString()!, "o", CultureInfo.InvariantCulture);
         }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, Date value, JsonSerializerOptions options)
         {
-            writer.WriteValue(((Date?)value)?.ToString("o", CultureInfo.InvariantCulture));
-        }
-
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-        {
-            if (reader.Value == null)
-                return null;
-
-            var date = reader.Value as DateTime?;
-            if(date != null)
-                return (Date?)date;
-
-            return Date.ParseExact((string)reader.Value, "o", CultureInfo.InvariantCulture);
+            writer.WriteStringValue(value.ToString("o", CultureInfo.InvariantCulture));
         }
     }
 }

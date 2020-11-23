@@ -37,58 +37,11 @@ namespace Signum.Utilities
                    (maxDate == null || date < maxDate);
         }
 
-        static void AssertDateOnly(DateTime? date)
-        {
-            if (date == null)
-                return;
-            DateTime d = date.Value;
-            if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
-                throw new InvalidOperationException("The date has some hours, minutes, seconds or milliseconds");
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander))]
-        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return minDate <= date && date <= maxDate;
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpanderNull))]
-        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate);
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpanderNullNull))]
-        public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate);
-        }
-
         class IsInIntervalExpander : IMethodExpander
         {
             static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -98,7 +51,7 @@ namespace Signum.Utilities
         {
             Expression<Func<DateTime, DateTime, DateTime?, bool>> func = (date, minDate, maxDate) => minDate <= date && (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -110,7 +63,7 @@ namespace Signum.Utilities
                 (minDate == null || minDate <= date) &&
                 (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }

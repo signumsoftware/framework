@@ -15,7 +15,6 @@ namespace Signum.Utilities
             return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
-        [return: MaybeNull]
         public static T? TryGetArgC<T>(this IEnumerable<object?>? args) where T : class
         {
             return args?.SmartConvertTo<T?>().SingleOrDefaultEx(() => "There are more than one {0} in the argument list".FormatWith(typeof(T)));

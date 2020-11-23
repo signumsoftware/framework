@@ -15,8 +15,6 @@ export interface ModifiableEntity {
   mixins?: { [name: string]: MixinEntity }
 }
 
-export type PrimaryKey = { Object: number | string | undefined }
-
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
@@ -466,7 +464,6 @@ export module SearchMessage {
   export const Refresh = new MessageKey("SearchMessage", "Refresh");
   export const Create = new MessageKey("SearchMessage", "Create");
   export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
-  export const SearchControl_Pagination_All = new MessageKey("SearchMessage", "SearchControl_Pagination_All");
   export const ThereIsNo0 = new MessageKey("SearchMessage", "ThereIsNo0");
   export const Value = new MessageKey("SearchMessage", "Value");
   export const View = new MessageKey("SearchMessage", "View");
@@ -489,6 +486,9 @@ export module SearchMessage {
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
   export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
   export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
+  export const PaginationAll_0Elements = new MessageKey("SearchMessage", "PaginationAll_0Elements");
+  export const PaginationPages_0Of01lements = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
+  export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
 }
 
 export module SelectorMessage {

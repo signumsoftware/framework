@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
                     if (Implementations == null)
-                        Implementations = propertyRoutes.FirstOrDefault().TryGetImplementations();
+                        Implementations = propertyRoutes.FirstEx().TryGetImplementations();
                     processedType = null;
                 }
             }
@@ -152,7 +152,7 @@ namespace Signum.Engine.DynamicQuery
 
             if (propertyRoutes != null)
             {
-                var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
+                var result = propertyRoutes.Select(a => a.IsAllowed()).NotNull();
                 if (result.IsEmpty())
                     return null;
 

@@ -35,6 +35,8 @@ namespace Signum.Utilities.ExpressionTrees
         {
             ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
             var result = ee.Visit(expr);
+            if (result == null)
+                return null;
             return partialEval(result);
         }
 
@@ -255,7 +257,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         bool GetBool(Expression exp)
         {
-            return (bool)((ConstantExpression)exp).Value;
+            return (bool)((ConstantExpression)exp).Value!;
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -280,7 +282,7 @@ namespace Signum.Utilities.ExpressionTrees
                 }
 
                 Expression right = this.Visit(b.Right);
-                Expression conversion = this.Visit(b.Conversion);
+                Expression? conversion = this.Visit(b.Conversion);
 
                 return Expression.Coalesce(left, right, conversion as LambdaExpression);
             }
@@ -378,7 +380,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return result;
 
             if (exp is ConstantExpression ceInt && ceInt.Type == typeof(int))
-                return Expression.Constant((char)(int)ceInt.Value, typeof(char));
+                return Expression.Constant((char)(int)ceInt.Value!, typeof(char));
 
             if (exp is ConstantExpression ceChar && ceChar.Type == typeof(char))
                 return ceChar;

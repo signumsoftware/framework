@@ -108,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Expression GetExpression(BuildExpressionContext ctx)
         {
-            CollectionAnyAllToken anyAll = Token.Follow(a => a.Parent)
+            CollectionAnyAllToken? anyAll = Token.Follow(a => a.Parent)
                   .OfType<CollectionAnyAllToken>()
                   .TakeWhile(c => !ctx.Replacemens.ContainsKey(c))
                   .LastOrDefault();

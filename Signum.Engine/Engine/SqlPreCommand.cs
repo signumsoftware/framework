@@ -142,59 +142,64 @@ namespace Signum.Engine
                 var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
 
                 int pos = 0;
-
-                try
+                for (pos = 0; pos < realParts.Length; pos++)
                 {
-                    for (pos = 0; pos < realParts.Length; pos++)
+                    var currentPart = realParts[pos];
+
+                    try
                     {
-                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length), () => Executor.ExecuteNonQuery(realParts[pos]));
+
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length), 
+                            () => Executor.ExecuteNonQuery(currentPart));
+
                     }
-                }
-                catch (Exception ex)
-                {
-                    var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
-                    var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
-                    if (sqlE == null && pgE == null)
-                        throw;
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    var list = script.Lines();
-
-                    var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber - 1) + pos + parts.Take(parts.IndexOf(realParts[pos])).Sum(a => a.Lines().Length);
-
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
-
-                    var min = Math.Max(0, lineNumer - 20);
-                    var max = Math.Min(list.Length - 1, lineNumer + 20);
-
-                    if (min > 0)
-                        Console.WriteLine("...");
-
-                    for (int i = min; i <= max; i++)
+                    catch (Exception ex)
                     {
-                        Console.Write(i + ": ");
-                        SafeConsole.WriteLineColor(i == lineNumer ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
-                    }
+                        var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                        var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+                        if (sqlE == null && pgE == null)
+                            throw;
 
-                    if (max < list.Length - 1)
-                        Console.WriteLine("...");
+                        Console.WriteLine();
+                        Console.WriteLine();
 
-                    Console.WriteLine();
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, ex.GetType().Name + " (Number {0}): ".FormatWith(pgE?.SqlState ?? sqlE?.Number.ToString()));
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
-                    if(ex.InnerException!=null)
-                    {
-                        SafeConsole.WriteLineColor(ConsoleColor.Red, ex.InnerException.Message);
-                        foreach (var item in realParts[pos].Lines())
+                        var list = currentPart.Lines();
+
+                        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
+
+                        var min = Math.Max(0, lineNumer - 20);
+                        var max = Math.Min(list.Length - 1, lineNumer + 20);
+
+                        if (min > 0)
+                            Console.WriteLine("...");
+
+                        for (int i = min; i <= max; i++)
                         {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, item);
+                            Console.Write(i + ": ");
+                            SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
                         }
-                    }
 
-                    Console.WriteLine();                    
-                    throw new ExecuteSqlScriptException(ex.Message, ex);
+                        if (max < list.Length - 1)
+                            Console.WriteLine("...");
+
+                        Console.WriteLine();
+
+                        ex.Follow(a => a.InnerException).ToList().ForEach(e =>
+                        {
+                            var sql = e as SqlException;
+                            var pg = e as PostgresException;
+
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, (e == ex ? "" : "InnerException: ") + e.GetType().Name + " (Number {0}): ".FormatWith(pg?.SqlState ?? sql?.Number.ToString()));
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
+                            Console.WriteLine();
+                            Console.WriteLine();
+                        });
+
+                        Console.WriteLine();
+                        throw new ExecuteSqlScriptException(ex.Message, ex);
+                    }
                 }
             }
         }

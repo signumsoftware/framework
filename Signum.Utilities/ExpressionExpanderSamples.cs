@@ -91,7 +91,7 @@ namespace Signum.Utilities
 	{
         static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
-        public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] parameters, MethodInfo mi)
         {
             var parts = (string[])ExpressionEvaluator.Eval(parameters[1])!;
 
@@ -103,7 +103,7 @@ namespace Signum.Utilities
     {
         static readonly MethodInfo miContains = ReflectionTools.GetMethodInfo(() => "".Contains(""));
 
-        public Expression Expand(Expression instance, Expression[] parameters, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] parameters, MethodInfo mi)
         {
             var parts = (string[])ExpressionEvaluator.Eval(parameters[1])!;
 
@@ -116,10 +116,10 @@ namespace Signum.Utilities
     {
         static readonly MethodInfo miAnyEnumerable = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null!)).GetGenericMethodDefinition();
         static readonly MethodInfo miAnyQueryable = ReflectionTools.GetMethodInfo(() =>Queryable.Any((IQueryable<string>)null!)).GetGenericMethodDefinition();
-        static readonly MethodInfo miAnyEnumerableWithPredicate = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IEnumerable<string>)null!, null)).GetGenericMethodDefinition();
-        static readonly MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null!, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyEnumerableWithPredicate = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IEnumerable<string>)null!, null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null!, null!)).GetGenericMethodDefinition();
 
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             Type foo = mi.DeclaringType!;
             Type bar = typeof(Queryable);

@@ -15,6 +15,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -72,7 +73,7 @@ namespace Signum.Engine.Linq
             return expandedResult;
         }
 
-        protected override Expression? VisitMethodCall(MethodCallExpression m)
+        protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) ||
                 m.Method.DeclaringType == typeof(Enumerable) ||
@@ -149,10 +150,10 @@ namespace Signum.Engine.Linq
             else if (m.Method.DeclaringType == typeof(LinqHintsExpand))
             {
                 if (m.Method.Name == nameof(LinqHintsExpand.ExpandLite))
-                    return BindExpandLite(m.Type, m.GetArgument("source"), m.GetArgument("liteSelector").StripQuotes(), (ExpandLite)((ConstantExpression)m.GetArgument("expandLite")).Value);
+                    return BindExpandLite(m.Type, m.GetArgument("source"), m.GetArgument("liteSelector").StripQuotes(), (ExpandLite)((ConstantExpression)m.GetArgument("expandLite")).Value!);
 
                 if (m.Method.Name == nameof(LinqHintsExpand.ExpandEntity))
-                    return BindExpandEntity(m.Type, m.GetArgument("source"), m.GetArgument("entitySelector").StripQuotes(), (ExpandEntity)((ConstantExpression)m.GetArgument("expandEntity")).Value);
+                    return BindExpandEntity(m.Type, m.GetArgument("source"), m.GetArgument("entitySelector").StripQuotes(), (ExpandEntity)((ConstantExpression)m.GetArgument("expandEntity")).Value!);
             }
             else if (m.Method.DeclaringType == typeof(LinqHints))
             {
@@ -183,7 +184,7 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
-                Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
+                Expression? toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
                 var entity = Visit(m.GetArgument("entity"));
                 var converted = EntityCasting(entity, Lite.Extract(m.Type)!)!;
@@ -191,7 +192,7 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType!.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
             {
-                EntityExpression fi = (EntityExpression)Visit(m.Object);
+                EntityExpression fi = (EntityExpression)Visit(m.Object)!;
 
                 return Expression.Convert((ColumnExpression)fi.ExternalId.Value, m.Method.DeclaringType!.GetGenericArguments()[0]);
             }
@@ -213,7 +214,7 @@ namespace Signum.Engine.Linq
                 {
                     if(obj is MemberExpression me)
                     {
-                        obj = me.Expression;
+                        obj = me.Expression!;
                     }
                 }
 
@@ -318,7 +319,7 @@ namespace Signum.Engine.Linq
 
                     var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
 
-                    var binding = ee.Bindings.Select(fb =>
+                    var binding = ee.Bindings!.Select(fb =>
                     !ReflectionTools.FieldEquals(fb.FieldInfo, fi) ? fb :
                     new FieldBinding(fi, newBinding));
 
@@ -328,13 +329,13 @@ namespace Signum.Engine.Linq
                 {
                     var p = (PropertyInfo)m;
 
-                    var mIndex = ne.Members.IndexOf(pi => ReflectionTools.PropertyEquals((PropertyInfo)pi, p));
+                    var mIndex = ne.Members!.IndexOf(pi => ReflectionTools.PropertyEquals((PropertyInfo)pi, p));
 
                     var newArg = ChangeProjector(index + 1, members, ne.Arguments[mIndex], changeExpression);
 
                     var arguments = ne.Arguments.Select((oldArg, i) => i != index ? oldArg : newArg);
 
-                    return Expression.New(ne.Constructor, arguments, ne.Members);
+                    return Expression.New(ne.Constructor!, arguments, ne.Members);
                 }
                 else if (projector is MListExpression me)
                 {
@@ -343,7 +344,7 @@ namespace Signum.Engine.Linq
                     {
                         var mle = (NewExpression)proj.Projector;
 
-                        var paramIndex = mle.Constructor.GetParameters().IndexOf(p => p.Name == "value");
+                        var paramIndex = mle.Constructor!.GetParameters().IndexOf(p => p.Name == "value");
 
                         var newElement = ChangeProjector(index + 1, members, mle.Arguments[paramIndex], changeExpression);
 
@@ -366,7 +367,7 @@ namespace Signum.Engine.Linq
             string? oldHint = currentTableHint;
             try
             {
-                currentTableHint = (string)hint.Value;
+                currentTableHint = (string)hint.Value!;
 
                 ProjectionExpression projection = this.VisitCastProjection(source);
 
@@ -610,15 +611,15 @@ namespace Signum.Engine.Linq
 
             ProjectionExpression projection = (ProjectionExpression)newSource;
 
-            var set = DbExpressionNominator.Nominate(projection.Projector, out Expression nominated, isGroupKey: true);
+            var set = DbExpressionNominator.Nominate(projection.Projector, out var nominated, isGroupKey: true);
 
-            if (!set.Contains(nominated))
+            if (!set.Contains(nominated!))
                 return Expression.Call(mi, projection, separator);
 
             if (!(separator is ConstantExpression))
                 throw new InvalidCastException("The parameter 'separator' from ToString method should be a constant");
 
-            string value = (string)((ConstantExpression)separator).Value;
+            string value = (string)((ConstantExpression)separator).Value!;
 
             
             if (isPostgres)
@@ -815,7 +816,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private Expression? BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression? selectorOrPredicate, bool isRoot)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression? selectorOrPredicate, bool isRoot)
         {
             var (newSource, selector, distinct) = DisassembleAggregate(aggregateFunction, source, selectorOrPredicate, isRoot);
 
@@ -947,7 +948,7 @@ namespace Signum.Engine.Linq
             {
                 System.Diagnostics.Debug.Assert(!isRoot);
                 Type oType = predicate!.Parameters[0].Type;
-                Expression[] exp = ((IEnumerable)constSource.Value).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
+                Expression[] exp = ((IEnumerable)constSource.Value!).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
 
                 Expression where = isAll ? exp.AggregateAnd() : exp.AggregateOr();
 
@@ -983,7 +984,7 @@ namespace Signum.Engine.Linq
             if (source.NodeType == ExpressionType.Constant && !typeof(IQueryable).IsAssignableFrom(source.Type)) //!isRoot
             {
                 ConstantExpression ce = (ConstantExpression)source;
-                IEnumerable col = (IEnumerable)ce.Value ?? new object[0];
+                IEnumerable col = (IEnumerable?)ce.Value ?? new object[0];
 
                 if (newItem.Type == typeof(Type))
                     return SmartEqualizer.TypeIn(newItem, col.Cast<Type>().ToList());
@@ -1040,7 +1041,7 @@ namespace Signum.Engine.Linq
                 MapVisitExpand(predicate, projection) :
                 MapVisitExpandWithIndex(predicate, ref projection);
 
-            if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value))
+            if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value!))
                 return projection;
 
             Expression where = DbExpressionNominator.FullNominate(exp)!;
@@ -1353,7 +1354,7 @@ namespace Signum.Engine.Linq
         private bool IsTable(Expression expression)
         {
             ConstantExpression? c = expression as ConstantExpression;
-            return c != null && IsTable(c.Value);
+            return c != null && IsTable(c.Value!);
         }
 
         public bool IsTable(object value)
@@ -1464,8 +1465,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (IsTable(c.Value))
-                return GetTableProjection((IQueryable)c.Value);
+            if (IsTable(c.Value!))
+                return GetTableProjection((IQueryable)c.Value!);
 
             return c;
         }
@@ -1494,16 +1495,16 @@ namespace Signum.Engine.Linq
             return assignment;
         }
 
-        protected override Expression? VisitMember(MemberExpression m)
+        protected override Expression VisitMember(MemberExpression m)
         {
             Expression ex = base.VisitMember(m);
-            Expression? binded = BindMemberAccess((MemberExpression)ex);
+            Expression binded = BindMemberAccess((MemberExpression)ex);
             return binded;
         }
 
         public Expression BindMethodCall(MethodCallExpression m)
         {
-            Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0] : m.Object;
+            Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0] : m.Object!;
 
             if (source == null || m.Method.Name == "InSql" || m.Method.Name == "DisableQueryFilter")
                 return m;
@@ -1535,7 +1536,7 @@ namespace Signum.Engine.Linq
 
                 var parameters = m.Method.GetParameters();
 
-                MethodCallExpression simple = Expression.Call(replace(m.Object, null), m.Method, m.Arguments.Select((a, i) => replace(a, parameters[i])).ToArray());
+                MethodCallExpression simple = Expression.Call(replace(m.Object, null), m.Method, m.Arguments.Select((a, i) => replace(a, parameters[i])!).ToArray());
 
                 Expression binded = ExpressionCleaner.BindMethodExpression(simple, true)!;
 
@@ -1655,9 +1656,9 @@ namespace Signum.Engine.Linq
         static readonly PropertyInfo piIdClass = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
         static readonly PropertyInfo piIdInterface = ReflectionTools.GetPropertyInfo((IEntity e) => e.Id);
 
-        public Expression? BindMemberAccess(MemberExpression m)
+        public Expression BindMemberAccess(MemberExpression m)
         {
-            Expression source = m.Expression;
+            Expression source = m.Expression!;
 
             if (source.NodeType == ExpressionType.Conditional)
             {
@@ -1678,14 +1679,14 @@ namespace Signum.Engine.Linq
 
             if (m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member) && source is EntityExpression) //new expansions discovered
             {
-                ParameterExpression parameter = Expression.Parameter(m.Expression.Type, "temp");
+                ParameterExpression parameter = Expression.Parameter(m.Expression!.Type, "temp");
                 MemberExpression simple = Expression.MakeMemberAccess(parameter, m.Member);
 
                 Expression? binded = ExpressionCleaner.BindMemberExpression(simple, true);
 
                 Expression? cleanedSimple = DbQueryProvider.Clean(binded, true, null);
                 map.Add(parameter, source);
-                Expression? result = Visit(cleanedSimple);
+                Expression result = Visit(cleanedSimple)!;
                 map.Remove(parameter);
                 return result;
             }
@@ -1729,7 +1730,7 @@ namespace Signum.Engine.Linq
                         {
                             if (nex.Members == null)
                             {
-                                int index = nex.Constructor.GetParameters().IndexOf(p => p.Name!.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
+                                int index = nex.Constructor!.GetParameters().IndexOf(p => p.Name!.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
 
                                 if (index == -1)
                                     throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
@@ -1769,7 +1770,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection(me, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, entityCompleter: false);
+                                            return BindAdditionalField(afe, entityCompleter: false)!;
 
                                         return result;
                                     }
@@ -1786,7 +1787,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection((MListExpression)result, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, entityCompleter: false);
+                                            return BindAdditionalField(afe, entityCompleter: false)!;
 
                                         return result;
                                     }
@@ -1809,7 +1810,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection((MListExpression)result, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, entityCompleter: false);
+                                            return BindAdditionalField(afe, entityCompleter: false)!;
 
                                         return result;
                                     }
@@ -1865,8 +1866,8 @@ namespace Signum.Engine.Linq
 
                                         switch (m.Member.Name)
                                         {
-                                            case "Min": return interval.Min ?? Expression.Field(interval.PostgresRange, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.LowerBound));
-                                            case "Max": return interval.Max ?? Expression.Field(interval.PostgresRange, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.UpperBound));
+                                            case "Min": return interval.Min ?? Expression.Field(interval.PostgresRange!, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.LowerBound));
+                                            case "Max": return interval.Max ?? Expression.Field(interval.PostgresRange!, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.UpperBound));
                                             default:
                                                 throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member));
                                         }
@@ -2421,7 +2422,7 @@ namespace Signum.Engine.Linq
                     var param = setter.ValueExpression.Parameters.Single();
                     map.Add(param, pr.Projector);
                     var cleanedValue = DbQueryProvider.Clean(setter.ValueExpression.Body, true, null);
-                    Expression valExpression = Visit(cleanedValue);
+                    Expression valExpression = Visit(cleanedValue)!;
                     map.Remove(param);
 
                     assignments.AddRange(AdaptAssign(colExpression, valExpression));
@@ -2486,7 +2487,7 @@ namespace Signum.Engine.Linq
                 FillColumnAssigments(assignments, toInsertParam, cleanedConstructor, e =>
                 {
                     var cleaned = DbQueryProvider.Clean(e, true, null);
-                    Expression expression = Visit(cleaned);
+                    Expression expression = Visit(cleaned)!;
                     return expression;
                 });
                 map.Remove(toInsertParam);
@@ -3045,7 +3046,7 @@ namespace Signum.Engine.Linq
 
                     var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
 
-                    var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) });
+                    var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) })!;
 
                     var order = preserveOrder ?
                         ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type))) :
@@ -3207,7 +3208,7 @@ namespace Signum.Engine.Linq
 
             var whens = values.Select(kvp =>
             {
-                var union = Implementations[kvp.Key].UnionExternalId;
+                var union = Implementations[kvp.Key].UnionExternalId!;
 
                 var condition = Expression.NotEqual(union, QueryBinder.NullId(union!.ValueType));
 
@@ -3249,12 +3250,12 @@ namespace Signum.Engine.Linq
 
             //var knownAliases = KnownAliases(request.Implementations[type].Table);
 
-            var nominations = DbExpressionNominator.Nominate(exp, out Expression newExp);
+            var nominations = DbExpressionNominator.Nominate(exp, out var newExp);
 
-            if (nominations.Contains(newExp))
-                return newExp;
+            if (nominations.Contains(newExp!))
+                return newExp!;
 
-            return new DityExpression(projector : newExp, candidates : nominations);
+            return new DityExpression(projector : newExp!, candidates : nominations);
 
         }
 
@@ -3316,6 +3317,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        [return: NotNullIfNotNull("source")]
         protected internal override SourceExpression VisitSource(SourceExpression source)
         {
             if (source == null)
@@ -3356,7 +3358,7 @@ namespace Signum.Engine.Linq
                 {
                     var unionAll = ua.Implementations.Select(ue =>
                     {
-                        var table = VisitSource(ue.Value.Table)!;
+                        var table = VisitSource(ue.Value.Table);
 
                         var columns = ua.GetDeclarations(ue.Key);
 
@@ -3413,7 +3415,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            var source = VisitSource(insertSelect.Source)!;
+            var source = VisitSource(insertSelect.Source);
             var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
             {

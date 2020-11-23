@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -43,7 +43,7 @@ namespace Signum.Utilities
             XmlSerializer serializer = new XmlSerializer(typeof(T));
             using (StringReader reader = new StringReader(str))
             {
-                return (T)serializer.Deserialize(reader);
+                return (T)serializer.Deserialize(reader)!;
             }
         }
     }

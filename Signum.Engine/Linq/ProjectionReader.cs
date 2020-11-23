@@ -7,6 +7,7 @@ using System.Threading;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Linq
 {
@@ -129,7 +130,8 @@ namespace Signum.Engine.Linq
 
     internal class ExpressionCompilableAsserter : ExpressionVisitor
     {
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             try
             {
@@ -138,7 +140,7 @@ namespace Signum.Engine.Linq
             catch (ArgumentException e)
             {
                 if (e.Message.Contains("reducible"))
-                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".FormatWith(exp.ToString()));
+                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".FormatWith(exp!.ToString()));
                 throw;
             }
         }
