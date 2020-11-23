@@ -16,27 +16,33 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
-            uctx.ForeachCodeFile("Southwind.React/App/MainPublic.tsx", uctx.EntitiesDirectory, file =>
+            uctx.ChangeCodeFile("Southwind.React/Startup.cs", file =>
+            {
+                file.WarningLevel = WarningLevel.Warning;
+                file.RemoveAllLines(a => a.Contains("builder.UseETagger();"));
+            });
+
+            uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
             {
                 file.WarningLevel = WarningLevel.None;
                 file.RemoveAllLines(a => a.Contains("WebAuthnClient.start({"));
             });
 
-            uctx.ForeachCodeFile("Southwind.React/package.json", file =>
+            uctx.ChangeCodeFile("Southwind.React/package.json", file =>
             {
                 file.Replace(
                     searchFor: @"&& webpack --config webpack.config.dll.js",
                     replaceBy: @"&& webpack --config webpack.config.polyfills.js && webpack --config webpack.config.dll.js");
             });
 
-            uctx.ForeachCodeFile("Southwind.React/webpack.config.js", file =>
+            uctx.ChangeCodeFile("Southwind.React/webpack.config.js", file =>
             {
                 file.Replace(
                     searchFor: @"""./App/polyfills.js"", ",
                     replaceBy:"");
             });
 
-            uctx.CreateCodeFile("Southwind.React/webpack.config.js", @"var path = require(""path"");
+            uctx.CreateCodeFile("Southwind.React/webpack.config.polyfills.js", @"var path = require(""path"");
 var webpack = require(""webpack"");
 var AssetsPlugin = require('assets-webpack-plugin');
 
@@ -64,17 +70,14 @@ module.exports = {
   }
 };");
 
-            uctx.ForeachCodeFile("Southwind.React/Views/Home/Index.cshtml", file =>
+            uctx.ChangeCodeFile("Southwind.React/Views/Home/Index.cshtml", file =>
             {
                 file.InsertAfterFirstLine(
                     a => a.Contains("var vendor = (string)JObject.Parse(jsonDll"),
 @"
 string jsonPolyfills = File.ReadAllText(System.IO.Path.Combine(hostingEnv.WebRootPath, ""dist/webpack-assets.polyfills.json""));
 var polyfills = (string)JObject.Parse(jsonPolyfills).Property(""polyfills"")!.Value[""js""]!;");
-            });
 
-            uctx.ChangeCodeFile($@"Southwind.React\Startup.cs", file =>
-            {
                 file.InsertAfterFirstLine(a => a.Contains(@" var __baseUrl = ""@Url.Content(""~/"")"";"),
 @"var browser = (function (agent) {
     switch (true) {
