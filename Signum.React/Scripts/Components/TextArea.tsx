@@ -8,6 +8,8 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export default function TextArea(p: TextAreaProps) {
 
+  var textAreaRef = React.useRef<HTMLTextAreaElement | null | undefined>();
+
   function handleResize(ta: HTMLTextAreaElement) {
     ta.style.height = "0";
     ta.style.height = ta.scrollHeight + 'px';
@@ -18,16 +20,21 @@ export default function TextArea(p: TextAreaProps) {
   const { autoResize, innerRef, minHeight, ...props } = p;
 
   const handleRef = React.useCallback((ta: HTMLTextAreaElement | null) => {
+    textAreaRef.current = ta;
     if (ta && p.autoResize) {
       if (ta.offsetParent != null)
         handleResize(ta);
       else
         whenVisible(ta, visible => visible && handleResize(ta));
     }
-
-    ta && p.autoResize && handleResize(ta);
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);
+
+  var prevValue = usePrevious(p.value);
+  React.useEffect(() => {
+    if (p.autoResize && textAreaRef.current && p.value != null)
+      handleResize(textAreaRef.current);
+  }, [p.value]);
 
   return (
     <textarea {...props} onInput={e => {
