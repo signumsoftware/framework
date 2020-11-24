@@ -64,6 +64,9 @@ namespace Signum.Upgrade
 
         internal static Encoding GetEncoding(string filePath)
         {
+            if (Path.GetFileName(filePath) == "packages.json")
+                return new UTF8Encoding(false);
+
             return Encoding.UTF8;
         }
 
