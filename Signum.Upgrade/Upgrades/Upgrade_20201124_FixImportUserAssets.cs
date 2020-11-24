@@ -10,9 +10,9 @@ namespace Signum.Upgrade.Upgrades
 {
     class Upgrade_20201124_FixImportUserAssets : CodeUpgradeBase
     {
-        public override string Description => "Fix Import User Assets";
+        public override string Description => "fix UserAssetsImporter";
 
-        public override string SouthwindCommitHash => "5d87563412c238710d184528853d65f67848d03c";
+        public override string SouthwindCommitHash => "1a70a66b5b09cee8010d980329d20300995f7121";
 
         public override void Execute(UpgradeContext uctx)
         {
