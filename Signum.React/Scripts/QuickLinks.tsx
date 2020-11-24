@@ -241,7 +241,7 @@ export interface QuickLinkGroup {
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
-  text?: () => string; //To delay niceName and avoid exceptions
+  text?: (nothing?: undefined /*TS 4.1 Bug*/) => string; //To delay niceName and avoid exceptions
   order?: number;
   icon?: IconProp;
   iconColor?: string;
