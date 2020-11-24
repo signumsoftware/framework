@@ -12,9 +12,16 @@ using System.Xml.Linq;
 
 namespace Signum.Upgrade
 {
+    public enum WarningLevel
+    {
+        None, 
+        Warning, 
+        Error, 
+    }
+
     public class CodeFile
     {
-        public bool ShowWarnings { get; set; }
+        public WarningLevel WarningLevel { get; set; }
 
         public CodeFile(string filePath, UpgradeContext uctx)
         {
@@ -55,7 +62,7 @@ namespace Signum.Upgrade
             File.WriteAllText(Path.Combine(this.Uctx.RootFolder, FilePath), _content, GetEncoding(FilePath));
         }
 
-        Encoding GetEncoding(string filePath)
+        internal static Encoding GetEncoding(string filePath)
         {
             return Encoding.UTF8;
         }
@@ -70,18 +77,19 @@ namespace Signum.Upgrade
             this.Content = newContent;
         }
 
-        bool isFirstWarning = true;
+        WarningLevel? isFirstWarning = null;
         public void Warning(FormattableString message)
         {
-            if (!ShowWarnings)
+            if (WarningLevel == WarningLevel.None)
                 return;
 
-            Uctx.HasWarnings = true;
+            if (Uctx.HasWarnings != WarningLevel.Error)
+                Uctx.HasWarnings = WarningLevel;
 
-            if (isFirstWarning)
+            if (isFirstWarning != WarningLevel)
             {
-                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "WARNING in " + this.FilePath);
-                isFirstWarning = false;
+                SafeConsole.WriteLineColor(WarningLevel == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow, WarningLevel.ToString().ToUpper() + " in " + this.FilePath);
+                isFirstWarning = WarningLevel;
             }
 
             Console.Write(" ");
@@ -145,7 +153,7 @@ namespace Signum.Upgrade
 
         /// <param name="fromLine">Not included</param>
         /// <param name="toLine">Not included</param>
-        public void ReplaceBetween(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
+        public void ReplaceBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
         {
             ProcessLines(lines =>
             {
@@ -164,6 +172,31 @@ namespace Signum.Upgrade
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from + 1, to - from - 1);
                 lines.InsertRange(from + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                return true;
+            });
+        }
+
+        /// <param name="fromLine">Not included</param>
+        /// <param name="toLine">Not included</param>
+        public void ReplaceBetweenIncluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
+        {
+            ProcessLines(lines =>
+            {
+                var from = lines.FindIndex(fromLine.Compile());
+                if (from == -1)
+                {
+                    Warning($"Unable to find a line where {fromLine} to insert after {text}");
+                    return false;
+                }
+                var to = lines.FindIndex(from + 1, toLine.Compile());
+                if (to == -1)
+                {
+                    Warning($"Unable to find a line where {toLine} after line {to} to insert before {text}");
+                    return false;
+                }
+                var indent = GetIndent(lines[from]);
+                lines.RemoveRange(from, (to - from) + 1);
+                lines.InsertRange(from, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
                 return true;
             });
         }
@@ -252,7 +285,7 @@ namespace Signum.Upgrade
                 throw new InvalidOperationException("");
         }
 
-        public void UpgradeNpmPackage(string packageName, string version)
+        public void UpdateNpmPackage(string packageName, string version)
         {
             AssertExtension(".json");
             this.ReplaceLine(condition: a => a.Contains(@$"""{packageName}"""),

@@ -31,7 +31,7 @@ namespace Signum.Upgrade.Upgrades
                     l => l.Contains("ConfigureReactWidgets.asumeGlobalUtcMode(moment, false);")
                  );
 
-                file.ReplaceBetween(
+                file.ReplaceBetweenExcluded(
                     l => l.Contains("const culture = ci.name"),
                     l => l.Contains("});"),
 @"  luxon.Settings.defaultLocale = culture;

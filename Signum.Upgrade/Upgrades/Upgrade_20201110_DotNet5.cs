@@ -23,6 +23,8 @@ namespace Signum.Upgrade.Upgrades
                     replaceBy: @"protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)");
             });
 
+
+
             uctx.ForeachCodeFile("*.csproj", file =>
             {
                 file.Replace(
@@ -39,6 +41,18 @@ namespace Signum.Upgrade.Upgrades
                 file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.8.0");
             });
 
+            uctx.ChangeCodeFile("Southwind.Terminal/Program.cs", file =>
+            {
+                file.WarningLevel = WarningLevel.Warning;
+                file.Replace("BigStringMode.FileSystem", "BigStringMode.File");
+            });
+
+            uctx.ChangeCodeFile("Southwind.Logic/Starter.cs", file =>
+            {
+                file.WarningLevel = WarningLevel.Warning;
+                file.Replace("BigStringMode.FileSystem", "BigStringMode.File");
+            });
+
             uctx.ChangeCodeFile($@"Southwind.React\Startup.cs", file =>
             {
                 file.Replace("AddNewtonsoftJson", "AddJsonOptions");
@@ -49,9 +63,9 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ChangeCodeFile($@"Southwind.React/package.json", file =>
             {
-                file.UpgradeNpmPackage("@types/react", "file:../Framework/Signum.React/node_modules/@types/react");
-                file.UpgradeNpmPackage("node-sass", "5.0.0");
-                file.UpgradeNpmPackage("sass-loader", "10.1.0");
+                file.UpdateNpmPackage("@types/react", "file:../Framework/Signum.React/node_modules/@types/react");
+                file.UpdateNpmPackage("node-sass", "5.0.0");
+                file.UpdateNpmPackage("sass-loader", "10.1.0");
             });
 
             uctx.ChangeCodeFile($@"Southwind.React/Dockerfile", file =>
@@ -63,7 +77,7 @@ namespace Signum.Upgrade.Upgrades
                     a => a.Contains("FROM mcr.microsoft.com/dotnet/core/sdk"),
                     "FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build");
 
-                file.ReplaceBetween(
+                file.ReplaceBetweenExcluded(
                     a => a.Contains("RUN apt-get -y install curl"),
                     a => a.Contains("RUN apt-get -y install nodejs"),
 @"RUN apt-get -y install curl

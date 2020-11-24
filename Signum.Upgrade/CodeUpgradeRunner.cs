@@ -105,7 +105,7 @@ namespace Signum.Upgrade
 
             try
             {
-                uctx.HasWarnings = false;
+                uctx.HasWarnings = WarningLevel.None;
                 upgrade.Execute(uctx);
             }
             catch (Exception ex)
@@ -120,10 +120,14 @@ namespace Signum.Upgrade
             File.AppendAllLines(signumUpgradeFile, new[] { upgrade.Key });
 
             Console.WriteLine();
-            if (uctx.HasWarnings)
-                SafeConsole.WriteColor(ConsoleColor.Yellow, "Upgrade finished with warnings...");
-            else
-                SafeConsole.WriteColor(ConsoleColor.Green, "Upgrade finished sucessfully!");
+
+            switch (uctx.HasWarnings)
+            {
+                case WarningLevel.None: SafeConsole.WriteColor(ConsoleColor.Green, "Upgrade finished sucessfully!"); break;
+                case WarningLevel.Warning: SafeConsole.WriteColor(ConsoleColor.Yellow, "Upgrade finished with Warnings..."); break;
+                case WarningLevel.Error:SafeConsole.WriteColor(ConsoleColor.Red, "Upgrade finished with Errors..."); break;
+                default: throw new UnexpectedValueException(uctx.HasWarnings);
+            }
 
             Console.WriteLine(" Please review the changes...");
 
@@ -175,7 +179,7 @@ namespace Signum.Upgrade
             foreach (var upg in this.Upgrades)
             {
                 ConsoleColor color = upg.IsExecuted ? ConsoleColor.DarkGreen :
-                                     upg == next ? ConsoleColor.Green :
+                                     upg == next ? ConsoleColor.Blue :
                                      ConsoleColor.White;
 
                 SafeConsole.WriteColor(color,

@@ -46,6 +46,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2020.11.13 IE Support?](https://github.com/signumsoftware/framework/commit/eb9b9f7cc550bcfd51c643133ebdf6dd73202aaa#commitcomment-44460763)
 * [2020.11.13 Presenting Signum.Upgrade](https://github.com/signumsoftware/framework/commit/a1a37a4a8bd3291dd244daa0db7e113d5ce4f859#comments)
 * [2020.11.13 Switch to .Net 5 and C# 9](https://github.com/signumsoftware/framework/commit/227a8e79aece9d3be5020f2a8dad840c4fba95ad#comments)
 * [2020.09.29 Adding support for WebAuthn](https://github.com/signumsoftware/framework/commit/76c66b8a2416b13b74bc4aeba480369651e09645#comments)
