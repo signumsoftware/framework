@@ -285,7 +285,7 @@ namespace Signum.Upgrade
                 throw new InvalidOperationException("");
         }
 
-        public void UpgradeNpmPackage(string packageName, string version)
+        public void UpdateNpmPackage(string packageName, string version)
         {
             AssertExtension(".json");
             this.ReplaceLine(condition: a => a.Contains(@$"""{packageName}"""),
