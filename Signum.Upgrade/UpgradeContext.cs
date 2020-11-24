@@ -46,49 +46,75 @@ namespace Signum.Upgrade
             return lists.SingleEx(a => Directory.Exists(Path.Combine(rootFolder, a + ".Entities")));
         }
 
+        public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
+        {
+            fileName = fileName.Replace("Southwind", ApplicationName);
+            if (File.Exists(Path.Combine(this.RootFolder, fileName)))
+            {
+                if (showWarning != WarningLevel.None)
+                {
+                    if (HasWarnings != WarningLevel.Error)
+                        HasWarnings = showWarning;
+
+                    SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                        showWarning.ToString().ToUpper() + " file " + fileName + " already exists");
+                }
+            }
+            else
+            {
+                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName));
+            }
+        }
+
         public string EntitiesDirectory => Path.Combine(RootFolder, ApplicationName + ".Entities");
         public string LogicDirectory => Path.Combine(RootFolder, ApplicationName + ".Logic");
         public string TerminalDirectory => Path.Combine(RootFolder, ApplicationName + ".Terminal");
         public string ReactDirectory => Path.Combine(RootFolder, ApplicationName + ".React");
 
-        public bool HasWarnings { get; internal set; }
+        public WarningLevel HasWarnings { get; internal set; }
 
         public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", "Extensions" };
 
-        public void ChangeCodeFile(string fileName, Action<CodeFile> action, bool showWarnings = true)
+        public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarning = WarningLevel.Error)
         {
             fileName = fileName.Replace("Southwind", ApplicationName);
             if (!File.Exists(Path.Combine(this.RootFolder, fileName)))
             {
-                HasWarnings = true;
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "WARNING file " + fileName + " not found");
+                if (showWarning != WarningLevel.None)
+                {
+                    if (HasWarnings != WarningLevel.Error)
+                        HasWarnings = showWarning;
+
+                    SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow, 
+                        showWarning.ToString().ToUpper() + " file " + fileName + " not found");
+                }
             }
             else
             {
-                var codeFile = new CodeFile(fileName, this) { ShowWarnings = showWarnings };
+                var codeFile = new CodeFile(fileName, this) { WarningLevel = showWarning };
                 action(codeFile);
                 codeFile.SafeIfNecessary();
             }
         }
 
 
-        public void ForeachCodeFile(string searchPattern, Action<CodeFile> action, bool showWarnings = false)
+        public void ForeachCodeFile(string searchPattern, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
             var codeFiles = GetCodeFiles(RootFolder, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
             foreach (var codeFile in codeFiles)
             {
-                codeFile.ShowWarnings = showWarnings;
+                codeFile.WarningLevel = showWarnings;
                 action(codeFile);
                 codeFile.SafeIfNecessary();
             }
         }
 
-        public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, bool showWarnings = false)
+        public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
             var codeFiles = GetCodeFiles(directory, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
             foreach (var codeFile in codeFiles)
             {
-                codeFile.ShowWarnings = showWarnings;
+                codeFile.WarningLevel = showWarnings;
                 action(codeFile);
                 codeFile.SafeIfNecessary();
             }
@@ -98,7 +124,7 @@ namespace Signum.Upgrade
 
     
 
-        public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, bool showWarnings = false)
+        public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
 
             foreach (var dir in directories)
@@ -106,7 +132,7 @@ namespace Signum.Upgrade
                 var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a=>a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
-                    codeFile.ShowWarnings = showWarnings;
+                    codeFile.WarningLevel = showWarnings;
                     action(codeFile);
                     codeFile.SafeIfNecessary();
                 }
