@@ -47,8 +47,8 @@ var webpack = require(""webpack"");
 var AssetsPlugin = require('assets-webpack-plugin');
 
 module.exports = {
-  mode: ""development"",  //Now mandatory, alternatively �production�
-  devtool: false, //To remove source maps in �development�, avoids problems with errors in Chrome
+  mode: ""development"",  //Now mandatory, alternatively ""production""
+  devtool: false, //To remove source maps in ""development"", avoids problems with errors in Chrome
   entry: {
     polyfills: [path.join(__dirname, ""App"", ""polyfills.js"")]
   },
