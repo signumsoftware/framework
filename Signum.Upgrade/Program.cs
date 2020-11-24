@@ -31,7 +31,9 @@ namespace Signum.Upgrade
                 new Upgrade_20200929_WebAuthn(),
                 new Upgrade_20201110_DotNet5(),
                 new Upgrade_20201118_FixSwagger(),
-                new Upgrade_20201119_SplitPolyfills()
+                new Upgrade_20201119_SplitPolyfills(),
+                new Upgrade_20201123_Typescript41(),
+                new Upgrade_20201124_CombinedUserChartPart(),
             }.Run(uctx);
         }
     }
