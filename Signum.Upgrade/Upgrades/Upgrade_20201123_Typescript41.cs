@@ -30,7 +30,10 @@ namespace Signum.Upgrade.Upgrades
             uctx.ChangeCodeFile("Southwind.React/tsconfig.json", file =>
             {
                 file.RemoveAllLines(a => a.Contains(@"""baseUrl"": ""."","));
+                file.Replace("\"*\": [", "temp123");
                 file.Replace("\"*\"", "\"./*\"");
+                file.Replace("temp123", "\"*\": [");
+
             });
         }
     }

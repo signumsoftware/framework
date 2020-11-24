@@ -177,7 +177,7 @@ namespace Signum.React.ApiControllers
                                 return token.ToObject<Lite<Entity>>(SignumServer.JsonSerializerOptions);
 
                             if (token.TryGetProperty("Type", out var type))
-                                return token.ToObject<Entity>(SignumServer.JsonSerializerOptions);
+                                return token.ToObject<ModifiableEntity>(SignumServer.JsonSerializerOptions);
 
                             var conv = CustomOperationArgsConverters.TryGetC(operationSymbol);
 
