@@ -92,7 +92,7 @@ export class FunctionalAdapter extends React.Component {
 
   innerRef?: any | null;
 
-  render() {
+  render(): React.ReactNode {
     var only = React.Children.only(this.props.children);
     if (!React.isValidElement(only))
       throw new Error("Not a valid react element: " + only);

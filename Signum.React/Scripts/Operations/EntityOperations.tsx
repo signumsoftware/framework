@@ -177,7 +177,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
     const item =
       <Dropdown.Item
-        {...props}
+        {...props as any}
         disabled={disabled}
         title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
