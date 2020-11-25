@@ -4,9 +4,11 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
+import { extensionToIcon } from './FilesClient'
 import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
 
@@ -16,6 +18,7 @@ export interface FileDownloaderProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   children?: React.ReactNode;
+  showFileIcon?: boolean;
 }
 
 export function FileDownloader(p: FileDownloaderProps) {
@@ -61,13 +64,18 @@ export function FileDownloader(p: FileDownloaderProps) {
       title={toStr ?? undefined}
       target="_blank"
       {...p.htmlAttributes}>
-      {p.children ?? toStr}
+      {p.children ??
+        <>
+          {p.showFileIcon && <FontAwesomeIcon className="mr-1" icon={["far", extensionToIcon[fileName.tryAfter(".")!] ?? "file"]} />}
+          {toStr}
+        </>}
     </a>
   );
 }
 
 FileDownloader.defaultProps = {
   download: "SaveAs",
+  showFileIcon: true,
 }
 
 export const configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = { };

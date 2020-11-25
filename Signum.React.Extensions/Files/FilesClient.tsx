@@ -12,7 +12,8 @@ import { MultiFileLine } from './MultiFileLine';
 import { FileDownloader } from './FileDownloader';
 import { FetchInState } from '@framework/Lines/Retrieve';
 import { FileImage } from './FileImage';
-import { ImageModal } from './ImageModal'
+import { ImageModal } from './ImageModal';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -56,6 +57,67 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
         <FileThumbnail file={cell as IFile & ModifiableEntity} />)
   });
 }
+
+export const extensionToIcon: { [ext: string]: IconName } = {
+
+  ["jpg"]: "file-image",
+  ["jpeg"]: "file-image",
+  ["gif"]: "file-image",
+  ["png"]: "file-image",
+  ["bmp"]: "file-image",
+  ["tiff"]: "file-image",
+
+  ["doc"]: "file-word",
+  ["docx"]: "file-word",
+
+  ["xls"]: "file-excel",
+  ["xlsx"]: "file-excel",
+
+  ["ppt"]: "file-powerpoint",
+  ["pptx"]: "file-powerpoint",
+
+  ["pdf"]: "file-pdf",
+
+  ["html"]: "file-code",
+  ["xml"]: "file-code",
+  ["css"]: "file-code",
+  ["js"]: "file-code",
+  ["jsx"]: "file-code",
+  ["ts"]: "file-code",
+  ["tsx"]: "file-code",
+  ["cs"]: "file-code",
+  ["csproj"]: "file-code",
+  ["sln"]: "file-code",
+  ["py"]: "file-code",
+  ["c"]: "file-code",
+  ["cpp"]: "file-code",
+  ["vb"]: "file-code",
+  ["fs"]: "file-code",
+
+  ["zip"]: "file-archive",
+  ["rar"]: "file-archive",
+  ["7z"]: "file-archive",
+
+  ["txt"]: "file-alt",
+  ["info"]: "file-alt",
+  ["log"]: "file-alt",
+
+  ["avi"]: "file-video",
+  ["mkv"]: "file-video",
+  ["mpg"]: "file-video",
+  ["mp4"]: "file-video",
+  ["ogg"]: "file-video",
+  ["mov"]: "file-video",
+  ["webm"]: "file-video",
+  ["wmv"]: "file-video",
+
+  ["mp3"]: "file-audio",
+  ["wav"]: "file-audio",
+  ["wma"]: "file-audio",
+
+  ["csv"]: "file-csv",
+};
+
 
 interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file: IFile & ModifiableEntity;

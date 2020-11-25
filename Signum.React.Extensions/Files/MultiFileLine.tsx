@@ -18,6 +18,7 @@ export { FileTypeSymbol };
 interface MultiFileLineProps extends EntityListBaseProps {
   ctx: TypeContext<MList<ModifiableEntity & IFile | Lite<IFile & Entity> | EmbeddedEntity /*implement getFile create Embedded*/>>;
   download?: DownloadBehaviour;
+  showFileIcon?: boolean;
   dragAndDrop?: boolean;
   dragAndDropMessage?: string;
   fileType?: FileTypeSymbol;
@@ -51,8 +52,6 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
         p.maxSizeInBytes = m.defaultFileTypeInfo.maxSizeInBytes;
     }
   }
-
- 
 
   handleDeleteValue = (index: number) => {
     const list = this.props.ctx.value;
@@ -110,6 +109,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                       </span > :
                       <FileDownloader
                         configuration={p.configuration}
+                        showFileIcon={p.showFileIcon}
                         download={p.download}
                         entityOrLite={p.getFile ? p.getFile(mlec.value as EmbeddedEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
@@ -143,5 +143,6 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
 
 (MultiFileLine as any).defaultProps = {
   download: "SaveAs",
+  showFileIcon: true,
   dragAndDrop: true
 } as MultiFileLineProps;
