@@ -29,6 +29,7 @@ namespace Signum.Engine.Chart.Scripts
                 CreateBlock("Scale ", ChartParameterType.Enum, EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log"), includeValues: true),
                 CreateBlock("CSS Style ", ChartParameterType.String, new StringValue(""), includeValues: true),
                 CreateBlock("Max Text Length ", ChartParameterType.Number, new NumberInterval { DefaultValue = 50 }, includeValues: false),
+                CreateBlock("Show Create Button ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes"), includeValues: true),
                 new ChartScriptParameterGroup()
                 {
                     new ChartScriptParameter("SubTotal Horizontal Axis (2)", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("no|yes")},
@@ -53,7 +54,7 @@ namespace Signum.Engine.Chart.Scripts
 
             if (includeValues)
             {
-                result.Add(new ChartScriptParameter(prefix + "Values", type) { ColumnIndex = 6, ValueDefinition = valueDefinition });
+                result.Add(new ChartScriptParameter(prefix + "Value", type) { ColumnIndex = 6, ValueDefinition = valueDefinition });
             }
             return result;
         }

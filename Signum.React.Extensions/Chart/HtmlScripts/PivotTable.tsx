@@ -1,5 +1,7 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator';
+import * as Finder from '@framework/Finder';
+import * as Constructor from '@framework/Constructor';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
@@ -10,8 +12,9 @@ import './PivotTable.css'
 import { Color } from '../../Basics/Color';
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
-import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption } from '@framework/FindOptions';
+import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';
+import { EntityBaseController } from '../../../../Framework/Signum.React/Scripts/Lines';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -97,6 +100,7 @@ interface CellStyle {
   _complete?: "No" | "Yes" | "FromFilters",
   column?: ChartColumn<unknown>;
   maxTextLength?: number;
+  showCreateButton: boolean;
 }
 
 interface DimParameters {
@@ -108,6 +112,7 @@ interface DimParameters {
   placeholder?: "no" | "empty" | "filled"
   cssStyle: string,
   maxTextLength?: number,
+  createButton?: "No" | "Yes"
 }
 
 
@@ -123,6 +128,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
   function getDimParameters(columnName: string): DimParameters {
     return ({
       complete: parameters["Complete " + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
+      createButton: parameters["Show Create Button " + columnName] as "No" | "Yes",
       order: parameters["Order " + columnName],
       gradient: parameters["Gradient " + columnName],
       scale: parameters["Scale " + columnName],
@@ -195,6 +201,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       order: params.order,
       _keys: column && params.complete == "Consistent" ? data!.rows.map(row => column.getValue(row)).distinctBy(val => column.getKey(val)) : undefined,
       _complete: params.complete == "Consistent" ? undefined : params.complete,
+      showCreateButton: params.createButton == "Yes",
     });
   }
 
@@ -259,9 +266,13 @@ export default function renderPivotTable({ data, width, height, parameters, load
   const horizontalGroups = getRowGroups(horizontalDic, horStyles, 0, []);
   const verticalGroups = getRowGroups(verticalDic, vertStyles, 0, []);
 
-  const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Values"));
+  const valueStyle = getCellStyle(data.rows.map(a => valueColumn.getValue(a)), getDimParameters("Value"));
 
   const numbroFormat = toNumberFormat(valueColumn.token?.format);
+
+  const typeName = chartRequest.queryKey;
+
+  const isCreable = Navigator.isCreable(typeName, { isSearch: true });
 
   function Cell(p:
     {
@@ -281,6 +292,12 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     function handleNumberClick(e: React.MouseEvent<HTMLAnchorElement>) {
       e.preventDefault();
+
+      if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
+        Navigator.navigate(p.gor[0].entity as Lite<Entity>).done();
+        return;
+      }
+
       var filters = p.filters ?? gr?.getFilters();
 
       if (filters == null)
@@ -295,7 +312,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
+    const link = p.gor == null ? null : <a  href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
@@ -318,10 +335,35 @@ export default function renderPivotTable({ data, width, height, parameters, load
       ...style?.cssStyle
     };
 
+    var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.createIcon}</a>;
+
+    function handleCreateClick(e: React.MouseEvent) {
+      e.preventDefault()
+      var filters = p.filters ?? gr?.getFilters();
+
+      if (filters == null)
+        throw new Error("Unexpected no filters");
+
+      var fop = [
+        ...filters.map(f => softCast<FilterOptionParsed>({ token: f.col.token!, operation: "EqualTo", value: f.val, frozen: false })),
+        ...chartRequest.filterOptions,
+      ];
+
+      Finder.getPropsFromFilters(typeName, fop)
+        .then(props => Constructor.construct(typeName, props))
+        .then(e => e && Navigator.navigate(e))
+        .done();
+    }
+
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
 
     if (title == null) {
-      return <td style={cssStyle}>{link}</td>;
+      return (
+        <td style={cssStyle}>
+          {link}
+          {createLink}
+        </td>
+      );
     }
 
     function handleLiteClick(e: React.MouseEvent) {
@@ -339,6 +381,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
         {titleElement}
         {link && <span> ({link})</span>}
+        {createLink}
       </th>
     );
   }
