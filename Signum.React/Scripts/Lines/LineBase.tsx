@@ -13,14 +13,14 @@ export interface ChangeEvent {
 export interface LineBaseProps extends StyleOptions {
   ctx: TypeContext<any>;
   type?: TypeReference;
-  labelText?: React.ReactChild;
+  labelText?: React.ReactNode;
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
-  helpText?: React.ReactChild;
+  helpText?: React.ReactNode | null;
   mandatory?: boolean;
 }
 

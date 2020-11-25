@@ -152,7 +152,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   }
 }
 
-function asString(reactChild: React.ReactChild | undefined): string | undefined {
+function asString(reactChild: React.ReactNode | undefined): string | undefined {
   if (typeof reactChild == "string")
     return reactChild as string;
 
