@@ -579,13 +579,10 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
   function numericTextBox(binding: Binding<number | undefined>, title: string) {
 
     var val = binding.getValue();
-    if (p.readonly)
-      return <span className="numeric form-control form-control-xs" style={{ width: "60px" }}>{val}</span>;
-
     var numberFormat = toNumberFormat("0");
 
     return (
-      <NumericTextBox value={val == undefined ? null : val} format={numberFormat} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
+      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val} format={numberFormat} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
         validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "60px" } }} />
     );
   }
