@@ -509,6 +509,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
 
 export interface NumericTextBoxProps {
   value: number | null;
+  readonly?: boolean;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   format: Intl.NumberFormat;
@@ -545,6 +546,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       "";
 
   return <input ref={p.innerRef} {...p.htmlAttributes}
+    readOnly={p.readonly}
     type="text"
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
@@ -567,17 +569,18 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      let value = ValueLineController.autoFixString(input.value, false);
 
-    let value = ValueLineController.autoFixString(input.value, false);
+      //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
+      //  value = value + ",00";
 
-    //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-    //  value = value + ",00";
-
-    const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
-    setText(undefined);
-    if (result != p.value)
-      p.onChange(result);
+      const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
+      setText(undefined);
+      if (result != p.value)
+        p.onChange(result);
+    }
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
@@ -607,8 +610,10 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-    setText(input.value);
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      setText(input.value);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
