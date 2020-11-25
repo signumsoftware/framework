@@ -46,7 +46,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
               <Tabs id="statsTabs">
                 {
                   caseActivityStats.map(a =>
-                    <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!}
+                    <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!.toString()}
                       title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.doneBy.toStr} {DoneType.niceToString(a.doneType!)} <mark>({DateTime.fromISO(a.doneDate).toRelative()})</mark></span> as any}>
                       <CaseActivityStatsComponent stats={a} caseEntity={p.case} />
                     </Tab>)

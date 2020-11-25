@@ -259,7 +259,7 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 `;
   }
   return (
-    <DropdownButton id="modules" size="xs" variant="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
+    <DropdownButton id="modules" size={"xs" as any} variant="info" title={DynamicViewMessage.ModulesHelp.niceToString()}>
       {Dic.getKeys(globalModules)
         .orderBy(a => p.clientCode && !clientModules[a])
         .map((moduleName, i) => <Dropdown.Item style={{ paddingTop: "0", paddingBottom: "0" }} key={i} onClick={() => handleModulesClick(moduleName)}>

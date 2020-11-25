@@ -13,16 +13,19 @@
   ],
   "author": "Signum Software",
   "license": "MIT",
+  "resolutions": {
+    "@types/react": "file:../../Framework/Signum.React/node_modules/@types/react"
+  },
   "dependencies": {
     "@types/codemirror": "0.0.95",
     "@types/draft-js": "0.10.40",
     "@types/googlemaps": "3.39.6",
-    "@types/react": "16.9.54",
     "draft-js": "0.11.5",
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "msal": "1.1.1"
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
+    "msal": "1.1.1",
+    "@types/react": "file:../../Framework/Signum.React/node_modules/@types/react"
   }
 }
