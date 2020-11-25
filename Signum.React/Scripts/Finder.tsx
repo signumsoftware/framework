@@ -391,7 +391,14 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     }) as ColumnOptionParsed));
 }
 
-export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[]): Promise<any> {
+export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
+
+  const ti = getTypeInfo(type);
+
+  if (!avoidCustom && querySettings[ti.name]?.customGetPropsFromFilter) {
+    return querySettings[ti.name].customGetPropsFromFilter!([...filterOptionsParsed]);
+  }
+
 
   function getMemberForToken(ti: TypeInfo, fullKey: string) {
     var token = fullKey.tryAfter("Entity.") ?? fullKey;
@@ -402,7 +409,6 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
     return ti.members[token];
   }
 
-  const ti = getTypeInfo(type);
 
   var result: any = {};
 
@@ -1505,6 +1511,7 @@ export interface QuerySettings {
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
+  customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
 }
 
 
