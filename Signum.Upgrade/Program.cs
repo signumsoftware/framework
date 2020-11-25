@@ -34,6 +34,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201119_SplitPolyfills(),
                 new Upgrade_20201123_Typescript41(),
                 new Upgrade_20201124_CombinedUserChartPart(),
+                new Upgrade_20201124_FixImportUserAssets(),
             }.Run(uctx);
         }
     }
