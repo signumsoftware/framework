@@ -255,8 +255,8 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
     }
   }, [p.ctx.value]);
 
-  function getSwitchModelButton(isValue: boolean) : React.ReactElement<any> {
-    return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text")}
+  function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
+    return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
       <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
