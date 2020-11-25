@@ -501,6 +501,19 @@ namespace Signum.Entities
             return null;
         }
 
+        public MixinEntity? TryMixin(string mixinName)
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current.GetType().Name == mixinName)
+                    return current;
+                current = current.Next;
+            }
+
+            return null;
+        }
+
         public MixinEntity GetMixin(Type mixinType)
         {
             var current = mixin;
