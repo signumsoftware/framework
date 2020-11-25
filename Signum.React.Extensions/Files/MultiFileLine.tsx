@@ -23,7 +23,6 @@ interface MultiFileLineProps extends EntityListBaseProps {
   fileType?: FileTypeSymbol;
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
-  helpText?: React.ReactChild;
   maxSizeInBytes?: number;
   getFile?: (e: any /*EmbeddedEntity*/) => ModifiableEntity & IFile | Lite<IFile & Entity>;
   createEmbedded?: (file: ModifiableEntity & IFile) => Promise<EmbeddedEntity>;

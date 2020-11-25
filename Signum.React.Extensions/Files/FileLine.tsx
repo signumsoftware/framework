@@ -22,7 +22,6 @@ export interface FileLineProps extends EntityBaseProps {
   fileType?: FileTypeSymbol;
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
-  helpText?: React.ReactChild;
   maxSizeInBytes?: number;
 }
 
