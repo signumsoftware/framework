@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace Signum.Upgrade
 {
@@ -11,6 +12,11 @@ namespace Signum.Upgrade
     {
         public string RootFolder { get; set; }
         public string ApplicationName { get; set; }
+
+        static UpgradeContext()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
 
         public UpgradeContext(string rootFolder, string applicationName)
         {
@@ -20,6 +26,7 @@ namespace Signum.Upgrade
 
         public static UpgradeContext CreateFromCurrentDirectory()
         {
+
             var rootFolder = GetRootFolder();
             var applicationName = GetApplicationName(rootFolder);
 
