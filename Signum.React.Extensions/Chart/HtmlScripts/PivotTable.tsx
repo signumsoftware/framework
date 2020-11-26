@@ -14,7 +14,7 @@ import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';
-import { EntityBaseController } from '../../../../Framework/Signum.React/Scripts/Lines';
+import { EntityBaseController } from '@framework/Lines';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -94,7 +94,7 @@ interface CellStyle {
   cssStyle: React.CSSProperties | undefined;
   subTotal?: "no" | "yes";
   placeholder?: "no" | "empty" | "filled";
-  background?: (key: any, number: number) => string;
+  background?: (key: any, number: number) => string | undefined;
   order?: string;
   _keys?: unknown[];
   _complete?: "No" | "Yes" | "FromFilters",
@@ -184,9 +184,9 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function getCellStyle(values: number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
 
-    let background: ((key: unknown, num: number) => string) | undefined = undefined;
+    let background: ((key: unknown, num: number) => string | undefined) | undefined = undefined;
     if (params.gradient == "EntityPalette" && column != null) {
-      background = (key: unknown, num: number) => column.getColor(key) ?? "";
+      background = (key: unknown, num: number) => column.getColor(key) ?? undefined;
     }
     else if (params.scale && params.gradient != "None") {
       const scaleFunc = ChartUtils.scaleFor(valueColumn, values, 0, 1, params.scale);
