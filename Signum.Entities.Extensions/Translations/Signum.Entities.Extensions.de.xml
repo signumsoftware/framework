@@ -378,6 +378,14 @@
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
   <Type Name="CNTKPredictorAlgorithm" />
+  <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
+    <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowData" Description="Daten anzeigen" />
+    <Member Name="UserCharts" Description="Benutzerdiagramme" />
+    <Member Name="UseSameScale" Description="Verwenden der gleichen Skala" />
+  </Type>
   <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
@@ -1441,6 +1449,7 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
+  <Type Name="NewTasksEmbedded" />
   <Type Name="NoteEntity" Description="Notiz" PluralDescription="Notizen" Gender="f">
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -2357,6 +2366,7 @@
   </Type>
   <Type Name="UserAssetPreviewLineEmbedded" Description="Benutzer-Asset-Vorschau-Linie">
     <Member Name="Action" Description="Aktion" />
+    <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />
     <Member Name="Text" Description="Text" />
