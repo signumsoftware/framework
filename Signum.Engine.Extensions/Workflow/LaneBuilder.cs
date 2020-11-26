@@ -276,11 +276,6 @@ namespace Signum.Engine.Workflow
           
             internal void DeleteAll(Locator? locator)
             {
-                foreach (var c in connections.Values.Select(a => a.Entity))
-                {
-                    c.Delete(WorkflowConnectionOperation.Delete);
-                }
-
                 foreach (var e in events.Values.Select(a => a.Entity))
                 {
                     if (e.Type == WorkflowEventType.IntermediateTimer)
