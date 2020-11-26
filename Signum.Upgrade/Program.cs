@@ -35,6 +35,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201123_Typescript41(),
                 new Upgrade_20201124_CombinedUserChartPart(),
                 new Upgrade_20201124_FixImportUserAssets(),
+                new Upgrade_20201125_ReactBootstrap14(),
             }.Run(uctx);
         }
     }
