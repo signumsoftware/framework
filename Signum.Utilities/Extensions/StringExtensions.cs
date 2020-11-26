@@ -663,13 +663,16 @@ namespace Signum.Utilities
 
         public static string Indent(this string str, int numChars)
         {
-            return Indent(str, numChars, ' ');
+            return Indent(str, new string(' ', numChars));
         }
 
         public static string Indent(this string str, int numChars, char indentChar)
         {
-            string space = new string(indentChar, numChars);
+            return Indent(str, new string(indentChar, numChars));
+        }
 
+        public static string Indent(this string str, string space)
+        {
             StringBuilder sb = new StringBuilder();
 
             for (int pos = 0; pos < str.Length; )

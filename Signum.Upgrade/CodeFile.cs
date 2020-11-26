@@ -144,7 +144,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -174,7 +174,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from + 1, to - from - 1);
-                lines.InsertRange(from + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(from + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -199,7 +199,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from, (to - from) + 1);
-                lines.InsertRange(from, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -216,7 +216,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[pos]);
                 lines.RemoveRange(pos, 1);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -232,9 +232,16 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
+        }
+
+        private string IndentAndReplace(string a, string indent)
+        {
+            return a.Replace("Southwind", this.Uctx.ApplicationName)
+                .Replace("southwind", this.Uctx.ApplicationName.ToLower())
+                .Indent(indent);
         }
 
         public void InsertAfterLastLine(Expression<Predicate<string>> condition, string text)
@@ -248,7 +255,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -264,7 +271,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
