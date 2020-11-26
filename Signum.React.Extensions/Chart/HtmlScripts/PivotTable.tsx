@@ -94,7 +94,7 @@ interface CellStyle {
   cssStyle: React.CSSProperties | undefined;
   subTotal?: "no" | "yes";
   placeholder?: "no" | "empty" | "filled";
-  background?: (number: number) => string;
+  background?: (key: any, number: number) => string;
   order?: string;
   _keys?: unknown[];
   _complete?: "No" | "Yes" | "FromFilters",
@@ -184,18 +184,21 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function getCellStyle(values: number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
 
-    let color: ((num: number) => string) | undefined = undefined;
-    if (params.scale && params.gradient != "None") {
+    let background: ((key: unknown, num: number) => string) | undefined = undefined;
+    if (params.gradient == "EntityPalette" && column != null) {
+      background = (key: unknown, num: number) => column.getColor(key) ?? "";
+    }
+    else if (params.scale && params.gradient != "None") {
       const scaleFunc = ChartUtils.scaleFor(valueColumn, values, 0, 1, params.scale);
       const gradient = ChartUtils.getColorInterpolation(params.gradient)!;
-      color = (num: number) => gradient(scaleFunc(num)!);
+      background = (key: unknown, num: number) => gradient(scaleFunc(num)!);
     }
 
     return ({
       cssStyle: parseCssStyle(params.cssStyle),
       placeholder: params.placeholder,
       subTotal: params.subTotal,
-      background: color,
+      background: background,
       maxTextLength: params.maxTextLength,
       column: column,
       order: params.order,
@@ -319,7 +322,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
         p.isSummary == 3 ? "rgb(236, 236, 236)" :
           p.isSummary == 2 ? "rgb(241, 241, 241)" :
             p.isSummary == 1 ? "#f8f8f8" :
-              style && style.background && style.background(val);
+              style && style.background && style.background(gr?.value, val);
 
     const cssStyle: React.CSSProperties | undefined = style && {
       backgroundColor: color,

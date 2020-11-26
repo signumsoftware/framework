@@ -25,7 +25,7 @@ namespace Signum.Engine.Chart.Scripts
             {
                 CreateBlock("Complete ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes|Consistent|FromFilters"), includeValues: false),
                 CreateBlock("Order ", ChartParameterType.Enum, EnumValueList.Parse("None|Ascending|AscendingKey|AscendingToStr|AscendingSumValues|Descending|DescendingKey|DescendingToStr|DescendingSumValues"), includeValues: false),
-                CreateBlock("Gradient ", ChartParameterType.Enum, EnumValueList.Parse("None|YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn"), includeValues: true),
+                CreateBlock("Gradient ", ChartParameterType.Enum, EnumValueList.Parse("None|EntityPalette|YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn"), includeValues: true),
                 CreateBlock("Scale ", ChartParameterType.Enum, EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log"), includeValues: true),
                 CreateBlock("CSS Style ", ChartParameterType.String, new StringValue(""), includeValues: true),
                 CreateBlock("Max Text Length ", ChartParameterType.Number, new NumberInterval { DefaultValue = 50 }, includeValues: false),
