@@ -15,10 +15,6 @@ namespace Signum.Entities.Chart
         MList<ChartColumnEmbedded> Columns { get; }
         MList<ChartParameterEmbedded> Parameters { get; }
 
-        void InvalidateResults(bool needNewQuery);
-
-        bool Invalidator { get; }
-
         void FixParameters(ChartColumnEmbedded chartColumnEntity);
     }
 
@@ -50,9 +46,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    var newQuery = this.GetChartScript().SynchronizeColumns(this, null);
-                    NotifyAllColumns();
-                    InvalidateResults(newQuery);
+                    this.GetChartScript().SynchronizeColumns(this, null);
                 }
             }
         }
@@ -84,39 +78,6 @@ namespace Signum.Entities.Chart
 
             return result;
         }
-
-        void NotifyAllColumns()
-        {
-            foreach (var item in Columns)
-            {
-                item.NotifyAll();
-            }
-        }
-
-        [field: NonSerialized, Ignore]
-        public event Action ChartRequestChanged;
-
-        public void InvalidateResults(bool needNewQuery)
-        {
-            if (needNewQuery)
-                this.NeedNewQuery = true;
-
-            ChartRequestChanged?.Invoke();
-
-            Notify(() => Invalidator);
-        }
-
-        public bool Invalidator { get { return false; } }
-
-        [NonSerialized]
-        bool needNewQuery;
-        [HiddenProperty]
-        public bool NeedNewQuery
-        {
-            get { return needNewQuery; }
-            set { Set(ref needNewQuery, value); }
-        }
-
 
         [InTypeScript(false)]
         public List<Filter> Filters { get; set; } = new List<Filter>();

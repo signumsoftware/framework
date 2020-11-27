@@ -326,7 +326,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value))).ToList();
+            var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(uc.Attribute("Guid")!.Value))).ToList();
             ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
             AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             CombinePinnedFiltersWithSameLabel = element.Attribute("CombinePinnedFiltersWithSameLabel")?.Value.ToBool() ?? false;

@@ -19,8 +19,8 @@ export function loadCurrentCulture(): Promise<void> {
 
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
   API.setCurrentCulture(newCulture)
-    .then(() => reloadTypes())
     .then(() => loadCurrentCulture())
+    .then(() => reloadTypes())
     .then(() => AppContext.resetUI())
     .done();
 }

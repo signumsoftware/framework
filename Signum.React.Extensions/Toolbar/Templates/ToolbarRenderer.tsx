@@ -203,10 +203,10 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
       case "Header":
       case "Item":
 
-        var HeaderOrItem =
+        var HeaderOrItem: typeof Dropdown.Item =
           (isNavbar ?
-            (res.type == "Header" ? NavDropdown.Header : NavDropdown.Item) :
-            (res.type == "Header" ? Dropdown.Header : Dropdown.Item));
+            (res.type == "Header" ? NavDropdown.Header as any : NavDropdown.Item) :
+            (res.type == "Header" ? Dropdown.Header as any : Dropdown.Item));
 
         if (res.elements && res.elements.length) {
           return [

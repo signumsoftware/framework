@@ -30,7 +30,6 @@ interface MultiFileImageLineProps extends EntityListBaseProps {
   fileType?: FileTypeSymbol;
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
-  helpText?: React.ReactChild;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
   getFile?: (ectx: EmbeddedEntity) => ModifiableEntity & IFile | Lite<IFile & Entity>;
