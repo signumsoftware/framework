@@ -92,8 +92,8 @@ namespace Signum.Entities.Workflow
                 if (ViewName.HasText())
                 {
                     var dv = DynamicViewEntity.TryGetDynamicView(Lane.Pool.Workflow.MainEntityType.ToType(), ViewName);
-                    if(dv != null)
-                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                    if (dv != null)
+                        return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
                 }
             }
 
