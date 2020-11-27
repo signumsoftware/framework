@@ -66,6 +66,9 @@ export const extensionToIcon: { [ext: string]: IconName } = {
   ["png"]: "file-image",
   ["bmp"]: "file-image",
   ["tiff"]: "file-image",
+  ["svg"]: "file-image",
+  ["psd"]: "file-image",
+  ["ai"]: "file-image",
 
   ["doc"]: "file-word",
   ["docx"]: "file-word",
@@ -99,6 +102,7 @@ export const extensionToIcon: { [ext: string]: IconName } = {
   ["7z"]: "file-archive",
 
   ["txt"]: "file-alt",
+  ["rtf"]: "file-alt",
   ["info"]: "file-alt",
   ["log"]: "file-alt",
 
