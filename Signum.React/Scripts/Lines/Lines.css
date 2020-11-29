@@ -329,21 +329,16 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-xs .rw-input {
-    padding: 0px 3px;
-    height: 22px;
-    font-size: 0.875rem;
+.rw-widget-xs .rw-widget-input {
+    min-height: 24px;
 }
 
-.rw-widget-xs .rw-widget > .rw-widget-picker {
-    height: 24px;
-    line-height: 10px;
-    margin-top: -2px;
-    border: #ccc 1px solid;
+.rw-widget-xs .rw-dropdown-list-input {
+    padding: 0 0.4em;
 }
 
-.rw-widget-xs .rw-select {
-    vertical-align: top;
+.rw-widget-xs .rw-widget-picker {
+    min-height: 24px;
 }
 
 .form-group.form-group-xs {
@@ -364,13 +359,13 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-sm .rw-input {
-    padding: 3px 6px;
-    height: 28px;
+.rw-widget-sm .rw-widget-input {
+    /*    padding: 3px 6px;*/
+    min-height: 28px;
 }
 
 .rw-widget-sm .rw-widget-picker {
-    height: 31px;
+    min-height: 28px;
 }
 
 .input-group > .form-control-plaintext {

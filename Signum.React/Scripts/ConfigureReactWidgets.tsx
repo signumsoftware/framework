@@ -1,8 +1,39 @@
-import { DateTime } from 'luxon';
-
+import * as React from 'react';
+import { DateTime, Settings } from 'luxon';
 import * as ReactWidgets from 'react-widgets';
+import { UserProvidedMessages } from 'react-widgets/lib/messages';
+import { ReactWidgetsMessage } from './Signum.Entities';
+import { NumberLocalizer } from 'react-widgets/lib/IntlLocalizer';
 
-export function configure(maxTwoDigitYear?: number) {
+export function getMessages(): UserProvidedMessages{
+  return ({
+    moveToday: ReactWidgetsMessage.MoveToday.niceToString(),
+    moveBack: ReactWidgetsMessage.MoveBack.niceToString(),
+    moveForward: ReactWidgetsMessage.MoveForward.niceToString(),
+    dateButton: ReactWidgetsMessage.DateButton.niceToString(),
+    timeButton: ReactWidgetsMessage.TimeButton.niceToString(),
+    openCombobox: ReactWidgetsMessage.OpenCombobox.niceToString(),
+    openDropdown: ReactWidgetsMessage.OpenDropdown.niceToString(),
+    placeholder: ReactWidgetsMessage.Placeholder.niceToString(),
+    emptyList: ReactWidgetsMessage.EmptyList.niceToString(),
+    emptyFilter: ReactWidgetsMessage.EmptyFilter.niceToString(),
+    createOption: (_value, searchTerm) =>
+      !searchTerm ? ReactWidgetsMessage.CreateOption.niceToString() :
+        ReactWidgetsMessage.CreateOption0.niceToString().formatHtml(<strong>"{searchTerm}"</strong>),
+    tagsLabel: ReactWidgetsMessage.TagsLabel.niceToString(),
+    removeLabel: ReactWidgetsMessage.RemoveLabel.niceToString(),
+    noneSelected: ReactWidgetsMessage.NoneSelected.niceToString(),
+    selectedItems: (labels) => ReactWidgetsMessage.SelectedItems0.niceToString(labels.join(", ")),
+    increment: ReactWidgetsMessage.IncrementValue.niceToString(),
+    decrement: ReactWidgetsMessage.DecrementValue.niceToString(),
+  });
+}
+
+export function getNumberLocalizer(): ReactWidgets.NumberLocalizer<any> {
+  return new NumberLocalizer();
+}
+
+export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLocalizer<string> {
 
   var maxTwoDigitYearDefault = maxTwoDigitYear ?? DateTime.local().year + 10;
 
@@ -14,29 +45,20 @@ export function configure(maxTwoDigitYear?: number) {
     return DateTime.fromJSDate(date).plus({ years: 100 }).minus({ millisecond: 1 }).toJSDate();
   }
 
-  const localizer = {
-    formats: {
-      date: 'D',
-      time: 't',
-      'default': 'FF',
-      header: 'MMMM yyyy',
-      footer: 'DDD',
-      weekday: 'EE',
-      dayOfMonth: 'dd',
-      month: 'MMM',
-      year: 'yyyy',
+  return {
+    date: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "D"),
+    time: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "t"),
+    datetime: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "FF"),
+    header: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMMM yyyy"),
+    weekday: (date, format) => DateTime.fromJSDate(date).toFormatFixed(format ?? "EE"),
+    dayOfMonth: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "dd"),
+    month: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMM"),
+    year: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "yyyy"),
+    decade: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? 'yyyy') + ' - ' + DateTime.fromJSDate(endOfDecade(date)).toFormat(format ?? 'yyyy'),
+    century: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? 'yyyy') + ' - ' + DateTime.fromJSDate(endOfCentury(date)).toFormat(format ?? 'yyyy'),
 
-      decade: function decade(date: Date, culture: string, localizer: any) {
-        return localizer.format(date, 'YYYY', culture) + ' - ' + localizer.format(endOfDecade(date), 'YYYY', culture);
-      },
-
-      century: function century(date: Date, culture: string, localizer: any) {
-        return localizer.format(date, 'YYYY', culture) + ' - ' + localizer.format(endOfCentury(date), 'YYYY', culture);
-      }
-    },
-
-    firstOfWeek: function firstOfWeek(culture: string) {
-      var day = fistDay[culture?.tryAfter("-") ?? "ES"];
+    firstOfWeek: function firstOfWeek(): number {
+      var day = fistDay[Settings.defaultLocale?.tryAfter("-") ?? "ES"];
 
       switch (day) {
         case "sun": return 0;
@@ -47,39 +69,33 @@ export function configure(maxTwoDigitYear?: number) {
       }
     },
 
-    parse: function parse(value: string, format: string, culture: string) {
+    parse: function parse(value: string, format?: string) {
+
+      debugger;
+
       if (value == undefined || value == "")
-        return undefined;
+        return null;
 
-      let t = DateTime.fromFormat(value, format ?? "F", { locale: culture })
+      let t = DateTime.fromFormat(value, format ?? "F")
       if (t.isValid)
         return t.toJSDate();
 
-      t = DateTime.fromFormat(value, "D", { locale: culture })
+      t = DateTime.fromFormat(value, "D")
       if (t.isValid)
         return t.toJSDate();
 
-      t = DateTime.fromFormat(value, "ddMMyy", { locale: culture })
+      t = DateTime.fromFormat(value, "ddMMyy")
       if (t.isValid) {
         if (value.length == 6) {
           var twoDigitYear = parseInt(value.substr(4, 2));
-          t = t.set({ year: t.year > maxTwoDigitYearDefault ? 1900 + twoDigitYear : 2000 + twoDigitYear });
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
         }
         return t.toJSDate();
       }
 
-      return undefined;
-    },
-
-    format: function format(value: Date, _format: string, culture: string) {
-      if (value == undefined)
-        return "";
-
-      return DateTime.fromJSDate(value, { locale: culture }).toFormatFixed(_format);
+      return null;
     }
   };
-  (ReactWidgets as any).setDateLocalizer(localizer);
-
 }
 
 //https://github.com/unicode-cldr/cldr-core/blob/master/supplemental/weekData.json#L61

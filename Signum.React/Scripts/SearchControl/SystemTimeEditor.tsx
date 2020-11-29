@@ -135,7 +135,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
 
     var systemTime = this.props.findOptions.systemTime!;
 
-    const handleDatePickerOnChange = (date?: Date, str?: string) => {
+    const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
       const m = date && DateTime.fromJSDate(date);
       systemTime[field] = m ? asUTC(m.toISO()) : undefined;
     };
@@ -147,7 +147,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
-          format={luxonFormat} time={true} />
+          valueEditFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }} />
       </div>
     );
   }
