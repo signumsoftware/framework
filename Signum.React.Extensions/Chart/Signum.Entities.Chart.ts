@@ -127,6 +127,7 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   chartScript: ChartScriptSymbol;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
+  invalidator: boolean;
 }
 
 export const ChartScriptSymbol = new Type<ChartScriptSymbol>("ChartScript");
@@ -176,6 +177,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   guid: string;
+  invalidator: boolean;
 }
 
 export module UserChartOperation {
