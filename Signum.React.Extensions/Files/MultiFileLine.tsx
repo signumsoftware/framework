@@ -142,7 +142,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
 });
 
 (MultiFileLine as any).defaultProps = {
-  download: "SaveAs",
+  download: "ViewOrSave",
   showFileIcon: true,
   dragAndDrop: true
 } as MultiFileLineProps;

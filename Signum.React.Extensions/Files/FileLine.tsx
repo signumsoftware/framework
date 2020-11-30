@@ -118,7 +118,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
 }), (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
-  download: "SaveAs",
+  download: "ViewOrSave",
   dragAndDrop: true,
   showFileIcon: true
 } as FileLineProps;
