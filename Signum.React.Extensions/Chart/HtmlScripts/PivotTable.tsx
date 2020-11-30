@@ -116,7 +116,7 @@ interface DimParameters {
 }
 
 
-export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, onReload }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null)
     return (
@@ -297,7 +297,9 @@ export default function renderPivotTable({ data, width, height, parameters, load
       e.preventDefault();
 
       if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
-        Navigator.navigate(p.gor[0].entity as Lite<Entity>).done();
+        Navigator.navigate(p.gor[0].entity as Lite<Entity>)
+          .then(() => onReload && onReload())
+          .done();
         return;
       }
 
@@ -355,6 +357,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       Finder.getPropsFromFilters(typeName, fop)
         .then(props => Constructor.construct(typeName, props))
         .then(e => e && Navigator.navigate(e))
+        .then(() => onReload && onReload())
         .done();
     }
 
@@ -371,7 +374,9 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     function handleLiteClick(e: React.MouseEvent) {
       e.preventDefault();
-      Navigator.navigate(lite as Lite<Entity>).done();
+      Navigator.navigate(lite as Lite<Entity>)
+        .then(() => onReload && onReload())
+        .done();
     }
 
     var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;
