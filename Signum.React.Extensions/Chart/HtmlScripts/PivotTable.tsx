@@ -92,6 +92,7 @@ function multiDictionary(rows: ChartRow[], columns: ChartColumn<unknown>[]): Row
 
 interface CellStyle {
   cssStyle: React.CSSProperties | undefined;
+  cssStyleDiv: React.CSSProperties | undefined;
   subTotal?: "no" | "yes";
   placeholder?: "no" | "empty" | "filled";
   background?: (key: any, number: number) => string | undefined;
@@ -110,7 +111,8 @@ interface DimParameters {
   scale: string,
   subTotal?: "no" | "yes"
   placeholder?: "no" | "empty" | "filled"
-  cssStyle: string,
+  cssStyle?: string,
+  cssStyleDiv?: string,
   maxTextLength?: number,
   createButton?: "No" | "Yes"
 }
@@ -135,6 +137,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       placeholder: parameters["Placeholder " + columnName] as "no" | "empty" | "filled",
       subTotal: parameters["SubTotal " + columnName] as "no" | "yes",
       cssStyle: parameters["CSS Style " + columnName],
+      cssStyleDiv: parameters["CSS Style (div) " + columnName],
       maxTextLength: parseInt(parameters["Max Text Length " + columnName]) || undefined,
     });
   }
@@ -198,6 +201,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     return ({
       cssStyle: parseCssStyle(params.cssStyle),
+      cssStyleDiv: parseCssStyle(params.cssStyleDiv),
       placeholder: params.placeholder,
       subTotal: params.subTotal,
       background: background,
@@ -366,12 +370,22 @@ export default function renderPivotTable({ data, width, height, parameters, load
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
 
     if (title == null) {
-      return (
-        <td style={cssStyle}>
-          {link}
-          {createLink}
-        </td>
-      );
+      if (style?.cssStyleDiv)
+        return (
+          <td style={cssStyle}>
+            <div style={style.cssStyleDiv}>
+              {link}
+              {createLink}
+            </div>
+          </td>
+        );
+      else
+        return (
+          <td style={cssStyle}>
+            {link}
+            {createLink}
+          </td>
+        );
     }
 
     function handleLiteClick(e: React.MouseEvent) {
@@ -387,13 +401,24 @@ export default function renderPivotTable({ data, width, height, parameters, load
       <a href="#" onClick={handleLiteClick} title={title}>{etcTitle}</a> :
       <span title={title}>{etcTitle}</span>
 
-    return (
-      <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
-        {titleElement}
-        {link && <span> ({link})</span>}
-        {createLink}
-      </th>
-    );
+    if (style?.cssStyleDiv)
+      return (
+        <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
+          <div style={style.cssStyleDiv}>
+            {titleElement}
+            {link && <span> ({link})</span>}
+            {createLink}
+          </div>
+        </th>
+      );
+    else
+      return (
+        <th style={cssStyle} colSpan={p.colSpan} rowSpan={p.rowSpan}>
+          {titleElement}
+          {link && <span> ({link})</span>}
+          {createLink}
+        </th>
+      );
   }
 
   function orderKeys(keys: unknown[], order: string, col: ChartColumn<unknown>, group: RowDictionary | undefined) {
