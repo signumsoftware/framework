@@ -12,6 +12,7 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
       <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
+      <ValueLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
     </div>
   );
 }

@@ -58,8 +58,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
-  function handleReload(e: React.MouseEvent<any>) {
-    e.preventDefault();
+  function handleReload(e?: React.MouseEvent<any>) {
+    e?.preventDefault();
     makeQuery();
   }
 
@@ -102,6 +102,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           data={result?.chartTable}
           loading={result === null}
           onReload={handleReload}
+          autoRefresh={p.part.autoRefresh}
           typeInfos={typeInfos}
           onCreateNew={handleOnCreateNew}
         />

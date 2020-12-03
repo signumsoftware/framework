@@ -58,7 +58,7 @@ export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> 
 
 export function toColorPalete(model: ChartPaletteModel): ColorPalette {
 
-  var ti = tryGetTypeInfo(model.type.cleanName);
+  var ti = tryGetTypeInfo(model.typeName);
 
   var byId = model.colors.filter(a => a.element.color != null)
     .toObject(a => a.element.related.id as string, a => a.element.color); 
@@ -75,13 +75,13 @@ export function toColorPalete(model: ChartPaletteModel): ColorPalette {
 export function setColorPalette(model: ChartPaletteModel) {
 
   if (model.colors.some(c => c.element.color != null)) {
-    colorPalette[model.type.cleanName] = toColorPalete(model);
-    if (!colorPalettesTypes.contains(model.type.cleanName))
-      colorPalettesTypes.push(model.type.cleanName);
+    colorPalette[model.typeName] = toColorPalete(model);
+    if (!colorPalettesTypes.contains(model.typeName))
+      colorPalettesTypes.push(model.typeName);
   } else {
-    delete colorPalette[model.type.cleanName];
-    if (colorPalettesTypes.contains(model.type.cleanName))
-      colorPalettesTypes.remove(model.type.cleanName);
+    delete colorPalette[model.typeName];
+    if (colorPalettesTypes.contains(model.typeName))
+      colorPalettesTypes.remove(model.typeName);
   }
 }
 
@@ -95,7 +95,7 @@ export module API {
   }
 
   export function saveColorPalette(model: ChartPaletteModel): Promise<void> {
-    return ajaxPost({ url: `~/api/chart/colorPalette/${model.type.cleanName}/save`, }, model);
+    return ajaxPost({ url: `~/api/chart/colorPalette/${model.typeName}/save`, }, model);
   }
 
   export function deleteColorPalette(typeName: string): Promise<void> {
