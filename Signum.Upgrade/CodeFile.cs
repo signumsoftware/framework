@@ -42,11 +42,15 @@ namespace Signum.Upgrade
             set { _content = value; }
         }
 
+        Encoding? encoding;
+
         private void ReadIfNecessary()
         {
             if(_content == null)
             {
-                _originalContent = _content = File.ReadAllText(Path.Combine(Uctx.RootFolder, FilePath), GetEncoding(FilePath));
+                var bytes = File.ReadAllBytes(Path.Combine(Uctx.RootFolder, FilePath));
+                encoding = GetEncoding(FilePath, bytes);
+                _originalContent = _content = encoding.GetString(bytes[encoding.Preamble.Length..]);
             }
         }
 
@@ -59,16 +63,31 @@ namespace Signum.Upgrade
                 return;
 
             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Modified " + FilePath);
-            File.WriteAllText(Path.Combine(this.Uctx.RootFolder, FilePath), _content, GetEncoding(FilePath));
+            File.WriteAllText(Path.Combine(this.Uctx.RootFolder, FilePath), _content, encoding!);
         }
 
-        internal static Encoding GetEncoding(string filePath)
+        internal static Encoding GetEncoding(string filePath, byte[]? bytes)
         {
-            if (Path.GetFileName(filePath) == "packages.json")
-                return new UTF8Encoding(false);
+            if (bytes != null)
+                return DetectUTFBOM(bytes);
 
-            return Encoding.UTF8;
+            switch (Path.GetExtension(filePath))
+            {
+                case ".csproj":
+                case ".cs": return Encoding.UTF8;
+                default: return UTF8NoBOM;
+            }
         }
+
+        public static Encoding DetectUTFBOM(byte[] bytes)
+        {
+            if (Encoding.UTF8.Preamble.SequenceEqual(bytes[0..Encoding.UTF8.Preamble.Length]))
+                return Encoding.UTF8;
+
+            return UTF8NoBOM;
+        }
+
+        static readonly Encoding UTF8NoBOM = new UTF8Encoding(false);
 
         public void Replace(string searchFor, string replaceBy)
         {
