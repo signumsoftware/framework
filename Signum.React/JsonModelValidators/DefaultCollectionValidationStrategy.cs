@@ -61,13 +61,13 @@ namespace Signum.React.JsonModelValidators
             object model)
         {
             var enumerator = GetEnumeratorForElementType(metadata, model);
-            return new Enumerator(metadata.ElementMetadata, key, enumerator);
+            return new Enumerator(metadata.ElementMetadata!, key, enumerator);
         }
 
         public IEnumerator GetEnumeratorForElementType(ModelMetadata metadata, object model)
         {
             Func<object, IEnumerator> getEnumerator = _genericGetEnumeratorCache.GetOrAdd(
-                key: metadata.ElementType,
+                key: metadata.ElementType!,
                 valueFactory: (type) =>
                 {
                     var getEnumeratorMethod = _getEnumerator.MakeGenericMethod(type);

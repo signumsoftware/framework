@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
@@ -21,7 +22,8 @@ namespace Signum.Engine.Linq
             return new Replacer(searchFor, replaceWith).Visit(expression);
         }
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             if (exp != null && (exp == this.searchFor || exp.Equals(this.searchFor)))
             {

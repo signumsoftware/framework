@@ -36,8 +36,8 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactN
 export interface EmbeddedWidget {
   embeddedWidget: React.ReactElement<any>;
   position: EmbeddedWidgetPosition;
-  title?: string;
-  eventKey?: string | number;
+  title: string;
+  eventKey: string;
 }
 
 export type EmbeddedWidgetPosition = "Top" | "Bottom" | "Tab";

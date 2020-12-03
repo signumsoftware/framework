@@ -388,7 +388,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public TableNameAttribute(string fullName)
         {
             var parts = fullName.Split('.');
-            this.Name = parts.ElementAtOrDefault(parts.Length - 1).Trim('[', ']');
+            this.Name = parts.ElementAt(parts.Length - 1).Trim('[', ']');
             this.SchemaName = parts.ElementAtOrDefault(parts.Length - 2)?.Trim('[', ']');
             this.DatabaseName = parts.ElementAtOrDefault(parts.Length - 3)?.Trim('[', ']');
             this.ServerName = parts.ElementAtOrDefault(parts.Length - 4)?.Trim('[', ']');

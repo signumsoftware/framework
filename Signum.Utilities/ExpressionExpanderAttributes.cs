@@ -11,7 +11,7 @@ namespace Signum.Utilities
     /// </summary>
     public interface IMethodExpander
     {
-        Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi);
+        Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi);
     }
 
 
@@ -126,7 +126,7 @@ namespace Signum.Utilities
             if (body is UnaryExpression u && u.NodeType == ExpressionType.Convert)
                 body = u.Operand;
 
-            var member = body is MemberExpression m ? m.Expression.Type.GetProperty(((PropertyInfo)m.Member).Name) ?? m.Member:
+            var member = body is MemberExpression m ? m.Expression!.Type.GetProperty(((PropertyInfo)m.Member).Name) ?? m.Member:
                 body is MethodCallExpression mc ? mc.Object?.Type.GetMethod(mc.Method.Name, mc.Method.GetParameters().Select(p=> p.ParameterType).ToArray()) ?? mc.Method :
                 throw new InvalidOperationException($"Unexpected expression of type {body.NodeType}");
 

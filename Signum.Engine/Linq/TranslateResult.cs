@@ -330,7 +330,7 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal T UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)
+        internal T? UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)
         {
             switch (uniqueFunction)
             {

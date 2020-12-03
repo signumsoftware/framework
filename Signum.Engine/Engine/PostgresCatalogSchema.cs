@@ -40,7 +40,7 @@ namespace Signum.Engine.Engine
                          {
                              Name = new ObjectName(new SchemaName(db, s.nspname, isPostgres), t.relname, isPostgres),
 
-                             TemporalType = t.Triggers().Any(t => t.Proc().proname == "versioning") ? Signum.Engine.SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
+                             TemporalType = t.Triggers().Any(t => t.Proc()!.proname == "versioning") ? Signum.Engine.SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
 
                              //Period = !con.SupportsTemporalTables ? null :
 
@@ -54,7 +54,7 @@ namespace Signum.Engine.Engine
                              // }).SingleOrDefaultEx(),
 
                              TemporalTableName = t.Triggers()
-                                 .Where(t => t.Proc().proname == "versioning")
+                                 .Where(t => t.Proc()!.proname == "versioning")
                                  .Select(t => ParseVersionFunctionParam(t.tgargs))
                                  .SingleOrDefaultEx(),
 
@@ -66,7 +66,7 @@ namespace Signum.Engine.Engine
 
                              PrimaryKeyName = (from c in t.Constraints()
                                                where c.contype == ConstraintType.PrimaryKey
-                                               select c.conname == null ? null : new ObjectName(new SchemaName(db, c.Namespace().nspname, isPostgres), c.conname, isPostgres))
+                                               select c.conname == null ? null : new ObjectName(new SchemaName(db, c.Namespace()!.nspname, isPostgres), c.conname, isPostgres))
                                                .SingleOrDefaultEx(),
 
                              Columns = (from c in t.Attributes()
@@ -74,7 +74,7 @@ namespace Signum.Engine.Engine
                                         select new DiffColumn
                                         {
                                             Name = c.attname,
-                                            DbType = new AbstractDbType(ToNpgsqlDbType(c.Type().typname)),
+                                            DbType = new AbstractDbType(ToNpgsqlDbType(c.Type()!.typname)),
                                             UserTypeName = null,
                                             Nullable = !c.attnotnull,
                                             Collation = null,
@@ -94,9 +94,9 @@ namespace Signum.Engine.Engine
                                                  where fk.contype == ConstraintType.ForeignKey
                                                  select new DiffForeignKey
                                                  {
-                                                     Name = new ObjectName(new SchemaName(db, fk.Namespace().nspname, isPostgres), fk.conname, isPostgres),
+                                                     Name = new ObjectName(new SchemaName(db, fk.Namespace()!.nspname, isPostgres), fk.conname, isPostgres),
                                                      IsDisabled = false,
-                                                     TargetTable = new ObjectName(new SchemaName(db, fk.TargetTable().Namespace().nspname, isPostgres), fk.TargetTable().relname, isPostgres),
+                                                     TargetTable = new ObjectName(new SchemaName(db, fk.TargetTable().Namespace()!.nspname, isPostgres), fk.TargetTable().relname, isPostgres),
                                                      Columns = PostgresFunctions.generate_subscripts(fk.conkey, 1).Select(i => new DiffForeignKeyColumn
                                                      {
                                                          Parent = t.Attributes().Single(c => c.attnum == fk.conkey[i]).attname,

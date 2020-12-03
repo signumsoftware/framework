@@ -45,8 +45,8 @@ namespace Signum.Engine.Extensions.Basics
                         var result = EnumerableExtensions.JoinRelaxed(
                           current,
                           getSemiSymbols(),
-                          c => c.Key,
-                          s => s.Key,
+                          c => c.Key!,
+                          s => s.Key!,
                           (c, s) => { s.SetIdAndProps(c); return s; },
                           "caching " + typeof(T).Name);
 

@@ -36,8 +36,8 @@ namespace Signum.Engine.Linq
             SourceExpression from = this.VisitSource(select.From!);
             this.currentFrom = from;
 
-            Expression top = this.Visit(select.Top);
-            Expression where = this.Visit(select.Where);
+            Expression? top = this.Visit(select.Top);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);

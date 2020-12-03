@@ -696,12 +696,12 @@ namespace Signum.Test.LinqProvider
                         where a.Songs.Count > 1
                         select new
                         {
-                            FirstName = a.Songs.OrderBy(s => s.Name).FirstOrDefault().Name,
-                            FirstDuration = a.Songs.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            FirstName = a.Songs.OrderBy(s => s.Name).FirstOrDefault()!.Name,
+                            FirstDuration = a.Songs.OrderBy(s => s.Name).FirstOrDefault()!.Duration,
                             Last = a.Songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last.Name));
         }
 
         [Fact]
@@ -712,12 +712,12 @@ namespace Signum.Test.LinqProvider
                         where g.Count() > 1
                         select new
                         {
-                            FirstName = g.OrderBy(s => s.Name).FirstOrDefault().Name,
-                            FirstDuration = g.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            FirstName = g.OrderBy(s => s.Name).FirstOrDefault()!.Name,
+                            FirstDuration = g.OrderBy(s => s.Name).FirstOrDefault()!.Duration,
                             Last = g.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last!.Name));
 
 
         }
@@ -731,12 +731,12 @@ namespace Signum.Test.LinqProvider
                         where songs.Count > 1
                         select new
                         {
-                            FirstName = songs.OrderBy(s => s.Name).FirstOrDefault().Name,
-                            FirstDuration = songs.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            FirstName = songs.OrderBy(s => s.Name).FirstOrDefault()!.Name,
+                            FirstDuration = songs.OrderBy(s => s.Name).FirstOrDefault()!.Duration,
                             Last = songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.True(list.All(a => a.FirstName != a.Last!/*CSBUG*/.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last!.Name));
 
 
         }

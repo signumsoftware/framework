@@ -266,7 +266,7 @@ namespace Signum.Engine.Linq
 
             this.PrependOrderings(leftOrders);
 
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
 
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {

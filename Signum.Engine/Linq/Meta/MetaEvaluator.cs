@@ -5,6 +5,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Linq
 {
@@ -13,7 +14,8 @@ namespace Signum.Engine.Linq
     /// </summary>
     public class MetaEvaluator : ExpressionVisitor
     {
-        public static Expression? Clean(Expression expression)
+        [return: NotNullIfNotNull("expression")]
+        public static Expression? Clean(Expression? expression)
         {
             Expression? expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
             Expression? simplified = OverloadingSimplifier.Simplify(expand);
@@ -38,7 +40,8 @@ namespace Signum.Engine.Linq
             return new MetaEvaluator(candidates: ExpressionNominator.Nominate(exp)).Visit(exp);
         }
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             if (exp == null)
                 return null!;

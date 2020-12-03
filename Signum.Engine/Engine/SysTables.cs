@@ -289,7 +289,7 @@ namespace Signum.Engine.SchemaInfoTables
             As.Expression(() => Database.View<SysTables>().Single(a => a.object_id == this.object_id));
 
         [AutoExpressionField]
-        public SysPartitions Partition() => 
+        public SysPartitions? Partition() => 
             As.Expression(() => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == this.object_id && au.index_id == this.index_id));
     }
 

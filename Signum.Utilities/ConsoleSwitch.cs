@@ -58,7 +58,7 @@ namespace Signum.Utilities
             do
             {
             
-                var input = Console.ReadLine().Trim();
+                var input = Console.ReadLine()?.Trim();
                 if (input == "+")
                 {
                     if (noOfOptsPrinted >= dictionary.Count)
@@ -141,7 +141,7 @@ namespace Signum.Utilities
                 PrintOptions(0, this.dictionary.Count);
 
                 Console.WriteLine(endMessage);
-                string line = Console.ReadLine();
+                string? line = Console.ReadLine();
 
                 if (string.IsNullOrEmpty(line))
                 {

@@ -368,6 +368,17 @@ namespace Signum.Entities
         }
     }
 
+    public class AzureStorageCollectionNameValidationAttribute : RegexValidatorAttribute
+    {
+        static Regex CollectionNameRegex = new Regex(@"^[a-z\-]+");
+
+        public AzureStorageCollectionNameValidationAttribute() : base(CollectionNameRegex)
+        {
+        }
+
+        public override string FormatName => "Azure Storage Collection Name";
+    }
+
     public class FileNameValidatorAttribute : ValidatorAttribute
     {
         public static char[] InvalidCharts = Path.GetInvalidPathChars();

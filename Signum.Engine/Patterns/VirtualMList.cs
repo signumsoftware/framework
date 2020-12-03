@@ -100,7 +100,7 @@ namespace Signum.Engine
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>>? setter = null;
-            bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)
+            bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)!
                 .OfType<PreserveOrderAttribute>()
                 .Any();
 
@@ -354,8 +354,8 @@ namespace Signum.Engine
                 return acum;
 
             return SafeAccess(param,
-                member: (MemberExpression)member.Expression,
-                acum: Expression.Condition(Expression.Equal(member.Expression, Expression.Constant(null, member.Expression.Type)), Expression.Constant(null, acum.Type), acum)
+                member: (MemberExpression)member.Expression!,
+                acum: Expression.Condition(Expression.Equal(member.Expression!, Expression.Constant(null, member.Expression!.Type)), Expression.Constant(null, acum.Type), acum)
                 );
         }
 

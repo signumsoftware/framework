@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
@@ -20,6 +18,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using static Signum.React.ApiControllers.OperationController;
 
 namespace Signum.React.ApiControllers
@@ -32,7 +32,9 @@ namespace Signum.React.ApiControllers
         {
             var entityType = TypeLogic.GetType(request.Type);
 
-            var entity = OperationLogic.ServiceConstruct(entityType, request.GetOperationSymbol(entityType), request.Args);
+            var op = request.GetOperationSymbol(entityType);
+
+            var entity = OperationLogic.ServiceConstruct(entityType, op, request.ParseArgs(op));
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -40,7 +42,9 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/constructFromEntity"), ProfilerActionSplitter]
         public EntityPackTS? ConstructFromEntity([Required, FromBody] EntityOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
+            var op = request.GetOperationSymbol(request.entity.GetType());
+
+            var entity = OperationLogic.ServiceConstructFrom(request.entity, op, request.ParseArgs(op));
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -48,7 +52,8 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/constructFromLite"), ProfilerActionSplitter]
         public EntityPackTS? ConstructFromLite([Required, FromBody] LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
+            var op = request.GetOperationSymbol(request.lite.EntityType);
+            var entity = OperationLogic.ServiceConstructFromLite(request.lite, op, request.ParseArgs(op));
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
 
@@ -56,17 +61,20 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/executeEntity"), ProfilerActionSplitter]
         public ActionResult<EntityPackTS> ExecuteEntity([Required, FromBody] EntityOperationRequest request)
         {
+            var op = request.GetOperationSymbol(request.entity.GetType());
             Entity entity;
             try
             {
-                entity = OperationLogic.ServiceExecute(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
+
+                entity = OperationLogic.ServiceExecute(request.entity, op, request.ParseArgs(op));
             }
             catch (IntegrityCheckException ex)
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRootVirtual(request.entity), ex);
                 this.TryValidateModel(request, "request");
                 if (this.ModelState.IsValid)
-                    throw ex;
+                    throw;
+
                 return BadRequest(this.ModelState);
             }
 
@@ -77,7 +85,8 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/executeLite"), ProfilerActionSplitter]
         public EntityPackTS ExecuteLite([Required, FromBody] LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceExecuteLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
+            var op = request.GetOperationSymbol(request.lite.EntityType);
+            var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op));
 
             return SignumServer.GetEntityPack(entity);
         }
@@ -85,53 +94,105 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/operation/deleteEntity"), ProfilerActionSplitter]
         public void DeleteEntity([Required, FromBody] EntityOperationRequest request)
         {
-            OperationLogic.ServiceDelete(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.Args);
+            var op = request.GetOperationSymbol(request.entity.GetType());
+            OperationLogic.ServiceDelete(request.entity, op, request.ParseArgs(op));
         }
 
         [HttpPost("api/operation/deleteLite"), ProfilerActionSplitter]
         public void DeleteLite([Required, FromBody] LiteOperationRequest request)
         {
-            OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.Args);
+            var op = request.GetOperationSymbol(request.lite.EntityType);
+            OperationLogic.ServiceDelete(request.lite, op, request.ParseArgs(op));
         }
 
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        [JsonConverter(typeof(ArgsJsonConverter))]
         public class ConstructOperationRequest : BaseOperationRequest
         {
             public string Type { get; set; }
         }
 
-
-        [JsonConverter(typeof(ArgsJsonConverter))]
         public class EntityOperationRequest : BaseOperationRequest
         {
             public Entity entity { get; set; }
         }
 
-
-        [JsonConverter(typeof(ArgsJsonConverter))]
         public class LiteOperationRequest : BaseOperationRequest
         {
             public Lite<Entity> lite { get; set; }
         }
 
-        [JsonConverter(typeof(ArgsJsonConverter))]
         public class BaseOperationRequest
         {
             public string OperationKey { get; set; }
 
-            public object?[]? Args { get; set; }
+            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
 
-            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType, this.Args);
-
-            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object?[]? args = null)
+            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
                 OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
 
                 return symbol;
+            }
+
+            public List<JsonElement>? Args { get; set; }
+
+            public object?[]? ParseArgs(OperationSymbol op)
+            {
+                return Args == null ? null : Args.Select(a => ConvertObject(a, op)).ToArray();
+            }
+
+
+            public static Dictionary<OperationSymbol, Func<JsonElement, object?>> CustomOperationArgsConverters = new Dictionary<OperationSymbol, Func<JsonElement, object?>>();
+
+            public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JsonElement, object?> converter)
+            {
+                Func<JsonElement, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol); /*CSBUG*/
+
+                CustomOperationArgsConverters[operationSymbol] = a + converter;
+            }
+
+            private static object? ConvertObject(JsonElement token, OperationSymbol operationSymbol)
+            {
+                switch (token.ValueKind)
+                {
+                    case JsonValueKind.Undefined: return null;
+                    case JsonValueKind.String:
+                        if (token.TryGetDateTime(out var dt))
+                            return dt;
+
+                        if (token.TryGetDateTimeOffset(out var dto))
+                            return dto;
+
+                        return token.GetString();
+                    case JsonValueKind.Number: return token.GetDecimal();
+                    case JsonValueKind.True: return true;
+                    case JsonValueKind.False: return false;
+                    case JsonValueKind.Null: return null;
+                    case JsonValueKind.Object:
+                        {
+                            if (token.TryGetProperty("EntityType", out var entityType))
+                                return token.ToObject<Lite<Entity>>(SignumServer.JsonSerializerOptions);
+
+                            if (token.TryGetProperty("Type", out var type))
+                                return token.ToObject<ModifiableEntity>(SignumServer.JsonSerializerOptions);
+
+                            var conv = CustomOperationArgsConverters.TryGetC(operationSymbol);
+
+                            if (conv == null)
+                                throw new InvalidOperationException("Impossible to deserialize request before executing {0}.\r\nConsider registering your own converter in 'CustomOperationArgsConverters'.\r\nReceived JSON:\r\n\r\n{1}".FormatWith(operationSymbol, token));
+
+                            return conv.GetInvocationListTyped().Select(f => conv(token)).NotNull().FirstOrDefault();
+                        }
+                    case JsonValueKind.Array:
+                        var result = token.EnumerateArray().Select(t => ConvertObject(t, operationSymbol)).ToList();
+                        return result;
+                    default: 
+                        throw new UnexpectedValueException(token.ValueKind);
+                }
+
             }
 
             public override string ToString() => OperationKey;
@@ -143,7 +204,8 @@ namespace Signum.React.ApiControllers
         {
             var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type);
 
-            var entity = OperationLogic.ServiceConstructFromMany(request.Lites, type, request.GetOperationSymbol(type), request.Args);
+            var op = request.GetOperationSymbol(type);
+            var entity = OperationLogic.ServiceConstructFromMany(request.Lites, type, op, request.ParseArgs(op));
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -159,7 +221,9 @@ namespace Signum.React.ApiControllers
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                    OperationLogic.ServiceConstructFrom(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
+                    var op = request.GetOperationSymbol(entity.GetType());
+
+                    OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
                 });
 
                 return new MultiOperationResponse(errors);
@@ -167,7 +231,11 @@ namespace Signum.React.ApiControllers
             else
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
-                            OperationLogic.ServiceConstructFromLite(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
+                {
+                    var op = request.GetOperationSymbol(lite.EntityType);
+
+                    OperationLogic.ServiceConstructFromLite(lite, op, request.ParseArgs(op));
+                });
 
                 return new MultiOperationResponse(errors);
             }
@@ -184,8 +252,8 @@ namespace Signum.React.ApiControllers
                     var entity = lite.RetrieveAndForget();
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-
-                    OperationLogic.ServiceExecute(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
+                    var op = request.GetOperationSymbol(entity.GetType());
+                    OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
                 });
 
                 return new MultiOperationResponse(errors);
@@ -193,7 +261,10 @@ namespace Signum.React.ApiControllers
             else
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
-                            OperationLogic.ServiceExecuteLite(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
+                {
+                    var op = request.GetOperationSymbol(lite.EntityType);
+                    OperationLogic.ServiceExecuteLite(lite, op, request.ParseArgs(op));
+                });
 
                 return new MultiOperationResponse(errors);
             }
@@ -211,7 +282,9 @@ namespace Signum.React.ApiControllers
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                    OperationLogic.ServiceDelete(entity, request.GetOperationSymbol(entity.GetType()), request.Args);
+                    var op = request.GetOperationSymbol(entity.GetType());
+
+                    OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
                 });
 
                 return new MultiOperationResponse(errors);
@@ -219,7 +292,10 @@ namespace Signum.React.ApiControllers
             else
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
-                            OperationLogic.ServiceDelete(lite, request.GetOperationSymbol(lite.EntityType), request.Args));
+                {
+                    var op = request.GetOperationSymbol(lite.EntityType);
+                    OperationLogic.ServiceDelete(lite, op, request.ParseArgs(op));
+                });
 
                 return new MultiOperationResponse(errors);
             }
@@ -247,7 +323,6 @@ namespace Signum.React.ApiControllers
 
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        [JsonConverter(typeof(ArgsJsonConverter))]
         public class MultiOperationRequest : BaseOperationRequest
         {
             public string Type { get; set; }
@@ -324,13 +399,13 @@ namespace Signum.React.ApiControllers
     {
         public static void SetSetters(ModifiableEntity entity, List<PropertySetter> setters, PropertyRoute route)
         {
-            JsonSerializer serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
+            var options = SignumServer.JsonSerializerOptions;
 
             foreach (var setter in setters)
             {
                 var pr = route.Add(setter.Property);
 
-                EntityJsonConverter.AssertCanWrite(pr, entity);
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
 
                 if (pr.Type.IsMList())
                 {
@@ -347,7 +422,7 @@ namespace Signum.React.ApiControllers
                             break;
                         case PropertyOperation.ChangeElements:
                             {
-                                var predicate = GetPredicate(setter.Predicate!, elementPr, serializer);
+                                var predicate = GetPredicate(setter.Predicate!, elementPr, options);
                                 var toChange = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
                                 foreach (var item in toChange)
                                 {
@@ -357,7 +432,7 @@ namespace Signum.React.ApiControllers
                             break;
                         case PropertyOperation.RemoveElements:
                             {
-                                var predicate = GetPredicate(setter.Predicate!, elementPr, serializer);
+                                var predicate = GetPredicate(setter.Predicate!, elementPr, options);
                                 var toRemove = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
                                 foreach (var item in toRemove)
                                 {
@@ -369,7 +444,7 @@ namespace Signum.React.ApiControllers
                             break;
                     }
                 }
-                else if (setter.Operation == PropertyOperation.CreateNewEntiy)
+                else if (setter.Operation == PropertyOperation.CreateNewEntity)
                 {
                     var subPr = pr.Type.IsEmbeddedEntity() ? pr : PropertyRoute.Root(TypeLogic.GetType(setter.EntityType!));
                     var item = (ModifiableEntity)Activator.CreateInstance(subPr.Type)!;
@@ -387,7 +462,7 @@ namespace Signum.React.ApiControllers
                 }
                 else
                 {
-                    var value = ConvertObject(setter.Value, pr, serializer);
+                    var value = ConvertObject(setter.Value, pr, options);
                     SetProperty(entity, pr, route, value);
                 }
             }
@@ -410,7 +485,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        static Expression<Func<object, bool>> GetPredicate(List<PropertySetter> predicate, PropertyRoute mainRoute, JsonSerializer serializer)
+        static Expression<Func<object, bool>> GetPredicate(List<PropertySetter> predicate, PropertyRoute mainRoute, JsonSerializerOptions options)
         {
             var param = Expression.Parameter(typeof(object), "p");
 
@@ -421,7 +496,7 @@ namespace Signum.React.ApiControllers
                 var lambda = pr.GetLambdaExpression<object, object>(true, mainRoute.GetMListItemsRoute());
 
                 var left = Expression.Invoke(lambda, param);
-                object? objClean = ConvertObject(p.Value, pr, serializer);
+                object? objClean = ConvertObject(p.Value, pr, options);
 
                 return (Expression)QueryUtils.GetCompareExpression(p.FilterOperation!.Value, left, Expression.Constant(objClean), inMemory: true);
 
@@ -430,11 +505,10 @@ namespace Signum.React.ApiControllers
             return Expression.Lambda<Func<object, bool>>(body, param);
         }
 
-        private static object? ConvertObject(object? value, PropertyRoute pr, JsonSerializer serializer)
+        private static object? ConvertObject(object? value, PropertyRoute pr, JsonSerializerOptions options)
         {
             var objRaw = value == null ? null :
-                            value is JValue jval ? jval.Value :
-                            value is JObject jobj ? serializer.Deserialize(new JTokenReader(jobj), pr.Type) :
+                            value is JsonElement elem ? elem.ToObject(pr.Type, options) :
                             value;
 
             var objClean = ReflectionTools.ChangeType(objRaw, pr.Type);

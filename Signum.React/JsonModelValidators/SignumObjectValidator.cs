@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Signum.Entities;
+using Signum.React.Facades;
 using Signum.React.Json;
 using Signum.Utilities;
 using System;
@@ -207,7 +208,7 @@ namespace Signum.React.JsonModelValidators
                 var entity = mod as Entity;
                 using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
                 {
-                    foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
+                    foreach (var kvp in SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(mod.GetType()))
                     {
                         if (kvp.Value.AvoidValidate)
                             continue;
