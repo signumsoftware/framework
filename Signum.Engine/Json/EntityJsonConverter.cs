@@ -582,6 +582,9 @@ namespace Signum.Engine.Json
                     if (!identityInfo.Modified!.Value)
                         ((Entity)result).SetCleanModified(false);
 
+                    if (identityInfo.IsNew != true)
+                        ((Entity)result).SetIsNew(false);
+
                     if (identityInfo.Ticks != null)
                         result.Ticks = identityInfo.Ticks.Value;
 
