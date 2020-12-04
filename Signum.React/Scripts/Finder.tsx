@@ -1082,7 +1082,6 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
 
         fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needToStr));
       }
-
       else {
         if (Array.isArray(fo.value))
           throw new Error("Unespected array for operation " + fo.operation);
@@ -1106,7 +1105,15 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
     case "Decimal": return nanToNull(parseFloat(val));
-    case "DateTime": return val == null ? null : val;
+    case "DateTime": {
+
+      if (val == null)
+        return null;
+
+      var dt = DateTime.fromISO(val);
+
+      return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
+    }
     case "Lite":
       {
         const lite = convertToLite(val);
