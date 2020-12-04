@@ -592,40 +592,7 @@ namespace Signum.Utilities
             return str;
         }
 
-        /// <summary>
-        /// removes all characters except allowedChars
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="allowedChars"></param>
-        /// <returns></returns>
-        public static string GetOnly(this string str, IEnumerable<char> allowedChars)
-        {
-            string onlyAllowedString = "";
-
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            foreach (char a in str)
-            {
-                if (allowedChars.Contains(a))
-                    onlyAllowedString += a;
-            }
-
-            return onlyAllowedString;
-
-        }
-        /// <summary>
-        /// removes all chars except numbers 0-9
-        /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        public static string GetOnlyNumbers(this string str)
-        {
-            return str.GetOnly(new char[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' });
-        }
-        
-
-    public static bool ContinuesWith(this string str, string subString, int pos)
+        public static bool ContinuesWith(this string str, string subString, int pos)
         {
             return str.IndexOf(subString, pos) == pos;
         }
