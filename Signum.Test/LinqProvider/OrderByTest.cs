@@ -67,14 +67,14 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void OrderByLastOrDefault()
         {
-            var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault();
+            var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault()!;
             Assert.Contains("Michael", michael.Name);
         }
 
         [Fact]
         public void OrderByLastOrDefaultPredicate()
         {
-            var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault(a => a.Name.Length > 1);
+            var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault(a => a.Name.Length > 1)!;
             Assert.Contains("Michael", michael.Name);
         }
 

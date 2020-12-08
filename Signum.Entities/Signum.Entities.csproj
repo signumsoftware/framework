@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
-    <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Platforms>x64;x86;AnyCPU</Platforms>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<Platforms>x64;x86;AnyCPU</Platforms>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Npgsql" Version="4.1.4" />
-    <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="2.0.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Npgsql" Version="4.1.5" />
+		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="5.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Update="Translations\*.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Translations\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>

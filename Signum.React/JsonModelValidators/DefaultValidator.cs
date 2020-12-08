@@ -124,7 +124,7 @@ namespace Signum.React.JsonModelValidators
         /// <returns><c>true</c> if the node is valid, otherwise <c>false</c>.</returns>
         protected virtual bool ValidateNode()
         {
-            var state = ModelState.GetValidationState(Key);
+            var state = ModelState.GetValidationState(Key!);
 
             // Rationale: we might see the same model state key used for two different objects.
             // We want to run validation unless it's already known that this key is invalid.
@@ -137,10 +137,10 @@ namespace Signum.React.JsonModelValidators
                 {
                     var context = new ModelValidationContext(
                         Context,
-                        Metadata,
+                        Metadata!,
                         MetadataProvider,
-                        Container,
-                        Model);
+                        Container!,
+                        Model!);
 
                     var results = new List<ModelValidationResult>();
                     for (var i = 0; i < count; i++)
@@ -161,7 +161,7 @@ namespace Signum.React.JsonModelValidators
                 }
             }
 
-            state = ModelState.GetFieldValidationState(Key);
+            state = ModelState.GetFieldValidationState(Key!);
             if (state == ModelValidationState.Invalid)
             {
                 return false;
@@ -170,7 +170,7 @@ namespace Signum.React.JsonModelValidators
             {
                 // If the field has an entry in ModelState, then record it as valid. Don't create
                 // extra entries if they don't exist already.
-                var entry = ModelState[Key];
+                var entry = ModelState[Key!];
                 if (entry != null)
                 {
                     entry.ValidationState = ModelValidationState.Valid;
@@ -284,8 +284,8 @@ namespace Signum.React.JsonModelValidators
         protected virtual bool VisitChildren(IValidationStrategy strategy)
         {
             var isValid = true;
-            var enumerator = strategy.GetChildren(Metadata, Key, Model);
-            var parentEntry = new ValidationEntry(Metadata, Key, Model);
+            var enumerator = strategy.GetChildren(Metadata!, Key!, Model!);
+            var parentEntry = new ValidationEntry(Metadata!, Key!, Model!);
 
             while (enumerator.MoveNext())
             {

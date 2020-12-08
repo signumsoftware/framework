@@ -44,6 +44,7 @@ namespace Signum.Engine
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
+                    con.Open();
                     var sql =
     @"SELECT
     SERVERPROPERTY ('ProductVersion') as ProductVersion,
@@ -361,7 +362,7 @@ namespace Signum.Engine
 
             if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
             {
-                var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
+                var mins = command.Parameters!.Where(a => DateTime.MinValue.Equals(a.Value));
 
                 if (mins.Any())
                 {
@@ -519,7 +520,7 @@ namespace Signum.Engine
 
         public override int MaxNameLength => 128;
 
-        public override string ToString() => $"SqlConnector({Version})";
+        public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
     }
 
     public class SqlParameterBuilder : ParameterBuilder
@@ -560,17 +561,17 @@ namespace Signum.Engine
                             Expression.Constant(DBNull.Value, typeof(object)),
                             valueExpr);
 
-            NewExpression newExpr = Expression.New(typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(object) }), parameterName, valueExpr);
+            NewExpression newExpr = Expression.New(typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
 
             List<MemberBinding> mb = new List<MemberBinding>()
             {
-                Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable"), Expression.Constant(nullable)),
-                Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType"), Expression.Constant(dbType.SqlServer)),
+                Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable")!, Expression.Constant(nullable)),
+                Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType")!, Expression.Constant(dbType.SqlServer)),
             };
 
             if (udtTypeName != null)
-                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty("UdtTypeName"), Expression.Constant(udtTypeName)));
+                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty("UdtTypeName")!, Expression.Constant(udtTypeName)));
 
             return Expression.MemberInit(newExpr, mb);
         }

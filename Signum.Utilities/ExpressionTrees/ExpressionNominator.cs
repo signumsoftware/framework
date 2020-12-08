@@ -44,7 +44,7 @@ namespace Signum.Utilities.ExpressionTrees
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
 
-        public override Expression Visit(Expression expression)
+        public override Expression? Visit(Expression? expression)
         {
             if (expression != null)
             {
@@ -134,7 +134,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         class DistinctNullExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var a = arguments[0];
                 var b = arguments[1];

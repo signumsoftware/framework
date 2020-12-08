@@ -108,7 +108,7 @@ namespace Signum.Engine.Linq
 
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
                 return new JoinExpression(join.JoinType, left, right, condition);
@@ -204,8 +204,8 @@ namespace Signum.Engine.Linq
                 col.Visit(e);
 
             SourceExpression from = this.VisitSource(select.From!);
-            Expression top = this.Visit(select.Top);
-            Expression where = this.Visit(select.Where);
+            Expression? top = this.Visit(select.Top);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             if (orderBy.HasItems())
                 orderBy = RemoveDuplicates(orderBy);

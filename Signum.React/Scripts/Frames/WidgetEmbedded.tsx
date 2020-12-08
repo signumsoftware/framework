@@ -13,10 +13,10 @@ export interface WidgetEmbeddedProps {
   children?: React.ReactNode;
 }
 
-function toTab(e: EmbeddedWidget, key: number) {
+function toTab(e: EmbeddedWidget) {
 
   return (
-    <Tab eventKey={e.eventKey} key={"tab" + key} mountOnEnter={true} title={e.title}>
+    <Tab eventKey={e.eventKey} key={e.eventKey} mountOnEnter={true} title={e.title}>
       {e.embeddedWidget}
     </Tab>
   );
@@ -26,7 +26,7 @@ export function addAdditionalTabs(frame: EntityFrame | undefined) {
   if (frame === undefined || frame.tabs === undefined)
     return undefined;
 
-  return frame.tabs.map((e, i) => toTab(e, i)); 
+  return frame.tabs.map(e => toTab(e)); 
 }
 
 export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
@@ -47,7 +47,7 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
           <Tab eventKey="tabMain1" title={NormalWindowMessage.Main.niceToString()}>
             {p.children}
           </Tab>
-          {tab.map((e, i) => toTab(e, i))}
+          {tab.map((e, i) => toTab(e))}
         </Tabs>
         {bottom}
       </>);

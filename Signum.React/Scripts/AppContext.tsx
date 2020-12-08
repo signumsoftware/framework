@@ -63,6 +63,8 @@ export const clearSettingsActions: Array<() => void> = [
 
 export function clearAllSettings() {
   clearSettingsActions.forEach(a => a());
+  clearSettingsActions.clear();
+  clearSettingsActions.push(clearContextHeaders);
 }
 
 export let resetUI: () => void = () => { };

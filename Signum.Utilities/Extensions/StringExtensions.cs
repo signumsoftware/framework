@@ -386,7 +386,7 @@ namespace Signum.Utilities
             start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 throw NotFound(str, secondSeparator);
 
             return str.Substring(start, end - start);
@@ -404,7 +404,7 @@ namespace Signum.Utilities
             start = start + 1;
 
             int end = str.IndexOf(secondSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 throw NotFound(str, secondSeparator);
 
             return str.Substring(start, end - start);
@@ -422,7 +422,7 @@ namespace Signum.Utilities
             start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 return null;
 
             return str.Substring(start, end - start);
@@ -440,7 +440,7 @@ namespace Signum.Utilities
             start = start + 1;
 
             int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 return null;
 
             return str.Substring(start, end - start);
@@ -663,13 +663,16 @@ namespace Signum.Utilities
 
         public static string Indent(this string str, int numChars)
         {
-            return Indent(str, numChars, ' ');
+            return Indent(str, new string(' ', numChars));
         }
 
         public static string Indent(this string str, int numChars, char indentChar)
         {
-            string space = new string(indentChar, numChars);
+            return Indent(str, new string(indentChar, numChars));
+        }
 
+        public static string Indent(this string str, string space)
+        {
             StringBuilder sb = new StringBuilder();
 
             for (int pos = 0; pos < str.Length; )

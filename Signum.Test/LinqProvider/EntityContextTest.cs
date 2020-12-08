@@ -39,7 +39,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void EntityIdMListMember()
         {
-            var authors = Database.Query<AlbumEntity>().Count(a => EntityContext.EntityId(a.Songs.FirstOrDefault().Name) == a.Id);
+            var authors = Database.Query<AlbumEntity>().Count(a => EntityContext.EntityId(a.Songs.FirstOrDefault()!.Name) == a.Id);
         }
 
 
@@ -53,7 +53,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void RowIdMListMember()
         {
-            var authors = Database.Query<AlbumEntity>().Count(a => EntityContext.MListRowId(a.Songs.FirstOrDefault().Name) == a.Id);
+            var authors = Database.Query<AlbumEntity>().Count(a => EntityContext.MListRowId(a.Songs.FirstOrDefault()!.Name) == a.Id);
         }
 
     }

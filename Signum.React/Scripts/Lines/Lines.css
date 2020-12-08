@@ -21,7 +21,6 @@ input[type=checkbox].form-control {
 }
 
 .form-control.readonly, .form-control:disabled, .form-control[readonly] {
-    background-color: #ddd;
     overflow: hidden;
 }
 

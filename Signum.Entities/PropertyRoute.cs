@@ -677,14 +677,14 @@ namespace Signum.Entities
                         exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
                         break;
                     case PropertyRouteType.LiteEntity:
-                        exp = Expression.Property(exp, "Entity");
+                        exp = Expression.Property(exp!, "Entity");
                         break;
                     default:
                         throw new InvalidOperationException("Unexpected {0}".FormatWith(p.PropertyRouteType));
                 }
             }
 
-            var selector = Expression.Lambda<Func<T, R>>(exp, pe);
+            var selector = Expression.Lambda<Func<T, R>>(exp!, pe);
             return selector;
         }
 

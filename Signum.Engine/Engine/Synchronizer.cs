@@ -389,7 +389,7 @@ namespace Signum.Engine
                 //var key = replacementsKey + "." + oldValue;
                 //string? answer = cases!.ContainsKey(key) ? cases[key].NewValue:  Console.ReadLine();
 
-                string answer =  Console.ReadLine();
+                string answer =  Console.ReadLine()!;
 
                 if (answer == null)
                     answer = "n";

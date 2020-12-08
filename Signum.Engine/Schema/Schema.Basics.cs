@@ -163,12 +163,12 @@ namespace Signum.Engine.Maps
 
         public List<TableIndex>? MultiColumnIndexes { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Table(Type type)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             this.Type = type;
         }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public override string ToString()
         {
@@ -292,7 +292,7 @@ namespace Signum.Engine.Maps
             if (result.OfType<UniqueTableIndex>().Any())
             {
                 var s = Schema.Current.Settings;
-                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo)).OfType<AttachToUniqueIndexesAttribute>().Any())
+                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
                    .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
                    .ToList();
 
@@ -364,7 +364,7 @@ namespace Signum.Engine.Maps
 
         Type type;
         Func<object, object?>? getter;
-        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo)!);
+        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
 
         public EntityField(Type type, FieldInfo fi, Field field)
         {
@@ -1311,7 +1311,7 @@ namespace Signum.Engine.Maps
             this.PrimaryKey = primaryKey;
             this.BackReference = backReference;
             this.CollectionType = collectionType;
-            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -1409,7 +1409,7 @@ namespace Signum.Engine.Maps
 
         public bool IdentityBehaviour => true; //For now
 
-        internal object[] BulkInsertDataRow(Entity entity, object value, int order)
+        internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
         {
             return this.cache.Value.BulkInsertDataRow(entity, value, order);
         }

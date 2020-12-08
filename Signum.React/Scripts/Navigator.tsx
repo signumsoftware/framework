@@ -3,7 +3,7 @@ import { Dic, classes, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite } from './Reflection';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
@@ -56,7 +56,7 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
     if (entity.isNew)
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+    return renderTitle(typeInfo, entity);
 
   }
   else if (isTypeModel(entity.Type)) {
@@ -74,6 +74,16 @@ let renderId = (entity: Entity): React.ReactChild => <span className={classes(ge
 
 export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
   renderId = newFunction;
+}
+
+
+let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
+  return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+  return null;
+}
+
+export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
+  renderTitle = newFunction;
 }
 
 export function navigateRoute(entity: Entity, viewName?: string): string;

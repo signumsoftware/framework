@@ -171,8 +171,8 @@ namespace Signum.Entities
             if (nullable == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
                 this.Validators.Add(new NotNullValidatorAttribute());
 
-            this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;
-            this.SetValue = ReflectionTools.CreateSetter<T>(pi)!;
+            this.GetValue = ReflectionTools.CreateGetter<T, object?>(pi)!;
+            this.SetValue = ReflectionTools.CreateSetter<T, object?>(pi)!;
         }
 
         public void ReplaceValidators(params ValidatorAttribute[] validators)
@@ -185,6 +185,9 @@ namespace Signum.Entities
         {
             if (IsApplicable != null && !IsApplicable(entity))
                 return null;
+
+            if (entity.temporalErrors != null)
+                return entity.temporalErrors.TryGetC(PropertyInfo.Name);
 
             if (Validators.Count > 0)
             {
@@ -236,9 +239,6 @@ namespace Signum.Entities
                         return result;
                 }
             }
-
-            if (entity.temporalErrors != null)
-                return entity.temporalErrors.TryGetC(PropertyInfo.Name);
 
             return null;
         }

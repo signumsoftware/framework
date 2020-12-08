@@ -57,7 +57,7 @@ export class ReplaceVisitor extends ReactVisitor {
     super();
   }
 
-  visitElement(element: React.ReactElement<any>) {
+  visitElement(element: React.ReactElement<any>): React.ReactNode {
 
     if (this.predicate(element)) {
 
@@ -73,7 +73,7 @@ export class ReplaceVisitor extends ReactVisitor {
 }
 
 export class ReactValidator extends ReactVisitor {
-  visitElement(element: React.ReactElement<any>) {
+  visitElement(element: React.ReactElement<any>): React.ReactNode {
 
     if (!React.isValidElement(element))
       return <div className="alert alert-danger">Invalid react element: {JSON.stringify(element)}</div>;

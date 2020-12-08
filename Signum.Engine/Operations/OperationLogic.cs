@@ -26,7 +26,7 @@ namespace Signum.Engine.Operations
             As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Target.Is(e)));
 
         [AutoExpressionField]
-        public static OperationLogEntity PreviousOperationLog(this Entity e) => 
+        public static OperationLogEntity? PreviousOperationLog(this Entity e) => 
             As.Expression(() => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
 
         [AutoExpressionField]

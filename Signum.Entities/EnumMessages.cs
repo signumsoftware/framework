@@ -25,8 +25,8 @@ namespace Signum.Entities
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
         Confirm,
-        [Description("Please confirm you want like to delete {0} from the system")]
-        PleaseConfirmYouWantLikeToDelete0FromTheSystem,
+        [Description("Please confirm you would like to delete {0} from the system")]
+        PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
         [Description("{0} didn't return an entity")]
         TheOperation0DidNotReturnAnEntity,
         Logs,
@@ -37,10 +37,10 @@ namespace Signum.Entities
         _0AndNew,
 
         BulkModifications, 
-        [Description("Please confirm that you'd like to apply the above changes and execute {0} over {1} {2}")]
-        PleaseConfirmThatYouDLineToApplyTheAboveChangesAndExecute0Over12,
+        [Description("Please confirm that you would like to apply the above changes and execute {0} over {1} {2}")]
+        PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12,
 
-        Predictate, 
+        Condition, 
         Setters,
         [Description("Add setter")]
         AddSetter,
@@ -192,8 +192,6 @@ Lose changes?")]
         Create,
         [Description("Create new {0}")]
         CreateNew0_G,
-        [Description("All")]
-        SearchControl_Pagination_All,
         [Description("There is no {0}")]
         ThereIsNo0,
         Value,
@@ -224,6 +222,14 @@ Lose changes?")]
         [Description("{0} filters collapsed")]
         _0FiltersCollapsed,
         DisplayName,
+        [Description("To prevent performance issues automatic search is disabled, check your filters first and then click [Search] button.")]
+        ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton,
+        [Description("{0} elements")]
+        PaginationAll_0Elements,
+        [Description("{0} of {1} elements")]
+        PaginationPages_0Of01lements,
+        [Description("{0} {1} elements")]
+        PaginationFirst_01Elements
     }
 
     public enum SelectorMessage
@@ -377,7 +383,8 @@ Lose changes?")]
         [Description("Show Period")]
         showPeriod,
         [Description("Show Previous Operation")]
-        showPreviousOperation
+        showPreviousOperation,
+
     }
 
     public enum QuickLinkMessage

@@ -16,6 +16,11 @@
     }
 }
 
+#tooltip-buildId .tooltip-inner {
+    max-width: initial;
+    white-space: normal;
+}
+
 .sf-version-info {
     margin-right: 10px;
     margin-top: auto;

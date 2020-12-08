@@ -4,12 +4,12 @@ import { classes, addClass } from '../Globals';
 import "./Lines.css"
 
 export interface FormGroupProps {
-  labelText?: React.ReactChild;
+  labelText?: React.ReactNode;
   controlId?: string;
   ctx: StyleContext;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  helpText?: React.ReactChild;
+  helpText?: React.ReactNode;
   children?: React.ReactNode;
 }
 

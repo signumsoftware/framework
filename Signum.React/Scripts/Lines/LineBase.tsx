@@ -13,14 +13,14 @@ export interface ChangeEvent {
 export interface LineBaseProps extends StyleOptions {
   ctx: TypeContext<any>;
   type?: TypeReference;
-  labelText?: React.ReactChild;
+  labelText?: React.ReactNode;
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
-  helpText?: React.ReactChild;
+  helpText?: React.ReactNode | null;
   mandatory?: boolean;
 }
 
@@ -89,7 +89,7 @@ export class LineBaseController<P extends LineBaseProps> {
 
     this.getDefaultProps(p);
     this.overrideProps(p, otherProps as P);
-    runTasks(this as any as LineBaseController<LineBaseProps>, p);
+    runTasks(this as any as LineBaseController<LineBaseProps>, p, props);
 
     return p;
   }
@@ -128,8 +128,8 @@ export class LineBaseController<P extends LineBaseProps> {
   }
 }
 
-export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) => void)[] = [];
+export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 
-export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
-  tasks.forEach(t => t(lineBase, state));
+export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) {
+  tasks.forEach(t => t(lineBase, state, originalProps));
 }

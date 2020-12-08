@@ -152,7 +152,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   }
 }
 
-function asString(reactChild: React.ReactChild | undefined): string | undefined {
+function asString(reactChild: React.ReactNode | undefined): string | undefined {
   if (typeof reactChild == "string")
     return reactChild as string;
 
@@ -403,11 +403,12 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
   const s = vl.props;
 
   var htmlAtts = vl.props.valueHtmlAttributes;
+  var autoResize = htmlAtts?.style?.height == null && htmlAtts?.rows == null;
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        <TextArea {...htmlAtts} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
     );
@@ -433,7 +434,7 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <TextArea {...vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
           onInput={isIE11() ? handleTextOnChange : undefined}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
@@ -508,6 +509,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
 
 export interface NumericTextBoxProps {
   value: number | null;
+  readonly?: boolean;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   format: Intl.NumberFormat;
@@ -544,6 +546,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       "";
 
   return <input ref={p.innerRef} {...p.htmlAttributes}
+    readOnly={p.readonly}
     type="text"
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
@@ -566,17 +569,18 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      let value = ValueLineController.autoFixString(input.value, false);
 
-    let value = ValueLineController.autoFixString(input.value, false);
+      //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
+      //  value = value + ",00";
 
-    //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-    //  value = value + ",00";
-
-    const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
-    setText(undefined);
-    if (result != p.value)
-      p.onChange(result);
+      const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
+      setText(undefined);
+      if (result != p.value)
+        p.onChange(result);
+    }
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
@@ -606,8 +610,10 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-    setText(input.value);
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      setText(input.value);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {

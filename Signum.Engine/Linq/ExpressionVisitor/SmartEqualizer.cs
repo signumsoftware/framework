@@ -163,7 +163,7 @@ namespace Signum.Engine.Linq
             if (ce == null)
                 return null;
 
-            var type = ce.Value.GetType();
+            var type = ce.Value!.GetType();
 
             if (!type.IsAnonymous())
                 return null;
@@ -452,7 +452,7 @@ namespace Signum.Engine.Linq
             if (ce.IsNull())
                 return EqualsToNull(typeEntity.ExternalId);
 
-            if (((Type)ce.Value == typeEntity.TypeValue))
+            if (((Type)ce.Value! == typeEntity.TypeValue))
                 return NotEqualToNull(typeEntity.ExternalId);
 
             return False;
@@ -465,7 +465,7 @@ namespace Signum.Engine.Linq
                 return typeIb.TypeImplementations.Select(imp => EqualsToNull(imp.Value)).AggregateAnd();
             }
 
-            Type type = (Type)ce.Value;
+            Type type = (Type)ce.Value!;
 
             var externalId = typeIb.TypeImplementations.TryGetC(type);
 
@@ -477,7 +477,7 @@ namespace Signum.Engine.Linq
             if (ce.IsNull())
                 return EqualsToNull(typeIba.TypeColumn);
 
-            return EqualNullable(QueryBinder.TypeConstant((Type)ce.Value), typeIba.TypeColumn.Value);
+            return EqualNullable(QueryBinder.TypeConstant((Type)ce.Value!), typeIba.TypeColumn.Value);
         }
 
         private static Expression TypeConstantConstantEquals(ConstantExpression c1, ConstantExpression c2)
@@ -491,7 +491,7 @@ namespace Signum.Engine.Linq
             {
                 if (c2.IsNull()) return False;
 
-                if (c1.Value.Equals(c2.Value)) return True;
+                if (c1.Value!.Equals(c2.Value)) return True;
                 else return False;
             }
         }
@@ -550,7 +550,7 @@ namespace Signum.Engine.Linq
 
             if (typeExpr.NodeType == ExpressionType.Constant)
             {
-                Type type = (Type)((ConstantExpression)typeExpr).Value;
+                Type type = (Type)((ConstantExpression)typeExpr).Value!;
 
                 return collection.Contains(type) ? True : False;
             }

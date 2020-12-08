@@ -1,25 +1,21 @@
-using Newtonsoft.Json;
 using Signum.Utilities;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Json
 {
-    public class TimeSpanConverter : JsonConverter
+    public class TimeSpanConverter : JsonConverter<TimeSpan>
     {
-        public override bool CanConvert(Type objectType)
+        public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return typeof(TimeSpan).IsAssignableFrom(objectType.UnNullify());
+            var str = reader.GetString()!;
+            return TimeSpan.Parse(str);
         }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
         {
-            writer.WriteValue(((TimeSpan?) value)?.ToString());
-        }
-
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-        {
-            var str = reader.Value as string;
-            return string.IsNullOrEmpty(str) ? (TimeSpan?)null : TimeSpan.Parse(str);
+            writer.WriteStringValue(value.ToString());
         }
     }
 

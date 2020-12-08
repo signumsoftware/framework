@@ -238,7 +238,7 @@ namespace Signum.Engine.Basics
                     Database.RetrieveAll<TypeEntity>(),
                     current.Tables.Keys,
                     t => t.FullClassName,
-                    t => (EnumEntity.Extract(t) ?? t).FullName,
+                    t => (EnumEntity.Extract(t) ?? t).FullName!,
                     (typeEntity, type) => (typeEntity, type),
                      "caching {0}".FormatWith(current.Table(typeof(TypeEntity)).Name)
                     ).ToDictionary(a => a.type, a => a.typeEntity);

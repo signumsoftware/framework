@@ -1286,6 +1286,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
     if (!this.state.resultTable) {
+      if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
+        return <tr><td colSpan={columnsCount} className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</td></tr>;
+
       return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
     }
 

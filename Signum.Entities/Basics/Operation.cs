@@ -255,6 +255,6 @@ namespace Signum.Entities
         ChangeElements,
         RemoveElements,
         ModifyEntity,
-        CreateNewEntiy,
+        CreateNewEntity,
     }
 }

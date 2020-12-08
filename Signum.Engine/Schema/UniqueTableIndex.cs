@@ -9,6 +9,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Maps
 {
@@ -232,9 +233,10 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
-            switch (exp.NodeType)
+            switch (exp!.NodeType)
             {
                 case ExpressionType.Conditional:
                 case ExpressionType.Constant:
@@ -288,7 +290,7 @@ namespace Signum.Engine.Maps
 
         public static Expression RemoveLiteEntity(Expression exp)
         {
-            if (exp is MemberExpression m && m.Member is PropertyInfo pi && m.Expression.Type.IsInstantiationOf(typeof(Lite<>)) &&
+            if (exp is MemberExpression m && m.Member is PropertyInfo pi && m.Expression!.Type.IsInstantiationOf(typeof(Lite<>)) &&
                 (pi.Name == nameof(Lite<Entity>.Entity) || pi.Name == nameof(Lite<Entity>.EntityOrNull)))
                 return m.Expression;
             return exp;
@@ -402,13 +404,13 @@ namespace Signum.Engine.Maps
 
                     Field field = GetField(b.Right);
 
-                    sb.Append(Equals(field, ((ConstantExpression)b.Left).Value, b.NodeType == ExpressionType.Equal, isPostgres));
+                    sb.Append(Equals(field, ((ConstantExpression)b.Left).Value!, b.NodeType == ExpressionType.Equal, isPostgres));
                 }
                 else if (b.Right is ConstantExpression)
                 {
                     Field field = GetField(b.Left);
 
-                    sb.Append(Equals(field, ((ConstantExpression)b.Right).Value, b.NodeType == ExpressionType.Equal, isPostgres));
+                    sb.Append(Equals(field, ((ConstantExpression)b.Right).Value!, b.NodeType == ExpressionType.Equal, isPostgres));
                 }
                 else
                     throw new NotSupportedException("Impossible to translate {0}".FormatWith(b.ToString()));

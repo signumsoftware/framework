@@ -57,7 +57,7 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer? Log(string role, Func<string> additionalData)
+        public static Tracer? Log(string role, Func<string?> additionalData)
         {
             if (!enabled)
                 return null;
@@ -109,7 +109,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Tracer? CreateNewEntry(string role, Func<string>? additionalData, bool stackTrace)
+        private static Tracer? CreateNewEntry(string role, Func<string?>? additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
@@ -126,7 +126,7 @@ namespace Signum.Utilities
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AdditionalData = additionalData == null ? null : additionalData(),
+                AdditionalData = additionalData?.Invoke(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
                 Parent = parent,
                 Depth = parent == null ? 0 : (parent.Depth + 1),
@@ -214,7 +214,7 @@ namespace Signum.Utilities
 
         public static void ImportXml(XDocument doc, bool rebaseTime)
         {
-            var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
+            var list = doc.Element("Logs")!.Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
 
             ImportEntries(list, rebaseTime);
         }
@@ -399,10 +399,10 @@ namespace Signum.Utilities
                 new XAttribute("BeforeStart", this.BeforeStart),
                 new XAttribute("Start", this.Start),
                 new XAttribute("End", this.End ?? PerfCounter.Ticks),
-                this.AdditionalData == null ? null :
+                this.AdditionalData == null ? null! :
                 new XAttribute("AdditionalData", this.AdditionalData),
-                 includeStackTrace && StackTrace != null ? StackTraceToXml(StackTrace) : null,
-                Entries?.Select(e => e.ExportXml(includeStackTrace)).ToList());
+                 includeStackTrace && StackTrace != null ? StackTraceToXml(StackTrace) : null!,
+                Entries?.Select(e => e.ExportXml(includeStackTrace)).ToList()!);
         }
 
         private XElement StackTraceToXml(StackTrace stackTrace)
@@ -422,13 +422,13 @@ namespace Signum.Utilities
         {
             return st.Elements("StackFrame").Select(a =>
             {
-                var parts = a.Attribute("Method").Value.Split('.');
-                var line = a.Attribute("Line").Value;
+                var parts = a.Attribute("Method")!.Value.Split('.');
+                var line = a.Attribute("Line")!.Value;
 
                 return new ExternalStackTrace
                 {
-                    MethodName = parts.LastOrDefault(),
-                    Type = parts.ElementAtOrDefault(parts.Length - 2),
+                    MethodName = parts.LastOrDefault() ?? "",
+                    Type = parts.ElementAtOrDefault(parts.Length - 2) ?? "",
                     Namespace = parts.Take(parts.Length - 2).ToString("."),
                     FileName = line.BeforeLast(":"),
                     LineNumber = line.AfterLast(":").ToInt(),
@@ -449,11 +449,11 @@ namespace Signum.Utilities
             var result = new HeavyProfilerEntry
             {
                 Parent = parent,
-                Index = int.Parse(xLog.Attribute("Index").Value),
-                Role = xLog.Attribute("Role").Value,
-                BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
-                Start = long.Parse(xLog.Attribute("Start").Value),
-                End = long.Parse(xLog.Attribute("End").Value),
+                Index = int.Parse(xLog.Attribute("Index")!.Value),
+                Role = xLog.Attribute("Role")!.Value,
+                BeforeStart = long.Parse(xLog.Attribute("BeforeStart")!.Value),
+                Start = long.Parse(xLog.Attribute("Start")!.Value),
+                End = long.Parse(xLog.Attribute("End")!.Value),
                 AdditionalData = xLog.Attribute("AdditionalData")?.Value,
                 Depth = parent == null ? 0 : parent.Depth + 1
             };

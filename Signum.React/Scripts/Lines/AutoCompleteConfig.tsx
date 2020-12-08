@@ -55,7 +55,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return this.abortableRequest.getData(subStr);
   }
 
-  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string) {
+  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string): React.ReactNode{
 
     if (isAutocompleteConstructor<T>(item)) {
       var ti = getTypeInfo(item.type);
@@ -217,7 +217,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       });
   }
 
-  renderItem(item: ResultRow | AutocompleteConstructor<Entity>, subStr: string) {
+  renderItem(item: ResultRow | AutocompleteConstructor<Entity>, subStr: string): React.ReactNode {
     if (isAutocompleteConstructor<Entity>(item)) {
       var ti = getTypeInfo(item.type);
       return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;

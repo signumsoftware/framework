@@ -124,7 +124,7 @@ namespace Signum.Utilities.Reflection
 
         protected override Expression VisitNew(NewExpression nex)
         {
-            ConstructorInfo ci = nex.Constructor.GetGenericConstructorDefinition().MakeGenericConstructor(types);
+            ConstructorInfo ci = nex.Constructor!.GetGenericConstructorDefinition().MakeGenericConstructor(types);
             var result = Expression.New(ci, nex.Arguments.Zip(ci.GetParameters(), (e, p) => Convert(e, p.ParameterType)));
             return result;
         }
