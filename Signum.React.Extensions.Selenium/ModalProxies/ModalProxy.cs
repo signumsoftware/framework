@@ -62,7 +62,7 @@ namespace Signum.React.Selenium
         }
 
 
-        public FrameModalProxy<T> OkWaitPopupControl<T>() where T : Entity
+        public FrameModalProxy<T> OkWaitFrameModal<T>() where T : ModifiableEntity
         {
             var element = this.OkButton.Find().CaptureOnClick();
             var disposing = this.Disposing;
