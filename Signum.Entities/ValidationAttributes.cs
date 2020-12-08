@@ -1181,4 +1181,17 @@ namespace Signum.Entities
         [Description("There are {0} that reference this {1}")]
         ThereAre0ThatReferenceThis1,
     }
+
+    public static class ValidationMessageHelper
+    {
+        public static string ShouldBe(this PropertyInfo pi, ComparisonType ct, object value)
+        {
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ct.NiceToString(),
+                value is PropertyInfo pi2 ? pi2.NiceName() :
+                value is Type t ? t.NiceName() :
+                value is Enum e ? e.NiceToString() :
+                value is null ? "null" :
+                value?.ToString());
+        }
+    }
 }
