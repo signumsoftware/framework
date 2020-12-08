@@ -558,7 +558,7 @@ namespace Signum.Engine.Json
                     {                        
                         if (identityInfo.Ticks != null)
                         {
-                            if (identityInfo.Modified != true && existingEntity.Ticks != identityInfo.Ticks.Value)
+                            if (identityInfo.Modified == true && existingEntity.Ticks != identityInfo.Ticks.Value)
                                 throw new ConcurrencyException(type, id);
 
                             existingEntity.Ticks = identityInfo.Ticks.Value;
@@ -573,7 +573,7 @@ namespace Signum.Engine.Json
                     var retrievedEntity = Database.Retrieve(type, id);
                     if (identityInfo.Ticks != null)
                     {
-                        if (identityInfo.Modified != true && retrievedEntity.Ticks != identityInfo.Ticks.Value)
+                        if (identityInfo.Modified == true && retrievedEntity.Ticks != identityInfo.Ticks.Value)
                             throw new ConcurrencyException(type, id); 
 
                         retrievedEntity.Ticks = identityInfo.Ticks.Value;
