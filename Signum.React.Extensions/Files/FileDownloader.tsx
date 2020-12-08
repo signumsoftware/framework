@@ -21,6 +21,15 @@ export interface FileDownloaderProps {
   showFileIcon?: boolean;
 }
 
+const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+function getFileName(toStr: string) {
+  if (units.some(u => toStr.endsWith(" " + u)))
+    return toStr.beforeLast(" - ");
+
+  return toStr;
+}
+
 export function FileDownloader(p: FileDownloaderProps) {
 
   function handleOnClick(e: React.MouseEvent, save: boolean) {
@@ -54,7 +63,7 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   const toStr = getToString(entityOrLite);
 
-  const fileName = toStr!.tryBeforeLast(" - ") ?? toStr; //Hacky
+  const fileName = getFileName(toStr); //Hacky
 
   var info = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
 
@@ -71,7 +80,7 @@ export function FileDownloader(p: FileDownloaderProps) {
       >
         {p.children ??
           <>
-            {p.showFileIcon && <FontAwesomeIcon className="mr-1" icon={["far", info?.icon ?? "file"]} color={info.color ?? "grey"} />}
+            {p.showFileIcon && <FontAwesomeIcon className="mr-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
             {toStr}
           </>}
       </a>
