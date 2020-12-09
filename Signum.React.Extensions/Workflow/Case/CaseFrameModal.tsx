@@ -6,7 +6,7 @@ import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, }
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
-import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
@@ -93,8 +93,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
-        message: NormalWindowMessage.LoseChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
+        message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         icon: "warning",
         style: "warning"
@@ -122,8 +122,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   handleCancelClicked = () => {
     if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
-        message: NormalWindowMessage.LoseChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
+        message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         style: "warning",
         icon: "warning"
@@ -139,7 +139,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   handleOkClicked = () => {
     if (this.hasChanges()) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
         buttons: "ok",
         style: "warning",
