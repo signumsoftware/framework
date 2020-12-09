@@ -43,7 +43,7 @@ export interface SearchControlProps {
   allowChangeColumns?: boolean;
   allowChangeOrder?: boolean;
   create?: boolean;
-  navigate?: boolean | "InPlace";
+  view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   avoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;
@@ -186,7 +186,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
         create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
-        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, { isSearch: true}))}
+        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
 
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}

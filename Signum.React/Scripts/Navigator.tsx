@@ -430,22 +430,36 @@ export interface IsViewableOptions {
   customComponent?: boolean;
   isSearch?: boolean;
   isEmbedded?: boolean;
+  buttons?: ViewButtons;
 }
 
-export function isViewable(typeOrEntity: TypeReference | PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
+export type ViewButtons = "ok_cancel" | "close" | undefined;
+
+export function typeDefaultButtons(typeName: string, isEmbedded: boolean | undefined): ViewButtons {
+  if (isEmbedded)
+    return "ok_cancel";
+
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo != null && typeInfo.entityKind == "Part" || typeInfo?.entityKind == "SharedPart")
+    return "ok_cancel";
+
+  return "close";
+}
+
+export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsViewable = typeIsViewable(typeName, options?.isEmbedded);
+  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch);
 
   const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
-  return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
+  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
 }
 
-function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): boolean {
+function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
 
   const es = entitySettings[typeName];
 
@@ -453,50 +467,7 @@ function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): bool
     return es.isViewable;
 
   if (isEmbedded)
-    return true;
-
-  const typeInfo = tryGetTypeInfo(typeName);
-  if (typeInfo == null)
-    return false;
-
-  if (typeInfo.kind == "Enum")
-    return false;
-
-  switch (typeInfo.entityKind) {
-    case "SystemString": return false;
-    case "System": return true;
-    case "Relational": return false;
-    case "String": return false;
-    case "Shared": return true;
-    case "Main": return true;
-    case "Part": return true;
-    case "SharedPart": return true;
-    default: return true;
-  }
-}
-
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
-
-  const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
-
-  const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
-
-  const baseTypeName = checkFlag(typeIsNavigable(typeName, options?.isEmbedded), options?.isSearch);
-
-  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
-
-  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
-}
-
-function typeIsNavigable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
-
-  const es = entitySettings[typeName];
-
-  if (es != undefined && es.isNavigable != undefined)
-    return es.isNavigable;
-
-  if (isEmbedded)
-    return "Never";
+    return "IsLine";
 
   const typeInfo = tryGetTypeInfo(typeName);
   if (typeInfo == null)
@@ -585,7 +556,10 @@ export interface ViewOptions {
   validate?: boolean;
   requiresSaveOperation?: boolean;
   avoidPromptLoseChange?: boolean;
+  buttons?: ViewButtons;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
+  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
+  allowExchangeEntity?: boolean;
   extraProps?: {};
 }
 
@@ -610,32 +584,6 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
     .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
 
-export interface NavigateOptions {
-  readOnly?: boolean;
-  modalSize?: BsSize;
-  avoidPromptLooseChange?: boolean;
-  getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraProps?: {};
-  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
-}
-
-export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-
-  const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
-
-  const es = getSettings(typeName);
-
-  if (es?.onNavigate)
-    return es.onNavigate(entityOrPack, navigateOptions);
-  else
-    return navigateDefault(entityOrPack, navigateOptions);
-}
-
-export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-  return NavigatorManager.getFrameModal()
-    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions ?? {}));
-}
-
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var url = createRoute(pack.entity.Type) + "?waitData=true";
   window.dataForChildWindow = pack;
@@ -652,7 +600,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event:
     return Promise.resolve();
   }
   else {
-    return navigate(pack);
+    return view(pack).then(() => undefined);
   }
 }
 
@@ -811,8 +759,7 @@ export module API {
 export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
-  isViewable?: boolean;
-  isNavigable?: EntityWhen;
+  isViewable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
@@ -825,7 +772,6 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
-  onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
@@ -858,8 +804,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   isCreable?: EntityWhen;
   isFindable?: boolean;
-  isViewable?: boolean;
-  isNavigable?: EntityWhen;
+  isViewable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
@@ -871,10 +816,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
 
   findOptions?: FindOptions;
-  onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
-  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {

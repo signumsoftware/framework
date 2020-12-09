@@ -81,7 +81,7 @@ function SearchPage(p: SearchPageProps) {
         showFilters={SearchPage.showFilters(fo, qs)}
         showGroupButton={true}
         avoidChangeUrl={false}
-        navigate={qs?.inPlaceNavigation ? "InPlace" : undefined}
+        view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
         enableAutoFocus={true}
         onHeighChanged={onResize}
