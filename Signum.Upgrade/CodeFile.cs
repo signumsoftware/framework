@@ -298,7 +298,7 @@ namespace Signum.Upgrade
         public void ProcessLines(Func<List<string>, bool> process)
         {
             var separator = this.Content.Contains("\r\n") ? "\r\n" : "\n";
-            var lines = this.Content.Split(separator).ToList();
+            var lines = Regex.Split(this.Content, "\r?\n").ToList();
 
             if (process(lines))
             {
