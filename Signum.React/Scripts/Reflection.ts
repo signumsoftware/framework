@@ -1410,6 +1410,10 @@ export class QueryTokenString<T> {
   average(): QueryTokenString<T> {
     return new QueryTokenString<T>(this.token + ".Average");
   }
+
+  hasValue(): QueryTokenString<boolean> {
+    return new QueryTokenString<boolean>(this.token + ".HasValue");
+  }
 }
 
 type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;
