@@ -68,7 +68,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
     if (newWindow)
       window.open(Navigator.navigateRoute(r.entity));
     else
-      Navigator.navigate(r.entity)
+      Navigator.view(r.entity)
         .then(() => onReload && onReload())
         .done();
   } else {

@@ -90,7 +90,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
       <h4>Next activities to execute</h4>
       <SearchControl
         showContextMenu={fo => "Basic"}
-        navigate={false}
+        view={false}
         findOptions={{
           queryName: CaseActivityEntity,
           filterOptions: [
@@ -131,7 +131,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
         <Tab title="Last executed activities" eventKey="lastActivities">
           <SearchControl
             showContextMenu={fo => "Basic"}
-            navigate={false}
+            view={false}
             findOptions={{
               queryName: CaseActivityEntity,
               filterOptions: [

@@ -110,7 +110,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       API.fetchCaseFlowPack(ctx.lite)
-        .then(result => Navigator.navigate(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
+        .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
     },
@@ -186,8 +186,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
     onNavigateRoute: (typeName, id) => AppContext.toAbsoluteUrl("~/workflow/activity/" + id),
-    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
-    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
+    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options),
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
@@ -431,7 +430,7 @@ function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, col
 }
 
 function hide<T extends Entity>(type: Type<T>) {
-  Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
+  Navigator.addSettings(new EntitySettings(type, undefined, { isViewable: "Never", isCreable: "Never" }));
 }
 
 export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => void) {
@@ -544,15 +543,10 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
   });
 }
 
-export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
   return import("./Case/CaseFrameModal")
-    .then(NP => NP.default.openNavigate(entityOrPack, readOnly)) as Promise<void>;
-}
-
-export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
-  return import("./Case/CaseFrameModal")
-    .then(NP => NP.default.openView(entityOrPack, readOnly));
+    .then(NP => NP.default.openView(entityOrPack, options));
 
 }
 

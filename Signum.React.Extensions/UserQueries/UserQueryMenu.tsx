@@ -108,7 +108,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleEdit() {
     Navigator.API.fetchAndForget(currentUserQuery!)
-      .then(userQuery => Navigator.navigate(userQuery))
+      .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
       .then(() => applyUserQuery(currentUserQuery!))
       .done();

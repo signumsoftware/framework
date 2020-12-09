@@ -336,7 +336,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       }
       else {
         action()
-          .then(m => Navigator.navigate(m))
+          .then(m => Navigator.view(m))
           .then(() => action())
           .then(m => {
             setNewValue(m);

@@ -72,7 +72,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     return SelectorModal.chooseType(typeInfos!)
       .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
         .then(props => Constructor.constructPack(ti.name, props)))
-      .then(pack => pack && Navigator.navigate(pack))
+      .then(pack => pack && Navigator.view(pack))
       .then(() => makeQuery())
       .done();
   }

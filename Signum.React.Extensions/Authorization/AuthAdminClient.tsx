@@ -62,7 +62,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
-      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
+      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red", color: "danger", group: null }));
   }
 
@@ -81,7 +81,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
-      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
+      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack)).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange", color: "warning", group: null }));
   }
 

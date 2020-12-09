@@ -143,7 +143,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
         return;
       }
       else {
-        Navigator.navigate(pack);
+        Navigator.view(pack);
       }
     }).done();
   }).done();

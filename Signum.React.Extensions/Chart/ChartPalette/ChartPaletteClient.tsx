@@ -29,7 +29,7 @@ export function navigatePalette(type: PseudoType): Promise<void> {
       if (cp == null)
         return MessageModal.showError(ChartMessage.Type0NotFoundInTheDatabase.niceToString(getTypeName(type)), ChartMessage.TypeNotFound.niceToString());
 
-      return Navigator.navigate(cp)
+      return Navigator.view(cp).then(() => undefined);
     });
 }
 

@@ -29,8 +29,7 @@ modules.React.useEffect(() => {
 });`;
   modules["Components"] = "";
   modules["Globals"] = "";
-  modules["Navigator"] = `modules.Navigator.navigate(e);
-modules.Navigaor.view(e);
+  modules["Navigator"] = `modules.Navigator.view(e);
 modules.Navigator.API.fetchEntity("${p.cleanName}", [id]).then(entity => { /* do something here ... */ }).done();
 modules.Navigator.API.fetchAndForget([lite]).then(entity => { /* do something here ... */ }).done();
 

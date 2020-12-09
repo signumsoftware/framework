@@ -152,7 +152,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
     else
       DynamicViewClient.API.getDynamicView(typeName, viewName!)
         .then(dv => {
-          Navigator.navigate(dv, { extraProps: props });
+          Navigator.view(dv, { extraProps: props });
         }).done();
   }
 
