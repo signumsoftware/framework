@@ -101,7 +101,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
       queryName: CaseEntity,
       filterOptions: [{ token: CaseEntity.token().entity(e => e.parentCase), value: p.caseEntity, frozen: true }]
     }, { autoSelectIfOne: true })
-      .then(c => c && Navigator.navigate(c))
+      .then(c => c && Navigator.view(c))
       .done();
   }
 

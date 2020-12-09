@@ -303,7 +303,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       e.preventDefault();
 
       if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
-        Navigator.navigate(p.gor[0].entity as Lite<Entity>)
+        Navigator.view(p.gor[0].entity as Lite<Entity>)
           .then(() => onReload && onReload())
           .done();
         return;
@@ -362,7 +362,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
       Finder.getPropsFromFilters(typeName, fop)
         .then(props => Constructor.construct(typeName, props))
-        .then(e => e && Navigator.navigate(e))
+        .then(e => e && Navigator.view(e))
         .then(() => onReload && onReload())
         .done();
     }
@@ -390,7 +390,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     function handleLiteClick(e: React.MouseEvent) {
       e.preventDefault();
-      Navigator.navigate(lite as Lite<Entity>)
+      Navigator.view(lite as Lite<Entity>)
         .then(() => onReload && onReload())
         .done();
     }

@@ -50,7 +50,7 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
       .then(fop => SelectorModal.chooseType(typeInfos!)
         .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
           .then(props => Constructor.constructPack(ti.name, props)))
-        .then(pack => pack && Navigator.navigate(pack))
+        .then(pack => pack && Navigator.view(pack))
         .then(() => setRefreshCount(a => a + 1)))
       .done();
   }

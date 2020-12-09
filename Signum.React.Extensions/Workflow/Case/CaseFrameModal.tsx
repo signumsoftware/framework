@@ -30,7 +30,7 @@ interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<C
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;
   readOnly?: boolean;
-  isNavigate?: boolean;
+  buttons?: Navigator.ViewButtons;
 }
 
 interface CaseFrameModalState {
@@ -166,9 +166,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     return (
       <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
         <ModalHeaderButtons htmlAttributes={{ style: { display: "block" } }} closeBeforeTitle={true}
-          onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
-          onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
-          onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
+          onClose={this.props.buttons == "close" ? this.handleCancelClicked : undefined}
+          onOk={this.props.buttons == "ok_cancel" ? this.handleOkClicked : undefined}
+          onCancel={this.props.buttons == "ok_cancel" ? this.handleCancelClicked : undefined}
           okDisabled={!pack}>
           {this.renderTitle()}
         </ModalHeaderButtons>
@@ -213,7 +213,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
-      allowChangeEntity: false,
+      allowExchangeEntity: false,
       prefix: this.prefix
     };
 
@@ -266,7 +266,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.forceUpdate()
       },
       refreshCount: this.state.refreshCount,
-      allowChangeEntity: false,
+      allowExchangeEntity: false,
       prefix: this.prefix
     };
 
@@ -325,7 +325,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ti = getTypeInfo(entity.Type);
 
-    if (!Navigator.isNavigable(ti)) //Embedded
+    if (!Navigator.isViewable(ti, { buttons: "close" })) //Embedded
       return null;
 
     return (
@@ -339,23 +339,13 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     AppContext.pushOrOpenInTab("~/workflow/activity/" + this.state.pack!.activity.id, e);
   }
 
-  static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
+  static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
 
     return openModal<CaseActivityEntity>(<CaseFrameModal
       entityOrPack={entityOrPack}
-      readOnly={readOnly || false}
-      isNavigate={false}
+      readOnly={options?.readOnly ?? false}
+      buttons={options?.buttons ?? "close"}
     />);
-  }
-
-
-  static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<void> {
-
-    return openModal<void>(<CaseFrameModal
-      entityOrPack={entityOrPack}
-      readOnly={readOnly || false}
-      isNavigate={true}
-    />) as Promise<void>;
   }
 }
 
