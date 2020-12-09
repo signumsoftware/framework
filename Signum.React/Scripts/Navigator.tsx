@@ -279,7 +279,7 @@ function hasAllowedConstructor(typeName: string) {
   if (!ti.hasConstructorOperation)
     return true;
 
-  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == OperationType.Constructor);
+  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == "Constructor");
 
   return allowed;
 }

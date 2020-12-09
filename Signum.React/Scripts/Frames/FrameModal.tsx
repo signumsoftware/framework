@@ -7,12 +7,12 @@ import * as AppContext from '../AppContext';
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
-import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
+import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { EntityOperationContext } from '../Operations'
+import { EntityOperationContext, operationInfos } from '../Operations'
 import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -99,12 +99,32 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     }).then(callback).done();
   }
 
+  function getSaveChangesOperations(frame: EntityFrame) {
+
+    const ti = tryGetTypeInfo(frame.pack.entity.Type)
+
+    const pack = frame.pack;
+
+    const buttonContext: ButtonsContext = {
+      frame: frame,
+      pack: pack,
+      isOperationVisible: p.isOperationVisible,
+      tag: "SaveChangesModal"
+    };
+
+    const eocs = ti == null ? [] : operationInfos(ti)
+      .filter(oi => oi.canBeNew || !pack.entity.isNew)
+      .filter(oi => oi.operationType == "Execute" && oi.canBeModified)
+      .map(oi => EntityOperationContext.fromEntityPack(frame, pack as EntityPack<Entity>, oi.key))
+      .filter(eoc => eoc!.isVisibleInButtonBar(buttonContext));
+  }
+
   function handleOkClicked() {
     const pack = packComponent?.pack;
     if (hasChanges() &&
       (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack!.entity.Type))) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
         buttons: "ok",
         style: "warning",
@@ -152,8 +172,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     if (hasChanges() && !p.avoidPromptLoseChange) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
-        message: NormalWindowMessage.LoseChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
+        message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         style: "warning",
         icon: "warning"

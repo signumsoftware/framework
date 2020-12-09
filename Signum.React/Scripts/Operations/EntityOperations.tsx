@@ -38,26 +38,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
       return eoc;
     })
-    .filter(eoc => {
-      if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
-        return false;
-
-      var ov = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IOperationVisible | null;
-      if (ov?.isOperationVisible && !ov.isOperationVisible(eoc))
-        return false;
-
-      var eos = eoc.settings;
-      if (eos?.isVisible && !eos.isVisible(eoc))
-        return false;
-
-      if (eos?.hideOnCanExecute && eoc.canExecute)
-        return false;
-
-      if (Navigator.isReadOnly(ctx.pack, { ignoreTypeIsReadonly: true }) && !(eos?.showOnReadOnly))
-        return false;
-
-      return true;
-    });
+    .filter(eoc => eoc.isVisibleInButtonBar(ctx));
 
   operations.forEach(eoc => eoc.complete());
 
@@ -313,15 +294,15 @@ function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?:
 export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
   if (!eoc.operationInfo.canBeModified) {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteLite(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteLite(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromLite(eoc, ...args); return;
+      case "Execute": defaultExecuteLite(eoc, ...args); return;
+      case "Delete": defaultDeleteLite(eoc, ...args); return;
     }
   } else {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteEntity(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteEntity(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromEntity(eoc, ...args); return;
+      case "Execute": defaultExecuteEntity(eoc, ...args); return;
+      case "Delete": defaultDeleteEntity(eoc, ...args); return;
     }
   }
 
@@ -457,7 +438,7 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
     return eoc.settings.confirmMessage(eoc);
 
   //eoc.settings.confirmMessage === undefined
-  if (eoc.operationInfo.operationType == OperationType.Delete)
+  if (eoc.operationInfo.operationType == "Delete")
     return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
       <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
     );
