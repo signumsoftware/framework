@@ -100,17 +100,13 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
-    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
+    isVisible: eoc.frame!.allowExchangeEntity && eoc.frame.createNew != null && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = (eoc.frame.frameComponent as FunctionalFrameComponent).createNew ??
-          Navigator.getSettings(pack.entity.Type)?.onCreateNew ??
-          (pack => Constructor.constructPack(pack.entity.Type));
-
-        (createNew(pack) ?? Promise.resolve(undefined))
+        (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
           .then(newPack => newPack && eoc.frame.onReload(newPack, true))
           .done();
       };

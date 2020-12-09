@@ -28,6 +28,7 @@ interface FramePageState {
   pack: EntityPack<Entity>;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
+  createNew?: () => Promise<EntityPack<Entity> | undefined>;
 }
 
 export default function FramePage(p: FramePageProps) {
@@ -47,8 +48,9 @@ export default function FramePage(p: FramePageProps) {
 
   React.useEffect(() => {
     loadEntity()
-      .then(pack => loadComponent(pack).then(getComponent => mounted.current ? setState({
-        pack: pack,
+      .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
+        pack: a.pack!,
+        createNew: a.createNew,
         getComponent: getComponent,
         refreshCount: state ? state.refreshCount + 1 : 0
       }) : undefined))
@@ -65,14 +67,13 @@ export default function FramePage(p: FramePageProps) {
       buttonBar.current.handleKeyDown(e);
   }
 
-
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
     return Navigator.getViewPromise(pack.entity, viewName).promise;
   }
 
 
-  function loadEntity(): Promise<EntityPack<Entity>> {
+  function loadEntity(): Promise<{ pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(p.location.search);
 
@@ -81,9 +82,13 @@ export default function FramePage(p: FramePageProps) {
         throw new Error("No dataForChildWindow in parent found!")
       }
 
-      var pack = window.opener.dataForChildWindow;
+      var pack = window.opener.dataForChildWindow as EntityPack<Entity>;
       window.opener.dataForChildWindow = undefined;
-      return Promise.resolve(pack);
+      var txt = JSON.stringify(pack);
+      return Promise.resolve({
+        pack,
+        createNew: () => Promise.resolve(JSON.parse(txt))
+      });
     }
 
     if (id) {
@@ -95,17 +100,26 @@ export default function FramePage(p: FramePageProps) {
 
       return Navigator.API.fetchEntityPack(lite)
         .then(pack => {
-          return Promise.resolve(pack);
+          return Promise.resolve({
+            pack,
+            createNew: undefined
+          });
         });
 
     } else {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key).then(pack => pack!);
+        return Operations.API.construct(ti.name, oi.key).then(pack => ({
+          pack: pack!,
+          createNew: () => Operations.API.construct(ti.name, oi.key)
+        }));
       }
 
-      return Constructor.constructPack(ti.name).then(pack => pack as EntityPack<Entity>);
+      return Constructor.constructPack(ti.name).then(pack => ({
+        pack: pack! as EntityPack<Entity>,
+        createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
+      }));
     }
   }
 
@@ -152,15 +166,19 @@ export default function FramePage(p: FramePageProps) {
             .then(gc => {
               if (mounted.current)
                 setState({
-                  getComponent: gc,
                   pack: packEntity,
+                  getComponent: gc,
                   refreshCount: state.refreshCount + 1
                 }).then(callback).done();
             })
             .done();
         }
         else {
-          setState({ pack: packEntity, getComponent: state.getComponent, refreshCount: state.refreshCount + 1 }).then(callback).done();
+          setState({
+            pack: packEntity,
+            getComponent: state.getComponent,
+            refreshCount: state.refreshCount + 1
+          }).then(callback).done();
         }
       }
     },
@@ -171,7 +189,8 @@ export default function FramePage(p: FramePageProps) {
       forceUpdate()
     },
     refreshCount: state.refreshCount,
-    allowChangeEntity: true,
+    createNew: state.createNew,
+    allowExchangeEntity: true,
     prefix: "framePage"
   };
 

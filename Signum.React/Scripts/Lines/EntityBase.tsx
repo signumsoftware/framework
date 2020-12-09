@@ -134,7 +134,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {
     return Navigator.view(value, {
       propertyRoute: propertyRoute,
-      getViewPromise: this.getGetViewPromise(value)
+      getViewPromise: this.getGetViewPromise(value),
+      allowExchangeEntity: false,
     });
   }
 

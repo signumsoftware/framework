@@ -772,10 +772,10 @@ function getTypeIfNew(val: any): string[] {
 
 
 
-export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
+export function exploreOrView(findOptions: FindOptions): Promise<void> {
   return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
-      return Navigator.navigate(list[0]);
+      return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
       return explore(findOptions);
   });
@@ -1691,12 +1691,12 @@ export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
     isApplicable: sc => true,
-    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc?.handleOnNavigated}
         getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
         <span title={EntityControlMessage.View.niceToString()}>
           {EntityBaseController.viewIcon}
         </span>

@@ -73,7 +73,7 @@ export function RenderEntity(p: RenderEntityProps) {
     onReload: pack => { throw new Error("Not implemented Exception"); },
     setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
     refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
-    allowChangeEntity: false,
+    allowExchangeEntity: false,
     prefix: prefix,
   };
 

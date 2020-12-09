@@ -34,7 +34,8 @@ interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
   avoidPromptLoseChange?: boolean;
   extraProps?: {}
   getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  isNavigate?: boolean;
+  buttons?: Navigator.ViewButtons;
+  allowExchangeEntity?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
@@ -205,9 +206,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
         <ModalHeaderButtons
-        onClose={p.isNavigate ? handleCancelClicked : undefined}
-        onOk={!p.isNavigate ? handleOkClicked : undefined}
-        onCancel={!p.isNavigate ? handleCancelClicked : undefined}
+          onClose={p.buttons == "close" ? handleCancelClicked : undefined}
+          onOk={p.buttons == "ok_cancel" ? handleOkClicked : undefined}
+          onCancel={p.buttons == "ok_cancel" ? handleCancelClicked : undefined}
         okDisabled={!packComponent}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
         </ModalHeaderButtons>
@@ -219,7 +220,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     const frame: EntityFrame = {
       tabs: undefined,
-      frameComponent: { forceUpdate, createNew: p.createNew, type: FrameModal as any },
+      frameComponent: { forceUpdate, type: FrameModal as any },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;
@@ -241,7 +242,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         forceUpdate();
       },
       refreshCount: pc.refreshCount,
-      allowChangeEntity: p.isNavigate || false,
+      createNew: p.createNew,
+      allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
     };
 
@@ -303,23 +305,9 @@ export namespace FrameModalManager {
       extraProps={options.extraProps}
       validate={options.validate == undefined ? isTypeModel(getTypeName(entityOrPack)) : options.validate}
       title={options.title}
-      isNavigate={false} />);
-  }
-
-  export function openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
-
-    return openModal<void>(<FrameModal
-      entityOrPack={entityOrPack}
-      readOnly={options.readOnly}
-      modalSize={options.modalSize}
-      propertyRoute={undefined}
-      getViewPromise={options.getViewPromise}
-      requiresSaveOperation={undefined}
-      avoidPromptLoseChange={options.avoidPromptLooseChange}
-      extraProps={options.extraProps}
       createNew={options.createNew}
-      isNavigate={true}
-    />);
+      allowExchangeEntity={options.allowExchangeEntity}
+      buttons={options.buttons ?? Navigator.typeDefaultButtons(getTypeName(entityOrPack), options.propertyRoute?.typeReference().isEmbedded)} />);
   }
 }
 
@@ -348,7 +336,7 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
 
     const ti = tryGetTypeInfo(entity.Type);
 
-    if (ti == undefined || !Navigator.isNavigable(ti)) //Embedded
+    if (ti == undefined || !Navigator.isViewable(ti, { buttons: "close" })) //Embedded
       return undefined;
 
     return (
