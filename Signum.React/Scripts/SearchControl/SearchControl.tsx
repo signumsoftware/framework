@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
-import { Lite, Entity } from '../Signum.Entities'
+import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
@@ -58,7 +58,7 @@ export interface SearchControlProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => Promise<void | boolean>;
+  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>; //return false to avoid autoRefresh
   styleContext?: StyleContext;
 }
 
