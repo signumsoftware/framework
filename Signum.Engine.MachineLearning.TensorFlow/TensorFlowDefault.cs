@@ -2,9 +2,9 @@ using System;
 using Signum.Entities.MachineLearning;
 using Signum.Utilities;
 
-namespace Signum.Engine.MachineLearning.CNTK
+namespace Signum.Engine.MachineLearning.TensorFlow
 {
-    public static class CNTKDefault
+    public static class TensorFlowDefault
     {
         static readonly object Zero = 0;
         public static object? GetDefaultValue(PredictorCodification c)

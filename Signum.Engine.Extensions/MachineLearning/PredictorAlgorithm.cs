@@ -28,9 +28,10 @@ namespace Signum.Engine.MachineLearning
         public int TrainingExamples;
         public int Epoch;
         public double? LossTraining;
-        public double? EvaluationTraining;
+        public double? AccuracyTraining;
+
         public double? LossValidation;
-        public double? EvaluationValidation;
+        public double? AccuracyValidation;
 
         object?[]? array;
         public object?[] ToObjectArray()
@@ -41,9 +42,9 @@ namespace Signum.Engine.MachineLearning
                 TrainingExamples,
                 Epoch,
                 LossTraining,
-                EvaluationTraining,
+                AccuracyTraining,
                 LossValidation,
-                EvaluationValidation,
+                AccuracyValidation,
             });
         }
 
@@ -56,9 +57,9 @@ namespace Signum.Engine.MachineLearning
                 Epoch = Epoch,
                 TrainingExamples = TrainingExamples,
                 LossTraining = LossTraining?.CleanDouble(),
-                EvaluationTraining = EvaluationTraining?.CleanDouble(),
+                EvaluationTraining = AccuracyTraining?.CleanDouble(),
                 LossValidation = LossValidation?.CleanDouble(),
-                EvaluationValidation = EvaluationValidation?.CleanDouble(),
+                EvaluationValidation = AccuracyValidation?.CleanDouble(),
             }.Save();
         }
     }
@@ -228,7 +229,6 @@ namespace Signum.Engine.MachineLearning
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
         List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs);
-        string[] GetAvailableDevices();
         List<PredictorCodification> GenerateCodifications(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn, PredictorColumnBase column);
         IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredEncodingSymbols();
     }

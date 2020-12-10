@@ -4,7 +4,6 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
-		<Platforms>x86;x64;AnyCPU</Platforms>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
@@ -24,6 +23,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CNTK.CPUOnly" Version="2.7.0" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.1.0" />
 	</ItemGroup>
 </Project>

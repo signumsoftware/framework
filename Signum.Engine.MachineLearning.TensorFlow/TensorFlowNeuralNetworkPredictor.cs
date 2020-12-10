@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.MachineLearning;
-using CNTK;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
@@ -11,41 +10,30 @@ using Signum.Engine.Files;
 using Signum.Engine.Operations;
 using Signum.Entities.UserAssets;
 using System.IO;
+using static Tensorflow.Binding;
+using Tensorflow;
+using Tensorflow.Keras.Optimizers;
+using NumSharp;
 
-
-namespace Signum.Engine.MachineLearning.CNTK
+namespace Signum.Engine.MachineLearning.TensorFlow
 {
-    public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
+    public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
     {
-        public Dictionary<PredictorColumnEncodingSymbol, ICNTKEncoding> Encodings = new Dictionary<PredictorColumnEncodingSymbol, ICNTKEncoding>
+        public static string TempFile = "tempFile.ckpt";
+
+        public Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding> Encodings = new Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding>
         {
-            { DefaultColumnEncodings.None, new NoneCNTKEncoding() },
-            { DefaultColumnEncodings.OneHot, new OneHotCNTKEncoding() },
-            { DefaultColumnEncodings.NormalizeZScore, new NormalizeZScoreCNTKEncoding() },
-            { DefaultColumnEncodings.NormalizeMinMax, new NormalizeMinMaxCNTKEncoding() },
-            { DefaultColumnEncodings.NormalizeLog, new NormalizeLogCNTKEncoding() },
-            { DefaultColumnEncodings.SplitWords, new SplitWordsCNTKEncoding() },
+            { DefaultColumnEncodings.None, new NoneTFEncoding() },
+            { DefaultColumnEncodings.OneHot, new OneHotTFEncoding() },
+            { DefaultColumnEncodings.NormalizeZScore, new NormalizeZScoreTFEncoding() },
+            { DefaultColumnEncodings.NormalizeMinMax, new NormalizeMinMaxTFEncoding() },
+            { DefaultColumnEncodings.NormalizeLog, new NormalizeLogTFEncoding() },
+            { DefaultColumnEncodings.SplitWords, new SplitWordsTFEncoding() },
         };
 
         public void InitialSetup()
         {
-            if (!Environment.Is64BitProcess)
-                throw new InvalidOperationException("CNTK only works with starting projects compiled for x64");
-
-
-            /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
-            var dir = AppDomain.CurrentDomain.BaseDirectory;
-
-            if (!Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
-            {
-                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin");
-                if (!Directory.Exists(dir) || !Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
-                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "bin")}");
-            }
-
-            var oldPath = Environment.GetEnvironmentVariable("Path")!;
-            if (!oldPath.Contains(dir + ";"))
-                Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
+         
         }
 
         public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
@@ -63,24 +51,6 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Encodings.Keys;
         }
 
-        public string[] GetAvailableDevices()
-        {
-            InitialSetup();
-            return DeviceDescriptor.AllDevices().Select(a => a.AsString()).ToArray();
-        }
-
-        private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
-        {
-            if (!nnSettings.Device.HasText())
-                return DeviceDescriptor.UseDefaultDevice();
-
-            var dev = DeviceDescriptor.AllDevices().FirstOrDefault(a => a.AsString() == nnSettings.Device);
-            if(dev == null)
-                return DeviceDescriptor.UseDefaultDevice();
-
-            return dev;
-        }
-
         //Errors with CNTK: https://github.com/Microsoft/CNTK/issues/2614
         public void Train(PredictorTrainingContext ctx)
         {
@@ -89,24 +59,23 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            DeviceDescriptor device = GetDevice(nn);
-            Variable inputVariable = Variable.InputVariable(new[] { ctx.InputCodifications.Count }, DataType.Float, "input");
-            Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputCodifications.Count }, DataType.Float, "output");
+            Tensor inputVariable = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "input");
+            Tensor outputVariable = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "output");
 
-            Variable currentVar = inputVariable;
+            Tensor currentVar = inputVariable;
             nn.HiddenLayers.ForEach((layer, i) =>
             {
-                currentVar = NetworkBuilder.DenseLayer(currentVar, layer.Size, device, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
+                currentVar = NetworkBuilder.DenseLayer(currentVar, layer.Size, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
             });
-            Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputCodifications.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
+            Tensor calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputCodifications.Count, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
-            Function loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, calculatedOutputs, outputVariable);
-            Function evalError = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, calculatedOutputs, outputVariable);
+            Tensor loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, outputVariable, calculatedOutputs);
+            Tensor accuracy = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, outputVariable, calculatedOutputs);
 
             // prepare for training
-            Learner learner = NetworkBuilder.GetInitializer(calculatedOutputs.Parameters(), nn);
+            Optimizer optimizer = NetworkBuilder.GetOptimizer(nn);
 
-            Trainer trainer = Trainer.CreateTrainer(calculatedOutputs, loss, evalError, new List<Learner>() { learner });
+            Operation trainOperation = optimizer.minimize(loss);
 
             Random rand = p.Settings.Seed == null ?
                 new Random() :
@@ -117,87 +86,111 @@ namespace Signum.Engine.MachineLearning.CNTK
             var minibachtSize = nn.MinibatchSize;
             var numMinibatches = nn.NumMinibatches;
 
+
             Stopwatch sw = Stopwatch.StartNew();
             List<FinalCandidate> candidate = new List<FinalCandidate>();
-            for (int i = 0; i < numMinibatches; i++)
+
+            var config = new ConfigProto
             {
-                using (HeavyProfiler.Log("MiniBatch", () => i.ToString()))
+                IntraOpParallelismThreads = 1,
+                InterOpParallelismThreads = 1,
+                LogDevicePlacement = true
+            };
+
+            var saver = tf.train.Saver();
+
+            using (var sess = tf.Session(config))
+            {
+                sess.run(tf.global_variables_initializer());
+
+                for (int i = 0; i < numMinibatches; i++)
                 {
-                    ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
-
+                    using (HeavyProfiler.Log("MiniBatch", () => i.ToString()))
                     {
+                        ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
+
                         var trainMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(training)).ToList();
-                        using (Value inputValue = CreateValue(ctx, trainMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
-                        using (Value outputValue = CreateValue(ctx, trainMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
+
+                        var inputValue = CreateNDArray(ctx, trainMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn);
+                        var outputValue = CreateNDArray(ctx, trainMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn);
+
+                        using (HeavyProfiler.Log("TrainMinibatch", () => i.ToString())) 
                         {
-                            using (HeavyProfiler.Log("TrainMinibatch", () => i.ToString()))
-                                trainer.TrainMinibatch(new Dictionary<Variable, Value>()
-                                {
-                                    { inputVariable, inputValue },
-                                    { outputVariable, outputValue },
-                                }, false, device);
+                            sess.run(optimizer,
+                                (inputVariable, inputValue),
+                                (outputVariable, outputValue));
                         }
-                    }
 
-                    var ep = new EpochProgress
-                    {
-                        Ellapsed = sw.ElapsedMilliseconds,
-                        Epoch = i,
-                        TrainingExamples = (int)trainer.TotalNumberOfSamplesSeen(),
-                        LossTraining = trainer.PreviousMinibatchLossAverage(),
-                        EvaluationTraining = trainer.PreviousMinibatchEvaluationAverage(),
-                        LossValidation = null,
-                        EvaluationValidation = null,
-                    };
+                        if (ctx.StopTraining)
+                            p = ctx.Predictor = ctx.Predictor.ToLite().RetrieveAndRemember();
 
-                    ctx.Progresses.Enqueue(ep);
-
-                    if (ctx.StopTraining)
-                        p = ctx.Predictor = ctx.Predictor.ToLite().RetrieveAndRemember();
-
-                    var isLast = numMinibatches - nn.BestResultFromLast <= i;
-                    if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
-                    {
-                        if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
+                        var isLast = numMinibatches - nn.BestResultFromLast <= i;
+                        if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
                         {
-                            using (HeavyProfiler.LogNoStackTrace("Validation"))
+                            float loss_val = 100.0f;
+                            float accuracy_val = 0f;
+
+                            using (HeavyProfiler.Log("EvalTraining", () => i.ToString()))
                             {
-                                var validateMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(validation)).ToList();
+                                (loss_val, accuracy_val) = sess.run((loss, accuracy), 
+                                    (inputVariable, inputValue),
+                                    (outputVariable, outputValue));
+                            }
 
-                                using (Value inputValValue = CreateValue(ctx, validateMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
-                                using (Value outputValValue = CreateValue(ctx, validateMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
+                            var ep = new EpochProgress
+                            {
+                                Ellapsed = sw.ElapsedMilliseconds,
+                                Epoch = i,
+                                TrainingExamples = i * minibachtSize,
+                                LossTraining = loss_val,
+                                AccuracyTraining = accuracy_val,
+                                LossValidation = null,
+                                AccuracyValidation = null,
+                            };
+
+                            ctx.Progresses.Enqueue(ep);
+
+                            if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
+                            {
+                                using (HeavyProfiler.LogNoStackTrace("EvalValidation"))
                                 {
-                                    var inputs = new Dictionary<Variable, Value>()
-                                    {
-                                        { inputVariable, inputValValue },
-                                        { outputVariable, outputValValue },
-                                    };
+                                    var validateMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(validation)).ToList();
 
-                                    ep.LossValidation = loss.EvaluateAvg(inputs, device);
-                                    ep.EvaluationValidation = evalError.EvaluateAvg(inputs, device);
+                                    var inputValValue = CreateNDArray(ctx, validateMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn);
+                                    var outputValValue = CreateNDArray(ctx, validateMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn);
+
+                                    (loss_val, accuracy_val) = sess.run((loss, accuracy),
+                                    (inputVariable, inputValue),
+                                    (outputVariable, outputValue));
+
+
+                                    ep.LossValidation = loss_val;
+                                    ep.AccuracyValidation = accuracy_val;
+                                }
+                            }
+
+                            var progress = ep.SaveEntity(ctx.Predictor);
+
+                            if (isLast || ctx.StopTraining)
+                            {
+                                var save = saver.save(sess, TempFile);
+
+                                using (HeavyProfiler.LogNoStackTrace("FinalCandidate"))
+                                {
+                                    candidate.Add(new FinalCandidate
+                                    {
+                                        Model = null!,
+
+                                        ResultTraining = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationTraining, Loss = progress.LossTraining },
+                                        ResultValidation = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationValidation, Loss = progress.LossValidation },
+                                    });
                                 }
                             }
                         }
 
-                        var progress = ep.SaveEntity(ctx.Predictor);
-
-                        if (isLast || ctx.StopTraining)
-                        {
-                            using (HeavyProfiler.LogNoStackTrace("FinalCandidate"))
-                            {
-                                candidate.Add(new FinalCandidate
-                                {
-                                    Model = calculatedOutputs.Save(),
-
-                                    ResultTraining = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationTraining, Loss = progress.LossTraining },
-                                    ResultValidation = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationValidation, Loss = progress.LossValidation },
-                                });
-                            }
-                        }
+                        if (ctx.StopTraining)
+                            break;
                     }
-
-                    if (ctx.StopTraining)
-                        break;
                 }
             }
 
@@ -223,7 +216,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-        Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
+        NDArray CreateNDArray(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn)
         {
             using (HeavyProfiler.Log("CreateValue", () => $"Rows {rows.Count} Codifications {codificationCount}"))
             {
@@ -256,15 +249,15 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                         using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
                         {
-                            ICNTKEncoding encoding = Encodings.GetOrThrow(col.Encoding);
+                            ITensorFlowEncoding encoding = Encodings.GetOrThrow(col.Encoding);
 
-                            encoding.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
+                            encoding.EncodeValue(value ?? TensorFlowDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return Value.CreateBatch<float>(new int[] { codificationCount }, inputValues, device);
+                    return np.array(inputValues);
             }
         }
 
@@ -277,11 +270,16 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
             {
-                var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
-                lock (lockKey) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+                lock (lockKey)
                 {
+                    var graph = new Graph().as_default();
+                    using (var sess = tf.Session(graph))
+                    {
+
+
+                    }
+
                     Function calculatedOutputs = (Function)ctx.Model!;
-                    var device = GetDevice(nnSettings);
                     Value inputValue = GetValueForPredict(ctx, inputs, device);
 
                     var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
@@ -322,7 +320,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
         }
 
-        private Value GetValueForPredict(PredictorPredictContext ctx, List<PredictDictionary> inputs, DeviceDescriptor device)
+        private NDArray GetValueForPredict(PredictorPredictContext ctx, List<PredictDictionary> inputs)
         {
             using (HeavyProfiler.Log("GetValueForPredict", () => $"Inputs {inputs.Count} Codifications {ctx.InputCodifications.Count}"))
             {
@@ -360,13 +358,13 @@ namespace Signum.Engine.MachineLearning.CNTK
                         using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
                         {
                             var enc = Encodings.GetOrThrow(col.Encoding);
-                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
+                            enc.EncodeValue(value ?? TensorFlowDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return Value.CreateBatch<float>(new int[] { ctx.InputCodifications.Count }, inputValues, device);
+                    return np.array(inputValues);
             }
         }
 

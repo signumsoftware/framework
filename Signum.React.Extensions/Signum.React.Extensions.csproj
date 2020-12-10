@@ -7,7 +7,6 @@
 		<StartupObject></StartupObject>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
-		<Platforms>x64;x86;AnyCPU;linux64;win64;win86</Platforms>
 	</PropertyGroup>
 
 	<PropertyGroup>
