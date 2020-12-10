@@ -439,9 +439,14 @@ export function typeDefaultButtons(typeName: string, isEmbedded: boolean | undef
   if (isEmbedded)
     return "ok_cancel";
 
-  const typeInfo = tryGetTypeInfo(typeName);
-  if (typeInfo != null && typeInfo.entityKind == "Part" || typeInfo?.entityKind == "SharedPart")
-    return "ok_cancel";
+  const ti = tryGetTypeInfo(typeName);
+  if (ti != null) {
+    if (
+      ti.entityKind == undefined ||
+      ti.entityKind == "Part" ||
+      ti.entityKind == "SharedPart")
+      return "ok_cancel";
+  }
 
   return "close";
 }
