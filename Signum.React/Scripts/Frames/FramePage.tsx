@@ -3,6 +3,7 @@ import { RouteComponentProps } from 'react-router'
 import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
+import { Prompt } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
@@ -13,7 +14,7 @@ import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { useStateWithPromise, useForceUpdate, useMounted } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useWindowEvent, useUpdatedRef } from '../Hooks'
 import * as Operations from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
@@ -26,6 +27,7 @@ interface FramePageProps extends RouteComponentProps<{ type: string; id?: string
 
 interface FramePageState {
   pack: EntityPack<Entity>;
+  lastEntity?: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
@@ -34,6 +36,7 @@ interface FramePageState {
 export default function FramePage(p: FramePageProps) {
 
   const [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
+  const stateRef = useUpdatedRef(state);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
   const validationErrors = React.useRef<React.Component>(null);
@@ -50,6 +53,7 @@ export default function FramePage(p: FramePageProps) {
     loadEntity()
       .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
         pack: a.pack!,
+        lastEntity: JSON.stringify(a.pack!.entity),
         createNew: a.createNew,
         getComponent: getComponent,
         refreshCount: state ? state.refreshCount + 1 : 0
@@ -57,10 +61,15 @@ export default function FramePage(p: FramePageProps) {
       .done();
   }, [type, id, p.location.search]);
 
-  React.useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+
+  useWindowEvent("beforeunload", e => {
+    if (stateRef.current && hasChanges(stateRef.current)) {
+      e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+      e.returnValue = '';   // Chrome requires returnValue to be set
+    }
   }, []);
 
+  useWindowEvent("keydown", handleKeyDown, []);
 
   function handleKeyDown(e: KeyboardEvent) {
     if (!e.openedModals && buttonBar.current)
@@ -204,8 +213,10 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
+
   return (
     <div className="normal-control">
+      <Prompt when={true} message={() => hasChanges(state)}/>
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
@@ -237,6 +248,15 @@ export default function FramePage(p: FramePageProps) {
   }
 }
 
+function hasChanges(state: FramePageState) {
+  const entity = state.pack.entity;
+  const ge = GraphExplorer.propagateAll(entity);
+  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
+    return JavascriptMessage.loseCurrentChanges.niceToString();
+  }
+
+  return true;
+}
 
 
 

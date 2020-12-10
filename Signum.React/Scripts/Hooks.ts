@@ -109,11 +109,20 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   return { size, setContainer: setContainerMemo };
 }
 
-export function useDocumentEvent(type: string, handler: (e: Event) => void, deps: any[]) {
+export function useDocumentEvent<K extends keyof DocumentEventMap>(type: K, handler: (this: Document, ev: DocumentEventMap[K]) => any, deps: any[]) {
   React.useEffect(() => {
     document.addEventListener(type, handler);
     return () => {
       document.removeEventListener(type, handler);
+    }
+  }, deps);
+}
+
+export function useWindowEvent<K extends keyof WindowEventMap>(type: K, handler: (this: Window, ev: WindowEventMap[K]) => void, deps: any[]) {
+  React.useEffect(() => {
+    window.addEventListener(type, handler);
+    return () => {
+      window.removeEventListener(type, handler);
     }
   }, deps);
 }
