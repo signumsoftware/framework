@@ -4,7 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Platforms>x64;x86;AnyCPU</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

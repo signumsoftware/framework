@@ -5,7 +5,6 @@
     <UserSecretsId>SignumTest</UserSecretsId>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Platforms>x64;x86;AnyCPU</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
