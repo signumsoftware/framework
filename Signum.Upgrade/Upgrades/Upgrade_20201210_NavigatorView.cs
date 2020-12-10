@@ -18,8 +18,8 @@ namespace Signum.Upgrade.Upgrades
         {
             uctx.ForeachCodeFile("*.ts, *.tsx", file =>
             {
-                file.Replace("Navigator.navigate", "Navigator.view");
-                file.Replace("Navigator.isNavigable", "Navigator.isViewable");
+                file.Replace("Navigator.navigate(", "Navigator.view(");
+                file.Replace("Navigator.isNavigable(", "Navigator.isViewable(");
             });
         }
     }
