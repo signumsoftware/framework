@@ -20,6 +20,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
 
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? CustomOptionName { get; set; }
+
         public string? GetName() => Name;
 
         [StringLengthValidator(Min = 1, Max = 100)]
@@ -42,6 +45,7 @@ namespace Signum.Entities.Workflow
             {
                 MainEntityType = this.From!.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
+                CustomOptionName = this.CustomOptionName,
                 Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
@@ -55,6 +59,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowConnectionModel)model;
             this.Name = wModel.Name;
+            this.CustomOptionName = wModel.CustomOptionName;
             this.Type = wModel.Type;
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
@@ -72,6 +77,7 @@ namespace Signum.Entities.Workflow
         Normal,
         Approve,
         Decline,
+        CustomOption,
         Jump,
         ScriptException,
     }
@@ -91,6 +97,9 @@ namespace Signum.Entities.Workflow
 
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
+
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? CustomOptionName { get; set; }
 
         public bool NeedCondition { get; set; }
         public bool NeedOrder { get; set; }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, CustomDecissionOptionEmbedded, 
 } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
@@ -220,7 +220,20 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
 
-          <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+        <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+
+        <ValueLine ctx={ctx.subCtx(a => a.hasCustomOptions)} onChange={forceUpdate}/>
+
+        {ctx.value.hasCustomOptions ? <EntityTable ctx={ctx.subCtx(a => a.customDecissionOptions)}
+          columns={EntityTable.typedColumns<CustomDecissionOptionEmbedded>([
+            {
+              property: c => c.name,
+            },
+            {
+              property: c => c.style,
+            },
+          ])}
+        /> : null}
 
           {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
