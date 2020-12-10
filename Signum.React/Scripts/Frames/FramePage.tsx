@@ -31,6 +31,7 @@ interface FramePageState {
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
+  avoidPrompt?: boolean;
 }
 
 export default function FramePage(p: FramePageProps) {
@@ -162,6 +163,7 @@ export default function FramePage(p: FramePageProps) {
     frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
+    avoidPrompt: () => state.avoidPrompt = true,
     onReload: (pack, reloadComponent, callback) => {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
@@ -177,7 +179,8 @@ export default function FramePage(p: FramePageProps) {
                 setState({
                   pack: packEntity,
                   getComponent: gc,
-                  refreshCount: state.refreshCount + 1
+                  refreshCount: state.refreshCount + 1,
+                  
                 }).then(callback).done();
             })
             .done();
@@ -249,6 +252,10 @@ export default function FramePage(p: FramePageProps) {
 }
 
 function hasChanges(state: FramePageState) {
+
+  if (state.avoidPrompt)
+    return true;
+
   const entity = state.pack.entity;
   const ge = GraphExplorer.propagateAll(entity);
   if (entity.modified && JSON.stringify(entity) != state.lastEntity) {

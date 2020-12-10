@@ -313,6 +313,9 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   click() {
+    if (this.frame.avoidPrompt) //othwersie FrontPage will prompt then executing and navigating
+      this.frame.avoidPrompt();
+
     if (this.settings && this.settings.onClick)
       this.settings.onClick(this);
     else
