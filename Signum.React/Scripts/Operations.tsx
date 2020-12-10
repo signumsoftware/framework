@@ -22,6 +22,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
 import { FilterOperation } from "./Signum.Entities.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
+import { SearchControlLoaded } from "./Search";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -211,6 +212,7 @@ export class ContextualOperationContext<T extends Entity> {
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
+
   defaultContextualClick(...args: any[]) {
     defaultContextualClick(this, ...args);
   }
@@ -218,6 +220,17 @@ export class ContextualOperationContext<T extends Entity> {
   constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
     this.operationInfo = operationInfo;
     this.context = context;
+  }
+
+
+  getSearchControlColumnValue(tokenName: string): unknown {
+    if (!(this.context.container instanceof SearchControlLoaded))
+      return undefined;
+
+    var sc = this.context.container;
+    var row = sc.state.selectedRows!.first();
+    var val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
+    return val;
   }
 }
 

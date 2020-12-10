@@ -456,6 +456,7 @@ export interface EntityFrame {
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowExchangeEntity: boolean;
+  avoidPrompt?: () => void;
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
 }
