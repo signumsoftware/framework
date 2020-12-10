@@ -32,6 +32,10 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
+        public bool HasCustomOptions { get; set; }
+
+        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
+
         [Ignore, QueryableProperty]
         [NoRepeatValidator]
         public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
@@ -120,6 +124,9 @@ namespace Signum.Entities.Workflow
                 Timer = we.Timer,
                 BpmnElementId = we.BpmnElementId
             }).ToMList());
+
+            model.HasCustomOptions = this.HasCustomOptions;
+            model.CustomDecissionOptions.AssignMList(this.CustomDecissionOptions);
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -138,6 +145,8 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
+            this.HasCustomOptions = wModel.HasCustomOptions;
+            this.CustomDecissionOptions.AssignMList(wModel.CustomDecissionOptions);
             // We can not set boundary timers in model
             //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
@@ -170,6 +179,27 @@ namespace Signum.Entities.Workflow
                 missing.HasText() ? "The ViewProps " + missing + " are mandatory in " + dv.ViewName : null
                 ).DefaultToNull();
         }
+    }
+
+    [Serializable]
+    public class CustomDecissionOptionEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string Name { get; set; }
+
+        public CustomDecissionStyle Style { get; set; }
+    }
+
+    public enum CustomDecissionStyle
+    {
+        Light,
+        Dark,
+        Primary,
+        Secondary,
+        Success,
+        Info,
+        Warning,
+        Danger,
     }
 
     public class WorkflowActivityInfo
@@ -310,6 +340,10 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
+
+        public bool HasCustomOptions { get; set; }
+
+        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
 
         [PreserveOrder]
         [NoRepeatValidator]
