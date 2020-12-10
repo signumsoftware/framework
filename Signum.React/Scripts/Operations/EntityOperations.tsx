@@ -136,7 +136,7 @@ interface OperationButtonProps extends ButtonProps {
   children?: React.ReactNode
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -148,7 +148,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   const disabled = !!canExecute;
 
-  var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
+  var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
   if (group) {
 

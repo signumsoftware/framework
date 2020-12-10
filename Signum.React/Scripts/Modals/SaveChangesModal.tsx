@@ -42,9 +42,9 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
     <Modal show={show} onExited={handleOnExited}
       dialogClassName={classes("message-modal")}
       onHide={handleCancelClicked} autoFocus={true}>
-      <div className={classes("modal-header", "dialog-header-warning")}>
+      <div className={classes("modal-header", "dialog-header-wait")}>
         <span>
-          <FontAwesomeIcon icon={"save"} />&nbsp;&nbsp;{SaveChangesMessage.ThereAreChanges.niceToString()}
+          {SaveChangesMessage.ThereAreChanges.niceToString()}
         </span>
       </div>
       <div className="modal-body">
@@ -52,7 +52,7 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
       </div>
       <div className="modal-footer">
         <div className="btn-toolbar">
-          {p.eocs.map(eoc => <OperationButton key={eoc.operationInfo.key} eoc={eoc} onClick={() => handleButtonClicked(eoc)} />)}
+          {p.eocs.map(eoc => <OperationButton key={eoc.operationInfo.key} eoc={eoc} avoidAlternatives onOperationClick={() => handleButtonClicked(eoc)} />)}
           <button
             className="btn btn-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}

@@ -12,17 +12,17 @@ import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage,
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { EntityOperationContext, operationInfos } from '../Operations'
+import { EntityOperationContext, notifySuccess, operationInfos } from '../Operations'
 import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { instanceOf } from 'prop-types';
 import { useStateWithPromise, useForceUpdate } from '../Hooks'
 import { Modal } from 'react-bootstrap'
 import { ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 import WidgetEmbedded from './WidgetEmbedded'
+import SaveChangesModal from '../Modals/SaveChangesModal';
 
 interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
   title?: string;
@@ -60,6 +60,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component>(null);
   const validationErrors = React.useRef<ValidationErrorsHandle>(null);
+  const frameRef = React.useRef<EntityFrame | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
 
@@ -100,7 +101,12 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     }).then(callback).done();
   }
 
-  function getSaveChangesOperations(frame: EntityFrame) {
+  function getSaveChangesOperations() {
+
+    const frame = frameRef.current;
+
+    if (frame == null)
+      return [];
 
     const ti = tryGetTypeInfo(frame.pack.entity.Type)
 
@@ -113,11 +119,11 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       tag: "SaveChangesModal"
     };
 
-    const eocs = ti == null ? [] : operationInfos(ti)
+    return ti == null ? [] : operationInfos(ti)
       .filter(oi => oi.canBeNew || !pack.entity.isNew)
       .filter(oi => oi.operationType == "Execute" && oi.canBeModified)
-      .map(oi => EntityOperationContext.fromEntityPack(frame, pack as EntityPack<Entity>, oi.key))
-      .filter(eoc => eoc!.isVisibleInButtonBar(buttonContext));
+      .map(oi => EntityOperationContext.fromEntityPack(frame, pack as EntityPack<Entity>, oi.key)!)
+      .filter(eoc => eoc.isVisibleInButtonBar(buttonContext));
   }
 
   function handleOkClicked() {
@@ -172,17 +178,21 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function handleCancelClicked() {
 
     if (hasChanges() && !p.avoidPromptLoseChange) {
-      MessageModal.show({
-        title: SaveChangesMessage.ThereAreChanges.niceToString(),
-        message: JavascriptMessage.loseCurrentChanges.niceToString(),
-        buttons: "yes_no",
-        style: "warning",
-        icon: "warning"
-      }).then(result => {
-        if (result == "yes") {
-          setShow(false);
-        }
-      }).done();
+      SaveChangesModal.show({ eocs: getSaveChangesOperations() })
+        .then(result => {
+          if (result == "loseChanges")
+            setShow(false);
+
+          if (result instanceof EntityOperationContext) {
+
+            result.onExecuteSuccess = pack => {
+              notifySuccess();
+              frameRef.current!.onClose(pack);
+            };
+
+            result.defaultClick();
+          }
+        }).done();
     }
     else {
       setShow(false);
@@ -246,6 +256,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
     };
+
+    frameRef.current = frame;
 
     const styleOptions: StyleOptions = {
       readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
