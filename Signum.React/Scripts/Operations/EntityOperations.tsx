@@ -132,6 +132,7 @@ interface OperationButtonProps extends ButtonProps {
   canExecute?: string | null;
   className?: string;
   outline?: boolean;
+  avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
   children?: React.ReactNode
 }
@@ -260,8 +261,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 
-    const s = eoc.settings;
-    return withIcon(text, s?.icon, s?.iconColor, s?.iconAlign);
+    return withIcon(text, eoc?.icon, eoc?.iconColor, eoc?.iconAlign);
   }
 
   function handleOnClick(event: React.MouseEvent<any>) {

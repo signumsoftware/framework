@@ -261,6 +261,9 @@ export class EntityOperationContext<T extends Entity> {
   onDeleteSuccess?: () => void;
 
   color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+  iconAlign?: "start" | "end";
   outline?: boolean;
   group?: EntityOperationGroup;
   keyboardShortcut?: KeyboardShortcut;
@@ -297,6 +300,9 @@ export class EntityOperationContext<T extends Entity> {
     var s = this.settings;
     this.color = s?.color ?? Defaults.getColor(this.operationInfo);
     this.outline = s?.outline ?? Defaults.getOutline(this.operationInfo);
+    this.icon = s?.icon ?? Defaults.getIcon(this.operationInfo) as any;
+    this.iconColor = s?.iconColor;
+    this.iconAlign = s?.iconAlign;
     this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
     this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
@@ -497,6 +503,11 @@ export namespace Defaults {
   export function getOutline(oi: OperationInfo): boolean {
     return oi.operationType == "Delete" ? true :
       oi.operationType == "Execute" && Defaults.isSave(oi) ? false : true;
+  }
+
+  export function getIcon(oi: OperationInfo): IconProp | undefined {
+    return oi.operationType == "Delete" ? ["far", "trash-alt"] :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? ["far", "save"] : undefined;
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
