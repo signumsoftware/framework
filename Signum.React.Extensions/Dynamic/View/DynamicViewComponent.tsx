@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityTable } from '@framework/Lines'
-import { ModifiableEntity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, JavascriptMessage, NormalWindowMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
@@ -83,7 +83,7 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
 
     if (dynamicView.isNew || node != dynamicView.viewContent) {
       return MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         style: "warning",

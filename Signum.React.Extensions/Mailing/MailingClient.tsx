@@ -184,7 +184,7 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
 export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
 
   Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
-    .then(pack => pack && Navigator.navigate(pack))
+    .then(pack => pack && Navigator.view(pack))
     .done();
 }
 

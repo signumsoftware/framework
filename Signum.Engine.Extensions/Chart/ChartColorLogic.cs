@@ -10,6 +10,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using System.Drawing;
 using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Chart
 {
@@ -85,7 +86,7 @@ namespace Signum.Engine.Chart
         {
             using (Transaction tr = new Transaction())
             {
-                Type type = model.Type.ToType();
+                Type type = TypeLogic.GetType(model.TypeName);
 
                 giDeleteColors.GetInvoker(type)();
 
@@ -119,7 +120,7 @@ namespace Signum.Engine.Chart
 
                 return new ChartPaletteModel
                 {
-                    Type = type.ToTypeEntity(),
+                    TypeName = TypeLogic.GetCleanName(type),
                     Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                     {
                         Related = (Lite<Entity>)l,
@@ -138,7 +139,7 @@ namespace Signum.Engine.Chart
 
                     return new ChartPaletteModel
                     {
-                        Type = type.ToTypeEntity(),
+                        TypeName = type.ToTypeEntity().CleanName,
                         Colors = dic.Select(kvp => new ChartColorEntity
                         {
                             Related = lites.GetOrThrow(kvp.Key),
@@ -150,7 +151,7 @@ namespace Signum.Engine.Chart
                 {
                     return new ChartPaletteModel
                     {
-                        Type = type.ToTypeEntity(),
+                        TypeName = type.ToTypeEntity().CleanName,
                         Colors = dic.Select(kvp => new ChartColorEntity
                         {
                             Related = Lite.Create(type, kvp.Key),

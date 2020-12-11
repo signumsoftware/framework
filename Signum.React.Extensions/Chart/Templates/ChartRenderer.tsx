@@ -20,9 +20,11 @@ import { FullscreenComponent } from './FullscreenComponent'
 export interface ChartRendererProps {
   chartRequest: ChartRequestModel;
   loading: boolean;
+
   data?: ChartClient.ChartTable;
   lastChartRequest?: ChartRequestModel;
-  onReload?: (e: React.MouseEvent<any>) => void;
+  onReload?: (e?: React.MouseEvent<any>) => void;
+  autoRefresh: boolean;
   onCreateNew?: (e: React.MouseEvent<any>) => void;
   typeInfos?: TypeInfo[];
 }
@@ -47,9 +49,10 @@ export default function ChartRenderer(p: ChartRendererProps) {
           <ReactChart
             chartRequest={p.chartRequest}
             data={p.data}
-            loading={p.loading}
-            onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!)}
+          loading={p.loading}
+          onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined)}
             parameters={parameters}
+            onReload={p.onReload}
             onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
         }
       </ErrorBoundary>
@@ -57,7 +60,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, onReload?: () => void) {
 
   var newWindow = e.ctrlKey || e.button == 1;
 
@@ -65,7 +68,9 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
     if (newWindow)
       window.open(Navigator.navigateRoute(r.entity));
     else
-      Navigator.navigate(r.entity).done();
+      Navigator.view(r.entity)
+        .then(() => onReload && onReload())
+        .done();
   } else {
     const filters = cr.filterOptions.map(f => {
       let f2 = withoutPinned(f);
@@ -110,6 +115,8 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
     if (newWindow)
       window.open(Finder.findOptionsPath(fo));
     else
-      Finder.explore(fo).done();
+      Finder.explore(fo)
+        .then(() => onReload && onReload())
+        .done();
   }
 }

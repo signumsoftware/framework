@@ -56,7 +56,6 @@ namespace Signum.Entities.Chart
                 if (Set(ref chartScript, value))
                 {
                     this.GetChartScript().SynchronizeColumns(this, null);
-                    NotifyAllColumns();
                 }
             }
         }
@@ -72,14 +71,6 @@ namespace Signum.Entities.Chart
 
         [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
-
-        void NotifyAllColumns()
-        {
-            foreach (var item in Columns)
-            {
-                item.NotifyAll();
-            }
-        }
 
         [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
@@ -119,13 +110,6 @@ namespace Signum.Entities.Chart
                 throw new InvalidOperationException($"Error Synchronizing columns for '{this}'. Maybe the ChartScript has changed. Consider opening UserChart and saving it again.");
             }
         }
-
-        public void InvalidateResults(bool needNewQuery)
-        {
-            Notify(() => Invalidator);
-        }
-
-        public bool Invalidator { get { return true; } }
 
         public XElement ToXml(IToXmlContext ctx)
         {

@@ -18,7 +18,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
 
   function reload(bc: ButtonsContext) {
     const pal = (bc.pack.entity as ChartPaletteModel);
-    ChartPaletteClient.API.fetchColorPalette(pal.type.cleanName, true)
+    ChartPaletteClient.API.fetchColorPalette(pal.typeName, true)
       .then(newPack => {
         ChartPaletteClient.setColorPalette(newPack!);
         bc.frame.onReload({ entity: newPack!, canExecute: {} });
@@ -38,7 +38,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
 
   function handleDeleteClick(bc: ButtonsContext) {
     const pal = (bc.pack.entity as ChartPaletteModel);
-    ChartPaletteClient.API.deleteColorPalette(pal.type.cleanName)
+    ChartPaletteClient.API.deleteColorPalette(pal.typeName)
       .then(newPack => {
         notifySuccess();
         reload(bc);
@@ -49,7 +49,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
   function handleNewPaletteClick(bc: ButtonsContext) {
     const pal = (bc.pack.entity as ChartPaletteModel);
     SelectorModal.chooseElement(["Category10", "Category20", "Category20b", "Category20c"], { title: ChartMessage.ChooseABasePalette.niceToString() })
-      .then(palette => palette && ChartPaletteClient.API.newColorPalette(pal.type.cleanName, palette)
+      .then(palette => palette && ChartPaletteClient.API.newColorPalette(pal.typeName, palette)
         .then(newPack => {
           notifySuccess();
           reload(bc);
@@ -72,7 +72,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
   return (
     <div>
       <div className="form-compact">
-        <EntityLine ctx={ctx.subCtx(f => f.type)} readOnly />
+        <ValueLine ctx={ctx.subCtx(f => f.typeName)} readOnly />
       </div>
       <table className="table table-sm sf-auth-rules">
         <thead>

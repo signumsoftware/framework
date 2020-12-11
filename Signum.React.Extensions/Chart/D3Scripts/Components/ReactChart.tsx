@@ -17,6 +17,7 @@ export interface ReactChartProps {
   data?: ChartClient.ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
+  onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
@@ -39,6 +40,7 @@ export default function ReactChart(p: ReactChartProps) {
           parameters: p.parameters,
           loading: p.loading,
           onDrillDown: p.onDrillDown,
+          onReload: p.onReload,
           height: size.height,
           width: size.width,
           initialLoad: initialLoad,

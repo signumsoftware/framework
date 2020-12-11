@@ -123,7 +123,8 @@ namespace Signum.React.Authorization
                 using (var ms = new MemoryStream(array))
                 using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
                 {
-                    return JsonExtensions.FromJsonBytes<AuthToken>(ds.ReadAllBytes(), EntityJsonContext.FullJsonSerializerOptions);
+                    var bytes = ds.ReadAllBytes();
+                    return JsonExtensions.FromJsonBytes<AuthToken>(bytes, EntityJsonContext.FullJsonSerializerOptions);
                 }
             }
             catch (Exception)

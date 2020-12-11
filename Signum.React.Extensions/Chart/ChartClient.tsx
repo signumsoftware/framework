@@ -74,6 +74,7 @@ export interface ChartScriptProps {
   parameters: { [name: string]: string },
   loading: boolean;
   onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
+  onReload: (() => void) | undefined;
   width: number;
   height: number;
   initialLoad: boolean;

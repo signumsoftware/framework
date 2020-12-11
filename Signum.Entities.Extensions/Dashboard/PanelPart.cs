@@ -246,6 +246,8 @@ namespace Signum.Entities.Dashboard
 
         public bool CreateNew { get; set; } = false;
 
+        public bool AutoRefresh { get; set; } = false;
+
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserChart + "");
 
@@ -270,6 +272,7 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("ShowData", ShowData),
                 new XAttribute("AllowChangeShowData", AllowChangeShowData),
                 CreateNew ? new XAttribute("CreateNew", CreateNew) : null!,
+                AutoRefresh ? new XAttribute("AutoRefresh", AutoRefresh) : null!,
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
@@ -278,6 +281,7 @@ namespace Signum.Entities.Dashboard
             ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
             AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
+            AutoRefresh = element.Attribute("AutoRefresh")?.Value.ToBool() ?? false;
             UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
         }
     }

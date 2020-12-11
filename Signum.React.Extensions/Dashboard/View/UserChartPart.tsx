@@ -58,8 +58,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
-  function handleReload(e: React.MouseEvent<any>) {
-    e.preventDefault();
+  function handleReload(e?: React.MouseEvent<any>) {
+    e?.preventDefault();
     makeQuery();
   }
 
@@ -72,7 +72,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     return SelectorModal.chooseType(typeInfos!)
       .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
         .then(props => Constructor.constructPack(ti.name, props)))
-      .then(pack => pack && Navigator.navigate(pack))
+      .then(pack => pack && Navigator.view(pack))
       .then(() => makeQuery())
       .done();
   }
@@ -102,6 +102,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           data={result?.chartTable}
           loading={result === null}
           onReload={handleReload}
+          autoRefresh={p.part.autoRefresh}
           typeInfos={typeInfos}
           onCreateNew={handleOnCreateNew}
         />

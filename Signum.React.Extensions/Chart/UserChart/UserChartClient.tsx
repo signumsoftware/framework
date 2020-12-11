@@ -86,7 +86,7 @@ export module Converter {
 
       cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
 
-      cr.parameters = uq.parameters!.map(mle => ({
+      cr.parameters = uq.parameters.map(mle => ({
         rowId: null,
         element: ChartParameterEmbedded.New({
           name: mle.element.name,
@@ -94,7 +94,7 @@ export module Converter {
         })
       }));
 
-      cr.columns = uq.columns!.map(mle => {
+      cr.columns = uq.columns.map(mle => {
         var t = mle.element.token;
 
         return ({
@@ -113,11 +113,14 @@ export module Converter {
           })
         })
       });
-      
-      return cr;
+
+      return ChartClient.getChartScript(cr.chartScript)
+        .then(cs => {
+          ChartClient.synchronizeColumns(cr, cs);
+          return cr;
+        });
     });
   }
-
 
   export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
     const cs = ChartRequestModel.New({ queryKey: uq.query!.key });

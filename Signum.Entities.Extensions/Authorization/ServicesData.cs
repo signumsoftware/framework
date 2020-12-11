@@ -166,8 +166,10 @@ namespace Signum.Entities.Authorization
 
         public AuthThumbnail? Queries { get; set; }
 
-        public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions { get; set; }
+        public List<TypeConditionSymbol> AvailableConditions { get; set; }
     }
+
+  
 
     [Serializable]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>

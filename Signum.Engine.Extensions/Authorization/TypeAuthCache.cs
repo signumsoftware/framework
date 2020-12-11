@@ -200,7 +200,7 @@ namespace Signum.Entities.Authorization
                                Resource = r,
                                AllowedBase = cache.GetAllowedBase(type),
                                Allowed = cache.GetAllowed(type),
-                               AvailableConditions = TypeConditionLogic.ConditionsFor(type).ToReadOnly()
+                               AvailableConditions = TypeConditionLogic.ConditionsFor(type).ToList()
                            }).ToMList();
         }
 

@@ -28,7 +28,7 @@ export default function PrintPanelPage(p: {}) {
   function handlePrintClick(e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: ValueSearchControl) {
     e.preventDefault();
     API.createPrintProcess(fileType)
-      .then(p => p && Navigator.navigate(p))
+      .then(p => p && Navigator.view(p))
       .then(p => vsc.refreshValue())
       .done();
   }

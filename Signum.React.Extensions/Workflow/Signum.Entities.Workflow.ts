@@ -215,8 +215,27 @@ export type ConnectionType =
   "Normal" |
   "Approve" |
   "Decline" |
+  "CustomOption" |
   "Jump" |
   "ScriptException";
+
+export const CustomDecissionOptionEmbedded = new Type<CustomDecissionOptionEmbedded>("CustomDecissionOptionEmbedded");
+export interface CustomDecissionOptionEmbedded extends Entities.EmbeddedEntity {
+  Type: "CustomDecissionOptionEmbedded";
+  name: string;
+  style: CustomDecissionStyle;
+}
+
+export const CustomDecissionStyle = new EnumType<CustomDecissionStyle>("CustomDecissionStyle");
+export type CustomDecissionStyle =
+  "Light" |
+  "Dark" |
+  "Primary" |
+  "Secondary" |
+  "Success" |
+  "Info" |
+  "Warning" |
+  "Danger";
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =
@@ -335,6 +354,8 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
   type: WorkflowActivityType;
   comments: string | null;
   requiresOpen: boolean;
+  hasCustomOptions: boolean;
+  customDecissionOptions: Entities.MList<CustomDecissionOptionEmbedded>;
   boundaryTimers: Entities.MList<WorkflowEventEntity>;
   estimatedDuration: number | null;
   viewName: string | null;
@@ -366,6 +387,8 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
   name: string;
   type: WorkflowActivityType;
   requiresOpen: boolean;
+  hasCustomOptions: boolean;
+  customDecissionOptions: Entities.MList<CustomDecissionOptionEmbedded>;
   boundaryTimers: Entities.MList<WorkflowEventModel>;
   estimatedDuration: number | null;
   script: WorkflowScriptPartEmbedded | null;
@@ -432,6 +455,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
   from: IWorkflowNodeEntity;
   to: IWorkflowNodeEntity;
   name: string | null;
+  customOptionName: string | null;
   bpmnElementId: string;
   type: ConnectionType;
   condition: Entities.Lite<WorkflowConditionEntity> | null;
@@ -445,6 +469,7 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
   Type: "WorkflowConnectionModel";
   mainEntityType: Basics.TypeEntity;
   name: string | null;
+  customOptionName: string | null;
   needCondition: boolean;
   needOrder: boolean;
   type: ConnectionType;

@@ -18,7 +18,7 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         [UniqueIndex]
-        public Guid Guid { get; set; }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public TypeEntity MainEntityType { get; set; }
 
@@ -30,7 +30,7 @@ namespace Signum.Entities.Workflow
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("WorkflowActionEntity",
+            return new XElement("WorkflowAction",
                  new XAttribute("Guid", Guid),
                  new XAttribute("Name", Name),
                  new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),

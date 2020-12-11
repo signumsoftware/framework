@@ -18,7 +18,7 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         [UniqueIndex]
-        public Guid Guid { get; set; }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public TypeEntity MainEntityType { get; set; }
 
