@@ -40,7 +40,7 @@ namespace Signum.Engine.Json
             {
                 writer.WritePropertyName("entity");
                 using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((PropertyRoute.Root(lite.Entity.GetType()), (ModifiableEntity)(IEntity)lite.EntityOrNull)))
-                    JsonSerializer.Serialize(writer, lite.Entity);
+                    JsonSerializer.Serialize(writer, lite.Entity, options);
             }
 
             writer.WriteEndObject();
@@ -84,7 +84,7 @@ namespace Signum.Engine.Json
                         {
                             reader.Read();
                             var converter = (JsonConverterWithExisting<Entity>)options.GetConverter(typeof(Entity));
-                            converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
+                            entity = converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
                         }
                         break;
                     default: throw new JsonException("unexpected property " + propName);

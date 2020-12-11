@@ -772,10 +772,10 @@ function getTypeIfNew(val: any): string[] {
 
 
 
-export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
+export function exploreOrView(findOptions: FindOptions): Promise<void> {
   return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
-      return Navigator.navigate(list[0]);
+      return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
       return explore(findOptions);
   });
@@ -1082,7 +1082,6 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
 
         fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needToStr));
       }
-
       else {
         if (Array.isArray(fo.value))
           throw new Error("Unespected array for operation " + fo.operation);
@@ -1106,7 +1105,15 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
     case "Decimal": return nanToNull(parseFloat(val));
-    case "DateTime": return val == null ? null : val;
+    case "DateTime": {
+
+      if (val == null)
+        return null;
+
+      var dt = DateTime.fromISO(val);
+
+      return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
+    }
     case "Lite":
       {
         const lite = convertToLite(val);
@@ -1684,12 +1691,12 @@ export const entityFormatRules: EntityFormatRule[] = [
   {
     name: "View",
     isApplicable: sc => true,
-    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
       <EntityLink lite={row.entity}
         inSearch={true}
         onNavigated={sc?.handleOnNavigated}
         getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.navigate == "InPlace"} className="sf-line-button sf-view">
+        inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
         <span title={EntityControlMessage.View.niceToString()}>
           {EntityBaseController.viewIcon}
         </span>

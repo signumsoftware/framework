@@ -127,8 +127,9 @@ if (!supportIE && (browser == ""old edge"" || browser == ""ie"")) {
 
     loadNextScript();
 }");
-            });
 
+                file.RemoveAllLines(a => a.Contains(@" src=""@Url.Content(""~/dist/"""));
+            });
         }
     }
 }

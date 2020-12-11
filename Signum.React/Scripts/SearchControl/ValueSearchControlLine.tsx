@@ -190,7 +190,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (this.props.onViewEntity)
       this.props.onViewEntity(entity);
 
-    Navigator.navigate(entity)
+    Navigator.view(entity)
       .then(() => {
         this.refreshValue();
         this.props.onExplored && this.props.onExplored();
@@ -226,7 +226,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             Finder.parseFilterOptions(fo.filterOptions || [], false, qd)
               .then(fos => Finder.getPropsFromFilters(tn, fos)
                 .then(props => Constructor.constructPack(tn, props))
-                .then(pack => pack && Navigator.navigate(pack!, {
+                .then(pack => pack && Navigator.view(pack!, {
                   getViewPromise: getViewPromise as any,
                   createNew: () => Finder.getPropsFromFilters(tn, fos)
                     .then(props => Constructor.constructPack(tn, props)!),

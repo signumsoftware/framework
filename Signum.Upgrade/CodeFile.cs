@@ -42,11 +42,15 @@ namespace Signum.Upgrade
             set { _content = value; }
         }
 
+        Encoding? encoding;
+
         private void ReadIfNecessary()
         {
             if(_content == null)
             {
-                _originalContent = _content = File.ReadAllText(Path.Combine(Uctx.RootFolder, FilePath), GetEncoding(FilePath));
+                var bytes = File.ReadAllBytes(Path.Combine(Uctx.RootFolder, FilePath));
+                encoding = GetEncoding(FilePath, bytes);
+                _originalContent = _content = encoding.GetString(bytes[encoding.Preamble.Length..]);
             }
         }
 
@@ -59,16 +63,31 @@ namespace Signum.Upgrade
                 return;
 
             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Modified " + FilePath);
-            File.WriteAllText(Path.Combine(this.Uctx.RootFolder, FilePath), _content, GetEncoding(FilePath));
+            File.WriteAllText(Path.Combine(this.Uctx.RootFolder, FilePath), _content, encoding!);
         }
 
-        internal static Encoding GetEncoding(string filePath)
+        internal static Encoding GetEncoding(string filePath, byte[]? bytes)
         {
-            if (Path.GetFileName(filePath) == "packages.json")
-                return new UTF8Encoding(false);
+            if (bytes != null)
+                return DetectUTFBOM(bytes);
 
-            return Encoding.UTF8;
+            switch (Path.GetExtension(filePath))
+            {
+                case ".csproj":
+                case ".cs": return Encoding.UTF8;
+                default: return UTF8NoBOM;
+            }
         }
+
+        public static Encoding DetectUTFBOM(byte[] bytes)
+        {
+            if (Encoding.UTF8.Preamble.SequenceEqual(bytes[0..Encoding.UTF8.Preamble.Length]))
+                return Encoding.UTF8;
+
+            return UTF8NoBOM;
+        }
+
+        static readonly Encoding UTF8NoBOM = new UTF8Encoding(false);
 
         public void Replace(string searchFor, string replaceBy)
         {
@@ -144,7 +163,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -174,7 +193,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from + 1, to - from - 1);
-                lines.InsertRange(from + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(from + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -199,7 +218,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[from]);
                 lines.RemoveRange(from, (to - from) + 1);
-                lines.InsertRange(from, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -216,7 +235,7 @@ namespace Signum.Upgrade
                 }
                 var indent = GetIndent(lines[pos]);
                 lines.RemoveRange(pos, 1);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -232,9 +251,16 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
+        }
+
+        private string IndentAndReplace(string a, string indent)
+        {
+            return a.Replace("Southwind", this.Uctx.ApplicationName)
+                .Replace("southwind", this.Uctx.ApplicationName.ToLower())
+                .Indent(indent);
         }
 
         public void InsertAfterLastLine(Expression<Predicate<string>> condition, string text)
@@ -248,7 +274,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos + 1, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -264,7 +290,7 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[pos]);
-                lines.InsertRange(pos, text.Lines().Select(a => indent + a.Replace("Southwind", this.Uctx.ApplicationName)));
+                lines.InsertRange(pos, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }
@@ -272,7 +298,7 @@ namespace Signum.Upgrade
         public void ProcessLines(Func<List<string>, bool> process)
         {
             var separator = this.Content.Contains("\r\n") ? "\r\n" : "\n";
-            var lines = this.Content.Split(separator).ToList();
+            var lines = Regex.Split(this.Content, "\r?\n").ToList();
 
             if (process(lines))
             {

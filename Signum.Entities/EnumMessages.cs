@@ -95,20 +95,12 @@ namespace Signum.Entities
         ImpossibleToSaveIntegrityCheckFailed,
         [Description("Loading {0}...")]
         Loading0,
-        [Description(@"There are changes that haven't been saved.
-Lose changes?")]
-        LoseChanges,
         NoDirectErrors,
         Ok,
         Reload,
         [Description(@"The {0} has errors:
 {1}")]
         The0HasErrors1,
-        ThereAreChanges,
-        [Description(@"There are new changes that will be lost.
-
-    Continue?")]
-        ThereAreChangesContinue,
         ThereAreErrors,
         Message,
         [Description("New {0}")]
@@ -277,13 +269,17 @@ Lose changes?")]
 
     public enum NormalControlMessage
     {
-        Save,
         [Description("View for type {0} is not allowed")]
         ViewForType0IsNotAllowed,
-
-        SaveChangesFirst
+        SaveChangesFirst,
     }
 
+    public enum SaveChangesMessage
+    {
+        ThereAreChanges,
+        YoureTryingToCloseAnEntityWithChanges,
+        LoseChanges,
+    }
 
     public enum CalendarMessage
     {

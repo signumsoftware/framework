@@ -7,10 +7,11 @@ import {
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
-import { TypeContext, EntityFrame } from './TypeContext';
+import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
+import * as Navigator from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew } from './Operations/EntityOperations';
@@ -20,6 +21,8 @@ import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
 import { FilterOperation } from "./Signum.Entities.DynamicQuery";
+import { FunctionalAdapter } from "./Modals";
+import { SearchControlLoaded } from "./Search";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -209,6 +212,7 @@ export class ContextualOperationContext<T extends Entity> {
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
+
   defaultContextualClick(...args: any[]) {
     defaultContextualClick(this, ...args);
   }
@@ -217,9 +221,21 @@ export class ContextualOperationContext<T extends Entity> {
     this.operationInfo = operationInfo;
     this.context = context;
   }
+
+
+  getSearchControlColumnValue(tokenName: string): unknown {
+    if (!(this.context.container instanceof SearchControlLoaded))
+      return undefined;
+
+    var sc = this.context.container;
+    var row = sc.state.selectedRows!.first();
+    var val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
+    return val;
+  }
 }
 
 export class EntityOperationContext<T extends Entity> {
+  
 
   static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     if (!ctx.frame)
@@ -258,6 +274,9 @@ export class EntityOperationContext<T extends Entity> {
   onDeleteSuccess?: () => void;
 
   color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+  iconAlign?: "start" | "end";
   outline?: boolean;
   group?: EntityOperationGroup;
   keyboardShortcut?: KeyboardShortcut;
@@ -269,10 +288,34 @@ export class EntityOperationContext<T extends Entity> {
     this.operationInfo = operationInfo;
   }
 
+  isVisibleInButtonBar(ctx: ButtonsContext): unknown {
+    if (ctx.isOperationVisible && !ctx.isOperationVisible(this))
+      return false;
+
+    var ov = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IOperationVisible | null;
+    if (ov?.isOperationVisible && !ov.isOperationVisible(this))
+      return false;
+
+    var eos = this.settings;
+    if (eos?.isVisible && !eos.isVisible(this))
+      return false;
+
+    if (eos?.hideOnCanExecute && this.canExecute)
+      return false;
+
+    if (Navigator.isReadOnly(ctx.pack, { ignoreTypeIsReadonly: true }) && !(eos?.showOnReadOnly))
+      return false;
+
+    return true;
+  }
+
   complete() {
     var s = this.settings;
     this.color = s?.color ?? Defaults.getColor(this.operationInfo);
     this.outline = s?.outline ?? Defaults.getOutline(this.operationInfo);
+    this.icon = s?.icon ?? Defaults.getIcon(this.operationInfo) as any;
+    this.iconColor = s?.iconColor;
+    this.iconAlign = s?.iconAlign;
     this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
     this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
@@ -283,6 +326,9 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   click() {
+    if (this.frame.avoidPrompt) //othwersie FrontPage will prompt then executing and navigating
+      this.frame.avoidPrompt();
+
     if (this.settings && this.settings.onClick)
       this.settings.onClick(this);
     else
@@ -466,22 +512,27 @@ export namespace Defaults {
   }
 
   export function getColor(oi: OperationInfo): BsColor {
-    return oi.operationType == OperationType.Delete ? "danger" :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? "primary" : "secondary";
+    return oi.operationType == "Delete" ? "danger" :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? "primary" : "secondary";
   }
 
   export function getOutline(oi: OperationInfo): boolean {
-    return oi.operationType == OperationType.Delete ? true :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? false : true;
+    return oi.operationType == "Delete" ? true :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? false : true;
+  }
+
+  export function getIcon(oi: OperationInfo): IconProp | undefined {
+    return oi.operationType == "Delete" ? ["far", "trash-alt"] :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? ["far", "save"] : undefined;
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {
-    return oi.operationType == OperationType.ConstructorFrom ? CreateGroup : undefined;
+    return oi.operationType == "ConstructorFrom" ? CreateGroup : undefined;
   }
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
-    return oi.operationType == OperationType.Delete ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == OperationType.Execute && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s", keyCode: 83 }) : undefined;
+    return oi.operationType == "Delete" ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s", keyCode: 83 }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
@@ -497,9 +548,9 @@ export namespace Defaults {
 }
 
 export function isEntityOperation(operationType: OperationType) {
-  return operationType == OperationType.ConstructorFrom ||
-    operationType == OperationType.Execute ||
-    operationType == OperationType.Delete;
+  return operationType == "ConstructorFrom" ||
+    operationType == "Execute" ||
+    operationType == "Delete";
 }
 
 

@@ -258,7 +258,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       return;
     }
 
-    Navigator.navigate(lite)
+    Navigator.view(lite)
       .then(() => { this.refreshValue(); this.props.onExplored && this.props.onExplored(); })
       .done();
   }

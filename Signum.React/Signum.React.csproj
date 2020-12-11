@@ -38,7 +38,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="4.1.5" />
+    <PackageReference Include="Npgsql" Version="5.0.0" />
     <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
     <PackageReference Include="Signum.TSGenerator" Version="5.0.0" />
   </ItemGroup>

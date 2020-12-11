@@ -65,13 +65,12 @@ export interface OperationInfo {
   hasStates?: boolean;
 }
 
-export enum OperationType {
-  Execute = "Execute" as any,
-  Delete = "Delete" as any,
-  Constructor = "Constructor" as any,
-  ConstructorFrom = "ConstructorFrom" as any,
-  ConstructorFromMany = "ConstructorFromMany" as any
-}
+export type OperationType =
+  "Execute" |
+  "Delete" |
+  "Constructor" |
+  "ConstructorFrom" |
+  "ConstructorFromMany";
 
 //https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
@@ -1409,6 +1408,10 @@ export class QueryTokenString<T> {
 
   average(): QueryTokenString<T> {
     return new QueryTokenString<T>(this.token + ".Average");
+  }
+
+  hasValue(): QueryTokenString<boolean> {
+    return new QueryTokenString<boolean>(this.token + ".HasValue");
   }
 }
 

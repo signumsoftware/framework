@@ -69,7 +69,7 @@ namespace Signum.Upgrade
             }
             else
             {
-                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName));
+                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName, null));
             }
         }
 
@@ -127,16 +127,11 @@ namespace Signum.Upgrade
             }
         }
 
-
-
-    
-
         public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
-
             foreach (var dir in directories)
             {
-                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a=>a.Trim()).ToArray(), DefaultIgnoreDirectories);
+                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
                     codeFile.WarningLevel = showWarnings;

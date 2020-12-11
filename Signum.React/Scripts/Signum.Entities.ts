@@ -353,7 +353,6 @@ export interface ModelEntity extends ModifiableEntity {
 }
 
 export module NormalControlMessage {
-  export const Save = new MessageKey("NormalControlMessage", "Save");
   export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
 }
@@ -367,13 +366,10 @@ export module NormalWindowMessage {
   export const FixErrors = new MessageKey("NormalWindowMessage", "FixErrors");
   export const ImpossibleToSaveIntegrityCheckFailed = new MessageKey("NormalWindowMessage", "ImpossibleToSaveIntegrityCheckFailed");
   export const Loading0 = new MessageKey("NormalWindowMessage", "Loading0");
-  export const LoseChanges = new MessageKey("NormalWindowMessage", "LoseChanges");
   export const NoDirectErrors = new MessageKey("NormalWindowMessage", "NoDirectErrors");
   export const Ok = new MessageKey("NormalWindowMessage", "Ok");
   export const Reload = new MessageKey("NormalWindowMessage", "Reload");
   export const The0HasErrors1 = new MessageKey("NormalWindowMessage", "The0HasErrors1");
-  export const ThereAreChanges = new MessageKey("NormalWindowMessage", "ThereAreChanges");
-  export const ThereAreChangesContinue = new MessageKey("NormalWindowMessage", "ThereAreChangesContinue");
   export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
   export const Message = new MessageKey("NormalWindowMessage", "Message");
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
@@ -431,6 +427,12 @@ export type PropertyOperation =
 export module QuickLinkMessage {
   export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
   export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");
+}
+
+export module SaveChangesMessage {
+  export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
+  export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
+  export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
 }
 
 export module SearchMessage {
