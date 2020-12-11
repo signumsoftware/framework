@@ -57,7 +57,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 var entityExpression = baseExpression.ExtractEntity(true);
 
-                return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
+                return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Signum.Entities.DynamicQuery
 
                 Expression result = Expression.Property(entityExpression, PropertyInfo);
 
-                return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
+                return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
             }
         }
 

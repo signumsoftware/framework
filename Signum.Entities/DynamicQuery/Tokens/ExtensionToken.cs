@@ -81,7 +81,7 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
             var result = BuildExtension(parent.Type.CleanType().UnNullify(), Key, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
+            return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
         public PropertyRoute? propertyRoute;
