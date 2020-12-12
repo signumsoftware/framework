@@ -17,12 +17,12 @@ export { FileTypeSymbol };
 export interface FileLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
   download?: DownloadBehaviour;
+  showFileIcon?: boolean;
   dragAndDrop?: boolean;
   dragAndDropMessage?: string;
   fileType?: FileTypeSymbol;
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
-  helpText?: React.ReactChild;
   maxSizeInBytes?: number;
 }
 
@@ -97,6 +97,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       <FileDownloader
         configuration={p.configuration}
         download={p.download}
+        showFileIcon={p.showFileIcon}
         entityOrLite={val}
         htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
@@ -117,6 +118,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
 }), (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
-  download: "SaveAs",
-  dragAndDrop: true
+  download: "ViewOrSave",
+  dragAndDrop: true,
+  showFileIcon: true
 } as FileLineProps;

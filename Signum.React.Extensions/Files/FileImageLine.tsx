@@ -22,7 +22,6 @@ export interface FileImageLineProps extends EntityBaseProps {
   fileType?: FileTypeSymbol;
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
-  helpText?: React.ReactChild;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
 }

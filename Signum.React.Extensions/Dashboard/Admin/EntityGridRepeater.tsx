@@ -145,6 +145,8 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
   };
 
   handleItemsRowDragOver = (e: React.DragEvent<any>, row: number) => {
+    if (this.drag == null)
+      return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     const de = e.nativeEvent as DragEvent;

@@ -63,8 +63,8 @@ function monkeyPatchCreateContextualMenuItem() {
     if (!Navigator.isViewable(PackageOperationEntity))
       return base(coc, defaultClick);
 
-    if (coc.operationInfo.operationType == OperationType.Constructor ||
-      coc.operationInfo.operationType == OperationType.ConstructorFromMany)
+    if (coc.operationInfo.operationType == "Constructor" ||
+      coc.operationInfo.operationType == "ConstructorFromMany")
       return base(coc, defaultClick);
 
     if (coc.context.lites.length <= 1)
@@ -143,7 +143,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
         return;
       }
       else {
-        Navigator.navigate(pack);
+        Navigator.view(pack);
       }
     }).done();
   }).done();

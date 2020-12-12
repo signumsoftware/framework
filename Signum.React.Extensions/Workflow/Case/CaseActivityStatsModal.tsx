@@ -46,7 +46,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
               <Tabs id="statsTabs">
                 {
                   caseActivityStats.map(a =>
-                    <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!}
+                    <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!.toString()}
                       title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.doneBy.toStr} {DoneType.niceToString(a.doneType!)} <mark>({DateTime.fromISO(a.doneDate).toRelative()})</mark></span> as any}>
                       <CaseActivityStatsComponent stats={a} caseEntity={p.case} />
                     </Tab>)
@@ -101,7 +101,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
       queryName: CaseEntity,
       filterOptions: [{ token: CaseEntity.token().entity(e => e.parentCase), value: p.caseEntity, frozen: true }]
     }, { autoSelectIfOne: true })
-      .then(c => c && Navigator.navigate(c))
+      .then(c => c && Navigator.view(c))
       .done();
   }
 

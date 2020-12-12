@@ -64,7 +64,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
 
   function handleEdit() {
     Navigator.API.fetchAndForget(p.chartRequestView.userChart!)
-      .then(userChart => Navigator.navigate(userChart))
+      .then(userChart => Navigator.view(userChart))
       .then(() => reloadList())
       .done();
   }

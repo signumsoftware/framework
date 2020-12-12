@@ -27,14 +27,13 @@ export default function renderMultiLines({ data, width, height, parameters, load
   //xRule.debugX(chart)
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 20,
     content: '*',
     ticks: 4,
     _3: 5,
-    labels0: 15,
-    labels1: 15,
+    labels: 30,
     _4: 10,
     title: 15,
     _5: 5,

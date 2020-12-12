@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
-import { ModifiableEntity, Entity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, Entity, JavascriptMessage, NormalWindowMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
 import MessageModal from '@framework/Modals/MessageModal'
 import { DynamicViewTabs } from './DynamicViewTabs'
@@ -127,7 +127,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
   handleTypeRemove = () => {
     if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!))
       return MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         icon: "warning",

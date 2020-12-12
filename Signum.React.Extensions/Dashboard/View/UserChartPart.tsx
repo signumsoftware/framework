@@ -17,10 +17,6 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 
-interface ResultOrError {
-
-}
-
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
@@ -46,7 +42,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
       </div>
     );
-
   }
 
   if (!chartRequest)
@@ -63,8 +58,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
-  function handleReload(e: React.MouseEvent<any>) {
-    e.preventDefault();
+  function handleReload(e?: React.MouseEvent<any>) {
+    e?.preventDefault();
     makeQuery();
   }
 
@@ -77,7 +72,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     return SelectorModal.chooseType(typeInfos!)
       .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
         .then(props => Constructor.constructPack(ti.name, props)))
-      .then(pack => pack && Navigator.navigate(pack))
+      .then(pack => pack && Navigator.view(pack))
       .then(() => makeQuery())
       .done();
   }
@@ -107,6 +102,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           data={result?.chartTable}
           loading={result === null}
           onReload={handleReload}
+          autoRefresh={p.part.autoRefresh}
           typeInfos={typeInfos}
           onCreateNew={handleOnCreateNew}
         />

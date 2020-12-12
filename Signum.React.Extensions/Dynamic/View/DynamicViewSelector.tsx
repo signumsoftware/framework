@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { DynamicViewSelectorEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { EntityLine, TypeContext } from '@framework/Lines'
-import { Entity, JavascriptMessage, NormalWindowMessage, is } from '@framework/Signum.Entities'
+import { Entity, JavascriptMessage, NormalWindowMessage, is, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
@@ -29,7 +29,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   function handleTypeRemove() {
     if (scriptChangedRef.current)
       return MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.loseCurrentChanges.niceToString(),
         buttons: "yes_no",
         icon: "warning",

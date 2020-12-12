@@ -1420,7 +1420,7 @@
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Link" Description="Enlace" />
   </Type>
-  <Type Name="LinkListPartEntity" Description="Elemento de lista de vínculo">
+  <Type Name="LinkListPartEntity" Description="Parte lista de vínculos">
     <Member Name="Links" Description="Enlaces" />
     <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
@@ -2636,7 +2636,7 @@
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="UserChartPartEntity" Description="Gráfico de usuario parte">
+  <Type Name="UserChartPartEntity" Description="Parte gráfico de usuario ">
     <Member Name="AllowChangeShowData" Description="Permitir cambio de datos mostrados" />
     <Member Name="RequiresTitle" Description="Requiere título" />
     <Member Name="ShowData" Description="Mostrar datos" />

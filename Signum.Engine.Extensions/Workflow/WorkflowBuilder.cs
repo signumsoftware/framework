@@ -341,6 +341,8 @@ namespace Signum.Engine.Workflow
         }
 
         public void Delete() {
+            Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow.Is(this.workflow)).UnsafeDelete();
+            Database.Query<WorkflowConnectionEntity>().Where(a => a.To.Lane.Pool.Workflow.Is(this.workflow)).UnsafeDelete();
             this.pools.SingleEx().Value.DeleteAll(null);
             this.workflow.Cases().UnsafeDelete();
             this.workflow.Delete();

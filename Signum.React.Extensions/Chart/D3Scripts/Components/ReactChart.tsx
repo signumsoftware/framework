@@ -17,6 +17,7 @@ export interface ReactChartProps {
   data?: ChartClient.ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
+  onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
@@ -24,15 +25,14 @@ export interface ReactChartProps {
 
 export default function ReactChart(p: ReactChartProps) {
 
-  const initalLoadEnabled = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
-  const oldData = useThrottle(p.data, 200, { enabled: initalLoadEnabled});
-  const initialLoad = oldData == null && p.data != null && initalLoadEnabled;
+  const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
+  const oldData = useThrottle(p.data, 200, { enabled: isSimple});
+  const initialLoad = oldData == null && p.data != null && isSimple;
 
   const { size, setContainer } = useSize();
 
-  var animated = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   return (
-    <div className={classes("sf-chart-container", animated ? "sf-chart-animable" : "")} ref={setContainer} >
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,
@@ -40,6 +40,7 @@ export default function ReactChart(p: ReactChartProps) {
           parameters: p.parameters,
           loading: p.loading,
           onDrillDown: p.onDrillDown,
+          onReload: p.onReload,
           height: size.height,
           width: size.width,
           initialLoad: initialLoad,
@@ -49,5 +50,7 @@ export default function ReactChart(p: ReactChartProps) {
   );
 }
 
-
 ReactChart.maxRowsForAnimation = 500;
+
+
+

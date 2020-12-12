@@ -367,7 +367,7 @@ namespace Signum.Entities.UserQueries
                     new XAttribute("Indentation", Indentation),
                     new XAttribute("Token", Token!.Token.FullKey()),
                     new XAttribute("Operation", Operation!),
-                    new XAttribute("Value", ValueString ?? ""),
+                    ValueString == null ? null! : new XAttribute("Value", ValueString),
                     Pinned?.ToXml(ctx)!);
             }
         }

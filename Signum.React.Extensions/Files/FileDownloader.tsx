@@ -4,11 +4,13 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
+import { extensionInfo } from './FilesClient'
 import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-export type DownloadBehaviour = "SaveAs" | "View" | "None";
+export type DownloadBehaviour = "SaveAs" | "View" | "ViewOrSave" | "None";
 
 export interface FileDownloaderProps {
   entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
@@ -16,12 +18,21 @@ export interface FileDownloaderProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   children?: React.ReactNode;
+  showFileIcon?: boolean;
+}
+
+const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+function getFileName(toStr: string) {
+  if (units.some(u => toStr.endsWith(" " + u)))
+    return toStr.beforeLast(" - ");
+
+  return toStr;
 }
 
 export function FileDownloader(p: FileDownloaderProps) {
 
-  function handleOnClick(e: React.MouseEvent<any>) {
-    e.preventDefault();
+  function handleOnClick(e: React.MouseEvent, save: boolean) {
     const entityOrLite = p.entityOrLite;
     var promise = isModifiableEntity(entityOrLite) ? Promise.resolve(entityOrLite) :
       Navigator.API.fetchAndRemember(entityOrLite as Lite<IFile & Entity>);
@@ -32,14 +43,15 @@ export function FileDownloader(p: FileDownloaderProps) {
       if (!configuration)
         throw new Error("No configuration registered in FileDownloader.configurations for ");
 
-      if (p.download == "SaveAs") {
+      if (save) {
         if (entity.binaryFile)
           downloadBase64(e, entity.binaryFile, entity.fileName!);
         else
           configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
       } else {
-        if (entity.binaryFile)
-          viewBase64(e, entity.binaryFile, entity.fileName!);
+        if (entity.binaryFile) {
+          viewBase64(e, entity.binaryFile, entity.fileName!); //view without mime type is problematic
+        }
         else
           configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
       }
@@ -51,26 +63,47 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   const toStr = getToString(entityOrLite);
 
-  const fileName = toStr!.tryBeforeLast(" - ") ?? toStr; //Hacky
+  const fileName = getFileName(toStr); //Hacky
+
+  var info = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
 
   return (
-    <a
-      href="#"
-      onClick={handleOnClick}
-      download={p.download == "View" ? undefined : fileName}
-      title={toStr ?? undefined}
-      target="_blank"
-      {...p.htmlAttributes}>
-      {p.children ?? toStr}
-    </a>
+    <div {...p.htmlAttributes}>
+      <a
+        href="#"
+        onClick={e => {
+          e.preventDefault();
+          handleOnClick(e, p.download == "SaveAs");
+        }}
+        title={toStr ?? undefined}
+        target="_blank"
+      >
+        {p.children ??
+          <>
+            {p.showFileIcon && <FontAwesomeIcon className="mr-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
+            {toStr}
+          </>}
+      </a>
+      {p.download == "ViewOrSave" &&
+        <a href="#"
+          className="sf-view sf-line-button"
+          onClick={e => {
+            e.preventDefault();
+            handleOnClick(e, true);
+          }}>
+          <FontAwesomeIcon className="ml-1 sf-pointer" icon={["fas", "download"]} />
+        </a>
+      }
+    </div>
   );
 }
 
 FileDownloader.defaultProps = {
-  download: "SaveAs",
+  download: "ViewOrSave",
+  showFileIcon: true,
 }
 
-export const configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = { };
+export const configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
 
 export function registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>) {
   configurtions[type.typeName] = configuration as FileDownloaderConfiguration<IFile>;
@@ -136,7 +169,9 @@ function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: 
 function viewBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
   e.preventDefault();
 
-  const blob = Services.b64toBlob(binaryFile);
+  const info = extensionInfo[fileName.tryAfterLast(".")?.toLocaleLowerCase()!];
+
+  const blob = Services.b64toBlob(binaryFile, info?.mimeType);
 
   const url = URL.createObjectURL(blob);
 

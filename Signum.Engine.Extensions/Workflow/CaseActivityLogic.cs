@@ -176,6 +176,11 @@ namespace Signum.Engine.Workflow
                         e.Case,
                     });
 
+                sb.Schema.EntityEvents<CaseActivityEntity>().Saved += (e, args) =>
+                {
+                    if (args.WasNew && e.WorkflowActivity is WorkflowActivityEntity wa && wa.Type == WorkflowActivityType.Script)
+                        WorkflowScriptRunner.WakeupOnCommit();
+                };
 
                 sb.Include<CaseActivityExecutedTimerEntity>()
                     .WithExpressionFrom((CaseActivityEntity ca) => ca.ExecutedTimers())

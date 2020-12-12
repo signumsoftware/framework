@@ -37,6 +37,7 @@ namespace Signum.Entities.Dashboard
 
         [ImplementedBy(
             typeof(UserChartPartEntity),
+            typeof(CombinedUserChartPartEntity),
             typeof(UserQueryPartEntity),
             typeof(ValueUserQueryListPartEntity),
             typeof(LinkListPartEntity))]
@@ -245,6 +246,8 @@ namespace Signum.Entities.Dashboard
 
         public bool CreateNew { get; set; } = false;
 
+        public bool AutoRefresh { get; set; } = false;
+
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserChart + "");
 
@@ -269,6 +272,7 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("ShowData", ShowData),
                 new XAttribute("AllowChangeShowData", AllowChangeShowData),
                 CreateNew ? new XAttribute("CreateNew", CreateNew) : null!,
+                AutoRefresh ? new XAttribute("AutoRefresh", AutoRefresh) : null!,
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
@@ -277,9 +281,64 @@ namespace Signum.Entities.Dashboard
             ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
             AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
+            AutoRefresh = element.Attribute("AutoRefresh")?.Value.ToBool() ?? false;
             UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
         }
     }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class CombinedUserChartPartEntity : Entity, IPartEntity
+    {
+        [PreserveOrder, NoRepeatValidator]
+        public MList<UserChartEntity> UserCharts { get; set; } = new MList<UserChartEntity>();
+
+        public bool ShowData { get; set; } = false;
+
+        public bool AllowChangeShowData { get; set; } = false;
+
+        public bool CombinePinnedFiltersWithSameLabel { get; set; } = true;
+
+        public bool UseSameScale { get; set; }
+
+        public override string ToString()
+        {
+            return UserCharts.ToString(", ");
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
+        public IPartEntity Clone()
+        {
+            return new CombinedUserChartPartEntity
+            {
+                UserCharts = this.UserCharts.ToMList(),
+            };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("CombinedUserChartPart",
+                new XAttribute("ShowData", ShowData),
+                new XAttribute("AllowChangeShowData", AllowChangeShowData),
+                new XAttribute("CombinePinnedFiltersWithSameLabel", CombinePinnedFiltersWithSameLabel),
+                new XAttribute("UseSameScale", UseSameScale),
+                UserCharts.Select(uc => new XElement("UserChart", new XAttribute("Guid", ctx.Include(uc)))));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(uc.Attribute("Guid")!.Value))).ToList();
+            ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
+            AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
+            CombinePinnedFiltersWithSameLabel = element.Attribute("CombinePinnedFiltersWithSameLabel")?.Value.ToBool() ?? false;
+            UseSameScale = element.Attribute("UseSameScale")?.Value.ToBool() ?? false;
+            UserCharts.Synchronize(newUserCharts);
+        }
+    }
+
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity

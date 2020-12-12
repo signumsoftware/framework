@@ -11,6 +11,17 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
+export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
+  Type: "CombinedUserChartPart";
+  userCharts: Entities.MList<Chart.UserChartEntity>;
+  showData: boolean;
+  allowChangeShowData: boolean;
+  combinePinnedFiltersWithSameLabel: boolean;
+  useSameScale: boolean;
+  requiresTitle: boolean;
+}
+
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
   "None" |
@@ -101,6 +112,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   showData: boolean;
   allowChangeShowData: boolean;
   createNew: boolean;
+  autoRefresh: boolean;
   requiresTitle: boolean;
 }
 

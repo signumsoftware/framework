@@ -1294,7 +1294,7 @@ NodeUtils.register<SearchControlNode>({
     allowChangeColumns={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
     create={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
     onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
-    navigate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
+    view={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
     refreshKey={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
     maxResultsHeight={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
     onSearch={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onSearch, NodeUtils.isFunctionOrNull)}
@@ -1337,7 +1337,7 @@ NodeUtils.register<SearchControlNode>({
 
         /* Set entity properties here... */
         /* pack.entity.[propertyName] = ... */
-        modules.Navigator.navigate(pack).done();
+        modules.Navigator.view(pack).done();
     }).done();
 }`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />

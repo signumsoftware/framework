@@ -28,7 +28,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   //xRule.debugX(chart)
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 5,
     content: '*',

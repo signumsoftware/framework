@@ -27,13 +27,15 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartPaletteModel : ModelEntity
     {   
-        public TypeEntity Type { get; set; }
+        public string TypeName { get; set; }
         
         public MList<ChartColorEntity> Colors { get; set; } = new MList<ChartColorEntity>();
 
         public override string ToString()
         {
-            return ChartMessage.ColorsFor0.NiceToString().FormatWith(Type.CleanName);
+            var type = TypeEntity.TryGetType(TypeName);
+
+            return ChartMessage.ColorsFor0.NiceToString().FormatWith(type?.NiceName() ?? TypeName);
         }
     }
 }
