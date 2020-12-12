@@ -3,6 +3,7 @@ import { RouteComponentProps } from 'react-router'
 import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
+import { Prompt } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
@@ -13,7 +14,7 @@ import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { useStateWithPromise, useForceUpdate, useMounted } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useWindowEvent, useUpdatedRef } from '../Hooks'
 import * as Operations from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
@@ -26,13 +27,17 @@ interface FramePageProps extends RouteComponentProps<{ type: string; id?: string
 
 interface FramePageState {
   pack: EntityPack<Entity>;
+  lastEntity?: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
+  createNew?: () => Promise<EntityPack<Entity> | undefined>;
+  avoidPrompt?: boolean;
 }
 
 export default function FramePage(p: FramePageProps) {
 
   const [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
+  const stateRef = useUpdatedRef(state);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
   const validationErrors = React.useRef<React.Component>(null);
@@ -47,24 +52,30 @@ export default function FramePage(p: FramePageProps) {
 
   React.useEffect(() => {
     loadEntity()
-      .then(pack => loadComponent(pack).then(getComponent => mounted.current ? setState({
-        pack: pack,
+      .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
+        pack: a.pack!,
+        lastEntity: JSON.stringify(a.pack!.entity),
+        createNew: a.createNew,
         getComponent: getComponent,
         refreshCount: state ? state.refreshCount + 1 : 0
       }) : undefined))
       .done();
   }, [type, id, p.location.search]);
 
-  React.useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+
+  useWindowEvent("beforeunload", e => {
+    if (stateRef.current && hasChanges(stateRef.current)) {
+      e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+      e.returnValue = '';   // Chrome requires returnValue to be set
+    }
   }, []);
 
+  useWindowEvent("keydown", handleKeyDown, []);
 
   function handleKeyDown(e: KeyboardEvent) {
     if (!e.openedModals && buttonBar.current)
       buttonBar.current.handleKeyDown(e);
   }
-
 
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
@@ -72,7 +83,7 @@ export default function FramePage(p: FramePageProps) {
   }
 
 
-  function loadEntity(): Promise<EntityPack<Entity>> {
+  function loadEntity(): Promise<{ pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(p.location.search);
 
@@ -81,9 +92,13 @@ export default function FramePage(p: FramePageProps) {
         throw new Error("No dataForChildWindow in parent found!")
       }
 
-      var pack = window.opener.dataForChildWindow;
+      var pack = window.opener.dataForChildWindow as EntityPack<Entity>;
       window.opener.dataForChildWindow = undefined;
-      return Promise.resolve(pack);
+      var txt = JSON.stringify(pack);
+      return Promise.resolve({
+        pack,
+        createNew: () => Promise.resolve(JSON.parse(txt))
+      });
     }
 
     if (id) {
@@ -95,17 +110,26 @@ export default function FramePage(p: FramePageProps) {
 
       return Navigator.API.fetchEntityPack(lite)
         .then(pack => {
-          return Promise.resolve(pack);
+          return Promise.resolve({
+            pack,
+            createNew: undefined
+          });
         });
 
     } else {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
-        const oi = Operations.operationInfos(ti).single(a => a.operationType == OperationType.Constructor && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key).then(pack => pack!);
+        const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
+        return Operations.API.construct(ti.name, oi.key).then(pack => ({
+          pack: pack!,
+          createNew: () => Operations.API.construct(ti.name, oi.key)
+        }));
       }
 
-      return Constructor.constructPack(ti.name).then(pack => pack as EntityPack<Entity>);
+      return Constructor.constructPack(ti.name).then(pack => ({
+        pack: pack! as EntityPack<Entity>,
+        createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
+      }));
     }
   }
 
@@ -139,6 +163,7 @@ export default function FramePage(p: FramePageProps) {
     frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
+    avoidPrompt: () => state.avoidPrompt = true,
     onReload: (pack, reloadComponent, callback) => {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
@@ -152,15 +177,20 @@ export default function FramePage(p: FramePageProps) {
             .then(gc => {
               if (mounted.current)
                 setState({
-                  getComponent: gc,
                   pack: packEntity,
-                  refreshCount: state.refreshCount + 1
+                  getComponent: gc,
+                  refreshCount: state.refreshCount + 1,
+                  
                 }).then(callback).done();
             })
             .done();
         }
         else {
-          setState({ pack: packEntity, getComponent: state.getComponent, refreshCount: state.refreshCount + 1 }).then(callback).done();
+          setState({
+            pack: packEntity,
+            getComponent: state.getComponent,
+            refreshCount: state.refreshCount + 1
+          }).then(callback).done();
         }
       }
     },
@@ -171,7 +201,8 @@ export default function FramePage(p: FramePageProps) {
       forceUpdate()
     },
     refreshCount: state.refreshCount,
-    allowChangeEntity: true,
+    createNew: state.createNew,
+    allowExchangeEntity: true,
     prefix: "framePage"
   };
 
@@ -185,8 +216,10 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
+
   return (
     <div className="normal-control">
+      <Prompt when={true} message={() => hasChanges(state)}/>
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
@@ -218,6 +251,19 @@ export default function FramePage(p: FramePageProps) {
   }
 }
 
+function hasChanges(state: FramePageState) {
+
+  if (state.avoidPrompt)
+    return true;
+
+  const entity = state.pack.entity;
+  const ge = GraphExplorer.propagateAll(entity);
+  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
+    return JavascriptMessage.loseCurrentChanges.niceToString();
+  }
+
+  return true;
+}
 
 
 

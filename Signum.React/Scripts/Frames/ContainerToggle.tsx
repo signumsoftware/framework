@@ -33,7 +33,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
       <a className="expand-window d-none d-md-block" onClick={handleExpandToggle} href="#" >
         <FontAwesomeIcon icon={fluid ? "compress" : "expand"} />
       </a>
-      <ErrorBoundary refreshKey={AppContext.history.location.pathname + AppContext.history.location.search}>
+      <ErrorBoundary deps={[AppContext.history.location.pathname + AppContext.history.location.search]}>
         {React.Children.map(p.children, c => c && React.cloneElement(c as React.ReactElement))}
       </ErrorBoundary>
     </div>

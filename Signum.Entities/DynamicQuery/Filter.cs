@@ -120,7 +120,7 @@ namespace Signum.Entities.DynamicQuery
             Type elementType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacemens.Add(anyAll, p.BuildLiteNulifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
+            ctx.Replacemens.Add(anyAll, p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
             var body = GetExpression(ctx);
             ctx.Replacemens.Remove(anyAll);
 

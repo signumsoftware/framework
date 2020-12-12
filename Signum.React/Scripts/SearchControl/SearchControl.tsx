@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
-import { Lite, Entity } from '../Signum.Entities'
+import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
@@ -43,7 +43,7 @@ export interface SearchControlProps {
   allowChangeColumns?: boolean;
   allowChangeOrder?: boolean;
   create?: boolean;
-  navigate?: boolean | "InPlace";
+  view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   avoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;
@@ -58,7 +58,7 @@ export interface SearchControlProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => Promise<void | boolean>;
+  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>; //return false to avoid autoRefresh
   styleContext?: StyleContext;
 }
 
@@ -186,7 +186,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
         create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
-        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, { isSearch: true}))}
+        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
 
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}

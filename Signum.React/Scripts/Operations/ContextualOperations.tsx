@@ -26,7 +26,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
   const ti = getTypeInfo(types[0].key);
 
   const menuItems = operationInfos(ti)
-    .filter(oi => oi.operationType == OperationType.ConstructorFromMany)
+    .filter(oi => oi.operationType == "ConstructorFromMany")
     .map(oi => {
       const os = getSettings(oi.key) as ContextualOperationSettings<Entity>;
       const coc = new ContextualOperationContext<Entity>(oi, ctx);
@@ -89,7 +89,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
 
       const visibleByDefault =
         (!oi.canBeModified || (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc)) != "No") &&
-        (oi.operationType != OperationType.ConstructorFrom || ctx.lites.length == 1);
+        (oi.operationType != "ConstructorFrom" || ctx.lites.length == 1);
 
       if (eos == undefined ? visibleByDefault :
         cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
@@ -198,7 +198,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage != undefined)
     return coc.settings.confirmMessage(coc);
 
-  if (coc.operationInfo.operationType == OperationType.Delete) {
+  if (coc.operationInfo.operationType == "Delete") {
 
     if (coc.context.lites.length > 1) {
       var message = coc.context.lites
@@ -275,7 +275,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
       return;
 
     switch (coc.operationInfo.operationType) {
-      case OperationType.ConstructorFromMany:
+      case "ConstructorFromMany":
         {
 
           API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
@@ -289,7 +289,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
 
           break;
         }
-      case OperationType.ConstructorFrom:
+      case "ConstructorFrom":
         if (coc.context.lites.length == 1) {
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
@@ -309,7 +309,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
             .done();
         }
         break;
-      case OperationType.Execute:
+      case "Execute":
         getSetters(coc)
           .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
@@ -318,7 +318,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
             })))
           .done();
         break;
-      case OperationType.Delete:
+      case "Delete":
         getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {

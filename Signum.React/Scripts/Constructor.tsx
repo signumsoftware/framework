@@ -39,7 +39,7 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
 
     if (ti.hasConstructorOperation) {
 
-      const ctrs = Dic.getValues(ti.operations!).filter(a => a.operationType == OperationType.Constructor);
+      const ctrs = Dic.getValues(ti.operations!).filter(a => a.operationType == "Constructor");
 
       if (!ctrs.length)
         throw new Error("No constructor is allowed!");

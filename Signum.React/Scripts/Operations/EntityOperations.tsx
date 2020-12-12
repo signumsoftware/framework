@@ -38,26 +38,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
       return eoc;
     })
-    .filter(eoc => {
-      if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
-        return false;
-
-      var ov = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IOperationVisible | null;
-      if (ov?.isOperationVisible && !ov.isOperationVisible(eoc))
-        return false;
-
-      var eos = eoc.settings;
-      if (eos?.isVisible && !eos.isVisible(eoc))
-        return false;
-
-      if (eos?.hideOnCanExecute && eoc.canExecute)
-        return false;
-
-      if (Navigator.isReadOnly(ctx.pack, { ignoreTypeIsReadonly: true }) && !(eos?.showOnReadOnly))
-        return false;
-
-      return true;
-    });
+    .filter(eoc => eoc.isVisibleInButtonBar(ctx));
 
   operations.forEach(eoc => eoc.complete());
 
@@ -119,17 +100,13 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
-    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
+    isVisible: eoc.frame!.allowExchangeEntity && eoc.frame.createNew != null && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = (eoc.frame.frameComponent as FunctionalFrameComponent).createNew ??
-          Navigator.getSettings(pack.entity.Type)?.onCreateNew ??
-          (pack => Constructor.constructPack(pack.entity.Type));
-
-        (createNew(pack) ?? Promise.resolve(undefined))
+        (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
           .then(newPack => newPack && eoc.frame.onReload(newPack, true))
           .done();
       };
@@ -155,11 +132,12 @@ interface OperationButtonProps extends ButtonProps {
   canExecute?: string | null;
   className?: string;
   outline?: boolean;
+  avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
   children?: React.ReactNode
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -171,13 +149,13 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   const disabled = !!canExecute;
 
-  var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
+  var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
   if (group) {
 
     const item =
       <Dropdown.Item
-        {...props}
+        {...props as any}
         disabled={disabled}
         title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
@@ -283,8 +261,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 
-    const s = eoc.settings;
-    return withIcon(text, s?.icon, s?.iconColor, s?.iconAlign);
+    return withIcon(text, eoc?.icon, eoc?.iconColor, eoc?.iconAlign);
   }
 
   function handleOnClick(event: React.MouseEvent<any>) {
@@ -313,15 +290,15 @@ function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?:
 export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
   if (!eoc.operationInfo.canBeModified) {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteLite(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteLite(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromLite(eoc, ...args); return;
+      case "Execute": defaultExecuteLite(eoc, ...args); return;
+      case "Delete": defaultDeleteLite(eoc, ...args); return;
     }
   } else {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteEntity(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteEntity(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromEntity(eoc, ...args); return;
+      case "Execute": defaultExecuteEntity(eoc, ...args); return;
+      case "Delete": defaultDeleteEntity(eoc, ...args); return;
     }
   }
 
@@ -457,7 +434,7 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
     return eoc.settings.confirmMessage(eoc);
 
   //eoc.settings.confirmMessage === undefined
-  if (eoc.operationInfo.operationType == OperationType.Delete)
+  if (eoc.operationInfo.operationType == "Delete")
     return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
       <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
     );

@@ -97,7 +97,13 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            return name?.Trim('.');
+            if (name == null)
+                return null;
+
+            if (name.Contains("."))
+                return name.Before(".").DefaultToNull() ?? name.After(".");
+
+            return name;
         }
     }
 

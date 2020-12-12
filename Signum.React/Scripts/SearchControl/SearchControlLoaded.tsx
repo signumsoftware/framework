@@ -7,7 +7,7 @@ import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -67,7 +67,7 @@ export interface SearchControlLoadedProps {
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
-  navigate: boolean | "InPlace";
+  view: boolean | "InPlace";
   largeToolbarButtons: boolean;
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
@@ -75,7 +75,7 @@ export interface SearchControlLoadedProps {
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
-  onCreate?: () => Promise<void | boolean>;
+  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -655,13 +655,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
-        if (isWindowsOpen || (s != null && s.avoidPopup && this.props.navigate != "InPlace")) {
+        if (isWindowsOpen || (s != null && s.avoidPopup && this.props.view != "InPlace")) {
           var vp = getViewPromise && getViewPromise(null)
 
           window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
         } else {
 
-          if (this.props.navigate == "InPlace") {
+          if (this.props.view == "InPlace") {
 
             var vp = getViewPromise && getViewPromise(null);
             AppContext.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
@@ -670,7 +670,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
               .then(props => Constructor.constructPack(tn, props))
-              .then(pack => pack && Navigator.navigate(pack!, {
+              .then(pack => pack && Navigator.view(pack!, {
                 getViewPromise: getViewPromise as any,
                 createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
                   .then(props => Constructor.constructPack(tn, props)!),
@@ -1100,7 +1100,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
         </th>
         }
-        {(this.props.navigate || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {this.props.findOptions.columnOptions.map((co, i) =>
           <th key={i}
             draggable={true}
@@ -1244,10 +1244,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return;
     }
 
-    if (this.props.navigate) {
+    if (this.props.view) {
       var lite = row.entity!;
 
-      if (!Navigator.isNavigable(lite.EntityType, { isSearch: true }))
+      if (!Navigator.isViewable(lite.EntityType, { isSearch: true }))
         return;
 
       e.preventDefault();
@@ -1260,16 +1260,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const avoidPopup = s != undefined && s.avoidPopup;
 
-      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.navigate != "InPlace") {
+      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.view != "InPlace") {
         var vp = getViewPromise && getViewPromise(null);
         window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
       }
       else {
-        if (this.props.navigate == "InPlace") {
+        if (this.props.view == "InPlace") {
           var vp = getViewPromise && getViewPromise(null);
           AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
         } else {
-          Navigator.navigate(lite, { getViewPromise: getViewPromise })
+          Navigator.view(lite, { getViewPromise: getViewPromise })
             .then(() => {
               this.handleOnNavigated(lite);
             }).done();
@@ -1282,7 +1282,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const columnsCount = this.props.findOptions.columnOptions.length +
       (this.props.allowSelection ? 1 : 0) +
-      (this.props.navigate ? 1 : 0);
+      (this.props.view ? 1 : 0);
 
 
     if (!this.state.resultTable) {
@@ -1335,7 +1335,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             </td>
           }
 
-          {(this.props.findOptions.groupResults || this.props.navigate) &&
+          {(this.props.findOptions.groupResults || this.props.view) &&
             <td className={entityFormatter.cellClass}>
               {entityFormatter.formatter(row, resultTable.columns, this)}
             </td>

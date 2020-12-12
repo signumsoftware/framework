@@ -442,7 +442,6 @@ export interface IHasChanges {
 
 export interface FunctionalFrameComponent {
   forceUpdate(): void;
-  createNew?(): (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   type: Function;
 }
 
@@ -456,7 +455,9 @@ export interface EntityFrame {
   revalidate: () => void;
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
-  allowChangeEntity: boolean;
+  allowExchangeEntity: boolean;
+  avoidPrompt?: () => void;
+  createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
 }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace Signum.Upgrade
 {
@@ -11,6 +12,11 @@ namespace Signum.Upgrade
     {
         public string RootFolder { get; set; }
         public string ApplicationName { get; set; }
+
+        static UpgradeContext()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
 
         public UpgradeContext(string rootFolder, string applicationName)
         {
@@ -20,6 +26,7 @@ namespace Signum.Upgrade
 
         public static UpgradeContext CreateFromCurrentDirectory()
         {
+
             var rootFolder = GetRootFolder();
             var applicationName = GetApplicationName(rootFolder);
 
@@ -62,7 +69,7 @@ namespace Signum.Upgrade
             }
             else
             {
-                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName));
+                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName, null));
             }
         }
 
@@ -120,16 +127,11 @@ namespace Signum.Upgrade
             }
         }
 
-
-
-    
-
         public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
-
             foreach (var dir in directories)
             {
-                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a=>a.Trim()).ToArray(), DefaultIgnoreDirectories);
+                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
                     codeFile.WarningLevel = showWarnings;

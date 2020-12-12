@@ -241,7 +241,7 @@ export interface QuickLinkGroup {
 
 export interface QuickLinkOptions {
   isVisible?: boolean;
-  text?: () => string; //To delay niceName and avoid exceptions
+  text?: (nothing?: undefined /*TS 4.1 Bug*/) => string; //To delay niceName and avoid exceptions
   order?: number;
   icon?: IconProp;
   iconColor?: string;
@@ -359,7 +359,7 @@ export class QuickLinkNavigate extends QuickLink {
 
   constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
     super(lite.EntityType, {
-      isVisible: Navigator.isNavigable(lite.EntityType),
+      isVisible: Navigator.isViewable(lite.EntityType),
       text: () => getTypeInfo(lite.EntityType).niceName!,
       ...options
     });
@@ -378,6 +378,6 @@ export class QuickLinkNavigate extends QuickLink {
     if (e.ctrlKey || e.button == 1 || es?.avoidPopup)
       window.open(Navigator.navigateRoute(this.lite, this.viewName));
     else
-      Navigator.navigate(this.lite, { getViewPromise: e => this.viewName });
+      Navigator.view(this.lite, { buttons: "close", getViewPromise: this.viewName ? (e => this.viewName) : undefined });
   }
 }

@@ -252,6 +252,8 @@ namespace Signum.Engine.CodeGeneration
             foreach (var item in GetServerUsingNamespaces(mod))
                 sb.AppendLine("using {0};".FormatWith(item));
 
+            sb.AppendLine("using Microsoft.AspNetCore.Mvc;");
+
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");

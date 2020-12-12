@@ -32,18 +32,20 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <ValueLine ctx={ctx.subCtx(f => f.requestUrl)} />
       <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
       <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
-      <pre><code>{ctx.value.exceptionMessage}</code></pre>
+
+      <pre style={{ whiteSpace: "pre-wrap" }}><code>{ctx.value.exceptionMessage}</code></pre>
+    
       <Tabs id="exceptionTabs">
-        {codeTab(0, a => a.stackTrace)}
-        {codeTab(1, a => a.data)}
-        {codeTab(2, a => a.queryString)}
-        {codeTab(3, a => a.form, true)}
-        {codeTab(4, a => a.session)}
+        {codeTab("stackTrace", a => a.stackTrace)}
+        {codeTab("data", a => a.data)}
+        {codeTab("queryString", a => a.queryString)}
+        {codeTab("form", a => a.form, true)}
+        {codeTab("session", a => a.session)}
       </Tabs>
     </div>
   );
 
-  function codeTab(tabId: number, property: (ex: ExceptionEntity) => BigStringEmbedded, formatJson?: boolean) {
+  function codeTab(tabId: string, property: (ex: ExceptionEntity) => BigStringEmbedded, formatJson?: boolean) {
     const tc = p.ctx.subCtx(property);
 
     if (tc.propertyRoute == null || !tc.value.text || tc.value.text == "")
@@ -53,7 +55,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <Tab title={tc.propertyRoute.member!.niceName} eventKey={tabId}>
         {formatJson ?
           <FormatJson code={tc.value.text} /> :
-          <pre>
+          <pre style={{ whiteSpace: "pre-wrap" }}>
             <code>{tc.value.text}</code>
           </pre>
         }
@@ -82,7 +84,7 @@ function FormatJson(p: { code: string | undefined | null }) {
       <button className={classes("btn btn-sm btn-light", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
         <FontAwesomeIcon icon="code" /> Format JSON 
       </button>
-      <pre>
+      <pre style={{ whiteSpace: "pre-wrap" }}>
         <code>{formatJson ? formattedJson : p.code}</code>
       </pre>
     </div>

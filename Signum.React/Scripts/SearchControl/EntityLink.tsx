@@ -18,9 +18,8 @@ export default function EntityLink(p: EntityLinkProps) {
 
   const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, ...htmlAtts } = p;
 
-  if (!Navigator.isNavigable(lite.EntityType, { isSearch: p.inSearch || false }))
+  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch || false }))
     return <span data-entity={liteKey(lite)}>{p.children ?? getToString(lite)}</span>;
-
 
   return (
     <Link
@@ -54,7 +53,7 @@ export default function EntityLink(p: EntityLinkProps) {
       var vp = p.getViewPromise && p.getViewPromise(null);
       AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
     } else {
-      Navigator.navigate(lite, { getViewPromise: p.getViewPromise }).then(() => {
+      Navigator.view(lite, { getViewPromise: p.getViewPromise }).then(() => {
         p.onNavigated && p.onNavigated(lite);
       }).done();
     }

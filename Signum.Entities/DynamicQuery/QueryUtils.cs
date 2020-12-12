@@ -426,12 +426,12 @@ namespace Signum.Entities.DynamicQuery
                     return mce.Arguments[0];
 
                 if (!idAndToStr)
-                    return Expression.Property(expression, "Entity");
+                return Expression.Property(expression, "Entity");
             }
             return expression;
         }
 
-        internal static Expression BuildLiteNulifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)
+        internal static Expression BuildLiteNullifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)
         {
             var buildLite = BuildLite(expression);
 
