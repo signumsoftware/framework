@@ -487,9 +487,9 @@ namespace Signum.Entities.MachineLearning
     }
 
     [AutoInit]
-    public static class CNTKPredictorAlgorithm
+    public static class PredictorAlgorithm
     {
-        public static PredictorAlgorithmSymbol NeuralNetwork;
+        public static PredictorAlgorithmSymbol NeuralNetworkTFGraph;
     }
 
     [AutoInit]

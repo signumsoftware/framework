@@ -15,15 +15,6 @@ namespace Signum.React.MachineLearning
     [ValidateModelFilter]
     public class PredictorController : ControllerBase
     {
-        [HttpGet("api/predictor/availableDevices/{algorithmKey}")]
-        public string[] AvailableDevices(string algorithmKey)
-        {
-            var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
-
-            var alg = PredictorLogic.Algorithms.GetOrThrow(key);
-            return alg.GetAvailableDevices();
-        }
-
         [HttpGet("api/predictor/trainingProgress/{id}")]
         public TrainingProgress GetTrainingState(int id)
         {

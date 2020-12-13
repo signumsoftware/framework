@@ -30,10 +30,6 @@ export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Proce
   seed: number | null;
 }
 
-export module CNTKPredictorAlgorithm {
-  export const NeuralNetwork : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "CNTKPredictorAlgorithm.NeuralNetwork");
-}
-
 export module DefaultColumnEncodings {
   export const None : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.None");
   export const OneHot : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.OneHot");
@@ -55,9 +51,11 @@ export type NeuralNetworkActivation =
 
 export const NeuralNetworkEvalFunction = new EnumType<NeuralNetworkEvalFunction>("NeuralNetworkEvalFunction");
 export type NeuralNetworkEvalFunction =
-  "CrossEntropyWithSoftmax" |
+  "softmax_cross_entropy_with_logits_v2" |
+  "softmax_cross_entropy_with_logits" |
+  "sigmoid_cross_entropy_with_logits" |
   "ClassificationError" |
-  "SquaredError" |
+  "MeanSquaredError" |
   "MeanAbsoluteError" |
   "MeanAbsolutePercentageError";
 
@@ -71,25 +69,14 @@ export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity
 
 export const NeuralNetworkInitializer = new EnumType<NeuralNetworkInitializer>("NeuralNetworkInitializer");
 export type NeuralNetworkInitializer =
-  "Zero" |
-  "GlorotNormal" |
-  "GlorotUniform" |
-  "HeNormal" |
-  "HeUniform" |
-  "Normal" |
-  "TruncateNormal" |
-  "Uniform" |
-  "Xavier";
-
-export const NeuralNetworkLearner = new EnumType<NeuralNetworkLearner>("NeuralNetworkLearner");
-export type NeuralNetworkLearner =
-  "Adam" |
-  "AdaDelta" |
-  "AdaGrad" |
-  "FSAdaGrad" |
-  "RMSProp" |
-  "MomentumSGD" |
-  "SGD";
+  "glorot_uniform_initializer" |
+  "ones_initializer" |
+  "zeros_initializer" |
+  "random_uniform_initializer" |
+  "orthogonal_initializer" |
+  "random_normal_initializer" |
+  "truncated_normal_initializer" |
+  "variance_scaling_initializer";
 
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
@@ -99,13 +86,11 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
   hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
   outputActivation: NeuralNetworkActivation;
   outputInitializer: NeuralNetworkInitializer;
-  learner: NeuralNetworkLearner;
+  optimizer: TensorFlowOptimizer;
   lossFunction: NeuralNetworkEvalFunction;
   evalErrorFunction: NeuralNetworkEvalFunction;
   learningRate: number;
-  learningMomentum: number | null;
-  learningUnitGain: boolean | null;
-  learningVarianceMomentum: number | null;
+  learningEpsilon: number;
   minibatchSize: number;
   numMinibatches: number;
   bestResultFromLast: number;
@@ -124,6 +109,10 @@ export type PredictionType =
   "MultiRegression" |
   "Classification" |
   "MultiClassification";
+
+export module PredictorAlgorithm {
+  export const NeuralNetworkTFGraph : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "PredictorAlgorithm.NeuralNetworkTFGraph");
+}
 
 export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
 export interface PredictorAlgorithmSymbol extends Entities.Symbol {
@@ -368,5 +357,10 @@ export interface PredictSimpleResultEntity extends Entities.Entity {
   predictedCategory: string | null;
   predictedValue: number | null;
 }
+
+export const TensorFlowOptimizer = new EnumType<TensorFlowOptimizer>("TensorFlowOptimizer");
+export type TensorFlowOptimizer =
+  "Adam" |
+  "GradientDescentOptimizer";
 
 

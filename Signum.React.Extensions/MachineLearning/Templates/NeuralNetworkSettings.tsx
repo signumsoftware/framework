@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
 import { ValueSearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, NeuralNetworkLearner } from '../Signum.Entities.MachineLearning'
+import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, TensorFlowOptimizer } from '../Signum.Entities.MachineLearning'
 import { API } from '../PredictorClient';
 import { is } from '@framework/Signum.Entities';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
@@ -14,67 +14,32 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
   function handlePredictionTypeChanged() {
     var nn = p.ctx.value;
     if (nn.predictionType == "Classification" || nn.predictionType == "MultiClassification") {
-      nn.lossFunction = "CrossEntropyWithSoftmax";
+      nn.lossFunction = "softmax_cross_entropy_with_logits";
       nn.evalErrorFunction = "ClassificationError";
     } else {
-      nn.lossFunction = "SquaredError";
-      nn.evalErrorFunction = "SquaredError";
+      nn.lossFunction = "MeanSquaredError";
+      nn.evalErrorFunction = "MeanSquaredError";
     }
   }
 
 
-  function getHelpBlock(learner: NeuralNetworkLearner | undefined) {
-    switch (learner) {
-      case "AdaDelta": return "Did not work :S";
-      case "AdaGrad": return "";
+  function getHelpBlock(optimizer: TensorFlowOptimizer | undefined) {
+    switch (optimizer) {
       case "Adam": return "";
-      case "FSAdaGrad": return "";
-      case "MomentumSGD": return "";
-      case "RMSProp": return "";
-      case "SGD": return "";
-      default: throw new Error("Unexpected " + learner)
+      case "GradientDescentOptimizer": return "";
+      default: throw new Error("Unexpected " + optimizer)
     }
   }
 
   //Values found letting a NN work for a night learning y = sin(x * 5), no idea if they work ok for other cases
-  function handleLearnerChange() {
+  function handleOptimizerChange() {
     var nns = p.ctx.value;
-    switch (nns.learner) {
+    switch (nns.optimizer) {
       case "Adam":
-        nns.learningRate = 1;
-        nns.learningMomentum = 0.1;
-        nns.learningVarianceMomentum = 0.1;
-        nns.learningUnitGain = false;
+        nns.learningRate = 0.01;
         break;
-      case "AdaDelta":
-        nns.learningRate = 1;
-        nns.learningMomentum = nns.learningVarianceMomentum = nns.learningUnitGain = null;
-        break;
-      case "AdaGrad":
-        nns.learningRate = 0.1;
-        nns.learningMomentum = nns.learningVarianceMomentum = nns.learningUnitGain = null;
-        break;
-      case "FSAdaGrad":
-        nns.learningRate = 0.1;
-        nns.learningMomentum = 0.01;
-        nns.learningVarianceMomentum = 1;
-        nns.learningUnitGain = false;
-        break;
-      case "MomentumSGD":
-        nns.learningRate = 0.1;
-        nns.learningMomentum = 0.01;
-        nns.learningVarianceMomentum = 0.001;
-        nns.learningUnitGain = false;
-        break;
-      case "RMSProp":
-        nns.learningRate = 0.1;
-        nns.learningMomentum = 0.01;
-        nns.learningVarianceMomentum = 1;
-        nns.learningUnitGain = false;
-        break;
-      case "SGD":
-        nns.learningRate = 0.1;
-        nns.learningMomentum = nns.learningVarianceMomentum = nns.learningUnitGain = null;
+      case "GradientDescentOptimizer":
+        nns.learningRate = 0.01;
         break;
       default:
     }
@@ -106,7 +71,6 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
   return (
     <div>
       <h4>{NeuralNetworkSettingsEntity.niceName()}</h4>
-      {pred.algorithm && <DeviceLine ctx={ctx.subCtx(a => a.device)} algorithm={pred.algorithm} />}
       <ValueLine ctx={ctx.subCtx(a => a.predictionType)} onChange={handlePredictionTypeChanged} />
       {renderCount(ctx, pred, "Input")}
       <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
@@ -141,11 +105,8 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
       <hr />
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={handleLearnerChange} helpText={getHelpBlock(ctx.value.learner)} />
+          <ValueLine ctx={ctx6.subCtx(a => a.optimizer)} onChange={handleOptimizerChange} helpText={getHelpBlock(ctx.value.optimizer)} />
           <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.learningMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />
-          {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br />false diverge (Loss {">>"} 1)</p>)}
-          <ValueLine ctx={ctx6.subCtx(a => a.learningVarianceMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD", "MomentumSGD")} />
         </div>
         <div className="col-sm-6">
           <ValueLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
@@ -185,23 +146,4 @@ export function LabelWithHelp(p: LabelWithHelpProps) {
         </span>
       </OverlayTrigger>
     );
-}
-
-function hideFor(ctx: TypeContext<NeuralNetworkSettingsEntity>, ...learners: NeuralNetworkLearner[]): React.HTMLAttributes<any> | undefined {
-  return ctx.value.learner && learners.contains(ctx.value.learner) ? ({ style: { opacity: 0.5 } }) : undefined;
-}
-
-interface DeviceLineProps {
-  ctx: TypeContext<string | null | undefined>;
-  algorithm: PredictorAlgorithmSymbol;
-}
-
-export function DeviceLine(p: DeviceLineProps) {
-
-  const devices = useAPI(() => API.availableDevices(p.algorithm), [p.algorithm]);
-
-  const ctx = p.ctx;
-  return (
-    <ValueLine ctx={ctx} comboBoxItems={(devices ?? []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
-  );
 }

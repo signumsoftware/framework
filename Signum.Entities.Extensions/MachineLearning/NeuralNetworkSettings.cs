@@ -23,7 +23,7 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation OutputActivation { get; set; }
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
-        public TensorFlowOptimizer Learner { get; set; }
+        public TensorFlowOptimizer Optimizer { get; set; }
 
         public NeuralNetworkEvalFunction LossFunction { get; set; }
         public NeuralNetworkEvalFunction EvalErrorFunction { get; set; }
@@ -108,7 +108,7 @@ namespace Signum.Entities.MachineLearning
 
             LossFunction = LossFunction,
             EvalErrorFunction = EvalErrorFunction,
-            Learner = Learner,
+            Optimizer = Optimizer,
             LearningRate = LearningRate,
 
             MinibatchSize = MinibatchSize,
@@ -168,7 +168,6 @@ namespace Signum.Entities.MachineLearning
     public enum TensorFlowOptimizer
     {
         Adam,
-        RMSprop,
         GradientDescentOptimizer,
     }
 

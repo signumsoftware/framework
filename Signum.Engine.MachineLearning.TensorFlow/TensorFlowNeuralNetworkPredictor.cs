@@ -19,7 +19,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 {
     public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
     {
-        public static string TempFile = "tempFile.ckpt";
+        public static string TempFile = "TempDirectory";
 
         public Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding> Encodings = new Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding>
         {
@@ -55,6 +55,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
         public void Train(PredictorTrainingContext ctx)
         {
             InitialSetup();
+
+            tf.compat.v1.disable_eager_execution();
             var p = ctx.Predictor;
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
@@ -116,7 +118,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
                         using (HeavyProfiler.Log("TrainMinibatch", () => i.ToString())) 
                         {
-                            sess.run(optimizer,
+                            sess.run(trainOperation,
                                 (inputVariable, inputValue),
                                 (outputVariable, outputValue));
                         }
@@ -257,7 +259,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return np.array(inputValues);
+                    return np.array(inputValues).reshape((rows.Count, codificationCount));
             }
         }
 
@@ -268,32 +270,34 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         public List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs)
         {
-            using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
-            {
-                lock (lockKey)
-                {
-                    var graph = new Graph().as_default();
-                    using (var sess = tf.Session(graph))
-                    {
+            throw new NotImplementedException();
+
+            //using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
+            //{
+            //    lock (lockKey)
+            //    {
+            //        var graph = new Graph().as_default();
+            //        using (var sess = tf.Session(graph))
+            //        {
 
 
-                    }
+            //        }
 
-                    Function calculatedOutputs = (Function)ctx.Model!;
-                    Value inputValue = GetValueForPredict(ctx, inputs, device);
+            //        Function calculatedOutputs = (Function)ctx.Model!;
+            //        Value inputValue = GetValueForPredict(ctx, inputs);
 
-                    var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
-                    var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
-                    var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null! } };
+            //        var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
+            //        var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
+            //        var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null! } };
 
-                    calculatedOutputs.Evaluate(inputDic, outputDic, device);
+            //        calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
-                    Value output = outputDic[calculatedOutputs];
-                    IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
-                    var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
-                    return result;
-                }
-            }
+            //        Value output = outputDic[calculatedOutputs];
+            //        IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
+            //        var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
+            //        return result;
+            //    }
+            //}
         }
 
         private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx, PredictionOptions options)
@@ -378,7 +382,20 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
                 var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
-                ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
+                var dir = Directory.CreateDirectory(Path.Combine(TempFile, ctx.Predictor.Id.ToString()));
+
+                foreach (var item in ctx.Predictor.Files)
+                {
+                    using (var fileStream = File.Create(Path.Combine(dir.Name, item.FileName)))
+                    {
+                        using (var readStream = item.OpenRead())
+                        {
+                            readStream.CopyTo(fileStream);
+                        }
+                    }
+                }
+
+                //ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray());
             }
         }
     }

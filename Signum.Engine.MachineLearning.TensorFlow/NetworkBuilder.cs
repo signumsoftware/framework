@@ -90,7 +90,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         private static Tensor MeanSquaredError(Tensor labels, Tensor calculatedOutputs)
         {
-            return tf.reduce_mean(tf.squared_difference(calculatedOutputs, labels));
+            return tf.reduce_mean(tf.square(calculatedOutputs - labels));
         }
 
         public static Tensor MeanAbsoluteError(Tensor labels, Tensor calculatedOutputs)
@@ -105,13 +105,13 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         internal static Optimizer GetOptimizer(NeuralNetworkSettingsEntity s)
         {
-            switch (s.Learner)
+            switch (s.Optimizer)
             {
                 case TensorFlowOptimizer.Adam:
-                    return tf.train.AdamOptimizer(s.LearningRate, s.LearningEpsilon);
+                    return tf.train.AdamOptimizer((float)s.LearningRate, (float)s.LearningEpsilon);
 
                 case TensorFlowOptimizer.GradientDescentOptimizer:
-                    return tf.train.GradientDescentOptimizer(s.LearningRate);
+                    return tf.train.GradientDescentOptimizer((float)s.LearningRate);
 
                 default:
                     throw new InvalidOperationException("Unexpected Learner");

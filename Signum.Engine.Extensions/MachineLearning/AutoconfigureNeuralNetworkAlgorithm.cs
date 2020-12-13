@@ -70,7 +70,7 @@ namespace Signum.Engine.MachineLearning
 
             if (conf.ExploreLearner)
             {
-                nnChild.Learner = r.NextBool() ? nnFather.Learner : nnMother.Learner;
+                nnChild.Optimizer = r.NextBool() ? nnFather.Optimizer : nnMother.Optimizer;
             }
 
             if (conf.ExploreLearningValues)
@@ -149,7 +149,7 @@ namespace Signum.Engine.MachineLearning
             if (conf.ExploreLearner)
             {
                 if (r.NextDouble() < mutationProbability)
-                    nns.Learner = r.NextElement(EnumExtensions.GetValues<TensorFlowOptimizer>());
+                    nns.Optimizer = r.NextElement(EnumExtensions.GetValues<TensorFlowOptimizer>());
             }
 
             if (conf.ExploreLearningValues)
@@ -207,9 +207,6 @@ namespace Signum.Engine.MachineLearning
                 if (r.NextDouble() < mutationProbability)
                     nns.OutputInitializer = r.NextElement(EnumExtensions.GetValues<NeuralNetworkInitializer>());
             }
-
-            nns.LearningUnitGain = false; //better to deverge than to stay flat
-
         }
     }
 }

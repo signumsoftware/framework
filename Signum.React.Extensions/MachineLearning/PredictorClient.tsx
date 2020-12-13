@@ -10,10 +10,10 @@ import { symbolNiceName, toNumberFormat } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import {
   PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
-  PredictorAlgorithmSymbol, CNTKPredictorAlgorithm,
+  PredictorAlgorithmSymbol,
   PredictorResultSaverSymbol, PredictorSimpleResultSaver,
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
-  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity
+  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, PredictorAlgorithm
 } from './Signum.Entities.MachineLearning'
 import * as QuickLinks from '@framework/QuickLinks'
 import { QueryToken } from '@framework/FindOptions';
@@ -95,17 +95,14 @@ export function start(options: { routes: JSX.Element[] }) {
     settings: PredictorSettingsEmbedded.New(),
   }));
 
-  registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
+  registerInitializer(PredictorAlgorithm.NeuralNetworkTFGraph, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
     predictionType: "Regression",
-    lossFunction: "SquaredError",
+    lossFunction: "MeanSquaredError",
     evalErrorFunction: "MeanAbsoluteError",
 
-    learner: "MomentumSGD",
+    optimizer: "Adam",
 
-    learningRate: 0.1,
-    learningMomentum: 0.01,
-    learningUnitGain: false,
-    learningVarianceMomentum: 0.001,
+    learningRate: 0.01,
 
     minibatchSize: 1000,
     numMinibatches: 100,
@@ -151,10 +148,6 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 }
 
 export namespace API {
-
-  export function availableDevices(algorithm: PredictorAlgorithmSymbol): Promise<string[]> {
-    return ajaxGet({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
-  }
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
