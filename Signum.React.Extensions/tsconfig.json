@@ -12,6 +12,7 @@
     //"noEmit": true,
     "strict": true,
     "declarationMap": true,
+    "baseUrl": "./",
     "paths": {
       "@framework/*": [ "../../Framework/Signum.React/Scripts/*" ],
       "*": [
