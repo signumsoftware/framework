@@ -28,6 +28,8 @@ namespace Signum.Engine.Json
                     new MListJsonConverterFactory(ejcf.AssertCanWrite),
                     new LiteJsonConverterFactory(),
                     new JsonStringEnumConverter(),
+                    new TimeSpanConverter(),
+                    new DateConverter()
                 }
             };
         }

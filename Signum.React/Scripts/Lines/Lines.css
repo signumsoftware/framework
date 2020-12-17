@@ -22,13 +22,14 @@ input[type=checkbox].form-control {
 
 .form-control.readonly, .form-control:disabled, .form-control[readonly] {
     overflow: hidden;
+    background-color: #e9ecef;
+    opacity: 1;
 }
 
     .form-control.readonly.readonly-textarea {
         height: initial !important;
         white-space: pre-wrap;
     }
-
 
 .numeric {
     text-align: right;

@@ -64,7 +64,7 @@ namespace Signum.Entities.DynamicQuery
 
             var result = Expression.Invoke(Lambda, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
+            return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
         public PropertyRoute? propertyRoute;
