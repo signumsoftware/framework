@@ -75,18 +75,9 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       coc.settings = cos;
       coc.entityOperationSettings = eos;
 
-      const visibleByDefault =
-        (!oi.canBeModified || (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc)) != "No") &&
-        (oi.operationType != "ConstructorFrom" || ctx.lites.length == 1);
-
-      if (eos == undefined ? visibleByDefault :
-        cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
-          cos.isVisible(coc))
         return coc;
-
-      return undefined;
     })
-    .filter(coc => coc != undefined)
+    .filter(coc => coc.isVisibleInContextualMenu())
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order);
 
@@ -352,9 +343,9 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
     if (!coc.operationInfo.canBeModified)
       return Promise.resolve([]);
 
-    var settersConfig = coc.settings?.settersConfig ?? Defaults.defaultSetterConfig(coc);
+    var settersConfig = (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig)(coc);
 
-    if (settersConfig == "No")
+    if (settersConfig == "NoDialog")
       return Promise.resolve([]);
 
     var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy(a => a).onlyOrNull();

@@ -163,7 +163,8 @@ export class ConstructorOperationContext<T extends Entity> {
 
 
 
-export type SettersConfig = "No" | "Optional" | "Mandatory";
+
+export type SettersConfig = "NoButton" | "NoDialog" | "Optional" | "Mandatory";
 
 /**
  * Contextual Operation Settings
@@ -176,11 +177,11 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   onClick?: (coc: ContextualOperationContext<T>) => void;
+  settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
   order?: number;
-  settersConfig?: SettersConfig;
 
   constructor(operationSymbol: ConstructSymbol_FromMany<any, T> | string, options: ContextualOperationOptions<T>) {
     super(operationSymbol);
@@ -197,6 +198,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -204,6 +206,7 @@ export interface ContextualOperationOptions<T extends Entity> {
 }
 
 export class ContextualOperationContext<T extends Entity> {
+
   context: ContextualItemsContext<T>
   operationInfo: OperationInfo;
   settings?: ContextualOperationSettings<T>;
@@ -236,6 +239,33 @@ export class ContextualOperationContext<T extends Entity> {
     return val;
   }
 
+  isVisibleInContextualMenu(): boolean {
+
+    const cos = this.settings;
+
+    if (cos?.isVisible)
+      return cos.isVisible(this);
+
+    const oi = this.operationInfo;
+
+    if ((cos?.settersConfig ?? Defaults.defaultSetterConfig)(this) == "NoButton")
+      return false;
+
+    if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1)
+      return false;
+
+    const eos = this.entityOperationSettings;
+    if (eos) {
+      if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
+        return false;
+
+      if (eos.onClick != null && cos?.onClick) //also for isClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
+        return false;
+    }
+
+    return true;
+  }
+
   createMenuItems(): React.ReactElement[]{
 
     debugger;
@@ -244,7 +274,7 @@ export class ContextualOperationContext<T extends Entity> {
       return this.settings.createMenuItems(this);
 
     return [<OperationMenuItem coc={this} />];
-  };
+  }
 }
 
 export class EntityOperationContext<T extends Entity> {
@@ -528,14 +558,22 @@ export namespace Defaults {
     return oi.key.endsWith(".Save");
   }
 
-  export function defaultSetterConfig(coc: ContextualOperationContext<Entity>): SettersConfig {
+  export function defaultSetterConfig(coc: ContextualOperationContext<any>): SettersConfig {
     if (!coc.operationInfo.canBeModified)
-      return "No";
+      return "NoDialog";
 
-    if (coc.context.lites.length == 1) //Will create too much noise
-      return "No";
+    if (isSave(coc.operationInfo)) {
+      if (coc.context.lites.length == 1)
+        return "NoButton";
 
-    return isSave(coc.operationInfo) ? "Mandatory" : "Optional";
+      return "Mandatory"
+    }
+    else {
+      if (coc.context.lites.length == 1)
+        return "NoDialog";
+
+      return "Optional";
+    }
   }
 
   export function getColor(oi: OperationInfo): BsColor {
