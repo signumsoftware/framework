@@ -427,7 +427,7 @@ namespace Signum.Engine.Workflow
 
         static bool Applicable(this WorkflowConnectionEntity wc, WorkflowExecuteStepContext ctx)
         {
-            var doneDecission = wc.DoneDecission();
+            var doneDecission = wc.DoneDecision();
 
             if (doneDecission != null && doneDecission != ctx.CaseActivity?.DoneDecision)
                 return false;
@@ -1040,7 +1040,7 @@ namespace Signum.Engine.Workflow
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
                             {
                                 var firstConnection = gateway.NextConnectionsFromCache(null)
-                                    .Where(a => a.Type == ConnectionType.Approve || a.Type == ConnectionType.Decline || a.Type == ConnectionType.Normal || a.Type == ConnectionType.CustomDecision)
+                                    .Where(a => a.Type == ConnectionType.Normal || a.Type == ConnectionType.Decision)
                                     .GroupBy(c => c.Order)
                                     .OrderBy(gr => gr.Key)
                                     .Select(gr => gr.SingleOrDefaultEx(c => c.Applicable(ctx)))
@@ -1061,8 +1061,7 @@ namespace Signum.Engine.Workflow
                             {
                                 var applicable = gateway.NextConnectionsFromCache(null)
                                      .Where(a =>
-                                     a.Type == ConnectionType.Approve ||
-                                     a.Type == ConnectionType.Decline ||
+                                     a.Type == ConnectionType.Decision ||
                                      a.Type == ConnectionType.Normal && (gateway.Type == WorkflowGatewayType.Parallel || a.Condition != null))
                                      .Where(c =>
                                      {
@@ -1293,7 +1292,7 @@ namespace Signum.Engine.Workflow
 
                     var doneTypeOk = CaseActivity.DoneType!.Value switch
                     {
-                        DoneType.Next => wc.Type == ConnectionType.Normal && (wc.DoneDecission() == null || wc.DoneDecission() == CaseActivity.DoneDecision),
+                        DoneType.Next => wc.Type == ConnectionType.Normal && (wc.DoneDecision() == null || wc.DoneDecision() == CaseActivity.DoneDecision),
                         DoneType.Jump => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.Jump : wc.Type == ConnectionType.Normal,
                         DoneType.ScriptFailure => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.ScriptException : wc.Type == ConnectionType.Normal,
                         DoneType.ScriptSuccess => wc.Type == ConnectionType.Normal,

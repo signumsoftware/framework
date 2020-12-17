@@ -6,8 +6,8 @@ import { TypeContext } from '@framework/TypeContext'
 import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
-import { PanelStyle } from '../Signum.Entities.Dashboard';
 import { useController } from '@framework/Lines/LineBase';
+import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics';
 
 
 export interface IGridEntity {
@@ -292,7 +292,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
-  bsStyle?: PanelStyle;
+  bsStyle?: BootstrapStyle;
   children?: React.ReactNode;
 
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;

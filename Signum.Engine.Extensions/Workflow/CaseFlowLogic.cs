@@ -116,7 +116,7 @@ namespace Signum.Engine.Workflow
                         gr.NextConnections(from);
 
                     var nextConnection = candidates
-                    .SingleOrDefaultEx(c => IsCompatible(c.Type, cs.DoneType!.Value) && (c.DoneDecission() == null || c.DoneDecission() == cs.DoneDecision) && gr.IsParallelGateway(c.To, WorkflowGatewayDirection.Join));
+                    .SingleOrDefaultEx(c => IsCompatible(c.Type, cs.DoneType!.Value) && (c.DoneDecision() == null || c.DoneDecision() == cs.DoneDecision) && gr.IsParallelGateway(c.To, WorkflowGatewayDirection.Join));
 
                     if (nextConnection != null)
                         return new CaseConnectionStats().WithConnection(nextConnection).WithDone(cs);
@@ -182,7 +182,7 @@ namespace Signum.Engine.Workflow
                 case DoneType.Next: 
                 case DoneType.ScriptSuccess:
                 case DoneType.Recompose:
-                    return path.All(a => a.Type == ConnectionType.Normal && (a.DoneDecission() == null || a.DoneDecission() == doneDecision));
+                    return path.All(a => a.Type == ConnectionType.Normal && (a.DoneDecision() == null || a.DoneDecision() == doneDecision));
                 case DoneType.Jump: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
                 case DoneType.ScriptFailure: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
                 case DoneType.Timeout:

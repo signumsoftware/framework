@@ -6,6 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -90,20 +91,9 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   row: number;
   startColumn: number;
   columns: number;
-  style: PanelStyle;
+  style: Signum.BootstrapStyle;
   content: IPartEntity;
 }
-
-export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
-export type PanelStyle =
-  "Light" |
-  "Dark" |
-  "Primary" |
-  "Secondary" |
-  "Success" |
-  "Info" |
-  "Warning" |
-  "Danger";
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {

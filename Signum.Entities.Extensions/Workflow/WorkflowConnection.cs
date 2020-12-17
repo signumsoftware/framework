@@ -2,6 +2,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Entities.Workflow
 {
@@ -21,7 +22,7 @@ namespace Signum.Entities.Workflow
         public string? Name { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
-        public string? CustomDecisionName { get; set; }
+        public string? DecisionOptionName { get; set; }
 
         public string? GetName() => Name;
 
@@ -45,7 +46,7 @@ namespace Signum.Entities.Workflow
             {
                 MainEntityType = this.From!.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
-                CustomOptionName = this.CustomDecisionName,
+                DecisionOptionName = this.DecisionOptionName,
                 Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
@@ -59,7 +60,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowConnectionModel)model;
             this.Name = wModel.Name;
-            this.CustomDecisionName = wModel.CustomOptionName;
+            this.DecisionOptionName = wModel.Type == ConnectionType.Decision ? wModel.DecisionOptionName : null;
             this.Type = wModel.Type;
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
@@ -71,20 +72,25 @@ namespace Signum.Entities.Workflow
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
-        internal string? DoneDecission() =>
-                Type == ConnectionType.Approve ? ConnectionType.Approve.ToString() :
-                Type == ConnectionType.Decline ? ConnectionType.Decline.ToString() :
-                Type == ConnectionType.CustomDecision ? CustomDecisionName :
-                (string?)null;
+        internal string? DoneDecision() => Type == ConnectionType.Decision ? DecisionOptionName : (string?)null;
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+
+            if(pi.Name == nameof(DecisionOptionName))
+            {
+                return (pi, DecisionOptionName).IsSetOnlyWhen(Type == ConnectionType.Decision);
+            }
+
+            return base.PropertyValidation(pi);
+        }
 
     }
 
     public enum ConnectionType
     {
         Normal,
-        Approve,
-        Decline,
-        CustomDecision,
+        Decision,
         Jump,
         ScriptException,
     }
@@ -106,9 +112,10 @@ namespace Signum.Entities.Workflow
         public string? Name { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
-        public string? CustomOptionName { get; set; }
+        public string? DecisionOptionName { get; set; }
 
         public bool NeedCondition { get; set; }
+
         public bool NeedOrder { get; set; }
 
         public ConnectionType Type { get; set; }
@@ -118,5 +125,15 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowActionEntity>? Action { get; set; }
 
         public int? Order { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if(pi.Name == nameof(DecisionOptionName) && DecisionOptionName == null && Type == ConnectionType.Decision)
+            {
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 }

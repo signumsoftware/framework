@@ -5,7 +5,7 @@ import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { UserQueryPartEntity, PanelPartEmbedded, PanelStyle } from '../Signum.Entities.Dashboard'
+import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { parseIcon } from '../Admin/Dashboard';
@@ -16,6 +16,7 @@ import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
 import SelectorModal from '@framework/SelectorModal'
+import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
@@ -70,7 +71,7 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
 interface BigValueBadgeProps {
   findOptions: FindOptions;
   text?: string;
-  style: PanelStyle;
+  style: BootstrapStyle;
   iconName?: string;
   iconColor?: string;
 }

@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CustomDecisionStyle
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -227,17 +227,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
           button: <OperationButton eoc={eoc} group={group} />,
         }];
       } else if (wa.type == "Decision") {
-        var modes = wa.customDecisionOptions.length > 0 ?
-          wa.customDecisionOptions.map(mle => ({ name: mle.element.name, style: mle.element.style })) :
-          [
-            { name: ConnectionType.niceToString("Approve"), style: CustomDecisionStyle.value("Success") },
-            { name: ConnectionType.niceToString("Decline"), style: CustomDecisionStyle.value("Warning") },
-          ];
-
-        return modes.map(m => ({
+        return wa.decisionOptions.map(mle => ({
           order: s?.order ?? 0,
           shortcut: undefined,
-          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(m.name)} color={m.style.toLowerCase() as BsColor}>{m.name}</OperationButton>,
+          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
         }));
       }
       else
@@ -245,6 +238,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
     contextual: 
     {
+      settersConfig: coc => "NoDialog",
       createMenuItems: coc => {
         const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
         if (wa.type == "Task") {
@@ -252,14 +246,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
           return [<OperationMenuItem coc={coc} />];
 
         } else if (wa.type == "Decision") {
-          var modes = wa.customDecisionOptions.length > 0 ?
-            wa.customDecisionOptions.map(mle => ({ name: mle.element.name, style: mle.element.style })) :
-            [
-              { name: ConnectionType.niceToString("Approve"), style: CustomDecisionStyle.value("Success") },
-              { name: ConnectionType.niceToString("Decline"), style: CustomDecisionStyle.value("Warning") },
-            ];
-
-          return modes.map(m => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(m.name)} color={m.style.toLowerCase() as BsColor}>{m.name}</OperationMenuItem>);
+          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
         }
         else
           return [];

@@ -17,11 +17,9 @@ export class CustomRenderer extends BpmnRenderer {
 
     if (ct && ct != "Normal")
       result.style.setProperty('stroke',
-        ct == "Approve" ? "#0c9c01" :
-          ct == "Decline" ? "#c71a01" :
-            ct == "Jump" ? "blue" :
-              ct == "ScriptException" ? "magenta" :
-                "gray");
+          ct == "Jump" ? "blue" :
+            ct == "ScriptException" ? "magenta" :
+              "gray");
 
     return result;
   }

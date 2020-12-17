@@ -9,9 +9,9 @@ export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
-      <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={forceUpdate}/>
+      <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
 
-      {ctx.value.type == "CustomDecision" ? <ValueLine ctx={ctx.subCtx(e => e.customOptionName)} /> : null}
+      {ctx.value.type == "Decision" ? <ValueLine ctx={ctx.subCtx(e => e.decisionOptionName)} mandatory /> : null}
 
       {ctx.value.needCondition ?
         ctx.value.mainEntityType ?
