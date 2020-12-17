@@ -11,7 +11,7 @@ export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
       <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={forceUpdate}/>
 
-      {ctx.value.type == "CustomOption" ? <ValueLine ctx={ctx.subCtx(e => e.customOptionName)} /> : null}
+      {ctx.value.type == "CustomDecision" ? <ValueLine ctx={ctx.subCtx(e => e.customOptionName)} /> : null}
 
       {ctx.value.needCondition ?
         ctx.value.mainEntityType ?

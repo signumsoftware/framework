@@ -32,9 +32,7 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public bool HasCustomOptions { get; set; }
-
-        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
+        public MList<CustomDecisionOptionEmbedded> CustomDecisionOptions { get; set; } = new MList<CustomDecisionOptionEmbedded>();
 
         [Ignore, QueryableProperty]
         [NoRepeatValidator]
@@ -125,8 +123,7 @@ namespace Signum.Entities.Workflow
                 BpmnElementId = we.BpmnElementId
             }).ToMList());
 
-            model.HasCustomOptions = this.HasCustomOptions;
-            model.CustomDecissionOptions.AssignMList(this.CustomDecissionOptions);
+            model.CustomDecisionOptions.AssignMList(this.CustomDecisionOptions);
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -145,8 +142,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
-            this.HasCustomOptions = wModel.HasCustomOptions;
-            this.CustomDecissionOptions.AssignMList(wModel.CustomDecissionOptions);
+            this.CustomDecisionOptions.AssignMList(wModel.CustomDecisionOptions);
             // We can not set boundary timers in model
             //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
@@ -182,15 +178,15 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class CustomDecissionOptionEmbedded : EmbeddedEntity
+    public class CustomDecisionOptionEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public CustomDecissionStyle Style { get; set; }
+        public CustomDecisionStyle Style { get; set; }
     }
 
-    public enum CustomDecissionStyle
+    public enum CustomDecisionStyle
     {
         Light,
         Dark,
@@ -343,7 +339,7 @@ namespace Signum.Entities.Workflow
 
         public bool HasCustomOptions { get; set; }
 
-        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
+        public MList<CustomDecisionOptionEmbedded> CustomDecisionOptions { get; set; } = new MList<CustomDecisionOptionEmbedded>();
 
         [PreserveOrder]
         [NoRepeatValidator]

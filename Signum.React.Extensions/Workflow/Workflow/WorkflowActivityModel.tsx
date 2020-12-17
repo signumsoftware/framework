@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, CustomDecissionOptionEmbedded, 
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, CustomDecisionOptionEmbedded, 
 } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
@@ -224,8 +224,8 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
         <ValueLine ctx={ctx.subCtx(a => a.hasCustomOptions)} onChange={forceUpdate}/>
 
-        {ctx.value.hasCustomOptions ? <EntityTable ctx={ctx.subCtx(a => a.customDecissionOptions)}
-          columns={EntityTable.typedColumns<CustomDecissionOptionEmbedded>([
+        {ctx.value.hasCustomOptions ? <EntityTable ctx={ctx.subCtx(a => a.customDecisionOptions)}
+          columns={EntityTable.typedColumns<CustomDecisionOptionEmbedded>([
             {
               property: c => c.name,
             },

@@ -57,6 +57,7 @@ export interface CaseActivityEntity extends Entities.Entity {
   duration: number | null;
   doneBy: Entities.Lite<Authorization.UserEntity> | null;
   doneType: DoneType | null;
+  doneDecision: string | null;
   scriptExecution: ScriptExecutionEmbedded | null;
 }
 
@@ -108,8 +109,6 @@ export module CaseActivityOperation {
   export const Register : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Register");
   export const Delete : Entities.DeleteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Delete");
   export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
-  export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
-  export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
   export const Jump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Jump");
   export const Timer : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timer");
   export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
@@ -215,19 +214,19 @@ export type ConnectionType =
   "Normal" |
   "Approve" |
   "Decline" |
-  "CustomOption" |
+  "CustomDecision" |
   "Jump" |
   "ScriptException";
 
-export const CustomDecissionOptionEmbedded = new Type<CustomDecissionOptionEmbedded>("CustomDecissionOptionEmbedded");
-export interface CustomDecissionOptionEmbedded extends Entities.EmbeddedEntity {
-  Type: "CustomDecissionOptionEmbedded";
+export const CustomDecisionOptionEmbedded = new Type<CustomDecisionOptionEmbedded>("CustomDecisionOptionEmbedded");
+export interface CustomDecisionOptionEmbedded extends Entities.EmbeddedEntity {
+  Type: "CustomDecisionOptionEmbedded";
   name: string;
-  style: CustomDecissionStyle;
+  style: CustomDecisionStyle;
 }
 
-export const CustomDecissionStyle = new EnumType<CustomDecissionStyle>("CustomDecissionStyle");
-export type CustomDecissionStyle =
+export const CustomDecisionStyle = new EnumType<CustomDecisionStyle>("CustomDecisionStyle");
+export type CustomDecisionStyle =
   "Light" |
   "Dark" |
   "Primary" |
@@ -247,8 +246,6 @@ export type DateFilterRange =
 export const DoneType = new EnumType<DoneType>("DoneType");
 export type DoneType =
   "Next" |
-  "Approve" |
-  "Decline" |
   "Jump" |
   "Timeout" |
   "ScriptSuccess" |
@@ -354,8 +351,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
   type: WorkflowActivityType;
   comments: string | null;
   requiresOpen: boolean;
-  hasCustomOptions: boolean;
-  customDecissionOptions: Entities.MList<CustomDecissionOptionEmbedded>;
+  customDecisionOptions: Entities.MList<CustomDecisionOptionEmbedded>;
   boundaryTimers: Entities.MList<WorkflowEventEntity>;
   estimatedDuration: number | null;
   viewName: string | null;
@@ -388,7 +384,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
   type: WorkflowActivityType;
   requiresOpen: boolean;
   hasCustomOptions: boolean;
-  customDecissionOptions: Entities.MList<CustomDecissionOptionEmbedded>;
+  customDecisionOptions: Entities.MList<CustomDecisionOptionEmbedded>;
   boundaryTimers: Entities.MList<WorkflowEventModel>;
   estimatedDuration: number | null;
   script: WorkflowScriptPartEmbedded | null;
@@ -455,7 +451,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
   from: IWorkflowNodeEntity;
   to: IWorkflowNodeEntity;
   name: string | null;
-  customOptionName: string | null;
+  customDecisionName: string | null;
   bpmnElementId: string;
   type: ConnectionType;
   condition: Entities.Lite<WorkflowConditionEntity> | null;

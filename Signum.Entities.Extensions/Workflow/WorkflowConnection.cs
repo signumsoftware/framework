@@ -21,7 +21,7 @@ namespace Signum.Entities.Workflow
         public string? Name { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
-        public string? CustomOptionName { get; set; }
+        public string? CustomDecisionName { get; set; }
 
         public string? GetName() => Name;
 
@@ -45,7 +45,7 @@ namespace Signum.Entities.Workflow
             {
                 MainEntityType = this.From!.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
-                CustomOptionName = this.CustomOptionName,
+                CustomOptionName = this.CustomDecisionName,
                 Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
@@ -59,7 +59,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowConnectionModel)model;
             this.Name = wModel.Name;
-            this.CustomOptionName = wModel.CustomOptionName;
+            this.CustomDecisionName = wModel.CustomOptionName;
             this.Type = wModel.Type;
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
@@ -70,6 +70,13 @@ namespace Signum.Entities.Workflow
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
+
+        internal string? DoneDecission() =>
+                Type == ConnectionType.Approve ? ConnectionType.Approve.ToString() :
+                Type == ConnectionType.Decline ? ConnectionType.Decline.ToString() :
+                Type == ConnectionType.CustomDecision ? CustomDecisionName :
+                (string?)null;
+
     }
 
     public enum ConnectionType
@@ -77,7 +84,7 @@ namespace Signum.Entities.Workflow
         Normal,
         Approve,
         Decline,
-        CustomOption,
+        CustomDecision,
         Jump,
         ScriptException,
     }

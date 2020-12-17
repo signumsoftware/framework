@@ -82,6 +82,9 @@ namespace Signum.Engine.Workflow
                 !a.ViewNameProps.Any() ? null! : new XElement("ViewNameProps",
                     a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))
                 ),
+                !a.CustomDecisionOptions.Any() ? null! : new XElement("CustomDecisionOptions", 
+                    a.CustomDecisionOptions.Select(cdo => new XElement("CustomDecisionOption", new XAttribute("Name", cdo.Name), new XAttribute("Style", cdo.Style.ToString())))
+                ),
                 string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
                 a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
                     new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
@@ -121,6 +124,7 @@ namespace Signum.Engine.Workflow
                     new XAttribute("Type", c.Type.ToString()),
                     new XAttribute("From", c.From.BpmnElementId),
                     new XAttribute("To", c.To.BpmnElementId),
+                    c.CustomDecisionName == null ? null! : new XAttribute("CustomDecisionName", c.CustomDecisionName!),
                     c.Condition == null ? null! : new XAttribute("Condition", ctx.Include(c.Condition)),
                     c.Action == null ? null! : new XAttribute("Action", ctx.Include(c.Action)),
                     c.Order == null ? null! : new XAttribute("Order", c.Order),
@@ -230,7 +234,7 @@ namespace Signum.Engine.Workflow
                         .Set(ca => ca.WorkflowActivity, ca => replacement)
                         .Execute();
 
-                    var running = act.CaseActivities().Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+                    var running = act.CaseActivities().Where(a => a.State == CaseActivityState.Pending).ToList();
 
                     running.ForEach(a =>
                     {
@@ -298,6 +302,11 @@ namespace Signum.Engine.Workflow
                         {
                             vnpe.Name = elem.Value;
                         });
+                        activity.CustomDecisionOptions.Synchronize(xml.Element("CustomDecisionOptions")?.Elements("CustomDecisionOption").ToList(), (cdoe, elem) =>
+                        {
+                            cdoe.Name = elem.Attribute("Name")!.Value;
+                            cdoe.Style = Enum.Parse<CustomDecisionStyle>(elem.Attribute("Style")!.Value);
+                        });
                         activity.UserHelp = xml.Element("UserHelp")?.Value;
                         activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
                         {
@@ -343,6 +352,7 @@ namespace Signum.Engine.Workflow
                                 using (Sync(this.connections, element.Elements("Connection"), ctx, WorkflowConnectionOperation.Save, WorkflowConnectionOperation.Delete, (conn, xml) =>
                                 {
                                     conn.Name = xml.Attribute("Name")?.Value;
+                                    conn.CustomDecisionName = xml.Attribute("CustomDecisionName")?.Value;
                                     conn.Type = xml.Attribute("Type")!.Value.ToEnum<ConnectionType>();
                                     conn.From = GetNode(xml.Attribute("From")!.Value);
                                     conn.To = GetNode(xml.Attribute("To")!.Value);
