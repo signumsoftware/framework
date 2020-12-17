@@ -7,16 +7,16 @@ import {
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
-import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible } from './TypeContext';
+import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
 import * as Navigator from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
-import { getEntityOperationButtons, defaultOnClick, andClose, andNew } from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
-import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick, OperationMenuItem } from './Operations/ContextualOperations';
+import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
@@ -174,6 +174,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   onClick?: (coc: ContextualOperationContext<T>) => void;
   color?: BsColor;
   icon?: IconProp;
@@ -195,6 +196,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   onClick?: (coc: ContextualOperationContext<T>) => void;
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -206,6 +208,7 @@ export class ContextualOperationContext<T extends Entity> {
   operationInfo: OperationInfo;
   settings?: ContextualOperationSettings<T>;
   entityOperationSettings?: EntityOperationSettings<T>;
+  pack?: EntityPack<T>; /*only for single contextual*/
   canExecute?: string;
   isReadonly?: boolean;
   event?: React.MouseEvent<any>;
@@ -232,6 +235,16 @@ export class ContextualOperationContext<T extends Entity> {
     var val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
     return val;
   }
+
+  createMenuItems(): React.ReactElement[]{
+
+    debugger;
+
+    if (this.settings?.createMenuItems)
+      return this.settings.createMenuItems(this);
+
+    return [<OperationMenuItem coc={this} />];
+  };
 }
 
 export class EntityOperationContext<T extends Entity> {
@@ -307,6 +320,19 @@ export class EntityOperationContext<T extends Entity> {
       return false;
 
     return true;
+  }
+
+  createButton(group?: EntityOperationGroup): ButtonBarElement[] {
+    const s = this.settings;
+
+    if (s?.createButton != null)
+      return s.createButton(this, group);
+
+    return [{
+      order: s?.order ?? 0,
+      shortcut: e => this.onKeyDown(e),
+      button: <OperationButton eoc={this} group={group} />,
+    }];
   }
 
   complete() {
@@ -388,6 +414,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
+  createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;
@@ -414,12 +441,12 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 export interface EntityOperationOptions<T extends Entity> {
   contextual?: ContextualOperationOptions<T>;
   contextualFromMany?: ContextualOperationOptions<T>;
-
   text?: () => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => void;
+  createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   group?: EntityOperationGroup | null;

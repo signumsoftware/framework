@@ -13,6 +13,7 @@ import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
+import { BsColor } from "../Components";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -39,7 +40,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
     .filter(coc => coc != undefined)
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order)
-    .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
+    .flatMap(coc => coc.createMenuItems());
 
   if (!menuItems.length)
     return undefined;
@@ -52,20 +53,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
 
-  confirmInNecessary(coc).then(conf => {
-    if (!conf)
-      return;
-
-    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-      Navigator.createNavigateOrTab(pack, coc.event!)
-        .then(() => coc.context.markRows({}))
-        .done();
-    }).done();
-  }).done();
-
-}
 
 export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -110,6 +98,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     if (ctx.lites.length == 1) {
       contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
         contexts.forEach(coc => {
+          coc.pack = ep;
           coc.canExecute = ep.canExecute[coc.operationInfo.key];
           coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
         });
@@ -140,7 +129,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       .filter(coc => !coc.isReadonly || showOnReadonly(coc))
       .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
         coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-      .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
+      .flatMap(coc => coc.createMenuItems());
 
     if (menuItems.length == 0)
       return undefined;
@@ -217,52 +206,80 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   return undefined;
 }
 
-export namespace MenuItemConstructor { //To allow monkey patching
 
-  export function simplifyName(niceName: string) {
-    const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-    return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
+export interface OperationMenuItemProps {
+  coc: ContextualOperationContext<any>;
+  onOperationClick?: (coc: ContextualOperationContext<Entity>) => void;
+  extraButtons?: React.ReactNode;
+  children?: React.ReactNode;
+  color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+}
+
+export function OperationMenuItem({ coc, onOperationClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
+  const text = children ?? OperationMenuItem.getText(coc);
+
+
+  if (color == null)
+    color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+
+  if (icon == null)
+    icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+
+  if (iconColor == null)
+    iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+
+  const disabled = !!coc.canExecute;
+
+  const onClick = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
+
+  const handleOnClick = (me: React.MouseEvent<any>) => {
+    coc.event = me;
+    onClick(coc);
   }
-  export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
-    const text = coc.settings && coc.settings.text ? coc.settings.text() :
-      coc.entityOperationSettings?.text ? coc.entityOperationSettings.text() :
-        <>{simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+  const item = (
+    <Dropdown.Item
+      onClick={disabled ? undefined : handleOnClick}
+      disabled={disabled}
+      style={{ pointerEvents: "initial" }}
+      data-operation={coc.operationInfo.key}>
+      {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
+        color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
+      {(icon != null || color != null) && " "}
+      {text}
+      {extraButtons}
+    </Dropdown.Item>
+  );
 
-    const color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
-    const icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
-    const iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+  if (!coc.canExecute)
+    return item;
 
-    const disabled = !!coc.canExecute;
+  return (
+    <OverlayTrigger placement="right"
+      overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
+      {item}
+    </OverlayTrigger >
+  );
+}
 
-    const onClick = (me: React.MouseEvent<any>) => {
-      coc.event = me;
-      coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
-    }
 
-    const item = (
-      <Dropdown.Item
-        onClick={disabled ? undefined : onClick}
-        disabled={disabled}
-        style={{ pointerEvents: "initial" }}
-        data-operation={coc.operationInfo.key}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
-          color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon != null || color != null) && " "}
-        {text}
-      </Dropdown.Item>
-    );
+OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactNode => {
 
-    if (!coc.canExecute)
-      return item;
+  if (coc.settings && coc.settings.text)
+    return coc.settings.text();
 
-    return (
-      <OverlayTrigger placement="right"
-        overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
-        {item}
-      </OverlayTrigger >
-    );
-  }
+  if (coc.entityOperationSettings?.text)
+    return coc.entityOperationSettings.text();
+
+  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+
+};
+
+OperationMenuItem.simplifyName = (niceName: string) => {
+  const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
+  return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
 }
 
 
