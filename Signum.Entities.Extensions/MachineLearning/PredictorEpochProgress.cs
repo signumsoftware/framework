@@ -20,10 +20,10 @@ namespace Signum.Entities.MachineLearning
         [Format("0.0000")]
         public double? LossTraining { get; set; }
         [Format("0.0000")]
-        public double? EvaluationTraining { get; set; }
+        public double? AccuracyTraining { get; set; }
         [Format("0.0000")]
         public double? LossValidation { get; internal set; }
         [Format("0.0000")]
-        public double? EvaluationValidation { get; internal set; }
+        public double? AccuracyValidation { get; internal set; }
     }
 }

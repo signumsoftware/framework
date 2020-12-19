@@ -19,7 +19,9 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 {
     public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
     {
-        public static string TempFile = "TempDirectory";
+        public static Func<PredictorEntity, int, string> TrainingModelDirectory = (PredictorEntity p, int miniBatchIndex) => $"TensorFlowModels/{p.Id}/Training/{miniBatchIndex}";
+        public static Func<PredictorEntity, string> PredictorDirectory = (PredictorEntity p) => $"TensorFlowModels/{p.Id}";
+        public string ModelFileName = "Model";
 
         public Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding> Encodings = new Dictionary<PredictorColumnEncodingSymbol, ITensorFlowEncoding>
         {
@@ -61,18 +63,18 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            Tensor inputVariable = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "input");
-            Tensor outputVariable = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "output");
+            Tensor inputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "input");
+            Tensor outputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "output");
 
-            Tensor currentVar = inputVariable;
+            Tensor currentTensor = inputPlaceholder;
             nn.HiddenLayers.ForEach((layer, i) =>
             {
-                currentVar = NetworkBuilder.DenseLayer(currentVar, layer.Size, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
+                currentTensor = NetworkBuilder.DenseLayer(currentTensor, layer.Size, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
             });
-            Tensor calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputCodifications.Count, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
+            Tensor calculatedOutputs = NetworkBuilder.DenseLayer(currentTensor, ctx.OutputCodifications.Count, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
-            Tensor loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, outputVariable, calculatedOutputs);
-            Tensor accuracy = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, outputVariable, calculatedOutputs);
+            Tensor loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, outputPlaceholder, calculatedOutputs);
+            Tensor accuracy = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, outputPlaceholder, calculatedOutputs);
 
             // prepare for training
             Optimizer optimizer = NetworkBuilder.GetOptimizer(nn);
@@ -99,6 +101,16 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 LogDevicePlacement = true
             };
 
+            ctx.ReportProgress($"Deleting Files");
+            var dir = PredictorDirectory(ctx.Predictor);
+
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, true);
+
+            Directory.CreateDirectory(dir);
+            
+            ctx.ReportProgress($"Starting training...");
+
             var saver = tf.train.Saver();
 
             using (var sess = tf.Session(config))
@@ -109,8 +121,6 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 {
                     using (HeavyProfiler.Log("MiniBatch", () => i.ToString()))
                     {
-                        ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
-
                         var trainMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(training)).ToList();
 
                         var inputValue = CreateNDArray(ctx, trainMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn);
@@ -119,8 +129,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                         using (HeavyProfiler.Log("TrainMinibatch", () => i.ToString())) 
                         {
                             sess.run(trainOperation,
-                                (inputVariable, inputValue),
-                                (outputVariable, outputValue));
+                                (inputPlaceholder, inputValue),
+                                (outputPlaceholder, outputValue));
                         }
 
                         if (ctx.StopTraining)
@@ -129,14 +139,14 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                         var isLast = numMinibatches - nn.BestResultFromLast <= i;
                         if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
                         {
-                            float loss_val = 100.0f;
-                            float accuracy_val = 0f;
+                            float loss_val;
+                            float accuracy_val;
 
                             using (HeavyProfiler.Log("EvalTraining", () => i.ToString()))
                             {
                                 (loss_val, accuracy_val) = sess.run((loss, accuracy), 
-                                    (inputVariable, inputValue),
-                                    (outputVariable, outputValue));
+                                    (inputPlaceholder, inputValue),
+                                    (outputPlaceholder, outputValue));
                             }
 
                             var ep = new EpochProgress
@@ -150,6 +160,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                                 AccuracyValidation = null,
                             };
 
+                            ctx.ReportProgress($"Training Minibatches Loss:{loss_val} / Accuracy:{accuracy_val}", (i + 1) / (decimal)numMinibatches);
+
                             ctx.Progresses.Enqueue(ep);
 
                             if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
@@ -162,8 +174,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                                     var outputValValue = CreateNDArray(ctx, validateMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn);
 
                                     (loss_val, accuracy_val) = sess.run((loss, accuracy),
-                                    (inputVariable, inputValue),
-                                    (outputVariable, outputValue));
+                                    (inputPlaceholder, inputValValue),
+                                    (outputPlaceholder, outputValValue));
 
 
                                     ep.LossValidation = loss_val;
@@ -175,16 +187,16 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
                             if (isLast || ctx.StopTraining)
                             {
-                                var save = saver.save(sess, TempFile);
+                                Directory.CreateDirectory(TrainingModelDirectory(ctx.Predictor, i));
+                                var save = saver.save(sess, Path.Combine(TrainingModelDirectory(ctx.Predictor, i), ModelFileName));
 
                                 using (HeavyProfiler.LogNoStackTrace("FinalCandidate"))
                                 {
                                     candidate.Add(new FinalCandidate
                                     {
-                                        Model = null!,
-
-                                        ResultTraining = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationTraining, Loss = progress.LossTraining },
-                                        ResultValidation = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationValidation, Loss = progress.LossValidation },
+                                        ModelIndex = i,
+                                        ResultTraining = new PredictorMetricsEmbedded { Accuracy = progress.AccuracyTraining, Loss = progress.LossTraining },
+                                        ResultValidation = new PredictorMetricsEmbedded { Accuracy = progress.AccuracyValidation, Loss = progress.LossValidation },
                                     });
                                 }
                             }
@@ -201,9 +213,9 @@ namespace Signum.Engine.MachineLearning.TensorFlow
             p.ResultTraining = best.ResultTraining;
             p.ResultValidation = best.ResultValidation;
 
-            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", best.Model);
+            var files = Directory.GetFiles(TrainingModelDirectory(ctx.Predictor, best.ModelIndex));
 
-            p.Files.Add(fp);
+            p.Files.AddRange(files.Select(p => new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, p)));
 
             using (OperationLogic.AllowSave<PredictorEntity>())
                 p.Save();
@@ -212,7 +224,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public class FinalCandidate
         {
-            public byte[] Model;
+            public int ModelIndex;
             public PredictorMetricsEmbedded ResultTraining;
             public PredictorMetricsEmbedded ResultValidation;
         }
@@ -270,34 +282,26 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         public List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs)
         {
-            throw new NotImplementedException();
+            using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
+            {
+                lock (lockKey)
+                {
+                    var model = (TensorFlowModel)ctx.Model!;
 
-            //using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
-            //{
-            //    lock (lockKey)
-            //    {
-            //        var graph = new Graph().as_default();
-            //        using (var sess = tf.Session(graph))
-            //        {
+                    model.Session.as_default();
+                    model.Graph.as_default();
 
+                   
+                    NDArray inputValue = GetValueForPredict(ctx, inputs);
 
-            //        }
-
-            //        Function calculatedOutputs = (Function)ctx.Model!;
-            //        Value inputValue = GetValueForPredict(ctx, inputs);
-
-            //        var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
-            //        var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
-            //        var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null! } };
-
-            //        calculatedOutputs.Evaluate(inputDic, outputDic, device);
-
-            //        Value output = outputDic[calculatedOutputs];
-            //        IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
-            //        var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
-            //        return result;
-            //    }
-            //}
+                    var outputValue = model.Session.run(model.Output, (model.Input, inputValue));
+                    throw new InvalidOperationException();
+ 
+                    //IList<IList<float>> values = outputValue.ToMuliDimArray();
+                    //var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
+                    //return result;
+                }
+            }
         }
 
         private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx, PredictionOptions options)
@@ -368,7 +372,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return np.array(inputValues);
+                    return np.array(inputValues).reshape((inputs.Count, ctx.InputCodifications.Count));
             }
         }
 
@@ -382,11 +386,16 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
                 var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
-                var dir = Directory.CreateDirectory(Path.Combine(TempFile, ctx.Predictor.Id.ToString()));
+                var dir = Path.Combine(PredictorDirectory(ctx.Predictor));
+
+                if (Directory.Exists(dir))
+                    Directory.Delete(dir, true);
+
+                Directory.CreateDirectory(dir);
 
                 foreach (var item in ctx.Predictor.Files)
                 {
-                    using (var fileStream = File.Create(Path.Combine(dir.Name, item.FileName)))
+                    using (var fileStream = File.Create(Path.Combine(dir, item.FileName)))
                     {
                         using (var readStream = item.OpenRead())
                         {
@@ -395,8 +404,38 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                     }
                 }
 
+                var graph = tf.Graph();
+                using (var sess = tf.Session(graph))
+                {
+                    var saver = tf.train.import_meta_graph(Path.Combine(dir, $"{ModelFileName}.meta"));
+                    saver.restore(sess, Path.Combine(dir, ModelFileName));
+
+                    var array = graph.get_operations().Select(a=>a.name).ToArray();
+
+                    var input = graph.get_operation_by_name("input");
+                    var output = graph.get_operation_by_name("output");
+
+                    ctx.Model = new TensorFlowModel
+                    {
+                        Input = input,
+                        Output = output,
+                        Graph = graph,
+                        Session = sess,
+                    };
+                }
+
                 //ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray());
             }
         }
     }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    class TensorFlowModel
+    {
+        public Tensor Input { get; internal set; }
+        public Tensor Output { get; internal set; }
+        public Graph Graph { get; internal set; }
+        public Session Session { get; internal set; }
+    }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 }

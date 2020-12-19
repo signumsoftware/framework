@@ -38,8 +38,8 @@ namespace Signum.React.MachineLearning
                 Ellapsed = p.Ellapsed,
                 Epoch = p.Epoch,
                 TrainingExamples = p.TrainingExamples,
-                AccuracyTraining = p.EvaluationTraining,
-                AccuracyValidation = p.EvaluationValidation,
+                AccuracyTraining = p.AccuracyTraining,
+                AccuracyValidation = p.AccuracyValidation,
                 LossTraining = p.LossTraining,
                 LossValidation = p.LossValidation,
             })

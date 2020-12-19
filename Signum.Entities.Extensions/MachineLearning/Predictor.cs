@@ -167,7 +167,7 @@ namespace Signum.Entities.MachineLearning
         public double? Loss { get; set; }
 
         [Format("F4")]
-        public double? Evaluation { get; set; }
+        public double? Accuracy { get; set; }
     }
 
     [Serializable]

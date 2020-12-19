@@ -57,9 +57,9 @@ namespace Signum.Engine.MachineLearning
                 Epoch = Epoch,
                 TrainingExamples = TrainingExamples,
                 LossTraining = LossTraining?.CleanDouble(),
-                EvaluationTraining = AccuracyTraining?.CleanDouble(),
+                AccuracyTraining = AccuracyTraining?.CleanDouble(),
                 LossValidation = LossValidation?.CleanDouble(),
-                EvaluationValidation = AccuracyValidation?.CleanDouble(),
+                AccuracyValidation = AccuracyValidation?.CleanDouble(),
             }.Save();
         }
     }
