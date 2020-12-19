@@ -339,6 +339,8 @@ export module JavascriptMessage {
   export const cancel = new MessageKey("JavascriptMessage", "cancel");
   export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
+  export const Date = new MessageKey("JavascriptMessage", "Date");
+  export const Time = new MessageKey("JavascriptMessage", "Time");
 }
 
 export module LiteMessage {
@@ -433,6 +435,28 @@ export module SaveChangesMessage {
   export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
   export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
   export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
+}
+
+export module ReactWidgetsMessage {
+  export const MoveToday = new MessageKey("ReactWidgetsMessage", "MoveToday");
+  export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
+  export const MoveForward = new MessageKey("ReactWidgetsMessage", "MoveForward");
+  export const DateButton = new MessageKey("ReactWidgetsMessage", "DateButton");
+  export const TimeButton = new MessageKey("ReactWidgetsMessage", "TimeButton");
+  export const OpenCombobox = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
+  export const OpenDropdown = new MessageKey("ReactWidgetsMessage", "OpenDropdown");
+  export const Placeholder = new MessageKey("ReactWidgetsMessage", "Placeholder");
+  export const FilterPlaceholder = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
+  export const EmptyList = new MessageKey("ReactWidgetsMessage", "EmptyList");
+  export const EmptyFilter = new MessageKey("ReactWidgetsMessage", "EmptyFilter");
+  export const CreateOption = new MessageKey("ReactWidgetsMessage", "CreateOption");
+  export const CreateOption0 = new MessageKey("ReactWidgetsMessage", "CreateOption0");
+  export const TagsLabel = new MessageKey("ReactWidgetsMessage", "TagsLabel");
+  export const RemoveLabel = new MessageKey("ReactWidgetsMessage", "RemoveLabel");
+  export const NoneSelected = new MessageKey("ReactWidgetsMessage", "NoneSelected");
+  export const SelectedItems0 = new MessageKey("ReactWidgetsMessage", "SelectedItems0");
+  export const IncrementValue = new MessageKey("ReactWidgetsMessage", "IncrementValue");
+  export const DecrementValue = new MessageKey("ReactWidgetsMessage", "DecrementValue");
 }
 
 export module SearchMessage {

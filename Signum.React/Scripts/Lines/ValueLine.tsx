@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
-import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
+import { DateTimePicker, DatePicker } from 'react-widgets'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { BooleanEnum } from '../Signum.Entities'
+import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
@@ -634,7 +634,6 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
   const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
-
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -644,17 +643,13 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       </FormGroup>
     );
 
-  const handleDatePickerOnChange = (date?: Date, str?: string) => {
+  const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
     const m = date && DateTime.fromJSDate(date);
     vl.setValue(m == null || !m.isValid ? null :
       vl.props.type!.name == "Date" ? m.toISODate():
         !showTime ? m.toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
           m.toISO());
   };
-
-  let currentDate = s.ctx.value == null ? null : DateTime.fromISO(s.ctx.value);
-  if (!showTime && currentDate)
-    currentDate = currentDate.startOf("day");
 
   const htmlAttributes = {
     placeholder: vl.getPlaceholder(),
@@ -666,7 +661,12 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
           <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
-            format={luxonFormat} time={showTime} defaultCurrentDate={currentDate?.toJSDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
+            valueEditFormat={luxonFormat}
+            valueDisplayFormat={luxonFormat}
+            includeTime={showTime}
+            inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
+            messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+          />
         </div>
       )}
     </FormGroup>
