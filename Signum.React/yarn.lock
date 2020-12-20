@@ -297,15 +297,20 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.7.tgz#613957d900fab9ff84c8dfb24fa3eef0c2a40896"
   integrity sha512-2xtoL22/3Mv6a70i4+4RB7VgbDDORoWwjcqeNysojZA0R7NK17RbY5Gof/2QiFfJgX+KkWghbwJ+d/2SB8Ndzg==
 
+"@types/history@4.7.8":
+  version "4.7.8"
+  resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.8.tgz#49348387983075705fe8f4e02fb67f7daaec4934"
+  integrity sha512-S78QIYirQcUoo6UJZx9CSP0O2ix9IaeAXwQi26Rhr/+mg7qqPy8TzaxHSUut7eGjL8WmLccT7/MXf304WjqHcA==
+
 "@types/invariant@^2.2.33":
   version "2.2.34"
   resolved "https://registry.yarnpkg.com/@types/invariant/-/invariant-2.2.34.tgz#05e4f79f465c2007884374d4795452f995720bbe"
   integrity sha512-lYUtmJ9BqUN688fGY1U1HZoWT1/Jrmgigx2loq4ZcJpICECm/Om3V314BxdzypO0u5PORKGMM6x0OXaljV1YFg==
 
-"@types/luxon@1.24.4":
-  version "1.24.4"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.24.4.tgz#5dbd050b89247dbccab6eaa7744874c1fb7cea85"
-  integrity sha512-ce+P0b4rVq3LNXdD5r7eDqX2ydz2BonmTgVrHrV5yxsNKTt3YpnT5QDrid7xMAThhE/gg1RLAbxqbW1OCdiZog==
+"@types/luxon@1.25.0":
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.25.0.tgz#3d6fe591fac874f48dd225cb5660b2b785a21a05"
+  integrity sha512-iIJp2CP6C32gVqI08HIYnzqj55tlLnodIBMCcMf28q9ckqMfMzocCmIzd9JWI/ALLPMUiTkCu1JGv3FFtu6t3g==
 
 "@types/prop-types@*", "@types/prop-types@15.7.3", "@types/prop-types@^15.7.3":
   version "15.7.3"
@@ -319,10 +324,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-router-dom@5.1.5":
-  version "5.1.5"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-5.1.5.tgz#7c334a2ea785dbad2b2dcdd83d2cf3d9973da090"
-  integrity sha512-ArBM4B1g3BWLGbaGvwBGO75GNFbLDUthrDojV2vHLih/Tq8M+tgvY1DSwkuNrPSwdp/GUL93WSEpTZs8nVyJLw==
+"@types/react-router-dom@5.1.6":
+  version "5.1.6"
+  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-5.1.6.tgz#07b14e7ab1893a837c8565634960dc398564b1fb"
+  integrity sha512-gjrxYqxz37zWEdMVvQtWPFMFj1dRDb4TGOcgyOfSXTrEXdF92L00WE3C471O3TV/RF1oskcStkXsOU0Ete4s/g==
   dependencies:
     "@types/history" "*"
     "@types/react" "*"
