@@ -16,6 +16,11 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
+            uctx.ForeachCodeFile("*.csproj", file =>
+            {  
+                file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.8.3");
+            });
+
             uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
             {
                 file.InsertBeforeFirstLine(a => a.Contains(@"""./site.css"""),
