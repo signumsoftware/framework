@@ -431,12 +431,6 @@ export module QuickLinkMessage {
   export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");
 }
 
-export module SaveChangesMessage {
-  export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
-  export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
-  export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
-}
-
 export module ReactWidgetsMessage {
   export const MoveToday = new MessageKey("ReactWidgetsMessage", "MoveToday");
   export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
@@ -457,6 +451,12 @@ export module ReactWidgetsMessage {
   export const SelectedItems0 = new MessageKey("ReactWidgetsMessage", "SelectedItems0");
   export const IncrementValue = new MessageKey("ReactWidgetsMessage", "IncrementValue");
   export const DecrementValue = new MessageKey("ReactWidgetsMessage", "DecrementValue");
+}
+
+export module SaveChangesMessage {
+  export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
+  export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
+  export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
 }
 
 export module SearchMessage {
