@@ -165,7 +165,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     }
 
     if (this.props.onRender)
-      return this.props.onRender(this.state.value, this);
+      return this.props.onRender(this.state.value, this)!;
 
    
 
