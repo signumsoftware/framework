@@ -38,6 +38,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201125_ReactBootstrap14(),
                 new Upgrade_20201126_AddWebAppRestart(),
                 new Upgrade_20201210_NavigatorView(),
+                new Upgrade_20201220_React17(),
             }.Run(uctx);
         }
     }
