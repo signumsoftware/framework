@@ -321,7 +321,7 @@ namespace Signum.Engine.Workflow
                         });
                         activity.Script = activity.Script.CreateOrAssignEmbedded(xml.Element("Script"), (swe, elem) =>
                         {
-                            swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script")!)).ToLite();
+                            swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script")!)).ToLiteFat();
                             swe.RetryStrategy = elem.Attribute("RetryStrategy")?.Let(a => (WorkflowScriptRetryStrategyEntity)ctx.GetEntity((Guid)a));
                         });
                         SetXmlDiagram(activity, xml);
