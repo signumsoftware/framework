@@ -81,7 +81,6 @@ const numberLocalizer = ConfigureReactWidgets.getNumberLocalizer();"
                 file.UpdateNpmPackage("css-loader", "5.0.1");
                 file.UpdateNpmPackage("file-loader", "6.2.0");
                 file.UpdateNpmPackage("raw-loader", "4.0.2");
-                file.UpdateNpmPackage("sass", "1.30.0");
                 file.UpdateNpmPackage("style-loader", "2.0.0");
                 file.UpdateNpmPackage("ts-loader", "8.0.12");
                 file.UpdateNpmPackage("typescript", "4.1.3");
@@ -90,6 +89,8 @@ const numberLocalizer = ConfigureReactWidgets.getNumberLocalizer();"
                 file.UpdateNpmPackage("webpack-cli", "4.2.0");
 
                 file.WarningLevel = WarningLevel.None;
+
+                file.RemoveAllLines(a => a.Contains("dom-helpers"));
 
                 file.UpdateNpmPackage("@types/draft-js", "0.10.44");
                 file.UpdateNpmPackage("bpmn-js", "7.5.0");
