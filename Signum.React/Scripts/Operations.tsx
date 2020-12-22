@@ -259,7 +259,7 @@ export class ContextualOperationContext<T extends Entity> {
       if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
         return false;
 
-      if (eos.onClick != null && cos?.onClick) //also for isClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
+      if (eos.onClick != null && cos?.onClick == null) //also for isClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
         return false;
     }
 
