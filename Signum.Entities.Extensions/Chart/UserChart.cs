@@ -133,10 +133,16 @@ namespace Signum.Entities.Chart
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
+            ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
-            Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));
-            ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
+            var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
+            Parameters.ForEach(p =>
+            {
+                var pxml = paramsXml.TryGetC(p.Name);
+                if (pxml != null)
+                    p.FromXml(pxml, ctx);
+            });
             ParseData(ctx.GetQueryDescription(Query));
         }
 

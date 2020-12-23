@@ -33,16 +33,28 @@ namespace Signum.Entities.Dynamic
             }
         }
 
+
+        static JsonSerializerOptions settings = new JsonSerializerOptions
+        {
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNameCaseInsensitive = true,
+            Converters=
+            {
+                 new JsonStringEnumConverter(),
+            }
+        };
+
         [Ignore]
         DynamicTypeDefinition? definition;
         public DynamicTypeDefinition GetDefinition()
         {
-            return definition ?? JsonSerializer.Deserialize<DynamicTypeDefinition>(this.TypeDefinition)!;
+            return definition ?? (definition = JsonSerializer.Deserialize<DynamicTypeDefinition>(this.TypeDefinition, settings))!;
         }
 
         public void SetDefinition(DynamicTypeDefinition definition)
         {
-            this.TypeDefinition = JsonSerializer.Serialize(definition, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull } );
+            this.TypeDefinition = JsonSerializer.Serialize(definition, settings);
             this.definition = definition;
         }
 
@@ -118,10 +130,9 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypeDefinition
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+       
         public EntityKind? EntityKind;
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EntityData? EntityData;
 
         public string? TableName;
@@ -268,7 +279,7 @@ namespace Signum.Entities.Dynamic
         {
             using(JsonDocument doc = JsonDocument.ParseValue(ref reader))
             {
-                var typeName = doc.RootElement.GetProperty("Type").GetString()!;
+                var typeName = doc.RootElement.GetProperty("type").GetString()!;
                 var type = DynamicValidator.GetDynamicValidatorType(typeName);
 
                 return (DynamicValidator)doc.RootElement.ToObject(type, options);

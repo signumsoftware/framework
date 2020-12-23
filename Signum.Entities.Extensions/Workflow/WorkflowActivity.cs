@@ -32,9 +32,7 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public bool HasCustomOptions { get; set; }
-
-        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
+        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
 
         [Ignore, QueryableProperty]
         [NoRepeatValidator]
@@ -101,6 +99,11 @@ namespace Signum.Entities.Workflow
                 }
             }
 
+            if (pi.Name == nameof(DecisionOptions))
+            {
+                return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
+            }
+
             return base.PropertyValidation(pi);
         }
 
@@ -125,8 +128,7 @@ namespace Signum.Entities.Workflow
                 BpmnElementId = we.BpmnElementId
             }).ToMList());
 
-            model.HasCustomOptions = this.HasCustomOptions;
-            model.CustomDecissionOptions.AssignMList(this.CustomDecissionOptions);
+            model.DecisionOptions.AssignMList(this.DecisionOptions);
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -145,8 +147,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
-            this.HasCustomOptions = wModel.HasCustomOptions;
-            this.CustomDecissionOptions.AssignMList(wModel.CustomDecissionOptions);
+            this.DecisionOptions.AssignMList(wModel.Type == WorkflowActivityType.Decision ? wModel.DecisionOptions : new MList<DecisionOptionEmbedded>());
             // We can not set boundary timers in model
             //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
@@ -182,24 +183,12 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class CustomDecissionOptionEmbedded : EmbeddedEntity
+    public class DecisionOptionEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public CustomDecissionStyle Style { get; set; }
-    }
-
-    public enum CustomDecissionStyle
-    {
-        Light,
-        Dark,
-        Primary,
-        Secondary,
-        Success,
-        Info,
-        Warning,
-        Danger,
+        public BootstrapStyle Style { get; set; }
     }
 
     public class WorkflowActivityInfo
@@ -341,9 +330,7 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public bool HasCustomOptions { get; set; }
-
-        public MList<CustomDecissionOptionEmbedded> CustomDecissionOptions { get; set; } = new MList<CustomDecissionOptionEmbedded>();
+        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
 
         [PreserveOrder]
         [NoRepeatValidator]
@@ -381,6 +368,11 @@ namespace Signum.Entities.Workflow
                     if (dv != null)
                         return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
                 }
+            }
+
+            if (pi.Name == nameof(DecisionOptions))
+            {
+                return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
             }
 
             return base.PropertyValidation(pi);

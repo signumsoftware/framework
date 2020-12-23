@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Dashboard
 {
@@ -33,7 +34,7 @@ namespace Signum.Entities.Dashboard
         [NumberBetweenValidator(1, 12)]
         public int Columns { get; set; }
 
-        public PanelStyle Style { get; set; }
+        public BootstrapStyle Style { get; set; }
 
         [ImplementedBy(
             typeof(UserChartPartEntity),
@@ -102,7 +103,7 @@ namespace Signum.Entities.Dashboard
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Light);
+            Style = (BootstrapStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(BootstrapStyle), a.Value)) ?? BootstrapStyle.Light);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -112,17 +113,7 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    public enum PanelStyle
-    {
-        Light,
-        Dark,
-        Primary,
-        Secondary,
-        Success,
-        Info,
-        Warning,
-        Danger,
-    }
+
 
     public interface IGridEntity
     {

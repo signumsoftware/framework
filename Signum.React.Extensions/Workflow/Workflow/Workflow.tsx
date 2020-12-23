@@ -39,9 +39,11 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     });
   }
 
+
   React.useEffect(() => {
     const w = p.ctx.value;
     if (w.isNew) {
+      // @ts-ignore Cannot find name 'require'.
       require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
         updateState(WorkflowModel.New({
           diagramXml: xml.default,

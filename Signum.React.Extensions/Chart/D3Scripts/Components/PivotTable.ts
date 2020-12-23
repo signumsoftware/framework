@@ -20,7 +20,7 @@ export function toPivotTable(data: ChartTable,
 
   return {
     title,
-    columns: d3.values(usedCols.toObject(c => c.name, c => ({
+    columns: Object.values(usedCols.toObject(c => c.name, c => ({
       color: null,
       key: c.name,
       niceName: c.title,
@@ -34,7 +34,7 @@ export function groupedPivotTable(data: ChartTable,
   colSplit: ChartColumn<unknown>,
   colValue: ChartColumn<number>): PivotTable {
 
-  var columns = d3.values(data.rows.map(r => colSplit.getValue(r)).toObjectDistinct(v => colSplit.getKey(v), v => ({
+  var columns = Object.values(data.rows.map(r => colSplit.getValue(r)).toObjectDistinct(v => colSplit.getKey(v), v => ({
     niceName: colSplit.getNiceName(v),
     color: colSplit.getColor(v),
     key: colSplit.getKey(v),
