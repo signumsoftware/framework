@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "upgrade NPM modules, react 16, react-widgets";
 
-        public override string SouthwindCommitHash => "839fc1054e0641e0d0b7e01398dfdd72b846724c";
 
         public override void Execute(UpgradeContext uctx)
         {

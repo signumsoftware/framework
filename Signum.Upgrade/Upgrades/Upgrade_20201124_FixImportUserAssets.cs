@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "fix UserAssetsImporter";
 
-        public override string SouthwindCommitHash => "1a70a66b5b09cee8010d980329d20300995f7121";
 
         public override void Execute(UpgradeContext uctx)
         {

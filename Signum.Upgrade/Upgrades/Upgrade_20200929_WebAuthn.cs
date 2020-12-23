@@ -13,7 +13,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Add Support to WebAuthn";
 
-        public override string SouthwindCommitHash => "e7d32021965393f0fb2b46ef4ef58b464b091f93 120693c33e6948ce820cd093fec49b9206fe114f";
 
         public override void Execute(UpgradeContext uctx)
         {

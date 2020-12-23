@@ -13,7 +13,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Unify polyfills in core-js";
 
-        public override string SouthwindCommitHash => "905e77fbd6c22a29206ff57ab4d3f034ed4b317b";
 
         public override void Execute(UpgradeContext uctx)
         {

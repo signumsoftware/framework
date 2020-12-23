@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "CombinedUserChartPart";
 
-        public override string SouthwindCommitHash => "5d87563412c238710d184528853d65f67848d03c";
 
         public override void Execute(UpgradeContext uctx)
         {

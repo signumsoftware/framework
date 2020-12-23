@@ -13,7 +13,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "add Index.cshtml error handling (for iPhone)";
 
-        public override string SouthwindCommitHash => "";
 
         public override void Execute(UpgradeContext uctx)
         {
