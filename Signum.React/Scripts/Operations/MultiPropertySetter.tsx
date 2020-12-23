@@ -421,10 +421,10 @@ export function PropertyPart(p: PropertyPartProps) {
         data={subMembers}
         value={p.selectedRoute?.member}
         onChange={handleOnChange}
-        valueField="name"
+        dataKey="name"
         textField="niceName"
-        valueComponent={PropertyItem}
-        itemComponent={PropertyItemOptional}
+        renderValue={a => <PropertyItem item={a.item} />}
+        renderListItem={a => <PropertyItemOptional item={a.item} />}
         defaultOpen={p.defaultOpen}
       />
     </div>

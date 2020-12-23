@@ -109,20 +109,24 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   return { size, setContainer: setContainerMemo };
 }
 
-export function useDocumentEvent<K extends keyof DocumentEventMap>(type: K, handler: (this: Document, ev: DocumentEventMap[K]) => any, deps: any[]) {
+export function useDocumentEvent<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, deps: any[]): void;
+export function useDocumentEvent(type: string, listener: (this: Document, ev: Event) => any, deps: any[]): void;
+export function useDocumentEvent(type: string, listener: (this: Document, ev: Event) => any, deps: any[]) : void {
   React.useEffect(() => {
-    document.addEventListener(type, handler);
+    document.addEventListener(type, listener);
     return () => {
-      document.removeEventListener(type, handler);
+      document.removeEventListener(type, listener);
     }
   }, deps);
 }
 
-export function useWindowEvent<K extends keyof WindowEventMap>(type: K, handler: (this: Window, ev: WindowEventMap[K]) => void, deps: any[]) {
+export function useWindowEvent<K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, deps: any[]): void;
+export function useWindowEvent(type: string, listener: (this: Window, evt: Event) => void, deps: any[]): void;
+export function useWindowEvent(type: string, listener: (this: Window, evt: Event) => void, deps: any[]): void {
   React.useEffect(() => {
-    window.addEventListener(type, handler);
+    window.addEventListener(type, listener);
     return () => {
-      window.removeEventListener(type, handler);
+      window.removeEventListener(type, listener);
     }
   }, deps);
 }

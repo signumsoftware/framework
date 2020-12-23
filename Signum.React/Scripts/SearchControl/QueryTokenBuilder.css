@@ -2,6 +2,7 @@
 .sf-query-token-builder {
     display: inline-table;
     vertical-align: -webkit-baseline-middle;
+    margin-top: -6px;
 }
 
 .sf-query-token-part {

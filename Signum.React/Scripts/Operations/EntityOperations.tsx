@@ -46,25 +46,18 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
   const result = groups.flatMap((gr, i) => {
     if (gr.key == "") {
-      return gr.elements.map((eoc, j) => ({
-        order: eoc.settings && eoc.settings.order != undefined ? eoc.settings.order : 0,
-        shortcut: e => eoc.onKeyDown(e),
-        button: <OperationButton eoc={eoc} key={i + "-" + j} />,
-      }) as ButtonBarElement);
+      return gr.elements.flatMap((eoc, j) => eoc.createButton());
     } else {
 
       const group = gr.elements[0].group!;
+      var groupButtons = gr.elements.flatMap(eoc => eoc.createButton(group)).orderBy(a => a.order);
       
       return [{
         order: group.order != undefined ? group.order : 100,
-        shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
+        shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: (
           <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
-            {
-              gr.elements
-                .orderBy(a => a.settings && a.settings.order)
-                .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group} />)
-            }
+            { groupButtons.map(bbe => bbe.button) }
           </DropdownButton>
         )
       } as ButtonBarElement];
@@ -132,12 +125,13 @@ interface OperationButtonProps extends ButtonProps {
   canExecute?: string | null;
   className?: string;
   outline?: boolean;
+  color?: BsColor;
   avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
   children?: React.ReactNode
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -182,7 +176,10 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (outline == null)
     outline = eoc.outline;
 
-  var button = <Button variant={(outline? ("outline-" + eoc.color) as OutlineBsColor: eoc.color)}
+  if (color == null)
+    color = eoc.color;
+
+  var button = <Button variant={(outline? ("outline-" + color) as OutlineBsColor: color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
