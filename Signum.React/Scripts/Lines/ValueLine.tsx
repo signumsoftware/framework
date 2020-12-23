@@ -646,8 +646,8 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
     const m = date && DateTime.fromJSDate(date);
     vl.setValue(m == null || !m.isValid ? null :
-      vl.props.type!.name == "Date" ? m.toISODate():
-        !showTime ? m.toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
+      vl.props.type!.name == "Date" ? m.toISODate() :
+        !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
           m.toISO());
   };
 
