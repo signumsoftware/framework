@@ -60,7 +60,7 @@ namespace Signum.Entities.Tree
 
         public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)((Type)value).NiceName().ToOmniboxPascal());
+            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)QueryNameJsonConverter.GetQueryKey(value));
         }
 
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
