@@ -21,6 +21,7 @@ using Signum.Engine.Alerts;
 using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
 using System.Xml.Linq;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow
 {
@@ -381,12 +382,13 @@ namespace Signum.Engine.Workflow
 
         public static int NotifyInProgress(this ICaseMainEntity mainEntity)
         {
-            return Database.Query<CaseNotificationEntity>()
-                .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
-                .Where(n => n.User == UserEntity.Current.ToLite() && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
-                .UnsafeUpdate()
-                .Set(n => n.State, n => CaseNotificationState.InProgress)
-                .Execute();
+            using (AuthLogic.Disable())
+                return Database.Query<CaseNotificationEntity>()
+                    .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
+                    .Where(n => n.User == UserEntity.Current.ToLite() && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
+                    .UnsafeUpdate()
+                    .Set(n => n.State, n => CaseNotificationState.InProgress)
+                    .Execute();
         }
 
         public class WorkflowExecuteStepContext
