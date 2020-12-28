@@ -144,6 +144,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}
+              onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
               textAnchor="middle"
               fontWeight="bold">
               {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueNiceName}
