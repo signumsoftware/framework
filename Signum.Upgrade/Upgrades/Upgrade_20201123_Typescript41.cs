@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Update to Typescript 4.1";
 
-        public override string SouthwindCommitHash => "60d43b2f94249ff9ef0ee36eaecc1b7fc8f65c71";
 
         public override void Execute(UpgradeContext uctx)
         {

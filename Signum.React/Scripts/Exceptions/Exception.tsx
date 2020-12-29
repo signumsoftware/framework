@@ -32,7 +32,9 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <ValueLine ctx={ctx.subCtx(f => f.requestUrl)} />
       <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
       <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
-      <pre><code>{ctx.value.exceptionMessage}</code></pre>
+
+      <pre style={{ whiteSpace: "pre-wrap" }}><code>{ctx.value.exceptionMessage}</code></pre>
+    
       <Tabs id="exceptionTabs">
         {codeTab("stackTrace", a => a.stackTrace)}
         {codeTab("data", a => a.data)}
@@ -53,7 +55,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <Tab title={tc.propertyRoute.member!.niceName} eventKey={tabId}>
         {formatJson ?
           <FormatJson code={tc.value.text} /> :
-          <pre>
+          <pre style={{ whiteSpace: "pre-wrap" }}>
             <code>{tc.value.text}</code>
           </pre>
         }
@@ -82,7 +84,7 @@ function FormatJson(p: { code: string | undefined | null }) {
       <button className={classes("btn btn-sm btn-light", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
         <FontAwesomeIcon icon="code" /> Format JSON 
       </button>
-      <pre>
+      <pre style={{ whiteSpace: "pre-wrap" }}>
         <code>{formatJson ? formattedJson : p.code}</code>
       </pre>
     </div>

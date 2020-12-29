@@ -13,7 +13,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Replace Moment.js by Luxon.js";
 
-        public override string SouthwindCommitHash => "0fd8bcf1397705bc14d76631b631ae17011925ac";
 
         public override void Execute(UpgradeContext uctx)
         {

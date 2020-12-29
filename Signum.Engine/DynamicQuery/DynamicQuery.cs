@@ -268,7 +268,7 @@ namespace Signum.Engine.DynamicQuery
 
             var dic = description.Columns.ToDictionary(
                 cd => (QueryToken)new ColumnToken(cd, description.QueryName),
-                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNulifyUnwrapPrimaryKey(cd.PropertyRoutes!));
+                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
 
             return new DQueryable<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic));
         }

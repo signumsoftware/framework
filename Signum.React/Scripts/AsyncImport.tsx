@@ -28,7 +28,7 @@ interface ImportRouteProps {
   exact?: boolean;
   sensitive?: boolean;
   strict?: boolean;
-  location?: H.Location;
+  location?: H.Location<any>;
 
   onImportModule: () => Promise<ComponentModule>;
 

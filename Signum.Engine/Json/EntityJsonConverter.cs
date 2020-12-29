@@ -499,7 +499,31 @@ namespace Signum.Engine.Json
                     }
                     catch (Exception e)
                     {
-                        entity.SetTemporalError(pi, this.Factory.GetErrorMessage(pi, e));
+                        switch (reader.TokenType)
+                        {
+                            //Probably won't be able to continue deserialization
+                            case JsonTokenType.None:
+                            case JsonTokenType.StartObject:
+                            case JsonTokenType.StartArray:
+                            case JsonTokenType.PropertyName:
+                                throw;
+
+                            //Probably will be able to continue
+                            case JsonTokenType.EndObject:
+                            case JsonTokenType.EndArray:
+                            case JsonTokenType.Comment:
+                            case JsonTokenType.String:
+                            case JsonTokenType.Number:
+                            case JsonTokenType.True:
+                            case JsonTokenType.False:
+                            case JsonTokenType.Null:
+                            default:
+                                {
+                                    e.LogException();
+                                    entity.SetTemporalError(pi, this.Factory.GetErrorMessage(pi, e));
+                                    break;
+                                }
+                        }
                     }
                 }
             }

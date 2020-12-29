@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Fix Swagger";
 
-        public override string SouthwindCommitHash => "685de1570d239b47e829521f9cc57c7fc0115ea0";
 
         public override void Execute(UpgradeContext uctx)
         {

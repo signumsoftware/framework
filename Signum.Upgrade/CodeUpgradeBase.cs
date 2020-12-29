@@ -12,7 +12,6 @@ namespace Signum.Upgrade
         public string Key => $"{GetType().Name}";
         public bool IsExecuted { get; set; }
         public abstract string Description { get; }
-        public abstract string SouthwindCommitHash { get; }
 
         public abstract void Execute(UpgradeContext uctx);
 

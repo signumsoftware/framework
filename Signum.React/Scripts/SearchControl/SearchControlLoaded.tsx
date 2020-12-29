@@ -1220,8 +1220,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
 
-    if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
-      return;
+    //if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
+    //  return;
 
     if (this.props.onDoubleClick) {
       e.preventDefault();

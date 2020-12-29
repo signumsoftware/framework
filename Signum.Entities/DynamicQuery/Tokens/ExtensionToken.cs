@@ -77,11 +77,11 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
             if (BuildExtension == null)
                 throw new InvalidOperationException("ExtensionToken.BuildExtension not set");
 
-            var parentExpression = parent.BuildExpression(context).ExtractEntity(false).UnNullify();
+            var parentExpression = parent.BuildExpression(context);
 
-            var result = BuildExtension(parent.Type.CleanType().UnNullify(), Key, parentExpression);
+            var result = BuildExtension(parent.Type, Key, parentExpression);
 
-            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
+            return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.propertyRoute! });
         }
 
         public PropertyRoute? propertyRoute;
