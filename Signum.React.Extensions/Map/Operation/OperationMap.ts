@@ -110,16 +110,16 @@ export class OperationMapD3 {
   initStates(svg: d3.Selection<SVGElement, any, any, any>) {
 
     const drag = d3.drag<SVGGElement, MapState>()
-      .on("start", d => {
-        if (!d3.event.active)
+      .on("start", (e, d) => {
+        if (!e.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
-      .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+      .on("drag", (e, d) => {
+        d.fx = e.x;
+        d.fy = e.y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -132,22 +132,21 @@ export class OperationMapD3 {
       .enter()
       .append<SVGGElement>("svg:g").attr("class", "stateGroup")
       .style("cursor", d => d.token ? "pointer" : null)
-      .on("click", d => {
+      .on("click", (e, d) => {
 
         this.selectedNode = this.selectedNode == d ? undefined : d;
 
         this.selectLinks();
         this.selectNodes();
 
-        const event = d3.event;
-        if (event.defaultPrevented)
+        if (e.defaultPrevented)
           return;
 
         if ((<any>event).ctrlKey && d.token) {
           window.open(Finder.findOptionsPath({ queryName: this.queryName, filterOptions: [{ token: d.token, value: d.key }] }));
-          d3.event.preventDefault();
+          e.preventDefault();
         }
-      }).on("dblclick", d => {
+      }).on("dblclick", (e, d) => {
         d.fx = null;
         d.fy = null;
         this.simulation.alpha(0.3).restart();
@@ -189,16 +188,16 @@ export class OperationMapD3 {
   initOperations(svg: d3.Selection<SVGElement, any, any, any>) {
 
     const drag = d3.drag<SVGGElement, MapOperation>()
-      .on("start", d => {
-        if (!d3.event.active)
+      .on("start", (e, d) => {
+        if (!e.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
-      .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+      .on("drag", (e, d) => {
+        d.fx = e.x;
+        d.fy = e.y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -210,22 +209,21 @@ export class OperationMapD3 {
       .enter()
       .append<SVGGElement>("svg:g").attr("class", "operation")
       .style("cursor", "pointer")
-      .on("click", d => {
+      .on("click", (e, d) => {
 
         this.selectedNode = this.selectedNode == d ? undefined : d;
 
         this.selectLinks();
         this.selectNodes();
 
-        const event = d3.event;
-        if (event.defaultPrevented)
+        if (e.defaultPrevented)
           return;
 
-        if ((<any>event).ctrlKey) {
+        if (e.ctrlKey) {
           window.open(Finder.findOptionsPath({ queryName: OperationLogEntity, filterOptions: [{ token: "Operation.Key", value: d.key }] }));
-          d3.event.preventDefault();
+          e.preventDefault();
         }
-      }).on("dblclick", d => {
+      }).on("dblclick", (e, d) => {
         d.fx = null;
         d.fy = null;
         this.simulation.alpha(0.3).restart();

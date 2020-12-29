@@ -44,16 +44,15 @@ namespace Signum.Entities.Workflow
         public double? DurationRealTimeRatio => As.Expression(() => DurationRealTime / ((WorkflowActivityEntity)WorkflowActivity).EstimatedDuration);
 
         public Lite<UserEntity>? DoneBy { get; set; }
+
         public DoneType? DoneType { get; set; }
 
+        public string? DoneDecision { get; set; }
 
         public ScriptExecutionEmbedded? ScriptExecution { get; set; }
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
-        @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
-        (@this.WorkflowActivity is WorkflowEventEntity) ? CaseActivityState.PendingNext :
-        ((WorkflowActivityEntity)@this.WorkflowActivity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
-        CaseActivityState.PendingNext;
+        @this => @this.DoneDate.HasValue ? CaseActivityState.Done : CaseActivityState.Pending;
         [ExpressionField("StateExpression")]
         public CaseActivityState State 
         {
@@ -88,9 +87,7 @@ namespace Signum.Entities.Workflow
     public enum DoneType
     {
         Next,
-        Approve,
-        Decline,
-        Jump,
+        Jump = 3,
         Timeout,
         ScriptSuccess,
         ScriptFailure,
@@ -101,8 +98,7 @@ namespace Signum.Entities.Workflow
     {
         [Ignore]
         New,
-        PendingNext,
-        PendingDecision,
+        Pending,
         Done,
     }
 
@@ -115,8 +111,6 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Register;
         public static readonly DeleteSymbol<CaseActivityEntity> Delete;
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
-        public static readonly ExecuteSymbol<CaseActivityEntity> Approve;
-        public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
         public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
         public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;

@@ -16,7 +16,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { confirmInNecessary } from '@framework/Operations/EntityOperations'
+import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
 import { CodeContext } from '../Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
@@ -53,6 +53,7 @@ import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import { OperationMenuItem } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -195,6 +196,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
     icon: "share",
     iconColor: "blue",
+    hideOnCanExecute: true,
     onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
     contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
   }));
@@ -211,10 +213,62 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.CreateCaseActivityFromWorkflow, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.CreateCaseFromWorkflowEventTask, { isVisible: ctx => false }));
 
-  caseActivityOperation(CaseActivityOperation.Next, "primary");
-  caseActivityOperation(CaseActivityOperation.Approve, "success");
-  caseActivityOperation(CaseActivityOperation.Decline, "warning");
-  caseActivityOperation(CaseActivityOperation.Undo, "danger");
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Next, {
+    hideOnCanExecute: true,
+    color: "primary",
+    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    createButton: (eoc, group) => {
+      const wa = eoc.entity.workflowActivity as WorkflowActivityEntity;
+      const s = eoc.settings;
+      if (wa.type == "Task") {
+        return [{
+          order: s?.order ?? 0,
+          shortcut: e => eoc.onKeyDown(e),
+          button: <OperationButton eoc={eoc} group={group} />,
+        }];
+      } else if (wa.type == "Decision") {
+        return wa.decisionOptions.map(mle => ({
+          order: s?.order ?? 0,
+          shortcut: undefined,
+          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+        }));
+      }
+      else
+        return [];
+    },
+    contextual: 
+    {
+      settersConfig: coc => "NoDialog",
+      createMenuItems: coc => {
+        const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
+        if (wa.type == "Task") {
+
+          return [<OperationMenuItem coc={coc} />];
+
+        } else if (wa.type == "Decision") {
+          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
+        }
+        else
+          return [];
+      }
+    },
+    contextualFromMany: {
+      isVisible: ctx => true,
+      color: "primary"
+    },
+    
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
+    hideOnCanExecute: true,
+    color: "danger",
+    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    contextual: { isVisible: ctx => true },
+    contextualFromMany: {
+      isVisible: ctx => true,
+      color: "danger"
+    },
+  }));
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
     () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
@@ -416,18 +470,6 @@ public interface IWorkflowTransition
   }).done();
 }
 
-function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, color: BsColor) {
-  Operations.addSettings(new EntityOperationSettings(operation, {
-    hideOnCanExecute: true,
-    color: color,
-    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
-    contextual: { isVisible: ctx => true },
-    contextualFromMany: {
-      isVisible: ctx => true,
-      color: color
-    },
-  }));
-}
 
 function hide<T extends Entity>(type: Type<T>) {
   Navigator.addSettings(new EntitySettings(type, undefined, { isViewable: "Never", isCreable: "Never" }));

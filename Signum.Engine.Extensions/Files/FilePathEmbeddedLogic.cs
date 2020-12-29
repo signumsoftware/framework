@@ -1,6 +1,7 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -41,6 +42,11 @@ namespace Signum.Engine.Files
 
                 sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }
+        }
+
+        public static FilePathEmbedded ToFilePathEmbedded(this FileContent fileContent, FileTypeSymbol fileType)
+        {
+            return new FilePathEmbedded(fileType, fileContent.FileName, fileContent.Bytes);
         }
 
         private static void Schema_SchemaCompleted()

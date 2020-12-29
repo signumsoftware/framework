@@ -338,7 +338,7 @@ namespace Signum.Engine.Workflow
                         .Set(ca => ca.Previous, ca => ca.Previous!.Entity.Previous)
                         .Execute();
 
-                    var running = caseActivities.Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+                    var running = caseActivities.Where(a => a.State == CaseActivityState.Pending).ToList();
 
                     running.ForEach(a => {
                         if (a.Previous == null)
@@ -365,7 +365,7 @@ namespace Signum.Engine.Workflow
                             .Set(ca => ca.WorkflowActivity, ca => replacement)
                             .Execute();
 
-                        var running = node.CaseActivities().Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+                        var running = node.CaseActivities().Where(a => a.State == CaseActivityState.Pending).ToList();
 
                         running.ForEach(a =>
                         {

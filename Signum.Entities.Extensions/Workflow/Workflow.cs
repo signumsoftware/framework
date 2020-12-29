@@ -278,6 +278,10 @@ namespace Signum.Entities.Workflow
         ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions,
         [Description("Join '{0}' (of type {1}) does not match with its pair, the Split '{2}' (of type {3})")]
         Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3,
+        [Description("Decision option '{0}' is declared but never used in a connection")]
+        DecisionOption0IsDeclaredButNeverUsedInAConnection,
+        [Description("Decision option name '{0}' is not declared in any activity")]
+        DecisionOptionName0IsNotDeclaredInAnyActivity,
     }
 
     public enum WorkflowActivityMonitorMessage

@@ -93,7 +93,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-            sc.setState({ showFilters: false });
+            sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
