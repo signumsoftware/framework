@@ -13,7 +13,7 @@ import {
   PredictorAlgorithmSymbol,
   PredictorResultSaverSymbol, PredictorSimpleResultSaver,
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
-  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, PredictorAlgorithm
+  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
 } from './Signum.Entities.MachineLearning'
 import * as QuickLinks from '@framework/QuickLinks'
 import { QueryToken } from '@framework/FindOptions';
@@ -34,9 +34,9 @@ export function start(options: { routes: JSX.Element[] }) {
   }
 
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationTraining), numbericCellFormatter("#5DADE2"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyTraining), numbericCellFormatter("#5DADE2"));
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationValidation), numbericCellFormatter("#D98880"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadCsv.name,
@@ -95,7 +95,7 @@ export function start(options: { routes: JSX.Element[] }) {
     settings: PredictorSettingsEmbedded.New(),
   }));
 
-  registerInitializer(PredictorAlgorithm.NeuralNetworkTFGraph, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
+  registerInitializer(TensorFlowPredictorAlgorithm.NeuralNetworkGraph, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
     predictionType: "Regression",
     lossFunction: "MeanSquaredError",
     evalErrorFunction: "MeanAbsoluteError",
@@ -207,9 +207,9 @@ export interface EpochProgress {
   trainingExamples: number;
   epoch: number;
   lossTraining: number;
-  evaluationTraining: number;
+  accuracyTraining: number;
   lossValidation?: number;
-  evaluationValidation?: number;
+  accuracyValidation?: number;
 }
 
 function fromObjectArray(array: (number | undefined)[]): EpochProgress {
@@ -218,9 +218,9 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
     trainingExamples: array[1]!,
     epoch: array[2]!,
     lossTraining: array[3]!,
-    evaluationTraining: array[4]!,
+    accuracyTraining: array[4]!,
     lossValidation: array[5],
-    evaluationValidation: array[6],
+    accuracyValidation: array[6],
   }
 }
 

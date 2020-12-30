@@ -110,10 +110,6 @@ export type PredictionType =
   "Classification" |
   "MultiClassification";
 
-export module PredictorAlgorithm {
-  export const NeuralNetworkTFGraph : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "PredictorAlgorithm.NeuralNetworkTFGraph");
-}
-
 export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
 export interface PredictorAlgorithmSymbol extends Entities.Symbol {
   Type: "PredictorAlgorithm";
@@ -362,5 +358,9 @@ export const TensorFlowOptimizer = new EnumType<TensorFlowOptimizer>("TensorFlow
 export type TensorFlowOptimizer =
   "Adam" |
   "GradientDescentOptimizer";
+
+export module TensorFlowPredictorAlgorithm {
+  export const NeuralNetworkGraph : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "TensorFlowPredictorAlgorithm.NeuralNetworkGraph");
+}
 
 
