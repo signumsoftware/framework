@@ -63,8 +63,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            Tensor inputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "inputPlaceholder");
-            Tensor outputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "outputPlaceholder");
+            Tensor inputPlaceholder = tf.placeholder(tf.float32, new[] { -1, ctx.InputCodifications.Count }, "inputPlaceholder");
+            Tensor outputPlaceholder = tf.placeholder(tf.float32, new[] { -1, ctx.OutputCodifications.Count }, "outputPlaceholder");
 
             Tensor currentTensor = inputPlaceholder;
             nn.HiddenLayers.ForEach((layer, i) =>
@@ -385,7 +385,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return np.array(inputValues);
+                    return np.array(inputValues).reshape(-1, inputValues.Length);
             }
         }
 

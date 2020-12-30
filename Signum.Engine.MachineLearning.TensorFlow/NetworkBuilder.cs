@@ -37,13 +37,13 @@ namespace Signum.Engine.MachineLearning.TensorFlow
         public static Tensor FullyConnectedLinearLayer(Tensor input, int outputDim, NeuralNetworkInitializer initializer, int seed)
         {
             System.Diagnostics.Debug.Assert(input.shape.Rank == 1);
-            int inputDim = input.shape[0];
+            int inputDim = input.shape[1];
 
-            var init = GetInitializer(initializer, seed);
-            var W = tf.compat.v1.get_variable("W", new int[] { outputDim, inputDim }, tf.float32, init);
+            IInitializer? init = GetInitializer(initializer, seed);
+            IVariableV1 W = tf.compat.v1.get_variable("W", new int[] { inputDim, outputDim }, tf.float32, init);
 
-            var b = tf.compat.v1.get_variable("b", new int[] { outputDim }, tf.float32, init);
-            return b.AsTensor() + W.AsTensor() * input;
+            IVariableV1 b = tf.compat.v1.get_variable("b", new int[] { outputDim }, tf.float32, init);
+            return tf.matmul(input, W.AsTensor()) + b.AsTensor();
         }
 
         private static IInitializer GetInitializer(NeuralNetworkInitializer initializer, int seed)
