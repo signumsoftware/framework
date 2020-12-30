@@ -3,6 +3,7 @@
     margin-top:10px;
     margin-bottom: 0px;
     font-size: 1.3em;
+    flex-grow: 0 !important;
 }
 
 .blink {
@@ -13,4 +14,18 @@
     50% {
         opacity: 0.5;
     }
+}
+
+#tooltip-buildId .tooltip-inner {
+    max-width: initial;
+    white-space: normal;
+}
+
+.sf-version-info {
+    margin-right: 10px;
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 12px;
+    color: gray;
+    cursor: default;
 }

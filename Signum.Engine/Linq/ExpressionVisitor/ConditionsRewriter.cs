@@ -4,6 +4,8 @@ using Signum.Utilities;
 using System.Collections.ObjectModel;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlTypes;
+using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Linq
 {
@@ -26,7 +28,8 @@ namespace Signum.Engine.Linq
         static readonly BinaryExpression TrueCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
         static readonly BinaryExpression FalseCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
 
-        Expression MakeSqlCondition(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        Expression? MakeSqlCondition(Expression? exp)
         {
             if (exp == null)
                 return null!;
@@ -49,8 +52,8 @@ namespace Signum.Engine.Linq
             return exp.Type.IsNullable() ? result.Nullify() : result;
         }
 
-
-        Expression MakeSqlValue(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        Expression? MakeSqlValue(Expression? exp)
         {
             if (exp == null)
                 return null!;
@@ -159,7 +162,7 @@ namespace Signum.Engine.Linq
         {
             var expression = MakeSqlValue(Visit(castExpr.Expression));
             if (expression != castExpr.Expression)
-                return new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+                return new SqlCastExpression(castExpr.Type, expression, castExpr.DbType);
             return castExpr;
         }
 
@@ -271,7 +274,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            Expression obj = MakeSqlValue(Visit(sqlFunction.Object));
+            Expression? obj = MakeSqlValue(Visit(sqlFunction.Object));
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a=>MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
                 return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
@@ -282,7 +285,7 @@ namespace Signum.Engine.Linq
         {
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
             if (args != sqlFunction.Arguments)
-                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
@@ -307,17 +310,17 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = MakeSqlValue(Visit(aggregate.Expression));
-            if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
+            var arguments = Visit(aggregate.Arguments).Select(a => MakeSqlValue(a)).ToReadOnly();
+            if (arguments != aggregate.Arguments)
+                return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments);
             return aggregate;
         }
 
         protected internal override Expression VisitSelect(SelectExpression select)
         {
-            Expression top = this.Visit(select.Top);
+            Expression? top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From!);
-            Expression where = MakeSqlCondition(this.Visit(select.Where));
+            Expression? where = MakeSqlCondition(this.Visit(select.Where));
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, e => MakeSqlValue(Visit(e)));
@@ -374,7 +377,7 @@ namespace Signum.Engine.Linq
                 return c;
             });
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments, update.ReturnRowCount);
             return update;
         }
 
@@ -382,7 +385,7 @@ namespace Signum.Engine.Linq
         {
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
-            Expression condition = MakeSqlCondition(this.Visit(join.Condition));
+            Expression? condition = MakeSqlCondition(this.Visit(join.Condition));
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
                 return new JoinExpression(join.JoinType, left, right, condition);

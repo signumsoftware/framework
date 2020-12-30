@@ -16,8 +16,10 @@ namespace Signum.Engine
 {
     public static class BulkInserter
     {
+        const SqlBulkCopyOptions SafeDefaults = SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.KeepNulls;
+
         public static int BulkInsert<T>(this IEnumerable<T> entities,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             bool disableIdentity = false,
@@ -28,7 +30,6 @@ namespace Signum.Engine
             using (HeavyProfiler.Log(nameof(BulkInsert), () => typeof(T).TypeName()))
             using (Transaction tr = new Transaction())
             {
-
                 var table = Schema.Current.Table(typeof(T));
 
                 if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
@@ -53,7 +54,7 @@ namespace Signum.Engine
         public static int BulkInsertQueryIds<T, K>(this IEnumerable<T> entities,
             Expression<Func<T, K>> keySelector,
             Expression<Func<T, bool>>? isNewPredicate = null,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             int? timeout = null,
@@ -120,7 +121,7 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertTable<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             bool preSaving = true,
             bool validateFirst = true,
             bool disableIdentity = false,
@@ -155,27 +156,28 @@ namespace Signum.Engine
 
                 var t = Schema.Current.Table<T>();
                 bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
-                bool oldIdentityBehaviour = t.IdentityBehaviour;
 
                 DataTable dt = new DataTable();
-                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && (disableIdentityBehaviour || !c.IdentityBehaviour)))
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
+                foreach (var c in columns)
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
-                if (disableIdentityBehaviour) t.IdentityBehaviour = false;
-                foreach (var e in list)
+                using (disableIdentityBehaviour ? Administrator.DisableIdentity(t, behaviourOnly: true) : null)
                 {
-                    if (!e.IsNew)
-                        throw new InvalidOperationException("Entites should be new");
-                    t.SetToStrField(e);
-                    dt.Rows.Add(t.BulkInsertDataRow(e));
+                    foreach (var e in list)
+                    {
+                        if (!e.IsNew)
+                            throw new InvalidOperationException("Entites should be new");
+                        t.SetToStrField(e);
+                        dt.Rows.Add(t.BulkInsertDataRow(e));
+                    }
                 }
-                if (disableIdentityBehaviour) t.IdentityBehaviour = oldIdentityBehaviour;
 
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
-                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+                    Executor.BulkCopy(dt, columns, t.Name, copyOptions, timeout);
 
                     foreach (var item in list)
                         item.SetNotModified();
@@ -183,6 +185,15 @@ namespace Signum.Engine
                     return tr.Commit(list.Count);
                 }
             }
+        }
+
+        private static Type ConvertType(Type type)
+        {
+            var result = type.UnNullify();
+            if (result == typeof(Date))
+                return typeof(DateTime);
+
+            return result;
         }
 
         static void Validate<T>(IEnumerable<T> entities) where T : Entity
@@ -194,7 +205,8 @@ namespace Signum.Engine
                 if (ic != null)
                 {
 #if DEBUG
-                    throw new IntegrityCheckException(ic.WithEntities(GraphExplorer.FromRoots(entities)));
+                    var withEntites = ic.WithEntities(GraphExplorer.FromRoots(entities));
+                    throw new IntegrityCheckException(withEntites);
 #else
                     throw new IntegrityCheckException(ic);
 #endif
@@ -215,7 +227,7 @@ namespace Signum.Engine
         public static int BulkInsertMListTable<E, V>(
             List<E> entities,
             Expression<Func<E, MList<V>>> mListProperty,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             int? timeout = null,
             string? message = null)
             where E : Entity
@@ -224,10 +236,10 @@ namespace Signum.Engine
             {
                 try
                 {
-                    var func = mListProperty.Compile();
+                    var func = PropertyRoute.Construct(mListProperty).GetLambdaExpression<E, MList<V>>(safeNullAccess: true).Compile();
 
                     var mlistElements = (from e in entities
-                                         from mle in func(e).Select((iw, i) => new MListElement<E, V>
+                                         from mle in func(e).EmptyIfNull().Select((iw, i) => new MListElement<E, V>
                                          {
                                              Order = i,
                                              Element = iw,
@@ -247,7 +259,7 @@ namespace Signum.Engine
         public static int BulkInsertMListTable<E, V>(
             this IEnumerable<MListElement<E, V>> mlistElements,
             Expression<Func<E, MList<V>>> mListProperty,
-            SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            SqlBulkCopyOptions copyOptions = SafeDefaults,
             int? timeout = null,
             bool? updateParentTicks = null, /*Needed for concurrency and Temporal tables*/
             string? message = null)
@@ -272,22 +284,22 @@ namespace Signum.Engine
                 var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
 
                 DataTable dt = new DataTable();
-
-                foreach (var c in mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour).ToList();
+                foreach (var c in columns)
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
                 var list = mlistElements.ToList();
 
                 foreach (var e in list)
                 {
-                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
                 }
 
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
-                    Executor.BulkCopy(dt, mlistTable.Name, copyOptions, timeout);
+                    Executor.BulkCopy(dt, columns, mlistTable.Name, copyOptions, timeout);
 
                     var result = list.Count;
 
@@ -307,7 +319,7 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertView<T>(this IEnumerable<T> entities,
-          SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+          SqlBulkCopyOptions copyOptions = SafeDefaults,
           int? timeout = null,
           string? message = null)
           where T : IView
@@ -327,9 +339,10 @@ namespace Signum.Engine
 
                 bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
+                var columns = t.Columns.Values.ToList();
                 DataTable dt = new DataTable();
-                foreach (var c in t.Columns.Values)
-                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                foreach (var c in columns)
+                    dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
                 foreach (var e in entities)
                 {
@@ -340,34 +353,11 @@ namespace Signum.Engine
                 {
                     Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
-                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+                    Executor.BulkCopy(dt, columns, t.Name, copyOptions, timeout);
 
                     return tr.Commit(list.Count);
                 }
             }
         }
-    }
-
-    public class BulkSetterOptions
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public bool ValidateFirst = false;
-        public bool DisableIdentity = false;
-        public int? Timeout = null;
-    }
-
-
-    public class BulkSetterTableOptionsT
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public bool ValidateFirst = false;
-        public bool DisableIdentity = false;
-        public int? Timeout = null;
-    }
-
-    public class BulkSetterMListOptions
-    {
-        public SqlBulkCopyOptions CopyOptions = SqlBulkCopyOptions.Default;
-        public int? Timeout = null;
     }
 }

@@ -123,7 +123,7 @@ namespace Signum.Entities
 
         [NonSerialized]
         NotifyCollectionChangedEventHandler? collectionChanged;
-        public event NotifyCollectionChangedEventHandler CollectionChanged
+        public event NotifyCollectionChangedEventHandler? CollectionChanged
         {
             add { collectionChanged += value; }
             remove { collectionChanged -= value; }
@@ -686,12 +686,12 @@ namespace Signum.Entities
             this.innerList[index] = new RowIdElement(prev.Element, prev.RowId!.Value, index);
         }
 
-        void IMListPrivate.ExecutePostRetrieving()
+        void IMListPrivate.ExecutePostRetrieving(PostRetrievingContext ctx)
         {
-            this.PostRetrieving();
+            this.PostRetrieving(ctx);
         }
 
-        protected internal override void PostRetrieving()
+        protected internal override void PostRetrieving(PostRetrievingContext ctx)
         {
             if (this.innerList.Any(a => a.RowId == null))
                 return; //The MList was changed in the entity PostRetriever, like UserChart Columns
@@ -775,10 +775,10 @@ namespace Signum.Entities
 
         }
 
-        public void AssignAndPostRetrieving(IMListPrivate newList)
+        public void AssignAndPostRetrieving(IMListPrivate newList, PostRetrievingContext ctx)
         {
             this.AssignMList((MList<T>)newList);
-            this.PostRetrieving();
+            this.PostRetrieving(ctx);
         }
 
         public void Insert(int? index, object? value)
@@ -809,7 +809,7 @@ namespace Signum.Entities
 
         int Count { get; }
 
-        void ExecutePostRetrieving();
+        void ExecutePostRetrieving(PostRetrievingContext ctx);
         void SetOldIndex(int index);
         PrimaryKey? GetRowId(int index);
         void SetRowId(int index, PrimaryKey rowId);
@@ -817,7 +817,7 @@ namespace Signum.Entities
 
         void InnerListModified(IList? newItems, IList? oldItems);
 
-        void AssignAndPostRetrieving(IMListPrivate newList);
+        void AssignAndPostRetrieving(IMListPrivate newList, PostRetrievingContext ctx);
     }
 
     public interface IMListPrivate<T>  : IMListPrivate
@@ -858,7 +858,7 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
+    public sealed class PreserveOrderAttribute : DbTypeAttribute
     {
         public string? Name { get; set; }
 

@@ -25,7 +25,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(IQueryable).IsAssignableFrom(c.Type))
             {
-                IQueryable query = (IQueryable)c.Value;
+                IQueryable query = (IQueryable)c.Value!;
 
                 if (query.IsBase())
                 {

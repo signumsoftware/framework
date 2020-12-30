@@ -376,6 +376,13 @@ namespace Signum.Utilities
                 yield return i;
         }
 
+
+        public static IEnumerable<Date> To(this Date start, Date endNotIncluded)
+        {
+            for (Date i = start; i < endNotIncluded; i = i.AddDays(1))
+                yield return i;
+        }
+
         public static IEnumerable<DateTime> To(this DateTime start, DateTime endNotIncluded, TimeSpan span)
         {
             for (DateTime i = start; i < endNotIncluded; i = i.Add(span))

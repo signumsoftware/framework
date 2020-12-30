@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Test.Environment;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -54,6 +55,16 @@ namespace Signum.Test.LinqProvider
             Database.Query<AlbumEntity>().Where(a => ("C" + a.Id) == "C1").Any();
         }
 
+        [Fact]
+        public void WhereCombineConvert()
+        {
+            var query = Database.Query<AlbumEntity>().Where(a => ("C" + a.Id) + "B" == "C1B").Select(a => a.Id);
+
+            Assert.Equal(1, new Regex("CONCAT").Matches(query.QueryText()).Count);
+
+            query.ToList();
+        }
+
 
         [Fact]
         public void WhereSelect()
@@ -93,10 +104,6 @@ namespace Signum.Test.LinqProvider
             Assert.Null(artists.FirstOrDefault(a => a.Dead && !a.Dead));
             Assert.NotNull(artists.FirstOrDefault(a => a.Dead)); //michael
             Assert.NotNull(artists.FirstOrDefault(a => a.Sex == Sex.Male));
-
-            Assert.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrMany());
-            Assert.NotNull(artists.Where(a => a.Dead).SingleOrMany()); //michael
-            Assert.Null(artists.Where(a => a.Sex == Sex.Male).SingleOrMany());
         }
 
         [Fact]

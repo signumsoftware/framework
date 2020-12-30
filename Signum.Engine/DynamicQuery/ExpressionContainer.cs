@@ -24,22 +24,72 @@ namespace Signum.Engine.DynamicQuery
 
         internal Expression BuildExtension(Type parentType, string key, Expression parentExpression)
         {
-            LambdaExpression lambda = RegisteredExtensions.GetValue(parentType)[key].Lambda;
+            var extensionInfo = CompatibleTypes(parentType)
+                .Select(t => RegisteredExtensions.TryGetValue(t)?.TryGetC(key))
+                .NotNull()
+                .FirstEx(() => $"No Extension found for '{parentType.TypeName()}' and key '{key}'");
 
-            return ExpressionReplacer.Replace(Expression.Invoke(lambda, parentExpression));
+            var lambda = extensionInfo.Lambda;
+
+            var targetType = lambda.Parameters[0].Type;
+
+            var pe = targetType.IsAssignableFrom(parentExpression.Type) ? parentExpression :
+                     targetType.IsAssignableFrom(parentExpression.Type.CleanType()) ? parentExpression.ExtractEntity(false) :
+                    targetType.IsAssignableFrom(parentExpression.Type.BuildLite()) ? parentExpression.BuildLite() :
+                    targetType == parentExpression.Type.Nullify() ? parentExpression.Nullify() :
+                    targetType == parentExpression.Type.UnNullify() ? parentExpression.UnNullify() :
+                    parentExpression;
+
+            return ExpressionReplacer.Replace(Expression.Invoke(extensionInfo.Lambda, pe));
+        }
+
+        public IEnumerable<Type> CompatibleTypes(Type type)
+        {
+            yield return type;
+            if (type.IsValueType)
+            {
+                if (type.IsNullable())
+                    yield return type.UnNullify();
+                else
+                    yield return type.Nullify();
+            }
+            else 
+            {
+
+                if (type.IsLite())
+                    yield return type.CleanType();
+                else if (type.IsEntity())
+                    yield return type.BuildLite();
+            }
         }
 
         public IEnumerable<QueryToken> GetExtensions(QueryToken parent)
         {
-            var parentType = parent.Type.CleanType().UnNullify();
+            var parentTypeClean = parent.Type.CleanType();
 
-            var dic = RegisteredExtensions.TryGetValue(parentType);
+            var compatibleTypes = CompatibleTypes(parent.Type);
+
+            var dic = compatibleTypes
+                .Select(t => RegisteredExtensions.TryGetValue(t))
+                .Aggregate((Dictionary<string, ExtensionInfo>?)null, (dic1, dic2) =>
+               {
+                   if (dic1 == null)
+                       return dic2;
+
+                   if (dic2 == null)
+                       return dic1;
+
+                   var dic = new Dictionary<string, ExtensionInfo>();
+                   dic.SetRange(dic1);
+                   dic.DefaultRange(dic2);
+                   return dic;
+               });
 
             IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
-                dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType).Select(v => v.CreateToken(parent));
+                dic.Values.Where(ei => ei.Inherit || compatibleTypes.Contains(ei.SourceType)).Select(v => v.CreateToken(parent));
 
-            var pr = parentType.IsEntity() && !parentType.IsAbstract ? PropertyRoute.Root(parentType) :
-                parentType.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
+            var pr = parentTypeClean.IsEntity() && !parentTypeClean.IsAbstract ? PropertyRoute.Root(parentTypeClean) :
+                parentTypeClean.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
 
             var edi = pr == null ? null : RegisteredExtensionsDictionaries.TryGetC(pr);
 
@@ -203,7 +253,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var info = metas.GetOrAdd(parent, qt =>
             {
-                Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx());
+                Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx()!);
 
                 Expression e = MetadataVisitor.JustVisit(lambda, MetaExpression.FromToken(qt, typeof(T)));
                 
@@ -228,7 +278,7 @@ namespace Signum.Engine.DynamicQuery
                 format: info.Format,
                 implementations: info.Implementations,
                 propertyRoute: info.PropertyRoute,
-                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+                lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))!)
             ));
         }
     }

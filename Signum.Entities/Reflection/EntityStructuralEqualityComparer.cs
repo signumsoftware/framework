@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Entities.Reflection
 {
@@ -32,7 +33,7 @@ namespace Signum.Entities.Reflection
 
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
-            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
+            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Getter)
                 .Where(p => !((PropertyInfo)p.MemberInfo).HasAttribute<HiddenPropertyAttribute>())
                .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
                    propertyInfo: (PropertyInfo)a.MemberInfo, a.Getter!, 
@@ -42,7 +43,7 @@ namespace Signum.Entities.Reflection
                 MixinDeclarations.GetMixinDeclarations(typeof(T)).ToDictionary(t => t, t => resolver.GetEqualityComparer(t, null));
         }
 
-        public override bool Equals(T x, T y)
+        public override bool Equals(T? x, T? y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -108,14 +109,14 @@ namespace Signum.Entities.Reflection
 
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo? pi)
         {
-            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
+            Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Getter)
               .ToDictionary(a => a.Name, a => new PropertyComparer<T>(
                   propertyInfo: (PropertyInfo)a.MemberInfo,
                   getter: a.Getter!,
                   comparer: resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, (PropertyInfo)a.MemberInfo)));
         }
 
-        public override bool Equals(T x, T y)
+        public override bool Equals([AllowNull] T x, [AllowNull] T y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -178,7 +179,7 @@ namespace Signum.Entities.Reflection
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
 
-        public override bool Equals(IList<T> x, IList<T> y)
+        public override bool Equals(IList<T>? x, IList<T>? y)
         {
             if ((x == null) != (y == null))
                 return false;
@@ -203,7 +204,7 @@ namespace Signum.Entities.Reflection
             int result = 17;
             foreach (var p in obj)
             {
-                result = result * 31 + this.ElementComparer.GetHashCode(p);
+                result = result * 31 + this.ElementComparer.GetHashCode(p!);
             }
 
             return result;
@@ -224,7 +225,7 @@ namespace Signum.Entities.Reflection
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
         }
 
-        public override bool Equals(IList<T> mx, IList<T> my)
+        public override bool Equals(IList<T>? mx, IList<T>? my)
         {
             if ((mx == null) != (my == null))
                 return false;
@@ -232,10 +233,10 @@ namespace Signum.Entities.Reflection
             if (mx!.Count != my!.Count)
                 return false;
 
-            var dic = mx.GroupToDictionary(x => ElementComparer.GetHashCode(x));
+            var dic = mx.GroupToDictionary(x => ElementComparer.GetHashCode(x!));
             foreach (var y in my)
             {
-                var list = dic.TryGetC(ElementComparer.GetHashCode(y));
+                var list = dic.TryGetC(ElementComparer.GetHashCode(y!));
 
                 if (list == null)
                     return false;
@@ -258,7 +259,7 @@ namespace Signum.Entities.Reflection
             int result = 0;
             foreach (var p in obj)
             {
-                result += this.ElementComparer.GetHashCode(p);
+                result += this.ElementComparer.GetHashCode(p!);
             }
 
             return result;

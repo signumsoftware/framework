@@ -11,7 +11,7 @@ namespace Signum.Utilities.ExpressionTrees
 
     public static class ExpressionHelper
     {
-        static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null!)).GetGenericMethodDefinition();
 
         [DebuggerStepThrough]
         public static Expression TryConvert(this Expression expression, Type type)
@@ -74,8 +74,8 @@ namespace Signum.Utilities.ExpressionTrees
             if (expression.NodeType == ExpressionType.Convert && expression.Type == ((UnaryExpression)expression).Operand.Type.UnNullify())
                 return ((UnaryExpression)expression).Operand;
 
-            if (expression.NodeType == ExpressionType.MemberAccess && ((MemberExpression)expression).Member.Name == "Value" && expression.Type == ((MemberExpression)expression).Expression.Type.UnNullify())
-                return ((MemberExpression)expression).Expression;
+            if (expression.NodeType == ExpressionType.MemberAccess && ((MemberExpression)expression).Member.Name == "Value" && expression.Type == ((MemberExpression)expression).Expression!.Type.UnNullify())
+                return ((MemberExpression)expression).Expression!;
 
             return expression;
         }
@@ -145,8 +145,8 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static LambdaExpression StripQuotes(this Expression e)
         {
-            if (e is ConstantExpression)
-                return (LambdaExpression)((ConstantExpression)e).Value;
+            if (e is ConstantExpression co)
+                return (LambdaExpression)co.Value!;
 
             while (e.NodeType == ExpressionType.Quote)
             {

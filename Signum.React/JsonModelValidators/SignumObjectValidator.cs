@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Signum.Entities;
+using Signum.React.Facades;
 using Signum.React.Json;
 using Signum.Utilities;
 using System;
@@ -207,7 +208,7 @@ namespace Signum.React.JsonModelValidators
                 var entity = mod as Entity;
                 using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
                 {
-                    foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
+                    foreach (var kvp in SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(mod.GetType()))
                     {
                         if (kvp.Value.AvoidValidate)
                             continue;
@@ -231,17 +232,17 @@ namespace Signum.React.JsonModelValidators
                             }
                         }
                     }
-                }
 
-                if (entity != null && entity.Mixins.Any())
-                {
-                    foreach (var mixin in entity.Mixins)
+                    if (entity != null && entity.Mixins.Any())
                     {
-                        if (this.CurrentPath.Push(mixin))
+                        foreach (var mixin in entity.Mixins)
                         {
-                            using (StateManager.Recurse(this, "mixins[" + mixin.GetType().Name + "].element", null, mixin, null))
+                            if (this.CurrentPath.Push(mixin))
                             {
-                                isValid &= ValidateModifiableEntity(mixin);
+                                using (StateManager.Recurse(this, this.Key + ".mixins[" + mixin.GetType().Name + "]", null, mixin, null))
+                                {
+                                    isValid &= ValidateModifiableEntity(mixin);
+                                }
                             }
                         }
                     }

@@ -51,8 +51,6 @@ namespace Signum.MSBuildTask
                     return 0;
                 }
 
-                log.WriteLine("Signum.MSBuildTask doing nothing");
-
                 bool errors = false;
                 errors |= new ExpressionFieldGenerator(assembly, resolver, log).FixAutoExpressionField();
                 errors |= new FieldAutoInitializer(assembly, resolver, log).FixAutoInitializer();
@@ -91,9 +89,9 @@ namespace Signum.MSBuildTask
             return attr;
         }
 
-        static void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
+        static void MarkAsProcessed(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver)
         {
-            TypeDefinition generatedCodeAttribute = resolver.Resolve(AssemblyNameReference.Parse(typeof(GeneratedCodeAttribute).Assembly.GetName().Name)).MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
+            TypeDefinition generatedCodeAttribute = resolver.SystemRuntime.MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
             MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a => a.IsConstructor && a.Parameters.Count == 2);
 
             TypeReference stringType = assembly.MainModule.TypeSystem.String;

@@ -47,8 +47,6 @@ namespace Signum.React.Filters
     {
         public const string Signum_User_Key = "Signum_User";
 
-        public SignumAuthenticationFilter() : base("Signum_User_Session") { }
-
         public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
         private static SignumAuthenticationResult? Authenticate(ResourceExecutingContext actionContext)
@@ -72,7 +70,7 @@ namespace Signum.React.Filters
 
             context.HttpContext.Items[Signum_User_Key] = result.User;
 
-            return result.User != null ? UserHolder.UserSession(result.User) : null;
+            return UserHolder.UserSession(result.User!);
         }
     }
 
@@ -104,8 +102,6 @@ namespace Signum.React.Filters
 
     public class SignumTimesTrackerFilter : SignumDisposableResourceFilter
     {
-        public SignumTimesTrackerFilter() : base("Signum_TimesTracker") { }
-
         public override IDisposable? GetResource(ResourceExecutingContext context)
         {
             string action = ProfilerActionSplitterAttribute.GetActionDescription(context);
@@ -115,8 +111,6 @@ namespace Signum.React.Filters
 
     public class SignumHeavyProfilerFilter : SignumDisposableResourceFilter
     {
-        public SignumHeavyProfilerFilter() : base("Signum_HeavyProfiler") { }
-
         public override IDisposable? GetResource(ResourceExecutingContext context)
         {
             return HeavyProfiler.Log("Web.API " + context.HttpContext.Request.Method, () => context.HttpContext.Request.GetDisplayUrl());
@@ -125,8 +119,6 @@ namespace Signum.React.Filters
 
     public class SignumCurrentContextFilter : SignumDisposableResourceFilter
     {
-        public SignumCurrentContextFilter() : base("Signum_CurrentContext_Disposable") { }
-
         static ThreadVariable<FilterContext?> CurrentContextVariable = Statics.ThreadVariable<FilterContext?>("currentContext");
 
         public static FilterContext? CurrentContext => CurrentContextVariable.Value;
@@ -164,19 +156,30 @@ namespace Signum.React.Filters
 
     public abstract class SignumDisposableResourceFilter : IAsyncResourceFilter
     {
-        public string ResourceKey;
-
-        public SignumDisposableResourceFilter(string key)
-        {
-            this.ResourceKey = key;
-        }
-
         public abstract IDisposable? GetResource(ResourceExecutingContext context);
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
         {
             using (GetResource(context))
                 await next();
+        }
+    }
+
+    public class SignumHeavyProfilerResultFilter : IAsyncAlwaysRunResultFilter
+    {
+        public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+        {
+            using (HeavyProfiler.Log("Result", () => context.Result?.GetType().ToString()))
+                return next();
+        }
+    }
+
+    public class SignumHeavyProfilerActionFilter : IAsyncActionFilter
+    {
+        public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            using (HeavyProfiler.Log("Action", () => context.ActionDescriptor.DisplayName))
+                return next();
         }
     }
 }

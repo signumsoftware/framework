@@ -38,8 +38,6 @@ namespace Signum.Engine.Maps
                     cleanName => schema.NameToType.TryGetC(cleanName));
 
                 FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
-                Include<TypeEntity>()
-                    .WithUniqueIndex(t => new { t.Namespace, t.ClassName });
             }
 
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
@@ -223,12 +221,13 @@ namespace Signum.Engine.Maps
             return Include(type, null);
         }
 
-
-
         internal protected virtual Table Include(Type type, PropertyRoute? route)
         {
             if (schema.Tables.TryGetValue(type, out var result))
                 return result;
+
+            if (this.Schema.IsCompleted) //Below for nop includes of Views referencing lites or entities
+                throw new InvalidOperationException("Schema already completed");
 
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
@@ -304,16 +303,21 @@ namespace Signum.Engine.Maps
             if (att == null)
                 return null;
 
-            var tn = att.TemporalTableName != null ? ObjectName.Parse(att.TemporalTableName) :
-                    new ObjectName(tableName.Schema, tableName.Name + "_History");
+            var isPostgres = this.schema.Settings.IsPostgres;
+
+            var tn = att.TemporalTableName != null ? ObjectName.Parse(att.TemporalTableName, isPostgres) :
+                    new ObjectName(tableName.Schema, tableName.Name + "_History", isPostgres);
+
+            if (isPostgres)
+                return new SystemVersionedInfo(tn, att.PostgreeSysPeriodColumname);
 
             return new SystemVersionedInfo(tn, att.StartDateColumnName, att.EndDateColumnName);
         }
 
-        private Dictionary<Type, FieldMixin>? GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
+        private Dictionary<Type, FieldMixin>? GenerateMixins(PropertyRoute propertyRoute, ITable table, NameSequence nameSequence)
         {
             Dictionary<Type, FieldMixin>? mixins = null;
-            foreach (var t in MixinDeclarations.GetMixinDeclarations(table.Type))
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(propertyRoute.Type))
             {
                 if (mixins == null)
                     mixins = new Dictionary<Type, FieldMixin>();
@@ -437,7 +441,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("GenerateField", () => route.ToString()))
             {
-                KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
+                KindOfField kof = GetKindOfField(route);
 
                 if (kof == KindOfField.MList && inMList)
                     throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
@@ -495,7 +499,7 @@ namespace Signum.Engine.Maps
             MList,
         }
 
-        protected virtual KindOfField? GetKindOfField(PropertyRoute route)
+        protected virtual KindOfField GetKindOfField(PropertyRoute route)
         {
             if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiId))
                 return KindOfField.PrimaryKey;
@@ -503,7 +507,7 @@ namespace Signum.Engine.Maps
             if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiTicks))
                 return KindOfField.Ticks;
 
-            if (Settings.TryGetSqlDbType(Settings.FieldAttribute<SqlDbTypeAttribute>(route), route.Type) != null)
+            if (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type) != null)
                 return KindOfField.Value;
 
             if (route.Type.UnNullify().IsEnum)
@@ -518,7 +522,13 @@ namespace Signum.Engine.Maps
             if (Reflector.IsMList(route.Type))
                 return KindOfField.MList;
 
-            return null;
+            if (Settings.IsPostgres && route.Type.IsArray)
+            {
+                if (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type.ElementType()!) != null)
+                    return KindOfField.Value;
+            }
+
+            throw new InvalidOperationException($"Field {route} of type {route.Type.Name} has no database representation");
         }
 
         protected virtual Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
@@ -527,15 +537,16 @@ namespace Signum.Engine.Maps
 
             PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
-            SqlDbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
+            DbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
 
             return table.PrimaryKey = new FieldPrimaryKey(route, table, attr.Name, attr.Type)
             {
-                SqlDbType = pair.SqlDbType,
+                DbType = pair.DbType,
                 Collation = Settings.GetCollate(attr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
-                Default = attr.Default,
+                Default = attr.GetDefault(Settings.IsPostgres),
                 Identity = attr.Identity,
+                Size = attr.HasSize ? attr.Size : (int?)null,
             };
         }
 
@@ -561,43 +572,45 @@ namespace Signum.Engine.Maps
 
             Type type = ticksAttr?.Type ?? route.Type;
 
-            SqlDbTypePair pair = Settings.GetSqlDbType(ticksAttr, type);
+            DbTypePair pair = Settings.GetSqlDbType(ticksAttr, type);
 
             string ticksName = ticksAttr?.Name ?? name.ToString();
 
             return table.Ticks = new FieldTicks(route, type, ticksName)
             {
-                SqlDbType = pair.SqlDbType,
+                DbType = pair.DbType,
                 Collation = Settings.GetCollate(ticksAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
-                Size = Settings.GetSqlSize(ticksAttr, null, pair.SqlDbType),
-                Scale = Settings.GetSqlScale(ticksAttr, null, pair.SqlDbType),
-                Default = ticksAttr?.Default,
+                Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
+                Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
+                Default = ticksAttr?.GetDefault(Settings.IsPostgres),
             };
         }
 
         protected virtual FieldValue GenerateFieldValue(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+            var att = Settings.FieldAttribute<DbTypeAttribute>(route);
 
-            SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
+            DbTypePair pair = Settings.IsPostgres && route.Type.IsArray && route.Type != typeof(byte[]) ?
+               Settings.GetSqlDbType(att, route.Type.ElementType()!) :
+               Settings.GetSqlDbType(att, route.Type);
 
             return new FieldValue(route, null, name.ToString())
             {
-                SqlDbType = pair.SqlDbType,
+                DbType = pair.DbType,
                 Collation = Settings.GetCollate(att),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = Settings.GetIsNullable(route, forceNull),
-                Size = Settings.GetSqlSize(att, route, pair.SqlDbType),
-                Scale = Settings.GetSqlScale(att, route, pair.SqlDbType),
-                Default = att?.Default,
+                Size = Settings.GetSqlSize(att, route, pair.DbType),
+                Scale = Settings.GetSqlScale(att, route, pair.DbType),
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
         protected virtual FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+            var att = Settings.FieldAttribute<DbTypeAttribute>(route);
 
             Type cleanEnum = route.Type.UnNullify();
 
@@ -608,7 +621,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                Default = att?.Default,
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -624,7 +637,7 @@ namespace Signum.Engine.Maps
                 IsLite = route.Type.IsLite(),
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
                 AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null,
-                Default = Settings.FieldAttribute<SqlDbTypeAttribute>(route)?.Default
+                Default = Settings.FieldAttribute<DbTypeAttribute>(route)?.GetDefault(Settings.IsPostgres)
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -703,12 +716,12 @@ namespace Signum.Engine.Maps
 
                 order = new FieldValue(route: null!, fieldType:  typeof(int), orderAttr.Name ?? "Order")
                 {
-                    SqlDbType = pair.SqlDbType,
+                    DbType = pair.DbType,
                     Collation = Settings.GetCollate(orderAttr),
                     UserDefinedTypeName = pair.UserDefinedTypeName,
                     Nullable = IsNullable.No,
-                    Size = Settings.GetSqlSize(orderAttr, null, pair.SqlDbType),
-                    Scale = Settings.GetSqlScale(orderAttr, null, pair.SqlDbType),
+                    Size = Settings.GetSqlSize(orderAttr, null, pair.DbType),
+                    Scale = Settings.GetSqlScale(orderAttr, null, pair.DbType),
                 };
             }
 
@@ -719,10 +732,10 @@ namespace Signum.Engine.Maps
 
                 primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, keyAttr.Name)
                 {
-                    SqlDbType = pair.SqlDbType,
+                    DbType = pair.DbType,
                     Collation = Settings.GetCollate(orderAttr),
                     UserDefinedTypeName = pair.UserDefinedTypeName,
-                    Default = keyAttr.Default,
+                    Default = keyAttr.GetDefault(Settings.IsPostgres),
                     Identity = keyAttr.Identity,
                 };
             }
@@ -764,11 +777,11 @@ namespace Signum.Engine.Maps
             var hasValue = nullable.ToBool() ? new FieldEmbedded.EmbeddedHasValueColumn(name.Add("HasValue").ToString()) : null;
 
             var embeddedFields = GenerateFields(route, table, name, forceNull: nullable.ToBool() || forceNull, inMList: inMList);
-
-            return new FieldEmbedded(route, hasValue, embeddedFields);
+            var mixins = GenerateMixins(route, table, name);
+            return new FieldEmbedded(route, hasValue, embeddedFields, mixins);
         }
 
-        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
+        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, ITable table)
         {
             return new FieldMixin(route, table, GenerateFields(route, table, name, forceNull: false, inMList: false));
         }
@@ -796,26 +809,32 @@ namespace Signum.Engine.Maps
 
         public virtual ObjectName GenerateTableName(Type type, TableNameAttribute? tn)
         {
-            SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
+            var isPostgres = Schema.Settings.IsPostgres;
+
+            SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default(isPostgres);
 
             string name =  tn?.Name ?? EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type);
 
-            return new ObjectName(sn, name);
+            return new ObjectName(sn, name, isPostgres);
         }
 
         private SchemaName GetSchemaName(TableNameAttribute tn)
         {
-            ServerName? server = tn.ServerName == null ? null : new ServerName(tn.ServerName);
-            DatabaseName? dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.DatabaseName!);
-            SchemaName schema = tn.SchemaName == null && dataBase == null ? SchemaName.Default : new SchemaName(dataBase, tn.SchemaName!);
+            var isPostgres = Schema.Settings.IsPostgres;
+
+            ServerName? server = tn.ServerName == null ? null : new ServerName(tn.ServerName, isPostgres);
+            DatabaseName? dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.DatabaseName!, isPostgres);
+            SchemaName schema = tn.SchemaName == null && dataBase == null ? (tn.Name.StartsWith("#") && isPostgres ? null! : SchemaName.Default(isPostgres)) : new SchemaName(dataBase, tn.SchemaName!, isPostgres);
             return schema;
         }
 
         public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name, TableNameAttribute? tn)
         {
-            SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
+            var isPostgres = Schema.Settings.IsPostgres;
 
-            return new ObjectName(sn, tn?.Name ?? (table.Name.Name + name.ToString()));
+            SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default(isPostgres);
+
+            return new ObjectName(sn, tn?.Name ?? (table.Name.Name + name.ToString()), isPostgres);
         }
 
         public virtual string GenerateMListFieldName(PropertyRoute route, KindOfField kindOfField)
@@ -826,7 +845,7 @@ namespace Signum.Engine.Maps
             {
                 case KindOfField.Value:
                 case KindOfField.Embedded:
-                    return type.Name.FirstUpper();
+                    return type.Name;
                 case KindOfField.Enum:
                 case KindOfField.Reference:
                     return (EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type)) + "ID";
@@ -838,7 +857,7 @@ namespace Signum.Engine.Maps
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
             string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name)
-                : route.FieldInfo!.Name.FirstUpper();
+                : route.FieldInfo!.Name;
 
             switch (kindOfField)
             {
@@ -1024,7 +1043,7 @@ namespace Signum.Engine.Maps
 
         protected override FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+            var att = Settings.FieldAttribute<DbTypeAttribute>(route);
 
             Type cleanEnum = route.Type.UnNullify();
 
@@ -1035,7 +1054,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                Default = att?.Default,
+                Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
     }

@@ -61,8 +61,10 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
-        const string errorType = "TypeEntity table not cached. Remember to call Schema.Current.Initialize";
-
+        public List<string> PostgresExtensions = new List<string>()
+        {
+            "uuid-ossp"
+        };
 
         #region Events
 
@@ -72,7 +74,7 @@ namespace Signum.Engine.Maps
         {
             foreach (var f in IsAllowedCallback.GetInvocationListTyped())
             {
-                string result = f(type, inUserInterface);
+                string? result = f(type, inUserInterface);
 
                 if (result != null)
                     return result;
@@ -129,7 +131,7 @@ namespace Signum.Engine.Maps
             if (ee == null)
                 return null;
 
-            return ee.OnAlternativeRetriving(id);
+            return ee.OnAlternativeRetrieving(id);
         }
 
         internal void OnSaving(Entity entity)
@@ -157,16 +159,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaved(entity, args);
         }
 
-        internal void OnRetrieved(Entity entity)
+        internal void OnRetrieved(Entity entity, PostRetrievingContext ctx)
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity);
+                ee.OnRetrieved(entity, ctx);
 
-            entityEventsGlobal.OnRetrieved(entity);
+            entityEventsGlobal.OnRetrieved(entity, ctx);
         }
 
         internal IDisposable? OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
@@ -241,7 +243,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, NewExpression? period)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, EntityContextInfo entityContext, IntervalExpression? period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
@@ -251,7 +253,7 @@ namespace Signum.Engine.Maps
 
             return ee.AdditionalBindings
                 .Where(kvp => kvp.Key.Parent!.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, id, period, kvp.Key)))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, entityContext.EntityId, entityContext.MListRowId, period, kvp.Key)))
                 .ToList();
         }
 
@@ -438,22 +440,20 @@ namespace Signum.Engine.Maps
             }
         }
 
-        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View<T>() where T : IView
         {
             return View(typeof(T));
         }
 
+        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
         public Table View(Type viewType)
         {
-            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+            var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
 
-            if (tn?.SchemaName == "sys")
-            {
-                return ViewBuilder.NewView(viewType);
-            }
+            if (tn != null)
+                return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
 
-            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+            return ViewBuilder.NewView(viewType);
         }
 
         public event Func<SqlPreCommand?> Generating;
@@ -478,16 +478,18 @@ namespace Signum.Engine.Maps
 
         public event Action? SchemaCompleted;
 
+        public bool IsCompleted { get; private set; }
         public void OnSchemaCompleted()
         {
-            if (SchemaCompleted == null)
-                return;
-
-            using (ExecutionMode.Global())
-                foreach (var item in SchemaCompleted.GetInvocationListTyped())
-                    item();
-
+            if (SchemaCompleted != null)
+            {
+                using (ExecutionMode.Global())
+                    foreach (var item in SchemaCompleted.GetInvocationListTyped())
+                        item();
+            }
+               
             SchemaCompleted = null;
+            IsCompleted = true;
         }
 
         public void WhenIncluded<T>(Action action) where T : Entity
@@ -503,7 +505,7 @@ namespace Signum.Engine.Maps
 
         public void OnBeforeDatabaseAccess()
         {
-            if (SchemaCompleted != null)
+            if (IsCompleted == false)
                 throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
 
             if (BeforeDatabaseAccess == null)
@@ -541,6 +543,8 @@ namespace Signum.Engine.Maps
             ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
         }
 
+
+
         internal Schema(SchemaSettings settings)
         {
             this.typeCachesLazy = null!;
@@ -549,6 +553,8 @@ namespace Signum.Engine.Maps
             this.ViewBuilder = new Maps.ViewBuilder(this);
 
             Generating += SchemaGenerator.SnapshotIsolation;
+            Generating += SchemaGenerator.PostgresExtensions;
+            Generating += SchemaGenerator.PostgreeTemporalTableScript;
             Generating += SchemaGenerator.CreateSchemasScript;
             Generating += SchemaGenerator.CreateTablesScript;
             Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -574,8 +580,6 @@ namespace Signum.Engine.Maps
         public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
         {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
-
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
             return list.TableMList;
@@ -788,6 +792,8 @@ namespace Signum.Engine.Maps
         public bool IsCollection { get; set; }
         public bool IsEnum { get; set; }
         public bool IsImplementedByAll { get; set; }
+
+        public PropertyRoute PropertyRoute { get; set; } = null!;
     }
 
 

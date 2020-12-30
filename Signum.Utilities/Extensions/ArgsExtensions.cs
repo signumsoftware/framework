@@ -15,7 +15,6 @@ namespace Signum.Utilities
             return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
-        [return: MaybeNull]
         public static T? TryGetArgC<T>(this IEnumerable<object?>? args) where T : class
         {
             return args?.SmartConvertTo<T?>().SingleOrDefaultEx(() => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
@@ -42,7 +41,7 @@ namespace Signum.Utilities
                     yield return t;
                 else if (obj is string s && typeof(T).IsEnum && Enum.IsDefined(typeof(T), s))
                     yield return (T)Enum.Parse(typeof(T), s);
-                else if(obj is IComparable && ReflectionTools.IsNumber(obj.GetType()) && ReflectionTools.IsNumber(typeof(T)))
+                else if (obj is IComparable && ReflectionTools.IsNumber(obj.GetType()) && ReflectionTools.IsNumber(typeof(T)))
                 {
                     if (ReflectionTools.IsDecimalNumber(obj.GetType()) &&
                         !ReflectionTools.IsDecimalNumber(typeof(T)))
@@ -51,11 +50,15 @@ namespace Signum.Utilities
                     yield return ReflectionTools.ChangeType<T>(obj);
                 }
                 else if (obj is List<object> list)
-                    yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType()!)(list);
+                {
+                    var type = typeof(T).ElementType();
+                    if (type != null)
+                        yield return (T)giConvertListTo.GetInvoker(type)(list);
+                }
             }
         }
 
-        static readonly GenericInvoker<Func<List<object>,IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
+        static readonly GenericInvoker<Func<List<object>, IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
 
         static List<S> ConvertListTo<S>(List<object> list)
         {

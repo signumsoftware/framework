@@ -99,7 +99,8 @@ namespace Signum.Analyzer
                 if (!expressionType.Equals(fieldSymbol.Type, SymbolEqualityComparer.IncludeNullability))
                 {
                     var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
+                    var insteadOfParts = fieldSymbol.Type.ToMinimalDisplayString(context.SemanticModel, typeSyntax.GetLocation().SourceSpan.Start);
+                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}' instead of '{2}'", fieldName, minimalParts, insteadOfParts));
                     return;
                 }
             }
@@ -127,11 +128,13 @@ namespace Signum.Analyzer
 
             var funcConstruct = func.Construct(
                 parameters.Select(a => a.Item1).ToImmutableArray(),
-                parameters.Select(a => a.Item2).ToImmutableArray());
+                parameters.Select(a => a.Item2).ToImmutableArray()).WithNullableAnnotation(NullableAnnotation.NotAnnotated);
 
-            return expression.Construct(
-                ImmutableArray.Create((ITypeSymbol)funcConstruct), 
+            var expConstruct = expression.Construct(
+                ImmutableArray.Create((ITypeSymbol)funcConstruct),
                 ImmutableArray.Create(NullableAnnotation.NotAnnotated));
+            
+            return (INamedTypeSymbol)expConstruct.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
         }
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)

@@ -5,8 +5,16 @@ namespace Signum.Engine.Maps
 {
     public static class TableExtensions
     {
-        internal static string UnScapeSql(this string name)
+        internal static string UnScapeSql(this string name, bool isPostgres)
         {
+            if (isPostgres)
+            {
+                if (name.StartsWith('\"'))
+                    return name.Trim('\"');
+
+                return name.ToLower();
+            }
+
             return name.Trim('[', ']');
         }
     }
@@ -14,27 +22,32 @@ namespace Signum.Engine.Maps
     public class ServerName : IEquatable<ServerName>
     {
         public string Name { get; private set; }
+        public bool IsPostgres { get; private set; }
 
         /// <summary>
         /// Linked Servers: http://msdn.microsoft.com/en-us/library/ms188279.aspx
         /// </summary>
         /// <param name="name"></param>
-        public ServerName(string name)
+        public ServerName(string name, bool isPostgres)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
+            this.IsPostgres = isPostgres;
         }
 
         public override string ToString()
         {
-            return Name.SqlEscape();
+            return Name.SqlEscape(IsPostgres);
         }
 
         public override bool Equals(object? obj) => obj is ServerName sn && Equals(sn);
-        public bool Equals(ServerName other)
+        public bool Equals(ServerName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name;
         }
 
@@ -43,35 +56,37 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode();
         }
 
-        public static ServerName? Parse(string? name)
+        public static ServerName? Parse(string? name, bool isPostgres)
         {
             if (!name.HasText())
                 return null;
 
-            return new ServerName(name.UnScapeSql());
+            return new ServerName(name.UnScapeSql(isPostgres), isPostgres);
         }
     }
 
     public class DatabaseName : IEquatable<DatabaseName>
     {
         public string Name { get; private set; }
+        public bool IsPostgres { get; private set; }
 
         public ServerName? Server { get; private set; }
 
-        public DatabaseName(ServerName? server, string name)
+        public DatabaseName(ServerName? server, string name, bool isPostgres)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
             this.Server = server;
+            this.IsPostgres = isPostgres;
         }
 
         public override string ToString()
         {
             var options = ObjectName.CurrentOptions;
 
-            var name = !options.DatabaseNameReplacement.HasText() ? Name.SqlEscape(): Name.Replace(Connector.Current.DatabaseName(), options.DatabaseNameReplacement).SqlEscape();
+            var name = !options.DatabaseNameReplacement.HasText() ? Name.SqlEscape(IsPostgres): Name.Replace(Connector.Current.DatabaseName(), options.DatabaseNameReplacement).SqlEscape(IsPostgres);
 
             if (Server == null)
                 return name;
@@ -81,8 +96,11 @@ namespace Signum.Engine.Maps
 
 
         public override bool Equals(object? obj) => obj is DatabaseName dn && Equals(dn);
-        public bool Equals(DatabaseName other)
+        public bool Equals(DatabaseName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name && object.Equals(Server, other.Server);
         }
 
@@ -91,20 +109,21 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
         }
 
-        public static DatabaseName? Parse(string? name)
+        public static DatabaseName? Parse(string? name, bool isPostgres)
         {
             if (!name.HasText())
                 return null;
 
-            var tuple = ObjectName.SplitLast(name);
+            var tuple = ObjectName.SplitLast(name, isPostgres);
 
-            return new DatabaseName(ServerName.Parse(tuple.prefix), tuple.name);
+            return new DatabaseName(ServerName.Parse(tuple.prefix, isPostgres), tuple.name, isPostgres);
         }
     }
 
     public class SchemaName : IEquatable<SchemaName>
     {
         public string Name { get; private set; }
+        public bool IsPostgres { get; private set; }
 
         readonly DatabaseName? database;
 
@@ -119,25 +138,29 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public static readonly SchemaName Default = new SchemaName(null, "dbo");
+        static readonly SchemaName defaultSqlServer = new SchemaName(null, "dbo", isPostgres: false);
+        static readonly SchemaName defaultPostgreeSql = new SchemaName(null, "public", isPostgres: true);
+
+        public static SchemaName Default(bool isPostgres) => isPostgres ? defaultPostgreeSql : defaultSqlServer;
 
         public bool IsDefault()
         {
-            return Name == "dbo" && Database == null;
+            return Database == null && (IsPostgres ? defaultPostgreeSql : defaultSqlServer).Name == Name;
         }
 
-        public SchemaName(DatabaseName? database, string name)
+        public SchemaName(DatabaseName? database, string name, bool isPostgres)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
             this.Name = name;
             this.database = database;
+            this.IsPostgres = isPostgres;
         }
 
         public override string ToString()
         {
-            var result = Name.SqlEscape();
+            var result = Name.SqlEscape(IsPostgres);
 
             if (Database == null)
                 return result;
@@ -146,8 +169,12 @@ namespace Signum.Engine.Maps
         }
 
         public override bool Equals(object? obj) => obj is SchemaName sn && Equals(sn);
-        public bool Equals(SchemaName other)
+        public bool Equals(SchemaName? other)
         {
+
+            if (other == null)
+                return false;
+
             return other.Name == Name &&
                 object.Equals(Database, other.Database);
         }
@@ -157,84 +184,127 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
         }
 
-        public static SchemaName Parse(string? name)
+        public static SchemaName Parse(string? name, bool isPostgres)
         {
             if (!name.HasText())
-                return SchemaName.Default;
+                return SchemaName.Default(isPostgres);
 
-            var tuple = ObjectName.SplitLast(name);
+            var tuple = ObjectName.SplitLast(name, isPostgres);
 
-            return new SchemaName(DatabaseName.Parse(tuple.prefix), (tuple.name));
+            return new SchemaName(DatabaseName.Parse(tuple.prefix, isPostgres), tuple.name, isPostgres);
         }
 
+        internal SchemaName OnDatabase(DatabaseName? database)
+        {
+            return new SchemaName(database, this.Name, this.IsPostgres);
+        }
     }
 
     public class ObjectName : IEquatable<ObjectName>
     {
+        public static int MaxPostgreeSize = 63; 
+
         public string Name { get; private set; }
+        public bool IsPostgres { get; private set; }
 
-        public SchemaName Schema { get; private set; }
+        public SchemaName Schema { get; private set; } // null only for postgres temporary
 
-        public ObjectName(SchemaName schema, string name)
+        public ObjectName(SchemaName schema, string name, bool isPostgres)
         {
             this.Name = name.HasText() ? name : throw new ArgumentNullException(nameof(name));
-            this.Schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            if (isPostgres && this.Name.Length > MaxPostgreeSize)
+                throw new InvalidOperationException($"The name '{name}' is too long, consider using TableNameAttribute/ColumnNameAttribute");
+
+            this.Schema = schema ?? (isPostgres && name.StartsWith("#") ? (SchemaName)null! : throw new ArgumentNullException(nameof(schema)));
+            this.IsPostgres = isPostgres;
         }
 
         public override string ToString()
         {
-            return Schema.ToString() + "." + Name.SqlEscape();
+            if (Schema == null)
+                return Name.SqlEscape(IsPostgres);
+
+            return Schema.ToString() + "." + Name.SqlEscape(IsPostgres);
         }
 
         public override bool Equals(object? obj) => obj is ObjectName on && Equals(on);
-        public bool Equals(ObjectName other)
+        public bool Equals(ObjectName? other)
         {
+            if (other == null)
+                return false;
+
             return other.Name == Name &&
                 object.Equals(Schema, other.Schema);
         }
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ Schema.GetHashCode();
+            return Name.GetHashCode() ^ Schema?.GetHashCode() ?? 0;
         }
 
-        public static ObjectName Parse(string? name)
+        public static ObjectName Parse(string? name, bool isPostgres)
         {
             if (!name.HasText())
                 throw new ArgumentNullException(nameof(name));
 
-            var tuple = SplitLast(name);
+            var tuple = SplitLast(name, isPostgres);
 
-            return new ObjectName(SchemaName.Parse(tuple.prefix), tuple.name);
+            return new ObjectName(SchemaName.Parse(tuple.prefix, isPostgres), tuple.name, isPostgres);
         }
 
         //FROM "[a.b.c].[d.e.f].[a.b.c].[c.d.f]"
         //TO   ("[a.b.c].[d.e.f].[a.b.c]", "c.d.f")
-        internal static (string? prefix, string name) SplitLast(string str)
+        internal static (string? prefix, string name) SplitLast(string str, bool isPostgres)
         {
-            if (!str.EndsWith("]"))
+            if (isPostgres)
             {
-                return (
-                    prefix: str.TryBeforeLast('.'),
-                    name: str.TryAfterLast('.') ?? str
-                    );
-            }
+                if (!str.EndsWith('\"'))
+                {
+                    return (
+                        prefix: str.TryBeforeLast('.'),
+                        name: str.TryAfterLast('.') ?? str
+                        );
+                }
 
-            var index = str.LastIndexOf('[');
-            return (
-                prefix: index == 0 ? null : str.Substring(0, index - 1),
-                name: str.Substring(index).UnScapeSql()
-            );
+                var index = str.LastIndexOf('\"', str.Length - 2);
+                return (
+                    prefix: index == 0 ? null : str.Substring(0, index - 1),
+                    name: str.Substring(index).UnScapeSql(isPostgres)
+                );
+            }
+            else
+            {
+
+                if (!str.EndsWith("]"))
+                {
+                    return (
+                        prefix: str.TryBeforeLast('.'),
+                        name: str.TryAfterLast('.') ?? str
+                        );
+                }
+
+                var index = str.LastIndexOf('[');
+                return (
+                    prefix: index == 0 ? null : str.Substring(0, index - 1),
+                    name: str.Substring(index).UnScapeSql(isPostgres)
+                );
+            }
         }
 
         public ObjectName OnDatabase(DatabaseName? databaseName)
         {
-            return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
+            if (databaseName != null && databaseName.IsPostgres != this.IsPostgres)
+                throw new Exception("Inconsitent IsPostgres");
+
+            return new ObjectName(new SchemaName(databaseName, Schema!.Name, IsPostgres), Name, IsPostgres);
         }
 
         public ObjectName OnSchema(SchemaName schemaName)
         {
-            return new ObjectName(schemaName, Name);
+            if (schemaName.IsPostgres != this.IsPostgres)
+                throw new Exception("Inconsitent IsPostgres");
+
+            return new ObjectName(schemaName, Name, IsPostgres);
         }
 
         static readonly ThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");

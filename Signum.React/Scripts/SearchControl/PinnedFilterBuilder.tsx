@@ -4,7 +4,7 @@ import {
   isList, isFilterGroupOptionParsed
 } from '../FindOptions'
 import { ValueLine, FormGroup } from '../Lines'
-import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
 import { createFilterValueControl, MultiValue } from './FilterBuilder';
@@ -42,12 +42,12 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
-    var labelText = f.pinned!.label ?? f.token?.niceName;
+    var labelText = f.pinned!.label || f.token?.niceName;
 
     if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
       return (
         <div className="checkbox mt-4">
-          <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onClick={() => {
+          <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onChange={() => {
             f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
           }} />{labelText}</label>

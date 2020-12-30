@@ -28,7 +28,7 @@ interface ImportRouteProps {
   exact?: boolean;
   sensitive?: boolean;
   strict?: boolean;
-  location?: H.Location;
+  location?: H.Location<any>;
 
   onImportModule: () => Promise<ComponentModule>;
 
@@ -41,5 +41,5 @@ export function ImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
       {(props: RouteChildrenProps<any>) => <ImportComponent onImportModule={onImportModule} componentProps={props} />}
     </Route>
   );
- }
+}
  

@@ -3,6 +3,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
@@ -36,7 +37,7 @@ namespace Signum.Engine.Linq
         SqlTableValuedFunction,
         SqlConstant,
         SqlVariable,
-        SqlEnum,
+        SqlLiteral,
         SqlCast,
         Case,
         RowNumber,
@@ -50,7 +51,6 @@ namespace Signum.Engine.Linq
         Delete,
         InsertSelect,
         CommandAggregate,
-        SelectRowCount,
         Entity = 2000,
         EmbeddedInit,
         MixinInit,
@@ -68,6 +68,7 @@ namespace Signum.Engine.Linq
         PrimaryKey,
         PrimaryKeyString,
         ToDayOfWeek,
+        Interval,
     }
 
 
@@ -133,20 +134,25 @@ namespace Signum.Engine.Linq
 
     internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
     {
-        public readonly Table Table;
+        public readonly Table? ViewTable;
+        public readonly Type? SingleColumnType; 
         public readonly ReadOnlyCollection<Expression> Arguments;
-        public readonly string SqlFunction;
+        public readonly ObjectName SqlFunction;
 
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        public SqlTableValuedFunctionExpression(string sqlFunction, Table table, Alias alias, IEnumerable<Expression> arguments)
+        public SqlTableValuedFunctionExpression(ObjectName sqlFunction, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments)
             : base(DbExpressionType.SqlTableValuedFunction, alias)
         {
+            if ((viewTable == null) == (singleColumnType == null))
+                throw new ArgumentException("Either viewTable or singleColumn should be set");
+
             this.SqlFunction = sqlFunction;
-            this.Table = table;
+            this.ViewTable = viewTable;
+            this.SingleColumnType = singleColumnType;
             this.Arguments = arguments.ToReadOnly();
         }
 
@@ -159,12 +165,20 @@ namespace Signum.Engine.Linq
 
         internal ColumnExpression GetIdExpression()
         {
-            var expression = ((ITablePrivate)Table).GetPrimaryOrder(Alias);
+            if (ViewTable != null)
+            {
 
-            if (expression == null)
-                throw new InvalidOperationException("Impossible to determine Primary Key for {0}".FormatWith(Table.Name));
+                var expression = ((ITablePrivate)ViewTable).GetPrimaryOrder(Alias);
 
-            return expression;
+                if (expression == null)
+                    throw new InvalidOperationException("Impossible to determine Primary Key for {0}".FormatWith(ViewTable.Name));
+
+                return expression;
+            }
+            else
+            {
+                return new ColumnExpression(this.SingleColumnType!, Alias, null);
+            }
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -198,7 +212,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            var st = SystemTime != null && SystemTime is SystemTime.HistoryTable ? "FOR SYSTEM_TIME " + SystemTime.ToString() : null;
+            var st = SystemTime != null && !(SystemTime is SystemTime.HistoryTable) ? " FOR SYSTEM_TIME " + SystemTime.ToString() : null;
 
             return $"{Name}{st} as {Alias}";
         }
@@ -222,16 +236,16 @@ namespace Signum.Engine.Linq
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
         public readonly Alias Alias;
-        public readonly string Name;
+        public readonly string? Name;
 
-        internal ColumnExpression(Type type, Alias alias, string name)
+        internal ColumnExpression(Type type, Alias alias, string? name)
             : base(DbExpressionType.Column, type)
         {
             if (type.UnNullify() == typeof(PrimaryKey))
                 throw new ArgumentException("type should not be PrimaryKey");
 
             this.Alias = alias ?? throw new ArgumentNullException(nameof(alias));
-            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+            this.Name = name ?? (Schema.Current.Settings.IsPostgres ? (string?)null : throw new ArgumentNullException(nameof(name)));
         }
 
         public override string ToString()
@@ -240,14 +254,14 @@ namespace Signum.Engine.Linq
         }
 
         public override bool Equals(object? obj) => obj is ColumnExpression ce && Equals(ce);
-        public bool Equals(ColumnExpression other)
+        public bool Equals(ColumnExpression? other)
         {
             return other != null && other.Alias == Alias && other.Name == Name;
         }
 
         public override int GetHashCode()
         {
-            return Alias.GetHashCode() ^ Name.GetHashCode();
+            return Alias.GetHashCode() ^ (Name?.GetHashCode() ?? -1);
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -286,33 +300,54 @@ namespace Signum.Engine.Linq
         StdDev,
         StdDevP,
         Count,
+        CountDistinct,
         Min,
         Max,
         Sum,
+
+        string_agg,
+    }
+
+    static class AggregateSqlFunctionExtensions
+    {
+        public static bool OrderMatters(this AggregateSqlFunction aggregateFunction)
+        {
+            switch (aggregateFunction)
+            {
+                case AggregateSqlFunction.Average:
+                case AggregateSqlFunction.StdDev:
+                case AggregateSqlFunction.StdDevP:
+                case AggregateSqlFunction.Count:
+                case AggregateSqlFunction.CountDistinct:
+                case AggregateSqlFunction.Min:
+                case AggregateSqlFunction.Max:
+                case AggregateSqlFunction.Sum:
+                    return false;
+                case AggregateSqlFunction.string_agg:
+                    return true;
+                default:
+                    throw new UnexpectedValueException(aggregateFunction);
+            }
+        }
     }
 
     internal class AggregateExpression : DbExpression
     {
-        public readonly Expression Expression;
-        public readonly bool Distinct;
         public readonly AggregateSqlFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction, bool distinct)
+        public readonly ReadOnlyCollection<Expression> Arguments;
+        public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (aggregateFunction != AggregateSqlFunction.Count && expression == null )
-                throw new ArgumentNullException(nameof(expression));
-
-            if (distinct && (aggregateFunction != AggregateSqlFunction.Count || expression == null))
-                throw new ArgumentException("Distinct only allowed for Count with expression");
-
-            this.Distinct = distinct;
-            this.Expression = expression;
+            if (arguments == null)
+                throw new ArgumentNullException(nameof(arguments));
+            
             this.AggregateFunction = aggregateFunction;
+            this.Arguments = arguments.ToReadOnly();
         }
 
         public override string ToString()
         {
-            return $"{AggregateFunction}({(Distinct ? "Distinct " : "")}{Expression?.ToString() ?? "*"})";
+            return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -421,7 +456,7 @@ namespace Signum.Engine.Linq
 
                 if (GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
-                else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
+                else if (AggregateFinder.GetAggregates(Columns) != null)
                     roles |= SelectRoles.Aggregate;
 
                 if (OrderBy.Count > 0)
@@ -440,7 +475,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression);
+        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression ag && !ag.AggregateFunction.OrderMatters());
 
         public override string ToString()
         {
@@ -459,7 +494,7 @@ namespace Signum.Engine.Linq
         internal bool IsOneRow()
         {
 
-            if (Top is ConstantExpression ce && ((int)ce.Value) == 1)
+            if (Top is ConstantExpression ce && ((int)ce.Value!) == 1)
                 return true;
 
             return false;
@@ -541,8 +576,19 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.SetOperator, alias)
         {
             this.Operator = @operator;
-            this.Left = left ?? throw new ArgumentNullException(nameof(left));
-            this.Right = right ?? throw new ArgumentNullException(nameof(right));
+            this.Left = Validate(left, nameof(left));
+            this.Right = Validate(right, nameof(right));
+        }
+
+        static SourceWithAliasExpression Validate(SourceWithAliasExpression exp, string name)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(name);
+
+            if (exp is TableExpression || exp is SqlTableValuedFunctionExpression)
+                throw new ArgumentException($"{name} should not be a {exp.GetType().Name}");
+
+            return exp;
         }
 
         public override string ToString()
@@ -602,8 +648,32 @@ namespace Signum.Engine.Linq
 
         COALESCE,
         CONVERT,
-        ISNULL,
         STUFF,
+        COLLATE,
+        CONCAT,
+    }
+
+    internal enum PostgresFunction
+    {
+        strpos,
+        starts_with,
+        length,
+        EXTRACT,
+        trunc,
+        substr,
+        repeat,
+        date_trunc,
+        age,
+        tstzrange,
+    }
+
+    public static class PostgressOperator
+    {
+        public static string Overlap = "&&";
+        public static string Contains = "@>";
+
+        public static string[] All = new[] { Overlap, Contains };
+
     }
 
     internal enum SqlEnums
@@ -613,22 +683,23 @@ namespace Signum.Engine.Linq
         quarter,
         day,
         week,
-        weekday,
+        weekday, //Sql Server
+        dow,     //Postgres
         hour,
         minute,
         second,
         millisecond,
-        dayofyear,
-        iso_week
+        dayofyear, //SQL Server
+        doy,       //Postgres
+        epoch
     }
 
-
-
-    internal class SqlEnumExpression : DbExpression
+    internal class SqlLiteralExpression : DbExpression
     {
-        public readonly SqlEnums Value;
-        public SqlEnumExpression(SqlEnums value)
-            : base(DbExpressionType.SqlEnum, typeof(object))
+        public readonly string Value;
+        public SqlLiteralExpression(SqlEnums value) : this(typeof(object), value.ToString()) { }
+        public SqlLiteralExpression(Type type, string value)
+            : base(DbExpressionType.SqlLiteral, type)
         {
             this.Value = value;
         }
@@ -640,7 +711,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
-            return visitor.VisitSqlEnum(this);
+            return visitor.VisitSqlLiteral(this);
         }
     }
 
@@ -665,10 +736,18 @@ namespace Signum.Engine.Linq
             return visitor.VisitToDayOfWeek(this);
         }
 
-        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        internal static MethodInfo miToDayOfWeekPostgres = ReflectionTools.GetMethodInfo(() => ToDayOfWeekPostgres(1));
+        public static DayOfWeek? ToDayOfWeekPostgres(int? postgressWeekDay)
+        {
+            if (postgressWeekDay == null)
+                return null;
 
-        internal static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
-        public static DayOfWeek? ToDayOfWeek(int? sqlServerWeekDay, byte dateFirst)
+            return (DayOfWeek)(postgressWeekDay);
+        }
+
+
+        internal static MethodInfo miToDayOfWeekSql = ReflectionTools.GetMethodInfo(() => ToDayOfWeekSql(1, 1));
+        public static DayOfWeek? ToDayOfWeekSql(int? sqlServerWeekDay, byte dateFirst)
         {
             if (sqlServerWeekDay == null)
                 return null;
@@ -684,7 +763,7 @@ namespace Signum.Engine.Linq
 
     internal class SqlCastExpression : DbExpression
     {
-        public readonly SqlDbType SqlDbType;
+        public readonly AbstractDbType DbType;
         public readonly Expression Expression;
 
         public SqlCastExpression(Type type, Expression expression)
@@ -692,16 +771,16 @@ namespace Signum.Engine.Linq
         {
         }
 
-        public SqlCastExpression(Type type, Expression expression, SqlDbType sqlDbType)
+        public SqlCastExpression(Type type, Expression expression, AbstractDbType dbType)
             : base(DbExpressionType.SqlCast, type)
         {
             this.Expression = expression;
-            this.SqlDbType = sqlDbType;
+            this.DbType = dbType;
         }
 
         public override string ToString()
         {
-            return "Cast({0} as {1})".FormatWith(Expression.ToString(), SqlDbType.ToString().ToUpper());
+            return "Cast({0} as {1})".FormatWith(Expression.ToString(), DbType.ToString(Schema.Current.Settings.IsPostgres));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -895,6 +974,75 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitCase(this);
+        }
+    }
+
+    internal class IntervalExpression : DbExpression
+    {
+        public readonly Expression? Min;
+        public readonly Expression? Max;
+        public readonly Expression? PostgresRange;
+        public readonly bool AsUtc;
+
+        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange, bool asUtc)
+            :base(DbExpressionType.Interval, type)
+
+        {
+            this.Min = min ?? (postgresRange == null ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.Max = max ?? (postgresRange == null ? throw new ArgumentException(nameof(max)) : (Expression?)null);
+            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.AsUtc = asUtc;
+        }
+
+        public override string ToString()
+        {
+            var type = this.Type.GetGenericArguments()[0].TypeName();
+
+            if (PostgresRange != null)
+                return $"new Interval<{type}>({this.PostgresRange})";
+            else
+                return $"new Interval<{type}>({this.Min}, {this.Max})";
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitInterval(this);
+        }
+    }
+
+    public static class SystemTimeExpressions
+    {
+        static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
+        internal static Expression? Overlaps(this IntervalExpression? interval1, IntervalExpression? interval2)
+        {
+            if (interval1 == null)
+                return null;
+
+            if (interval2 == null)
+                return null;
+
+            if(interval1.PostgresRange != null)
+            {
+                return new SqlFunctionExpression(typeof(bool), null, "&&", new Expression[] { interval1.PostgresRange!, interval2.PostgresRange! });
+            }
+
+            var min1 = interval1.Min!;
+            var max1 = interval1.Max!;
+            var min2 = interval2.Min!;
+            var max2 = interval2.Max!;
+
+            return Expression.And(
+                 Expression.GreaterThan(max1, min2),
+                 Expression.GreaterThan(max2, min1)
+                 );
+        }
+
+        public static Expression And(this Expression expression, Expression? other)
+        {
+            if (other == null)
+                return expression;
+
+            return Expression.And(expression, other);
         }
     }
 
@@ -1192,22 +1340,25 @@ namespace Signum.Engine.Linq
 
         public readonly SourceWithAliasExpression Source;
         public readonly Expression? Where;
+        public readonly bool ReturnRowCount;
 
-        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where)
+        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where, bool returnRowCount)
             : base(DbExpressionType.Delete)
         {
             this.Table = table;
             this.UseHistoryTable = useHistoryTable;
             this.Source = source;
             this.Where = where;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
         {
-            return "DELETE {0}\r\nFROM {1}\r\n{2}".FormatWith(
+            return "DELETE FROM {0}\r\nFROM {1}\r\n{2}".FormatWith(
                 Table.Name,
                 Source.ToString(),
-                Where?.Let(w => "WHERE " + w.ToString()));
+                Where?.Let(w => "WHERE " + w.ToString())) + 
+                (ReturnRowCount ? "\r\nSELECT @@rowcount" : "");
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1225,8 +1376,9 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
+        public readonly bool ReturnRowCount;
 
-        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments, bool returnRowCount)
             : base(DbExpressionType.Update)
         {
             this.Table = table;
@@ -1234,6 +1386,7 @@ namespace Signum.Engine.Linq
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
             this.Where = where;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
@@ -1258,14 +1411,16 @@ namespace Signum.Engine.Linq
         public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned!.TableName : Table.Name; } }
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
+        public readonly bool ReturnRowCount;
 
-        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
+        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments, bool returnRowCount)
             : base(DbExpressionType.InsertSelect)
         {
             this.Table = table;
             this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
+            this.ReturnRowCount = returnRowCount;
         }
 
         public override string ToString()
@@ -1318,24 +1473,6 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitCommandAggregate(this);
-        }
-    }
-
-    internal class SelectRowCountExpression : CommandExpression
-    {
-        public SelectRowCountExpression()
-            : base(DbExpressionType.SelectRowCount)
-        {
-        }
-
-        public override string ToString()
-        {
-            return "SELECT @@rowcount";
-        }
-
-        protected override Expression Accept(DbExpressionVisitor visitor)
-        {
-            return visitor.VisitSelectRowCount(this);
         }
     }
 }

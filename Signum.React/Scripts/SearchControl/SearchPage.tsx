@@ -5,17 +5,14 @@ import * as Finder from '../Finder'
 import { FindOptions, FilterOption, isFilterGroupOption } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
+import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
-import * as QueryString from 'query-string'
 import { namespace } from 'd3'
-import { useTitle } from '../Hooks'
+import { useTitle } from '../AppContext'
+import { QueryString } from '../QueryString'
 
 interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
-}
-
-interface SearchPageState {
-  findOptions: FindOptions;
 }
 
 function SearchPage(p: SearchPageProps) {
@@ -29,15 +26,13 @@ function SearchPage(p: SearchPageProps) {
   }, []);
 
   function onResize() {
-    var sc = searchControl.current;
-    var scl = sc?.searchControlLoaded;
-    var containerDiv = scl?.containerDiv;
+    const sc = searchControl.current;
+    const scl = sc?.searchControlLoaded;
+    const containerDiv = scl?.containerDiv;
     if (containerDiv) {
 
-      var marginTop = containerDiv.offsetTop;
-
-      var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
-
+      const marginTop = containerDiv.offsetTop;
+      const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
     }
   }
@@ -48,10 +43,10 @@ function SearchPage(p: SearchPageProps) {
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions, scl.extraParams());
-    const currentLocation = Navigator.history.location;
+    const currentLocation = AppContext.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
-      Navigator.history.replace(newPath);
+      AppContext.history.replace(newPath);
   }
 
   if (!Finder.isFindable(fo.queryName, true))
@@ -66,7 +61,7 @@ function SearchPage(p: SearchPageProps) {
 
   var qs = Finder.getSettings(fo.queryName);
   return (
-    <div id="divSearchPage">
+    <div id="divSearchPage" className="sf-search-page">
       <h3 className="display-6 sf-query-title">
         <span>{getQueryNiceName(fo.queryName)}</span>
         &nbsp;
@@ -86,7 +81,7 @@ function SearchPage(p: SearchPageProps) {
         showFilters={SearchPage.showFilters(fo, qs)}
         showGroupButton={true}
         avoidChangeUrl={false}
-        navigate={qs?.inPlaceNavigation ? "InPlace" : undefined}
+        view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
         enableAutoFocus={true}
         onHeighChanged={onResize}

@@ -1,20 +1,19 @@
-using Newtonsoft.Json;
+using Signum.Engine.Json;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Json
 {
-    public class ResultTableConverter : JsonConverter
+    public class ResultTableConverter : JsonConverter<ResultTable>
     {
-        public override bool CanConvert(Type objectType)
-        {
-            return typeof(ResultTable).IsAssignableFrom(objectType);
-        }
-
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, ResultTable value, JsonSerializerOptions options)
         {
             using (HeavyProfiler.LogNoStackTrace("ReadJson", () => typeof(ResultTable).Name))
             {
@@ -23,16 +22,19 @@ namespace Signum.React.Json
                 writer.WriteStartObject();
 
                 writer.WritePropertyName("entityColumn");
-                writer.WriteValue(rt.EntityColumn?.Name);
+                writer.WriteStringValue(rt.EntityColumn?.Name);
 
                 writer.WritePropertyName("columns");
-                serializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList());
+                JsonSerializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList(), typeof(List<string>), options);
 
                 writer.WritePropertyName("pagination");
-                serializer.Serialize(writer, new PaginationTS(rt.Pagination));
+                JsonSerializer.Serialize(writer, new PaginationTS(rt.Pagination), typeof(PaginationTS), options);
 
                 writer.WritePropertyName("totalElements");
-                writer.WriteValue(rt.TotalElements);
+                if (rt.TotalElements == null)
+                    writer.WriteNullValue();
+                else
+                    writer.WriteNumberValue(rt.TotalElements!.Value);
 
 
                 writer.WritePropertyName("rows");
@@ -43,16 +45,16 @@ namespace Signum.React.Json
                     if (rt.EntityColumn != null)
                     {
                         writer.WritePropertyName("entity");
-                        serializer.Serialize(writer, row.Entity);
+                        JsonSerializer.Serialize(writer, row.Entity, options);
                     }
 
                     writer.WritePropertyName("columns");
                     writer.WriteStartArray();
                     foreach (var column in rt.Columns)
                     {
-                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(column.Column.Token.GetPropertyRoute()))
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null)))
                         {
-                            serializer.Serialize(writer, row[column]);
+                            JsonSerializer.Serialize(writer, row[column], options);
                         }
                     }
                     writer.WriteEndArray();
@@ -68,7 +70,7 @@ namespace Signum.React.Json
             }
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override ResultTable? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

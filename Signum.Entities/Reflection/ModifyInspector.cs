@@ -10,27 +10,29 @@ namespace Signum.Entities.Reflection
 {
     public class ModifyInspector
     {
-        static readonly Dictionary<Type, Func<object, object?>[]> getterCache = new Dictionary<Type, Func<object, object?>[]>();
-        static Func<object, object?>[] ModifiableFieldGetters(Type type)
+        static readonly Dictionary<Type, Func<ModifiableEntity, object?>[]> getterCache = new Dictionary<Type, Func<ModifiableEntity, object?>[]>();
+        static Func<ModifiableEntity, object?>[] ModifiableFieldGetters(Type type)
         {
             lock (getterCache)
                 return getterCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
                     return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && !IsIgnored(fi))
-                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)!).ToArray();
+                        .Select(fi => ReflectionTools.CreateGetter<ModifiableEntity, object?>(fi)!)
+                        .ToArray();
                 });
         }
 
-        static readonly Dictionary<Type, Func<object, object?>[]> getterVirtualCache = new Dictionary<Type, Func<object, object?>[]>();
-        static Func<object, object?>[] ModifiableFieldGettersVirtual(Type type)
+        static readonly Dictionary<Type, Func<ModifiableEntity, object?>[]> getterVirtualCache = new Dictionary<Type, Func<ModifiableEntity, object?>[]>();
+        static Func<ModifiableEntity, object?>[] ModifiableFieldGettersVirtual(Type type)
         {
             lock (getterVirtualCache)
                 return getterVirtualCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
                     return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && (!IsIgnored(fi) || IsQueryableProperty(fi)))
-                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)!).ToArray();
+                        .Select(fi => ReflectionTools.CreateGetter<ModifiableEntity, object?>(fi)!)
+                        .ToArray();
                 });
         }
 
@@ -51,7 +53,29 @@ namespace Signum.Entities.Reflection
             if (obj == null)
                 yield break;
 
-            if (Reflector.IsMList(obj.GetType()))
+            if (obj is Lite<IEntity> lite)
+            {
+                if (lite.EntityOrNull != null)
+                    yield return (Entity)lite.EntityOrNull;
+            }
+            else if (obj is ModifiableEntity mod)
+            {
+                foreach (var getter in ModifiableFieldGetters(obj.GetType()))
+                {
+                    object? field = getter(mod);
+
+                    if (field == null)
+                        continue;
+
+                    yield return (Modifiable)field;
+                }
+
+                foreach (var mixin in mod.Mixins)
+                {
+                    yield return mixin;
+                }
+            }
+            else if (Reflector.IsMList(obj.GetType()))
             {
                 Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
@@ -62,25 +86,7 @@ namespace Signum.Entities.Reflection
                 }
             }
             else
-            {
-                foreach (Func<object, object?> getter in ModifiableFieldGetters(obj.GetType()))
-                {
-                    object? field = getter(obj);
-
-                    if (field == null)
-                        continue;
-
-                    yield return (Modifiable)field;
-                }
-
-                if (obj is Entity ident)
-                {
-                    foreach (var mixin in ident.Mixins)
-                    {
-                        yield return mixin;
-                    }
-                }
-            }
+                throw new UnexpectedValueException(obj);
         }
 
         public static IEnumerable<Modifiable> FullExploreVirtual(Modifiable obj)
@@ -88,7 +94,29 @@ namespace Signum.Entities.Reflection
             if (obj == null)
                 yield break;
 
-            if (Reflector.IsMList(obj.GetType()))
+            if (obj is Lite<IEntity> lite)
+            {
+                if (lite.EntityOrNull != null)
+                    yield return (Entity)lite.EntityOrNull;
+            }
+            else if (obj is ModifiableEntity mod)
+            {
+                foreach (var getter in ModifiableFieldGettersVirtual(obj.GetType()))
+                {
+                    object? field = getter(mod);
+
+                    if (field == null)
+                        continue;
+
+                    yield return (Modifiable)field;
+                }
+
+                foreach (var mixin in mod.Mixins)
+                {
+                    yield return mixin;
+                }
+            }
+            else if (Reflector.IsMList(obj.GetType()))
             {
                 Type t = obj.GetType().ElementType()!;
                 if (Reflector.IsModifiableIdentifiableOrLite(t))
@@ -99,25 +127,7 @@ namespace Signum.Entities.Reflection
                 }
             }
             else
-            {
-                foreach (Func<object, object?> getter in ModifiableFieldGettersVirtual(obj.GetType()))
-                {
-                    object? field = getter(obj);
-
-                    if (field == null)
-                        continue;
-
-                    yield return (Modifiable)field;
-                }
-
-                if (obj is Entity ident)
-                {
-                    foreach (var mixin in ident.Mixins)
-                    {
-                        yield return mixin;
-                    }
-                }
-            }
+                throw new UnexpectedValueException(obj);
         }
 
         public static IEnumerable<Modifiable> EntityExplore(Modifiable obj)
@@ -125,7 +135,29 @@ namespace Signum.Entities.Reflection
             if (obj == null)//|| obj is Lite)
                 yield break;
 
-            if (Reflector.IsMList(obj.GetType()))
+            if (obj is Lite<IEntity> lite)
+            {
+                yield break;
+            }
+            else if (obj is ModifiableEntity mod)
+            {
+                foreach (var getter in ModifiableFieldGetters(mod.GetType()))
+                {
+                    object? field = getter(mod);
+
+                    if (field == null || field is Entity)
+                        continue;
+
+                    yield return (Modifiable)field;
+                }
+
+                foreach (var mixin in mod.Mixins)
+                {
+                    yield return mixin;
+                }
+
+            }
+            else if (Reflector.IsMList(obj.GetType()))
             {
                 Type t = obj.GetType().ElementType()!;
 
@@ -137,25 +169,7 @@ namespace Signum.Entities.Reflection
                 }
             }
             else
-            {
-                foreach (Func<object, object?> getter in ModifiableFieldGetters(obj.GetType()))
-                {
-                    object? field = getter(obj);
-
-                    if (field == null || field is Entity)
-                        continue;
-
-                    yield return (Modifiable)field;
-                }
-
-                if (obj is Entity ident)
-                {
-                    foreach (var mixin in ident.Mixins)
-                    {
-                        yield return mixin;
-                    }
-                }
-            }
+                throw new UnexpectedValueException(obj);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Signum.Engine.Linq
     public class AliasGenerator
     {
         readonly HashSet<string> usedAliases = new HashSet<string>();
+        public bool isPostgres = Schema.Current.Settings.IsPostgres;
 
         int selectAliasCount = 0;
         public Alias NextSelectAlias()
@@ -19,26 +20,26 @@ namespace Signum.Engine.Linq
         public Alias GetUniqueAlias(string baseAlias)
         {
             if (usedAliases.Add(baseAlias))
-                return new Alias(baseAlias);
+                return new Alias(baseAlias, isPostgres);
 
             for (int i = 1; ; i++)
             {
                 string alias = baseAlias + i;
 
                 if (usedAliases.Add(alias))
-                    return new Alias(alias);
+                    return new Alias(alias, isPostgres);
 
             }
         }
 
-        public Alias Table(ObjectName name)
+        public Alias Table(ObjectName objectName)
         {
-            return new Alias(name);
+            return new Alias(objectName);
         }
 
         public Alias Raw(string name)
         {
-            return new Alias(name);
+            return new Alias(name, isPostgres);
         }
 
         public Alias NextTableAlias(string tableName)
@@ -47,7 +48,7 @@ namespace Signum.Engine.Linq
                 tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
 
             if (!abv.HasText())
-                abv = tableName.TryStart(3)!;
+                abv = tableName.TryStart(3).ToLower();
             else
                 abv = abv.ToLower();
 
@@ -66,14 +67,14 @@ namespace Signum.Engine.Linq
 
     public class Alias: IEquatable<Alias>
     {
-        public static readonly Alias Unknown = new Alias("Unknown");
-
+        public readonly bool isPostgres;
         public readonly string? Name; //Mutually exclusive
         public readonly ObjectName? ObjectName; //Mutually exclusive
 
-        internal Alias(string name)
+        internal Alias(string name, bool isPostgres)
         {
             this.Name = name;
+            this.isPostgres = isPostgres;
         }
 
         internal Alias(ObjectName objectName)
@@ -81,8 +82,11 @@ namespace Signum.Engine.Linq
             this.ObjectName = objectName;
         }
 
-        public bool Equals(Alias other)
+        public bool Equals(Alias? other)
         {
+            if (other == null)
+                return false;
+
             return this.Name == other.Name && object.Equals(this.ObjectName, other.ObjectName);
         }
 
@@ -98,7 +102,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return Name?.SqlEscape() ?? ObjectName!.ToString();
+            return Name?.SqlEscape(isPostgres) ?? ObjectName!.ToString();
         }
     }
 }

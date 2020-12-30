@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
@@ -18,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Authentication;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Signum.React.Filters
@@ -28,7 +28,7 @@ namespace Signum.React.Filters
 
         public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
-        public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
+        public static readonly List<Type> AvoidLogException = new List<Type> { typeof(OperationCanceledException) };
 
         public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
@@ -42,31 +42,30 @@ namespace Signum.React.Filters
 
             if (context.Exception != null)
             {
-                if (!IgnoreExceptions.Contains(context.Exception.GetType()))
+                if (!AvoidLogException.Contains(context.Exception.GetType()))
                 {
-                    var statusCode = GetStatus(context.Exception.GetType());
-
                     var req = context.HttpContext.Request;
 
                     var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
 
                     var exLog = context.Exception.LogException(e =>
                     {
-                        e.ActionName = Try(100, ()=>(context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
+                        e.ActionName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
                         e.ControllerName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName);
                         e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
                         e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
                         e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
-                        e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
-                        e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                        e.User = (UserHolder.Current ?? (IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
-                        e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
-                        e.Form = Try(int.MaxValue, () => Encoding.UTF8.GetString(body));
-                        e.Session = null;
+                        e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
+                        e.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
+                        e.User = (UserHolder.Current ?? (IUserEntity?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
+                        e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
+                        e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
+                        e.Session = new BigStringEmbedded();
                     });
                     
                     if (ExpectsJsonResult(context))
                     {
+                        var statusCode = GetStatus(context.Exception.GetType()); 
                         var error = CustomHttpErrorFactory(context.Exception);
 
                         var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
@@ -154,5 +153,29 @@ namespace Signum.React.Filters
         public string? ExceptionId;
         public string? StackTrace;
         public HttpError? InnerException;
+    }
+
+    public class SignumInitializeFilterAttribute : IAsyncResourceFilter
+    {
+        public static Action InitializeDatabase = () => throw new InvalidOperationException("SignumInitializeFilterAttribute.InitializeDatabase should be set in Startup");
+        static object lockKey = new object();
+        public bool Initialized = false;
+
+        public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
+        {
+            if (!Initialized)
+            {
+                lock (lockKey)
+                {
+                    if (!Initialized)
+                    {
+                        InitializeDatabase();
+                        Initialized = true;
+                    }
+                }
+            }
+            
+            return next();
+        }
     }
 }

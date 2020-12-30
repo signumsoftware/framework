@@ -12,7 +12,7 @@ namespace Signum.Entities
         static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
 
         public static SystemTime? Current => currentVariable.Value;
-        
+
         public static IDisposable Override(DateTime asOf) => Override(new SystemTime.AsOf(asOf));
         public static IDisposable Override(SystemTime? systemTime)
         {
@@ -48,22 +48,8 @@ namespace Signum.Entities
 
         public abstract class Interval : SystemTime
         {
-          
 
-        }
 
-        public class FromTo : Interval
-        {
-            public DateTime StartDateTime { get; private set; }
-            public DateTime EndtDateTime { get; private set; }
-
-            public FromTo(DateTime startDateTime, DateTime endDateTime)
-            {
-                this.StartDateTime = ValidateUTC(startDateTime);
-                this.EndtDateTime = ValidateUTC(endDateTime);
-            }
-
-            public override string ToString() => $"FROM {StartDateTime:u} TO {EndtDateTime:u}";
         }
 
         public class Between : Interval
@@ -115,56 +101,6 @@ namespace Signum.Entities
             where E : Entity
         {
             throw new InvalidOperationException("Only for queries");
-        }
-
-
-        static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
-        internal static Expression? Overlaps(this NewExpression? interval1, NewExpression? interval2)
-        {
-            if (interval1 == null)
-                return null;
-
-            if (interval2 == null)
-                return null;
-
-            var min1 = interval1.Arguments[0];
-            var max1 = interval1.Arguments[1];
-            var min2 = interval2.Arguments[0];
-            var max2 = interval2.Arguments[1];
-
-            return Expression.And(
-                 Expression.GreaterThan(max1, min2),
-                 Expression.GreaterThan(max2, min1)
-                 );
-        }
-
-
-
-        static ConstructorInfo ciInterval = ReflectionTools.GetConstuctorInfo(() => new Interval<DateTime>(new DateTime(), new DateTime()));
-        internal static Expression? Intesection(this NewExpression? interval1, NewExpression? interval2)
-        {
-            if (interval1 == null)
-                return interval2;
-
-            if (interval2 == null)
-                return interval1;
-
-            var min1 = interval1.Arguments[0];
-            var max1 = interval1.Arguments[1];
-            var min2 = interval2.Arguments[0];
-            var max2 = interval2.Arguments[1];
-
-            return Expression.New(ciInterval,
-                  Expression.Condition(Expression.LessThan(min1, min2), min1, min2),
-                  Expression.Condition(Expression.GreaterThan(max1, max2), max1, max2));
-        }
-
-        public static Expression And(this Expression expression, Expression? other)
-        {
-            if (other == null)
-                return expression;
-
-            return Expression.And(expression, other);
         }
     }
 }

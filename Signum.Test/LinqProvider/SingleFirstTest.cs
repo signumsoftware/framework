@@ -5,6 +5,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -25,12 +26,12 @@ namespace Signum.Test.LinqProvider
                 Members = b.Members.Select(a => new { a.Name, a.Sex }).ToString(p => "{0} ({1})".FormatWith(p.Name, p.Sex), "\r\n")
             }).ToList();
 
-            var bands1 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault().Name }).ToList();
+            var bands1 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault()!.Name }).ToList();
             var bands2 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstEx().Name }).ToList();
             var bands3 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx()!.Name }).ToList();
             var bands4 = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleEx().Name }).ToList();
 
-            var bands1b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault(a => a.Sex == Sex.Female).Name }).ToList();
+            var bands1b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstOrDefault(a => a.Sex == Sex.Female)!.Name }).ToList();
             var bands2b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.FirstEx(a => a.Sex == Sex.Female).Name }).ToList();
             var bands3b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx(a => a.Sex == Sex.Female)!.Name }).ToList();
             var bands4b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleEx(a => a.Sex == Sex.Female).Name }).ToList();
@@ -70,7 +71,7 @@ namespace Signum.Test.LinqProvider
 
             query.ToList();
 
-            Assert.Equal(1, query.QueryText().CountRepetitions("APPLY"));
+            Assert.Equal(1, query.QueryText().CountRepetitions(Schema.Current.Settings.IsPostgres ? "LATERAL" : "APPLY"));
         }
 
         [Fact]

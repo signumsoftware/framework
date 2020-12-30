@@ -1,14 +1,17 @@
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -39,19 +42,21 @@ namespace Signum.Entities
         }
 
         [ForceEagerEvaluation]
-        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
+        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
             where T : IRootEntity
         {
-            return Root(typeof(T)).Continue(propertyRoute);
+            return Root(typeof(T)).Continue(lambda, avoidLastCasting);
         }
-                                
 
-        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
+
+        public PropertyRoute Continue<T, S>(Expression<Func<T, S>> lambda, bool avoidLastCasting = false)
         {
             if (typeof(T) != this.Type)
                 throw new InvalidOperationException("Type mismatch between {0} and {1}".FormatWith(typeof(T).TypeName(), this.Type.TypeName()));
 
-            var list = Reflector.GetMemberList(propertyRoute);
+            var list = avoidLastCasting && lambda.Body is UnaryExpression u && u.NodeType == ExpressionType.Convert ?
+                Reflector.GetMemberListUntyped(Expression.Lambda(u.Operand, lambda.Parameters)) :
+                Reflector.GetMemberList(lambda);
 
             return Continue(list);
         }
@@ -74,21 +79,21 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo? mi = 
-                (MemberInfo?)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
-                (MemberInfo?)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (mi == null && Type.IsEntity())
+            if (fieldOrProperty.StartsWith("["))
             {
-                string? name = ExtractMixin(fieldOrProperty);
+                var mixinName = ExtractMixin(fieldOrProperty);
 
-                mi = MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == name);
+                return MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == mixinName) ??
+                    throw new InvalidOperationException("{0}{1} does not exist".FormatWith(this, fieldOrProperty));
             }
+            else
+            {
+                var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-            if (mi == null)
-                throw new InvalidOperationException("{0}.{1} does not exist".FormatWith(this, fieldOrProperty));
-
-            return mi;
+                return (MemberInfo?)Type.GetProperty(fieldOrProperty, flags, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
+                    (MemberInfo?)Type.GetField(fieldOrProperty, flags) ??
+                    throw new InvalidOperationException("{0}.{1} does not exist".FormatWith(this, fieldOrProperty));
+            }
         }
 
         private bool IsCollection()
@@ -117,7 +122,7 @@ namespace Signum.Entities
                 {
                     Implementations imp = GetImplementations();
 
-                    Type only;
+                    Type? only;
                     if (imp.IsByAll || (only = imp.Types.Only()) == null)
                         throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
 
@@ -159,9 +164,9 @@ namespace Signum.Entities
                 PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.LiteEntity;
             }
-            else if (typeof(ModifiableEntity).IsAssignableFrom(parent.type) && fieldOrProperty is Type)
+            else if (typeof(ModifiableEntity).IsAssignableFrom(parent.Type) && fieldOrProperty is Type)
             {
-                MixinDeclarations.AssertDeclared(parent.type!, (Type)fieldOrProperty);
+                MixinDeclarations.AssertDeclared(parent.Type!, (Type)fieldOrProperty);
 
                 type = (Type)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.Mixin;
@@ -296,7 +301,7 @@ namespace Signum.Entities
                     }
 
                 case PropertyRouteType.Mixin:
-                    return "[{0}]".FormatWith(type!.Name);
+                    return (Parent!.PropertyRouteType == PropertyRouteType.Root ? "" : Parent!.PropertyString()) + "[{0}]".FormatWith(type!.Name);
                 case PropertyRouteType.MListItems:
                     return Parent!.PropertyString() + "/";
                 case PropertyRouteType.LiteEntity:
@@ -335,9 +340,52 @@ namespace Signum.Entities
 
         public static PropertyRoute Parse(Type rootType, string propertyString)
         {
-            PropertyRoute result = PropertyRoute.Root(rootType);
+            Sequence<string> splitMixin(string text)
+            {
+                if (text.Length == 0)
+                    return new Sequence<string>();
 
-            foreach (var part in propertyString.Replace("/", ".Item.").TrimEnd('.').Split('.'))
+                if (text.Contains("["))
+                    return new Sequence<string>
+                    {
+                        splitMixin(text.Before("[")),
+                        "[" + text.Between("[", "]") + "]",
+                        splitMixin(text.After("]")),
+                    };
+
+                return new Sequence<string> { text };
+            }
+
+            Sequence<string> splitDot(string text)
+            {
+                if (text.Contains("."))
+                    return new Sequence<string>
+                    {
+                        splitMixin(text.Before(".")),
+                        splitDot(text.After("."))
+                    };
+
+                return splitMixin(text);
+            }
+
+            Sequence<string> splitIndexer(string text) 
+            {
+                if (text.Contains("/"))
+                    return new Sequence<string>
+                    {
+                        splitDot(text.Before("/")),
+                        "Item",
+                        splitIndexer(text.After("/")),
+                    };
+
+                return splitDot(text);
+            }
+
+
+
+            PropertyRoute result = PropertyRoute.Root(rootType);
+            var parts = splitIndexer(propertyString);
+            foreach (var part in parts)
             {
                 result = result.Add(part);
             }
@@ -386,7 +434,7 @@ namespace Signum.Entities
         static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
-        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true)
+        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true, bool includeMixinItself = false, bool includeMListElements = false)
         {
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
@@ -402,45 +450,70 @@ namespace Signum.Entities
                     result.Add(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixinItself));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
+                        PropertyRoute itemRoute = route.Add("Item");
+
+                        if (includeMListElements)
+                            result.Add(itemRoute);
+
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixinItself));
                     }
                 }
             }
 
             foreach (var t in MixinDeclarations.GetMixinDeclarations(type))
             {
-                result.AddRange(GenerateEmbeddedProperties(root.Add(t), includeIgnored));
+                var mixinRoute = root.Add(t);
+
+                if (includeMixinItself)
+                    result.Add(mixinRoute);
+
+                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixinItself));
             }
 
             return result;
         }
 
-        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedProperty, bool includeIgnored)
+        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedRoute, bool includeIgnored, bool includeMListElements, bool includeMixinItself)
         {
             List<PropertyRoute> result = new List<PropertyRoute>();
-            foreach (var pi in Reflector.PublicInstancePropertiesInOrder(embeddedProperty.Type))
+            foreach (var pi in Reflector.PublicInstancePropertiesInOrder(embeddedRoute.Type))
             {
                 if (includeIgnored || !pi.HasAttribute<IgnoreAttribute>())
                 {
-                    PropertyRoute route = embeddedProperty.Add(pi);
+                    PropertyRoute route = embeddedRoute.Add(pi);
                     result.AddRange(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored, includeMListElements, includeMixinItself));
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
+                        PropertyRoute itemRoute = route.Add("Item");
+
+                        if (includeMListElements)
+                            result.Add(itemRoute);
+
                         Type colType = pi.PropertyType.ElementType()!;
                         if (Reflector.IsEmbeddedEntity(colType))
-                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                            result.AddRange(GenerateEmbeddedProperties(itemRoute, includeIgnored, includeMListElements, includeMixinItself));
                     }
                 }
+            }
+
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(embeddedRoute.Type))
+            {
+                var mixinRoute = embeddedRoute.Add(t);
+
+                if (includeMixinItself)
+                    result.Add(mixinRoute);
+
+                result.AddRange(GenerateEmbeddedProperties(mixinRoute, includeIgnored, includeMListElements, includeMixinItself));
             }
 
             return result;
@@ -452,8 +525,12 @@ namespace Signum.Entities
         }
 
         public override bool Equals(object? obj) => obj is PropertyRoute pr && Equals(pr);
-        public bool Equals(PropertyRoute other)
+        public bool Equals(PropertyRoute? other)
         {
+
+            if (other==null)
+                return false;
+
             if (other.PropertyRouteType != this.PropertyRouteType)
                 return false;
 
@@ -600,14 +677,14 @@ namespace Signum.Entities
                         exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
                         break;
                     case PropertyRouteType.LiteEntity:
-                        exp = Expression.Property(exp, "Entity");
+                        exp = Expression.Property(exp!, "Entity");
                         break;
                     default:
                         throw new InvalidOperationException("Unexpected {0}".FormatWith(p.PropertyRouteType));
                 }
             }
 
-            var selector = Expression.Lambda<Func<T, R>>(exp, pe);
+            var selector = Expression.Lambda<Func<T, R>>(exp!, pe);
             return selector;
         }
 

@@ -7,6 +7,8 @@ import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
 import { LineBaseProps, LineBaseController, useController } from "./LineBase";
+import { KeyGenerator } from "../Globals";
+import { MListElementBinding } from "../Reflection";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
@@ -16,6 +18,8 @@ interface MultiValueLineProps extends LineBaseProps {
 }
 
 export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
+
+  keyGenerator = new KeyGenerator();
 
   getDefaultProps(p: MultiValueLineProps) {
     if (p.ctx.value == undefined)
@@ -63,6 +67,8 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
   if (c.isHidden)
     return null;
 
+
+
   return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
@@ -72,7 +78,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
         <tbody>
           {
             mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-              (<ErrorBoundary key={i}>
+              (<ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
                 <MultiValueLineElement
                   ctx={mlec}
                   onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
@@ -104,11 +110,11 @@ export interface MultiValueLineElementProps {
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const ctx = props.ctx;
 
-  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute)
+  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute!)
 
   return (
     <tr>
-      <td>
+      <td className="px-2">
         {!ctx.readOnly &&
           <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
@@ -116,7 +122,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
             <FontAwesomeIcon icon="times" />
           </a>}
       </td>
-      <td>
+      <td className="w-100">
         {renderItem(ctx)}
       </td>
     </tr>

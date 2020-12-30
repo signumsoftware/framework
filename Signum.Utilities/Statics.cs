@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Utilities
 {
@@ -139,12 +140,11 @@ namespace Signum.Utilities
     public class ThreadVariable<T> : Variable<T>, IThreadVariable
     {
         readonly AsyncLocal<T> store = new AsyncLocal<T>();
-
         internal ThreadVariable(string name) : base(name) { }
 
         public override T Value
         {
-            get { return store.Value; }
+            get { return store.Value!; }
             set { store.Value = value; }
         }
 

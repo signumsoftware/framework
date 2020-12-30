@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 interface ErrorBoundaryProps {
+  deps?: unknown[];
 }
 
 interface ErrorBoundaryState {
@@ -18,6 +19,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.setState({ error, info });
   }
 
+  UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps) {
+    if (!depsEquals(newProps.deps, this.props.deps) && (this.state.error || this.state.info))
+      this.setState({ error: undefined, info: undefined });
+  }
+
   render() {
     if (this.state.error || this.state.info) {
       return (
@@ -32,4 +38,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
     return this.props.children ?? null;
   }
+}
+
+function depsEquals(prev: unknown[] | undefined, next: unknown[] | undefined) {
+  if (prev == next)
+    return true;
+
+  if (prev === undefined || next === undefined)
+    return false;
+
+  if (prev.length !== next.length)
+    return false;
+
+  for (var i = 0; i < prev.length; i++) {
+    if (prev[i] !== next[i])
+      return false;
+  }
+
+  return true;
 }

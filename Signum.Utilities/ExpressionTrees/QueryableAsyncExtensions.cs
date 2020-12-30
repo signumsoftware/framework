@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -49,7 +50,6 @@ namespace Signum.Utilities.ExpressionTrees
             var provider = (IQueryProviderAsync)query.Provider;
 
             var value = await provider.ExecuteAsync(mc2, cancellationToken);
-
             return (R)value!;
         }
 
@@ -63,20 +63,20 @@ namespace Signum.Utilities.ExpressionTrees
         public static Task<TSource> FirstAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.FirstEx(predicate));
         public static Task<TSource> FirstAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.FirstEx(predicate));
 
-        public static Task<TSource> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.FirstOrDefault());
-        public static Task<TSource> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.FirstOrDefault());
-        public static Task<TSource> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.FirstOrDefault(predicate));
-        public static Task<TSource> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.FirstOrDefault(predicate));
+        public static Task<TSource?> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.FirstOrDefault());
+        public static Task<TSource?> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.FirstOrDefault());
+        public static Task<TSource?> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.FirstOrDefault(predicate));
+        public static Task<TSource?> FirstOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.FirstOrDefault(predicate));
 
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.SingleEx());
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.SingleEx());
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleEx(predicate));
         public static Task<TSource> SingleAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleEx(predicate));
 
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx());
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx());
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx(predicate));
-        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx(predicate));
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx()!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx()!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.SingleOrDefaultEx(predicate)!);
+        public static Task<TSource> SingleOrDefaultAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.SingleOrDefaultEx(predicate)!);
 
 
         public static Task<bool> ContainsAsync<TSource>(this IQueryable<TSource> source, TSource item) => BindAsyncWithoutCancellationToken___(() => source.Contains(item));
@@ -100,15 +100,15 @@ namespace Signum.Utilities.ExpressionTrees
         public static Task<long> LongCountAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate) => BindAsyncWithoutCancellationToken___(() => source.LongCount(predicate));
         public static Task<long> LongCountAsync<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, bool>> predicate, CancellationToken token) => Bind(token, () => source.LongCount(predicate));
 
-        public static Task<TSource> MinAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.Min());
-        public static Task<TSource> MinAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.Min());
-        public static Task<TResult> MinAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector) => BindAsyncWithoutCancellationToken___(() => source.Min(selector));
-        public static Task<TResult> MinAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, CancellationToken token) => Bind(token, () => source.Min(selector));
+        public static Task<TSource?> MinAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.Min());
+        public static Task<TSource?> MinAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.Min());
+        public static Task<TResult?> MinAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector) => BindAsyncWithoutCancellationToken___(() => source.Min(selector));
+        public static Task<TResult?> MinAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, CancellationToken token) => Bind(token, () => source.Min(selector));
 
-        public static Task<TSource> MaxAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.Max());
-        public static Task<TSource> MaxAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.Max());
-        public static Task<TResult> MaxAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector) => BindAsyncWithoutCancellationToken___(() => source.Max(selector));
-        public static Task<TResult> MaxAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, CancellationToken token) => Bind(token, () => source.Max(selector));
+        public static Task<TSource?> MaxAsync<TSource>(this IQueryable<TSource> source) => BindAsyncWithoutCancellationToken___(() => source.Max());
+        public static Task<TSource?> MaxAsync<TSource>(this IQueryable<TSource> source, CancellationToken token) => Bind(token, () => source.Max());
+        public static Task<TResult?> MaxAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector) => BindAsyncWithoutCancellationToken___(() => source.Max(selector));
+        public static Task<TResult?> MaxAsync<TSource, TResult>(this IQueryable<TSource> source, Expression<Func<TSource, TResult>> selector, CancellationToken token) => Bind(token, () => source.Max(selector));
 
         public static Task<int> SumAsync(this IQueryable<int> source) => BindAsyncWithoutCancellationToken___(() => source.Sum());
         public static Task<int> SumAsync(this IQueryable<int> source, CancellationToken token) => Bind(token, () => source.Sum());

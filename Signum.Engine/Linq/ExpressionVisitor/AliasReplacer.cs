@@ -40,9 +40,9 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSelect(SelectExpression select)
         {
-            Expression top = this.Visit(select.Top);
+            Expression? top = this.Visit(select.Top);
             SourceExpression from = this.VisitSource(select.From!);
-            Expression where = this.Visit(select.Where);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns =  Visit(select.Columns, VisitColumnDeclaration);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
@@ -56,13 +56,13 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitEntity(EntityExpression ee)
         {
-            var bindings = Visit(ee.Bindings, VisitFieldBinding);
-            var mixins = Visit(ee.Mixins, VisitMixinEntity);
+            var bindings = Visit(ee.Bindings!, VisitFieldBinding);
+            var mixins = Visit(ee.Mixins!, VisitMixinEntity);
 
             var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
-            var externalPeriod = (NewExpression)Visit(ee.ExternalPeriod);
+            var externalPeriod = (IntervalExpression?)Visit(ee.ExternalPeriod);
 
-            var period = (NewExpression)Visit(ee.TablePeriod);
+            var period = (IntervalExpression?)Visit(ee.TablePeriod);
 
             Alias? newAlias = ee.TableAlias == null ? null : aliasMap.TryGetC(ee.TableAlias) ?? ee.TableAlias;
 

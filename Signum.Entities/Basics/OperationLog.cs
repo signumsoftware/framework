@@ -8,6 +8,11 @@ namespace Signum.Entities.Basics
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false), InTypeScript(Undefined = false)]
     public class OperationLogEntity : Entity
     {
+        public OperationLogEntity()
+        {
+            RebindEvents();
+        }
+
         [ImplementedByAll]
         public Lite<IEntity>? Target { get; set; }
 
@@ -18,8 +23,10 @@ namespace Signum.Entities.Basics
 
         public Lite<IUserEntity> User { get; set; }
 
+        [Format("G")]
         public DateTime Start { get; set; }
 
+        [Format("G")]
         public DateTime? End { get; set; }
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =

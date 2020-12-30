@@ -1,70 +1,40 @@
 import * as React from "react"
-import * as H from "history"
-import { Route, Switch } from "react-router"
 import { Dic, classes, } from './Globals';
-import { ajaxGet, ajaxPost } from './Services';
+import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
-import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
+import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
 import { TypeContext } from './TypeContext';
+import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
-import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
-import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { clearCustomConstructors } from "./Constructor";
+import { toAbsoluteUrl, currentUser } from "./AppContext";
+import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
+import { ErrorModalOptions } from "./Modals/ErrorModal";
 
-Dic.skipClasses.push(React.Component);
+if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
+  throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 
-export let currentUser: IUserEntity | undefined;
-export function setCurrentUser(user: IUserEntity | undefined) {
-  currentUser = user;
-}
+export function start(options: { routes: JSX.Element[] }) {
+  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
+  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage()} />);
 
-export let history: H.History;
-export function setCurrentHistory(h: H.History) {
-  history = h;
-}
+  AppContext.clearSettingsActions.push(clearEntitySettings);
+  AppContext.clearSettingsActions.push(clearWidgets)
+  AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
+  AppContext.clearSettingsActions.push(clearCustomConstructors);
 
-export let setTitle: (pageTitle?: string) => void;
-export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
-  setTitle = titleFunction;
-}
-
-export function createAppRelativeHistory(): H.History {
-  var h = H.createBrowserHistory({});
-  AppRelativeRoutes.useAppRelativeBasename(h);
-  AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-  AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-  AppRelativeRoutes.useAppRelativeSwitch(Switch);
-  setCurrentHistory(h);
-  return h;
-
-}
-
-export let resetUI: () => void = () => { };
-export function setResetUI(reset: () => void) {
-  resetUI = reset;
-}
-
-export namespace Expander {
-  export let onGetExpanded: () => boolean;
-  export let onSetExpanded: (isExpanded: boolean) => void;
-
-  export function setExpanded(expanded: boolean): boolean {
-    let wasExpanded = onGetExpanded != null && onGetExpanded();;
-    if (onSetExpanded)
-      onSetExpanded(expanded);
-
-    return wasExpanded;
-  }
+  ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
+  ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
 
 export namespace NavigatorManager {
@@ -77,32 +47,26 @@ export namespace NavigatorManager {
   }
 }
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
-  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage() } />);
-}
-
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-  if (isTypeEmbeddedOrValue(entity.Type)) {
-
-    return pr!.typeReference().typeNiceName;
-
-  } else if (isTypeModel(entity.Type)) {
-
-    const typeInfo = getTypeInfo(entity.Type);
-
-    return typeInfo.niceName;
-
-  }
-  else {
+  if (isTypeEntity(entity.Type)) {
 
     const typeInfo = getTypeInfo(entity.Type);
 
     if (entity.isNew)
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+    return renderTitle(typeInfo, entity);
+
+  }
+  else if (isTypeModel(entity.Type)) {
+
+    const typeInfo = getTypeInfo(entity.Type);
+    return typeInfo.niceName;
+
+  } else {
+
+    return pr!.typeReference().typeNiceName;
   }
 }
 
@@ -112,12 +76,23 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
   renderId = newFunction;
 }
 
+
+let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
+  return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+  return null;
+}
+
+export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
+  renderTitle = newFunction;
+}
+
 export function navigateRoute(entity: Entity, viewName?: string): string;
 export function navigateRoute(lite: Lite<Entity>, viewName?: string): string;
 export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: string): string {
   let typeName: string;
   let id: number | string | undefined;
   if (isEntity(entityOrLite)) {
+
     typeName = entityOrLite.Type;
     id = entityOrLite.id;
   }
@@ -149,20 +124,7 @@ export function createRoute(type: PseudoType, viewName?: string) {
 }
 
 
-export const clearSettingsActions: Array<() => void> = [
-  clearEntitySettings,
-  Finder.clearQuerySettings,
-  Finder.ButtonBarQuery.clearButtonBarElements,
-  ButtonBarManager.clearButtonBarRenderer,
-  Operations.clearOperationSettings,
-  clearWidgets,
-  clearContextualItems,
-  clearCustomConstructors
-];
 
-export function clearAllSettings() {
-  clearSettingsActions.forEach(a => a());
-}
 
 export function clearEntitySettings() {
   Dic.clear(entitySettings);
@@ -287,46 +249,53 @@ export function getViewPromise<T extends ModifiableEntity>(entity: T, viewName?:
   return viewDispatcher.getViewPromise(entity, viewName);
 }
 
-export const isCreableEvent: Array<(typeName: string) => boolean> = [];
+export const isCreableEvent: Array<(typeName: string, options: IsCreableOptions | undefined) => boolean> = [];
 
-export function isCreable(type: PseudoType, customView = false, isSearch = false) {
+export interface IsCreableOptions {
+  customComponent?: boolean;
+  isSearch?: boolean;
+  isEmbedded?: boolean;
+}
+
+export function isCreable(type: PseudoType, options?: IsCreableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
+  const baseIsCreable = checkFlag(typeIsCreable(typeName, options?.isEmbedded), options?.isSearch);
 
-  const hasView = customView || viewDispatcher.hasDefaultView(typeName);
+  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
   const hasConstructor = hasAllowedConstructor(typeName);
 
-  return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName));
+  return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName, options));
 }
 
 function hasAllowedConstructor(typeName: string) {
-  const ti = getTypeInfo(typeName);
+  const ti = tryGetTypeInfo(typeName);
 
   if (ti == undefined || ti.operations == undefined)
     return true;
 
-  const constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
-
-  if (!constructOperations.length)
+  if (!ti.hasConstructorOperation)
     return true;
 
-  const allowed = constructOperations.filter(oi => Operations.isOperationInfoAllowed(oi));
+  const allowed = Dic.getValues(ti.operations).some(oi => oi.operationType == "Constructor");
 
-  return allowed.length > 0;
+  return allowed;
 }
 
-function typeIsCreable(typeName: string): EntityWhen {
+function typeIsCreable(typeName: string, isEmbedded?: boolean): EntityWhen {
 
   const es = entitySettings[typeName];
   if (es != undefined && es.isCreable != undefined)
     return es.isCreable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return "IsLine";
+
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
+    return "Never";
 
   if (typeInfo.kind == "Enum")
     return "Never";
@@ -345,28 +314,36 @@ function typeIsCreable(typeName: string): EntityWhen {
 }
 
 
-export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
+export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>, options?: IsReadonlyOptions) => boolean> = [];
 
-export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, ignoreTypeIsReadonly: boolean = false) {
+export interface IsReadonlyOptions {
+  ignoreTypeIsReadonly?: boolean;
+  isEmbedded?: boolean;
+}
+
+export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsReadonlyOptions) {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsReadOnly = ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName);
+  const baseIsReadOnly = options?.ignoreTypeIsReadonly ? false : typeIsReadOnly(typeName, options?.isEmbedded);
 
-  return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
+  return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack, options));
 }
 
-function typeIsReadOnly(typeName: string): boolean {
+function typeIsReadOnly(typeName: string, isEmbedded: boolean | undefined): boolean {
 
   const es = entitySettings[typeName];
   if (es != undefined && es.isReadOnly != undefined)
     return es.isReadOnly;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
     return false;
+
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == undefined)
+    return true;
 
   if (typeInfo.kind == "Enum")
     return true;
@@ -386,7 +363,7 @@ function typeIsReadOnly(typeName: string): boolean {
 
 export function typeRequiresSaveOperation(typeName: string): boolean {
 
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
   if (typeInfo == undefined)
     return false;
 
@@ -403,26 +380,32 @@ export function typeRequiresSaveOperation(typeName: string): boolean {
   }
 }
 
-export const isFindableEvent: Array<(typeName: string) => boolean> = [];
+export interface IsFindableOptions {
+    isSearch?: boolean;
+    isEmbedded?: boolean;
+}
 
-export function isFindable(type: PseudoType, isSearch?: boolean) {
+export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbedded);
 
   return baseIsReadOnly && Finder.isFindable(typeName, true);
 }
 
-function typeIsFindable(typeName: string) {
+function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isFindable != undefined)
     return es.isFindable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  if (isEmbedded)
+    return false;
+
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
     return false;
 
   if (typeInfo.kind == "Enum")
@@ -441,71 +424,58 @@ function typeIsFindable(typeName: string) {
   }
 }
 
-export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = [];
+export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<ModifiableEntity> | undefined, options: IsViewableOptions | undefined) => boolean> = [];
 
-export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean {
+export interface IsViewableOptions {
+  customComponent?: boolean;
+  isSearch?: boolean;
+  isEmbedded?: boolean;
+  buttons?: ViewButtons;
+}
+
+export type ViewButtons = "ok_cancel" | "close" | undefined;
+
+export function typeDefaultButtons(typeName: string, isEmbedded: boolean | undefined): ViewButtons {
+  if (isEmbedded)
+    return "ok_cancel";
+
+  const ti = tryGetTypeInfo(typeName);
+  if (ti != null) {
+    if (
+      ti.entityKind == undefined ||
+      ti.entityKind == "Part" ||
+      ti.entityKind == "SharedPart")
+      return "ok_cancel";
+  }
+
+  return "close";
+}
+
+export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, options?: IsViewableOptions): boolean {
 
   const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseIsViewable = typeIsViewable(typeName);
+  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch);
 
-  const hasView = customView || viewDispatcher.hasDefaultView(typeName);
+  const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
-  return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
+  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack, options));
 }
 
-
-function typeIsViewable(typeName: string): boolean {
+function typeIsViewable(typeName: string, isEmbedded: boolean | undefined): EntityWhen {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isViewable != undefined)
     return es.isViewable;
 
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
-    return true;
+  if (isEmbedded)
+    return "IsLine";
 
-  if (typeInfo.kind == "Enum")
-    return false;
-
-  switch (typeInfo.entityKind) {
-    case "SystemString": return false;
-    case "System": return true;
-    case "Relational": return false;
-    case "String": return false;
-    case "Shared": return true;
-    case "Main": return true;
-    case "Part": return true;
-    case "SharedPart": return true;
-    default: return true;
-  }
-}
-
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customComponent = false, isSearch = false): boolean {
-
-  const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
-
-  const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
-
-  const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
-
-  const hasView = customComponent || viewDispatcher.hasDefaultView(typeName);
-
-  return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
-}
-
-function typeIsNavigable(typeName: string): EntityWhen {
-
-  const es = entitySettings[typeName];
-
-  if (es != undefined && es.isNavigable != undefined)
-    return es.isNavigable;
-
-  const typeInfo = getTypeInfo(typeName);
-  if (typeInfo == undefined)
+  const typeInfo = tryGetTypeInfo(typeName);
+  if (typeInfo == null)
     return "Never";
 
   if (typeInfo.kind == "Enum")
@@ -528,9 +498,9 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   if (type.isEmbedded || type.name == IsByAll)
     return undefined;
 
-  const types = getTypeInfos(type);
+  const types = tryGetTypeInfos(type);
 
-  if (types.length == 1) {
+  if (types.length == 1 && types[0] != null) {
     var s = getSettings(types[0]);
 
     if (s?.findOptions) {
@@ -552,10 +522,10 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
     });
 
-  const types = getTypeInfos(type);
+  const types = tryGetTypeInfos(type);
   var delay: number | undefined;
 
-  if (types.length == 1) {
+  if (types.length == 1 && types[0] != null) {
     var s = getSettings(types[0]);
 
     if (s) {
@@ -572,7 +542,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
       types: type.name,
       subString: subStr,
       count: 5
-    }, signal).then(lites => [...lites, ...(!create ? []: getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), false, showType == null ? type.name.contains(",") : showType);
+    }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
   if (!config.getItemsDelay) {
@@ -591,7 +561,10 @@ export interface ViewOptions {
   validate?: boolean;
   requiresSaveOperation?: boolean;
   avoidPromptLoseChange?: boolean;
+  buttons?: ViewButtons;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
+  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
+  allowExchangeEntity?: boolean;
   extraProps?: {};
 }
 
@@ -616,39 +589,13 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
     .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
 
-export interface NavigateOptions {
-  readOnly?: boolean;
-  modalSize?: BsSize;
-  avoidPromptLooseChange?: boolean;
-  getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  extraProps?: {};
-  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
-}
-
-export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-
-  const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
-
-  const es = getSettings(typeName);
-
-  if (es?.onNavigate)
-    return es.onNavigate(entityOrPack, navigateOptions);
-  else
-    return navigateDefault(entityOrPack, navigateOptions);
-}
-
-export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-  return NavigatorManager.getFrameModal()
-    .then(NP => NP.FrameModalManager.openNavigate(entityOrPack, navigateOptions ?? {}));
-}
-
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
   var url = createRoute(pack.entity.Type) + "?waitData=true";
   window.dataForChildWindow = pack;
   var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) : Promise<void> {
+export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event: React.MouseEvent<any>): Promise<void> {
   if (!pack || !pack.entity)
     return Promise.resolve();
 
@@ -658,19 +605,8 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
     return Promise.resolve();
   }
   else {
-    return navigate(pack);
+    return view(pack).then(() => undefined);
   }
-}
-
-export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
-  if ((e as React.MouseEvent<any>).button == 2)
-    return;
-
-  e.preventDefault();
-  if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
-    window.open(toAbsoluteUrl(path));
-  else
-    history.push(path);
 }
 
 
@@ -685,15 +621,66 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
   if (entity == undefined)
     return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-  let ti = getTypeInfo(entity.Type);
+  let ti = tryGetTypeInfo(entity.Type);
   if (ti == null || !ti.requiresEntityPack)
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-  return API.fetchEntityPackEntity(entity as Entity);
+  return API.fetchEntityPackEntity(entity as Entity).then(ep => ({ ...ep, entity: cloneEntity(entity)}));
 }
 
 function cloneEntity(obj: any) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+
+export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
+  return useAPI(signal =>
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
+      API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
+}
+
+export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
+  return useAPIWithReload(signal =>
+    lite == null ? Promise.resolve<T | null | undefined>(lite) :
+      API.fetchAndForget(lite),
+    [lite && liteKey(lite)]);
+}
+
+export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
+
+  const forceUpdate = useForceUpdate();
+  React.useEffect(() => {
+    if (lite && !lite.entity)
+      API.fetchAndRemember(lite)
+        .then(() => {
+          onLoaded && onLoaded();
+          forceUpdate();
+        })
+        .done();
+  }, [lite]);
+
+
+  if (lite == null)
+    return null;
+
+  if (lite.entity == null)
+    return undefined;
+
+  return lite.entity;
+}
+
+export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
+  return useAPI(signal => API.fetchAll(type), []);
+}
+
+export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+
+  var lite = React.useMemo(() => newLite(type, id), [type, id]);
+
+  useAPI(() => API.fillToStrings(lite), [lite]);
+
+  return lite;
 }
 
 export module API {
@@ -773,20 +760,26 @@ export module API {
   }
 }
 
+
 export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isCreable?: EntityWhen;
   isFindable?: boolean;
-  isViewable?: boolean;
-  isNavigable?: EntityWhen;
+  isViewable?: EntityWhen;
   isReadOnly?: boolean;
   avoidPopup?: boolean;
+  supportsAdditionalTabs?: boolean;
+
   modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
+  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
-  onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+  onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
+
   namedViews?: NamedViewSettings<T>[];
 }
 
@@ -810,28 +803,28 @@ export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx:
 export class EntitySettings<T extends ModifiableEntity> {
   typeName: string;
 
-  avoidPopup!: boolean;
-  modalSize?: BsSize;
-
   getViewPromise?: (entity: T) => ViewPromise<T>;
 
   viewOverrides?: Array<ViewOverride<T>>;
 
   isCreable?: EntityWhen;
   isFindable?: boolean;
-  isViewable?: boolean;
-  isNavigable?: EntityWhen;
+  isViewable?: EntityWhen;
   isReadOnly?: boolean;
+  avoidPopup!: boolean;
+  supportsAdditionalTabs?: boolean;
+
+  modalSize?: BsSize;
+
   autocomplete?: AutocompleteConfig<any>;
   autocompleteDelay?: number;
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+
   findOptions?: FindOptions;
-  onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
-
   overrideView(override: (replacer: ViewReplacer<T>) => void, viewName?: string) {
     if (this.viewOverrides == undefined)
       this.viewOverrides = [];
@@ -988,120 +981,10 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   return result;
 }
 
-export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
+export function checkFlag(entityWhen: EntityWhen, isSearch: boolean | undefined) {
   return entityWhen == "Always" ||
     entityWhen == (isSearch ? "IsSearch" : "IsLine");
 }
 
 export type EntityWhen = "Always" | "IsSearch" | "IsLine" | "Never";
 
-declare global {
-  interface String {
-    formatHtml(...parameters: any[]): React.ReactElement<any>;
-  }
-
-  interface Array<T> {
-    joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement<any>;
-  }
-}
-
-String.prototype.formatHtml = function (this: string) {
-  const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-  const args = arguments;
-
-  const parts = this.split(regex);
-
-  const result: (string | React.ReactElement<any>)[] = [];
-  for (let i = 0; i < parts.length - 4; i += 4) {
-    result.push(parts[i]);
-    result.push(args[parseInt(parts[i + 1])]);
-  }
-  result.push(parts[parts.length - 1]);
-
-  return React.createElement("span", undefined, ...result);
-};
-
-Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
-  const args = arguments;
-
-  const result: (string | React.ReactElement<any>)[] = [];
-  for (let i = 0; i < this.length - 2; i++) {
-    result.push(this[i]);
-    result.push(", ");
-  }
-
-  if (this.length >= 2) {
-    result.push(this[this.length - 2]);
-    result.push(lastSeparator)
-  }
-
-  if (this.length >= 1) {
-    result.push(this[this.length - 1]);
-  }
-
-  return React.createElement("span", undefined, ...result);
-}
-
-export function toAbsoluteUrl(appRelativeUrl: string): string {
-  if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseUrl + appRelativeUrl.after("~/");
-
-  var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
-    return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
-
-  if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
-    return appRelativeUrl;
-
-  return appRelativeUrl;
-}
-
-export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
-
-  if (value == null)
-    return Promise.resolve(null);
-
-  if (type.isLite) {
-
-    if (isLite(value))
-      return Promise.resolve(value);
-
-    if (isEntity(value))
-      return Promise.resolve(toLite(value));
-
-    return undefined;
-  }
-
-  const ti = getTypeInfo(type.name);
-
-  if (ti?.kind == "Entity") {
-
-    if (isLite(value))
-      return API.fetchAndForget(value);
-
-    if (isEntity(value))
-      return Promise.resolve(value);
-
-    return undefined;
-  }
-
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
-    if (typeof value === "string")
-      return Promise.resolve(value);
-
-    return undefined;
-  }
-
-  if (type.name == "boolean") {
-    if (typeof value === "boolean")
-      return Promise.resolve(value);
-  }
-
-  if (type.name == "number") {
-    if (typeof value === "number")
-      return Promise.resolve(value);
-  }
-
-  return undefined;
-}

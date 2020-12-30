@@ -3,13 +3,15 @@ import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, NormalControlMessage } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { useController } from './LineBase'
+import { getTypeInfo, getTypeName } from '../Reflection'
+
 
 export interface EntityStripProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -24,11 +26,17 @@ export interface EntityStripProps extends EntityListBaseProps {
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
-    if (p.autocomplete === undefined) {
-      p.autocomplete = Navigator.getAutoComplete(p.type!, p.findOptions, p.ctx, p.create!, p.showType);
+
+    if (p.type) {
+      if (p.showType == undefined)
+        p.showType = p.type.name.contains(",");
+
+      if (p.autocomplete === undefined) {
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.ctx, p.create!, p.showType);
+      }
+      if (p.iconStart == undefined && p.vertical)
+        p.iconStart = true;
     }
-    if (p.iconStart == undefined && p.vertical)
-      p.iconStart = true;
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -56,7 +64,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
       window.open(route);
     }
     else {
-      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
 
       const promise = this.props.onView ?
         this.props.onView(entity, pr) :
@@ -85,9 +93,12 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
   }
 }
 
-export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
+export const EntityStrip = React.forwardRef(function EntityStrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
+
+  if (c.isHidden)
+    return null;
 
   const readOnly = p.ctx.readOnly;
   return (
@@ -110,6 +121,7 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
                 onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
                 onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
                 onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+                showType={p.showType!}
               />))
           }
           {renderLastElement()}
@@ -163,7 +175,7 @@ export const EntityStrip = React.memo(React.forwardRef(function EntityTrip(props
       />
     );
   }
-}), (prev, next) => EntityBaseController.propEquals(prev, next));
+});
 
 export interface EntityStripElementProps {
   iconStart?: boolean;
@@ -175,6 +187,7 @@ export interface EntityStripElementProps {
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
+  showType: boolean;
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
@@ -212,12 +225,20 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   }, [p.ctx.value]);
 
-
-
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
       currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
-        getToString(p.ctx.value);
+        getToStr();
+
+  function getToStr() {
+    const toStr = getToString(p.ctx.value);
+    return !p.showType ? toStr :
+      <span style={{ wordBreak: "break-all" }} title={toStr}>
+        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
+        &nbsp;{toStr}
+      </span>;
+  }
+
 
   var drag = p.drag;
   const htmlAttributes = p.onItemHtmlAttributes && p.onItemHtmlAttributes(p.ctx.value);
@@ -227,6 +248,8 @@ export function EntityStripElement(p: EntityStripElementProps) {
   //Till https://github.com/facebook/react/issues/8529 gets fixed
   var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
     isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
+
+  var hasIcon = p.onRemove || p.drag;
 
   return (
     <li className="sf-strip-element"
@@ -238,7 +261,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
         onDrop={drag?.onDrop}
 
       >
-        {p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
         {
           p.onView ?
             <a href={url} className="sf-entitStrip-link" onClick={p.onView} {...htmlAttributes}>
@@ -249,7 +272,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
               {toStr}
             </span>
         }
-        {!p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
       </div>
     </li>
   );

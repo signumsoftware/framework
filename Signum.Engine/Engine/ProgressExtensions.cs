@@ -77,28 +77,15 @@ namespace Signum.Engine
 
                 Table table = Schema.Current.Table(disableIdentityFor);
 
-                if (!table.IdentityBehaviour)
-                    throw new InvalidOperationException("Identity is false already");
-
-                table.IdentityBehaviour = false;
-                try
+                collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action: item =>
                 {
-                    collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action: item =>
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            using (table.PrimaryKey.Default != null
-                                ? null
-                                : Administrator.DisableIdentity(table.Name))
-                                action!(item);
-                            tr.Commit();
-                        }
-                    });
-                }
-                finally
-                {
-                    table.IdentityBehaviour = true;
-                }
+                        using (table.PrimaryKey.Default != null ? null : Administrator.DisableIdentity(table))
+                            action!(item);
+                        tr.Commit();
+                    }
+                });
             }
         }
 
@@ -292,6 +279,5 @@ namespace Signum.Engine
 
 
         public delegate void LogWriter(ConsoleColor color, string text, params object[] parameters);
-
     }
 }

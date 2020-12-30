@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { classes } from '../Globals'
+import { classes, softCast } from '../Globals'
 import { Dropdown } from 'react-bootstrap';
 import DropdownMenu from 'react-bootstrap/DropdownMenu';
 import { useStateWithPromise } from '../Hooks';
@@ -12,7 +12,7 @@ export interface TypeaheadProps {
   getItems: (query: string) => Promise<unknown[]>;
   getItemsDelay?: number;
   minLength?: number;
-  renderList?: (typeahead: TypeaheadHandle) => React.ReactNode;
+  renderList?: (typeahead: TypeaheadController) => React.ReactNode;
   renderItem?: (item: unknown, query: string) => React.ReactNode;
   onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
   scrollHeight?: number;
@@ -22,131 +22,126 @@ export interface TypeaheadProps {
   renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
 }
 
-export interface TypeaheadState {
-  shown?: boolean;
-  items?: any[];
-  query?: string;
-  selectedIndex?: number;
-}
+export class TypeaheadController {
 
-export interface TypeaheadHandle {
-  items: any[] | undefined;
-  selectedIndex: number | undefined;
-  blur(): void;
-  writeInInput(query: string): void;
-}
+  query!: string | undefined;
+  setQuery!: (v: string | undefined) => void;
 
-export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadHandle>) {
-  const [query, setQuery] = React.useState<string | undefined>(undefined);
-  const [shown, setShown] = React.useState<boolean>(false);
-  const [items, setItem] = React.useState<any[] | undefined>(undefined);
-  const [selectedIndex, setSelectedIndex] = useStateWithPromise<number | undefined>(undefined);
+  shown!: boolean;
+  setShown!: (v: boolean) => void;
 
-  const rtl = React.useMemo(() => document.body.classList.contains("rtl"), []);
+  items!: any[] | undefined;
+  setItem!: (v: any[] | undefined) => void;
 
-  const handle = React.useRef<number | undefined>(undefined);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  selectedIndex!: number | undefined;
+  setSelectedIndex!: (v: number | undefined) => Promise<number | undefined>;
 
-  const focused = React.useRef<boolean>(false);
-  const container = React.useRef<HTMLDivElement>(null);
+  timeoutHandle: number | undefined;
+  rtl!: boolean;
+  input: HTMLInputElement | undefined | null;
+  focused!: boolean;
+  props!: TypeaheadProps;
 
-  React.useImperativeHandle(ref, () => {
-    return ({
-      items,
-      selectedIndex,
-      blur: blur,
-      writeInInput: writeInInput
-    } as TypeaheadHandle);
-  }, [items, selectedIndex]);
+  constructor() {
+    this.focused = false;
+    this.rtl = document.body.classList.contains("rtl");
+  }
 
+  init(props: TypeaheadProps) {
+    [this.query, this.setQuery] = React.useState<string | undefined>(undefined);
+    [this.shown, this.setShown] = React.useState<boolean>(false);
+    [this.items, this.setItem] = React.useState<any[] | undefined>(undefined);
+    [this.selectedIndex, this.setSelectedIndex] = useStateWithPromise<number | undefined>(undefined);
 
-  React.useEffect(() => {
-    return () => {
-      if (handle.current != undefined)
-        clearTimeout(handle.current);
-    };
-  }, []);
+    React.useEffect(() => {
+      return () => {
+        if (this.timeoutHandle != undefined)
+          clearTimeout(this.timeoutHandle);
+      };
+    }, []);
 
+    this.props = props;
+  }
 
-  function lookup() {
-    if (!p.getItemsDelay) {
-      populate();
+  setInput = (input: HTMLInputElement | null | undefined) => {
+    this.input = input
+  }
+
+  lookup = () => {
+    if (!this.props.getItemsDelay) {
+      this.populate();
     }
     else {
-      if (handle.current != undefined)
-        clearTimeout(handle.current);
+      if (this.timeoutHandle != undefined)
+        clearTimeout(this.timeoutHandle);
 
-      handle.current = setTimeout(() => populate(), p.getItemsDelay);
+      this.timeoutHandle = setTimeout(() => this.populate(), this.props.getItemsDelay);
     }
   }
 
+  populate = () => {
 
-
-  function populate() {
-
-    if (p.minLength == null || inputRef.current!.value.length < p.minLength) {
-      setShown(false);
-      setItem(undefined);
-      setSelectedIndex(undefined);
+    if (this.props.minLength == null || this.input!.value.length < this.props.minLength) {
+      this.setShown(false);
+      this.setItem(undefined);
+      this.setSelectedIndex(undefined);
       return;
     }
 
     //this.setState({ shown: true, items: undefined });
 
-    const query = TypeaheadOptions.normalizeString(inputRef.current!.value);
-    p.getItems(query).then(items => {
-      setItem(items);
-      setShown(true);
-      setQuery(query);
-      setSelectedIndex(0).done();
+    const query = TypeaheadOptions.normalizeString(this.input!.value);
+    this.props.getItems(query).then(items => {
+      this.setItem(items);
+      this.setShown(true);
+      this.setQuery(query);
+      this.setSelectedIndex(0).done();
     }).done();
   }
 
-
-
-  function select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
-    if (items!.length == 0)
+  select = (e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
+    if (this.items!.length == 0)
       return false;
 
-    const val = p.onSelect!(items![selectedIndex ?? 0], e);
+    const val = this.props.onSelect!(this.items![this.selectedIndex ?? 0], e);
 
-    inputRef.current!.value = val ?? "";
-    if (p.onChange)
-      p.onChange(inputRef.current!.value);
+    this.input!.value = val ?? "";
+    if (this.props.onChange)
+      this.props.onChange(this.input!.value);
 
-    setShown(false);
+    this.setShown(false);
     return val != null;
   }
 
   //public
-  function writeInInput(query: string) {
-    inputRef.current!.value = query;
-    inputRef.current!.focus();
-    lookup();
+  writeInInput = (query: string) => {
+    this.input!.value = query;
+    this.input!.focus();
+    this.lookup();
   }
 
-  function handleFocus() {
-    if (!focused.current) {
-      focused.current = true;
-      if (p.minLength == 0 && !inputRef.current!.value)
-        lookup();
+  handleFocus = () => {
+    if (!this.focused) {
+      this.focused = true;
+      if (this.props.minLength == 0 && !this.input!.value)
+        this.lookup();
     }
   }
 
-  function handleBlur() {
-    focused.current = false;
+  handleBlur = () => {
+    this.focused = false;
 
-    if (p.onBlur)
-      p.onBlur();
+    if (this.props.onBlur)
+      this.props.onBlur();
   }
 
 
-  function blur() {
-    inputRef.current!.blur();
+  blur = () => {
+    this.input!.blur();
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (!shown)
+  handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!this.shown)
       return;
 
     switch (e.keyCode) {
@@ -159,15 +154,15 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
       case 38: // up arrow
         {
           e.preventDefault();
-          const newIndex = ((selectedIndex ?? 0) - 1 + items!.length) % items!.length;
-          setSelectedIndex(newIndex).done();
+          const newIndex = ((this.selectedIndex ?? 0) - 1 + this.items!.length) % this.items!.length;
+          this.setSelectedIndex(newIndex).done();
           break;
         }
       case 40: // down arrow
         {
           e.preventDefault();
-          const newIndex = ((selectedIndex ?? 0) + 1) % items!.length;
-          setSelectedIndex(newIndex).done();
+          const newIndex = ((this.selectedIndex ?? 0) + 1) % this.items!.length;
+          this.setSelectedIndex(newIndex).done();
           break;
         }
     }
@@ -175,7 +170,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
     e.stopPropagation();
   }
 
-  function handleKeyUp(e: React.KeyboardEvent<any>) {
+  handleKeyUp = (e: React.KeyboardEvent<any>) => {
     switch (e.keyCode) {
       case 40: // down arrow
       case 38: // up arrow
@@ -186,85 +181,93 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
 
       case 9: // tab
       case 13: // enter
-        if (selectedIndex == undefined || !shown)
+        if (this.selectedIndex == undefined || !this.shown)
           return;
 
-        if (query != inputRef.current!.value)
+        if (this.query != this.input!.value)
           return;
 
-        select(e);
+        this.select(e);
         break;
 
       case 27: // escape
-        if (!shown)
+        if (!this.shown)
           return;
-        setShown(false);
+        this.setShown(false);
         break;
 
       default:
-        lookup();
+        this.lookup();
     }
   }
 
 
-  function handleMenuMouseUp(e: React.MouseEvent<any>, index: number) {
+  handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
     e.preventDefault();
     e.persist();
-    setSelectedIndex(index).then(() => {
-      if (select(e))
-        inputRef.current!.focus()
+    this.setSelectedIndex(index).then(() => {
+      if (this.select(e))
+        this.input!.focus()
     }).done();
   }
 
-  function handleElementMouseEnter(event: React.MouseEvent<any>, index: number) {
-    setSelectedIndex(index);
+  handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
+    this.setSelectedIndex(index);
   }
 
-  function handleElementMouseLeave(event: React.MouseEvent<any>, index: number) {
-    setSelectedIndex(undefined);
-    if (!focused.current && shown)
-      setShown(false);
+  handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
+    this.setSelectedIndex(undefined);
+    if (!this.focused && this.shown)
+      this.setShown(false);
   }
 
-  function handleOnChange() {
-    if (p.onChange)
-      p.onChange(inputRef.current!.value);
+  handleOnChange = () => {
+    if (this.props.onChange)
+      this.props.onChange(this.input!.value);
   }
+}
+
+
+export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadController>) {
+
+  const controller = React.useMemo(() => new TypeaheadController(), []);
+  controller.init(p);
+  React.useImperativeHandle(ref, () => controller, []);
 
   const input =
-    <input ref={inputRef} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+    <input ref={controller.setInput} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
       value={p.value}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onKeyUp={handleKeyUp}
-      onKeyDown={handleKeyDown}
-      onChange={handleOnChange}
+      onFocus={controller.handleFocus}
+      onBlur={controller.handleBlur}
+      onKeyUp={controller.handleKeyUp}
+      onKeyDown={controller.handleKeyDown}
+      onChange={controller.handleOnChange}
     />;
-
 
   return (
     <>
       {p.renderInput ? p.renderInput(input) : input}
-      <Dropdown show={shown} onToggle={(isOpen: boolean) => setShown(isOpen)}>
+      <Dropdown show={controller.shown} onToggle={(isOpen: boolean) => controller.setShown(isOpen)}>
         <Dropdown.Toggle id="dropdown" as={CustomToggle}></Dropdown.Toggle>
-        {(p.renderList ? p.renderList({ blur, items, selectedIndex, writeInInput } as TypeaheadHandle) : renderDefaultList())}
+        {(p.renderList ? p.renderList(controller) : renderDefaultList())}
       </Dropdown>
     </>
   );
 
   function renderDefaultList() {
+    var items = controller.items;
     return (
-      <Dropdown.Menu alignRight={rtl} className="typeahead">
+      <Dropdown.Menu alignRight={controller.rtl} className="typeahead">
         {
           !items ? null :
             items.length == 0 ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :
               items!.map((item, i) => <button key={i}
-                className={classes("dropdown-item", i == selectedIndex ? "active" : undefined)}
-                onMouseEnter={e => handleElementMouseEnter(e, i)}
-                onMouseLeave={e => handleElementMouseLeave(e, i)}
-                onMouseUp={e => handleMenuMouseUp(e, i)}
+                className={classes("dropdown-item", i == controller.selectedIndex ? "active" : undefined)}
+                onMouseEnter={e => controller.handleElementMouseEnter(e, i)}
+                onMouseLeave={e => controller.handleElementMouseLeave(e, i)}
+                onMouseUp={e => controller.handleMenuMouseUp(e, i)}
                 {...p.itemAttrs && p.itemAttrs(item)}>
-                {p.renderItem!(item, query!)}
+                {p.renderItem!(item, controller.query!)}
               </button>)
         }
       </Dropdown.Menu>
@@ -272,29 +275,18 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
   }
 });
 
-interface CustomToggleProps {
-  onClick?: (e: React.MouseEvent<any>) => void;
-}
 
-class CustomToggle extends React.Component<CustomToggleProps> {
-  constructor(props: CustomToggleProps, context: any) {
-    super(props, context);
-  }
+const CustomToggle = React.forwardRef(function CustomToggle(p: { children?: React.ReactNode, onClick?: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
 
-  handleClick = (e: React.MouseEvent<any>) => {
-    e.preventDefault();
-    this.props.onClick!(e);
-  }
-
-  render() {
-    return (
-      <a href="" onClick={this.handleClick}>
-        {this.props.children}
-      </a>
-    );
-  }
-}
-
+  return (
+    <a
+      ref={ref}
+      href=""
+      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
+      {p.children}
+    </a>
+  );
+});
 
 Typeahead.defaultProps = {
   getItems: undefined as any,

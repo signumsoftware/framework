@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, getTypeInfo, ReadonlyBinding } from '../Reflection'
+import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
-import { ViewPromise } from "../Navigator";
+import { ViewPromise, useFetchAndRemember } from "../Navigator";
 import { ErrorBoundary } from '../Components';
-import { FunctionalAdapter } from '../Frames/FrameModal';
-import { useFetchAndRemember, useAPI, useForceUpdate } from '../Hooks'
+import { useAPI, useForceUpdate } from '../Hooks'
+import { FunctionalAdapter } from '../Modals'
 
 export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -16,18 +16,25 @@ export interface RenderEntityProps {
   extraProps?: any;
 }
 
+interface FuncBox {
+  func: ((ctx: TypeContext<any /*T*/>) => React.ReactElement<any>)
+}
+
 export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
 
-  var entityFromLite = useFetchAndRemember(isLite(e) ? e : null, p.onEntityLoaded);
+  var entityFromLite = useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = isLite(e) ? e.entity : e;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
-  var componentBox = useAPI(() => {
+  var componentBox = useAPI<FuncBox | "useGetComponent" | null>(() => {
+    if (p.ctx.propertyRoute == null)
+      return Promise.resolve(null);
+
     if (p.getComponent)
-      return Promise.resolve({ func: p.getComponent });
+      return Promise.resolve("useGetComponent");
 
     if (entity == null)
       return Promise.resolve(null);
@@ -37,6 +44,8 @@ export function RenderEntity(p: RenderEntityProps) {
     return viewPromise.promise.then(p => ({ func: p }));
   }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
 
+  if (p.ctx.propertyRoute == null)
+    return null;
 
   if (entity == undefined)
     return null;
@@ -44,14 +53,19 @@ export function RenderEntity(p: RenderEntityProps) {
   if (componentBox == null)
     return null;
 
-  const ti = getTypeInfo(entity.Type);
+  if (componentBox == "useGetComponent" && p.getComponent == null)
+    return null;
+
+  const ti = tryGetTypeInfo(entity.Type);
 
   const ctx = p.ctx;
 
   const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
 
+  const prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
   const frame: EntityFrame = {
-    frameComponent: { forceUpdate },
+    tabs: undefined,
+    frameComponent: { forceUpdate, type: RenderEntity },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),
@@ -59,7 +73,8 @@ export function RenderEntity(p: RenderEntityProps) {
     onReload: pack => { throw new Error("Not implemented Exception"); },
     setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
     refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
-    allowChangeEntity: false,
+    allowExchangeEntity: false,
+    prefix: prefix,
   };
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -69,11 +84,10 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
-  var prefix = ctx.propertyRoute.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
 
-  var element = componentBox.func(newCtx);
+  var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
 
   if (p.extraProps)
     element = React.cloneElement(element, p.extraProps);

@@ -4,6 +4,7 @@
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
@@ -19,7 +20,7 @@ export interface EnumEntity<T> extends Entity {
 export interface MixinEntity extends ModifiableEntity {
 }
 
-export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M {
+export function getMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M {
 
   var mixin = tryGetMixin(entity, type);
   if (!mixin)
@@ -27,7 +28,7 @@ export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): 
   return mixin;
 }
 
-export function tryGetMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M | undefined {
+export function tryGetMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M | undefined {
   return entity.mixins && entity.mixins[type.typeName] as M;
 }
 
@@ -83,7 +84,7 @@ function getOrCreateToStringFunction(type: string) {
   if (f || f === null)
     return f;
 
-  const ti = Reflection.getTypeInfo(type);
+  const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
 
@@ -205,11 +206,14 @@ export function isLite(obj: any): obj is Lite<Entity> {
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-  return obj != null && (obj as ModifiableEntity).Type != undefined;
+return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-  return obj != null && (obj as Entity).Type != undefined;
+  if(!isModifiableEntity(obj))
+    return false;
+  const ti = Reflection.tryGetTypeInfo(obj.Type);
+  return ti != null && ti.entityKind != null;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {

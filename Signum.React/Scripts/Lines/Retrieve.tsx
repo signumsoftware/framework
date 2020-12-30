@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Entity, Lite } from "../Signum.Entities";
-import { useFetchAndRemember, useFetchInState } from "../Hooks";
+import { useFetchAndRemember, useFetchInState } from "../Navigator";
 
 export function FetchInState<T extends Entity>(p: { lite: Lite<T> | null, children: (val: T | null | undefined) => React.ReactElement | null | undefined}) {
 
@@ -25,4 +25,3 @@ export function FetchAndRemember<T extends Entity>(p: { lite: Lite<T> | null, ch
 
   return res;
 }
-

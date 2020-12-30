@@ -5,10 +5,11 @@ input[type=radio] {
     height: 16px;
 }
 
-label input[type=checkbox],
-label input[type=radio] {
+label > input[type=checkbox],
+label > input[type=radio] {
     margin: 0;
     vertical-align: middle;
+    margin-bottom: 3px;
 }
 
 input[type=checkbox].form-control {
@@ -20,8 +21,9 @@ input[type=checkbox].form-control {
 }
 
 .form-control.readonly, .form-control:disabled, .form-control[readonly] {
-    background-color: #ddd;
     overflow: hidden;
+    background-color: #e9ecef;
+    opacity: 1;
 }
 
     .form-control.readonly.readonly-textarea {
@@ -29,14 +31,8 @@ input[type=checkbox].form-control {
         white-space: pre-wrap;
     }
 
-
 .numeric {
     text-align: right;
-}
-
-label > input[type=checkbox] {
-    margin: 0px;
-    vertical-align: middle;
 }
 
 .date-time .input-group.date,
@@ -63,7 +59,7 @@ label > input[type=checkbox] {
     overflow: hidden;
 }
 
-.sf-entity-line .input-group .form-control{
+.sf-entity-line .input-group .form-control {
     overflow: hidden;
 }
 
@@ -203,11 +199,6 @@ ul.sf-strip-vertical > li {
     margin-bottom: 7px; /*sf-strip-horizontal*/
 }
 
-    .sf-strip.sf-strip-vertical {
-        margin-top: 7px; /*sf-strip-vertical*/
-    }
-
-
 .sf-strip-element .sf-line-button {
     margin-left: 2px;
 }
@@ -231,25 +222,32 @@ ul.nav-tabs {
 
 
 /*buton colors*/
-.sf-create:hover {
+.sf-create:not(.disabled):hover {
     color: #22BA00;
 }
 
-.sf-remove:hover {
+.sf-remove:not(.disabled):hover {
     color: #CF0000;
 }
 
-.sf-find:hover {
+.sf-find:not(.disabled):hover {
     color: #FFCC00;
 }
 
-.sf-view:hover {
+.sf-view:not(.disabled):hover {
     color: #007CE8;
 }
 
-.sf-move:hover {
+.sf-extra:not(.disabled):hover {
+    color: #9900E0;
+}
+
+.sf-move:not(.disabled):hover {
     color: #9900E0;
     cursor: move;
+}
+.sf-move:not(.disabled).sf-move-step:hover {
+    cursor: pointer;
 }
 
 body.rtl .form-group.row > label {
@@ -332,21 +330,16 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-xs .rw-input {
-    padding: 0px 3px;
-    height: 22px;
-    font-size: 0.875rem;
+.rw-widget-xs .rw-widget-input {
+    min-height: 24px;
 }
 
-.rw-widget-xs .rw-widget > .rw-widget-picker {
-    height: 24px;
-    line-height: 10px;
-    margin-top: -2px;
-    border: #ccc 0.5px solid;
+.rw-widget-xs .rw-dropdown-list-input {
+    padding: 0 0.4em;
 }
 
-.rw-widget-xs .rw-select {
-    vertical-align: top;
+.rw-widget-xs .rw-widget-picker {
+    min-height: 24px;
 }
 
 .form-group.form-group-xs {
@@ -367,13 +360,17 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-sm .rw-input {
-    padding: 3px 6px;
-    height: 28px;
+.rw-widget-input {
+    width: inherit;
+}
+
+.rw-widget-sm .rw-widget-input {
+    /*    padding: 3px 6px;*/
+    min-height: 28px;
 }
 
 .rw-widget-sm .rw-widget-picker {
-    height: 31px;
+    min-height: 28px;
 }
 
 .input-group > .form-control-plaintext {
@@ -452,7 +449,7 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
 
-.sf-no-padding{
+.sf-no-padding {
     padding: 1px !important;
 }
 

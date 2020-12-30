@@ -52,7 +52,7 @@ namespace Signum.Entities
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = GetPropertyInfo(automaticPropertyName!);
+            PropertyInfo? pi = GetPropertyInfo(automaticPropertyName!);
 
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
@@ -67,13 +67,13 @@ namespace Signum.Entities
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
                     foreach (var item in (IEnumerable<IModifiableEntity>)colb!)
-                        ((ModifiableEntity)item).SetParentEntity(null);
+                        ((ModifiableEntity)item).ClearParentEntity(this);
             }
 
             if (field is ModifiableEntity modb)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    modb.SetParentEntity(null);
+                    modb.ClearParentEntity(this);
             }
 
             SetSelfModified();
@@ -120,9 +120,9 @@ namespace Signum.Entities
             public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
         }
 
-        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
+        static readonly ConcurrentDictionary<PropertyKey, PropertyInfo?> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo?>();
 
-        protected PropertyInfo GetPropertyInfo(string propertyName)
+        protected PropertyInfo? GetPropertyInfo(string propertyName)
         {
             return PropertyCache.GetOrAdd(new PropertyKey(this.GetType(), propertyName), key =>
                 key.Type.GetProperty(propertyName, flags) ??
@@ -142,7 +142,7 @@ namespace Signum.Entities
         
         #region Collection Events
 
-        protected internal override void PostRetrieving()
+        protected internal override void PostRetrieving(PostRetrievingContext ctx)
         {
             RebindEvents();
         }
@@ -178,9 +178,9 @@ namespace Signum.Entities
         //    RebindEvents();
         //}
 
-        protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        protected virtual void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         {
-            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
+            string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender!);
             if (propertyName != null)
                 NotifyPrivate(propertyName);
 
@@ -217,13 +217,13 @@ namespace Signum.Entities
         [NonSerialized, Ignore]
         ModifiableEntity? parentEntity;
 
-        public T? TryGetParentEntity<T>()
+        public virtual T? TryGetParentEntity<T>()
             where T: class, IModifiableEntity 
         {
             return ((IModifiableEntity?)parentEntity) as T;
         }
 
-        public T GetParentEntity<T>()
+        public virtual T GetParentEntity<T>()
             where T : IModifiableEntity
         {
             if (parentEntity == null)
@@ -232,12 +232,18 @@ namespace Signum.Entities
             return (T)(IModifiableEntity)parentEntity;
         }
 
-        private void SetParentEntity(ModifiableEntity? p)
+        protected virtual void SetParentEntity(ModifiableEntity p)
         {
             if (p != null && this.parentEntity != null && this.parentEntity != p)
-                throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
+                throw new InvalidOperationException($"'{nameof(parentEntity)}' of '{this}'({this.GetType().TypeName()}) is still connected to '{parentEntity}'({parentEntity.GetType().TypeName()}), then can not be set to '{p}'({p.GetType().TypeName()})");
 
             this.parentEntity = p;
+        }
+
+        protected virtual void ClearParentEntity(ModifiableEntity p)
+        {
+            if (p == this.parentEntity)
+                this.parentEntity = null;
         }
 
         internal string? OnParentChildPropertyValidation(PropertyInfo pi)
@@ -258,6 +264,8 @@ namespace Signum.Entities
         {
             NotifyPrivate("Error");
         }
+
+     
 
         public void NotifyToString()
         {
@@ -352,6 +360,21 @@ namespace Signum.Entities
             return null;
         }
 
+        public bool IsPropertyReadonly(string propertyName)
+        {
+            IPropertyValidator? pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+
+            if (pp == null)
+                return false; //Hidden properties
+
+            return pp.IsPropertyReadonly(this);
+        }
+
+        protected internal virtual bool IsPropertyReadonly(PropertyInfo pi)
+        {
+            return false;
+        }
+
         protected static void Validate<T>(Expression<Func<T, object?>> property, Func<T, PropertyInfo, string?> validate) where T : ModifiableEntity
         {
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
@@ -381,6 +404,7 @@ namespace Signum.Entities
         #region ICloneable Members
         object ICloneable.Clone()
         {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             BinaryFormatter bf = new BinaryFormatter();
             using (MemoryStream stream = new MemoryStream())
             {
@@ -388,6 +412,7 @@ namespace Signum.Entities
                 stream.Seek(0, SeekOrigin.Begin);
                 return bf.Deserialize(stream);
             }
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
         }
 
         #endregion
@@ -470,6 +495,19 @@ namespace Signum.Entities
             {
                 if (current is M)
                     return (M)current;
+                current = current.Next;
+            }
+
+            return null;
+        }
+
+        public MixinEntity? TryMixin(string mixinName)
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current.GetType().Name == mixinName)
+                    return current;
                 current = current.Next;
             }
 
@@ -563,7 +601,7 @@ namespace Signum.Entities
             return $"{IntegrityCheck.Errors.Count} errors in {" ".Combine(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
                   + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
                       kvp.Key,
-                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity), 
+                      validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity) ?? "null", 
                       kvp.Value), 
                       "\r\n");
         }

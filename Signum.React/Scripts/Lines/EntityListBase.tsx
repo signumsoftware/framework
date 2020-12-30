@@ -38,9 +38,6 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     if (state.onFind)
       throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
-    if (state.ctx.value == undefined)
-      state.ctx.value = [];
-
     super.getDefaultProps(state);
   }
 
@@ -68,7 +65,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
@@ -77,7 +74,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
   }
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
-    const pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
+    const pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
@@ -94,7 +91,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
@@ -106,7 +103,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     event.preventDefault();
     event.stopPropagation();
-    var pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
+    var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
 
     const promise = this.props.onCreate ? this.props.onCreate(pr) : this.defaultCreate(pr);
 

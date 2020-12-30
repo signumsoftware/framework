@@ -5,9 +5,11 @@ export interface AjaxOptions {
   url: string;
   avoidNotifyPendingRequests?: boolean;
   avoidThrowError?: boolean;
+  avoidRetry?: boolean;
   avoidGraphExplorer?: boolean;
   avoidAuthToken?: boolean;
   avoidVersionCheck?: boolean;
+  avoidContextHeaders?: boolean;
 
   headers?: { [index: string]: string };
   mode?: string;
@@ -90,11 +92,23 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
   });
 }
 
+export const addContextHeaders: ((options: AjaxOptions) => void)[] = [];
 
-
-
+export function clearContextHeaders() {
+  addContextHeaders.clear();
+}
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
+
+  if (!options.avoidContextHeaders && addContextHeaders.length > 0) {
+    addContextHeaders.forEach(f => f(options));
+  }
+
+  if (!options.avoidRetry) {
+    const call = makeCall;
+    makeCall = () => RetryFilter.retryFilter(call);
+  }
+
   if (!options.avoidVersionCheck) {
     const call = makeCall;
     makeCall = () => VersionFilter.onVersionFilter(call);
@@ -124,12 +138,19 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 
 }
 
+export module RetryFilter {
+  export function retryFilter(makeCall: () => Promise<Response>): Promise<Response>{
+    return makeCall();
+  }
+}
+
 export module AuthTokenFilter {
   export let addAuthToken: (options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>;
 }
 
 export module VersionFilter {
   export let initialVersion: string | undefined;
+  export let initialBuildTime: string | undefined;
   export let latestVersion: string | undefined;
 
   export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
@@ -137,6 +158,7 @@ export module VersionFilter {
   export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
     function changeVersion(response: Response) {
       var ver = response.headers.get("X-App-Version");
+      var buildTime = response.headers.get("X-App-BuildTime");
 
       if (!ver)
         return;
@@ -144,6 +166,7 @@ export module VersionFilter {
       if (initialVersion == undefined) {
         initialVersion = ver;
         latestVersion = ver;
+        initialBuildTime = buildTime!;
       }
 
       if (latestVersion != ver) {
@@ -206,7 +229,7 @@ export function saveFile(response: Response, overrideFileName?: string) {
 
   var fileName = overrideFileName || getFileName(response);
 
-  response.blob().then(blob => {
+  return response.blob().then(blob => {
     saveFileBlob(blob, fileName);
   });
 }

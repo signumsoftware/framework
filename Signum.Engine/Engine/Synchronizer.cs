@@ -27,15 +27,15 @@ namespace Signum.Engine
 
                 if (!oldExists)
                 {
-                    createNew?.Invoke(key, newVal);
+                    createNew?.Invoke(key, newVal!);
                 }
                 else if (!newExists)
                 {
-                    removeOld?.Invoke(key, oldVal);
+                    removeOld?.Invoke(key, oldVal!);
                 }
                 else
                 {
-                    merge?.Invoke(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal!, oldVal!);
                 }
             }
         }
@@ -122,8 +122,15 @@ namespace Signum.Engine
             where N : class
             where K : notnull
         {
-            return newDictionary.OuterJoinDictionaryCC(oldDictionary, (key, newVal, oldVal) =>
+            HashSet<K> set = new HashSet<K>();
+            set.UnionWith(newDictionary.Keys);
+            set.UnionWith(oldDictionary.Keys);
+
+            return set.Select(key =>
             {
+                var newVal = newDictionary.TryGetC(key);
+                var oldVal = oldDictionary.TryGetC(key);
+
                 if (newVal == null)
                     return removeOld == null ? null : removeOld(key, oldVal!);
 
@@ -131,7 +138,7 @@ namespace Signum.Engine
                     return createNew == null ? null : createNew(key, newVal);
 
                 return mergeBoth == null ? null : mergeBoth(key, newVal, oldVal);
-            }).Values.Combine(spacing);
+            }).Combine(spacing);
         }
 
 
@@ -157,7 +164,7 @@ namespace Signum.Engine
             return SynchronizeScript(spacing, newDictionary, repOldDictionary, createNew, removeOld, mergeBoth);
         }
 
-        public static IDisposable? RenameTable(Table table, Replacements replacements)
+        public static IDisposable? UseOldTableName(Table table, Replacements replacements)
         {
             string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
             if (fullName == null)
@@ -165,7 +172,7 @@ namespace Signum.Engine
 
             ObjectName realName = table.Name;
 
-            table.Name = ObjectName.Parse(fullName);
+            table.Name = ObjectName.Parse(fullName, Schema.Current.Settings.IsPostgres);
 
             return new Disposable(() => table.Name = realName);
         }
@@ -328,7 +335,9 @@ namespace Signum.Engine
         }
 
         public static Func<AutoReplacementContext, Selection?>? AutoReplacement;
+        public static Action<string , string , string? >? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
+        //public static Dictionary<String, Replacements.Selection>? cases ;
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
             if (AutoReplacement != null)
@@ -344,12 +353,12 @@ namespace Signum.Engine
             }
 
             if (!interactive)
-                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console. Consider running the Load project.".FormatWith(replacementsKey));
+                throw new InvalidOperationException($"Unable to ask for renames for '{oldValue}' (in {replacementsKey}) without interactive Console. Please use your Terminal application");
 
             int startingIndex = 0;
             Console.WriteLine();
             SafeConsole.WriteLineColor(ConsoleColor.White, "   '{0}' has been renamed in {1}?".FormatWith(oldValue, replacementsKey));
-            retry:
+        retry:
             int maxElement = Console.LargestWindowHeight - 7;
 
             int i = 0;
@@ -377,23 +386,42 @@ namespace Signum.Engine
 
             while (true)
             {
-                string answer = Console.ReadLine();
+                //var key = replacementsKey + "." + oldValue;
+                //string? answer = cases!.ContainsKey(key) ? cases[key].NewValue:  Console.ReadLine();
+
+                string answer =  Console.ReadLine()!;
+
+                if (answer == null)
+                    answer = "n";
 
                 answer = answer.ToLower();
 
+
+                Selection? response = null;
                 if (answer == "+" && remaining > 0)
                 {
                     startingIndex += maxElement;
                     goto retry;
                 }
                 if (answer == "n")
-                    return new Selection(oldValue, null);
+                    response= new Selection(oldValue, null);
 
                 if (answer == "")
-                    return new Selection(oldValue, newValues[0]);
+                    response= new Selection(oldValue, newValues[0]);
 
                 if (int.TryParse(answer, out int option))
-                    return new Selection(oldValue, newValues[option]);
+                    response= new Selection(oldValue, newValues[option]);
+
+
+                if (response != null)
+                {
+
+                    if (ResponseRecorder != null)
+                        ResponseRecorder.Invoke(replacementsKey, response.Value.OldValue, response.Value.NewValue);
+
+                    return response.Value;
+
+                }
 
                 Console.WriteLine("Error");
 
@@ -411,6 +439,7 @@ namespace Signum.Engine
             }
 
             public readonly string OldValue;
+
             public readonly string? NewValue;
         }
 

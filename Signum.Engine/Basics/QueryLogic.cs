@@ -57,6 +57,7 @@ namespace Signum.Engine.Basics
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
+                FilterCondition.ToLowerString = () => Schema.Current.Settings.IsPostgres;
 
                 // QueryManagers = queryManagers;
                 sb.Schema.Initializing += () =>
@@ -97,6 +98,20 @@ namespace Signum.Engine.Basics
         public static object ToQueryName(this QueryEntity query)
         {
             return QueryNames.GetOrThrow(query.Key, "QueryName with key {0} not found");
+        }
+
+        public static object? ToQueryNameCatch(this QueryEntity query)
+        {
+            try
+            {
+                return query.ToQueryName();
+            }
+            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
+
+                return null;
+            }
         }
 
         public static object ToQueryName(string queryKey)

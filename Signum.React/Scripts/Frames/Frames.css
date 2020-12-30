@@ -6,40 +6,43 @@
 
 @media (min-width: 768px) {
     .modal-medium,
-    .modal-lg {
+    .modal-lg,
+    .modal-xl {
         min-width: 730px;
     }
 }
 
 @media (min-width: 992px) {
-    .modal-lg {
+    .modal-lg,
+    .modal-xl {
         min-width: 960px;
     }
 }
 
 @media (min-width: 1200px) {
-    .modal-lg {
+    .modal-lg,
+    .modal-xl {
         min-width: 1160px;
     }
 }
 
-/*@media (min-width: 1820px) {
-    .modal-lg {
+@media (min-width: 1820px) {
+    .modal-xl {
         min-width: 1780px;
     }
 }
 
 @media (min-width: 2460px) {
-    .modal-lg {
+    .modal-xl {
         min-width: 2400px;
     }
 }
 
 @media (min-width: 3740px) {
-    .modal-lg {
+    .modal-xl {
         min-width: 3680px;
     }
-}*/
+}
 
 .sf-button-bar
 {
@@ -101,6 +104,13 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     margin-bottom: 1rem;
 }
 
+.tab-content .tab-pane {
+    padding: 1em;
+    margin-top: -1em;
+    border: 1px solid #e5e5e5;
+    border-top: 0;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;
@@ -152,8 +162,11 @@ a.expand-window:hover {
     line-height: 1.2;
 }
 
-.sf-quicklinks{
+.sf-quicklinks {
     display: flex;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding: 4px;
 }
 
 .sf-guid-id {
@@ -178,6 +191,7 @@ a.expand-window:hover {
 
 .sf-page-container {
   display: flex;
+  flex-direction: column;
 }
 
 .sf-page-container > div{

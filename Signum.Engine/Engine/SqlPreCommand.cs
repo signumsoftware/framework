@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Maps;
+using Npgsql;
 
 namespace Signum.Engine
 {
@@ -83,27 +84,128 @@ namespace Signum.Engine
                 .Combine(Spacing.Simple)!;
         }
 
-        public static bool AvoidOpenOpenSqlFileRetry = true;
-
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
-            string file = command.OpenSqlFile();
-            if (!AvoidOpenOpenSqlFileRetry && SafeConsole.Ask("Open again?"))
-                Process.Start(file);
-        }
+            var fileName = "Sync {0:dd-MM-yyyy HH_mm_ss}.sql".FormatWith(DateTime.Now);
 
-        public static string OpenSqlFile(this SqlPreCommand command)
-        {
-            return OpenSqlFile(command, "Sync {0:dd-MM-yyyy hh_mm_ss}.sql".FormatWith(DateTime.Now));
-        }
-
-        public static string OpenSqlFile(this SqlPreCommand command, string fileName)
-        {
             Save(command, fileName);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
 
-            Thread.Sleep(1000);
+            Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
 
+            if(answer == "open")
+            {
+                Thread.Sleep(1000);
+                Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                    ExecuteRetry(fileName);
+            }
+            else if(answer == "run")
+            {
+                ExecuteRetry(fileName);   
+            }
+        }
+
+        static void ExecuteRetry(string fileName)
+        {
+            retry:
+            try
+            {
+                var script = File.ReadAllText(fileName);
+                using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+                {
+                    ExecuteScript("script", script);
+                    tr.Commit();
+                }
+            }
+            catch (ExecuteSqlScriptException)
+            {
+                Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+                if (SafeConsole.Ask("retry?"))
+                    goto retry;
+
+            }
+        }
+
+        public static int Timeout = 20 * 60;
+
+        public static void ExecuteScript(string title, string script)
+        {
+            using (Connector.CommandTimeoutScope(Timeout))
+            {
+                var regex = new Regex(@" *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase);
+
+                var parts = regex.Split(script);
+
+                var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
+
+                int pos = 0;
+                for (pos = 0; pos < realParts.Length; pos++)
+                {
+                    var currentPart = realParts[pos];
+
+                    try
+                    {
+
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length), 
+                            () => Executor.ExecuteNonQuery(currentPart));
+
+                    }
+                    catch (Exception ex)
+                    {
+                        var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                        var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+                        if (sqlE == null && pgE == null)
+                            throw;
+
+                        Console.WriteLine();
+                        Console.WriteLine();
+
+                        var list = currentPart.Lines();
+
+                        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
+
+                        var min = Math.Max(0, lineNumer - 20);
+                        var max = Math.Min(list.Length - 1, lineNumer + 20);
+
+                        if (min > 0)
+                            Console.WriteLine("...");
+
+                        for (int i = min; i <= max; i++)
+                        {
+                            Console.Write(i + ": ");
+                            SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
+                        }
+
+                        if (max < list.Length - 1)
+                            Console.WriteLine("...");
+
+                        Console.WriteLine();
+
+                        ex.Follow(a => a.InnerException).ToList().ForEach(e =>
+                        {
+                            var sql = e as SqlException;
+                            var pg = e as PostgresException;
+
+                            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, (e == ex ? "" : "InnerException: ") + e.GetType().Name + " (Number {0}): ".FormatWith(pg?.SqlState ?? sql?.Number.ToString()));
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
+                            Console.WriteLine();
+                            Console.WriteLine();
+                        });
+
+                        Console.WriteLine();
+                        throw new ExecuteSqlScriptException(ex.Message, ex);
+                    }
+                }
+            }
+        }
+
+        private static void Open(string fileName)
+        {
             new Process
             {
                 StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), fileName))
@@ -111,9 +213,8 @@ namespace Signum.Engine
                     UseShellExecute = true
                 }
             }.Start();
-
-            return fileName;
         }
+
 
         public static void Save(this SqlPreCommand command, string fileName)
         {
@@ -121,6 +222,18 @@ namespace Signum.Engine
 
             File.WriteAllText(fileName, content, Encoding.Unicode);
         }
+    }
+
+
+    [Serializable]
+    public class ExecuteSqlScriptException : Exception
+    {
+        public ExecuteSqlScriptException() { }
+        public ExecuteSqlScriptException(string message) : base(message) { }
+        public ExecuteSqlScriptException(string message, Exception inner) : base(message, inner) { }
+        protected ExecuteSqlScriptException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
     public class SqlPreCommandSimple : SqlPreCommand
@@ -159,7 +272,7 @@ namespace Signum.Engine
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
 
-        internal static string Encode(object value)
+        internal static string Encode(object? value)
         {
             if (value == null || value == DBNull.Value)
                 return "NULL";
@@ -167,17 +280,32 @@ namespace Signum.Engine
             if (value is string s)
                 return "\'" + s.Replace("'", "''") + "'";
 
+            if (value is char c)
+                return "\'" + c.ToString().Replace("'", "''") + "'";
+
             if (value is Guid g)
                 return "\'" + g.ToString() + "'";
 
             if (value is DateTime dt)
-                return "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
+            {
+                return Schema.Current.Settings.IsPostgres ?
+                    "'{0}'".FormatWith(dt.ToString("yyyy-MM-dd hh:mm:ss.fff", CultureInfo.InvariantCulture)) :
+                    "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
+            }
 
             if (value is TimeSpan ts)
-                return "convert(time, '{0:g}')".FormatWith(ts.ToString("g", CultureInfo.InvariantCulture));
+            {
+                var str = ts.ToString("g", CultureInfo.InvariantCulture);
+                return Schema.Current.Settings.IsPostgres ? str : "convert(time, '{0}')".FormatWith(str);
+            }
 
             if (value is bool b)
+            {
+                if (Schema.Current.Settings.IsPostgres)
+                    return b.ToString();
+
                 return (b ? 1 : 0).ToString();
+            }
 
             if (Schema.Current.Settings.UdtSqlName.TryGetValue(value.GetType(), out var name))
                 return "CAST('{0}' AS {1})".FormatWith(value, name);
@@ -187,6 +315,9 @@ namespace Signum.Engine
 
             if (value is byte[] bytes)
                 return "0x" + BitConverter.ToString(bytes).Replace("-", "");
+
+            if (value is IFormattable f)
+                return f.ToString(null, CultureInfo.InvariantCulture);
 
             return value.ToString()!;
         }
@@ -206,8 +337,9 @@ namespace Signum.Engine
         public string sp_executesql()
         {
             var pars = this.Parameters.EmptyIfNull();
+            var sqlBuilder = Connector.Current.SqlBuilder;
 
-            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}{SqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+            var parameterVars = pars.ToString(p => $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
             var parameterValues = pars.ToString(p => Encode(p.Value), ",");
 
             return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";

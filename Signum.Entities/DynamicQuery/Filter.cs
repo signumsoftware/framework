@@ -108,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Expression GetExpression(BuildExpressionContext ctx)
         {
-            CollectionAnyAllToken anyAll = Token.Follow(a => a.Parent)
+            CollectionAnyAllToken? anyAll = Token.Follow(a => a.Parent)
                   .OfType<CollectionAnyAllToken>()
                   .TakeWhile(c => !ctx.Replacemens.ContainsKey(c))
                   .LastOrDefault();
@@ -120,12 +120,14 @@ namespace Signum.Entities.DynamicQuery
             Type elementType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacemens.Add(anyAll, p.BuildLiteNulifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
+            ctx.Replacemens.Add(anyAll, p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
             var body = GetExpression(ctx);
             ctx.Replacemens.Remove(anyAll);
 
             return anyAll.BuildAnyAll(collection, p, body);
         }
+
+        public static Func<bool> ToLowerString = () => false; 
 
         private Expression GetConditionExpressionBasic(BuildExpressionContext context)
         {
@@ -153,6 +155,12 @@ namespace Signum.Entities.DynamicQuery
                         hasNull = true;
                     }
 
+                    if (ToLowerString())
+                    {
+                        clone = clone.Cast<string>().Select(a => a.ToLower()).ToList();
+                        left = Expression.Call(left, miToLower);
+                    }
+
                     if (hasNull)
                     {
                         clone.Add("");
@@ -160,14 +168,11 @@ namespace Signum.Entities.DynamicQuery
                     }
                 }
 
-
                 Expression right = Expression.Constant(clone, typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()));
                 var contains =  Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
-
                 var result = !hasNull || Token.Type == typeof(string) ? (Expression)contains :
                         Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
-
 
                 if (Operation == FilterOperation.IsIn)
                     return result;
@@ -186,11 +191,21 @@ namespace Signum.Entities.DynamicQuery
                     left = Expression.Coalesce(left, Expression.Constant(""));
                 }
 
-                Expression right = Expression.Constant(val, Token.Type);
-
-                return QueryUtils.GetCompareExpression(Operation, left, right);
+                
+                if(Token.Type == typeof(string) && ToLowerString())
+                {
+                    Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
+                    return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right);
+                }
+                else
+                {
+                    Expression right = Expression.Constant(val, Token.Type);
+                    return QueryUtils.GetCompareExpression(Operation, left, right);
+                }
             }
         }
+
+        static MethodInfo miToLower = ReflectionTools.GetMethodInfo(() => "".ToLower());
 
         public override bool IsAggregate()
         {
@@ -245,7 +260,6 @@ namespace Signum.Entities.DynamicQuery
         FirstOrDefault,
         Single,
         SingleOrDefault,
-        SingleOrMany,
         Only
     }
 

@@ -255,6 +255,20 @@ namespace Signum.Entities
             get { return ValidationMessage.Telephone.NiceToString(); }
         }
     }
+    public class AlphanumericOnlyValidatorAttribute : RegexValidatorAttribute
+    {
+        public static Regex AlphanumericOnlyRegex = new Regex($@"[A-Za-z0-9]");
+
+        public AlphanumericOnlyValidatorAttribute()
+            : base(AlphanumericOnlyRegex)
+        {
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage._0IsNotAllowed.NiceToString(@"Special characters (-_#+%&...)"); }
+        }
+    }
 
     public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
     {
@@ -352,6 +366,17 @@ namespace Signum.Entities
         {
             get { return "URL"; }
         }
+    }
+
+    public class AzureStorageCollectionNameValidationAttribute : RegexValidatorAttribute
+    {
+        static Regex CollectionNameRegex = new Regex(@"^[a-z\-]+");
+
+        public AzureStorageCollectionNameValidationAttribute() : base(CollectionNameRegex)
+        {
+        }
+
+        public override string FormatName => "Azure Storage Collection Name";
     }
 
     public class FileNameValidatorAttribute : ValidatorAttribute
@@ -654,28 +679,6 @@ namespace Signum.Entities
         LessThanOrEqualTo,
     }
 
-    public class DaysPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public DaysPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Days)
-        { }
-    }
-
-    public class SecondsPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public SecondsPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Seconds)
-        { }
-    }
-
-    public class MinutesPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
-    {
-        public MinutesPrecisionValidatorAttribute()
-            : base(DateTimePrecision.Minutes)
-        { }
-
-    }
-
     public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
@@ -691,9 +694,9 @@ namespace Signum.Entities
                 return null;
 
 
-            var dto= value as DateTimeOffset?;
+            var dto = ToDateTime(value);
 
-            var prec = dto!=null?dto.Value.Date.GetPrecision():((DateTime)value).GetPrecision();
+            var prec = dto.GetPrecision();
             if (prec > Precision)
                 return ValidationMessage._0HasAPrecisionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
@@ -717,30 +720,42 @@ namespace Signum.Entities
             }
         }
 
+        internal static DateTime ToDateTime(object? value)
+        {
+            return value is DateTime dt ? dt :
+                value is Date d ? (DateTime)d :
+                value is DateTimeOffset dto ? dto.DateTime :
+                throw new UnexpectedValueException(value);
+        }
+
         public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
     }
 
-    public class DateInPastValidator : ValidatorAttribute
+    public class DateInPastValidatorAttribute : ValidatorAttribute
     {
         protected override string? OverrideError(object? value)
         {
             if (value == null)
                 return null;
 
-            if (((DateTime)value) > TimeZoneManager.Now)
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+            if (dateTime > TimeZoneManager.Now)
                 return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
             return null;
         }
 
+        
+
         public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
     }
 
-    public class YearGreaterThanValidator : ValidatorAttribute
+    public class YearGreaterThanValidatorAttribute : ValidatorAttribute
     {
         public int MinYear { get; set; }
 
-        public YearGreaterThanValidator(int minYear)
+        public YearGreaterThanValidatorAttribute(int minYear)
         {
             this.MinYear = minYear;
         }
@@ -750,7 +765,10 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (((DateTime)value).Year < MinYear)
+            DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
+
+
+            if (dateTime.Year < MinYear)
                 return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
 
             return null;
@@ -1043,6 +1061,8 @@ namespace Signum.Entities
         _0IsNotAllowedOnState1,
         [Description("{0} is not set")]
         _0IsNotSet,
+        [Description("{0} are not set")]
+        _0AreNotSet,
         [Description("{0} is set")]
         _0IsSet,
         [Description("{0} is not a {1}")]
@@ -1147,11 +1167,31 @@ namespace Signum.Entities
         _0Have1ElementsButAllowedOnly2,
         [Description("{0} is empty")]
         _0IsEmpty,
+        [Description("{0} should be empty")]
+        _0ShouldBeEmpty,
         [Description("At least one value is needed")]
         _AtLeastOneValueIsNeeded,
         PowerOf,
         BeAString,
         BeAMultilineString,
         IsATimeOfTheDay,
+
+        [Description("There are {0} in state {1}")]
+        ThereAre0InState1,
+        [Description("There are {0} that reference this {1}")]
+        ThereAre0ThatReferenceThis1,
+    }
+
+    public static class ValidationMessageHelper
+    {
+        public static string ShouldBe(this PropertyInfo pi, ComparisonType ct, object value)
+        {
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ct.NiceToString(),
+                value is PropertyInfo pi2 ? pi2.NiceName() :
+                value is Type t ? t.NiceName() :
+                value is Enum e ? e.NiceToString() :
+                value is null ? "null" :
+                value?.ToString());
+        }
     }
 }

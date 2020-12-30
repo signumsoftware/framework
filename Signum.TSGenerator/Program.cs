@@ -13,8 +13,6 @@ namespace Signum.TSGenerator
 {
     public static class Program
     {
-        
-
         public static int Main(string[] args)
         {
             var log = Console.Out;

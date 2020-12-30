@@ -1,17 +1,17 @@
 import * as React from 'react'
-import * as moment from 'moment'
-import numbro from 'numbro'
-import * as DateTimePicker from 'react-widgets/lib/DateTimePicker'
+import { DateTime, Duration, DurationObjectUnits } from 'luxon'
+import { DateTimePicker, DatePicker } from 'react-widgets'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toMomentFormat, toDurationFormat, toNumbroFormat, isTypeEnum, durationToString } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { BooleanEnum } from '../Signum.Entities'
+import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
+import { isPrefix } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -27,6 +27,7 @@ export interface ValueLineProps extends LineBaseProps {
   incrementWithArrow?: boolean | number;
   columnCount?: number;
   columnWidth?: number;
+  showTimeBox?: boolean;
 }
 
 export interface OptionItem {
@@ -82,10 +83,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   getDefaultProps(state: ValueLineProps) {
     super.getDefaultProps(state);
-    state.valueLineType = ValueLineController.getValueLineType(state.type!);
+    if (state.type) {
+      state.valueLineType = ValueLineController.getValueLineType(state.type);
 
-    if (state.valueLineType == undefined)
-      throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+      if (state.valueLineType == undefined)
+        throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+    }
   }
 
   overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
@@ -106,7 +109,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset")
+    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -149,7 +152,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   }
 }
 
-function asString(reactChild: React.ReactChild | undefined): string | undefined {
+function asString(reactChild: React.ReactNode | undefined): string | undefined {
   if (typeof reactChild == "string")
     return reactChild as string;
 
@@ -164,7 +167,13 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
     return null;
 
   return ValueLineRenderers.renderers[c.props.valueLineType!](c);
-}), (prev, next) => LineBaseController.propEquals(prev, next));
+}), (prev, next) => {
+  if (
+    next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 export namespace ValueLineRenderers {
   export const renderers: {
@@ -174,8 +183,9 @@ export namespace ValueLineRenderers {
 
 export function isNumber(e: React.KeyboardEvent<any>) {
   const c = e.keyCode;
-  return ((c >= 48 && c <= 57) /*0-9*/ ||
+  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
     (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+    (c == KeyCodes.enter) ||
     (c == KeyCodes.backspace) ||
     (c == KeyCodes.tab) ||
     (c == KeyCodes.clear) ||
@@ -204,8 +214,7 @@ function isDecimal(e: React.KeyboardEvent<any>): boolean {
 
 function isDuration(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
-  return (isNumber(e) ||
-    (c == 190) /*. Colon*/);
+  return isNumber(e) || e.key == ":";
 }
 
 ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {
@@ -239,13 +248,15 @@ ValueLineRenderers.renderers["ComboBox"] = (vl) => {
   return internalComboBox(vl);
 };
 
-
-
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
-  var ti = getTypeInfo(vl.props.type!.name);
+  var ti: TypeInfo;
+  function getTi() {
+    return ti ?? (ti = getTypeInfo(vl.props.type!.name));
+  }
+
   if (vl.props.comboBoxItems)
     return vl.props.comboBoxItems.map(a =>
-      typeof a == "string" ? ti.members[a] && toOptionItem(ti.members[a]) :
+      typeof a == "string" ? getTi().members[a] && toOptionItem(getTi().members[a]) :
         toOptionItem(a)).filter(a => !!a);
 
   if (vl.props.type!.name == "boolean")
@@ -254,7 +265,7 @@ function getOptionsItems(vl: ValueLineController): OptionItem[] {
       { label: BooleanEnum.niceToString("True")!, value: true }
     ]);
 
-  return Dic.getValues(ti.members).map(m => toOptionItem(m));
+  return Dic.getValues(getTi().members).map(m => toOptionItem(m));
 }
 
 function toOptionItem(m: MemberInfo | OptionItem): OptionItem {
@@ -392,11 +403,12 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
   const s = vl.props;
 
   var htmlAtts = vl.props.valueHtmlAttributes;
+  var autoResize = htmlAtts?.style?.height == null && htmlAtts?.rows == null;
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        <TextArea {...htmlAtts} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
     );
@@ -422,7 +434,7 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <TextArea {...vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
           onInput={isIE11() ? handleTextOnChange : undefined}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
@@ -444,14 +456,14 @@ ValueLineRenderers.renderers["Decimal" as ValueLineType] = (vl) => {
 function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
 
-  const numbroFormat = toNumbroFormat(s.formatText);
+  const numberFormat = toNumberFormat(s.formatText);
 
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.inputElement}>
-            {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
+            {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
     );
@@ -487,7 +499,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
           onChange={handleOnChange}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
-          format={numbroFormat}
+          format={numberFormat}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>}
         />
       )}
@@ -497,13 +509,32 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
 
 export interface NumericTextBoxProps {
   value: number | null;
+  readonly?: boolean;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
-  format?: string;
+  format: Intl.NumberFormat;
   formControlClass?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
 }
+
+const cachedLocaleSeparators: {
+  [locale: string]: { group: string, decimal: string }
+} = {};
+
+function getLocaleSeparators(locale: string) {
+  var result = cachedLocaleSeparators[locale];
+  if (result)
+    return result;
+
+  var format = new Intl.NumberFormat(locale, { minimumFractionDigits: 0 });
+  result = {
+    group: format.format(1111).replace(/1/g, ''),
+    decimal: format.format(1.1).replace(/1/g, ''),
+  };
+  return cachedLocaleSeparators[locale] = result;
+}
+
 
 export function NumericTextBox(p: NumericTextBoxProps) {
 
@@ -511,45 +542,78 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
 
   const value = text != undefined ? text :
-    p.value != undefined ? numbro(p.value).format(p.format) :
+    p.value != undefined ? p.format?.format(p.value) :
       "";
 
   return <input ref={p.innerRef} {...p.htmlAttributes}
+    readOnly={p.readonly}
     type="text"
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
     onBlur={handleOnBlur}
     onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
     onInput={isIE11() ? handleOnChange : undefined}
-    onKeyDown={handleKeyDown} />
+    onKeyDown={handleKeyDown}
+    onFocus={handleOnFocus}/>
 
+
+  function handleOnFocus(e: React.FocusEvent<any>)
+  {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.htmlAttributes && p.htmlAttributes.onFocus)
+      p.htmlAttributes.onFocus(e);
+  };
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      let value = ValueLineController.autoFixString(input.value, false);
 
-    let value = ValueLineController.autoFixString(input.value, false);
+      //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
+      //  value = value + ",00";
 
-    if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-      value = value + ",00";
-
-    if (p.format && p.format.endsWith("%")) {
-      if (value && !value.endsWith("%"))
-        value += "%";
+      const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
+      setText(undefined);
+      if (result != p.value)
+        p.onChange(result);
     }
-
-    const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, p.format);
-    setText(undefined);
-    if (result != p.value)
-      p.onChange(result);
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
   }
 
+ 
+  function unformat(format: Intl.NumberFormat, str: string): number {
+
+    var options = format.resolvedOptions();
+
+    var isPercentage = options.style == "percent";
+
+    var separators = getLocaleSeparators(options.locale);
+
+    if (separators.group)
+      str = str.replace(new RegExp('\\' + separators.group, 'g'), '');
+
+    if (separators.decimal)
+      str = str.replace(new RegExp('\\' + separators.decimal), '.');
+
+    var result =  parseFloat(str);
+
+    if (isPercentage)
+      return result / 100;
+
+    return result;
+  }
+
   function handleOnChange(e: React.SyntheticEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-    setText(input.value);
+    if (!p.readonly) {
+      const input = e.currentTarget as HTMLInputElement;
+      setText(input.value);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
@@ -566,30 +630,26 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
-  const momentFormat = toMomentFormat(s.formatText);
+  const luxonFormat = toLuxonFormat(s.formatText);
 
-  const m = s.ctx.value ? moment(s.ctx.value) : undefined;
-  const showTime = momentFormat != "L" && momentFormat != "LL";
-
+  const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
+  const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.format(momentFormat)}
+          {m?.toFormatFixed(luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
 
-  const handleDatePickerOnChange = (date?: Date, str?: string) => {
-    const m = moment(date);
-    vl.setValue(!m.isValid() ? null :
-      !showTime ? m.format("YYYY-MM-DDTHH:mm:ss" /*No Z*/) :
-        m.format());
+  const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
+    const m = date && DateTime.fromJSDate(date);
+    vl.setValue(m == null || !m.isValid ? null :
+      vl.props.type!.name == "Date" ? m.toISODate() :
+        !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
+          m.toISO());
   };
-
-  let currentDate = moment();
-  if (!showTime)
-    currentDate = currentDate.startOf("day");
 
   const htmlAttributes = {
     placeholder: vl.getPlaceholder(),
@@ -600,8 +660,13 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
-            format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} inputProps={htmlAttributes} placeholder={htmlAttributes.placeholder} />
+          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+            valueEditFormat={luxonFormat}
+            valueDisplayFormat={luxonFormat}
+            includeTime={showTime}
+            inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
+            messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+          />
         </div>
       )}
     </FormGroup>
@@ -669,7 +734,7 @@ export interface DurationTextBoxProps {
 
 export function DurationTextBox(p: DurationTextBoxProps) {
 
-  const [text, setState] = React.useState<string | undefined>(undefined);
+  const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
     p.value != undefined ? durationToString(p.value, p.format) :
@@ -684,45 +749,36 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     onBlur={handleOnBlur}
     onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
     onInput={isIE11() ? handleOnChange : undefined}
-    onKeyDown={handleKeyDown} />
+    onKeyDown={handleKeyDown}
+    onFocus={handleOnFocus} />
 
 
+  function handleOnFocus(e: React.FocusEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.htmlAttributes && p.htmlAttributes.onFocus)
+      p.htmlAttributes.onFocus(e);
+  };
 
 
   function handleOnBlur(e: React.FocusEvent<any>) {
 
     var format = p.format!;
 
-    function fixNumber(val: string) {
-      if (!val.contains(":")) {
-        if (format.startsWith("hh"))
-          return format.replace("hh", val.toString()).replace("mm", "00").replace("ss", "00");
-        if (format.startsWith("mm"))
-          return format.replace("mm", val.toString()).replace("ss", "00");
-        return val;
-      }
-      return val;
-    }
-
-    function normalize(val: string) {
-      if (!"hh:mm:ss".contains(format))
-        throw new Error("not implemented");
-
-      return "hh:mm:ss".replace(format, val).replace("hh", "00").replace("mm", "00").replace("ss", "00")
-    }
-
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : normalize(fixNumber(input.value));
-    setState(undefined);
+    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
+    setText(undefined);
     if (p.value != result)
-      p.onChange(result);;
+      p.onChange(result);
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
       p.htmlAttributes.onBlur(e);
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    setState(input.value);
+    setText(input.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
@@ -731,6 +787,36 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
+export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
+  var valParts = timeStampOrHumanStr.split(":");
+  var formatParts = format.split(":");
+  if (valParts.length == 1 && formatParts.length > 1) {
+    const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+
+    var inferedFormat = validFormats.firstOrNull(f => f.length >= timeStampOrHumanStr.length);
+    if (inferedFormat == null)
+      return null;
+
+    var fixedVal = timeStampOrHumanStr.padStart(inferedFormat.length, '0');
+
+    const getPart = (part: string) => {
+      var index = inferedFormat!.indexOf(part);
+      if (index == -1)
+        return 0;
+
+      return parseInt(fixedVal.substr(index, part.length));
+    }
+
+    return Duration.fromObject({
+      hour: getPart("hh"),
+      minute: getPart("mm"),
+      second: getPart("ss"),
+    });
+
+  } else {
+    return parseDuration(timeStampOrHumanStr, format);
+  }
+}
 
 DurationTextBox.defaultProps = {
   format: "hh:mm:ss"

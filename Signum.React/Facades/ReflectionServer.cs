@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -16,6 +17,9 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities.Basics;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Signum.React.Facades
 {
@@ -32,6 +36,8 @@ namespace Signum.React.Facades
             return ci != CultureInfo.InvariantCulture ? ci : CultureInfo.GetCultureInfo("en");
         }
 
+        public static DateTimeOffset LastModified { get; private set; } = DateTimeOffset.UtcNow;
+
         public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
@@ -42,75 +48,97 @@ namespace Signum.React.Facades
             t.IsEnum && !t.Name.EndsWith("Query") && !t.Name.EndsWith("Message"))
             .ToDictionaryEx(GetTypeName, "Types"));
 
-        public static void RegisterLike(Type type)
+        public static Dictionary<string, Func<bool>> OverrideIsNamespaceAllowed = new Dictionary<string, Func<bool>>();
+
+        public static void RegisterLike(Type type, Func<bool> allowed)
         {
             TypesByName.Reset();
             EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace!);
+            OverrideIsNamespaceAllowed[type.Namespace!] = allowed;
         }
 
         internal static void Start()
         {
-            DescriptionManager.Invalidated += () => cache.Clear();
-            Schema.Current.OnMetadataInvalidated += () => cache.Clear();
+            DescriptionManager.Invalidated += InvalidateCache;
+            Schema.Current.OnMetadataInvalidated += InvalidateCache;
 
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
             var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
 
             EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
-            EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace!);
+        }
+
+        private static void InvalidateCache()
+        {
+            cache.Clear();
+            LastModified = DateTimeOffset.UtcNow;
         }
 
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        public static event Action<TypeInfoTS, Type>? AddTypeExtension;
-        static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
+        public static event Func<TypeInfoTS, Type, TypeInfoTS?>? TypeExtension;
+        static TypeInfoTS? OnTypeExtension(TypeInfoTS ti, Type t)
         {
-            foreach (var a in AddTypeExtension.GetInvocationListTyped())
-                a(ti, t);
+            foreach (var a in TypeExtension.GetInvocationListTyped())
+            {
+                ti = a(ti, t)!;
+                if (ti == null)
+                    return null;
+            }
 
             return ti;
         }
 
-        public static event Action<MemberInfoTS, PropertyRoute>? AddPropertyRouteExtension;
-        static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
+        public static event Func<MemberInfoTS, PropertyRoute, MemberInfoTS?>? PropertyRouteExtension;
+        static MemberInfoTS? OnPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
-            if (AddPropertyRouteExtension == null)
+            if (PropertyRouteExtension == null)
                 return mi;
 
-            foreach (var a in AddPropertyRouteExtension.GetInvocationListTyped())
-                a(mi, m);
+            foreach (var a in PropertyRouteExtension.GetInvocationListTyped())
+            {
+                mi = a(mi, m)!;
+                if (mi == null)
+                    return null;
+            }
 
             return mi;
         }
 
 
-        public static event Action<MemberInfoTS, FieldInfo>? AddFieldInfoExtension;
-        static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
+        public static event Func<MemberInfoTS, FieldInfo, MemberInfoTS?>? FieldInfoExtension;
+        static MemberInfoTS? OnFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
         {
-            if (AddFieldInfoExtension == null)
+            if (FieldInfoExtension == null)
                 return mi;
 
-            foreach (var a in AddFieldInfoExtension.GetInvocationListTyped())
-                a(mi, m);
+            foreach (var a in FieldInfoExtension.GetInvocationListTyped())
+            {
+                mi = a(mi, m)!;
+                if (mi == null)
+                    return null;
+            }
 
             return mi;
         }
 
-        public static event Action<OperationInfoTS, OperationInfo, Type>? AddOperationExtension;
-        static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
+        public static event Func<OperationInfoTS, OperationInfo, Type, OperationInfoTS?>? OperationExtension;
+        static OperationInfoTS? OnOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
         {
-            if (AddOperationExtension == null)
+            if (OperationExtension == null)
                 return oi;
 
-            foreach (var a in AddOperationExtension.GetInvocationListTyped())
-                a(oi, o, type);
+            foreach (var a in OperationExtension.GetInvocationListTyped())
+            {
+                oi = a(oi, o, type)!;
+                if (oi == null)
+                    return null;
+            }
 
             return oi;
         }
-
-
 
         public static HashSet<Type> ExcludeTypes = new HashSet<Type>();
 
@@ -164,10 +192,10 @@ namespace Signum.React.Facades
             var settings = Schema.Current.Settings;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
-                          where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
+                          where !type.IsEnumEntity() && !type.IsGenericType &&!ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
                               FullName = type.FullName!,
@@ -182,7 +210,7 @@ namespace Signum.React.Facades
                               QueryDefined = queries.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .Where(pr => InTypeScript(pr))
-                                .ToDictionary(p => p.PropertyString(), p =>
+                                .Select(p =>
                                 {
                                     var validators = Validator.TryGetPropertyValidator(p)?.Validators;
 
@@ -196,19 +224,24 @@ namespace Signum.React.Facades
                                         Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
                                         Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                         IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-										IsVirtualMList = p.IsVirtualMList(),
+                                        IsVirtualMList = p.IsVirtualMList(),
                                         MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                         PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     };
 
-                                    return OnAddPropertyRouteExtension(mi, p);
-                                }),
+                                    return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
+                                })
+                                .Where(kvp => kvp.Value != null)
+                                .ToDictionaryEx("properties"),
 
-                              Operations = allOperations == null ? null : allOperations.ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type)),
+                              HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
+                              Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
                               RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
 
-                          }, type))).ToDictionaryEx("entities");
+                          }, type)))
+                          .Where(kvp => kvp.Value != null)
+                          .ToDictionaryEx("entities");
 
             return result;
         }
@@ -248,19 +281,23 @@ namespace Signum.React.Facades
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
                               FullName = type.FullName!,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
                               .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
-                              .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
+                              .Select(fi => KeyValuePair.Create(fi.Name, OnFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),
                                   IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
-                              }, fi)),
-                          }, type))).ToDictionaryEx("enums");
+                              }, fi)!))
+                              .Where(a=>a.Value != null)
+                              .ToDictionaryEx("query"),
+                          }, type)))
+                          .Where(a => a.Value != null)
+                          .ToDictionaryEx("enums");
 
             return result;
         }
@@ -271,7 +308,7 @@ namespace Signum.React.Facades
 
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          select KeyValuePair.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
+                          select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
                               FullName = type.FullName!,
@@ -280,13 +317,15 @@ namespace Signum.React.Facades
                                   .Where(s =>
                                   s.FieldInfo != null && /*Duplicated like in Dynamic*/
                                   s.IdOrNull.HasValue /*Not registered*/)
-                                  .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
+                                  .Select(s => KeyValuePair.Create(s.FieldInfo.Name, OnFieldInfoExtension(new MemberInfoTS
                                   {
                                       NiceName = s.FieldInfo.NiceName(),
                                       Id = s.IdOrNull!.Value.Object
-                                  }, s.FieldInfo))
+                                  }, s.FieldInfo)!))
+                                  .Where(a => a.Value != null)
+                                  .ToDictionaryEx("fields"),
                           }, type)))
-                          .Where(a => a.Value.Members.Any())
+                          .Where(a => a.Value != null && a.Value.Members.Any())
                           .ToDictionaryEx("symbols");
 
             return result;
@@ -317,36 +356,24 @@ namespace Signum.React.Facades
         }
     }
 
+
     public class TypeInfoTS
     {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
         public KindOfType Kind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "fullName")]
         public string FullName { get; set; } = null!;
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string? NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
-        public string? NicePluralName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
-        public string? Gender { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
-        public EntityKind? EntityKind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
-        public EntityData? EntityData { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
-        public bool IsLowPopulation { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isSystemVersioned")]
-        public bool IsSystemVersioned { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
-        public string? ToStringFunction { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
-        public bool QueryDefined { get; internal set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
-        public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
-        public Dictionary<string, OperationInfoTS>? Operations { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]
-        public bool RequiresEntityPack { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public string? NiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NicePluralName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Gender { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public EntityKind? EntityKind { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public EntityData? EntityData { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLowPopulation { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsSystemVersioned { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ToStringFunction { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool QueryDefined { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasConstructorOperation { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, OperationInfoTS>? Operations { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool RequiresEntityPack { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -357,33 +384,19 @@ namespace Signum.React.Facades
 
     public class MemberInfoTS
     {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public TypeReferenceTS? Type { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string? NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string? TypeNiceName { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
-        public bool IsReadOnly { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "required")]
-        public bool Required { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
-        public string? Unit { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
-        public string? Format { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnoredEnum")]
-        public bool IsIgnoredEnum { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isVirtualMList")]
-        public bool IsVirtualMList { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
-        public int? MaxLength { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]
-        public bool IsMultiline { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "preserveOrder")]
-        public bool PreserveOrder { get; internal set; }
-
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
-        public object? Id { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public TypeReferenceTS? Type { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsReadOnly { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool Required { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Unit { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Format { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsIgnoredEnum { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsVirtualMList { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? MaxLength { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMultiline { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; internal set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -391,16 +404,11 @@ namespace Signum.React.Facades
 
     public class OperationInfoTS
     {
-        [JsonProperty(PropertyName = "operationType")]
-        private OperationType OperationType;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeNew")]
-        private bool? CanBeNew;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
-        private bool? HasCanExecute;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasStates")]
-        private bool? HasStates;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeModified")]
-        private bool? CanBeModified;
+        public OperationType OperationType;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeNew;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeModified;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasCanExecute;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasStates;
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -408,27 +416,21 @@ namespace Signum.React.Facades
         public OperationInfoTS(OperationInfo oper)
         {
             this.CanBeNew = oper.CanBeNew;
+            this.CanBeModified = oper.CanBeModified;
             this.HasCanExecute = oper.HasCanExecute;
             this.HasStates = oper.HasStates;
             this.OperationType = oper.OperationType;
-            this.CanBeModified = oper.CanBeModified;
         }
     }
 
     public class TypeReferenceTS
     {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
-        public bool IsCollection { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
-        public bool IsLite { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNotNullable")]
-        public bool IsNotNullable { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEmbedded")]
-        public bool IsEmbedded { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsCollection { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsEmbedded { get; set; }
         public string Name { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
-        public string? TypeNiceName { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
         public TypeReferenceTS() { }
@@ -454,7 +456,8 @@ namespace Signum.React.Facades
                 {
                     this.Name = "ERROR";
                 }
-            }else
+            }
+            else
             {
                 this.Name = TypeScriptType(type);
             }

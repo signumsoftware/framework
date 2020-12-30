@@ -83,3 +83,8 @@
 .bg-primary a {
     color: #BCE1E1;
 }
+
+
+.modal {
+    z-index: 1040 !important;
+}

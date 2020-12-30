@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
-import * as DropdownList from 'react-widgets/lib/DropdownList'
+import { DropdownList } from 'react-widgets'
 import { StyleContext } from '../Lines';
 import { useAPI } from '../Hooks';
 
@@ -66,15 +66,15 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
           fullKey: p.queryToken.fullKey,
           queryKey: p.queryKey
         } : undefined;
+        e.preventDefault();
       }
       else if (e.key == "v" && copiedToken?.queryKey == p.queryKey) {
         Finder.parseSingleToken(p.queryKey, copiedToken.fullKey, p.subTokenOptions)
           .then(a => p.onTokenChange(a))
           .done();
+        e.preventDefault();
       }
-
     }
-
   }
 }
 
@@ -92,7 +92,6 @@ interface QueryTokenPartProps{
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
 export function QueryTokenPart(p: QueryTokenPartProps) {
-
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
@@ -112,12 +111,13 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
           disabled={p.readOnly}
           filter="contains"
           data={subTokens ?? []}
+          placeholder={p.selectedToken == null ? "..." : undefined}
           value={p.selectedToken}
           onChange={handleOnChange}
-          valueField="fullKey"
+          dataKey="fullKey"
           textField="toStr"
-          valueComponent={QueryTokenItem}
-          itemComponent={QueryTokenOptionalItem}
+          renderValue={a => <QueryTokenItem item={a.item} />}
+          renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
           defaultOpen={p.defaultOpen}
           busy={!p.readOnly && subTokens == undefined}
         />

@@ -1,27 +1,27 @@
 import * as React from "react"
 import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
-import { getTypeInfo, OperationType, GraphExplorer } from '../Reflection';
+import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext, IOperationVisible, ButtonBarElement } from '../TypeContext';
+import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
   operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString, isOperationAllowed
+  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString
 } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import * as Constructor from "../Constructor"
-import { func } from "prop-types";
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
-import { FunctionalAdapter } from "../Frames/FrameModal";
 import { notifySuccess } from "../Operations";
+import { FunctionalAdapter } from "../Modals";
+import { getTypeNiceName } from "../Finder";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
-  const ti = getTypeInfo(ctx.pack.entity.Type);
+  const ti = tryGetTypeInfo(ctx.pack.entity.Type);
 
   if (ti == undefined)
     return undefined;
@@ -38,27 +38,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
       return eoc;
     })
-    .filter(eoc => {
-      if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
-        return false;
-
-      var ov = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IOperationVisible | null;
-      if (ov?.isOperationVisible && !ov.isOperationVisible(eoc))
-        return false;
-
-      var eos = eoc.settings;
-      if (eos?.isVisible && !eos.isVisible(eoc))
-        return false;
-
-      if (eos?.hideOnCanExecute && eoc.canExecute)
-        return false;
-
-      if (Navigator.isReadOnly(ctx.pack, true) && !(eos?.showOnReadOnly))
-        return false;
-
-      return true;
-    })
-    .map(eoc => eoc!);
+    .filter(eoc => eoc.isVisibleInButtonBar(ctx));
 
   operations.forEach(eoc => eoc.complete());
 
@@ -66,25 +46,18 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
   const result = groups.flatMap((gr, i) => {
     if (gr.key == "") {
-      return gr.elements.map((eoc, j) => ({
-        order: eoc.settings && eoc.settings.order != undefined ? eoc.settings.order : 0,
-        shortcut: e => eoc.onKeyDown(e),
-        button: <OperationButton eoc={eoc} key={i + "-" + j} />,
-      }) as ButtonBarElement);
+      return gr.elements.flatMap((eoc, j) => eoc.createButton());
     } else {
 
       const group = gr.elements[0].group!;
+      var groupButtons = gr.elements.flatMap(eoc => eoc.createButton(group)).orderBy(a => a.order);
       
       return [{
         order: group.order != undefined ? group.order : 100,
-        shortcut: e => gr.elements.some(eoc => eoc.onKeyDown(e)),
+        shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: (
-          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.color || "light"}>
-            {
-              gr.elements
-                .orderBy(a => a.settings && a.settings.order)
-                .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group} />)
-            }
+          <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
+            { groupButtons.map(bbe => bbe.button) }
           </DropdownButton>
         )
       } as ButtonBarElement];
@@ -120,55 +93,63 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
     text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
-    isVisible: eoc.frame!.allowChangeEntity && Navigator.isCreable(eoc.entity.Type, true, true),
+    isVisible: eoc.frame!.allowExchangeEntity && eoc.frame.createNew != null && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
     inDropdown: inDropdown,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        var createNew = eoc.frame.frameComponent.createNew;
-
-        if (createNew)
-          (createNew() ?? Promise.resolve(undefined))
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
-        else
-          Constructor.constructPack(pack.entity.Type)
-            .then(newPack => newPack && eoc.frame.onReload(newPack, true))
-            .done();
+        (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
+          .then(newPack => newPack && eoc.frame.onReload(newPack, true))
+          .done();
       };
       eoc.defaultClick();
     }
   });
 }
 
+type OutlineBsColor = 
+  | 'outline-primary'
+  | 'outline-secondary'
+  | 'outline-success'
+  | 'outline-danger'
+  | 'outline-warning'
+  | 'outline-info'
+  | 'outline-dark'
+  | 'outline-light';
+
 interface OperationButtonProps extends ButtonProps {
-  eoc: EntityOperationContext<any /*Entity*/>;
+  eoc: EntityOperationContext<any /*Entity*/> | undefined;
   group?: EntityOperationGroup;
   variant?: BsColor;
   canExecute?: string | null;
   className?: string;
-  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  outline?: boolean;
+  color?: BsColor;
+  avoidAlternatives?: boolean;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
   children?: React.ReactNode
 }
 
-export function OperationButton({ eoc, group, onOperationClick, canExecute, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
-  if (!isOperationAllowed(eoc.operationInfo.key, (eoc.entity as Entity).Type))
+  if (eocOrNull == null)
     return null;
+
+  const eoc = eocOrNull;
 
   if (canExecute === undefined)
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
   const disabled = !!canExecute;
 
-  var alternatives = eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
+  var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
   if (group) {
 
     const item =
       <Dropdown.Item
-        {...props}
+        {...props as any}
         disabled={disabled}
         title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
@@ -192,7 +173,13 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
     );
   }    
 
-  var button = <Button variant={eoc.color}
+  if (outline == null)
+    outline = eoc.outline;
+
+  if (color == null)
+    color = eoc.color;
+
+  var button = <Button variant={(outline? ("outline-" + color) as OutlineBsColor: color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
@@ -256,7 +243,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
         className={aos.classes}
         key={aos.name}
         title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
-        onClick={() => aos.onClick(eoc)}
+        onClick={() => aos.onClick(eoc!)}
         data-alternative={aos.name}>
         {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
       </Dropdown.Item>
@@ -271,8 +258,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 
-    const s = eoc.settings;
-    return withIcon(text, s?.icon, s?.iconColor, s?.iconAlign);
+    return withIcon(text, eoc?.icon, eoc?.iconColor, eoc?.iconAlign);
   }
 
   function handleOnClick(event: React.MouseEvent<any>) {
@@ -280,7 +266,7 @@ export function OperationButton({ eoc, group, onOperationClick, canExecute, ...p
     event.persist();
 
     if (onOperationClick)
-      onOperationClick(eoc);
+      onOperationClick(eoc, event);
     else
       eoc.click();
   }
@@ -301,15 +287,15 @@ function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?:
 export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
   if (!eoc.operationInfo.canBeModified) {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteLite(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteLite(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromLite(eoc, ...args); return;
+      case "Execute": defaultExecuteLite(eoc, ...args); return;
+      case "Delete": defaultDeleteLite(eoc, ...args); return;
     }
   } else {
     switch (eoc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, ...args); return;
-      case OperationType.Execute: defaultExecuteEntity(eoc, ...args); return;
-      case OperationType.Delete: defaultDeleteEntity(eoc, ...args); return;
+      case "ConstructorFrom": defaultConstructFromEntity(eoc, ...args); return;
+      case "Execute": defaultExecuteEntity(eoc, ...args); return;
+      case "Delete": defaultDeleteEntity(eoc, ...args); return;
     }
   }
 
@@ -325,7 +311,7 @@ export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperatio
     API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
@@ -341,7 +327,7 @@ export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationC
     API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
       .done();
@@ -445,8 +431,10 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
     return eoc.settings.confirmMessage(eoc);
 
   //eoc.settings.confirmMessage === undefined
-  if (eoc.operationInfo.operationType == OperationType.Delete)
-    return OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString(getToString(eoc.entity));
+  if (eoc.operationInfo.operationType == "Delete")
+    return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
+      <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
+    );
 
   return undefined;
 }

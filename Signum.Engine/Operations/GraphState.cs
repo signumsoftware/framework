@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine.Operations
 {
-    public interface IGraphHasFromStatesOperation
+    public interface IGraphHasStatesOperation
     {
         bool HasFromStates { get; }
     }
@@ -27,7 +27,7 @@ namespace Signum.Engine.Operations
             List<S> ToStates { get; }
         }
 
-        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasFromStatesOperation
+        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasStatesOperation
         {
             List<S> FromStates { get; }
         }
@@ -57,7 +57,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T entity)
             {
-                Graph<T, S>.AssertEnterState((T)entity, this);
+                Graph<T, S>.AssertEnterState(entity, this);
             }
 
             public override string ToString()
@@ -111,8 +111,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T result)
             {
-                if (result != null)
-                    Graph<T, S>.AssertEnterState(result, this);
+                Graph<T, S>.AssertEnterState(result, this);
             }
 
 
@@ -159,8 +158,7 @@ namespace Signum.Engine.Operations
 
             protected override void AssertEntity(T result)
             {
-                if (result != null)
-                    Graph<T, S>.AssertEnterState(result, this);
+                Graph<T, S>.AssertEnterState(result, this);
             }
 
             public override string ToString()
@@ -186,7 +184,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
             Type? IOperation.StateType { get { return typeof(S); } }
 
-            bool IGraphHasFromStatesOperation.HasFromStates
+            bool IGraphHasStatesOperation.HasFromStates
             {
                 get { return !FromStates.IsNullOrEmpty(); }
             }
@@ -206,8 +204,8 @@ namespace Signum.Engine.Operations
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
-                        ((Enum)(object)state!).NiceToString());
+                        FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
+                        ((Enum?)(object?)state)?.NiceToString() ?? "null");
 
                 return base.OnCanExecute(entity);
             }
@@ -236,7 +234,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
             Type? IOperation.StateType { get { return typeof(S); } }
 
-            bool IGraphHasFromStatesOperation.HasFromStates
+            bool IGraphHasStatesOperation.HasFromStates
             {
                 get { return !FromStates.IsNullOrEmpty(); }
             }
@@ -253,8 +251,8 @@ namespace Signum.Engine.Operations
 
                 if (!FromStates.Contains(state))
                     return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                        FromStates.CommaOr(v => ((Enum)(object)v!).NiceToString()),
-                        ((Enum)(object)state!).NiceToString());
+                        FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
+                        ((Enum?)(object?)state)?.NiceToString() ?? "null");
 
                 return base.OnCanDelete(entity);
             }

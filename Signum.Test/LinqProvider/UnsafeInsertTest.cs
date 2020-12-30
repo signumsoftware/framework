@@ -63,7 +63,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                using (Administrator.DisableIdentity<AlbumEntity>())
+                using (Administrator.SaveDisableIdentity<AlbumEntity>())
                 {
                     int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                     {

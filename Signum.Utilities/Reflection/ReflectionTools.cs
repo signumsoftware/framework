@@ -6,6 +6,9 @@ using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.ExpressionTrees;
+using System.IO;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Utilities.Reflection
 {
@@ -70,25 +73,28 @@ namespace Signum.Utilities.Reflection
                   null;
         }
 
-        public static bool FieldEquals(FieldInfo f1, FieldInfo f2)
+        public static bool FieldEquals(FieldInfo? f1, FieldInfo? f2)
         {
             return MemeberEquals(f1, f2);
         }
 
-        public static bool PropertyEquals(PropertyInfo p1, PropertyInfo p2)
+        public static bool PropertyEquals(PropertyInfo? p1, PropertyInfo? p2)
         {
             return MemeberEquals(p1, p2);
         }
 
-        public static bool MethodEqual(MethodInfo m1, MethodInfo m2)
+        public static bool MethodEqual(MethodInfo? m1, MethodInfo? m2)
         {
             return MemeberEquals(m1, m2);
         }
 
-        public static bool MemeberEquals(MemberInfo m1, MemberInfo m2)
+        public static bool MemeberEquals(MemberInfo? m1, MemberInfo? m2)
         {
             if (m1 == m2)
                 return true;
+
+            if (m1 == null || m2 == null)
+                return false;
 
             if (m1.DeclaringType != m2.DeclaringType)
                 return false;
@@ -166,7 +172,7 @@ namespace Signum.Utilities.Reflection
             if (!(body is NewExpression ex))
                 throw new ArgumentException("The lambda 'constuctor' should be an expression constructing an object");
 
-            return ex.Constructor;
+            return ex.Constructor!;
         }
 
 
@@ -277,89 +283,46 @@ namespace Signum.Utilities.Reflection
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
-            return ((MemberExpression)body).Expression.Type;
+            return ((MemberExpression)body).Expression!.Type;
         }
 
-        public static Func<T, P>? CreateGetter<T, P>(MemberInfo m)
-        {
-            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                return null;
-
-            ParameterExpression p = Expression.Parameter(typeof(T), "p");
-            var exp = Expression.Lambda(typeof(Func<T, P>), Expression.MakeMemberAccess(p, m), p);
-            return (Func<T, P>)exp.Compile();
-        }
-
-        public static Func<T, object?>? CreateGetter<T>(MemberInfo m)
+        public static Func<T, R>? CreateGetter<T, R>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateGetter"))
             {
-                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
+                if (m is PropertyInfo pi && !pi.CanRead)
                     return null;
 
-                ParameterExpression p = Expression.Parameter(typeof(T), "p");
-                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
-                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
-                return (Func<T, object?>)exp.Compile();
+                ParameterExpression t = Expression.Parameter(typeof(T), "t");
+                var member = Expression.MakeMemberAccess(t.ConvertIfNeeded(m.DeclaringType!), m);
+                var exp = Expression.Lambda(typeof(Func<T, R>), member.ConvertIfNeeded(typeof(R)), t);
+                return (Func<T, R>)exp.Compile();
             }
         }
 
-        public static Func<object, object?>? CreateGetterUntyped(Type type, MemberInfo m)
+        static Expression ConvertIfNeeded(this Expression expression, Type type)
         {
-            using (HeavyProfiler.LogNoStackTrace("CreateGetterUntyped"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                    return null;
+            if (type.IsAssignableFrom(expression.Type) && expression.Type.IsValueType == type.IsValueType)
+                return expression;
 
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
-                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
-                return (Func<object, object?>)exp.Compile();
-            }
+            return Expression.Convert(expression, type);
         }
 
         public static Action<T, P>? CreateSetter<T, P>(MemberInfo m)
         {
             using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
             {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
+                if (m is PropertyInfo pi && !pi.CanWrite)
                     return null;
 
                 ParameterExpression t = Expression.Parameter(typeof(T), "t");
                 ParameterExpression p = Expression.Parameter(typeof(P), "p");
-                var exp = Expression.Lambda(typeof(Action<T, P>),
-                    Expression.Assign(Expression.MakeMemberAccess(t, m), p), t, p);
+                
+                var t2 = t.ConvertIfNeeded(m.DeclaringType!);
+                var p2 = p.ConvertIfNeeded(m.ReturningType());
+
+                var exp = Expression.Lambda(typeof(Action<T, P>), Expression.Assign(Expression.MakeMemberAccess(t2, m), p2), t, p);
                 return (Action<T, P>)exp.Compile();
-            }
-        }
-
-        public static Action<T, object?>? CreateSetter<T>(MemberInfo m)
-        {
-            using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                    return null;
-
-                ParameterExpression t = Expression.Parameter(typeof(T), "t");
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                var exp = Expression.Lambda(typeof(Action<T, object>),
-                    Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<T, object?>)exp.Compile();
-            }
-        }
-        
-        public static Action<object, object?>? CreateSetterUntyped(Type type, MemberInfo m)
-        {
-            using (HeavyProfiler.LogNoStackTrace("CreateSetterUntyped"))
-            {
-                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                    return null;
-
-                ParameterExpression t = Expression.Parameter(typeof(object), "t");
-                ParameterExpression p = Expression.Parameter(typeof(object), "p");
-                var exp = Expression.Lambda(typeof(Action<object, object>),
-                    Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
-                return (Action<object, object?>)exp.Compile();
             }
         }
 
@@ -468,10 +431,14 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
-            else
-                return (T)Convert.ChangeType(value, utype)!;
+
+            if (utype == typeof(Date))
+                return (T)(object)Date.Parse(value);
+
+            return (T)Convert.ChangeType(value, utype)!;
         }
 
         public static object? Parse(string value, Type type)
@@ -488,6 +455,9 @@ namespace Signum.Utilities.Reflection
 
             if (utype == typeof(Guid))
                 return Guid.Parse(value);
+
+            if (utype == typeof(Date))
+                return Date.Parse(value);
 
             if (CustomParsers.TryGetValue(utype, out var func))
                 return func(value); //Delay reference
@@ -514,10 +484,11 @@ namespace Signum.Utilities.Reflection
             Type utype = typeof(T).UnNullify();
             if (utype.IsEnum)
                 return (T)Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
-            else
-                return (T)Convert.ChangeType(value, utype, culture)!;
+
+            return (T)Convert.ChangeType(value, utype, culture)!;
         }
 
         public static object? Parse(string value, Type type, CultureInfo culture)
@@ -531,10 +502,11 @@ namespace Signum.Utilities.Reflection
             Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return Guid.Parse(value);
-            else
-                return Convert.ChangeType(value, utype, culture);
+
+            return Convert.ChangeType(value, utype, culture);
         }
 
         public static bool TryParse<T>(string value, out T result)
@@ -725,6 +697,15 @@ namespace Signum.Utilities.Reflection
                 }
                 else return false;
             }
+            else if (utype == typeof(Date))
+            {
+                if (Date.TryParse(value, ci, DateTimeStyles.None, out Date _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false;
+            }
             else if (utype == typeof(Guid))
             {
                 if (Guid.TryParse(value, out Guid _result))
@@ -773,14 +754,18 @@ namespace Signum.Utilities.Reflection
                 {
                     if (value is string)
                         return (T)Enum.Parse(utype, (string)value);
-                    else
-                        return (T)Enum.ToObject(utype, value);
+
+
+                    return (T)Enum.ToObject(utype, value);
                 }
 
-                else if (utype == typeof(Guid) && value is string)
+                if (utype == typeof(Guid) && value is string)
                     return (T)(object)Guid.Parse((string)value);
-                else
-                    return (T)Convert.ChangeType(value, utype)!;
+
+                if (utype == typeof(Date) && value is string)
+                    return (T)(object)Date.Parse((string)value);
+
+                return (T)Convert.ChangeType(value, utype)!;
             }
         }
 
@@ -799,35 +784,40 @@ namespace Signum.Utilities.Reflection
                 {
                     if (value is string)
                         return Enum.Parse(utype, (string)value);
-                    else
-                        return Enum.ToObject(utype, value);
+
+                    return Enum.ToObject(utype, value);
                 }
-                else if (utype == typeof(Guid) && value is string)
+
+                if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
-                else
+
+                if (utype == typeof(Date) && value is string)
+                    return Date.Parse((string)value);
+
+                var conv = TypeDescriptor.GetConverter(type);
+                if (conv != null && conv.CanConvertFrom(value.GetType()))
+                    return conv.ConvertFrom(value);
+
+                conv = TypeDescriptor.GetConverter(value.GetType());
+                if (conv != null && conv.CanConvertTo(type))
+                    return conv.ConvertTo(value, type);
+
+                if (type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
                 {
-                    var conv = TypeDescriptor.GetConverter(type);
-                    if(conv != null && conv.CanConvertFrom(value.GetType()))
-                        return conv.ConvertFrom(value);
-
-                    conv = TypeDescriptor.GetConverter(value.GetType());
-                    if (conv != null && conv.CanConvertTo(type))
-                        return conv.ConvertTo(value, type);
-
-                    if(type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
+                    var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
+                    IList col = (IList)Activator.CreateInstance(colType)!;
+                    foreach (var item in (IEnumerable)value)
                     {
-                        var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
-                        IList col = (IList)Activator.CreateInstance(colType)!;
-                        foreach (var item in (IEnumerable)value)
-                        {
-                            col.Add(item);
-                        }
-                        return col;
+                        col.Add(item);
                     }
-
-                    return Convert.ChangeType(value, utype);
+                    return col;
                 }
-                  
+
+                if (value is IConvertible c)
+                    return Convert.ChangeType(c, utype);
+
+                throw new InvalidOperationException($"Unable to convert '{value}' (of type {value.GetType().TypeName()}) to type {utype.TypeName()}");
+
             }
         }
 
@@ -835,6 +825,22 @@ namespace Signum.Utilities.Reflection
         {
             return (pi.CanRead && pi.GetGetMethod()!.IsStatic) ||
                   (pi.CanWrite && pi.GetSetMethod()!.IsStatic);
-        }    
+        }
+        
+        public static DateTime BuildTimeUTC(this Assembly assembly)
+        {
+            const int peHeaderOffset = 60;
+            const int linkerTimestampOffset = 8;
+            byte[] bytes = new byte[2048];
+            using (FileStream file = new FileStream(assembly.Location, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                file.Read(bytes, 0, bytes.Length);
+            }
+            int headerPos = BitConverter.ToInt32(bytes, peHeaderOffset);
+            int secondsSince1970 = BitConverter.ToInt32(bytes, headerPos + linkerTimestampOffset);
+            DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime dateTimeUTC = dt.AddSeconds(secondsSince1970);
+            return dateTimeUTC;
+        }
     }
 }

@@ -9,6 +9,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Maps
 {
@@ -43,20 +44,33 @@ namespace Signum.Engine.Maps
             this.Columns = columns;
         }
 
-        public virtual string IndexName
+        public virtual string GetIndexName(ObjectName tableName)
         {
-            get { return "IX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            int maxLength = MaxNameLength();
+
+            return StringHashEncoder.ChopHash("IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
         }
+
+        protected static int MaxNameLength()
+        {
+            return Connector.Current.MaxNameLength - StringHashEncoder.HashSize - 2;
+        }
+
+        public string IndexName => GetIndexName(Table.Name);
 
         protected string ColumnSignature()
         {
-            string columns = Columns.ToString(c => c.Name, "_");
+            return Columns.ToString(c => c.Name, "_");
+        }
+
+        public string? WhereSignature()
+        {
             var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
 
-            if (string.IsNullOrEmpty(Where)  && includeColumns == null)
-                return columns;
+            if (string.IsNullOrEmpty(Where) && includeColumns == null)
+                return null;
 
-            return columns + "__" + StringHashEncoder.Codify(Where + includeColumns);
+            return "__" + StringHashEncoder.Codify(Where + includeColumns);
         }
 
         public override string ToString()
@@ -70,14 +84,14 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public class PrimaryClusteredIndex : TableIndex
+    public class PrimaryKeyIndex : TableIndex
     {
-        public PrimaryClusteredIndex(ITable table) : base(table, new[] { table.PrimaryKey })
+        public PrimaryKeyIndex(ITable table) : base(table, new[] { table.PrimaryKey })
         {
 
         }
 
-        public override string IndexName => GetPrimaryKeyName(this.Table.Name);
+        public override string GetIndexName(ObjectName tableName) => GetPrimaryKeyName(tableName);
 
         public static string GetPrimaryKeyName(ObjectName tableName)
         {
@@ -87,12 +101,17 @@ namespace Signum.Engine.Maps
 
     public class UniqueTableIndex : TableIndex
     {
-        public UniqueTableIndex(ITable table, IColumn[] columns) : base(table, columns) { }
+        public UniqueTableIndex(ITable table, IColumn[] columns) 
+            : base(table, columns) 
+        { 
+        }
 
 
-        public override string IndexName
+        public override string GetIndexName(ObjectName tableName)
         {
-            get { return "UIX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            var maxSize = MaxNameLength();
+
+            return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxSize) + WhereSignature();
         }
 
         public string? ViewName
@@ -105,7 +124,9 @@ namespace Signum.Engine.Maps
                 if (Connector.Current.AllowsIndexWithWhere(Where))
                     return null;
 
-                return "VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
+                var maxSize = MaxNameLength();
+
+                return StringHashEncoder.ChopHash("VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
             }
         }
 
@@ -184,10 +205,12 @@ namespace Signum.Engine.Maps
         StringBuilder sb = new StringBuilder();
 
         IFieldFinder RootFinder;
+        bool isPostgres;
 
         public IndexWhereExpressionVisitor(IFieldFinder rootFinder)
         {
             RootFinder = rootFinder;
+            this.isPostgres = Schema.Current.Settings.IsPostgres;
         }
 
         public static string GetIndexWhere(LambdaExpression lambda, IFieldFinder rootFiender)
@@ -210,9 +233,10 @@ namespace Signum.Engine.Maps
         }
 
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
-            switch (exp.NodeType)
+            switch (exp!.NodeType)
             {
                 case ExpressionType.Conditional:
                 case ExpressionType.Constant:
@@ -240,7 +264,7 @@ namespace Signum.Engine.Maps
             if (f is FieldReference fr)
             {
                 if (b.TypeOperand.IsAssignableFrom(fr.FieldType))
-                    sb.Append(fr.Name.SqlEscape() + " IS NOT NULL");
+                    sb.Append(fr.Name.SqlEscape(isPostgres) + " IS NOT NULL");
                 else
                     throw new InvalidOperationException("A {0} will never be {1}".FormatWith(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
 
@@ -254,7 +278,7 @@ namespace Signum.Engine.Maps
                 var imp = fib.ImplementationColumns.Where(kvp => typeOperant.IsAssignableFrom(kvp.Key));
 
                 if (imp.Any())
-                    sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape() + " IS NOT NULL", " OR "));
+                    sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape(isPostgres) + " IS NOT NULL", " OR "));
                 else
                     throw new InvalidOperationException("No implementation ({0}) will never be {1}".FormatWith(fib.ImplementationColumns.Keys.ToString(t => t.TypeName(), ", "), b.TypeOperand.TypeName()));
 
@@ -266,7 +290,7 @@ namespace Signum.Engine.Maps
 
         public static Expression RemoveLiteEntity(Expression exp)
         {
-            if (exp is MemberExpression m && m.Member is PropertyInfo pi && m.Expression.Type.IsInstantiationOf(typeof(Lite<>)) &&
+            if (exp is MemberExpression m && m.Member is PropertyInfo pi && m.Expression!.Type.IsInstantiationOf(typeof(Lite<>)) &&
                 (pi.Name == nameof(Lite<Entity>.Entity) || pi.Name == nameof(Lite<Entity>.EntityOrNull)))
                 return m.Expression;
             return exp;
@@ -276,7 +300,7 @@ namespace Signum.Engine.Maps
         {
             var field = GetField(m);
 
-            sb.Append(Equals(field, true, true));
+            sb.Append(Equals(field, value: true, equals: true, isPostgres));
 
             return m;
         }
@@ -308,52 +332,52 @@ namespace Signum.Engine.Maps
         }
 
 
-        public static string IsNull(Field field, bool equals)
+        public static string IsNull(Field field, bool equals, bool isPostgres)
         {
             string isNull = equals ? "{0} IS NULL" : "{0} IS NOT NULL";
 
             if (field is IColumn col)
             {
-                string result = isNull.FormatWith(col.Name.SqlEscape());
+                string result = isNull.FormatWith(col.Name.SqlEscape(isPostgres));
 
-                if (!SqlBuilder.IsString(col.SqlDbType))
+                if (!col.DbType.IsString())
                     return result;
 
-                return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " = " : " <> ") + "''");
+                return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape(isPostgres) + (equals ? " = " : " <> ") + "''");
 
             }
             else if (field is FieldImplementedBy ib)
             {
-                return ib.ImplementationColumns.Values.Select(ic => isNull.FormatWith(ic.Name.SqlEscape())).ToString(equals ? " AND " : " OR ");
+                return ib.ImplementationColumns.Values.Select(ic => isNull.FormatWith(ic.Name.SqlEscape(isPostgres))).ToString(equals ? " AND " : " OR ");
             }
             else if (field is FieldImplementedByAll iba)
             {
-                return isNull.FormatWith(iba.Column.Name.SqlEscape()) +
+                return isNull.FormatWith(iba.Column.Name.SqlEscape(isPostgres)) +
                     (equals ? " AND " : " OR ") +
-                    isNull.FormatWith(iba.ColumnType.Name.SqlEscape());
+                    isNull.FormatWith(iba.ColumnType.Name.SqlEscape(isPostgres));
             }
             else if (field is FieldEmbedded fe)
             {
                 if (fe.HasValue == null)
                     throw new NotSupportedException("{0} is not nullable".FormatWith(field));
 
-                return fe.HasValue.Name.SqlEscape() + " = 1";
+                return fe.HasValue.Name.SqlEscape(isPostgres) + " = 1";
             }
 
             throw new NotSupportedException(isNull.FormatWith(field.GetType()));
         }
 
-        static string Equals(Field field, object value, bool equals)
+        static string Equals(Field field, object value, bool equals, bool isPostgres)
         {
             if (value == null)
             {
-                return IsNull(field, equals);
+                return IsNull(field, equals, isPostgres);
             }
             else
             {
                 if (field is IColumn)
                 {
-                    return ((IColumn)field).Name.SqlEscape() +
+                    return ((IColumn)field).Name.SqlEscape(isPostgres) +
                         (equals ? " = " : " <> ") + SqlPreCommandSimple.Encode(value);
                 }
 
@@ -380,13 +404,13 @@ namespace Signum.Engine.Maps
 
                     Field field = GetField(b.Right);
 
-                    sb.Append(Equals(field, ((ConstantExpression)b.Left).Value, b.NodeType == ExpressionType.Equal));
+                    sb.Append(Equals(field, ((ConstantExpression)b.Left).Value!, b.NodeType == ExpressionType.Equal, isPostgres));
                 }
                 else if (b.Right is ConstantExpression)
                 {
                     Field field = GetField(b.Left);
 
-                    sb.Append(Equals(field, ((ConstantExpression)b.Right).Value, b.NodeType == ExpressionType.Equal));
+                    sb.Append(Equals(field, ((ConstantExpression)b.Right).Value!, b.NodeType == ExpressionType.Equal, isPostgres));
                 }
                 else
                     throw new NotSupportedException("Impossible to translate {0}".FormatWith(b.ToString()));

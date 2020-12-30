@@ -270,6 +270,10 @@ span.guid {
     white-space: nowrap;
 }
 
+.dropdown-item.active span.guid {
+    color: lightblue;
+}
+
 bdi.date {
     white-space: nowrap;
 }
@@ -334,4 +338,8 @@ ul.sf-context-menu li a:not([disabled]) {
 .sf-show-group-button {
     font-weight: bold;
     color: black;
+}
+
+select.sf-pagination-mode, select.sf-elements-per-page {
+    vertical-align: text-top;
 }

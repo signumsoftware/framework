@@ -11,6 +11,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Linq
 {
@@ -343,7 +344,7 @@ namespace Signum.Engine.Linq
             Type groupType = typeof(Grouping<,>).MakeGenericType(key.Type, element.Type);
 
             return new MetaProjectorExpression(resultType,
-                Expression.New(groupType.GetConstructor(new Type[] { key.Type, colType }),
+                Expression.New(groupType.GetConstructor(new Type[] { key.Type, colType })!,
                 key, new MetaProjectorExpression(colType, element)));
         }
 
@@ -357,7 +358,7 @@ namespace Signum.Engine.Linq
             return AsProjection(Visit(source));
         }
 
-        public Type? TableType(object value)
+        public Type? TableType(object? value)
         {
             if (value == null)
                 return null;
@@ -368,7 +369,8 @@ namespace Signum.Engine.Linq
                 null;
         }
 
-        public override Expression Visit(Expression exp)
+        [return:NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             if (exp is MetaExpression)
                 return exp;
@@ -388,7 +390,7 @@ namespace Signum.Engine.Linq
                 {
                     var parentType = type.GetGenericArguments()[0];
 
-                    ISignumTable st = (ISignumTable)c.Value;
+                    ISignumTable st = (ISignumTable)c.Value!;
                     TableMList rt = (TableMList)st.Table;
 
 
@@ -410,7 +412,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMember(MemberExpression m)
         {
-            Expression source = Visit(m.Expression);
+            Expression source = Visit(m.Expression!);
 
             return BindMember(source, m.Member, m.Type);
         }
@@ -457,7 +459,14 @@ namespace Signum.Engine.Linq
                 if (pi == null)
                     return new MetaExpression(memberType, new DirtyMeta(null, new Meta[0]));
 
+
                 MetaExpression meta = (MetaExpression)source;
+                if(pi.DeclaringType == typeof(MixinEntity) && pi.Name == nameof(MixinEntity.MainEntity))
+                {
+                    var rootType = ((CleanMeta)meta.Meta).PropertyRoutes.Single().RootType;
+
+                    return new MetaExpression(rootType, new CleanMeta(Implementations.By(rootType), PropertyRoute.Root(rootType)));
+                }
 
                 if (meta.Meta.Implementations != null)
                 {

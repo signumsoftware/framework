@@ -330,14 +330,14 @@ namespace Signum.Engine.Linq
             });
         }
 
-        internal T UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)
+        internal T? UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)
         {
             switch (uniqueFunction)
             {
                 case UniqueFunction.First:  return enumerable.FirstEx();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
                 case UniqueFunction.Single: return enumerable.SingleEx();
-                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefaultEx();
+                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefaultEx()!;
                 default:
                     throw new InvalidOperationException();
             }

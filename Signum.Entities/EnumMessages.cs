@@ -1,10 +1,17 @@
 
 
 using Signum.Utilities;
+using System;
 using System.ComponentModel;
 
 namespace Signum.Entities
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class AllowUnathenticatedAttribute : Attribute
+    {
+
+    }
+
     public enum OperationMessage
     {
         [Description("Create...")]
@@ -18,13 +25,8 @@ namespace Signum.Entities
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
         Confirm,
-        [Description("Please confirm you'd like to delete {0} from the system")]
-        PleaseConfirmYouDLikeToDelete0FromTheSystem,
-        [Description("Please confirm you'd like to delete the entity from the system")]
-        PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem,
-        [Description("Please confirm you'd like to delete the selected entities from the system")]
-        PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
-
+        [Description("Please confirm you would like to delete {0} from the system")]
+        PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
         [Description("{0} didn't return an entity")]
         TheOperation0DidNotReturnAnEntity,
         Logs,
@@ -33,6 +35,17 @@ namespace Signum.Entities
         _0AndClose,
         [Description("{0} & New")]
         _0AndNew,
+
+        BulkModifications, 
+        [Description("Please confirm that you would like to apply the above changes and execute {0} over {1} {2}")]
+        PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12,
+
+        Condition, 
+        Setters,
+        [Description("Add setter")]
+        AddSetter,
+        [Description("multi setter")]
+        MultiSetter,
     }
 
     public enum SynchronizerMessage
@@ -57,9 +70,9 @@ namespace Signum.Entities
         ThereAre0ThatReferThisEntity,
         [Description("There are records in '{0}' referring to this table by column '{1}'")]
         ThereAreRecordsIn0PointingToThisTableByColumn1,
-        [Description("Unautorized access to {0} because {1}")]
+        [Description("Unauthorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
-        [Description("There's already a {0} with {1} equals to '{2}'")]
+        [Description("There is already a {0} with {1} equals to {2}")]
         TheresAlreadyA0With1EqualsTo2_G
     }
 
@@ -82,26 +95,20 @@ namespace Signum.Entities
         ImpossibleToSaveIntegrityCheckFailed,
         [Description("Loading {0}...")]
         Loading0,
-        [Description(@"There are changes that haven't been saved.
-Lose changes?")]
-        LoseChanges,
         NoDirectErrors,
         Ok,
         Reload,
         [Description(@"The {0} has errors:
 {1}")]
         The0HasErrors1,
-        ThereAreChanges,
-        [Description(@"There are new changes that will be lost.
-
-    Continue?")]
-        ThereAreChangesContinue,
         ThereAreErrors,
         Message,
         [Description("New {0}")]
         New0_G,
         [Description("{0} {1}")]
-        Type0Id1
+        Type0Id1,
+        Main
+
     }
 
     public enum EntityControlMessage
@@ -144,6 +151,8 @@ Lose changes?")]
         AddValue,
         [Description("Delete filter")]
         DeleteFilter,
+        [Description("Delete all filter")]
+        DeleteAllFilter,
         Filters,
         Find,
         [Description("Finder of {0}")]
@@ -175,8 +184,6 @@ Lose changes?")]
         Create,
         [Description("Create new {0}")]
         CreateNew0_G,
-        [Description("All")]
-        SearchControl_Pagination_All,
         [Description("There is no {0}")]
         ThereIsNo0,
         Value,
@@ -207,6 +214,14 @@ Lose changes?")]
         [Description("{0} filters collapsed")]
         _0FiltersCollapsed,
         DisplayName,
+        [Description("To prevent performance issues automatic search is disabled, check your filters first and then click [Search] button.")]
+        ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton,
+        [Description("{0} elements")]
+        PaginationAll_0Elements,
+        [Description("{0} of {1} elements")]
+        PaginationPages_0Of01lements,
+        [Description("{0} {1} elements")]
+        PaginationFirst_01Elements
     }
 
     public enum SelectorMessage
@@ -232,6 +247,7 @@ Lose changes?")]
         PleaseChooseA0ToContinue,
     }
 
+    [AllowUnathenticated]
     public enum ConnectionMessage
     {
         AConnectionWithTheServerIsNecessaryToContinue,
@@ -239,6 +255,9 @@ Lose changes?")]
         SessionExpired,
         [Description("A new version has just been deployed! Save changes and {0}")]
         ANewVersionHasJustBeenDeployedSaveChangesAnd0,
+        OutdatedClientApplication,
+        [Description("Looks like a new version has just been deployed! If you don't have changes that need to be saved, consider reloading")]
+        ANewVersionHasJustBeenDeployedConsiderReload,
         Refresh,
     }
 
@@ -250,13 +269,17 @@ Lose changes?")]
 
     public enum NormalControlMessage
     {
-        Save,
         [Description("View for type {0} is not allowed")]
         ViewForType0IsNotAllowed,
-
-        SaveChangesFirst
+        SaveChangesFirst,
     }
 
+    public enum SaveChangesMessage
+    {
+        ThereAreChanges,
+        YoureTryingToCloseAnEntityWithChanges,
+        LoseChanges,
+    }
 
     public enum CalendarMessage
     {
@@ -264,6 +287,7 @@ Lose changes?")]
         Today,
     }
 
+    [AllowUnathenticated]
     public enum JavascriptMessage
     {
         [Description("Choose a type")]
@@ -274,12 +298,7 @@ Lose changes?")]
         addFilter,
         [Description("Open tab")]
         openTab,
-        [Description("Rename column")]
-        renameColumn,
-        [Description("Edit column")]
-        editColumn,
-        [Description("Enter the new column name")]
-        enterTheNewColumnName,
+
         [Description("Error")]
         error,
         [Description("Executed")]
@@ -292,6 +311,8 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Show group")]
+        ShowGroup,
         [Description("Acivate Time Machine")]
         activateTimeMachine,
         [Description("Deactivate Time Machine")]
@@ -318,12 +339,14 @@ Lose changes?")]
         popupErrorsStop,
         [Description("Insert column")]
         insertColumn,
+        [Description("Edit column")]
+        editColumn,
         [Description("Remove column")]
         removeColumn,
-        [Description("Move left")]
-        reorderColumn_MoveLeft,
-        [Description("Move right")]
-        reorderColumn_MoveRight,
+        [Description("Remove other columns")]
+        removeOtherColumns,
+        [Description("Restore default columns")]
+        restoreDefaultColumns,
         [Description("Saved")]
         saved,
         [Description("Search")]
@@ -356,7 +379,57 @@ Lose changes?")]
         [Description("Show Period")]
         showPeriod,
         [Description("Show Previous Operation")]
-        showPreviousOperation
+        showPreviousOperation,
+
+        [Description("Date")]
+        Date,
+        [Description("Time")]
+        Time,
+    }
+
+    //https://github.com/jquense/react-widgets/blob/5d4985c6dac0df34b86c7d8ad311ff97066977ab/packages/react-widgets/src/messages.tsx#L35
+    [AllowUnathenticated]
+    public enum ReactWidgetsMessage
+    {
+        [Description("Today")]
+        MoveToday,
+
+        [Description("Navigate back")]
+        MoveBack,
+        [Description("Navigate forward")]
+        MoveForward,
+        [Description("Select date")]
+        DateButton,
+        [Description("Select time")]
+        TimeButton,
+        [Description("open combobox")]
+        OpenCombobox,
+        [Description("open dropdown")]
+        OpenDropdown,
+        [Description("")]
+        Placeholder,
+        [Description("")]
+        FilterPlaceholder,
+        [Description("There are no items in this list")]
+        EmptyList,
+        [Description("The filter returned no results")]
+        EmptyFilter,
+        [Description("Create option")]
+        CreateOption,
+        [Description("Create option {0}")]
+        CreateOption0,
+        [Description("Selected items")]
+        TagsLabel,
+        [Description("Remove selected item")]
+        RemoveLabel,
+        [Description("no selected items")]
+        NoneSelected,
+        [Description("Selected items: {0}")]
+        SelectedItems0,
+        [Description("Increment value")]
+        IncrementValue,
+        [Description("Decrement value")]
+        DecrementValue,
     }
 
     public enum QuickLinkMessage

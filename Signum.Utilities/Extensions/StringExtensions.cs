@@ -26,7 +26,8 @@ namespace Signum.Utilities
         static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a! : b;
 #pragma warning restore IDE0052 // Remove unread private members
         [ExpressionField("DefaultTextExpression")]
-        public static string DefaultText(this string? str, string defaultText)
+        [return: NotNullIfNotNull("defaultText")]
+        public static string? DefaultText(this string? str, string? defaultText)
         {
             if (str.HasText())
                 return str!;
@@ -382,10 +383,10 @@ namespace Signum.Utilities
             if (start == -1)
                 throw NotFound(str, firstSeparator);
 
-            start = start+firstSeparator.Length ;
+            start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 throw NotFound(str, secondSeparator);
 
             return str.Substring(start, end - start);
@@ -403,7 +404,7 @@ namespace Signum.Utilities
             start = start + 1;
 
             int end = str.IndexOf(secondSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 throw NotFound(str, secondSeparator);
 
             return str.Substring(start, end - start);
@@ -418,10 +419,10 @@ namespace Signum.Utilities
             if (start == -1)
                 return null;
 
-            start = start + 1;
+            start = start + firstSeparator.Length;
 
             int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 return null;
 
             return str.Substring(start, end - start);
@@ -439,7 +440,7 @@ namespace Signum.Utilities
             start = start + 1;
 
             int end = str.IndexOf(secondSeparator ?? firstSeparator, start);
-            if (start == -1)
+            if (end == -1)
                 return null;
 
             return str.Substring(start, end - start);
@@ -662,25 +663,36 @@ namespace Signum.Utilities
 
         public static string Indent(this string str, int numChars)
         {
-            return Indent(str, numChars, ' ');
+            return Indent(str, new string(' ', numChars));
         }
 
         public static string Indent(this string str, int numChars, char indentChar)
         {
-            string space = new string(indentChar, numChars);
+            return Indent(str, new string(indentChar, numChars));
+        }
+
+        public static string Indent(this string str, string space)
+        {
             StringBuilder sb = new StringBuilder();
-            using (StringReader sr = new StringReader(str))
+
+            for (int pos = 0; pos < str.Length; )
             {
-                for (string? line = sr.ReadLine(); line != null; line = sr.ReadLine())
+                var nextPos = str.IndexOf('\n', pos);
+                if(nextPos == -1)
                 {
                     sb.Append(space);
-                    sb.AppendLine(line);
+                    sb.Append(str.Substring(pos));
+                    pos = str.Length + 1;
+                }
+                else
+                {
+                    sb.Append(space);
+                    sb.Append(str.Substring(pos, (nextPos - pos) + 1));
+                    pos = nextPos + 1;
                 }
             }
 
-            string result = sb.ToString(0, str.EndsWith("\r\n") ? sb.Length : Math.Max(sb.Length - 2, 0));
-
-            return result;
+            return sb.ToString();
         }
 
         public static string FirstUpper(this string str)

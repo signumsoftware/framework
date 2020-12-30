@@ -83,7 +83,7 @@ namespace Signum.Utilities
             Console.Write(question);
             do
             {
-                var userAnswer = Console.ReadLine();
+                var userAnswer = Console.ReadLine() ?? "";
 
                 string? error = stringValidator == null ? null : stringValidator(userAnswer);
                 if (error == null)
@@ -98,18 +98,41 @@ namespace Signum.Utilities
             return Ask(question, "yes", "no") == "yes";
         }
 
-        public static string Ask(string question, params string[] answers)
+        public static string AskRetry(string question, params string[] answers)
+        {
+            retry:
+            var result = Ask(question, answers);
+            if (result == null)
+                goto retry;
+
+            return result;
+        }
+
+        public static string? Ask(string question, params string[] answers)
         {
             Console.Write(question + " ({0}) ".FormatWith(answers.ToString("/")));
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine()?.ToLower();
+                if (!userAnswer.HasText())
+                    return null;
+
                 var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
                 if (result != null)
                     return result;
 
                 Console.Write("Possible answers: {0} ".FormatWith(answers.ToString("/")));
             } while (true);
+        }
+
+        public static string AskMultilineRetry(string question, params string[] answers)
+        {
+            retry:
+            var result = AskMultiLine(question, answers);
+            if (result == null)
+                goto retry;
+
+            return result;
         }
 
         public static string? AskMultiLine(string question, params string[] answers)
@@ -123,7 +146,7 @@ namespace Signum.Utilities
 
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine()?.ToLower();
 
                 if (!userAnswer.HasText())
                     return null;
@@ -149,7 +172,11 @@ namespace Signum.Utilities
 
             string? answerString = null;
 
-            string result = Ask(ref answerString, question, "yes", "no");
+            retry:
+            string? result = Ask(ref answerString, question, "yes", "no");
+
+            if (result == null)
+                goto retry;
 
             if (answerString.HasText())
                 rememberedAnswer = answerString == "yes";
@@ -157,7 +184,7 @@ namespace Signum.Utilities
             return result == "yes";
         }
 
-        public static string Ask(ref string? rememberedAnswer, string question, params string[] answers)
+        public static string? Ask(ref string? rememberedAnswer, string question, params string[] answers)
         {
             if (rememberedAnswer != null)
                 return rememberedAnswer;
@@ -167,10 +194,13 @@ namespace Signum.Utilities
                 Console.Write(question + " ({0} - use '!' for all) ".FormatWith(answers.ToString("/")));
                 do
                 {
-                    var userAnswer = Console.ReadLine().ToLower();
+                    var userAnswer = (Console.ReadLine() ?? "").ToLower();
                     bool remember = userAnswer.Contains("!");
                     if (remember)
                         userAnswer = userAnswer.Replace("!", "");
+
+                    if (!userAnswer.HasText())
+                        return null;
 
                     var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
                     if (result != null)

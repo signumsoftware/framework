@@ -45,6 +45,9 @@ namespace Signum.Entities.DynamicQuery
             if (uType == typeof(Guid))
                 return FilterType.Guid;
 
+            if (uType == typeof(Date))
+                return FilterType.DateTime;
+
             if (uType.IsEnum)
                 return FilterType.Enum;
 
@@ -423,12 +426,12 @@ namespace Signum.Entities.DynamicQuery
                     return mce.Arguments[0];
 
                 if (!idAndToStr)
-                    return Expression.Property(expression, "Entity");
+                return Expression.Property(expression, "Entity");
             }
             return expression;
         }
 
-        internal static Expression BuildLiteNulifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)
+        internal static Expression BuildLiteNullifyUnwrapPrimaryKey(this Expression expression, PropertyRoute[] routes)
         {
             var buildLite = BuildLite(expression);
 
@@ -497,14 +500,28 @@ namespace Signum.Entities.DynamicQuery
         static readonly MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
         static readonly MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
         static readonly MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
+        static readonly MethodInfo miEquals = ReflectionTools.GetMethodInfo(() => object.Equals(null, null));
 
         public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
         {
             switch (operation)
             {
-                case FilterOperation.EqualTo: return Expression.Equal(left, right);
+                case FilterOperation.EqualTo:
+                    {
+                        if (inMemory)
+                            return Expression.Call(null, miEquals, 
+                                Expression.Convert(left, typeof(object)), 
+                                Expression.Convert(right, typeof(object)));
+
+                        return Expression.Equal(left, right);
+                    }
                 case FilterOperation.DistinctTo:
                     {
+                        if (inMemory)
+                            return Expression.Not(Expression.Call(null, miEquals,
+                                Expression.Convert(left, typeof(object)),
+                                Expression.Convert(right, typeof(object))));
+
                         var t = left.Type.UnNullify();
                         var mi = t.IsValueType ? miDistinctNullable : miDistinct;
                         return Expression.Call(mi.MakeGenericMethod(t), left.Nullify(), right.Nullify());
@@ -517,9 +534,9 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 case FilterOperation.Like: return Expression.Call(miLike, Fix(left, inMemory), right);
-                case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right));
-                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right));
-                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right));
+                case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
+                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
+                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right, Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
                 case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, Fix(left, inMemory), right));
                 default:
                     throw new InvalidOperationException("Unknown operation {0}".FormatWith(operation));

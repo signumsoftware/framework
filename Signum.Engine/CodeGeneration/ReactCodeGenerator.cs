@@ -252,6 +252,8 @@ namespace Signum.Engine.CodeGeneration
             foreach (var item in GetServerUsingNamespaces(mod))
                 sb.AppendLine("using {0};".FormatWith(item));
 
+            sb.AppendLine("using Microsoft.AspNetCore.Mvc;");
+
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");
@@ -497,7 +499,7 @@ namespace Signum.Engine.CodeGeneration
 
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
-            if (elementType.IsEmbeddedEntity() || (eka!.EntityKind == EntityKind.Part || eka!.EntityKind == EntityKind.SharedPart))
+            if (elementType.IsEmbeddedEntity() || !pi.PropertyType.ElementType()!.IsLite() && (eka!.EntityKind == EntityKind.Part || eka!.EntityKind == EntityKind.SharedPart))
                 if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Length > 1)
                     return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
                 else
@@ -520,7 +522,7 @@ namespace Signum.Engine.CodeGeneration
             if (eka == null)
                 return "<EntityLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
-            if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
+            if (!pi.PropertyType.IsLite() && (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
                 return "<EntityDetail ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
             if (eka.IsLowPopulation)
@@ -534,7 +536,7 @@ namespace Signum.Engine.CodeGeneration
         {
             type = type.UnNullify();
 
-            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorEmbedded))
+            if (type.IsEnum || type == typeof(TimeSpan))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);

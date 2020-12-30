@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Signum.Utilities.NaturalLanguage
@@ -46,6 +46,26 @@ namespace Signum.Utilities.NaturalLanguage
                 return singularName.Substring(0, singularName.Length - result.Key.Length) + result.Value;
 
             return singularName + "s";
+        }
+
+        public string MakeSingular(string pluralName)
+        {
+            if (string.IsNullOrEmpty(pluralName))
+                return pluralName;
+
+            int index = pluralName.LastIndexOf(' ');
+
+            if (index != -1)
+                return pluralName.Substring(0, index + 1) + MakeSingular(pluralName.Substring(index + 1));
+
+            var result = exceptions.FirstOrDefault(r => r.Value != "s" && pluralName.EndsWith(r.Value));
+            if (result.Key != null)
+                return pluralName.Substring(0, pluralName.Length - result.Value.Length) + result.Key;
+
+            if (pluralName.EndsWith("s") || pluralName.EndsWith("S"))
+                return pluralName.Substring(0, pluralName.Length - 1);
+
+            return pluralName;
         }
     }
 

@@ -35,6 +35,8 @@ namespace Signum.Utilities.ExpressionTrees
         {
             ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
             var result = ee.Visit(expr);
+            if (result == null)
+                return null;
             return partialEval(result);
         }
 
@@ -255,7 +257,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         bool GetBool(Expression exp)
         {
-            return (bool)((ConstantExpression)exp).Value;
+            return (bool)((ConstantExpression)exp).Value!;
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -280,7 +282,7 @@ namespace Signum.Utilities.ExpressionTrees
                 }
 
                 Expression right = this.Visit(b.Right);
-                Expression conversion = this.Visit(b.Conversion);
+                Expression? conversion = this.Visit(b.Conversion);
 
                 return Expression.Coalesce(left, right, conversion as LambdaExpression);
             }
@@ -313,6 +315,23 @@ namespace Signum.Utilities.ExpressionTrees
                 return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
             }
 
+            // rel == 'a' is compiled as (int)rel == 123 
+            if(b.NodeType == ExpressionType.Equal || 
+                b.NodeType == ExpressionType.NotEqual)
+            {
+                {
+                    if (IsConvertCharToInt(b.Left) is Expression l &&
+                        IsConvertCharToIntOrConstant(b.Right) is Expression r)
+                        return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
+                }
+                {
+                    if (IsConvertCharToIntOrConstant(b.Left) is Expression l &&
+                        IsConvertCharToInt(b.Right) is Expression r)
+                        return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
+                }
+
+            }
+
             if (b.Left.Type != typeof(bool))
                 return base.VisitBinary(b);
 
@@ -342,6 +361,31 @@ namespace Signum.Utilities.ExpressionTrees
             }
 
             return base.VisitBinary(b);
+        }
+
+        static Expression? IsConvertCharToInt(Expression exp)
+        {
+            if (exp is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Operand.Type == typeof(char))
+            {
+                return ue.Operand;
+            }
+
+            return null;
+        }
+
+        static Expression? IsConvertCharToIntOrConstant(Expression exp)
+        {
+            var result = IsConvertCharToInt(exp);
+            if (result != null)
+                return result;
+
+            if (exp is ConstantExpression ceInt && ceInt.Type == typeof(int))
+                return Expression.Constant((char)(int)ceInt.Value!, typeof(char));
+
+            if (exp is ConstantExpression ceChar && ceChar.Type == typeof(char))
+                return ceChar;
+
+            return null;
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)

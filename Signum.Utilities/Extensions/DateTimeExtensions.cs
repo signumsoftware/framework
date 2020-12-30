@@ -37,58 +37,11 @@ namespace Signum.Utilities
                    (maxDate == null || date < maxDate);
         }
 
-        static void AssertDateOnly(DateTime? date)
-        {
-            if (date == null)
-                return;
-            DateTime d = date.Value;
-            if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
-                throw new InvalidOperationException("The date has some hours, minutes, seconds or milliseconds");
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpander))]
-        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return minDate <= date && date <= maxDate;
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpanderNull))]
-        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate);
-        }
-
-        /// <summary>
-        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
-        /// </summary>
-        [MethodExpander(typeof(IsInIntervalExpanderNullNull))]
-        public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
-        {
-            AssertDateOnly(date);
-            AssertDateOnly(minDate);
-            AssertDateOnly(maxDate);
-            return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate);
-        }
-
         class IsInIntervalExpander : IMethodExpander
         {
             static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -98,7 +51,7 @@ namespace Signum.Utilities
         {
             Expression<Func<DateTime, DateTime, DateTime?, bool>> func = (date, minDate, maxDate) => minDate <= date && (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -110,7 +63,7 @@ namespace Signum.Utilities
                 (minDate == null || minDate <= date) &&
                 (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -119,7 +72,16 @@ namespace Signum.Utilities
         public static int YearsTo(this DateTime start, DateTime end)
         {
             int result = end.Year - start.Year;
-            if (end.Month < start.Month || (end.Month == start.Month & end.Day < start.Day))
+            if (end < start.AddYears(result))
+                result--;
+
+            return result;
+        }
+
+        public static int YearsTo(this Date start, Date end)
+        {
+            int result = end.Year - start.Year;
+            if (end < start.AddYears(result))
                 result--;
 
             return result;
@@ -128,7 +90,16 @@ namespace Signum.Utilities
         public static int MonthsTo(this DateTime start, DateTime end)
         {
             int result = end.Month - start.Month + (end.Year - start.Year) * 12;
-            if (end.Day < start.Day)
+            if (end < start.AddMonths(result))
+                result--;
+
+            return result;
+        }
+
+        public static int MonthsTo(this Date start, Date end)
+        {
+            int result = end.Month - start.Month + (end.Year - start.Year) * 12;
+            if (end < start.AddMonths(result))
                 result--;
 
             return result;
@@ -384,6 +355,11 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date YearStart(this Date date)
+        {
+            return new Date(date.Year, 1, 1);
+        }
+
         public static DateTime QuarterStart(this DateTime dateTime)
         {
             var quarterMonthStart = (((dateTime.Month - 1) / 4) * 4) + 1;
@@ -391,9 +367,21 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, quarterMonthStart, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date QuarterStart(this Date date)
+        {
+            var quarterMonthStart = (((date.Month - 1) / 4) * 4) + 1;
+
+            return new Date(date.Year, quarterMonthStart, 1);
+        }
+
         public static int Quarter(this DateTime dateTime)
         {
             return ((dateTime.Month - 1) / 4) + 1;
+        }
+
+        public static int Quarter(this Date date)
+        {
+            return ((date.Month - 1) / 4) + 1;
         }
 
         public static DateTime MonthStart(this DateTime dateTime)
@@ -401,9 +389,19 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static Date MonthStart(this Date date)
+        {
+            return new Date(date.Year, date.Month, 1);
+        }
+
         public static DateTime WeekStart(this DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind).AddDays(-(int)dateTime.DayOfWeek);
+        }
+
+        public static Date WeekStart(this Date date)
+        {
+            return new Date(date.Year, date.Month, date.Day).AddDays(-(int)date.DayOfWeek);
         }
 
         public static DateTime HourStart(this DateTime dateTime)
@@ -436,6 +434,13 @@ namespace Signum.Utilities
             var cc = CultureInfo.CurrentCulture;
 
             return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+        }
+
+        public static int WeekNumber(this Date date)
+        {
+            var cc = CultureInfo.CurrentCulture;
+
+            return cc.Calendar.GetWeekOfYear(date, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
         }
 
         /// <summary>

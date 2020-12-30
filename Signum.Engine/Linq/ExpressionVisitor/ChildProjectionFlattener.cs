@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -130,7 +131,7 @@ namespace Signum.Engine.Linq
 
                     currentSource = old;
 
-                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM).Nullify()));
+                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => MakeEquatable(cd.GetReference(aliasSM))));
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type })!;
                     Type projType = proj.UniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(kvpType) : kvpType;
@@ -139,9 +140,17 @@ namespace Signum.Engine.Linq
                         Expression.New(ciKVP, key, projector), proj.UniqueFunction, projType);
 
                     return new ChildProjectionExpression(childProj,
-                        TupleReflection.TupleChainConstructor(columns.Select(a => a.Nullify())), inMList != null, inMList ?? proj.Type, new LookupToken());
+                        TupleReflection.TupleChainConstructor(columns.Select(a => MakeEquatable(a))), inMList != null, inMList ?? proj.Type, new LookupToken());
                 }
             }
+        }
+
+        public Expression MakeEquatable(Expression expression)
+        {
+            if (expression.Type.IsArray)
+                return Expression.New(typeof(ArrayBox<>).MakeGenericType(expression.Type.ElementType()!).GetConstructors().SingleEx(), expression);
+
+            return expression.Nullify();
         }
 
         private SelectExpression WithoutOrder(SelectExpression sel)
@@ -328,5 +337,28 @@ namespace Signum.Engine.Linq
             }
         }
 
+    }
+
+    class ArrayBox<T> : IEquatable<ArrayBox<T>>
+    {
+        readonly int hashCode;
+        public readonly T[]? Array;
+
+        public ArrayBox(T[]? array)
+        {
+            this.Array = array;
+            this.hashCode = 0;
+            if(array != null)
+            {
+                foreach (var item in array)
+                {
+                    this.hashCode = (this.hashCode << 1) ^ (item == null ? 0 : item.GetHashCode());
+                }
+            }
+        }
+
+        public override int GetHashCode() => hashCode;
+        public override bool Equals(object? obj) => obj is ArrayBox<T> a && Equals(a);
+        public bool Equals([AllowNull]ArrayBox<T> other) => other != null && Enumerable.SequenceEqual(Array!, other.Array!);
     }
 }

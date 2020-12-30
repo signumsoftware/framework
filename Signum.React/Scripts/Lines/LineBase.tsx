@@ -13,14 +13,14 @@ export interface ChangeEvent {
 export interface LineBaseProps extends StyleOptions {
   ctx: TypeContext<any>;
   type?: TypeReference;
-  labelText?: React.ReactChild;
+  labelText?: React.ReactNode;
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
-  helpText?: React.ReactChild;
+  helpText?: React.ReactNode | null;
   mandatory?: boolean;
 }
 
@@ -85,12 +85,12 @@ export class LineBaseController<P extends LineBaseProps> {
 
     const so: StyleOptions = { readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute.typeReference()) } as LineBaseProps as P;
+    const p = { ctx: ctx.subCtx(so), type: (type ?? ctx.propertyRoute?.typeReference()) } as LineBaseProps as P;
 
     this.getDefaultProps(p);
-    runTasks(this as any as LineBaseController<LineBaseProps>, p);
-
     this.overrideProps(p, otherProps as P);
+    runTasks(this as any as LineBaseController<LineBaseProps>, p, props);
+
     return p;
   }
 
@@ -124,12 +124,12 @@ export class LineBaseController<P extends LineBaseProps> {
   }
 
   get isHidden() {
-    return this.props.visible == false || this.props.hideIfNull && this.props.ctx.value == undefined;
+    return this.props.type == null || this.props.visible == false || this.props.hideIfNull && this.props.ctx.value == undefined;
   }
 }
 
-export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) => void)[] = [];
+export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 
-export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
-  tasks.forEach(t => t(lineBase, state));
+export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) {
+  tasks.forEach(t => t(lineBase, state, originalProps));
 }

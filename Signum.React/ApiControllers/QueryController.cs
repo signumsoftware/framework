@@ -7,8 +7,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Entities;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
@@ -20,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Json;
 using System.Linq.Expressions;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.React.ApiControllers
 {
@@ -34,33 +34,6 @@ namespace Signum.React.ApiControllers
             Implementations implementations = ParseImplementations(types);
 
             return await AutocompleteUtils.FindLiteLikeAsync(implementations, subString, count, token);
-        }
-
-        [HttpPost("api/query/findRowsLike"), ProfilerActionSplitter("types")]
-        public async Task<ResultTable> FindRowsLike([Required, FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
-        {
-            var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = QueryLogic.Queries.QueryDescription(qn);
-
-            var dqRequest = new DQueryableRequest
-            {
-                QueryName = qn,
-                Columns = request.columns.EmptyIfNull().Select(a => a.ToColumn(qd, false)).ToList(),
-                Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
-                Orders = request.orders.EmptyIfNull().Select(a => a.ToOrder(qd, false)).ToList()
-            };
-
-            var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
-            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations!.Value.Types.SingleEx();
-
-            var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
-
-            var columnAccessors = dqRequest.Columns.Select(c => (
-                column: c,
-                lambda: Expression.Lambda(c.Token.BuildExpression(dqueryable.Context), dqueryable.Context.Parameter)
-            )).ToList();
-
-            return DQueryable.ToResultTable(result.ToArray(), columnAccessors, null, new Pagination.Firsts(request.count));
         }
 
         [HttpGet("api/query/allLites"), ProfilerActionSplitter("types")]
@@ -161,6 +134,7 @@ namespace Signum.React.ApiControllers
         public string querykey;
         public List<FilterTS> filters;
         public string valueToken;
+        public bool? multipleValues;
         public SystemTimeTS/*?*/ systemTime;
 
         public QueryValueRequest ToQueryValueRequest()
@@ -173,6 +147,7 @@ namespace Signum.React.ApiControllers
             return new QueryValueRequest
             {
                 QueryName = qn,
+                MultipleValues = multipleValues ?? false,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
                 ValueToken = value,
                 SystemTime = this.systemTime?.ToSystemTime(),
@@ -182,19 +157,9 @@ namespace Signum.React.ApiControllers
         public override string ToString() => querykey;
     }
 
-    public class AutocompleteQueryRequestTS
-    {
-        public string queryKey;
-        public List<FilterTS> filters;
-        public List<ColumnTS> columns;
-        public List<OrderTS> orders;
-        public string subString;
-        public int count;
-    }
-
-
     public class QueryRequestTS
     {
+        public string queryUrl;
         public string queryKey;
         public bool groupResults;
         public List<FilterTS> filters;
@@ -210,6 +175,7 @@ namespace Signum.React.ApiControllers
 
             return new QueryRequest
             {
+                QueryUrl = queryUrl,
                 QueryName = qn,
                 GroupResults = groupResults,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),
@@ -299,8 +265,8 @@ namespace Signum.React.ApiControllers
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
             
-            var val = value is JToken jtok ?
-                 jtok.ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
+            var val = value is JsonElement jtok ?
+                 jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
                  value;
 
             return new FilterCondition(parsedToken, operation, val);
@@ -393,15 +359,9 @@ namespace Signum.React.ApiControllers
                 startDate = between.StartDateTime;
                 endDate = between.EndtDateTime;
             }
-            else if (systemTime is SystemTime.FromTo fromTo)
-            {
-                mode = SystemTimeMode.Between; //Same
-                startDate = fromTo.StartDateTime;
-                endDate = fromTo.EndtDateTime;
-            }
             else if (systemTime is SystemTime.ContainedIn containedIn)
             {
-                mode = SystemTimeMode.Between; //Same
+                mode = SystemTimeMode.ContainedIn;
                 startDate = containedIn.StartDateTime;
                 endDate = containedIn.EndtDateTime;
             }
@@ -464,9 +424,9 @@ namespace Signum.React.ApiControllers
         public string? format;
         public string displayName;
         public bool isGroupable;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool hasOrderAdapter;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool preferEquals;
         public string? propertyRoute;
 
@@ -547,9 +507,9 @@ namespace Signum.React.ApiControllers
         public string? format;
         public string? unit;
         public bool isGroupable;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool hasOrderAdapter;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool preferEquals;
         public QueryTokenTS? parent;
         public string? propertyRoute;

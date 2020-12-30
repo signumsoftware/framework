@@ -57,7 +57,7 @@ namespace Signum.Engine.Basics
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.CleanName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.CleanName, (dn, t) => GenerateProperties(t, dn).ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.CleanName, (dn, t) => GenerateProperties(t, dn, forSync: true).ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
@@ -83,17 +83,16 @@ namespace Signum.Engine.Basics
         public static List<PropertyRouteEntity> RetrieveOrGenerateProperties(TypeEntity typeEntity)
         {
             var retrieve = Database.Query<PropertyRouteEntity>().Where(f => f.RootType == typeEntity).ToDictionary(a => a.Path);
-            var generate = GenerateProperties(TypeLogic.EntityToType.GetOrThrow(typeEntity), typeEntity).ToDictionary(a => a.Path);
+            var generate = GenerateProperties(TypeLogic.EntityToType.GetOrThrow(typeEntity), typeEntity, forSync: false).ToDictionary(a => a.Path);
 
-            return generate.Select(kvp => retrieve.TryGetC(kvp.Key)?.Do(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
+            return generate.Select(kvp => retrieve.TryGetC(kvp.Key) ?? kvp.Value).ToList();
         }
 
-        public static List<PropertyRouteEntity> GenerateProperties(Type type, TypeEntity typeEntity)
+        public static List<PropertyRouteEntity> GenerateProperties(Type type, TypeEntity typeEntity, bool forSync)
         {
-            return PropertyRoute.GenerateRoutes(type).Select(pr =>
+            return PropertyRoute.GenerateRoutes(type, includeMListElements: forSync).Select(pr =>
                 new PropertyRouteEntity
                 {
-                    Route = pr,
                     RootType = typeEntity,
                     Path = pr.PropertyString()
                 }).ToList();
@@ -108,10 +107,9 @@ namespace Signum.Engine.Basics
         {
             TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(route.RootType);
             string path = route.PropertyString();
-            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path)?.Do(pi => pi.Route = route) ??
+            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path) ??
                  new PropertyRouteEntity
                  {
-                     Route = route,
                      RootType = type,
                      Path = path
                  };

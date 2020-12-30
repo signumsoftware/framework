@@ -167,16 +167,12 @@ namespace Signum.Entities
         Type BaseType { get; }
     }
 
-    public interface IConstructFromManySymbolContainer<in T> : IOperationSymbolContainer
-       where T : class, IEntity
-    {
-        Type BaseType { get; }
-    }
-
 
     public static class ConstructSymbol<T>
         where T : class, IEntity
     {
+ 
+
         public interface Simple : IOperationSymbolContainer
         {
         }
@@ -186,9 +182,10 @@ namespace Signum.Entities
         {
         }
 
-        public interface FromMany<in F> : IConstructFromManySymbolContainer<F>
+        public interface FromMany<in F> : IOperationSymbolContainer
             where F : class, IEntity
         {
+            Type BaseType { get; }
         }
     }
 
@@ -248,5 +245,16 @@ namespace Signum.Entities
         Constructor,
         ConstructorFrom,
         ConstructorFromMany
+    }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum PropertyOperation
+    {
+        Set,
+        AddElement,
+        ChangeElements,
+        RemoveElements,
+        ModifyEntity,
+        CreateNewEntity,
     }
 }

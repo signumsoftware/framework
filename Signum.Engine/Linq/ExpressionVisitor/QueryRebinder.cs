@@ -95,7 +95,7 @@ namespace Signum.Engine.Linq
 
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments)
-                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.Table, sqlFunction.Alias, args);
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
             return sqlFunction;
         }
 
@@ -108,7 +108,7 @@ namespace Signum.Engine.Linq
 
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
-            Expression condition = this.Visit(join.Condition);
+            Expression? condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
                 return new JoinExpression(join.JoinType, left, right, condition);
@@ -148,7 +148,7 @@ namespace Signum.Engine.Linq
             var where = Visit(delete.Where);
 
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where);
+                return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount);
 
             return delete;
         }
@@ -164,7 +164,7 @@ namespace Signum.Engine.Linq
             var where = Visit(update.Where);
             var assigments = Visit(update.Assigments, VisitColumnAssigment);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.UseHistoryTable, (SourceWithAliasExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SourceWithAliasExpression)source, where, assigments, update.ReturnRowCount);
 
             return update;
         }
@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
             var source = Visit(insertSelect.Source);
             var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
-                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, (SourceWithAliasExpression)source, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, (SourceWithAliasExpression)source, assigments, insertSelect.ReturnRowCount);
 
             return insertSelect;
         }
@@ -204,8 +204,8 @@ namespace Signum.Engine.Linq
                 col.Visit(e);
 
             SourceExpression from = this.VisitSource(select.From!);
-            Expression top = this.Visit(select.Top);
-            Expression where = this.Visit(select.Where);
+            Expression? top = this.Visit(select.Top);
+            Expression? where = this.Visit(select.Where);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
             if (orderBy.HasItems())
                 orderBy = RemoveDuplicates(orderBy);

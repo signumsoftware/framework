@@ -2,12 +2,12 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
-import { Lite, Entity } from '../Signum.Entities'
-import { getTypeInfos, getQueryKey } from '../Reflection'
+import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
-import { MaxHeightProperty } from 'csstype';
+import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
@@ -23,7 +23,7 @@ export interface SearchControlProps {
   entityFormatter?: EntityFormatter;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
-  maxResultsHeight?: MaxHeightProperty<string | number> | any;
+  maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
   searchOnLoad?: boolean;
   allowSelection?: boolean
@@ -43,12 +43,12 @@ export interface SearchControlProps {
   allowChangeColumns?: boolean;
   allowChangeOrder?: boolean;
   create?: boolean;
-  navigate?: boolean | "InPlace";
+  view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   avoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
-  refreshKey?: string | number;
+  refreshKey?: any;
   enableAutoFocus?: boolean;
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -58,7 +58,7 @@ export interface SearchControlProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => Promise<void | boolean>;
+  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>; //return false to avoid autoRefresh
   styleContext?: StyleContext;
 }
 
@@ -185,12 +185,12 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFooter={p.showFooter != null ? p.showFooter : true}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
-        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
-        navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
+        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
+        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
 
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
-        showContextMenu={p.showContextMenu || qs?.showContextMenu || ((fo) => fo.groupResults ? "Basic" : true)}
+        showContextMenu={p.showContextMenu ?? qs?.showContextMenu ?? ((fo) => fo.groupResults ? "Basic" : true)}
         hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
         hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
         showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}

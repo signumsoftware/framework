@@ -59,7 +59,9 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            if (Column.Type.UnNullify() == typeof(DateTime))
+            var uType = Column.Type.UnNullify();
+
+            if (uType == typeof(DateTime) || uType == typeof(DateTimeOffset))
             {
                 if (Column.PropertyRoutes != null)
                 {
@@ -78,9 +80,26 @@ namespace Signum.Entities.DynamicQuery
                     return DateTimeProperties(this, DateTimePrecision.Days).AndHasValue(this);
             }
 
-            if (Column.Type.UnNullify() == typeof(double) ||
-                Column.Type.UnNullify() == typeof(float) ||
-                Column.Type.UnNullify() == typeof(decimal))
+            if (uType == typeof(TimeSpan))
+            {
+                if (Column.PropertyRoutes != null)
+                {
+                    DateTimePrecision? precision =
+                        Column.PropertyRoutes
+                        .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx())
+                        .Select(dtp => dtp?.Precision)
+                        .Distinct()
+                        .Only();
+
+                    if (precision != null)
+                        return TimeSpanProperties(this, precision.Value).AndHasValue(this);
+                }
+            }
+
+
+            if (uType == typeof(double) ||
+                uType == typeof(float) ||
+                uType == typeof(decimal))
             {
                 if (Column.PropertyRoutes != null)
                 {

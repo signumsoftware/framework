@@ -33,7 +33,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination, request.SystemTime);
 
                 return result.ToResultTable(request);
             }
@@ -45,7 +45,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
 
                 return result.ToResultTable(request);
             }
@@ -57,7 +57,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination, request.SystemTime);
 
                 return result.ToResultTable(request);
             }
@@ -69,7 +69,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 DQueryable<T> query = GetDQueryable(request);
 
-                var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
 
                 return result.ToResultTable(request);
             }
@@ -79,7 +79,8 @@ namespace Signum.Engine.DynamicQuery
         {
             if (!request.GroupResults)
             {
-                request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+                if(!request.Columns.Where(c => c is _EntityColumn).Any())
+                    request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
                 return Query
                     .ToDQueryable(GetQueryDescription())
@@ -123,7 +124,7 @@ namespace Signum.Engine.DynamicQuery
                 if (request.ValueToken is AggregateToken)
                     return query.SimpleAggregate((AggregateToken)request.ValueToken);
 
-                return query.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+                return query.SelectOne(request.ValueToken).Unique(UniqueType.SingleOrDefault);
             }
         }
 
@@ -141,7 +142,10 @@ namespace Signum.Engine.DynamicQuery
                 if (request.ValueToken is AggregateToken)
                     return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
 
-                return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.Single, token);
+                if (request.MultipleValues)
+                    return await query.SelectOne(request.ValueToken).ToListAsync(token);
+
+                return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.SingleOrDefault, token);
             }
         }
 

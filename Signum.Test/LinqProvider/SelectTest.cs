@@ -8,7 +8,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
-
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -331,7 +331,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistEntity>()
                 .Where(a => a.Status != null)
-                .Select(a => (a.Status ?? a.Status).Value)
+                .Select(a => (a.Status ?? a.Status)!.Value)
                 .ToArray();
         }
 
@@ -377,7 +377,7 @@ namespace Signum.Test.LinqProvider
             var durations = (from a in Database.Query<AlbumEntity>()
                              from s in a.Songs
                              where s.Seconds.HasValue
-                             select s.Seconds.Value).ToArray();
+                             select s.Seconds!.Value).ToArray();
         }
 
         [Fact]
@@ -636,7 +636,14 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectView()
         {
-            var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            if (Schema.Current.Settings.IsPostgres)
+            {
+                var list = Database.View<Signum.Engine.PostgresCatalog.PgClass>().ToList();
+            }
+            else
+            {
+                var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            }
         }
 
         [Fact]
@@ -649,7 +656,10 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectWithHint()
         {
-            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
+            if (!Schema.Current.Settings.IsPostgres)
+            {
+                var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_Album_LabelID)").Select(a => a.Label.Name).ToList();
+            }
         }
 
         [Fact]
@@ -677,7 +687,7 @@ namespace Signum.Test.LinqProvider
                 .Select(a => ((decimal?)a).InSql()) //Avoid Cast( as decimal) in SQL because of https://stackoverflow.com/questions/4169520/casting-as-decimal-and-rounding
                 .ToList();
 
-            Assert.Contains(list, a => a.Value != Math.Round(a.Value)); //Decimal places are preserved
+            Assert.Contains(list, a => a!.Value != Math.Round(a!.Value)); //Decimal places are preserved
 
         }
     }

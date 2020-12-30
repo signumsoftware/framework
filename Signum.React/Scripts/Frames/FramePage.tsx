@@ -1,20 +1,25 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
+import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
+import { Prompt } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId } from '../Reflection'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
-import * as QueryString from 'query-string'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
+import { renderWidgets,  WidgetContext } from './Widgets'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { FunctionalAdapter } from './FrameModal';
-import { useStateWithPromise, useForceUpdate, useTitle, useMounted } from '../Hooks'
+import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useWindowEvent, useUpdatedRef } from '../Hooks'
+import * as Operations from '../Operations'
+import WidgetEmbedded from './WidgetEmbedded'
+import { useTitle } from '../AppContext'
+import { FunctionalAdapter } from '../Modals'
+import { QueryString } from '../QueryString'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -22,63 +27,78 @@ interface FramePageProps extends RouteComponentProps<{ type: string; id?: string
 
 interface FramePageState {
   pack: EntityPack<Entity>;
+  lastEntity?: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
+  createNew?: () => Promise<EntityPack<Entity> | undefined>;
+  avoidPrompt?: boolean;
 }
 
 export default function FramePage(p: FramePageProps) {
 
   const [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
+  const stateRef = useUpdatedRef(state);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
   const validationErrors = React.useRef<React.Component>(null);
   const mounted = useMounted();
   const forceUpdate = useForceUpdate();
 
-  const type = getTypeInfo(p.match.params.type).name;
+  const ti = getTypeInfo(p.match.params.type);
+  const type = ti.name;
   const id = p.match.params.id;
-
-  const ti = getTypeInfo(type);
 
   useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
 
   React.useEffect(() => {
     loadEntity()
-      .then(pack => loadComponent(pack).then(getComponent => mounted.current ? setState({
-        pack: pack,
+      .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
+        pack: a.pack!,
+        lastEntity: JSON.stringify(a.pack!.entity),
+        createNew: a.createNew,
         getComponent: getComponent,
         refreshCount: state ? state.refreshCount + 1 : 0
       }) : undefined))
       .done();
   }, [type, id, p.location.search]);
 
-  React.useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+
+  useWindowEvent("beforeunload", e => {
+    if (stateRef.current && hasChanges(stateRef.current)) {
+      e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+      e.returnValue = '';   // Chrome requires returnValue to be set
+    }
   }, []);
 
+  useWindowEvent("keydown", handleKeyDown, []);
 
   function handleKeyDown(e: KeyboardEvent) {
     if (!e.openedModals && buttonBar.current)
       buttonBar.current.handleKeyDown(e);
   }
 
-
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
     const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
-    return Navigator.getViewPromise(pack.entity, viewName && Array.isArray(viewName) ? viewName[0] : viewName).promise;
+    return Navigator.getViewPromise(pack.entity, viewName).promise;
   }
 
 
-  function loadEntity(): Promise<EntityPack<Entity>> {
+  function loadEntity(): Promise<{ pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
-    if (QueryString.parse(p.location.search).waitData) {
+    const queryString = QueryString.parse(p.location.search);
+
+    if (queryString.waitData) {
       if (window.opener.dataForChildWindow == undefined) {
         throw new Error("No dataForChildWindow in parent found!")
       }
 
-      var pack = window.opener.dataForChildWindow;
+      var pack = window.opener.dataForChildWindow as EntityPack<Entity>;
       window.opener.dataForChildWindow = undefined;
-      return Promise.resolve(pack);
+      var txt = JSON.stringify(pack);
+      return Promise.resolve({
+        pack,
+        createNew: () => Promise.resolve(JSON.parse(txt))
+      });
     }
 
     if (id) {
@@ -90,22 +110,34 @@ export default function FramePage(p: FramePageProps) {
 
       return Navigator.API.fetchEntityPack(lite)
         .then(pack => {
-          return Promise.resolve(pack);
+          return Promise.resolve({
+            pack,
+            createNew: undefined
+          });
         });
 
     } else {
-      return Constructor.constructPack(ti.name)
-        .then(pack => {
-          return Promise.resolve(pack as EntityPack<Entity>);
-        });
+      const cn = queryString["constructor"];
+      if (cn != null && typeof cn == "string") {
+        const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
+        return Operations.API.construct(ti.name, oi.key).then(pack => ({
+          pack: pack!,
+          createNew: () => Operations.API.construct(ti.name, oi.key)
+        }));
+      }
+
+      return Constructor.constructPack(ti.name).then(pack => ({
+        pack: pack! as EntityPack<Entity>,
+        createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
+      }));
     }
   }
 
   function onClose() {
     if (Finder.isFindable(p.match.params.type, true))
-      Navigator.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
+      AppContext.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
     else
-      Navigator.history.push("~/");
+      AppContext.history.push("~/");
   }
 
   function setComponent(c: React.Component | null) {
@@ -127,15 +159,17 @@ export default function FramePage(p: FramePageProps) {
 
 
   const frame: EntityFrame = {
-    frameComponent: { forceUpdate },
+    tabs: undefined,
+    frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
+    avoidPrompt: () => state.avoidPrompt = true,
     onReload: (pack, reloadComponent, callback) => {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
       if (packEntity.entity.id != null && entity.id == null)
-        Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
+        AppContext.history.push(Navigator.navigateRoute(packEntity.entity));
       else {
         if (reloadComponent) {
           setState(undefined)
@@ -143,15 +177,20 @@ export default function FramePage(p: FramePageProps) {
             .then(gc => {
               if (mounted.current)
                 setState({
-                  getComponent: gc,
                   pack: packEntity,
-                  refreshCount: state.refreshCount + 1
+                  getComponent: gc,
+                  refreshCount: state.refreshCount + 1,
+                  
                 }).then(callback).done();
             })
             .done();
         }
         else {
-          setState({ pack: packEntity, getComponent: state.getComponent, refreshCount: state.refreshCount + 1 }).then(callback).done();
+          setState({
+            pack: packEntity,
+            getComponent: state.getComponent,
+            refreshCount: state.refreshCount + 1,
+          }).then(callback).done();
         }
       }
     },
@@ -162,7 +201,9 @@ export default function FramePage(p: FramePageProps) {
       forceUpdate()
     },
     refreshCount: state.refreshCount,
-    allowChangeEntity: true,
+    createNew: state.createNew,
+    allowExchangeEntity: true,
+    prefix: "framePage"
   };
 
 
@@ -175,21 +216,21 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
-  const embeddedWidgets = renderEmbeddedWidgets(wc);
 
   return (
     <div className="normal-control">
+      <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true}/>
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
       <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
-        {embeddedWidgets.top}
-      <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-        <ErrorBoundary>
-          {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-        </ErrorBoundary>
-      </div>
-      {embeddedWidgets.bottom}
+      <WidgetEmbedded widgetContext={wc} >
+        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <ErrorBoundary>
+            {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+          </ErrorBoundary>
+        </div>
+      </WidgetEmbedded>
     </div>
   );
 
@@ -210,6 +251,19 @@ export default function FramePage(p: FramePageProps) {
   }
 }
 
+function hasChanges(state: FramePageState) {
+
+  if (state.avoidPrompt)
+    return false;
+
+  const entity = state.pack.entity;
+  const ge = GraphExplorer.propagateAll(entity);
+  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
+    return true
+  }
+
+  return false;
+}
 
 
 

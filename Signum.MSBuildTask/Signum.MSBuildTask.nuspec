@@ -2,21 +2,23 @@
 <package >
   <metadata>
     <id>Signum.MSBuildTask</id>
-    <version>1.0.7</version>
+    <version>5.0.0</version>
     <title>IL rewriter for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
-	<license type="expression">MIT</license>
     <projectUrl>http://www.signumframework.com</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/signumsoftware/framework/master/SignumLogo.png</iconUrl>
+    <icon>SignumLogo.png</icon>
+    <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>IL rewriter for Signum Framework applications (auto-properties in entities, [AutoInit] and [ExpressionField])</description>
-    <copyright>Copyright 2018</copyright>
+    <copyright>Copyright 2020</copyright>
     <tags>signum msbuild linq react</tags>
   </metadata>
   <files>
+    <file src="SignumLogo.png" target="" />
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
-    <file src=".\bin\$configuration$\netcoreapp2.1\*.dll" target="build" />
-    <file src=".\bin\$configuration$\netcoreapp2.1\*.json" target="build" />
+    <file src="bin\Release\net5.0\*.dll" target="build" />
+    <file src="bin\Release\net5.0\*.json" target="build" />
     <file src="Signum.MSBuildTask.targets" target="build" />
   </files>
 </package>

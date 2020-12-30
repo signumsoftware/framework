@@ -1,7 +1,7 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
-import { SearchControlProps } from "./Search";
+import { SearchControlProps, SearchControlLoaded } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -21,6 +21,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
+  onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
 export interface FindOptions {
@@ -71,6 +72,14 @@ export interface FilterGroupOption {
   value?: string; /*For search in multiple columns*/
 }
 
+export interface PinnedFilter {
+  label?: string | (() => string);
+  row?: number;
+  column?: number;
+  active?: PinnedFilterActive;
+  splitText?: boolean;
+}
+
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
 
 export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterGroupOptionParsed {
@@ -82,15 +91,25 @@ export interface FilterConditionOptionParsed {
   frozen: boolean;
   operation?: FilterOperation;
   value: any;
-  pinned?: PinnedFilter;
+  pinned?: PinnedFilterParsed;
 }
 
-export interface PinnedFilter {
+export interface PinnedFilterParsed {
   label?: string;
   row?: number;
   column?: number;
   active?: PinnedFilterActive;
   splitText?: boolean;
+}
+
+export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
+  return {
+    label: typeof pf.label == "function" ? pf.label() : pf.label,
+    row: pf.row,
+    column: pf.column,
+    active: pf.active,
+    splitText: pf.splitText
+  };
 }
 
 export interface FilterGroupOptionParsed {
@@ -99,7 +118,7 @@ export interface FilterGroupOptionParsed {
   expanded: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
-  pinned?: PinnedFilter;
+  pinned?: PinnedFilterParsed;
   value?: string; /*For search in multiple columns*/
 }
 
@@ -115,7 +134,7 @@ export interface OrderOptionParsed {
 
 export interface ColumnOption {
   token: string | QueryTokenString<any>;
-  displayName?: string;
+  displayName?: string | (() => string);
 }
 
 export interface ColumnOptionParsed {
@@ -183,6 +202,16 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
   return hasAggregate(token.parent);
 }
 
+export function hasElement(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Element")
+    return true;
+
+  return hasElement(token.parent);
+}
+
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {
 
   if (hasAggregate(fop.token))
@@ -200,6 +229,32 @@ export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | 
 
   return {
     ...fop,
+  };
+}
+
+export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | undefined {
+
+  if (fop.pinned) {
+    if (fop.pinned.active == "Checkbox_StartUnchecked" ||
+      fop.pinned.active == "WhenHasValue" && fop.value == null)
+      return undefined;
+  }
+
+  if (isFilterGroupOptionParsed(fop)) {
+    var newFilters = fop.filters.map(f => withoutPinned(f)).filter(Boolean);
+    if (newFilters.length == 0)
+      return undefined;
+
+    return ({
+      ...fop,
+      filters: newFilters,
+      pinned: undefined,
+    }) as FilterOptionParsed;
+  };
+
+  return {
+    ...fop,
+    pinned: undefined
   };
 }
 
@@ -281,6 +336,7 @@ export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
 export interface QueryValueRequest {
   queryKey: string;
   filters: FilterRequest[];
+  multipleValues?: boolean;
   valueToken?: string;
   systemTime?: SystemTime;
 }
@@ -364,6 +420,34 @@ export function isList(fo: FilterOperation) {
     fo == "IsNotIn";
 }
 
+
+export function getFilterType(tr: TypeReference): FilterType | null {
+  if (tr.name == "number")
+    return "Integer";
+
+  if (tr.name == "decmial")
+    return "Decimal";
+
+  if (tr.name == "boolean")
+    return "Boolean";
+
+  if (tr.name == "string")
+    return "String";
+
+  if (tr.name == "dateTime")
+    return "DateTime";
+
+  if (tr.name == "Guid")
+    return "Guid";
+
+  if (tr.isEmbedded)
+    return "Embedded";
+
+  if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
+    return "Lite";
+
+  return null;
+}
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
 filterOperations["String"] = [

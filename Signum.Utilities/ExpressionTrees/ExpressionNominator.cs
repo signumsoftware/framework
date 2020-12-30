@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -43,7 +44,7 @@ namespace Signum.Utilities.ExpressionTrees
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
 
-        public override Expression Visit(Expression expression)
+        public override Expression? Visit(Expression? expression)
         {
             if (expression != null)
             {
@@ -133,7 +134,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         class DistinctNullExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var a = arguments[0];
                 var b = arguments[1];
@@ -156,5 +157,9 @@ namespace Signum.Utilities.ExpressionTrees
 
             return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
         }
+
+        /// <param name="collation">database_default</param>
+        [return: NotNullIfNotNull("str")]
+        public static string? Collate(this string? str, string collation = "database_default") => throw new InvalidOperationException("Collate only supported inside queries");
     }
 }

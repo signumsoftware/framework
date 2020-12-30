@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -16,7 +18,7 @@ namespace Signum.Engine.Maps
         public event SavingEventHandler<T>? Saving;
         public event SavedEventHandler<T>? Saved;
 
-        public event AlternativeRetriveEventHandler<T>? AlternativeRetrive;
+        public event AlternativeRetrieveEventHandler<T>? AlternativeRetrieve;
         public event RetrievedEventHandler<T>? Retrieved;
 
         public CacheControllerBase<T>? CacheController { get; set; }
@@ -34,19 +36,23 @@ namespace Signum.Engine.Maps
         public Dictionary<PropertyRoute, IAdditionalBinding>? AdditionalBindings { get; private set; }
 
         /// <param name="valueFunction">For Caching scenarios</param>
-        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M>? valueFunction = null)
+        public void RegisterBinding<M>(PropertyRoute pr, Func<bool> shouldSet, Expression<Func<T, PrimaryKey? /*rowId*/, M>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
         {
             if (AdditionalBindings == null)
                 AdditionalBindings = new Dictionary<PropertyRoute, IAdditionalBinding>();
 
+            AdditionalBindings.Add(pr, new AdditionalBinding<T, M>(pr, shouldSet, valueExpression, valueFunction));
+        }
+
+        /// <param name="valueFunction">For Caching scenarios</param>
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, PrimaryKey? /*rowId*/, M>> valueExpression, Func<T, PrimaryKey? /*rowId*/, IRetriever, M>? valueFunction = null)
+        {
             var ma = (MemberExpression)field.Body;
 
             var pr = PropertyRoute.Construct(field);
 
-            AdditionalBindings.Add(pr, new AdditionalBinding<T, M>(pr, shouldSet, valueExpression, valueFunction));
+            RegisterBinding(pr, shouldSet, valueExpression, valueFunction);
         }
-
-
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
@@ -123,19 +129,19 @@ namespace Signum.Engine.Maps
 
         }
 
-        void IEntityEvents.OnRetrieved(Entity entity)
+        void IEntityEvents.OnRetrieved(Entity entity, PostRetrievingContext ctx)
         {
-            Retrieved?.Invoke((T)entity);
+            Retrieved?.Invoke((T)entity, ctx);
         }
 
-        public Entity? OnAlternativeRetriving(PrimaryKey id)
+        public Entity? OnAlternativeRetrieving(PrimaryKey id)
         {
-            if (AlternativeRetrive == null)
+            if (AlternativeRetrieve == null)
                 return null;
 
             var args = new AlternativeRetrieveArgs<T>();
 
-            AlternativeRetrive(id, args);
+            AlternativeRetrieve(id, args);
 
             if (args.Entity == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -167,18 +173,20 @@ namespace Signum.Engine.Maps
         void SetInMemory(Entity entity, IRetriever retriever);
     }
 
-    public class AdditionalBinding<T, M> : IAdditionalBinding
+    public class AdditionalBinding<T, V> : IAdditionalBinding
         where T : Entity
     {
         public PropertyRoute PropertyRoute { get; set; }
         public Func<bool> ShouldSet { get; set; }
-        public Expression<Func<T, M>> ValueExpression { get; set; }
-        public Func<T, IRetriever, M>? ValueFunction { get; set; }
+        public Expression<Func<T, PrimaryKey? /*rowId*/, V>> ValueExpression { get; set; }
+        public Func<T, PrimaryKey? /*rowId*/, IRetriever, V>? ValueFunction { get; set; }
         LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
 
-        Action<T, M, IRetriever>? _setter;
+        Action<T, IRetriever>? _setter;
 
-        public AdditionalBinding(PropertyRoute propertyRoute, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M>? valueFunction)
+        public AdditionalBinding(PropertyRoute propertyRoute, Func<bool> shouldSet, 
+            Expression<Func<T, PrimaryKey? /*rowId*/, V>> valueExpression, 
+            Func<T, PrimaryKey? /*rowId*/, IRetriever, V>? valueFunction)
         {
             PropertyRoute = propertyRoute;
             ShouldSet = shouldSet;
@@ -195,61 +203,94 @@ namespace Signum.Engine.Maps
             if (ValueFunction == null)
                 throw new InvalidOperationException($"ValueFunction should be set in AdditionalBinding {PropertyRoute} because {PropertyRoute.Type} is Cached");
 
-            var setter = _setter ?? (_setter = CreateSetter());
+            var setValue = _setter ?? (_setter = CreateSetter());
 
-            var value = ValueFunction(entity, retriever);
-
-            setter(entity, value, retriever);
+            setValue(entity, retriever);
         }
 
-        Action<T, M, IRetriever> CreateSetter()
+        Action<T, IRetriever> CreateSetter()
         {
+
             if (PropertyRoute.Type.IsMList())
             {
-                var partGetter = PropertyRoute.GetLambdaExpression<T, M>(true).Compile();
+                var partGetter = PropertyRoute.GetLambdaExpression<T, V>(true).Compile();
 
-                return (e, value, retriever) =>
+                return (e, retriever) =>
                 {
                     var mlist = partGetter(e);
 
                     if (mlist == null)
                         return;
 
-                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value!);
+                    var value = ValueFunction!(e, null, retriever);
+
+                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value!, null!);
 
                     retriever.ModifiablePostRetrieving((Modifiable)(object)mlist);
                 };
             }
             else if (PropertyRoute.Parent!.PropertyRouteType == PropertyRouteType.Root)
             {
-                var setter = ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo!);
+                var setter = ReflectionTools.CreateSetter<T, V>(PropertyRoute.PropertyInfo!);
 
-                return (e, value, retriever) => setter!(e, value);
+                return (e, retriever) => 
+                {
+                    var value = ValueFunction!(e, null, retriever);
+                    setter!(e, value);
+                };
             }
             else
             {
-                var partGetter = PropertyRoute.Parent!.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
-
-                var setter = ReflectionTools.CreateSetter<ModifiableEntity, M>(PropertyRoute.PropertyInfo!);
-
-                return (e, value, retriever) =>
+                var mlistRoute = PropertyRoute.GetMListItemsRoute();
+                if (mlistRoute != null)
                 {
-                    var part = partGetter(e);
-                    if (part == null)
-                        return;
+                    var mlistGetter = mlistRoute.GetLambdaExpression<T, IMListPrivate>(true).Compile();
+                    var partGetter = PropertyRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
 
-                    setter!(part, value);
-                };
+                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
+
+                    return (e, retriever) =>
+                    {
+                        var mlist = mlistGetter(e);
+                        if (mlist == null)
+                            return;
+
+                        var list = (IList)mlist;
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            var rowId = mlist.GetRowId(i);
+                            var part = partGetter((ModifiableEntity)list[i]!);
+                            var value = ValueFunction!(e, rowId, retriever);
+                            setter!(part, value);
+                        }
+                    };
+                }
+                else
+                {
+                    var partGetter = PropertyRoute.Parent!.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
+
+                    var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
+
+                    return (e, retriever) =>
+                    {
+                        var part = partGetter(e);
+                        if (part == null)
+                            return;
+
+                        var value = ValueFunction!(e, null, retriever);
+                        setter!(part, value);
+                    };
+                }
             }
         }
     }
 
     public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) where T : Entity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
+    public delegate void RetrievedEventHandler<T>(T ident, PostRetrievingContext ctx) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
     public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;
-    public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
+    public delegate void AlternativeRetrieveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
     public delegate IDisposable? PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
     public delegate IDisposable? PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
@@ -292,12 +333,12 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        Entity? OnAlternativeRetriving(PrimaryKey id);
+        Entity? OnAlternativeRetrieving(PrimaryKey id);
         void OnPreSaving(Entity entity, PreSavingContext ctx);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
 
-        void OnRetrieved(Entity entity);
+        void OnRetrieved(Entity entity, PostRetrievingContext ctx);
 
         IDisposable? OnPreUnsafeDelete(IQueryable entityQuery);
         IDisposable? OnPreUnsafeUpdate(IUpdateable update);

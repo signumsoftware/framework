@@ -13,7 +13,7 @@ namespace Signum.Engine.DynamicQuery
     {
         readonly internal Meta? Meta;
         public Func<string>? OverrideDisplayName { get; set; }
-        public Func<string>? OverrideIsAllowed { get; set; }
+        public Func<string?>? OverrideIsAllowed { get; set; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
                     if (Implementations == null)
-                        Implementations = propertyRoutes.FirstOrDefault().TryGetImplementations();
+                        Implementations = propertyRoutes.FirstEx().TryGetImplementations();
                     processedType = null;
                 }
             }
@@ -149,6 +149,15 @@ namespace Signum.Engine.DynamicQuery
         {
             if (OverrideIsAllowed != null)
                 return OverrideIsAllowed();
+
+            if (propertyRoutes != null)
+            {
+                var result = propertyRoutes.Select(a => a.IsAllowed()).NotNull();
+                if (result.IsEmpty())
+                    return null;
+
+                return result.CommaAnd();
+            }
 
             if (Meta != null)
                 return Meta.IsAllowed();

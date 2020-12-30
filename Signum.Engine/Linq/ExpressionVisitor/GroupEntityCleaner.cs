@@ -3,6 +3,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -16,7 +17,8 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             if (exp == null)
                 return null!;
@@ -209,7 +211,8 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        public override Expression Visit(Expression exp)
+        [return: NotNullIfNotNull("exp")]
+        public override Expression? Visit(Expression? exp)
         {
             if (exp == null)
                 return null!;

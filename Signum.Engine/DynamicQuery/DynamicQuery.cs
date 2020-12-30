@@ -14,6 +14,7 @@ using Signum.Entities.Basics;
 using DQ = Signum.Engine.DynamicQuery;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -267,7 +268,7 @@ namespace Signum.Engine.DynamicQuery
 
             var dic = description.Columns.ToDictionary(
                 cd => (QueryToken)new ColumnToken(cd, description.QueryName),
-                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNulifyUnwrapPrimaryKey(cd.PropertyRoutes!));
+                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
 
             return new DQueryable<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic));
         }
@@ -280,7 +281,7 @@ namespace Signum.Engine.DynamicQuery
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryPaginateAsync(request.Pagination, token);
+                .TryPaginateAsync(request.Pagination, request.SystemTime, token);
         }
 
         public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
@@ -290,7 +291,7 @@ namespace Signum.Engine.DynamicQuery
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryPaginate(request.Pagination);
+                .TryPaginate(request.Pagination, request.SystemTime);
         }
 
         #endregion
@@ -606,6 +607,7 @@ namespace Signum.Engine.DynamicQuery
 
         #region Unique
 
+        [return: MaybeNull]
         public static T Unique<T>(this IEnumerable<T> collection, UniqueType uniqueType)
         {
             switch (uniqueType)
@@ -614,23 +616,21 @@ namespace Signum.Engine.DynamicQuery
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
                 case UniqueType.Single: return collection.SingleEx();
                 case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
-                case UniqueType.SingleOrMany: return collection.SingleOrMany();
                 case UniqueType.Only: return collection.Only();
                 default: throw new InvalidOperationException();
             }
         }
 
-
+        //[return: MaybeNull]
         public static Task<T> UniqueAsync<T>(this IQueryable<T> collection, UniqueType uniqueType, CancellationToken token)
         {
             switch (uniqueType)
             {
                 case UniqueType.First: return collection.FirstAsync(token);
-                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token);
+                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token)!;
                 case UniqueType.Single: return collection.SingleAsync(token);
-                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token);
-                case UniqueType.SingleOrMany: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.SingleOrManyEx());
-                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only());
+                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token)!;
+                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only()!);
                 default: throw new InvalidOperationException();
             }
         }
@@ -656,7 +656,7 @@ namespace Signum.Engine.DynamicQuery
 
         #region TryPaginate
 
-        public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, CancellationToken token)
+        public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime, CancellationToken token)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -675,23 +675,42 @@ namespace Signum.Engine.DynamicQuery
             }
             else if (pagination is Pagination.Paginate pag)
             {
-                var q = query.Query.OrderAlsoByKeys();
+                if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+                {
+                    var q = query.Query.OrderAlsoByKeys();
 
-                if (pag.CurrentPage != 1)
-                    q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+                    var list = await query.Query.ToListAsync();
 
-                q = q.Take(pag.ElementsPerPage);
+                    var elements = list;
+                    if (pag.CurrentPage != 1)
+                        elements = elements.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage).ToList();
 
-                var listTask = await q.ToListAsync();
-                var countTask = await query.Query.CountAsync();
+                    elements = elements.Take(pag.ElementsPerPage).ToList();
 
-                return new DEnumerableCount<T>(listTask, query.Context, countTask);
+                    return new DEnumerableCount<T>(elements, query.Context, list.Count);
+                }
+                else
+                {
+                    var q = query.Query.OrderAlsoByKeys();
+
+                    if (pag.CurrentPage != 1)
+                        q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+
+                    q = q.Take(pag.ElementsPerPage);
+
+                    var listTask = await q.ToListAsync();
+                    var countTask = systemTime is SystemTime.Interval ?
+                        (await query.Query.ToListAsync()).Count : //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+                        await query.Query.CountAsync();
+
+                    return new DEnumerableCount<T>(listTask, query.Context, countTask);
+                }
             }
 
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination)
+        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -710,23 +729,44 @@ namespace Signum.Engine.DynamicQuery
             }
             else if (pagination is Pagination.Paginate pag)
             {
-                var q = query.Query.OrderAlsoByKeys();
+                if(systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+                {
+                    var q = query.Query.OrderAlsoByKeys();
 
-                if (pag.CurrentPage != 1)
-                    q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+                    var list = query.Query.ToList();
 
-                q = q.Take(pag.ElementsPerPage);
+                    var elements = list;
+                    if (pag.CurrentPage != 1)
+                        elements = elements.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage).ToList();
 
-                var list = q.ToList();
-                var count = list.Count < pag.ElementsPerPage ? pag.ElementsPerPage : query.Query.Count();
+                    elements = elements.Take(pag.ElementsPerPage).ToList();
 
-                return new DEnumerableCount<T>(list, query.Context, count);
+                    return new DEnumerableCount<T>(elements, query.Context, list.Count);
+                }
+                else
+                {
+                    var q = query.Query.OrderAlsoByKeys();
+
+                    if (pag.CurrentPage != 1)
+                        q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+
+                    q = q.Take(pag.ElementsPerPage);
+
+                    var list = q.ToList();
+                    var count = list.Count < pag.ElementsPerPage ? pag.ElementsPerPage :
+                        query.Query.Count();
+
+                    return new DEnumerableCount<T>(list, query.Context, count);
+                }
+
+
+              
             }
 
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination, SystemTime? systemTime)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -764,7 +804,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination, SystemTime? systemTime)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -974,14 +1014,17 @@ namespace Signum.Engine.DynamicQuery
 
             var task = func();
 
-            return giCastObject.GetInvoker(task.GetType().BaseType!.GetGenericArguments())(task);
+            return CastTask<object?>(task);
         }
-
-        static readonly GenericInvoker<Func<Task, Task<object?>>> giCastObject =
-            new GenericInvoker<Func<Task, Task<object?>>>(task => CastObject<int>((Task<int>)task));
-        static Task<object?> CastObject<T>(Task<T> task)
+        public static async Task<T> CastTask<T>(this Task task)
         {
-            return task.ContinueWith(t => (object?)t.Result);
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            await task.ConfigureAwait(false);
+
+            object? result = task.GetType().GetProperty(nameof(Task<object>.Result))!.GetValue(task);
+            return (T)result!;
         }
 
         #endregion

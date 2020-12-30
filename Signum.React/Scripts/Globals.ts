@@ -1,8 +1,5 @@
 declare global {
 
-  function require<T>(path: string): T;
-  function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
-
   interface RegExpConstructor {
     escape(s: string): string;
   }
@@ -12,8 +9,10 @@ declare global {
   }
 
   interface Window {
+    __allowNavigatorWithoutUser?: boolean;
     __baseUrl: string;
     dataForChildWindow?: any;
+    exploreGraphDebugMode: boolean;
   }
 
   interface RegExpConstructor {
@@ -21,8 +20,11 @@ declare global {
   }
 
   interface Array<T> {
-    groupBy<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
+    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
+    groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
+    groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
+    groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
 
@@ -109,6 +111,10 @@ declare global {
     forGenderAndNumber(this: string, gender: any, number?: number): string;
     replaceAll(this: string, from: string, to: string): string;
     indent(this: string, numChars: number): string;
+    between(this: string, separator: string): string;
+    between(this: string, firstSeparator: string, secondSeparator: string): string;
+    tryBetween(this: string, separator: string): string | undefined;
+    tryBetween(this: string, firstSeparator: string, secondSeparator: string): string | undefined;
     after(this: string, separator: string): string;
     before(this: string, separator: string): string;
     tryAfter(this: string, separator: string): string | undefined;
@@ -136,17 +142,28 @@ Array.prototype.clear = function (): void {
   this.length = 0;
 };
 
-Array.prototype.groupBy = function (this: any[], keySelector: (element: any) => string | number): { key: any /*string*/; elements: any[] }[] {
-  const result: { key: string | number; elements: any[] }[] = [];
-  const objectGrouped = this.groupToObject(keySelector as ((element: any) => string));
+Array.prototype.groupBy = function (this: any[],
+  keySelector: (element: any) => string,
+  keyStringifier?: (element: any) => string,
+  elementSelector?: (element: any) => unknown):
+  { key: any /*string*/; elements: any[] }[] {
+
+  const result: { key: string; elements: any[] }[] = [];
+ 
+  const objectGrouped = this.groupToObject(
+    keyStringifier ? e => keyStringifier(keySelector(e)) : keySelector,
+    elementSelector!);
+
   for (const prop in objectGrouped) {
-    if (objectGrouped.hasOwnProperty(prop))
-      result.push({ key: prop, elements: objectGrouped[prop] });
+    if (objectGrouped.hasOwnProperty(prop)) {
+      var elements = objectGrouped[prop]
+      result.push({ key: keySelector(elements[0]), elements: elements });
+    }
   }
   return result;
 };
 
-Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): { [key: string]: any[] } {
   const result: { [key: string]: any[] } = {};
 
   for (let i = 0; i < this.length; i++) {
@@ -154,7 +171,7 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
     const key = keySelector(element);
     if (!result[key])
       result[key] = [];
-    result[key].push(element);
+    result[key].push(elementSelector ? elementSelector(element) : element);
   }
   return result;
 };
@@ -741,6 +758,10 @@ export function isNumber(n: any): boolean {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+export function softCast<T>(val: T): T {
+  return val;
+}
+
 
 String.prototype.replaceAll = function (this: string, from: string, to: string) {
   return this.split(from).join(to)
@@ -749,6 +770,40 @@ String.prototype.replaceAll = function (this: string, from: string, to: string) 
 String.prototype.indent = function (this: string, numChars: number) {
   const indent = " ".repeat(numChars);
   return this.split("\n").map(a => indent + a).join("\n");
+};
+
+String.prototype.between = function (this: string, firstSeparator: string, secondSeparator?: string) {
+
+  if (!secondSeparator)
+    secondSeparator = firstSeparator;
+
+  const index = this.indexOf(firstSeparator);
+  if (index == -1)
+    throw Error("{0} not found".formatWith(firstSeparator));
+
+  var from = index + firstSeparator.length;
+  const index2 = this.indexOf(secondSeparator, from);
+  if (index2 == -1)
+    throw Error("{0} not found".formatWith(secondSeparator));
+
+  return this.substring(from, index2);
+};
+
+String.prototype.tryBetween = function (this: string, firstSeparator: string, secondSeparator?: string) {
+
+  if (!secondSeparator)
+    secondSeparator = firstSeparator;
+
+  const index = this.indexOf(firstSeparator);
+  if (index == -1)
+    return undefined;
+
+  var from = index + firstSeparator.length;
+  const index2 = this.indexOf(secondSeparator, from);
+  if (index2 == -1)
+    return undefined;
+
+  return this.substring(from, index2 - from);
 };
 
 String.prototype.after = function (this: string, separator: string) {
@@ -817,8 +872,6 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
 
 String.prototype.etc = function (this: string, maxLength: number, etcString: string = "(…)") {
   let str = this;
-
-  str = str.tryBefore("\n") || str;
 
   if (str.length > maxLength)
     str = str.substr(0, maxLength - etcString.length) + etcString;
@@ -989,6 +1042,17 @@ export module Dic {
     for (const name in obj) {
       if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
         result.push(selector(name, obj[name], index++));
+      }
+    }
+    return result;
+  }
+
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
+    let index = 0;
+    const result: { [key: string]: R } = {};
+    for (const name in obj) {
+      if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
+        result[name] = selector(name, obj[name], index++);
       }
     }
     return result;

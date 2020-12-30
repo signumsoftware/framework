@@ -9,6 +9,9 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using System.Collections.Concurrent;
 using System.Reflection;
+using Signum.Utilities.Reflection;
+using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine
 {
@@ -23,6 +26,7 @@ namespace Signum.Engine
         public List<PropertyInfo>? Properties { get; private set; }
 
         public string? Values { get; private set; }
+        public object?[]? HumanValues { get; private set; }
 
         protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
@@ -54,7 +58,7 @@ namespace Signum.Engine
                             if(index == null)
                                 return null;
 
-                            var properties = (from f in tup.Item1.Fields.Values
+                            var properties = (from f in tup.table.Fields.Values
                                               let cols = f.Field.Columns()
                                               where cols.Any() && cols.All(c => index.Columns.Contains(c))
                                               select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
@@ -69,13 +73,64 @@ namespace Signum.Engine
                         {
                             Index = tuple.Value.index;
                             Properties = tuple.Value.properties;
+
+                            try
+                            {
+                                var values = Values.Split(", ");
+
+                                if(values.Length == Index.Columns.Length)
+                                {
+                                    var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
+
+                                    HumanValues = Properties.Select(p =>
+                                    {
+                                        var f = Table.GetField(p);
+                                        if (f is FieldValue fv)
+                                            return colValues.GetOrThrow(fv);
+
+                                        if (f is FieldEnum fe)
+                                            return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
+
+                                        if (f is FieldReference fr)
+                                            colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
+
+                                        if (f is FieldImplementedBy ib)
+                                        {
+                                            var imp = ib.ImplementationColumns.SingleOrDefault(ic => colValues.TryGetCN(ic.Value) != null);
+                                            if (imp.Key == null)
+                                                return null;
+
+                                            return Database.RetrieveLite(imp.Key, PrimaryKey.Parse(colValues.GetOrThrow(imp.Value)!, imp.Key));
+                                        }
+
+                                        if (f is FieldImplementedByAll iba)
+                                        {
+                                            var typeId = colValues.GetOrThrow(iba.ColumnType);
+                                            if (typeId == null)
+                                                return null;
+
+                                            var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
+
+                                            return Database.RetrieveLite(type, PrimaryKey.Parse(colValues.GetOrThrow(iba.Column)!, type));
+                                        }
+
+                                        throw new UnexpectedValueException(f);
+                                    }).ToArray();
+                                }
+
+                            }
+                            catch
+                            {
+                                //
+                            }
+
                         }
                     }
                 }
             }
         }
 
-        static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
+        static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
         static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
             new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
 
@@ -89,8 +144,9 @@ namespace Signum.Engine
                 return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
-                    Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) :
-                    Properties!.CommaAnd(p => p.NiceName()),
+                    Properties != null  ? Properties!.CommaAnd(p => p.NiceName()) :
+                    Index.Columns.CommaAnd(c => c.Name),
+                    HumanValues != null ? HumanValues.CommaAnd(a => a is string? $"'{a}'" : a == null ? "NULL" : a.ToString()) : 
                     Values);
             }
         }

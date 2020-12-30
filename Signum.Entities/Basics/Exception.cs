@@ -19,7 +19,7 @@ namespace Signum.Entities.Basics
         {
             this.ExceptionType = ex.GetType().Name;
             this.ExceptionMessage = ex.Message!;
-            this.StackTrace = ex.StackTrace!;
+            this.StackTrace = new BigStringEmbedded(ex.StackTrace!);
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
             this.MachineName = System.Environment.MachineName;
@@ -29,10 +29,10 @@ namespace Signum.Entities.Basics
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [ForceNotNullable, SqlDbType(Size = 100)]
+        [ForceNotNullable, DbType(Size = 100)]
         public string? ExceptionType { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string exceptionMessage;
         public string ExceptionMessage
         {
@@ -40,21 +40,21 @@ namespace Signum.Entities.Basics
             set
             {
                 if (Set(ref exceptionMessage, value))
-                    ExceptionMessageHash = value == null ? 0 : value.GetHashCode();
+                    ExceptionMessageHash = value?.GetHashCode() ?? 0;
             }
         }
 
         public int ExceptionMessageHash { get; private set; }
 
-        [SqlDbType(Size = int.MaxValue)]
-        string stackTrace;
-        public string StackTrace
+        BigStringEmbedded stackTrace = new BigStringEmbedded();
+        [NotifyChildProperty]
+        public BigStringEmbedded StackTrace
         {
             get { return stackTrace; }
             set
             {
                 if (Set(ref stackTrace, value))
-                    StackTraceHash = value == null ? 0 : value.GetHashCode();
+                    StackTraceHash = value?.Text?.GetHashCode() ?? 0;
             }
         }
 
@@ -64,50 +64,50 @@ namespace Signum.Entities.Basics
 
         public Lite<IUserEntity>? User { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? Environment { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? Version { get; set; }
 
-        [SqlDbType(Size = 300)]
+        [DbType(Size = 300)]
         public string? UserAgent { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? RequestUrl { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ControllerName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ActionName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? UrlReferer { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? MachineName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ApplicationName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? UserHostAddress { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? UserHostName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
-        public string? Form { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Form { get; set; } = new BigStringEmbedded();
 
-        [SqlDbType(Size = int.MaxValue)]
-        public string? QueryString { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded QueryString { get; set; } = new BigStringEmbedded();
 
-        [SqlDbType(Size = int.MaxValue)]
-        public string? Session { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Session { get; set; } = new BigStringEmbedded();
 
-        [SqlDbType(Size = int.MaxValue)]
-        public string? Data { get; set; }
+        [NotifyChildProperty]
+        public BigStringEmbedded Data { get; set; } = new BigStringEmbedded();
 
         public int HResult { get; internal set; }
 
@@ -176,7 +176,7 @@ namespace Signum.Entities.Basics
         {
             if (pi.Name == nameof(DeleteLogsOlderThan))
             {
-                if (DeleteLogsOlderThan.HasValue && DeleteLogsWithExceptionsOlderThan.HasValue && DeleteLogsOlderThan.Value <= DeleteLogsWithExceptionsOlderThan.Value)
+                if (DeleteLogsOlderThan.HasValue && DeleteLogsWithExceptionsOlderThan.HasValue && DeleteLogsOlderThan.Value < DeleteLogsWithExceptionsOlderThan.Value)
                     return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi.NiceName(), NicePropertyName(() => DeleteLogsWithExceptionsOlderThan));
             }
 

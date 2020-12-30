@@ -1,10 +1,10 @@
 import * as React from 'react'
-import numbro from 'numbro'
 import * as Finder from '../Finder'
 import { classes } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import "./PaginationSelector.css"
+import { toNumberFormat } from '../Reflection'
 
 interface PaginationSelectorProps {
   resultTable?: ResultTable;
@@ -32,32 +32,30 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
 
     const pagination = p.pagination;
 
-    function format(num: number): string {
-      return numbro(num).format("0,0");
-    }
+    var numberFormat = toNumberFormat("0") 
 
     switch (pagination.mode) {
 
       case "All":
         return (
           <span>{SearchMessage._0Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-            <span className="sf-pagination-strong" key={1}>{resultTable.totalElements && format(resultTable.totalElements)}</span>)
+            <span className="sf-pagination-strong" key={1}>{resultTable.totalElements && numberFormat.format(resultTable.totalElements)}</span>)
           }</span>
         );
 
       case "Firsts":
         return (
           <span>{SearchMessage.First0Results_N.niceToString().forGenderAndNumber(resultTable.rows.length).formatHtml(
-            <span className={"sf-pagination-strong" + (resultTable.rows.length == resultTable.pagination.elementsPerPage ? " sf-pagination-overflow" : "")} key={1}>{format(resultTable.rows.length)}</span>)
+            <span className={"sf-pagination-strong" + (resultTable.rows.length == resultTable.pagination.elementsPerPage ? " sf-pagination-overflow" : "")} key={1}>{numberFormat.format(resultTable.rows.length)}</span>)
           }</span>
         );
 
       case "Paginate":
         return (
           <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-            <span className={"sf-pagination-strong"} key={1}>{format(PaginateMath.startElementIndex(pagination))}</span>,
-            <span className={"sf-pagination-strong"} key={2}>{format(PaginateMath.endElementIndex(pagination, resultTable.rows.length))}</span>,
-            <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements && format(resultTable.totalElements)}</span>)
+            <span className={"sf-pagination-strong"} key={1}>{numberFormat.format(PaginateMath.startElementIndex(pagination))}</span>,
+            <span className={"sf-pagination-strong"} key={2}>{numberFormat.format(PaginateMath.endElementIndex(pagination, resultTable.rows.length))}</span>,
+            <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements && numberFormat.format(resultTable.totalElements)}</span>)
           }</span>
         );
       default:
@@ -98,20 +96,28 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
   }
 
   function renderCenter() {
+
     return (
       <div className="sf-pagination-center">
         <div className="form-inline">
-          <select value={p.pagination.mode} onChange={handleMode} className="form-control form-control-xs sf-pagination-mode">
-            {["Paginate" as PaginationMode,
-            "Firsts" as PaginationMode,
-            "All" as PaginationMode].map(mode =>
-              <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
-          </select>
-          {p.pagination.mode != "All" &&
-            <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-control form-control-xs sf-elements-per-page">
-              {[5, 10, 20, 50, 100, 200].map(elem =>
-                <option key={elem} value={elem.toString()}>{elem}</option>)}
-            </select>
+          {(p.pagination.mode == "All" ? SearchMessage.PaginationAll_0Elements :
+            p.pagination.mode == "Firsts" ? SearchMessage.PaginationFirst_01Elements :
+              SearchMessage.PaginationPages_0Of01lements)
+            .niceToString().formatHtml(
+
+                <select value={p.pagination.mode} onChange={handleMode} className="form-control form-control-xs sf-pagination-mode">
+                  {["Paginate" as PaginationMode,
+                  "Firsts" as PaginationMode,
+                  "All" as PaginationMode].map(mode =>
+                    <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
+                </select>,
+
+                p.pagination.mode != "All" &&
+                <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-control form-control-xs sf-elements-per-page">
+                  {[5, 10, 20, 50, 100, 200].map(elem =>
+                    <option key={elem} value={elem.toString()}>{elem}</option>)}
+                </select>
+              )
           }
         </div>
       </div>

@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly PrimaryKeyExpression ExternalId;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
         //Optional
         public readonly Alias? TableAlias;
@@ -31,15 +31,15 @@ namespace Signum.Engine.Linq
 
         public readonly bool AvoidExpandOnRetrieving;
 
-        public readonly NewExpression? TablePeriod;
+        public readonly IntervalExpression? TablePeriod;
 
 
         public EntityExpression(Type type, PrimaryKeyExpression externalId, 
-            NewExpression? externalPeriod, 
+            IntervalExpression? externalPeriod, 
             Alias? tableAlias, 
             IEnumerable<FieldBinding>? bindings, 
-            IEnumerable<MixinEntityExpression>? mixins, 
-            NewExpression? tablePeriod, bool avoidExpandOnRetrieving)
+            IEnumerable<MixinEntityExpression>? mixins,
+            IntervalExpression? tablePeriod, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
             if (type == null)
@@ -105,11 +105,14 @@ namespace Signum.Engine.Linq
         public readonly Expression HasValue;
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+        public readonly ReadOnlyCollection<MixinEntityExpression>? Mixins;
+        public readonly EntityContextInfo? EntityContext; 
 
         public readonly FieldEmbedded? FieldEmbedded; //used for updates
         public readonly Table? ViewTable; //used for updates
 
-        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded? fieldEmbedded, Table? viewTable)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings,
+            IEnumerable<MixinEntityExpression>? mixins, FieldEmbedded? fieldEmbedded, Table? viewTable, EntityContextInfo? entityContext)
             : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
@@ -121,8 +124,10 @@ namespace Signum.Engine.Linq
             HasValue = hasValue;
 
             Bindings = bindings.ToReadOnly();
+            Mixins = mixins.ToReadOnly();
 
             FieldEmbedded = fieldEmbedded;
+            EntityContext = entityContext;
             ViewTable = viewTable;
         }
 
@@ -155,15 +160,29 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal class EntityContextInfo
+    {
+        public readonly PrimaryKeyExpression EntityId;
+        public readonly PrimaryKeyExpression? MListRowId;
+
+        public EntityContextInfo(PrimaryKeyExpression entityId, PrimaryKeyExpression? mlistRowId)
+        {
+            EntityId = entityId;
+            MListRowId = mlistRowId;
+        }
+    }
+
     internal class MixinEntityExpression : DbExpression
     {
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+
+        public readonly EntityContextInfo? EntityContext;
 
         public readonly FieldMixin? FieldMixin; //used for updates
 
         public readonly Alias? MainEntityAlias;
 
-        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias? mainEntityAlias, FieldMixin? fieldMixin)
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, Alias? mainEntityAlias, FieldMixin? fieldMixin, EntityContextInfo? info)
             : base(DbExpressionType.MixinInit, type)
         {
             if (bindings == null)
@@ -172,6 +191,8 @@ namespace Signum.Engine.Linq
             Bindings = bindings.ToReadOnly();
 
             FieldMixin = fieldMixin;
+
+            EntityContext = info;
 
             MainEntityAlias = mainEntityAlias;
         }
@@ -254,10 +275,10 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Id;
         public readonly TypeImplementedByAllExpression TypeId;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
 
-        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, NewExpression? externalPeriod)
+        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             if (id == null)
@@ -430,9 +451,9 @@ namespace Signum.Engine.Linq
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
         public readonly TableMList TableMList;
-        public readonly NewExpression? ExternalPeriod;
+        public readonly IntervalExpression? ExternalPeriod;
 
-        public MListExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, TableMList tr)
+        public MListExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, TableMList tr)
             : base(DbExpressionType.MList, type)
         {
             this.BackID = backID;
@@ -454,13 +475,15 @@ namespace Signum.Engine.Linq
     internal class AdditionalFieldExpression : DbExpression
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
-        public readonly NewExpression? ExternalPeriod;
+        public readonly PrimaryKeyExpression? MListRowId; // not readonly
+        public readonly IntervalExpression? ExternalPeriod;
         public readonly PropertyRoute Route;
 
-        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, NewExpression? externalPeriod, PropertyRoute route)
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, PrimaryKeyExpression? mlistRowId, IntervalExpression? externalPeriod, PropertyRoute route)
             : base(DbExpressionType.AdditionalField, type)
         {
             this.BackID = backID;
+            this.MListRowId = mlistRowId;
             this.Route = route;
             this.ExternalPeriod = externalPeriod;
         }
@@ -511,9 +534,9 @@ namespace Signum.Engine.Linq
 
         public readonly Alias Alias;
 
-        public readonly NewExpression? TablePeriod;
+        public readonly IntervalExpression? TablePeriod;
 
-        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, NewExpression? systemPeriod, TableMList table, Alias alias)
+        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, IntervalExpression? systemPeriod, TableMList table, Alias alias)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;

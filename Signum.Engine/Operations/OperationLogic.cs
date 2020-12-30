@@ -26,7 +26,7 @@ namespace Signum.Engine.Operations
             As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Target.Is(e)));
 
         [AutoExpressionField]
-        public static OperationLogEntity PreviousOperationLog(this Entity e) => 
+        public static OperationLogEntity? PreviousOperationLog(this Entity e) => 
             As.Expression(() => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
 
         [AutoExpressionField]
@@ -142,15 +142,21 @@ namespace Signum.Engine.Operations
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(OperationLogEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            void Remove(DateTime? dateLimit, bool withExceptions)
+            {
+                if (dateLimit == null)
+                    return;
 
-            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(OperationLogEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
+                var query = Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit.Value);
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
+                if (withExceptions)
+                    query = query.Where(a => a.Exception != null);
+
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
+            Remove(parameters.GetDateLimitDelete(typeof(OperationLogEntity).ToTypeEntity()), withExceptions: false);
+            Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(OperationLogEntity).ToTypeEntity()), withExceptions: true);
         }
 
         static void OperationLogic_Initializing()
@@ -199,7 +205,7 @@ Consider the following options:
         {
             if (ident.IsGraphModified &&
                 EntityKindCache.RequiresSaveOperation(ident.GetType()) && !AllowSaveGlobally && !IsSaveAllowedInContext(ident.GetType()))
-                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
+                throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use using(OperationLogic.AllowSave<{0}>()) or execute {1}".FormatWith(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Values
                     .Where(IsSaveLike)
@@ -242,6 +248,9 @@ Consider the following options:
 
         public static void Register(this IOperation operation, bool replace = false)
         {
+            if (Schema.Current.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             if (!operation.OverridenType.IsIEntity())
                 throw new InvalidOperationException("Type '{0}' has to implement at least {1}".FormatWith(operation.OverridenType.Name));
 
@@ -311,7 +320,7 @@ Consider the following options:
                 CanBeModified = (oper as IEntityOperation)?.CanBeModified,
                 Returns = oper.Returns,
                 ReturnType = oper.ReturnType,
-                HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates,
+                HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
                 HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
                 CanBeNew = (oper as IEntityOperation)?.CanBeNew,
                 BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType

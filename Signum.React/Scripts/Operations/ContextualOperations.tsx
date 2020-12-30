@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
@@ -12,6 +12,8 @@ import {
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
+import { BsColor } from "../Components";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -25,15 +27,11 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
   const ti = getTypeInfo(types[0].key);
 
   const menuItems = operationInfos(ti)
-    .filter(oi => oi.operationType == OperationType.ConstructorFromMany)
+    .filter(oi => oi.operationType == "ConstructorFromMany")
     .map(oi => {
       const os = getSettings(oi.key) as ContextualOperationSettings<Entity>;
-      const coc = {
-        context: ctx,
-        operationInfo: oi,
-        settings: os,
-      } as ContextualOperationContext<Entity>;
-
+      const coc = new ContextualOperationContext<Entity>(oi, ctx);
+      coc.settings = os;
       if (os == undefined || os.isVisible == undefined || os.isVisible(coc))
         return coc;
 
@@ -42,7 +40,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
     .filter(coc => coc != undefined)
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order)
-    .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
+    .flatMap(coc => coc.createMenuItems());
 
   if (!menuItems.length)
     return undefined;
@@ -55,20 +53,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
 
-  confirmInNecessary(coc).then(conf => {
-    if (!conf)
-      return;
-
-    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-      Navigator.createNavigateOrTab(pack, coc.event!)
-        .then(() => coc.context.markRows({}))
-        .done();
-    }).done();
-  }).done();
-
-}
 
 export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -90,16 +75,9 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       coc.settings = cos;
       coc.entityOperationSettings = eos;
 
-      const visibleByDefault = !oi.canBeModified && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
-
-      if (eos == undefined ? visibleByDefault :
-        cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
-          cos.isVisible(coc))
         return coc;
-
-      return undefined;
     })
-    .filter(coc => coc != undefined)
+    .filter(coc => coc.isVisibleInContextualMenu())
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order);
 
@@ -111,8 +89,9 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     if (ctx.lites.length == 1) {
       contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
         contexts.forEach(coc => {
+          coc.pack = ep;
           coc.canExecute = ep.canExecute[coc.operationInfo.key];
-          coc.isReadonly = Navigator.isReadOnly(ep, true);
+          coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
         });
         return contexts;
       });
@@ -128,7 +107,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     }
   } else {
 
-    if (Navigator.isReadOnly(ti, true)) {
+    if (Navigator.isReadOnly(ti, { ignoreTypeIsReadonly: true })) {
       contexts.forEach(a => a.isReadonly = true);
     }
 
@@ -141,7 +120,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       .filter(coc => !coc.isReadonly || showOnReadonly(coc))
       .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
         coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-      .map(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
+      .flatMap(coc => coc.createMenuItems());
 
     if (menuItems.length == 0)
       return undefined;
@@ -187,7 +166,8 @@ export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Pro
     title: OperationMessage.Confirm.niceToString(),
     message: confirmMessage,
     buttons: "yes_no",
-    icon: "question"
+    icon: "warning",
+    style: "warning",
   }).then(result => { return result == "yes"; });
 }
 
@@ -198,61 +178,99 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage != undefined)
     return coc.settings.confirmMessage(coc);
 
-  if (coc.operationInfo.operationType == OperationType.Delete)
-    return coc.context.lites.length > 1 ?
-      OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.niceToString() :
-      OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString();
+  if (coc.operationInfo.operationType == "Delete") {
+
+    if (coc.context.lites.length > 1) {
+      var message = coc.context.lites
+        .groupBy(a => a.EntityType)
+        .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
+        .joinComma(External.CollectionMessage.And.niceToString());
+
+      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{message}</strong>);
+    }
+    else {
+      var lite = coc.context.lites.single();
+      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{lite.toStr} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
+    }
+  }
 
   return undefined;
 }
 
 
-export namespace MenuItemConstructor { //To allow monkey patching
+export interface OperationMenuItemProps {
+  coc: ContextualOperationContext<any>;
+  onOperationClick?: (coc: ContextualOperationContext<Entity>) => void;
+  extraButtons?: React.ReactNode;
+  children?: React.ReactNode;
+  color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+}
 
-  export function simplifyName(niceName: string) {
-    const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-    return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
+export function OperationMenuItem({ coc, onOperationClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
+  const text = children ?? OperationMenuItem.getText(coc);
+
+
+  if (color == null)
+    color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+
+  if (icon == null)
+    icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+
+  if (iconColor == null)
+    iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+
+  const disabled = !!coc.canExecute;
+
+  const onClick = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
+
+  const handleOnClick = (me: React.MouseEvent<any>) => {
+    coc.event = me;
+    onClick(coc);
   }
-  export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
-    const text = coc.settings && coc.settings.text ? coc.settings.text() :
-      coc.entityOperationSettings?.text ? coc.entityOperationSettings.text() :
-        simplifyName(coc.operationInfo.niceName);
+  const item = (
+    <Dropdown.Item
+      onClick={disabled ? undefined : handleOnClick}
+      disabled={disabled}
+      style={{ pointerEvents: "initial" }}
+      data-operation={coc.operationInfo.key}>
+      {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
+        color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
+      {(icon != null || color != null) && " "}
+      {text}
+      {extraButtons}
+    </Dropdown.Item>
+  );
 
-    const color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
-    const icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
-    const iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+  if (!coc.canExecute)
+    return item;
 
-    const disabled = !!coc.canExecute;
+  return (
+    <OverlayTrigger placement="right"
+      overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
+      {item}
+    </OverlayTrigger >
+  );
+}
 
-    const onClick = (me: React.MouseEvent<any>) => {
-      coc.event = me;
-      coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
-    }
 
-    const item = (
-      <Dropdown.Item
-        onClick={disabled ? undefined : onClick}
-        disabled={disabled}
-        style={{ pointerEvents: "initial" }}
-        data-operation={coc.operationInfo.key}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
-          color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon != null || color != null) && " "}
-        {text}
-      </Dropdown.Item>
-    );
+OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactNode => {
 
-    if (!coc.canExecute)
-      return item;
+  if (coc.settings && coc.settings.text)
+    return coc.settings.text();
 
-    return (
-      <OverlayTrigger placement="right"
-        overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"}>{coc.canExecute}</Tooltip>} >
-        {item}
-      </OverlayTrigger >
-    );
-  }
+  if (coc.entityOperationSettings?.text)
+    return coc.entityOperationSettings.text();
+
+  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+
+};
+
+OperationMenuItem.simplifyName = (niceName: string) => {
+  const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
+  return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
 }
 
 
@@ -265,7 +283,21 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
       return;
 
     switch (coc.operationInfo.operationType) {
-      case OperationType.ConstructorFrom:
+      case "ConstructorFromMany":
+        {
+
+          API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
+            .then(coc.onConstructFromSuccess ?? (pack => {
+              notifySuccess();
+              Navigator.createNavigateOrTab(pack, coc.event!)
+                .then(() => coc.context.markRows({}))
+                .done();
+            }))
+            .done();
+
+          break;
+        }
+      case "ConstructorFrom":
         if (coc.context.lites.length == 1) {
           API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
@@ -276,35 +308,53 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
             }))
             .done();
         } else {
-          API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-            .then(coc.onContextualSuccess ?? (report => {
-              notifySuccess();
-              coc.context.markRows(report.errors);
-            }))
+          getSetters(coc)
+            .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+              .then(coc.onContextualSuccess ?? (report => {
+                notifySuccess();
+                coc.context.markRows(report.errors);
+              })))
             .done();
         }
         break;
-      case OperationType.Execute:
-        API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess ?? (report => {
-            notifySuccess();
-            coc.context.markRows(report.errors);
-          }))
+      case "Execute":
+        getSetters(coc)
+          .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              notifySuccess();
+              coc.context.markRows(report.errors);
+            })))
           .done();
         break;
-      case OperationType.Delete:
-        API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-          .then(coc.onContextualSuccess ?? (report => {
-            notifySuccess();
-            coc.context.markRows(report.errors);
-          }))
+      case "Delete":
+        getSetters(coc)
+          .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+            .then(coc.onContextualSuccess ?? (report => {
+              notifySuccess();
+              coc.context.markRows(report.errors);
+            })))
           .done();
         break;
     }
   }).done();
 
+  function getSetters(coc: ContextualOperationContext<Entity>): Promise<Operations.API.PropertySetter[] | undefined> {
 
+    if (!coc.operationInfo.canBeModified)
+      return Promise.resolve([]);
 
+    var settersConfig = (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig)(coc);
+
+    if (settersConfig == "NoDialog")
+      return Promise.resolve([]);
+
+    var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy(a => a).onlyOrNull();
+
+    if (!onlyType)
+      return Promise.resolve([]);
+
+    return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
+  }
 }
 
 

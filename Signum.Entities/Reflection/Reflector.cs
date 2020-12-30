@@ -162,6 +162,11 @@ namespace Signum.Entities.Reflection
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
         }
 
+        public static bool IsMixinEntity(this Type t)
+        {
+            return typeof(MixinEntity).IsAssignableFrom(t);
+        }
+
         public static bool IsModelEntity(this Type t)
         {
             return typeof(ModelEntity).IsAssignableFrom(t);
@@ -436,6 +441,9 @@ namespace Signum.Entities.Reflection
             type = type.UnNullify();
             if (type.IsEnum)
                 return null;
+
+            if (type == typeof(Date))
+                return "d";
 
             switch (Type.GetTypeCode(type))
             {

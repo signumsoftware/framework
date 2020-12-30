@@ -1,26 +1,28 @@
 
 import * as React from 'react'
-import { openModal, IModalProps, IHandleKeyboard } from '../Modals'
+import { openModal, IModalProps, IHandleKeyboard, FunctionalAdapter } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
+import * as AppContext from '../AppContext';
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
-import { TypeContext, StyleOptions, EntityFrame, IHasChanges } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity } from '../Signum.Entities'
-import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel } from '../Reflection'
-import { ValidationErrors, ValidationErrorHandle } from './ValidationErrors'
-import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
-import { EntityOperationContext } from '../Operations'
+import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage } from '../Signum.Entities'
+import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
+import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
+import { renderWidgets, WidgetContext } from './Widgets'
+import { EntityOperationContext, notifySuccess, operationInfos } from '../Operations'
 import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
-import { instanceOf } from 'prop-types';
 import { useStateWithPromise, useForceUpdate } from '../Hooks'
 import { Modal } from 'react-bootstrap'
 import { ModalHeaderButtons } from '../Components/ModalHeaderButtons'
+import WidgetEmbedded from './WidgetEmbedded'
+import SaveChangesModal from '../Modals/SaveChangesModal';
 
 interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
   title?: string;
@@ -32,7 +34,8 @@ interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
   avoidPromptLoseChange?: boolean;
   extraProps?: {}
   getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  isNavigate?: boolean;
+  buttons?: Navigator.ViewButtons;
+  allowExchangeEntity?: boolean;
   readOnly?: boolean;
   modalSize?: BsSize;
   createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
@@ -45,7 +48,7 @@ interface PackAndComponent {
   lastEntity: string;
   refreshCount: number;
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  }
+}
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
@@ -56,18 +59,19 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const okClicked = React.useRef(false);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component>(null);
-  const validationErrors = React.useRef<ValidationErrorHandle>(null);
+  const validationErrors = React.useRef<ValidationErrorsHandle>(null);
+  const frameRef = React.useRef<EntityFrame | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
 
   React.useImperativeHandle(ref, () => ({
-  handleKeyDown(e: KeyboardEvent) {
+    handleKeyDown(e: KeyboardEvent) {
       buttonBar.current && buttonBar.current.handleKeyDown(e);
-  }
+    }
   }));
 
   const typeName = getTypeName(p.entityOrPack);
-  const typeInfo = getTypeInfo(typeName);
+  const typeInfo = tryGetTypeInfo(typeName);
 
 
   React.useEffect(() => {
@@ -97,12 +101,37 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     }).then(callback).done();
   }
 
+  function getSaveChangesOperations() {
+
+    const frame = frameRef.current;
+
+    if (frame == null)
+      return [];
+
+    const ti = tryGetTypeInfo(frame.pack.entity.Type)
+
+    const pack = frame.pack;
+
+    const buttonContext: ButtonsContext = {
+      frame: frame,
+      pack: pack,
+      isOperationVisible: p.isOperationVisible,
+      tag: "SaveChangesModal"
+    };
+
+    return ti == null ? [] : operationInfos(ti)
+      .filter(oi => oi.canBeNew || !pack.entity.isNew)
+      .filter(oi => oi.operationType == "Execute" && oi.canBeModified)
+      .map(oi => EntityOperationContext.fromEntityPack(frame, pack as EntityPack<Entity>, oi.key)!)
+      .filter(eoc => eoc.isVisibleInButtonBar(buttonContext));
+  }
+
   function handleOkClicked() {
-    const pack = packComponent!.pack;
+    const pack = packComponent?.pack;
     if (hasChanges() &&
-      (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack.entity.Type))) {
+      (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack!.entity.Type))) {
       MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
+        title: SaveChangesMessage.ThereAreChanges.niceToString(),
         message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
         buttons: "ok",
         style: "warning",
@@ -119,12 +148,12 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         return;
       }
 
-      Navigator.API.validateEntity(pack.entity)
+      Navigator.API.validateEntity(pack!.entity)
         .then(() => {
           okClicked.current = true;
           setShow(false);
         }, ifError(ValidationError, e => {
-          GraphExplorer.setModelState(pack.entity, e.modelState, "entity");
+          GraphExplorer.setModelState(pack!.entity, e.modelState, "entity");
           forceUpdate();
         })).done();
     }
@@ -149,17 +178,21 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function handleCancelClicked() {
 
     if (hasChanges() && !p.avoidPromptLoseChange) {
-      MessageModal.show({
-        title: NormalWindowMessage.ThereAreChanges.niceToString(),
-        message: NormalWindowMessage.LoseChanges.niceToString(),
-        buttons: "yes_no",
-        style: "warning",
-        icon: "warning"
-      }).then(result => {
-        if (result == "yes") {
-          setShow(false);
-        }
-      }).done();
+      SaveChangesModal.show({ eocs: getSaveChangesOperations() })
+        .then(result => {
+          if (result == "loseChanges")
+            setShow(false);
+
+          if (result instanceof EntityOperationContext) {
+
+            result.onExecuteSuccess = pack => {
+              notifySuccess();
+              frameRef.current!.onClose(pack);
+            };
+
+            result.defaultClick();
+          }
+        }).done();
     }
     else {
       setShow(false);
@@ -167,7 +200,15 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function handleOnExited() {
-    p.onExited!(okClicked.current ? packComponent!.pack.entity : undefined);
+    if (okClicked.current)
+      p.onExited!(packComponent!.pack.entity);
+    else if (packComponent == null)
+      p.onExited!(undefined);
+    else {
+      var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
+      GraphExplorer.propagateAll(oldEntity);
+      p.onExited!(oldEntity.modified ? undefined : oldEntity);
+    }
   }
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
@@ -175,9 +216,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
         <ModalHeaderButtons
-        onClose={p.isNavigate ? handleCancelClicked : undefined}
-        onOk={!p.isNavigate ? handleOkClicked : undefined}
-        onCancel={!p.isNavigate ? handleCancelClicked : undefined}
+          onClose={p.buttons == "close" ? handleCancelClicked : undefined}
+          onOk={p.buttons == "ok_cancel" ? handleOkClicked : undefined}
+          onCancel={p.buttons == "ok_cancel" ? handleCancelClicked : undefined}
         okDisabled={!packComponent}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
         </ModalHeaderButtons>
@@ -188,7 +229,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   function renderBody(pc: PackAndComponent) {
 
     const frame: EntityFrame = {
-      frameComponent: { forceUpdate },
+      tabs: undefined,
+      frameComponent: { forceUpdate, type: FrameModal as any },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;
@@ -210,11 +252,15 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         forceUpdate();
       },
       refreshCount: pc.refreshCount,
-      allowChangeEntity: p.isNavigate || false,
+      createNew: p.createNew,
+      allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
+      prefix: prefix,
     };
 
+    frameRef.current = frame;
+
     const styleOptions: StyleOptions = {
-      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack),
+      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(pc.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
       frame: frame,
     };
 
@@ -226,20 +272,18 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
 
-    const embeddedWidgets = renderEmbeddedWidgets(wc);
-
     return (
       <div className="modal-body">
         {renderWidgets(wc)}
+        <WidgetEmbedded widgetContext={wc} >
         {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
         <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
-        {embeddedWidgets.top}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
           <ErrorBoundary>
             {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
           </ErrorBoundary>
         </div>
-        {embeddedWidgets.bottom}
+        </WidgetEmbedded>
       </div>
     );
   }
@@ -273,23 +317,9 @@ export namespace FrameModalManager {
       extraProps={options.extraProps}
       validate={options.validate == undefined ? isTypeModel(getTypeName(entityOrPack)) : options.validate}
       title={options.title}
-      isNavigate={false} />);
-  }
-
-  export function openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
-
-    return openModal<void>(<FrameModal
-      entityOrPack={entityOrPack}
-      readOnly={options.readOnly}
-      modalSize={options.modalSize}
-      propertyRoute={undefined}
-      getViewPromise={options.getViewPromise}
-      requiresSaveOperation={undefined}
-      avoidPromptLoseChange={options.avoidPromptLooseChange}
-      extraProps={options.extraProps}
       createNew={options.createNew}
-      isNavigate={true}
-    />);
+      allowExchangeEntity={options.allowExchangeEntity}
+      buttons={options.buttons ?? Navigator.typeDefaultButtons(getTypeName(entityOrPack), options.propertyRoute?.typeReference().isEmbedded)} />);
   }
 }
 
@@ -316,9 +346,9 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
     if (entity == undefined || entity.isNew)
       return undefined;
 
-    const ti = getTypeInfo(entity.Type);
+    const ti = tryGetTypeInfo(entity.Type);
 
-    if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
+    if (ti == undefined || !Navigator.isViewable(ti, { buttons: "close" })) //Embedded
       return undefined;
 
     return (
@@ -334,59 +364,7 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
 
     var entity = pack!.entity;
     var vp = getViewPromise && getViewPromise(entity);
-    Navigator.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
-  }
-}
-
-
-
-export class FunctionalAdapter extends React.Component {
-
-  innerRef?: any | null;
-
-  render() {
-    var only = React.Children.only(this.props.children);
-    if (!React.isValidElement(only))
-      throw new Error("Not a valid react element: " + only);
-
-    if (isForwardRef(only.type)) {
-      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } });
-}
-
-    return this.props.children;
-  }
-  
-  static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
-    var type = element.type as React.ComponentClass | React.FunctionComponent | string;
-    if (typeof type == "string" || type.prototype?.render) {
-      return React.cloneElement(element, { ref: ref });
-    } else {
-      return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
+    AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
     }
   }
 
-  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType) {
-
-    if (component instanceof type)
-      return true;
-
-    if (component instanceof FunctionalAdapter) {
-      var only = React.Children.only(component.props.children);
-      return React.isValidElement(only) && only.type == type;
-    }
-
-    return false
-  }
-
-  static innerRef(component: React.Component | null | undefined) {
-
-    if (component instanceof FunctionalAdapter) {
-      return component.innerRef;
-    }
-    return component;
-  }
-}
-
-function isForwardRef(type: any) {
-  return type.$$typeof == Symbol.for("react.forward_ref");
-}

@@ -30,7 +30,7 @@ export class ReactVisitor {
 
     const oldChildren = React.Children.toArray(element.props.children);
 
-    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c));
+    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c as React.ReactChild));
 
     if (newChildren.length != oldChildren.length || newChildren.some((n, i) => n !== oldChildren[i]))
       return React.cloneElement(element, undefined, newChildren);
@@ -57,7 +57,7 @@ export class ReplaceVisitor extends ReactVisitor {
     super();
   }
 
-  visitElement(element: React.ReactElement<any>) {
+  visitElement(element: React.ReactElement<any>): React.ReactNode {
 
     if (this.predicate(element)) {
 
@@ -73,7 +73,7 @@ export class ReplaceVisitor extends ReactVisitor {
 }
 
 export class ReactValidator extends ReactVisitor {
-  visitElement(element: React.ReactElement<any>) {
+  visitElement(element: React.ReactElement<any>): React.ReactNode {
 
     if (!React.isValidElement(element))
       return <div className="alert alert-danger">Invalid react element: {JSON.stringify(element)}</div>;
@@ -132,7 +132,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   removeLine(propertyRoute: (entity: T) => any): this {
 
-    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -157,7 +157,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   replaceAttributes<P>(propertyRoute: (entity: T) => any, newAttrs: Partial<P>): this {
 
-    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -169,7 +169,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
-    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -181,7 +181,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
 
-    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -200,7 +200,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
   }
 
   replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]) {
-    var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
+    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -209,8 +209,6 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
     return this;
   }
-
-
 
   removeTab(tabId: string | number): this {
     this.result = new ReplaceVisitor(
@@ -272,13 +270,13 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
   };
 }
 
-export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute) {
+export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute): boolean {
   const tc = e.props.ctx as TypeContext<any>;
 
   if (!tc)
     return false;
 
-  return tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
+  return tc.propertyRoute != null && tc.propertyRoute.toString() == pr.toString();
 }
 
 

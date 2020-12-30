@@ -11,6 +11,7 @@ export interface ModifiableEntity {
   modified: boolean;
   isNew: boolean;
   error?: { [member: string]: string };
+  readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
 }
 
@@ -26,7 +27,7 @@ export interface EnumEntity<T> extends Entity {
 export interface MixinEntity extends ModifiableEntity {
 }
 
-export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M {
+export function getMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M {
 
   var mixin = tryGetMixin(entity, type);
   if (!mixin)
@@ -34,7 +35,7 @@ export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): 
   return mixin;
 }
 
-export function tryGetMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M | undefined {
+export function tryGetMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M | undefined {
   return entity.mixins && entity.mixins[type.typeName] as M;
 }
 
@@ -90,7 +91,7 @@ function getOrCreateToStringFunction(type: string) {
   if (f || f === null)
     return f;
 
-  const ti = Reflection.getTypeInfo(type);
+  const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
 
@@ -212,11 +213,14 @@ export function isLite(obj: any): obj is Lite<Entity> {
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-  return obj != null && (obj as ModifiableEntity).Type != undefined;
+return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-  return obj != null && (obj as Entity).Type != undefined;
+  if(!isModifiableEntity(obj))
+    return false;
+  const ti = Reflection.tryGetTypeInfo(obj.Type);
+  return ti != null && ti.entityKind != null;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity> {
@@ -248,6 +252,8 @@ export module ConnectionMessage {
   export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
   export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+  export const OutdatedClientApplication = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
+  export const ANewVersionHasJustBeenDeployedConsiderReload = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
   export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
 }
 
@@ -293,15 +299,13 @@ export module JavascriptMessage {
   export const chooseAValue = new MessageKey("JavascriptMessage", "chooseAValue");
   export const addFilter = new MessageKey("JavascriptMessage", "addFilter");
   export const openTab = new MessageKey("JavascriptMessage", "openTab");
-  export const renameColumn = new MessageKey("JavascriptMessage", "renameColumn");
-  export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
-  export const enterTheNewColumnName = new MessageKey("JavascriptMessage", "enterTheNewColumnName");
   export const error = new MessageKey("JavascriptMessage", "error");
   export const executed = new MessageKey("JavascriptMessage", "executed");
   export const hideFilters = new MessageKey("JavascriptMessage", "hideFilters");
   export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
   export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
   export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
+  export const ShowGroup = new MessageKey("JavascriptMessage", "ShowGroup");
   export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
   export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
   export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
@@ -315,9 +319,10 @@ export module JavascriptMessage {
   export const popupErrors = new MessageKey("JavascriptMessage", "popupErrors");
   export const popupErrorsStop = new MessageKey("JavascriptMessage", "popupErrorsStop");
   export const insertColumn = new MessageKey("JavascriptMessage", "insertColumn");
+  export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
   export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
-  export const reorderColumn_MoveLeft = new MessageKey("JavascriptMessage", "reorderColumn_MoveLeft");
-  export const reorderColumn_MoveRight = new MessageKey("JavascriptMessage", "reorderColumn_MoveRight");
+  export const removeOtherColumns = new MessageKey("JavascriptMessage", "removeOtherColumns");
+  export const restoreDefaultColumns = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
   export const saved = new MessageKey("JavascriptMessage", "saved");
   export const search = new MessageKey("JavascriptMessage", "search");
   export const Selected = new MessageKey("JavascriptMessage", "Selected");
@@ -334,6 +339,8 @@ export module JavascriptMessage {
   export const cancel = new MessageKey("JavascriptMessage", "cancel");
   export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
+  export const Date = new MessageKey("JavascriptMessage", "Date");
+  export const Time = new MessageKey("JavascriptMessage", "Time");
 }
 
 export module LiteMessage {
@@ -348,7 +355,6 @@ export interface ModelEntity extends ModifiableEntity {
 }
 
 export module NormalControlMessage {
-  export const Save = new MessageKey("NormalControlMessage", "Save");
   export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
 }
@@ -362,17 +368,15 @@ export module NormalWindowMessage {
   export const FixErrors = new MessageKey("NormalWindowMessage", "FixErrors");
   export const ImpossibleToSaveIntegrityCheckFailed = new MessageKey("NormalWindowMessage", "ImpossibleToSaveIntegrityCheckFailed");
   export const Loading0 = new MessageKey("NormalWindowMessage", "Loading0");
-  export const LoseChanges = new MessageKey("NormalWindowMessage", "LoseChanges");
   export const NoDirectErrors = new MessageKey("NormalWindowMessage", "NoDirectErrors");
   export const Ok = new MessageKey("NormalWindowMessage", "Ok");
   export const Reload = new MessageKey("NormalWindowMessage", "Reload");
   export const The0HasErrors1 = new MessageKey("NormalWindowMessage", "The0HasErrors1");
-  export const ThereAreChanges = new MessageKey("NormalWindowMessage", "ThereAreChanges");
-  export const ThereAreChangesContinue = new MessageKey("NormalWindowMessage", "ThereAreChangesContinue");
   export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
   export const Message = new MessageKey("NormalWindowMessage", "Message");
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
   export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
+  export const Main = new MessageKey("NormalWindowMessage", "Main");
 }
 
 export module OperationMessage {
@@ -382,14 +386,18 @@ export module OperationMessage {
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
-  export const PleaseConfirmYouDLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDelete0FromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem");
-  export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
+  export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
+  export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
+  export const PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12 = new MessageKey("OperationMessage", "PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12");
+  export const Condition = new MessageKey("OperationMessage", "Condition");
+  export const Setters = new MessageKey("OperationMessage", "Setters");
+  export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
+  export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
@@ -409,9 +417,46 @@ export module PaginationMessage {
   export const All = new MessageKey("PaginationMessage", "All");
 }
 
+export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperation");
+export type PropertyOperation =
+  "Set" |
+  "AddElement" |
+  "ChangeElements" |
+  "RemoveElements" |
+  "ModifyEntity" |
+  "CreateNewEntity";
+
 export module QuickLinkMessage {
   export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
   export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");
+}
+
+export module ReactWidgetsMessage {
+  export const MoveToday = new MessageKey("ReactWidgetsMessage", "MoveToday");
+  export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
+  export const MoveForward = new MessageKey("ReactWidgetsMessage", "MoveForward");
+  export const DateButton = new MessageKey("ReactWidgetsMessage", "DateButton");
+  export const TimeButton = new MessageKey("ReactWidgetsMessage", "TimeButton");
+  export const OpenCombobox = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
+  export const OpenDropdown = new MessageKey("ReactWidgetsMessage", "OpenDropdown");
+  export const Placeholder = new MessageKey("ReactWidgetsMessage", "Placeholder");
+  export const FilterPlaceholder = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
+  export const EmptyList = new MessageKey("ReactWidgetsMessage", "EmptyList");
+  export const EmptyFilter = new MessageKey("ReactWidgetsMessage", "EmptyFilter");
+  export const CreateOption = new MessageKey("ReactWidgetsMessage", "CreateOption");
+  export const CreateOption0 = new MessageKey("ReactWidgetsMessage", "CreateOption0");
+  export const TagsLabel = new MessageKey("ReactWidgetsMessage", "TagsLabel");
+  export const RemoveLabel = new MessageKey("ReactWidgetsMessage", "RemoveLabel");
+  export const NoneSelected = new MessageKey("ReactWidgetsMessage", "NoneSelected");
+  export const SelectedItems0 = new MessageKey("ReactWidgetsMessage", "SelectedItems0");
+  export const IncrementValue = new MessageKey("ReactWidgetsMessage", "IncrementValue");
+  export const DecrementValue = new MessageKey("ReactWidgetsMessage", "DecrementValue");
+}
+
+export module SaveChangesMessage {
+  export const ThereAreChanges = new MessageKey("SaveChangesMessage", "ThereAreChanges");
+  export const YoureTryingToCloseAnEntityWithChanges = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
+  export const LoseChanges = new MessageKey("SaveChangesMessage", "LoseChanges");
 }
 
 export module SearchMessage {
@@ -423,6 +468,7 @@ export module SearchMessage {
   export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
+  export const DeleteAllFilter = new MessageKey("SearchMessage", "DeleteAllFilter");
   export const Filters = new MessageKey("SearchMessage", "Filters");
   export const Find = new MessageKey("SearchMessage", "Find");
   export const FinderOf0 = new MessageKey("SearchMessage", "FinderOf0");
@@ -444,7 +490,6 @@ export module SearchMessage {
   export const Refresh = new MessageKey("SearchMessage", "Refresh");
   export const Create = new MessageKey("SearchMessage", "Create");
   export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
-  export const SearchControl_Pagination_All = new MessageKey("SearchMessage", "SearchControl_Pagination_All");
   export const ThereIsNo0 = new MessageKey("SearchMessage", "ThereIsNo0");
   export const Value = new MessageKey("SearchMessage", "Value");
   export const View = new MessageKey("SearchMessage", "View");
@@ -466,6 +511,10 @@ export module SearchMessage {
   export const PleaseSelectOneOrSeveralEntities = new MessageKey("SearchMessage", "PleaseSelectOneOrSeveralEntities");
   export const _0FiltersCollapsed = new MessageKey("SearchMessage", "_0FiltersCollapsed");
   export const DisplayName = new MessageKey("SearchMessage", "DisplayName");
+  export const ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton = new MessageKey("SearchMessage", "ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton");
+  export const PaginationAll_0Elements = new MessageKey("SearchMessage", "PaginationAll_0Elements");
+  export const PaginationPages_0Of01lements = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
+  export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
 }
 
 export module SelectorMessage {
@@ -507,6 +556,7 @@ export module ValidationMessage {
   export const _0IsNotAllowed = new MessageKey("ValidationMessage", "_0IsNotAllowed");
   export const _0IsNotAllowedOnState1 = new MessageKey("ValidationMessage", "_0IsNotAllowedOnState1");
   export const _0IsNotSet = new MessageKey("ValidationMessage", "_0IsNotSet");
+  export const _0AreNotSet = new MessageKey("ValidationMessage", "_0AreNotSet");
   export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
   export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");
   export const BeA0_G = new MessageKey("ValidationMessage", "BeA0_G");
@@ -561,11 +611,14 @@ export module ValidationMessage {
   export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
   export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
   export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
+  export const _0ShouldBeEmpty = new MessageKey("ValidationMessage", "_0ShouldBeEmpty");
   export const _AtLeastOneValueIsNeeded = new MessageKey("ValidationMessage", "_AtLeastOneValueIsNeeded");
   export const PowerOf = new MessageKey("ValidationMessage", "PowerOf");
   export const BeAString = new MessageKey("ValidationMessage", "BeAString");
   export const BeAMultilineString = new MessageKey("ValidationMessage", "BeAMultilineString");
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
+  export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
+  export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
 }
 
 export module VoidEnumMessage {

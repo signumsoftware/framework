@@ -37,7 +37,8 @@ namespace Signum.Engine
                 if (error != null)
                 {
 #if DEBUG
-                    throw new IntegrityCheckException(error.WithEntities(modifiables));
+                    var withEntities = error.WithEntities(modifiables);
+                    throw new IntegrityCheckException(withEntities);
 #else
                     throw new IntegrityCheckException(error);
 #endif

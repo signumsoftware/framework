@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -89,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim().SplitNoEmpty(' ');
+                    var parts = subString.SplitParts();
 
                     results.AddRange(giLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
@@ -129,7 +130,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim().SplitNoEmpty(' ');
+                    var parts = subString.SplitParts();
 
                     var list = await giLiteContainingAsync.GetInvoker(t)(parts, count - results.Count, cancellationToken);
                     results.AddRange(list);
@@ -142,9 +143,9 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
-        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
-        static Lite<Entity> LiteById<T>(PrimaryKey id)
+        static GenericInvoker<Func<PrimaryKey, Lite<Entity>?>> giLiteById =
+            new GenericInvoker<Func<PrimaryKey, Lite<Entity>?>>(id => LiteById<TypeEntity>(id));
+        static Lite<Entity>? LiteById<T>(PrimaryKey id)
             where T : Entity
         {
             return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
@@ -164,7 +165,7 @@ namespace Signum.Engine.DynamicQuery
             where T : Entity
         {
             return Database.Query<T>()
-                .Where(a => a.ToString().ContainsAll(parts))
+                .Where(a => a.ToString().ContainsAllParts(parts))
                 .OrderBy(a => a.ToString().Length)
                 .Select(a => a.ToLite())
                 .Take(count)
@@ -179,7 +180,7 @@ namespace Signum.Engine.DynamicQuery
             where T : Entity
         {
             var list = await Database.Query<T>()
-                .Where(a => a.ToString().ContainsAll(parts))
+                .Where(a => a.ToString().ContainsAllParts(parts))
                 .OrderBy(a => a.ToString().Length)
                 .Select(a => a.ToLite())
                 .Take(count)
@@ -228,67 +229,6 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public static List<T> AutocompleteUntyped<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type)
-        {
-            using (ExecutionMode.UserInterface())
-            {
-                List<T> results = new List<T>();
-
-                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
-                {
-                    T entity = query.SingleOrDefaultEx(r => entitySelector.Evaluate(r).Id == id);
-
-                    if (entity != null)
-                        results.Add(entity);
-
-                    if (results.Count >= count)
-                        return results;
-                }
-
-                var parts = subString.Trim().SplitNoEmpty(' ');
-
-                var list = query
-                    .Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
-                    .Take(count - results.Count)
-                    .ToList();
-
-                results.AddRange(list);
-
-                return results;
-            }
-        }
-
-        public static async Task<List<T>> AutocompleteUntypedAsync<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type, CancellationToken token)
-        {
-            using (ExecutionMode.UserInterface())
-            {
-                List<T> results = new List<T>();
-
-                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
-                {
-                    T entity = await query.SingleOrDefaultAsync(r => entitySelector.Evaluate(r).Id == id);
-
-                    if (entity != null)
-                        results.Add(entity);
-
-                    if (results.Count >= count)
-                        return results;
-                }
-
-                var parts = subString.Trim().SplitNoEmpty(' ');
-
-                var list = await query.Where(r => entitySelector.Evaluate(r).ToString()!.ContainsAll(parts))
-                    .OrderBy(r => entitySelector.Evaluate(r).ToString()!.Length)
-                    .Take(count - results.Count)
-                    .ToListAsync();
-
-                results.AddRange(list);
-
-                return results;
-            }
-        }
-
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : Entity
         {
@@ -308,9 +248,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                results.AddRange(query.Where(a => a.ToString()!.ContainsAll(parts))
+                results.AddRange(query.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count));
 
@@ -336,9 +276,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                var list = await query.Where(a => a.ToString()!.ContainsAll(parts))
+                var list = await query.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count)
                     .ToListAsync(token);
@@ -367,9 +307,9 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim().SplitNoEmpty(' ');
+                var parts = subString.SplitParts();
 
-                var list = collection.Where(a => a.ToString()!.ContainsAll(parts))
+                var list = collection.Where(a => a.ToString()!.ContainsAllParts(parts))
                     .OrderBy(a => a.ToString()!.Length)
                     .Take(count - results.Count);
 
@@ -378,6 +318,20 @@ namespace Signum.Engine.DynamicQuery
                 return results;
             }
         }
+
+        public static string[] SplitParts(this string str)
+        {
+            if (FilterCondition.ToLowerString())
+                return str.Trim().ToLower().SplitNoEmpty(' ');
+
+            return str.Trim().SplitNoEmpty(' ');
+        }
+
+        [AutoExpressionField]
+        public static bool ContainsAllParts(this string str, string[] parts) => As.Expression(() =>
+            FilterCondition.ToLowerString() ?
+            str.ToLower().ContainsAll(parts) :
+            str.ContainsAll(parts));
 
     }
 }

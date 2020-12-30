@@ -1,26 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<Platforms>x64;x86;AnyCPU</Platforms>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>preview</LangVersion>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>    
-    <Platforms>x64;x86;AnyCPU</Platforms>
-    <NoWarn>NU1605</NoWarn>
-  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="Engine\Scripts\versioning_function.sql" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="2.5.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.7" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Engine\Scripts\versioning_function.sql" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Npgsql" Version="5.0.1.1" />
+		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="5.0.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
+		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
+	</ItemGroup>
 </Project>

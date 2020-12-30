@@ -7,6 +7,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Threading;
 using System.Threading.Tasks;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -16,16 +17,19 @@ namespace Signum.Engine.DynamicQuery
 
         public void Register<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            Register(queryName, new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName)));
         }
 
         public void Register<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            Register(queryName, new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName)));
         }
 
         public void Register(object queryName, DynamicQueryBucket bucket)
         {
+            if (Schema.Current.IsCompleted)
+                throw new InvalidOperationException("Schema already completed");
+
             queries[queryName] = bucket;
         }
 

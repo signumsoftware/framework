@@ -22,16 +22,17 @@ namespace Signum.Engine
     public static class Database
     {
         #region Save
-        public static void SaveList<T>(this IEnumerable<T> entities)
-            where T : class, IEntity
+        public static List<T> SaveList<T>(this IEnumerable<T> entities)
+                where T : class, IEntity
         {
+            var list = entities.ToList();
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".FormatWith(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(entities.Cast<Entity>().ToArray());
+                Saver.Save(list.Cast<Entity>().ToArray());
 
-                tr.Commit();
+                return tr.Commit(list);
             }
         }
 
@@ -74,10 +75,11 @@ namespace Signum.Engine
 
         public static int InsertView<T>(this T viewObject) where T : IView
         {
-            var view = Schema.Current.View<T>();
+            var schema = Schema.Current;
+            var view = schema.View<T>();
             var parameters = view.GetInsertParameters(viewObject);
 
-            var sql = $@"INSERT {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(), ", ")})
+            var sql = $@"INSERT INTO {view.Name} ({view.Columns.ToString(p => p.Key.SqlEscape(schema.Settings.IsPostgres), ", ")})
 VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             return Executor.ExecuteNonQuery(sql, parameters);
@@ -365,6 +367,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
 
+
         public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
         static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));
@@ -485,7 +488,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                             }
 
                             if (filter != null)
-                                result = result.Where(filter.InMemoryFunction).ToList();
+                                result = result.Where(filter.InMemoryFunction!).ToList();
 
                             return result;
                         }
@@ -524,7 +527,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                             }
 
                             if (filter != null)
-                                result = result.Where(filter.InMemoryFunction).ToList();
+                                result = result.Where(filter.InMemoryFunction!).ToList();
 
                             return result;
                         }
@@ -701,7 +704,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
 
                     if (filter != null)
-                        result = result.Where(filter.InMemoryFunction).ToList();
+                        result = result.Where(filter.InMemoryFunction!).ToList();
 
                     return result;
                 }
@@ -795,7 +798,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
 
                     if (filter != null)
-                        result = result.Where(filter.InMemoryFunction).ToList();
+                        result = result.Where(filter.InMemoryFunction!).ToList();
 
                     return result;
                 }
@@ -857,7 +860,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
-        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
+        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
             where T : Entity
         {
@@ -1106,7 +1109,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         class MListQueryExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(mi, arguments)).Compile()();
 
@@ -1131,10 +1134,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         class MListElementsExpander : IMethodExpander
         {
             static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null!)).GetGenericMethodDefinition();
-            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null, a => false)).GetGenericMethodDefinition();
+            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null!, a => false)).GetGenericMethodDefinition();
             static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 Type[] types = mi.GetGenericArguments();
 
@@ -1164,7 +1167,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         [MethodExpander(typeof(InDbExpander))]
-        public static R InDBEntity<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
+        public static R InDB<E, R>(this E entity, Expression<Func<E, R>> selector) where E : class, IEntity
         {
             return entity.InDB().Select(selector).SingleEx();
         }
@@ -1228,7 +1231,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             static readonly MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).Select(a => a)).GetGenericMethodDefinition();
             static readonly MethodInfo miSingleEx = ReflectionTools.GetMethodInfo(() => ((IQueryable<int>)null!).SingleEx()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {
                 var entity = arguments[0];
                 var lambda = arguments[1];
@@ -1240,7 +1243,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (partialEntity.NodeType != ExpressionType.Constant)
                     return Expression.Invoke(lambda.StripQuotes(), isLite ? Expression.Property(entity, "Entity") : entity);
 
-                var value = ((ConstantExpression)partialEntity).Value;
+                var value = ((ConstantExpression)partialEntity).Value!;
 
                 var genericArguments = mi.GetGenericArguments();
 
@@ -1466,7 +1469,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (Transaction tr = new Transaction())
             {
                 int result;
-                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
                     result = query.UnsafeInsert(a => a, message);
                 return tr.Commit(result);
             }
@@ -1478,7 +1481,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (Transaction tr = new Transaction())
             {
                 int result;
-                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E)).Name))
+                using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
                     result = query.UnsafeInsert(constructor, message);
                 return tr.Commit(result);
             }
@@ -1603,7 +1606,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             }
         }
 
-        public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
+        public static void MergeMList<E, V, A>(string? title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
             where E : Entity
             where A : class
         {
@@ -1615,7 +1618,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsertMList(mList, p => p, title != null ? "auto" : null);
         }
 
-        public static List<T> ToListWait<T>(this IQueryable<T> query, string message)
+        public static List<T> ToListWait<T>(this IEnumerable<T> query, string message)
         {
             message = message == "auto" ? typeof(T).TypeName() : message;
 

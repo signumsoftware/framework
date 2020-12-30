@@ -44,11 +44,22 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Schema current = Schema.Current;
+                Schema schema = Schema.Current;
 
-                current.SchemaCompleted += () =>
+                sb.Include<TypeEntity>()
+                  .WithQuery(() => t => new
+                  {
+                      Entity = t,
+                      t.Id,
+                      t.TableName,
+                      t.CleanName,
+                      t.ClassName,
+                      t.Namespace,
+                  });
+
+                schema.SchemaCompleted += () =>
                 {
-                    var attributes = current.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
+                    var attributes = schema.Tables.Keys.Select(t => KeyValuePair.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
                     var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\r\n");
 
@@ -56,25 +67,12 @@ namespace Signum.Engine.Basics
                         throw new InvalidOperationException(errors);
                 };
 
-                current.Initializing += () =>
+                schema.Initializing += () =>
                 {
-                    current.typeCachesLazy.Load();
+                    schema.typeCachesLazy.Load();
                 };
 
-                current.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(current),
-                    new InvalidateWith(typeof(TypeEntity)),
-                    Schema.Current.InvalidateMetadata);
-
-                sb.Include<TypeEntity>()
-                    .WithQuery(() => t => new
-                    {
-                        Entity = t,
-                        t.Id,
-                        t.TableName,
-                        t.CleanName,
-                        t.ClassName,
-                        t.Namespace,
-                    });
+                schema.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(schema), new InvalidateWith(typeof(TypeEntity)), Schema.Current.InvalidateMetadata);
 
                 TypeEntity.SetTypeEntityCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
@@ -92,6 +90,7 @@ namespace Signum.Engine.Basics
         public static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
         {
             var schema = Schema.Current;
+            var isPostgres = schema.Settings.IsPostgres;
 
             Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
@@ -99,8 +98,8 @@ namespace Signum.Engine.Basics
 
             { //External entities are nt asked in SchemaSynchronizer
                 replacements.AskForReplacements(
-                    currentList.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName).Schema.Database)).Select(a => a.TableName).ToHashSet(),
-                    should.Values.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName).Schema.Database)).Select(a => a.TableName).ToHashSet(),
+                    currentList.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName, isPostgres).Schema.Database)).Select(a => a.TableName).ToHashSet(),
+                    should.Values.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName, isPostgres).Schema.Database)).Select(a => a.TableName).ToHashSet(),
                     Replacements.KeyTables);
             }
 
@@ -109,12 +108,12 @@ namespace Signum.Engine.Basics
 
             { //Temporal solution until applications are updated
                 var repeated =
-                    should.Keys.Select(k => ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
-                    current.Keys.Select(k => ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
+                    should.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
+                    current.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
 
                 Func<string, string> simplify = tn =>
                 {
-                    ObjectName name = ObjectName.Parse(tn);
+                    ObjectName name = ObjectName.Parse(tn, isPostgres);
                     return repeated.Contains(name.Name) ? name.ToString() : name.Name;
                 };
 
@@ -138,8 +137,8 @@ namespace Signum.Engine.Basics
 
                         if (c.TableName != s.TableName)
                         {
-                            var pc = ObjectName.Parse(c.TableName);
-                            var ps = ObjectName.Parse(s.TableName);
+                            var pc = ObjectName.Parse(c.TableName, isPostgres);
+                            var ps = ObjectName.Parse(s.TableName, isPostgres);
 
                             if (!EqualsIgnoringDatabasePrefix(pc, ps))
                             {
@@ -239,7 +238,7 @@ namespace Signum.Engine.Basics
                     Database.RetrieveAll<TypeEntity>(),
                     current.Tables.Keys,
                     t => t.FullClassName,
-                    t => (EnumEntity.Extract(t) ?? t).FullName,
+                    t => (EnumEntity.Extract(t) ?? t).FullName!,
                     (typeEntity, type) => (typeEntity, type),
                      "caching {0}".FormatWith(current.Table(typeof(TypeEntity)).Name)
                     ).ToDictionary(a => a.type, a => a.typeEntity);

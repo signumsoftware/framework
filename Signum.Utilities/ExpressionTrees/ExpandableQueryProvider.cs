@@ -22,9 +22,9 @@ namespace Signum.Utilities.ExpressionTrees
 			return _item.Provider.CreateQuery(expression);
 		}
 
-		public object Execute(Expression expression)
+		public object? Execute(Expression expression)
 		{
-			return _item.Provider.Execute(ExpressionCleaner.Clean(expression));
+			return _item.Provider.Execute(ExpressionCleaner.Clean(expression)!);
 		}
 
 		public IQueryable<S> CreateQuery<S>(Expression expression)

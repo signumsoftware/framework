@@ -94,13 +94,13 @@ SelectorModal.chooseType = (options: TypeInfo[]): Promise<TypeInfo | undefined> 
     });
 };
 
-SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>): Promise<T | undefined> => {
-    return SelectorModal.chooseElement(enumType.values(),
+SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, title?: React.ReactNode, message?: React.ReactNode, values?: T[]): Promise<T | undefined> => {
+    return SelectorModal.chooseElement(values ?? enumType.values(),
       {
         buttonDisplay: a => enumType.niceToString(a),
         buttonName: a => a,
-        title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
-        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
+        title: title ?? SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
+        message: message ?? SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
         size: "md",
       });
 };

@@ -137,11 +137,11 @@ namespace Signum.Utilities.DataStructures
 
     class IntervalMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             return Expression.And( //min <= value && value < max;
-                Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
-                Expression.LessThan(arguments[0], Expression.Property(instance, "Max")));
+                Expression.LessThanOrEqual(Expression.Property(instance!, "Min"), arguments[0]),
+                Expression.LessThan(arguments[0], Expression.Property(instance!, "Max")));
         }
     }
 
@@ -149,15 +149,15 @@ namespace Signum.Utilities.DataStructures
     //Overlap
     class OverlapMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             Expression other = arguments.SingleEx();
 
             //!((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
 
             return Expression.Not(Expression.Or(
-                  Expression.LessThanOrEqual(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
-                  Expression.LessThanOrEqual(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                  Expression.LessThanOrEqual(Expression.Property(instance!, "Max"), Expression.Property(other, "Min")),
+                  Expression.LessThanOrEqual(Expression.Property(other, "Max"), Expression.Property(instance!, "Min"))
                   ));
         }
     }
@@ -165,16 +165,16 @@ namespace Signum.Utilities.DataStructures
     //Intersection
     class IntersectionMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             Expression other = arguments.SingleEx();
 
             var t = other.Type.GetGenericArguments()[0];
 
-            var c = other.Type.GetConstructor(new[] { t, t });
+            var c = other.Type.GetConstructor(new[] { t, t })!;
 
-            var minI = Expression.Property(instance, "Min");
-            var maxI = Expression.Property(instance, "Max");
+            var minI = Expression.Property(instance!, "Min");
+            var maxI = Expression.Property(instance!, "Max");
             var minO = Expression.Property(other, "Min");
             var maxO = Expression.Property(other, "Max");
 
@@ -353,10 +353,10 @@ namespace Signum.Utilities.DataStructures
 
     class ContainsNullableMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
-            var min = Expression.Property(instance, "Min");
-            var max = Expression.Property(instance, "Max");
+            var min = Expression.Property(instance!, "Min");
+            var max = Expression.Property(instance!, "Max");
 
             return Expression.And(
                 Expression.Or(Expression.Not(Expression.Property(min, "HasValue")), Expression.LessThanOrEqual(Expression.Property(min, "Value"), arguments[0])),
@@ -367,15 +367,15 @@ namespace Signum.Utilities.DataStructures
     //Overlap
     class OverlapNullableMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             Expression other = arguments.SingleEx();
 
             //!((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
 
             return Expression.Not(Expression.Or(
-                LessOrEqualNullable(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
-                LessOrEqualNullable(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                LessOrEqualNullable(Expression.Property(instance!, "Max"), Expression.Property(other, "Min")),
+                LessOrEqualNullable(Expression.Property(other, "Max"), Expression.Property(instance!, "Min"))
                 ));
         }
 
@@ -509,11 +509,11 @@ namespace Signum.Utilities.DataStructures
 
     class ContainsWithEndMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             return Expression.And( //min <= value && value < max;
-                Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
-                Expression.LessThanOrEqual(arguments[0], Expression.Property(instance, "Max")));
+                Expression.LessThanOrEqual(Expression.Property(instance!, "Min"), arguments[0]),
+                Expression.LessThanOrEqual(arguments[0], Expression.Property(instance!, "Max")));
         }
     }
 
@@ -521,15 +521,15 @@ namespace Signum.Utilities.DataStructures
     //Overlap
     class OverlapWithEndMethodExpander : IMethodExpander
     {
-        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {
             Expression other = arguments.SingleEx();
 
             //!((max.CompareTo(other.min) < 0) || (other.max.CompareTo(min) < 0));
 
             return Expression.Not(Expression.Or(
-                  Expression.LessThan(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
-                  Expression.LessThan(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                  Expression.LessThan(Expression.Property(instance!, "Max"), Expression.Property(other, "Min")),
+                  Expression.LessThan(Expression.Property(other, "Max"), Expression.Property(instance!, "Min"))
                   ));
         }
     }

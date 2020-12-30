@@ -6,7 +6,7 @@ import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity,
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
-import { MaxHeightProperty } from 'csstype';
+import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI, useForceUpdate } from '../Hooks'
 import { useController } from './LineBase'
@@ -19,7 +19,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean;
   avoidEmptyTable?: boolean;
-  maxResultsHeight?: MaxHeightProperty<string | number> | any;
+  maxResultsHeight?: Property.MaxHeight<string | number> | any;
   scrollable?: boolean;
   rowSubContext?: (ctx: TypeContext<any /*T*/>) => TypeContext<any>;
   tableClasses?: string;
@@ -51,7 +51,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     this.recentlyCreated = React.useRef<Lite<Entity> | ModifiableEntity | null>(null);
 
     React.useEffect(() => {
-      this.containerDiv && this.containerDiv.current!.addEventListener("scroll", (e) => {
+      this.containerDiv.current && this.containerDiv.current.addEventListener("scroll", (e) => {
         var translate = "translate(0," + this.containerDiv.current!.scrollTop + "px)";
         this.thead.current!.style.transform = translate;
       });
@@ -68,42 +68,49 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
   overrideProps(state: EntityTableProps, overridenProps: EntityTableProps) {
     super.overrideProps(state, overridenProps);
 
-    if (!state.columns) {
-      var elementPr = state.ctx.propertyRoute.addLambda(a => a[0].element);
+    if (state.ctx.propertyRoute) {
+      var pr = state.ctx.propertyRoute!.addMember("Indexer", "", true)!;
 
-      state.columns = Dic.getKeys(elementPr.subMembers())
-        .filter(a => a != "Id")
-        .map(memberName => ({
-          property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
-        }) as EntityTableColumn<ModifiableEntity, any>);
+      if (!state.columns) {
+        var elementPr = state.ctx.propertyRoute!.addLambda(a => a[0].element);
+
+        state.columns = Dic.getKeys(elementPr.subMembers())
+          .filter(a => a != "Id")
+          .map(memberName => ({
+            property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
+          }) as EntityTableColumn<ModifiableEntity, any>);
+      }
+      else {
+        state.columns = state.columns.filter(c => c.property == null ||
+          (c.property == "string" ? pr.addMember("Member", c.property, false) : pr.tryAddLambda(c.property!)) != null);
+      }
+
+      state.columns.forEach(c => {
+        if (c.template === undefined) {
+          if (c.property == null)
+            throw new Error("Column has no property and no template");
+
+          var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!));
+
+          c.template = (ctx, row, state) => {
+            var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
+            return factory(subCtx);
+          };
+        }
+
+        if (c.mergeCells == true) {
+          if (c.property == null)
+            throw new Error("Column has no property but mergeCells is true");
+
+          c.mergeCells = c.property;
+        }
+
+        if (typeof c.mergeCells == "string") {
+          const prop = c.mergeCells;
+          c.mergeCells = a => (a as any)[prop];
+        }
+      });
     }
-
-    var pr = state.ctx.propertyRoute.addMember("Indexer", "");
-    state.columns.forEach(c => {
-      if (c.template === undefined) {
-        if (c.property == null)
-          throw new Error("Column has no property and no template");
-
-        var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property) : pr.addLambda(c.property!));
-
-        c.template = (ctx, row, state) => {
-          var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
-          return factory(subCtx);
-        };
-      }
-
-      if (c.mergeCells == true) {
-        if (c.property == null)
-          throw new Error("Column has no property but mergeCells is true");
-
-        c.mergeCells = c.property;
-      }
-
-      if (typeof c.mergeCells == "string") {
-        const prop = c.mergeCells;
-        c.mergeCells = a => (a as any)[prop];
-      }
-    });
   }
 
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
@@ -134,7 +141,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
         });
 
       if (focusable.last() == e.target) {
-        var pr = this.props.ctx.propertyRoute.addLambda(a => a[0]);
+        var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
         const promise = p.onCreate ? p.onCreate(pr) : this.defaultCreate(pr);
         if (promise == null)
           return;
@@ -167,7 +174,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
       window.open(route);
     }
     else {
-      const pr = ctx.propertyRoute.addLambda(a => a[0]);
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
 
       const promise = p.onView ?
         p.onView(entity, pr) :
@@ -206,7 +213,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
   const c = useController(EntityTableController, props, ref);
   const p = c.props;
 
-  if (p.type!.isLite)
+  if (p.type && p.type.isLite)
     throw new Error("Lite not supported");
 
   if (c.isHidden)
@@ -239,6 +246,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       <span className="ml-2">
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
+        {c.props.extraButtons && c.props.extraButtons(c)}
       </span>
     );
 
@@ -248,7 +256,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
   function renderTable() {
 
     const readOnly = ctx.readOnly;
-    const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
+    const elementPr = ctx.propertyRoute!.addLambda(a => a[0].element);
 
     var elementCtxs = c.getMListItemContext(ctx);
     var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;

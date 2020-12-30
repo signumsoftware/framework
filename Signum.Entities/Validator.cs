@@ -26,6 +26,8 @@ namespace Signum.Entities
         }
 
         public static Func<ModifiableEntity, PropertyInfo, string?>? GlobalValidation { get; set; }
+        public static Func<ModifiableEntity, PropertyInfo, bool>? GlobalIsReadonly { get; set; }
+
 
         static readonly Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
@@ -43,11 +45,11 @@ namespace Signum.Entities
             if (validators.GetDefinition(typeof(T)) != null)
                 return;
 
-            if(typeof(T) != typeof(ModifiableEntity))
+            if (typeof(T) != typeof(ModifiableEntity))
                 GenerateType(typeof(T).BaseType!);
 
             var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                       where !pi.HasAttribute<HiddenPropertyAttribute>() && !pi.HasAttribute<ExpressionFieldAttribute>() 
+                       where !(pi.HasAttribute<HiddenPropertyAttribute>() || (pi.CanWrite == false && pi.HasAttribute<ExpressionFieldAttribute>()))
                        select KeyValuePair.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
 
             validators.SetDefinition(typeof(T), dic);
@@ -135,10 +137,12 @@ namespace Signum.Entities
     {
         PropertyInfo PropertyInfo { get; }
         List<ValidatorAttribute> Validators { get; }
-        bool Required { get; }
+    
 
         string? PropertyCheck(ModifiableEntity modifiableEntity);
         object? GetValueUntyped(ModifiableEntity entity);
+
+        bool IsPropertyReadonly(ModifiableEntity modifiableEntity);
     }
 
     public class PropertyValidator<T> : IPropertyValidator
@@ -156,7 +160,6 @@ namespace Signum.Entities
 
         public Func<T, PropertyInfo, string?>? StaticPropertyValidation { get; set; }
 
-        public bool Required => throw new NotImplementedException();
 
         internal PropertyValidator(PropertyInfo pi)
         {
@@ -168,8 +171,8 @@ namespace Signum.Entities
             if (nullable == false && !this.Validators.Any(v => v is NotNullValidatorAttribute))
                 this.Validators.Add(new NotNullValidatorAttribute());
 
-            this.GetValue = ReflectionTools.CreateGetter<T>(pi)!;
-            this.SetValue = ReflectionTools.CreateSetter<T>(pi)!;
+            this.GetValue = ReflectionTools.CreateGetter<T, object?>(pi)!;
+            this.SetValue = ReflectionTools.CreateSetter<T, object?>(pi)!;
         }
 
         public void ReplaceValidators(params ValidatorAttribute[] validators)
@@ -182,6 +185,9 @@ namespace Signum.Entities
         {
             if (IsApplicable != null && !IsApplicable(entity))
                 return null;
+
+            if (entity.temporalErrors != null)
+                return entity.temporalErrors.TryGetC(PropertyInfo.Name);
 
             if (Validators.Count > 0)
             {
@@ -217,7 +223,7 @@ namespace Signum.Entities
             {
                 foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }
@@ -228,14 +234,11 @@ namespace Signum.Entities
             {
                 foreach (var item in Validator.GlobalValidation.GetInvocationListTyped())
                 {
-                    string result = item(entity, PropertyInfo);
+                    string? result = item(entity, PropertyInfo);
                     if (result != null)
                         return result;
                 }
             }
-
-            if (entity.temporalErrors != null)
-                return entity.temporalErrors.TryGetC(PropertyInfo.Name);
 
             return null;
         }
@@ -257,6 +260,27 @@ namespace Signum.Entities
         public object? GetValueUntyped(ModifiableEntity entity)
         {
             return GetValue((T)entity);
+        }
+
+
+        public bool IsPropertyReadonly(ModifiableEntity modifiableEntity)
+        {
+            if (modifiableEntity.IsPropertyReadonly(this.PropertyInfo))
+                return true;
+
+            if (Validator.GlobalIsReadonly != null)
+            {
+                foreach (var f in Validator.GlobalIsReadonly.GetInvocationListTyped())
+                {
+                    if (f(modifiableEntity, PropertyInfo))
+                        return true;
+                }
+            }
+
+            if (this.PropertyInfo.CanWrite == false)
+                return true;
+
+            return false;
         }
     }
 }

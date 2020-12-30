@@ -11,6 +11,8 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Engine.Linq;
 using System.Globalization;
+using NpgsqlTypes;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Maps
 {
@@ -18,6 +20,7 @@ namespace Signum.Engine.Maps
     {
         Field GetField(MemberInfo value);
         Field? TryGetField(MemberInfo value);
+        IEnumerable<Field> FindFields(Func<Field, bool> predicate);
     }
 
     public interface ITable
@@ -36,14 +39,17 @@ namespace Signum.Engine.Maps
 
         SystemVersionedInfo? SystemVersioned { get; }
 
+        bool IdentityBehaviour { get; }
+
         FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
     }
 
     public class SystemVersionedInfo
     {
         public ObjectName TableName;
-        public string StartColumnName;
-        public string EndColumnName;
+        public string? StartColumnName;
+        public string? EndColumnName;
+        public string? PostgreeSysPeriodColumnName;
 
         public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
         {
@@ -52,13 +58,25 @@ namespace Signum.Engine.Maps
             EndColumnName = endColumnName;
         }
 
+        public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
+        {
+            TableName = tableName;
+            PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
+        }
+
         internal IEnumerable<IColumn> Columns()
         {
-            return new[]
-            {
-                new Column(this.StartColumnName, ColumnType.Start),
-                new Column(this.EndColumnName, ColumnType.End)
-            };
+            if (PostgreeSysPeriodColumnName != null)
+                return new[]
+                {
+                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+                };
+            else
+                return new[]
+                {
+                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
+                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+                };
         }
 
         public enum ColumnType
@@ -67,9 +85,9 @@ namespace Signum.Engine.Maps
             End,
         }
 
-        public class Column : IColumn
+        public class SqlServerPeriodColumn : IColumn
         {
-            public Column(string name, ColumnType systemVersionColumnType)
+            public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
             {
                 this.Name = name;
                 this.SystemVersionColumnType = systemVersionColumnType;
@@ -79,7 +97,31 @@ namespace Signum.Engine.Maps
             public ColumnType SystemVersionColumnType { get; private set; }
 
             public IsNullable Nullable => IsNullable.No;
-            public SqlDbType SqlDbType => SqlDbType.DateTime2;
+            public AbstractDbType DbType => new AbstractDbType(SqlDbType.DateTime2);
+            public Type Type => typeof(DateTime);
+            public string? UserDefinedTypeName => null;
+            public bool PrimaryKey => false;
+            public bool IdentityBehaviour => false;
+            public bool Identity => false;
+            public string? Default { get; set; }
+            public int? Size => null;
+            public int? Scale => null;
+            public string? Collation => null;
+            public Table? ReferenceTable => null;
+            public bool AvoidForeignKey => false;
+        }
+
+        public class PostgreePeriodColumn : IColumn
+        {
+            public PostgreePeriodColumn(string name)
+            {
+                this.Name = name;
+            }
+
+            public string Name { get; private set; }
+
+            public IsNullable Nullable => IsNullable.No;
+            public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
             public Type Type => typeof(DateTime);
             public string? UserDefinedTypeName => null;
             public bool PrimaryKey => false;
@@ -103,10 +145,11 @@ namespace Signum.Engine.Maps
     public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
+        public Schema Schema { get; private set; }
 
         public ObjectName Name { get; set; }
 
-        public bool IdentityBehaviour { get; set; }
+        public bool IdentityBehaviour { get; internal set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -120,12 +163,12 @@ namespace Signum.Engine.Maps
 
         public List<TableIndex>? MultiColumnIndexes { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Table(Type type)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             this.Type = type;
         }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
         public override string ToString()
         {
@@ -164,15 +207,13 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
-            if (member is MethodInfo mi)
+            Type? mixinType = member as Type ?? GetMixinType(member);
+            if (mixinType != null)
             {
-                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
-                {
-                    if (Mixins == null)
-                        throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
+                if (Mixins == null)
+                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
-                    return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
-                }
+                return Mixins.GetOrThrow(mixinType);
             }
             
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
@@ -187,19 +228,10 @@ namespace Signum.Engine.Maps
 
         public Field? TryGetField(MemberInfo member)
         {
-            if (member is MethodInfo mi)
+            Type? mixinType = member as Type ?? GetMixinType(member);
+            if (mixinType!= null)
             {
-                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
-                {
-                    return Mixins?.TryGetC(mi.GetGenericArguments().Single());
-                }
-
-                return null;
-            }
-
-            if (member is Type)
-            {
-                return Mixins?.TryGetC((Type)member);
+                return Mixins?.TryGetC(mixinType);
             }
 
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
@@ -213,6 +245,37 @@ namespace Signum.Engine.Maps
                 return null;
 
             return field.Field;
+        }
+
+
+        internal static Type? GetMixinType(MemberInfo member)
+        {
+            if (member is MethodInfo mi)
+            {
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    return mi.GetGenericArguments().SingleEx();
+                }
+            }
+            return null;
+        }
+
+
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            var fields =
+                Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+           
+            if(Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
         }
 
         public List<TableIndex> GeneratAllIndexes()
@@ -229,7 +292,7 @@ namespace Signum.Engine.Maps
             if (result.OfType<UniqueTableIndex>().Any())
             {
                 var s = Schema.Current.Settings;
-                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo)).OfType<AttachToUniqueIndexesAttribute>().Any())
+                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
                    .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
                    .ToList();
 
@@ -280,7 +343,7 @@ namespace Signum.Engine.Maps
             get { return PrimaryKey; }
         }
 
-        internal IEnumerable<EntityField> AllFields()
+        public IEnumerable<EntityField> AllFields()
         {
             return this.Fields.Values.Concat(
                 this.Mixins == null ? Enumerable.Empty<EntityField>() :
@@ -291,6 +354,7 @@ namespace Signum.Engine.Maps
         {
             return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
         }
+
     }
 
     public class EntityField
@@ -300,7 +364,7 @@ namespace Signum.Engine.Maps
 
         Type type;
         Func<object, object?>? getter;
-        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo)!);
+        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
 
         public EntityField(Type type, FieldInfo fi, Field field)
         {
@@ -349,7 +413,7 @@ namespace Signum.Engine.Maps
             };
 
             if(attribute.AllowMultipleNulls)
-                result.Where = IndexWhereExpressionVisitor.IsNull(this, false);
+                result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
 
             return result;
         }
@@ -391,7 +455,7 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         IsNullable Nullable { get; }
-        SqlDbType SqlDbType { get; }
+        AbstractDbType DbType { get; }
         Type Type { get; }
         string? UserDefinedTypeName { get; }
         bool PrimaryKey { get; }
@@ -420,14 +484,14 @@ namespace Signum.Engine.Maps
             return isNullable != IsNullable.No;
         }
 
-        public static string GetSqlDbTypeString(this IColumn column)
-        {
-            return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
-        }
+        //public static string GetSqlDbTypeString(this IColumn column)
+        //{
+        //    return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        //}
 
         public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
         {
-            if (column is SystemVersionedInfo.Column svc)
+            if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
                 return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
 
             return GeneratedAlwaysType.None;
@@ -446,12 +510,12 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-        public SqlDbType SqlDbType { get; set; }
+        public AbstractDbType DbType { get; set; }
         public string? UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
-        int? IColumn.Size { get { return null; } }
+        public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
         public string? Collation { get; set; }
         Table? IColumn.ReferenceTable { get { return null; } }
@@ -483,7 +547,7 @@ namespace Signum.Engine.Maps
             if (this.UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-            return new[] { new PrimaryClusteredIndex(table) };
+            return new[] { new PrimaryKeyIndex(table) };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -501,7 +565,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public IsNullable Nullable { get; set; }
-        public SqlDbType SqlDbType { get; set; }
+        public AbstractDbType DbType { get; set; }
         public string? UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
@@ -523,7 +587,7 @@ namespace Signum.Engine.Maps
         {
             return "{0} {1} ({2},{3},{4})".FormatWith(
                 Name,
-                SqlDbType,
+                DbType,
                 Nullable.ToBool() ? "Nullable" : "",
                 Size,
                 Scale);
@@ -567,7 +631,7 @@ namespace Signum.Engine.Maps
         {
             public string Name { get; set; }
             public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
-            public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
+            public AbstractDbType DbType => new AbstractDbType(SqlDbType.Bit, NpgsqlDbType.Boolean);
             string? IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
@@ -589,21 +653,36 @@ namespace Signum.Engine.Maps
         public EmbeddedHasValueColumn? HasValue { get; set; }
 
         public Dictionary<string, EntityField> EmbeddedFields { get; set; }
-        
-        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields)
+        public Dictionary<Type, FieldMixin>? Mixins { get; set; }
+
+        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields, Dictionary<Type, FieldMixin>? mixins)
             : base(route)
         {
             this.HasValue = hasValue;
             this.EmbeddedFields = embeddedFields;
+            this.Mixins = mixins;
         }
 
         public override string ToString()
         {
-            return "Embebed\r\n{0}".FormatWith(EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
+            return "\r\n".Combine(
+                "Embedded",
+                EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
+                Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
+                );
         }
 
         public Field GetField(MemberInfo member)
         {
+            Type? mixinType = member as Type ?? Table.GetMixinType(member);
+            if (mixinType != null)
+            {
+                if (Mixins == null)
+                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Route.Type.Name));
+
+                return Mixins.GetOrThrow(mixinType);
+            }
+
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
@@ -614,9 +693,15 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public Field? TryGetField(MemberInfo value)
+        public Field? TryGetField(MemberInfo member)
         {
-            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
+            Type? mixinType = member as Type ?? Table.GetMixinType(member);
+            if (mixinType != null)
+            {
+                return Mixins?.TryGetC(mixinType);
+            }
+
+            FieldInfo fi = member as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)member)!;
 
             if (fi == null)
                 return null;
@@ -629,6 +714,25 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+
+            if (Mixins != null)
+            {
+                foreach (var mixin in this.Mixins.Values)
+                {
+                    fields.AddRange(mixin.FindFields(predicate));
+                }
+            }
+            return fields;
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -638,21 +742,40 @@ namespace Signum.Engine.Maps
 
             result.AddRange(EmbeddedFields.Values.SelectMany(c => c.Field.Columns()));
 
+            if (Mixins != null)
+                result.AddRange(Mixins.Values.SelectMany(c => c.Columns()));
+
             return result;
         }
 
         public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
         {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table));
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table))
+                .Concat((this.Mixins?.Values.SelectMany(a => a.Fields.Values).SelectMany(f => f.Field.GenerateIndexes(table))).EmptyIfNull());
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
+
             foreach (var f in EmbeddedFields.Values)
             {
                 foreach (var kvp in f.Field.GetTables())
                 {
                     yield return kvp;
+                }
+            }
+
+            if (Mixins != null)
+            {
+                foreach (var mi in Mixins.Values)
+                {
+                    foreach (var f in mi.Fields.Values)
+                    {
+                        foreach (var kvp in f.Field.GetTables())
+                        {
+                            yield return kvp;
+                        }
+                    }
                 }
             }
         }
@@ -664,9 +787,15 @@ namespace Signum.Engine.Maps
 
         internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
         {
-            var subHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            var enbeddedHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            if (enbeddedHasValue != null)
+                return enbeddedHasValue;
 
-            return subHasValue ?? (this.Columns().Contains(column) ? this.HasValue : null);
+            var mixinHasValue = this.Mixins?.Select(a => a.Value).Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+            if (mixinHasValue != null)
+                return mixinHasValue;
+
+            return this.Columns().Contains(column) ? this.HasValue : null;
         }
     }
 
@@ -674,9 +803,9 @@ namespace Signum.Engine.Maps
     {
         public Dictionary<string, EntityField> Fields { get; set; }
 
-        public Table MainEntityTable;
+        public ITable MainEntityTable;
 
-        public FieldMixin(PropertyRoute route, Table mainEntityTable, Dictionary<string, EntityField> fields)
+        public FieldMixin(PropertyRoute route, ITable mainEntityTable, Dictionary<string, EntityField> fields)
             : base(route)
         {
             this.MainEntityTable = mainEntityTable;
@@ -715,6 +844,16 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            return Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+                f is IFieldFinder ff ? ff.FindFields(predicate) :
+                Enumerable.Empty<Field>()).ToList();
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -749,6 +888,11 @@ namespace Signum.Engine.Maps
         {
             return ((Entity)ident).GetMixin(FieldType);
         }
+
+        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+        {
+            return Fields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+        }
     }
 
     public partial class FieldReference : Field, IColumn, IFieldReference
@@ -759,11 +903,11 @@ namespace Signum.Engine.Maps
         public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
-        int? IColumn.Size { get { return null; } }
+        int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
-        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
         public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
@@ -798,9 +942,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
-                 IsLite = IsLite,
-                 IsCollection = false,
-                 IsNullable = Nullable.ToBool()
+                IsLite = IsLite,
+                IsCollection = false,
+                IsNullable = Nullable.ToBool(),
+                PropertyRoute = this.Route
             });
         }
 
@@ -863,12 +1008,14 @@ namespace Signum.Engine.Maps
         {
             if (ReferenceTable == null)
                 yield break;
+
             yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
             {
                 IsLite = IsLite,
                 IsCollection = false,
                 IsNullable = Nullable.ToBool(),
                 IsEnum = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -907,7 +1054,8 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = a.Value.Nullable.ToBool()
+                IsNullable = a.Value.Nullable.ToBool(),
+                PropertyRoute = this.Route
             }));
         }
 
@@ -961,9 +1109,10 @@ namespace Signum.Engine.Maps
         {
             yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
             {
-                 IsNullable = this.ColumnType.Nullable.ToBool(),
-                 IsLite = this.IsLite,
-                 IsImplementedByAll = true,
+                IsNullable = this.ColumnType.Nullable.ToBool(),
+                IsLite = this.IsLite,
+                IsImplementedByAll = true,
+                PropertyRoute = this.Route
             });
         }
 
@@ -1007,7 +1156,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; private set; }
         Table? IColumn.ReferenceTable => ReferenceTable;
-        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
         public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
@@ -1033,7 +1182,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public string? Collation { get; set; }
         public Table? ReferenceTable { get { return null; } }
-        public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
+        public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
         public Type Type { get { return typeof(string); } }
         public bool AvoidForeignKey { get { return false; } }
         public string? Default { get; set; }
@@ -1074,6 +1223,15 @@ namespace Signum.Engine.Maps
             return null;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this))
+                return new[] { this };
+
+            return TableMList.FindFields(predicate);
+            
+        }
+
         public override IEnumerable<IColumn> Columns()
         {
             return new IColumn[0];
@@ -1108,7 +1266,7 @@ namespace Signum.Engine.Maps
         {
             public string Name { get; set; }
             IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-            public SqlDbType SqlDbType { get; set; }
+            public AbstractDbType DbType { get; set; }
             public string? Collation { get; set; }
             public string? UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
@@ -1153,7 +1311,7 @@ namespace Signum.Engine.Maps
             this.PrimaryKey = primaryKey;
             this.BackReference = backReference;
             this.CollectionType = collectionType;
-            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
         }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -1181,7 +1339,7 @@ namespace Signum.Engine.Maps
         {
             var result = new List<TableIndex>
             {
-                new PrimaryClusteredIndex(this)
+                new PrimaryKeyIndex(this)
             };
 
             result.AddRange(BackReference.GenerateIndexes(this));
@@ -1214,6 +1372,25 @@ namespace Signum.Engine.Maps
             return null;
         }
 
+        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        {
+            if (predicate(this.BackReference))
+                yield return this.BackReference;
+
+            if (this.Order != null && predicate(this.Order))
+                yield return this.Order;
+
+            if (predicate(this.Field))
+                yield return this.Field;
+            else if (this.Field is IFieldFinder ff)
+            {
+                foreach (var f in ff.FindFields(predicate))
+                {
+                    yield return f;
+                }
+            }
+        }
+
         public void ToDatabase(DatabaseName databaseName)
         {
             this.Name = this.Name.OnDatabase(databaseName);
@@ -1230,7 +1407,9 @@ namespace Signum.Engine.Maps
             get { return PrimaryKey; }
         }
 
-        internal object[] BulkInsertDataRow(Entity entity, object value, int order)
+        public bool IdentityBehaviour => true; //For now
+
+        internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
         {
             return this.cache.Value.BulkInsertDataRow(entity, value, order);
         }
@@ -1248,4 +1427,263 @@ namespace Signum.Engine.Maps
             return null;
         }
     }
+
+    public struct AbstractDbType : IEquatable<AbstractDbType>
+    {
+        SqlDbType? sqlServer;
+        public SqlDbType SqlServer => sqlServer ?? throw new InvalidOperationException("No SqlDbType type defined");
+
+        NpgsqlDbType? postgreSql;
+        public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
+
+        public bool IsPostgres => postgreSql.HasValue;
+
+        public AbstractDbType(SqlDbType sqlDbType)
+        {
+            this.sqlServer = sqlDbType;
+            this.postgreSql = null;
+        }
+
+        public AbstractDbType(NpgsqlDbType npgsqlDbType)
+        { 
+            this.sqlServer = null;
+            this.postgreSql = npgsqlDbType;
+        }
+
+        public AbstractDbType(SqlDbType sqlDbType, NpgsqlDbType npgsqlDbType)
+        {
+            this.sqlServer = sqlDbType;
+            this.postgreSql = npgsqlDbType;
+        }
+
+        public override bool Equals(object? obj) => obj is AbstractDbType adt && Equals(adt);
+        public bool Equals(AbstractDbType adt) =>
+            Schema.Current.Settings.IsPostgres ?
+            this.postgreSql == adt.postgreSql :
+            this.sqlServer == adt.sqlServer;
+        public override int GetHashCode() => this.postgreSql.GetHashCode() ^ this.sqlServer.GetHashCode();
+
+        public bool IsDate()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Date:
+                    case SqlDbType.DateTime:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.SmallDateTime: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Date:
+                    case NpgsqlDbType.Timestamp: 
+                    case NpgsqlDbType.TimestampTz: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsTime()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Time:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Time:
+                    case NpgsqlDbType.TimeTz:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsNumber()
+        {
+            if(sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.BigInt:
+                    case SqlDbType.Float:
+                    case SqlDbType.Decimal:
+                    case SqlDbType.Int:
+                    case SqlDbType.Bit:
+                    case SqlDbType.Money:
+                    case SqlDbType.Real:
+                    case SqlDbType.TinyInt:
+                    case SqlDbType.SmallInt:
+                    case SqlDbType.SmallMoney: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Smallint:
+                    case NpgsqlDbType.Integer:
+                    case NpgsqlDbType.Bigint:
+                    case NpgsqlDbType.Numeric:
+                    case NpgsqlDbType.Money:
+                    case NpgsqlDbType.Real:
+                    case NpgsqlDbType.Double: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsString()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.NText:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Text:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.Char:
+                    case SqlDbType.NChar:
+                        return true;
+                    default: 
+                        return false;
+                }
+
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Char:
+                    case NpgsqlDbType.Varchar:
+                    case NpgsqlDbType.Text: 
+                        return true;
+                    default: 
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+
+        public override string ToString() => ToString(Schema.Current.Settings.IsPostgres);
+        public string ToString(bool isPostgres)
+        {
+            if (!isPostgres)
+                return sqlServer.ToString()!.ToUpperInvariant();
+
+            var pg = postgreSql!.Value;
+            if ((pg & NpgsqlDbType.Array) != 0)
+                return (pg & ~NpgsqlDbType.Range).ToString() + "[]";
+
+            if ((pg & NpgsqlDbType.Range) != 0)
+                switch (pg & ~NpgsqlDbType.Range)
+                {
+                    case NpgsqlDbType.Integer: return "int4range";
+                    case NpgsqlDbType.Bigint : return "int8range";
+                    case NpgsqlDbType.Numeric: return "numrange";
+                    case NpgsqlDbType.TimestampTz: return "tstzrange";
+                    case NpgsqlDbType.Date: return "daterange";
+                    throw new InvalidOperationException("");
+                }
+
+            if (pg == NpgsqlDbType.Double)
+                return "double precision";
+
+            return pg.ToString()!;
+        }
+
+        public bool IsBoolean()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Bit:
+                        return true;
+                    default:
+                        return false;
+                }
+
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Boolean:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        public bool IsGuid()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.UniqueIdentifier:
+                        return true;
+                    default:
+                        return false;
+                }
+
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Uuid:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+
+        internal bool IsDecimal()
+        {
+            if (sqlServer is SqlDbType s)
+                switch (s)
+                {
+                    case SqlDbType.Decimal:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            if (postgreSql is NpgsqlDbType p)
+                switch (p)
+                {
+                    case NpgsqlDbType.Numeric:
+                        return true;
+                    default:
+                        return false;
+                }
+
+            throw new NotImplementedException();
+        }
+    }
 }
+
+
+

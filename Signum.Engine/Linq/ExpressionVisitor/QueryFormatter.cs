@@ -19,6 +19,9 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class QueryFormatter : DbExpressionVisitor
     {
+        Schema schema = Schema.Current;
+        bool isPostgres = Schema.Current.Settings.IsPostgres;
+
         StringBuilder sb = new StringBuilder();
         int indent = 2;
         int depth;
@@ -48,28 +51,29 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null!, SqlDbType.BigInt, null, false, null));
-
         DbParameterPair CreateParameter(ConstantExpression value)
         {
             string name = GetNextParamAlias();
 
             bool nullable = value.Type.IsClass || value.Type.IsNullable();
+            object? val = value.Value;
             Type clrType = value.Type.UnNullify();
             if (clrType.IsEnum)
+            {
                 clrType = typeof(int);
+                val = val == null ? (int?)null : Convert.ToInt32(val);
+            }
 
             var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
 
             var pb = Connector.Current.ParameterBuilder;
 
-            var param = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value);
+            var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, val ?? DBNull.Value);
 
             return new DbParameterPair(param, name);
         }
 
         ObjectNameOptions objectNameOptions;
-
         private QueryFormatter()
         {
             objectNameOptions = ObjectName.CurrentOptions;
@@ -153,7 +157,7 @@ namespace Signum.Engine.Linq
         {
             if (b.NodeType == ExpressionType.Coalesce)
             {
-                sb.Append("IsNull(");
+                sb.Append("COALESCE(");
                 Visit(b.Left);
                 sb.Append(",");
                 Visit(b.Right);
@@ -162,12 +166,17 @@ namespace Signum.Engine.Linq
             else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
                 sb.Append("(");
-
                 Visit(b.Left);
                 sb.Append(b.NodeType == ExpressionType.Equal ? " = " : " <> ");
                 Visit(b.Right);
-
                 sb.Append(")");
+            }
+            else if (b.NodeType == ExpressionType.ArrayIndex)
+            {
+                Visit(b.Left);
+                sb.Append("[");
+                Visit(b.Right);
+                sb.Append("]");
             }
             else
             {
@@ -201,7 +210,10 @@ namespace Signum.Engine.Linq
 
                     case ExpressionType.Add:
                     case ExpressionType.AddChecked:
-                        sb.Append(" + ");
+                        if (this.isPostgres && (b.Left.Type == typeof(string) || b.Right.Type == typeof(string)))
+                            sb.Append(" || ");
+                        else
+                            sb.Append(" + ");
                         break;
                     case ExpressionType.Subtract:
                     case ExpressionType.SubtractChecked:
@@ -333,7 +345,7 @@ namespace Signum.Engine.Linq
             return inExpression;
         }
 
-        protected internal override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
+        protected internal override Expression VisitSqlLiteral(SqlLiteralExpression sqlEnum)
         {
             sb.Append(sqlEnum.Value);
             return sqlEnum;
@@ -344,9 +356,11 @@ namespace Signum.Engine.Linq
             sb.Append("CAST(");
             Visit(castExpr.Expression);
             sb.Append(" as ");
-            sb.Append(castExpr.SqlDbType.ToString().ToUpperInvariant());
-            if (castExpr.SqlDbType == SqlDbType.NVarChar || castExpr.SqlDbType == SqlDbType.VarChar)
+            sb.Append(castExpr.DbType.ToString(schema.Settings.IsPostgres));
+            
+            if (!schema.Settings.IsPostgres && (castExpr.DbType.SqlServer == SqlDbType.NVarChar || castExpr.DbType.SqlServer == SqlDbType.VarChar))
                 sb.Append("(MAX)");
+
             sb.Append(")");
             return castExpr;
         }
@@ -357,7 +371,7 @@ namespace Signum.Engine.Linq
                 sb.Append("NULL");
             else
             {
-                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
+                if (!schema.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 var pi = parameterExpressions.GetOrCreate(c, () => this.CreateParameter(c));
@@ -373,16 +387,18 @@ namespace Signum.Engine.Linq
                 sb.Append("NULL");
             else
             {
-                if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
+                if (!schema.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
-                if (c.Value.Equals(true))
+                if (!isPostgres && c.Value.Equals(true))
                     sb.Append("1");
-                else if (c.Value.Equals(false))
+                else if (!isPostgres && c.Value.Equals(false))
                     sb.Append("0");
                 else if (c.Value is string s)
                     sb.Append(s == "" ? "''" : ("'" + s + "'"));
-                else
+                else if (c.Value is TimeSpan ts)
+                    sb.Append(@$"CONVERT(time, '{ts.ToString()}')");
+                else 
                     sb.Append(c.ToString());
             }
 
@@ -399,9 +415,11 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
             sb.Append(column.Alias.ToString());
-            sb.Append(".");
-            sb.Append(column.Name.SqlEscape());
-
+            if (column.Name != null) //Is null for PostgressFunctions.unnest and friends (IQueryable<int> table-valued function)
+            {
+                sb.Append(".");
+                sb.Append(column.Name.SqlEscape(isPostgres));
+            }
             return column;
         }
 
@@ -418,7 +436,7 @@ namespace Signum.Engine.Linq
             if (select.IsDistinct)
                 sb.Append("DISTINCT ");
 
-            if (select.Top != null)
+            if (select.Top != null && !this.isPostgres)
             {
                 sb.Append("TOP (");
                 Visit(select.Top);
@@ -491,6 +509,13 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (select.Top != null && this.isPostgres)
+            {
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("LIMIT ");
+                Visit(select.Top);
+            }
+
             if (select.IsForXmlPathEmpty)
             {
                 this.AppendNewLine(Indentation.Same);
@@ -506,28 +531,45 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        Dictionary<AggregateSqlFunction, string> dic = new Dictionary<AggregateSqlFunction, string>
+        
+        string GetAggregateFunction(AggregateSqlFunction agg)
         {
-            {AggregateSqlFunction.Average, "AVG"},
-            {AggregateSqlFunction.StdDev, "STDEV"},
-            {AggregateSqlFunction.StdDevP, "STDEVP"},
-            {AggregateSqlFunction.Count, "COUNT"},
-            {AggregateSqlFunction.Max, "MAX"},
-            {AggregateSqlFunction.Min, "MIN"},
-            {AggregateSqlFunction.Sum, "SUM"}
-        };
+            return agg switch
+            {
+                AggregateSqlFunction.Average => "AVG",
+                AggregateSqlFunction.StdDev => !isPostgres ? "STDEV" : "stddev_samp",
+                AggregateSqlFunction.StdDevP => !isPostgres? "STDEVP" : "stddev_pop",
+                AggregateSqlFunction.Count => "COUNT",
+                AggregateSqlFunction.CountDistinct => "COUNT",
+                AggregateSqlFunction.Max => "MAX",
+                AggregateSqlFunction.Min => "MIN",
+                AggregateSqlFunction.Sum => "SUM",
+                AggregateSqlFunction.string_agg => "string_agg",
+                _ => throw new UnexpectedValueException(agg)
+            };
+        }
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            sb.Append(dic[aggregate.AggregateFunction]);
+            sb.Append(GetAggregateFunction(aggregate.AggregateFunction));
             sb.Append("(");
-            if (aggregate.Distinct)
+            if (aggregate.AggregateFunction == AggregateSqlFunction.CountDistinct)
                 sb.Append("DISTINCT ");
 
-            if (aggregate.Expression == null)
+            if (aggregate.Arguments.Count == 1 && aggregate.Arguments[0] == null && aggregate.AggregateFunction == AggregateSqlFunction.Count)
+            {
                 sb.Append("*");
+            }
             else
-                Visit(aggregate.Expression);
+            {
+                for (int i = 0, n = aggregate.Arguments.Count; i < n; i++)
+                {
+                    Expression exp = aggregate.Arguments[i];
+                    if (i > 0)
+                        sb.Append(", ");
+                    this.Visit(exp);
+                }
+            }
             sb.Append(")");
 
             return aggregate;
@@ -535,28 +577,54 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            if (sqlFunction.Object != null)
+            if (isPostgres && sqlFunction.SqlFunction == PostgresFunction.EXTRACT.ToString())
             {
-                Visit(sqlFunction.Object);
-                sb.Append(".");
+                sb.Append(sqlFunction.SqlFunction);
+                sb.Append("(");
+                this.Visit(sqlFunction.Arguments[0]);
+                sb.Append(" from ");
+                this.Visit(sqlFunction.Arguments[1]);
+                sb.Append(")");
             }
-            sb.Append(sqlFunction.SqlFunction);
-            sb.Append("(");
-            for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+            else if(isPostgres && PostgressOperator.All.Contains(sqlFunction.SqlFunction))
             {
-                Expression exp = sqlFunction.Arguments[i];
-                if (i > 0)
-                    sb.Append(", ");
-                this.Visit(exp);
+                sb.Append("(");
+                this.Visit(sqlFunction.Arguments[0]);
+                sb.Append(" " + sqlFunction.SqlFunction + " ");
+                this.Visit(sqlFunction.Arguments[1]);
+                sb.Append(")");
             }
-            sb.Append(")");
-
+            else if (sqlFunction.SqlFunction == SqlFunction.COLLATE.ToString())
+            {
+                this.Visit(sqlFunction.Arguments[0]);
+                sb.Append(" COLLATE ");
+                if (sqlFunction.Arguments[1] is SqlConstantExpression ce)
+                    sb.Append((string)ce.Value!);
+            }
+            else
+			{
+                if (sqlFunction.Object != null)
+                {
+                    Visit(sqlFunction.Object);
+                    sb.Append(".");
+                }
+                sb.Append(sqlFunction.SqlFunction);
+                sb.Append("(");
+                for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
+                {
+                    Expression exp = sqlFunction.Arguments[i];
+                    if (i > 0)
+                        sb.Append(", ");
+                    this.Visit(exp);
+                }
+                sb.Append(")");
+            }
             return sqlFunction;
         }
 
         protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
-            sb.Append(sqlFunction.SqlFunction);
+            sb.Append(sqlFunction.SqlFunction.ToString());
             sb.Append("(");
             for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
             {
@@ -576,10 +644,9 @@ namespace Signum.Engine.Linq
 
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
-
-                sb.Append(column.Name.SqlEscape());
-                sb.Append(" = ");
                 this.Visit(column.Expression);
+                sb.Append(" as ");
+                sb.Append(column.Name.SqlEscape(isPostgres));
             }
             else
             {
@@ -607,14 +674,6 @@ namespace Signum.Engine.Linq
             {
                 sb.Append("AS OF ");
                 this.VisitSystemTimeConstant(asOf.DateTime);
-            }
-            else if (st is SystemTime.FromTo fromTo)
-            {
-                sb.Append("FROM ");
-                this.VisitSystemTimeConstant(fromTo.StartDateTime);
-
-                sb.Append(" TO ");
-                this.VisitSystemTimeConstant(fromTo.EndtDateTime);
             }
             else if (st is SystemTime.Between between)
             {
@@ -700,10 +759,10 @@ namespace Signum.Engine.Linq
                     sb.Append("FULL OUTER JOIN ");
                     break;
                 case JoinType.CrossApply:
-                    sb.Append("CROSS APPLY ");
+                    sb.Append(isPostgres ? "JOIN LATERAL " : "CROSS APPLY ");
                     break;
                 case JoinType.OuterApply:
-                    sb.Append("OUTER APPLY ");
+                    sb.Append(isPostgres ? "LEFT JOIN LATERAL " : "OUTER APPLY ");
                     break;
             }
 
@@ -722,6 +781,12 @@ namespace Signum.Engine.Linq
                 this.AppendNewLine(Indentation.Inner);
                 sb.Append("ON ");
                 this.Visit(join.Condition);
+                this.Indent(Indentation.Outer);
+            }
+            else if (isPostgres && join.JoinType != JoinType.CrossJoin)
+            {
+                this.AppendNewLine(Indentation.Inner);
+                sb.Append("ON true");
                 this.Indent(Indentation.Outer);
             }
             return join;
@@ -764,92 +829,134 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
-            sb.Append("DELETE ");
-            sb.Append(delete.Name.ToString());
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("FROM ");
-            VisitSource(delete.Source);
-            if (delete.Where != null)
+            using (this.PrintSelectRowCount(delete.ReturnRowCount))
             {
+                sb.Append("DELETE FROM ");
+                sb.Append(delete.Name.ToString());
                 this.AppendNewLine(Indentation.Same);
-                sb.Append("WHERE ");
-                Visit(delete.Where);
+
+                if (isPostgres)
+                    sb.Append("USING ");
+                else
+                    sb.Append("FROM ");
+
+                VisitSource(delete.Source);
+                if (delete.Where != null)
+                {
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("WHERE ");
+                    Visit(delete.Where);
+                }
+                return delete;
             }
-            return delete;
         }
 
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
-            sb.Append("UPDATE ");
-            sb.Append(update.Name.ToString());
-            sb.Append(" SET");
-            this.AppendNewLine(Indentation.Inner);
-
-            for (int i = 0, n = update.Assigments.Count; i < n; i++)
+            using (this.PrintSelectRowCount(update.ReturnRowCount))
             {
-                ColumnAssignment assignment = update.Assigments[i];
-                if (i > 0)
+                sb.Append("UPDATE ");
+                sb.Append(update.Name.ToString());
+                sb.Append(" SET");
+                this.AppendNewLine(Indentation.Inner);
+
+                for (int i = 0, n = update.Assigments.Count; i < n; i++)
                 {
-                    sb.Append(",");
-                    this.AppendNewLine(Indentation.Same);
+                    ColumnAssignment assignment = update.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(",");
+                        this.AppendNewLine(Indentation.Same);
+                    }
+                    sb.Append(assignment.Column.SqlEscape(isPostgres));
+                    sb.Append(" = ");
+                    this.Visit(assignment.Expression);
                 }
-                sb.Append(assignment.Column.SqlEscape());
-                sb.Append(" = ");
-                this.Visit(assignment.Expression);
+                this.AppendNewLine(Indentation.Outer);
+                sb.Append("FROM ");
+                VisitSource(update.Source);
+                if (update.Where != null)
+                {
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("WHERE ");
+                    Visit(update.Where);
+                }
+                return update;
             }
-            this.AppendNewLine(Indentation.Outer);
-            sb.Append("FROM ");
-            VisitSource(update.Source);
-            if (update.Where != null)
-            {
-                this.AppendNewLine(Indentation.Same);
-                sb.Append("WHERE ");
-                Visit(update.Where);
-            }
-            return update;
-
         }
 
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
-            sb.Append("INSERT INTO ");
-            sb.Append(insertSelect.Name.ToString());
-            sb.Append("(");
-            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
+            using (this.PrintSelectRowCount(insertSelect.ReturnRowCount))
             {
-                ColumnAssignment assignment = insertSelect.Assigments[i];
-                if (i > 0)
+                sb.Append("INSERT INTO ");
+                sb.Append(insertSelect.Name.ToString());
+                sb.Append("(");
+                for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
                 {
-                    sb.Append(", ");
-                    if (i % 4 == 0)
-                        this.AppendNewLine(Indentation.Same);
+                    ColumnAssignment assignment = insertSelect.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                        if (i % 4 == 0)
+                            this.AppendNewLine(Indentation.Same);
+                    }
+                    sb.Append(assignment.Column.SqlEscape(isPostgres));
                 }
-                sb.Append(assignment.Column.SqlEscape());
-            }
-            sb.Append(")");
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("SELECT ");
-            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
-            {
-                ColumnAssignment assignment = insertSelect.Assigments[i];
-                if (i > 0)
+                sb.Append(")");
+                this.AppendNewLine(Indentation.Same);
+                if(this.isPostgres && Administrator.IsIdentityBehaviourDisabled(insertSelect.Table))
                 {
-                    sb.Append(", ");
-                    if (i % 4 == 0)
-                        this.AppendNewLine(Indentation.Same);
+                    sb.Append("OVERRIDING SYSTEM VALUE");
+                    this.AppendNewLine(Indentation.Same);
                 }
-                this.Visit(assignment.Expression);
-            }
-            sb.Append(" FROM ");
-            VisitSource(insertSelect.Source);
-            return insertSelect;
+                sb.Append("SELECT ");
+                for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
+                {
+                    ColumnAssignment assignment = insertSelect.Assigments[i];
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                        if (i % 4 == 0)
+                            this.AppendNewLine(Indentation.Same);
+                    }
+                    this.Visit(assignment.Expression);
+                }
+                sb.Append(" FROM ");
+                VisitSource(insertSelect.Source);
 
+                return insertSelect;
+            }
         }
 
-        protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
+        protected internal IDisposable? PrintSelectRowCount(bool returnRowCount)
         {
-            sb.Append("SELECT @@rowcount");
-            return src;
+            if (returnRowCount == false)
+                return null;
+
+            if (!this.isPostgres)
+            {
+                return new Disposable(() =>
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("SELECT @@rowcount");
+                });
+            }
+            else
+            {
+                sb.Append("WITH rows AS (");
+                this.AppendNewLine(Indentation.Inner);
+
+                return new Disposable(() =>
+                {
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("RETURNING 1");
+                    this.AppendNewLine(Indentation.Outer);
+                    sb.Append(")");
+                    this.AppendNewLine(Indentation.Same);
+                    sb.Append("SELECT CAST(COUNT(*) AS INTEGER) FROM rows");
+                });
+            }
         }
 
         protected internal override Expression VisitCommandAggregate(CommandAggregateExpression cea)
