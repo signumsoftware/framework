@@ -510,7 +510,7 @@ namespace Signum.Engine.Help
 
         public static void ImportExportHelp()
         {
-            ImportExportHelp(@"..\..\..\..\Help");
+            ImportExportHelp(@"..\..\..\Help");
         }
 
         public static void ImportExportHelp(string directoryName)
