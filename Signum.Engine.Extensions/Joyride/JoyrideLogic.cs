@@ -1,4 +1,4 @@
-﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.UserAssets;
@@ -45,9 +45,9 @@ namespace Signum.Engine.Joyride
                       e.Name
                   });
 
-                UserAssetsImporter.RegisterName<JoyrideEntity>("Joyride");
-                UserAssetsImporter.RegisterName<JoyrideStepEntity>("JoyrideStep");
-                UserAssetsImporter.RegisterName<JoyrideStepStyleEntity>("JoyrideStepStyle");
+                UserAssetsImporter.Register<JoyrideEntity>("Joyride", JoyrideOperation.Save);
+                UserAssetsImporter.Register<JoyrideStepEntity>("JoyrideStep", JoyrideStepOperation.Save);
+                UserAssetsImporter.Register<JoyrideStepStyleEntity>("JoyrideStepStyle", JoyrideStepStyleOperation.Save);
             }
         }
     }

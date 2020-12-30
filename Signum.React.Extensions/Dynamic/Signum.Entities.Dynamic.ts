@@ -178,6 +178,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
 }
 
 export module DynamicTypeMessage {
+  export const TypeSaved = new MessageKey("DynamicTypeMessage", "TypeSaved");
   export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
   export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
   export const RemoveSaveOperation = new MessageKey("DynamicTypeMessage", "RemoveSaveOperation");

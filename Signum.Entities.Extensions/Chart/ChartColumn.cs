@@ -26,13 +26,12 @@ namespace Signum.Entities.Chart
 
         public void TokenChanged()
         {
-            NotifyChange(true);
-
             this.parentChart?.FixParameters(this);
 
             if (token != null)
             {
                 DisplayName = null;
+                Format = null;
             }
         }
 
@@ -47,27 +46,9 @@ namespace Signum.Entities.Chart
             }
         }
 
-        string? displayName;
-        public string? DisplayName
-        {
-            get { return displayName ?? Token?.Let(t => t.TryToken?.NiceName()); }
-            set
-            {
-                var name = value == Token?.Let(t => t.TryToken?.NiceName()) ? null : value;
-                Set(ref displayName, name);
-            }
-        }
+        public string? DisplayName { get; set; }
 
-        string? format;
-        public string? Format
-        {
-            get { return format ?? Token?.Let(t => t.TryToken?.Format); }
-            set
-            {
-                var name = value == Token?.Let(t => t.TryToken?.Format) ? null : value;
-                Set(ref format, name);
-            }
-        }
+        public string? Format { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int? OrderByIndex { get; set; }
@@ -80,25 +61,6 @@ namespace Signum.Entities.Chart
         [HiddenProperty]
         public IChartBase ParentChart { get { return parentChart; } }
         
-        [HiddenProperty]
-        public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
-
-        public void NotifyChange(bool needNewQuery)
-        {
-            parentChart?.InvalidateResults(needNewQuery);
-        }
-
-        [field: NonSerialized, Ignore]
-        public event Action Notified;
-
-        internal void NotifyAll()
-        {
-            Notify(() => Token);
-            Notify(() => PropertyLabel);
-
-            Notified?.Invoke();
-        }
-
         protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Token))
@@ -120,11 +82,6 @@ namespace Signum.Entities.Chart
             return DisplayName + (unit.HasText() ? " ({0})".FormatWith(unit) : null);
         }
 
-        protected override void PreSaving(PreSavingContext ctx)
-        {
-            DisplayName = displayName;
-        }
-
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (token != null)
@@ -139,11 +96,11 @@ namespace Signum.Entities.Chart
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
-              Token == null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
-              !DisplayName.HasText() ? null : new XAttribute("DisplayName", this.DisplayName),
-              !Format.HasText() ? null : new XAttribute("Format", this.Format),
-              OrderByIndex == null ? null : new XAttribute("OrderByIndex", this.OrderByIndex),
-              OrderByType == null ? null : new XAttribute("OrderByType", this.OrderByType)
+              Token == null ? null! : new XAttribute("Token", this.Token.Token.FullKey()),
+              !DisplayName.HasText() ? null! : new XAttribute("DisplayName", this.DisplayName),
+              !Format.HasText() ? null! : new XAttribute("Format", this.Format),
+              OrderByIndex == null! ? null! : new XAttribute("OrderByIndex", this.OrderByIndex),
+              OrderByType == null! ? null! : new XAttribute("OrderByType", this.OrderByType)
             );
         }
 

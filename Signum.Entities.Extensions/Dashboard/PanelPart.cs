@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Dashboard
 {
@@ -33,10 +34,11 @@ namespace Signum.Entities.Dashboard
         [NumberBetweenValidator(1, 12)]
         public int Columns { get; set; }
 
-        public PanelStyle Style { get; set; }
+        public BootstrapStyle Style { get; set; }
 
         [ImplementedBy(
             typeof(UserChartPartEntity),
+            typeof(CombinedUserChartPartEntity),
             typeof(UserQueryPartEntity),
             typeof(ValueUserQueryListPartEntity),
             typeof(LinkListPartEntity))]
@@ -86,22 +88,22 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("Row", Row),
                 new XAttribute("StartColumn", StartColumn),
                 new XAttribute("Columns", Columns),
-                Title == null ? null : new XAttribute("Title", Title),
-                IconName == null ? null : new XAttribute("IconName", IconName),
-                IconColor == null ? null : new XAttribute("IconColor", IconColor),
+                Title == null ? null! : new XAttribute("Title", Title),
+                IconName == null ? null! : new XAttribute("IconName", IconName),
+                IconColor == null ? null! : new XAttribute("IconColor", IconColor),
                 new XAttribute("Style", Style),
                 Content.ToXml(ctx));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Row = int.Parse(x.Attribute("Row").Value);
-            StartColumn = int.Parse(x.Attribute("StartColumn").Value);
-            Columns = int.Parse(x.Attribute("Columns").Value);
+            Row = int.Parse(x.Attribute("Row")!.Value);
+            StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
+            Columns = int.Parse(x.Attribute("Columns")!.Value);
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Light);
+            Style = (BootstrapStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(BootstrapStyle), a.Value)) ?? BootstrapStyle.Light);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -111,17 +113,7 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    public enum PanelStyle
-    {
-        Light,
-        Dark,
-        Primary,
-        Secondary,
-        Success,
-        Info,
-        Warning,
-        Danger,
-    }
+
 
     public interface IGridEntity
     {
@@ -185,7 +177,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
             RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
             AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
             ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
@@ -230,7 +222,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
         }
     }
 
@@ -244,6 +236,8 @@ namespace Signum.Entities.Dashboard
         public bool AllowChangeShowData { get; set; } = false;
 
         public bool CreateNew { get; set; } = false;
+
+        public bool AutoRefresh { get; set; } = false;
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserChart + "");
@@ -268,7 +262,8 @@ namespace Signum.Entities.Dashboard
             return new XElement("UserChartPart",
                 new XAttribute("ShowData", ShowData),
                 new XAttribute("AllowChangeShowData", AllowChangeShowData),
-                CreateNew ? new XAttribute("CreateNew", CreateNew) : null,
+                CreateNew ? new XAttribute("CreateNew", CreateNew) : null!,
+                AutoRefresh ? new XAttribute("AutoRefresh", AutoRefresh) : null!,
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
@@ -277,9 +272,64 @@ namespace Signum.Entities.Dashboard
             ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
             AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
-            UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
+            AutoRefresh = element.Attribute("AutoRefresh")?.Value.ToBool() ?? false;
+            UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
         }
     }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class CombinedUserChartPartEntity : Entity, IPartEntity
+    {
+        [PreserveOrder, NoRepeatValidator]
+        public MList<UserChartEntity> UserCharts { get; set; } = new MList<UserChartEntity>();
+
+        public bool ShowData { get; set; } = false;
+
+        public bool AllowChangeShowData { get; set; } = false;
+
+        public bool CombinePinnedFiltersWithSameLabel { get; set; } = true;
+
+        public bool UseSameScale { get; set; }
+
+        public override string ToString()
+        {
+            return UserCharts.ToString(", ");
+        }
+
+        public bool RequiresTitle
+        {
+            get { return true; }
+        }
+
+        public IPartEntity Clone()
+        {
+            return new CombinedUserChartPartEntity
+            {
+                UserCharts = this.UserCharts.ToMList(),
+            };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("CombinedUserChartPart",
+                new XAttribute("ShowData", ShowData),
+                new XAttribute("AllowChangeShowData", AllowChangeShowData),
+                new XAttribute("CombinePinnedFiltersWithSameLabel", CombinePinnedFiltersWithSameLabel),
+                new XAttribute("UseSameScale", UseSameScale),
+                UserCharts.Select(uc => new XElement("UserChart", new XAttribute("Guid", ctx.Include(uc)))));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(uc.Attribute("Guid")!.Value))).ToList();
+            ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
+            AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
+            CombinePinnedFiltersWithSameLabel = element.Attribute("CombinePinnedFiltersWithSameLabel")?.Value.ToBool() ?? false;
+            UseSameScale = element.Attribute("UseSameScale")?.Value.ToBool() ?? false;
+            UserCharts.Synchronize(newUserCharts);
+        }
+    }
+
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
@@ -340,8 +390,8 @@ namespace Signum.Entities.Dashboard
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("ValueUserQueryElement",
-                Label == null ? null : new XAttribute("Label", Label),
-                Href == null ? null : new XAttribute("Href", Href),
+                Label == null ? null! : new XAttribute("Label", Label),
+                Href == null ? null! : new XAttribute("Href", Href),
                 new XAttribute("UserQuery", ctx.Include(UserQuery)));
         }
 
@@ -349,7 +399,7 @@ namespace Signum.Entities.Dashboard
         {
             Label = element.Attribute("Label")?.Value;
             Href = element.Attribute("Href")?.Value;
-            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
         }
     }
 
@@ -417,8 +467,8 @@ namespace Signum.Entities.Dashboard
 
         internal void FromXml(XElement element)
         {
-            Label = element.Attribute("Label").Value;
-            Link = element.Attribute("Link").Value;
+            Label = element.Attribute("Label")!.Value;
+            Link = element.Attribute("Link")!.Value;
         }
     }
 }

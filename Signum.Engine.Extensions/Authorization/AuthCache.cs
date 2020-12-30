@@ -292,7 +292,7 @@ namespace Signum.Entities.Authorization
                 (from r in AuthLogic.RolesInOrder()
                  let rac = rules.GetOrThrow(r)
                  select new XElement("Role",
-                     new XAttribute("Name", r.ToString()),
+                     new XAttribute("Name", r.ToString()!),
                          from k in allKeys ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
@@ -311,7 +311,7 @@ namespace Signum.Entities.Authorization
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element(rootName)?.Elements("Role")).EmptyIfNull();
-            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
+            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name")!.Value));
 
             Table table = Schema.Current.Table(typeof(RT));
 
@@ -319,9 +319,9 @@ namespace Signum.Entities.Authorization
                 createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements(elementName)
-                               let r = toResource(xr.Attribute("Resource").Value)
+                               let r = toResource(xr.Attribute("Resource")!.Value)
                                where r != null
-                               select KeyValuePair.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
+                               select KeyValuePair.Create(r, parseAllowed(xr.Attribute("Allowed")!.Value)))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RT
@@ -339,7 +339,7 @@ namespace Signum.Entities.Authorization
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
 
                     var shouldResources = (from xr in x.Elements(elementName)
-                               let r = toResource(xr.Attribute("Resource").Value)
+                               let r = toResource(xr.Attribute("Resource")!.Value)
                                where r != null
                                select KeyValuePair.Create(ToKey(r), xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
@@ -349,15 +349,17 @@ namespace Signum.Entities.Authorization
                     SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                         (r, xr) =>
                         {
-                            var a = parseAllowed(xr.Attribute("Allowed").Value);
+                            var a = parseAllowed(xr.Attribute("Allowed")!.Value);
                             return table.InsertSqlSync(new RT { Resource = ToEntity(r), Role = role, Allowed = a }, comment: Comment(role, ToEntity(r), a));
                         },
                         (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), rt.Allowed)),
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
-                            rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            rt.Allowed = parseAllowed(xr.Attribute("Allowed")!.Value);
+                            if (rt.IsGraphModified)
+                                return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            return null;
                         })?.Do(p => p.GoBefore = true);
 
                     return restSql;

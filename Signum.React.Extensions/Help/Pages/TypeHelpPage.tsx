@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
-import * as numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'

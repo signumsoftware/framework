@@ -1,18 +1,23 @@
-﻿using Signum.Utilities;
+using Signum.Entities.UserAssets;
+using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class WorkflowScriptRetryStrategyEntity : Entity
+    public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Rule { get; set; }
+
+        [UniqueIndex]
+        public Guid Guid { get; set; }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Rule);
@@ -47,6 +52,19 @@ namespace Signum.Entities.Workflow
                 case "d": return TimeZoneManager.Now.AddDays(value);
                 default: throw new InvalidOperationException("Unexpected unit " + unit);
             }
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("WorkflowScriptRetryStrategy",
+                  new XAttribute("Guid", Guid),
+                  new XAttribute("Rule", Rule)
+                );
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Rule = element.Attribute("Rule")!.Value;
         }
     }
 

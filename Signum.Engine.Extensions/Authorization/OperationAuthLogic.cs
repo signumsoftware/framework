@@ -14,16 +14,17 @@ using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
+
     public static class OperationAuthLogic
     {
         static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed> cache = null!;
 
-        public static HashSet<OperationSymbol> AvoidCoerce = new HashSet<OperationSymbol>();
 
         public static IManualAuth<(OperationSymbol operation, Type type), OperationAllowed> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
+        public static readonly Dictionary<OperationSymbol, MinimumTypeAllowed> MinimumTypeAllowed = new Dictionary<OperationSymbol, MinimumTypeAllowed>();
         public static readonly Dictionary<OperationSymbol, OperationAllowed> MaxAutomaticUpgrade = new Dictionary<OperationSymbol, OperationAllowed>();
 
         internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
@@ -59,7 +60,7 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    var allResources = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet();
+                    var allResources = x.Element("Operations")!.Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource")!.Value).ToHashSet();
 
                     replacements.AskForReplacements(
                       allResources.Select(a => a.TryBefore("/") ?? a).ToHashSet(),
@@ -196,20 +197,15 @@ namespace Signum.Engine.Authorization
             return ta.Contains(operationKey);
         }
 
-        public static void RegisterAvoidCoerce(this IOperation operation)
+        public static T SetMinimumTypeAllowed<T>(this T operation, TypeAllowedBasic? overridenType, TypeAllowedBasic? returnType = null) where T : IOperation
         {
-            SetAvoidCoerce(operation.OperationSymbol);
-            operation.Register();
+            MinimumTypeAllowed.Add(operation.OperationSymbol, new MinimumTypeAllowed { OverridenType = overridenType, ReturnType = returnType });
+            return operation;
         }
 
-        private static void SetAvoidCoerce(OperationSymbol operationSymbol)
+        public static OperationAllowed InferredOperationAllowed((OperationSymbol operation, Type type) operationType, Func<Type, TypeAllowedAndConditions> allowed)
         {
-            AvoidCoerce.Add(operationSymbol);
-        }
-
-        public static OperationAllowed MaxTypePermission((OperationSymbol operation, Type type) operationType, TypeAllowedBasic checkFor, Func<Type, TypeAllowedAndConditions> allowed)
-        {
-            Func<Type, OperationAllowed> operationAllowed = t =>
+            Func<Type, TypeAllowedBasic, OperationAllowed> operationAllowed = (t, checkFor) =>
             {
                 if (!TypeLogic.TypeToEntity.ContainsKey(t))
                     return OperationAllowed.Allow;
@@ -221,27 +217,30 @@ namespace Signum.Engine.Authorization
                     OperationAllowed.None;
             };
 
-
-
             var operation = OperationLogic.FindOperation(operationType.type ?? /*Temp*/  OperationLogic.FindTypes(operationType.operation).First(), operationType.operation);
 
-            Type resultType = operation.OperationType == OperationType.ConstructorFrom ||
-                operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType! : operation.OverridenType;
+            var mta = OperationAuthLogic.MinimumTypeAllowed.TryGetC(operationType.operation);
+            switch (operation.OperationType)
+            {
+                case OperationType.Execute:
+                case OperationType.Delete:
+                    return operationAllowed(operation.OverridenType, mta?.OverridenType ?? TypeAllowedBasic.Write);
 
-            var result = operationAllowed(resultType);
+                case OperationType.Constructor:
+                    return operationAllowed(operation.ReturnType!, mta?.ReturnType ?? TypeAllowedBasic.Write);
 
-            if (result == OperationAllowed.None)
-                return result;
+                case OperationType.ConstructorFrom:
+                case OperationType.ConstructorFromMany:
+                    {
+                        var fromTypeAllowed = operationAllowed(operation.OverridenType, mta?.OverridenType ?? TypeAllowedBasic.Read);
+                        var returnTypeAllowed = operationAllowed(operation.ReturnType!, mta?.ReturnType ?? TypeAllowedBasic.Write);
 
-            Type? fromType = operation.OperationType == OperationType.ConstructorFrom ||
-                operation.OperationType == OperationType.ConstructorFromMany ? operation.OverridenType : null;
+                        return returnTypeAllowed < fromTypeAllowed ? returnTypeAllowed : fromTypeAllowed;
+                    }
 
-            if (fromType == null)
-                return result;
-
-            var fromTypeAllowed = operationAllowed(fromType);
-
-            return result < fromTypeAllowed ? result : fromTypeAllowed;
+                default:
+                    throw new UnexpectedValueException(operation.OperationType);
+            }
         }
     }
 
@@ -273,7 +272,7 @@ namespace Signum.Engine.Authorization
 
         static OperationAllowed GetDefault((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role)
         {
-            return OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Write, t => TypeAuthLogic.GetAllowed(role, t));
+            return OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.GetAllowed(role, t));
         }
 
         static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
@@ -328,6 +327,12 @@ namespace Signum.Engine.Authorization
 
     }
 
+    public class MinimumTypeAllowed
+    {
+        public TypeAllowedBasic? OverridenType;
+        public TypeAllowedBasic? ReturnType;
+    }
+
     class OperationCoercer : Coercer<OperationAllowed, (OperationSymbol symbol, Type type)>
     {
         public static readonly OperationCoercer Instance = new OperationCoercer();
@@ -340,10 +345,7 @@ namespace Signum.Engine.Authorization
         {
             return (operationType, allowed) =>
             {
-                if (OperationAuthLogic.AvoidCoerce.Contains(operationType.symbol))
-                    return allowed;
-
-                var required = OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Read, t => TypeAuthLogic.GetAllowed(role, t));
+                var required = OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;
             };
@@ -353,10 +355,7 @@ namespace Signum.Engine.Authorization
         {
             return (role, allowed) =>
             {
-                if (OperationAuthLogic.AvoidCoerce.Contains(operationType.symbol))
-                    return allowed;
-
-                var required = OperationAuthLogic.MaxTypePermission(operationType, TypeAllowedBasic.Read, t => TypeAuthLogic.Manual.GetAllowed(role, t));
+                var required = OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.Manual.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;
             };

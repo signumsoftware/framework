@@ -42,7 +42,7 @@ namespace Signum.Engine.Workflow
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
                 var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value!));
 
-                var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
+                var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id")!.Value);
                 var oldEvents = this.events.Values.Where(a => a.Entity.BoundaryOf == null).ToDictionaryEx(a => a.bpmnElementId, "events");
 
                 Synchronizer.Synchronize(events, oldEvents,
@@ -74,7 +74,7 @@ namespace Signum.Engine.Workflow
                        var we = oe.Entity.ApplyXml(e, locator);
                    });
 
-                var activities = laneElements.Where(a => WorkflowActivityTypes.Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
+                var activities = laneElements.Where(a => WorkflowActivityTypes.Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id")!.Value);
                 var oldActivities = this.activities.Values.ToDictionaryEx(a => a.bpmnElementId, "activities");
 
                 Synchronizer.Synchronize(activities, oldActivities,
@@ -105,7 +105,7 @@ namespace Signum.Engine.Workflow
 
                 var gateways = laneElements
                     .Where(a => WorkflowGatewayTypes.Values.Contains(a.Name.LocalName))
-                    .ToDictionary(a => a.Attribute("id").Value);
+                    .ToDictionary(a => a.Attribute("id")!.Value);
                 var oldGateways = this.gateways.Values.ToDictionaryEx(a => a.bpmnElementId, "gateways");
 
                 Synchronizer.Synchronize(gateways, oldGateways,
@@ -240,12 +240,12 @@ namespace Signum.Engine.Workflow
                 
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
-                    activity != null ? new XAttribute("attachedToRef", activity.BpmnElementId) : null,
-                    e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null,
-                    e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
+                    activity != null ? new XAttribute("attachedToRef", activity.BpmnElementId) : null!,
+                    e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null!,
+                    e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null!,
                     e.Entity.Type.IsScheduledStart() || e.Entity.Type.IsTimer() ? 
                         new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || (e.Entity.Type.IsTimer() && e.Entity.Timer!.Duration != null)) ? 
-                            "timerEventDefinition" : "conditionalEventDefinition")) : null, 
+                            "timerEventDefinition" : "conditionalEventDefinition")) : null!, 
                     GetConnections(e.Entity.ToLite()));
             }
 
@@ -261,7 +261,7 @@ namespace Signum.Engine.Workflow
             {
                 return new XElement(bpmn + WorkflowGatewayTypes.GetOrThrow(g.Entity.Type),
                     new XAttribute("id", g.bpmnElementId),
-                    g.Entity.Name.HasText() ? new XAttribute("name", g.Entity.Name) : null,
+                    g.Entity.Name.HasText() ? new XAttribute("name", g.Entity.Name) : null!,
                     GetConnections(g.Entity.ToLite()));
             }
 
@@ -276,11 +276,6 @@ namespace Signum.Engine.Workflow
           
             internal void DeleteAll(Locator? locator)
             {
-                foreach (var c in connections.Values.Select(a => a.Entity))
-                {
-                    c.Delete(WorkflowConnectionOperation.Delete);
-                }
-
                 foreach (var e in events.Values.Select(a => a.Entity))
                 {
                     if (e.Type == WorkflowEventType.IntermediateTimer)
@@ -343,7 +338,7 @@ namespace Signum.Engine.Workflow
                         .Set(ca => ca.Previous, ca => ca.Previous!.Entity.Previous)
                         .Execute();
 
-                    var running = caseActivities.Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+                    var running = caseActivities.Where(a => a.State == CaseActivityState.Pending).ToList();
 
                     running.ForEach(a => {
                         if (a.Previous == null)
@@ -370,7 +365,7 @@ namespace Signum.Engine.Workflow
                             .Set(ca => ca.WorkflowActivity, ca => replacement)
                             .Execute();
 
-                        var running = node.CaseActivities().Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+                        var running = node.CaseActivities().Where(a => a.State == CaseActivityState.Pending).ToList();
 
                         running.ForEach(a =>
                         {

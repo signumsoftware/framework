@@ -9,7 +9,8 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Entities.Authorization;
 using Signum.Entities.UserAssets;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -178,7 +179,8 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToOmniboxPascalDictionary(qn => QueryUtils.GetNiceName(qn), qn => qn));
+                 GetAllQueryNames().ToOmniboxPascalDictionary(qn =>
+                  qn is Type t ? (EnumEntity.Extract(t) ?? t).NiceName() : QueryUtils.GetNiceName(qn), qn => qn));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -188,10 +190,30 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NicePluralName(), t => t));
+               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
         }
     }
 
+    public class OmniboxConverter : JsonConverter<OmniboxResult>
+    {
+        public override bool CanConvert(Type type)
+        {
+            return typeof(OmniboxResult).IsAssignableFrom(type);
+        }
+
+        public override OmniboxResult? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, OmniboxResult value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, (object)value, options);
+        }
+    }
+
+
+    [JsonConverter(typeof(OmniboxConverter))]
     public abstract class OmniboxResult
     {
         public float Distance;

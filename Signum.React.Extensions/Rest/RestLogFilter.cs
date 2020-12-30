@@ -55,13 +55,13 @@ namespace Signum.React.RestLog
                     MachineName = System.Environment.MachineName,
                     ApplicationName = AppDomain.CurrentDomain.FriendlyName,
                     StartDate = TimeZoneManager.Now,
-                    UserHostAddress = connection.RemoteIpAddress.ToString(),
+                    UserHostAddress = connection.RemoteIpAddress!.ToString(),
                     UserHostName = request.Host.Value,
                     Referrer = request.Headers["Referrer"].ToString(),
                     RequestBody = IgnoreRequestBody ? null : GetRequestBody(context.HttpContext.Request)
                 };
 
-                context.HttpContext.Items.Add(typeof(RestLogEntity).FullName, restLog);
+                context.HttpContext.Items.Add(typeof(RestLogEntity).FullName!, restLog);
 
             }
             catch (Exception e)
@@ -94,8 +94,8 @@ namespace Signum.React.RestLog
         {
             if(context.Exception != null)
             {
-                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
-                var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
+                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
+                var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey)!;
                 request.EndDate = TimeZoneManager.Now;
                 request.Exception = context.Exception.LogException()?.ToLite();
 
@@ -112,7 +112,7 @@ namespace Signum.React.RestLog
         {
             try
             {
-                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
+                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
                 request.EndDate = TimeZoneManager.Now;
 
                 Stream memoryStream = RestoreOriginalStream(context);
@@ -139,7 +139,7 @@ namespace Signum.React.RestLog
 
         private static Stream RestoreOriginalStream(FilterContext context)
         {
-            var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
+            var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey)!;
             var memoryStream = context.HttpContext.Response.Body;
             memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
             memoryStream.CopyTo(originalStream);

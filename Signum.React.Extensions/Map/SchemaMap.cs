@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Engine;
@@ -65,6 +66,7 @@ namespace Signum.React.Maps
                 }
             }
 
+
             var normalEdges = (from t in s.Tables.Values
                                where s.IsAllowed(t.Type, true) == null
                                from kvp in t.DependentTables()
@@ -75,7 +77,8 @@ namespace Signum.React.Maps
                                    fromTable = t.Name.ToString(),
                                    toTable = kvp.Key.Name.ToString(),
                                    lite = kvp.Value.IsLite,
-                                   nullable = kvp.Value.IsNullable
+                                   nullable = kvp.Value.IsNullable,
+                                   isVirtualMListBackReference = VirtualMList.RegisteredVirtualMLists.TryGetC(kvp.Key.Type)?.Values.Any(a => a.BackReferenceRoute.Equals(kvp.Value.PropertyRoute)) ?? false
                                }).ToList();
 
             var mlistEdges = (from t in s.Tables.Values
@@ -144,8 +147,8 @@ namespace Signum.React.Maps
                             new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
                             new RuntimeStats
                             {
-                                rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,
-                                total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
+                                rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered)!.Partition()!.rows) ?? 0,
+                                total_size_kb = t.Indices().SelectMany(i => i.Partition()!.AllocationUnits()).Sum(a => a.total_pages) * 8
                             })).ToDictionary();
 
                         result.AddRange(dic);
@@ -220,6 +223,8 @@ namespace Signum.React.Maps
         public string toTable;
         public bool nullable;
         public bool lite;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool isVirtualMListBackReference;
     }
 
     public class MapColorProviderInfo

@@ -151,9 +151,8 @@ export function overrideAutocomplete(ti: TypeInfo) {
 export function overrideDefaultOrder(ti: TypeInfo) {
   var qs = getQuerySetting(ti.name);
 
-  if (!qs.defaultOrderColumn) {
-    qs.defaultOrderColumn = "FullName";
-    qs.defaultOrderType = "Ascending";
+  if (!qs.defaultOrders) {
+    qs.defaultOrders = [{ token: "FullName", orderType: "Ascending" }];
   }
 }
 

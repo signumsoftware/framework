@@ -28,7 +28,7 @@ namespace Signum.Engine.Help
             if (collection == null)
                 return;
 
-            Dictionary<string, XElement> loadedDictionary = collection.Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
+            Dictionary<string, XElement> loadedDictionary = collection.Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute)!.Value);
 
             if (loadedDictionary.IsEmpty())
                 return;
@@ -41,7 +41,7 @@ namespace Signum.Engine.Help
 
             foreach (var kvp in loadedDictionary)
             {
-                var key = kvp.Value.Attribute(elementKeyAttribute).Value;
+                var key = kvp.Value.Attribute(elementKeyAttribute)!.Value;
 
                 var newKey = reps?.TryGetC(key);
 

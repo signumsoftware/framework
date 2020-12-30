@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.Reflection;
 
@@ -40,28 +40,7 @@ namespace Signum.Entities.UserAssets
 
                 string[] parts = after.SplitNoEmpty('.' );
 
-                object? result = currentEntityVariable.Value;
-
-                if (result == null)
-                    return new Result<object?>.Success(null);
-
-                foreach (var part in parts)
-                {
-                    var prop = result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
-
-                    if (prop == null)
-                        return new Result<object?>.Error("Property {0} not found on {1}".FormatWith(part, type.FullName));
-
-                    result = prop.GetValue(result, null);
-
-                    if (result == null)
-                        return new Result<object?>.Success(null);
-                }
-
-                if (result is Entity e)
-                    result = e.ToLite();
-
-                return new Result<object?>.Success(result);
+                return SimpleMemberEvaluator.EvaluateExpression(currentEntityVariable.Value, parts);
             }
 
             return null;

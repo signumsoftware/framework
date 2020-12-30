@@ -4,8 +4,8 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -100,7 +100,7 @@ export module ChartMessage {
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
   Type: "ChartPaletteModel";
-  type: Basics.TypeEntity;
+  typeName: string;
   colors: Entities.MList<ChartColorEntity>;
 }
 
@@ -127,7 +127,6 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   chartScript: ChartScriptSymbol;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
-  invalidator: boolean;
 }
 
 export const ChartScriptSymbol = new Type<ChartScriptSymbol>("ChartScript");
@@ -177,7 +176,6 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
   guid: string;
-  invalidator: boolean;
 }
 
 export module UserChartOperation {

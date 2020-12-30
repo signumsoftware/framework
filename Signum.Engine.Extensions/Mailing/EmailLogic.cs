@@ -20,6 +20,7 @@ using Signum.Entities.Basics;
 using System.Text;
 using System.Threading;
 using Microsoft.Exchange.WebServices.Data;
+using Signum.Entities.Files;
 
 namespace Signum.Engine.Mailing
 {
@@ -114,10 +115,32 @@ namespace Signum.Engine.Mailing
 
         public static HashSet<Type> GetAllTypes()
         {
-            return TypeLogic.TypeToEntity
-                      .Where(kvp => typeof(IEmailOwnerEntity).IsAssignableFrom(kvp.Key))
-                      .Select(kvp => kvp.Key)
-                      .ToHashSet();
+            if (Schema.Current.IsAllowed(typeof(EmailMessageEntity), true) != null)
+                return new HashSet<Type>();
+
+            var field = Schema.Current.Field((EmailMessageEntity em) => em.Target);
+
+            if (field is FieldImplementedBy ib)
+                return ib.ImplementationColumns.Keys.ToHashSet();
+
+            //Hacky... 
+            if (field is FieldImplementedByAll iba)
+            {
+                var types = Database.Query<EmailMessageEntity>().Where(a => a.Target != null).Select(a => a.Target!.Entity.GetType()).Distinct().ToHashSet();
+                return types;
+            }
+
+            return new HashSet<Type>();
+        }
+
+        public static EmailMessageEntity WithAttachment(this EmailMessageEntity email, FilePathEmbedded filePath, string? contentId = null)
+        {
+            email.Attachments.Add(new EmailAttachmentEmbedded
+            {
+                ContentId = contentId ?? Guid.NewGuid().ToString(),
+                File = filePath,
+            });
+            return email;
         }
 
         public static void SendMail(this IEmailModel model)
@@ -330,7 +353,7 @@ namespace Signum.Engine.Mailing
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
                         Target = m.Target,
                         Subject = m.Subject,
-                        Body = m.Body,
+                        Body = new BigStringEmbedded(m.Body.Text),
                         IsBodyHtml = m.IsBodyHtml,
                         Template = m.Template,
                         EditableMessage = m.EditableMessage,
@@ -434,7 +457,7 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = email.IsBodyHtml,
             };
 
-            System.Net.Mail.AlternateView view = System.Net.Mail.AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
+            System.Net.Mail.AlternateView view = System.Net.Mail.AlternateView.CreateAlternateViewFromString(email.Body.Text!, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
                 .Select(a => new System.Net.Mail.LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
@@ -483,7 +506,7 @@ namespace Signum.Engine.Mailing
             message.CcRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToEmailAddress()).ToList());
             message.BccRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToEmailAddress()).ToList());
             message.Subject = email.Subject;
-            message.Body = new MessageBody(email.IsBodyHtml ? BodyType.HTML : BodyType.Text, email.Body);
+            message.Body = new MessageBody(email.IsBodyHtml ? BodyType.HTML : BodyType.Text, email.Body.Text);
             message.Send();
         }
 

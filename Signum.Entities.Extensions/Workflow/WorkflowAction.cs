@@ -1,21 +1,25 @@
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class WorkflowActionEntity : Entity
+    public class WorkflowActionEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
+
         public TypeEntity MainEntityType { get; set; }
 
         [NotifyChildProperty]
@@ -23,6 +27,29 @@ namespace Signum.Entities.Workflow
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("WorkflowAction",
+                 new XAttribute("Guid", Guid),
+                 new XAttribute("Name", Name),
+                 new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+                 new XElement("Eval",
+                    new XElement("Script", new XCData(Eval.Script))));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Name = element.Attribute("Name")!.Value;
+            MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
+
+            if (Eval == null)
+                Eval = new WorkflowActionEval();
+
+            var xEval = element.Element("Eval")!;
+
+            Eval.Script = xEval.Element("Script")!.Value;
+        }
     }
 
     [AutoInit]

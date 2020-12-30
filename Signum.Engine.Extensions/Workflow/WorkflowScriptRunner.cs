@@ -147,7 +147,9 @@ namespace Signum.Engine.Workflow
                                         }
                                     }
                                     SetTimer();
-                                    SetSqlDependency();
+
+                                    if (CacheLogic.WithSqlDependency)
+                                        SetSqlDependency();
                                 }
                             }
                         }
@@ -180,7 +182,7 @@ namespace Signum.Engine.Workflow
         static bool sqlDependencyRegistered = false;
         private static void SetSqlDependency()
         {
-            if(sqlDependencyRegistered)
+            if (sqlDependencyRegistered)
                 return;
             
             var query = Database.Query<CaseActivityEntity>().Where(m => !m.Workflow().HasExpired() && m.ScriptExecution != null).Select(m => m.Id);
@@ -206,6 +208,17 @@ namespace Signum.Engine.Workflow
                 .Execute();
 
             return queuedItems > 0;
+        }
+
+        public static void WakeupOnCommit()
+        {
+            Transaction.PostRealCommit -= Transaction_PostRealCommit;
+            Transaction.PostRealCommit += Transaction_PostRealCommit;
+        }
+
+        private static void Transaction_PostRealCommit(System.Collections.Generic.Dictionary<string, object> obj)
+        {
+            WakeUp("Save Transaction Commit", null);
         }
 
         internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)

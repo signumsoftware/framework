@@ -72,7 +72,7 @@ namespace Signum.Engine.Word
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
-            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations!.Value;
 
             if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
                 return new List<Filter>
@@ -186,7 +186,7 @@ namespace Signum.Engine.Word
                         dbWordModels, 
                         registeredWordModels.Keys, 
                         swr => swr.FullClassName, 
-                        type => type.FullName,
+                        type => type.FullName!,
                         (swr, type) => KeyValuePair.Create(type, swr), 
                         "caching " + nameof(WordModelEntity)).ToDictionary();
                 }, new InvalidateWith(typeof(WordModelEntity)));

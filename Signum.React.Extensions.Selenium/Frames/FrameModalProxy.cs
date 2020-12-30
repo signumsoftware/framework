@@ -51,7 +51,7 @@ namespace Signum.React.Selenium
 
                     return false;
 
-                }, () => "popup {0} to disapear with or without confirmation".FormatWith());
+                }, () => "popup {0} to disapear with or without confirmation".FormatWith(this.Element));
 
                 if (confirmationMessage != null)
                     throw new InvalidOperationException(confirmationMessage);
@@ -88,6 +88,15 @@ namespace Signum.React.Selenium
         {
             this.Element.WaitElementPresent(By.CssSelector("div.sf-main-control"));
             return this;
+        }
+    }
+
+    public static class FrameModalProxyExtension
+    {
+        public static FrameModalProxy<T> AsFrameModal<T>(this IWebElement element) 
+            where T: ModifiableEntity
+        {
+            return new FrameModalProxy<T>(element);
         }
     }
 }

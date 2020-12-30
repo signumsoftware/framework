@@ -4,7 +4,7 @@
     <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="Der Active Directory-Benutzer '{0}' ist nicht mit einem Benutzer in dieser Anwendung verbunden." />
   </Type>
   <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Active Directory-Konfiguration">
-    <Member Name="AllowSimpleUserNames" Description="Einfache Benutzernamen zulassen" />
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer durch einfachen Benutzernamen zulassen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
@@ -191,6 +191,9 @@
     <Member Name="AutomaticUpgradeOfOperations" Description="Automatische Aktualisierung der Operationen" />
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
+  </Type>
+  <Type Name="BigStringMixin">
+    <Member Name="File" Description="Datei" />
   </Type>
   <Type Name="BpmnEntityPairEmbedded" Description="Bpmn Entitätenpaar">
     <Member Name="BpmnElementId" Description="Bpmn Elemente Id" />
@@ -415,6 +418,14 @@
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
   <Type Name="CNTKPredictorAlgorithm" />
+  <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
+    <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowData" Description="Daten anzeigen" />
+    <Member Name="UserCharts" Description="Benutzerdiagramme" />
+    <Member Name="UseSameScale" Description="Verwenden der gleichen Skala" />
+  </Type>
   <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
@@ -1376,6 +1387,7 @@
     <Member Name="Start" Description="Start" />
   </Type>
   <Type Name="LoginAuthMessage">
+    <Member Name="_0HasBeenSucessfullyAssociatedWithUser1InThisDevice" Description="{0} wurde erfolgreich mit benutzerdefinierten {1} in diesem Gerät verknüpft." />
     <Member Name="AnErrorOccurredRequestNotProcessed" Description="Es ist ein Fehler aufgetreten, anfrage nicht verarbeitet." />
     <Member Name="ChangePassword" Description="Passwort ändern" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
@@ -1392,6 +1404,7 @@
     <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
+    <Member Name="LoginWith0" Description="Login mit {0}" />
     <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
@@ -1403,12 +1416,16 @@
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
     <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
     <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
+    <Member Name="Register0" Description="{0} registrieren" />
     <Member Name="RememberMe" Description="Auf diesem Computer merken" />
     <Member Name="RequestAccepted" Description="Anfrage angenommen" />
     <Member Name="SendEmail" Description="E-Mail senden" />
+    <Member Name="ShowLoginForm" Description="Anmeldeformular anzeigen" />
+    <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
+    <Member Name="TryToLogInWithIt" Description="Versuchen Sie, sich damit anzumelden!" />
     <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
     <Member Name="Username" Description="Benutzername" />
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
@@ -1472,36 +1489,7 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
-  <Type Name="NewsletterDeliveryEntity" Description="Newsletter-Versand" Gender="m">
-    <Member Name="Newsletter" Description="Newsletter" />
-    <Member Name="Recipient" Description="Empfänger" />
-    <Member Name="SendDate" Description="Sendedatum" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
-  <Type Name="NewsletterEntity" Description="Newsletter" Gender="m">
-    <Member Name="DisplayFrom" Description="Anzeigen aus" />
-    <Member Name="From" Description="Von" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="Query" Description="Abfrage" />
-    <Member Name="State" Description="Status" />
-    <Member Name="Subject" Description="Betreff" />
-    <Member Name="Text" Description="Text" />
-  </Type>
-  <Type Name="NewsletterOperation">
-    <Member Name="AddRecipients" Description="Empfänger hinzufügen" />
-    <Member Name="Clone" Description="Klonen" />
-    <Member Name="RemoveRecipients" Description="Empfänger entfernen" />
-    <Member Name="Save" Description="Speichern" />
-    <Member Name="Send" Description="Senden" />
-  </Type>
-  <Type Name="NewsletterProcess">
-    <Member Name="SendNewsletter" Description="Newsletter senden" />
-  </Type>
-  <Type Name="NewsletterState" Description="Newsletter-Status">
-    <Member Name="Created" Description="Erstellt" />
-    <Member Name="Saved" Description="Gespeichert" />
-    <Member Name="Sent" Description="Gesendet" />
-  </Type>
+  <Type Name="NewTasksEmbedded" />
   <Type Name="NoteEntity" Description="Notiz" PluralDescription="Notizen" Gender="f">
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -1922,9 +1910,6 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="RoleQuery">
-    <Member Name="RolesReferedBy" Description="Abhängige Rollen" />
-  </Type>
   <Type Name="RuleEntity`2">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="Resource" Description="Ressource" />
@@ -2203,6 +2188,7 @@
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
   <Type Name="TimeMachineMessage">
+    <Member Name="CompareVersions" Description="Versionen vergleichen" />
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
     <Member Name="TimeMachine" Description="Zeitmaschine" />
   </Type>
@@ -2420,6 +2406,7 @@
   </Type>
   <Type Name="UserAssetPreviewLineEmbedded" Description="Benutzer-Asset-Vorschau-Linie">
     <Member Name="Action" Description="Aktion" />
+    <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />
     <Member Name="Text" Description="Text" />
@@ -2512,6 +2499,7 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
@@ -2561,6 +2549,33 @@
     <Member Name="ViewLogMyLast" Description="Zeige mein letztes log" />
   </Type>
   <Type Name="ViewNamePropEmbedded" />
+  <Type Name="WebAuthnAssertionOptionsEntity" Description="WebAuthn Assertion Options" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Json" Description="Json" />
+  </Type>
+  <Type Name="WebAuthnConfigurationEmbedded" Description="Web-Authn-Konfiguration">
+    <Member Name="Origin" Description="Origin" />
+    <Member Name="ServerDomain" Description="Serverdomäne" />
+    <Member Name="ServerName" Description="Servername" />
+    <Member Name="TimestampDriftTolerance" Description="Timestamp drift tolerance" />
+  </Type>
+  <Type Name="WebAuthnCredentialEntity" Description="WebAuthn Credential" PluralDescription="WebAuthnCredentials" Gender="n">
+    <Member Name="Aaguid" Description="Aaguid" />
+    <Member Name="Counter" Description="Zähler" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="CredentialId" Description="CredentialId" />
+    <Member Name="CredType" Description="Cred-Typ" />
+    <Member Name="PublicKey" Description="Public key" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="WebAuthnCredentialOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="WebAuthnMakeCredentialsOptionsEntity" Description="WebAuthn Make Credentials Options" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Json" Description="Json" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
   <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="ModelConverter" Description="Modell-Konverter" />

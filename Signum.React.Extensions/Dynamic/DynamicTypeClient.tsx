@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
         .then(() => {
           if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
             MessageModal.show({
-              title: NormalControlMessage.Save.niceToString(),
+              title: DynamicTypeMessage.TypeSaved.niceToString(),
               message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
               buttons: "yes_no",
               style: "success",

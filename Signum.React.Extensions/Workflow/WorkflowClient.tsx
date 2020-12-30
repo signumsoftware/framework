@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment';
+import { DateTime, Duration } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -16,7 +16,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { confirmInNecessary } from '@framework/Operations/EntityOperations'
+import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
 import { CodeContext } from '../Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
@@ -52,8 +52,13 @@ import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
+import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import { OperationMenuItem } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
+
+  UserAssetsClient.start({ routes: options.routes });
+  UserAssetsClient.registerExportAssertLink(WorkflowEntity);
 
   options.routes.push(
     <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
@@ -106,7 +111,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       API.fetchCaseFlowPack(ctx.lite)
-        .then(result => Navigator.navigate(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
+        .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
     },
@@ -162,7 +167,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
       "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
     },
-    defaultOrderColumn: "StartDate",
+    defaultOrders: [{
+      token: "StartDate",
+      orderType: "Ascending"
+    }],
     simpleFilterBuilder: sfbc => {
       var model = InboxFilter.extract(sfbc.initialFilterOptions);
 
@@ -179,8 +187,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
     onNavigateRoute: (typeName, id) => AppContext.toAbsoluteUrl("~/workflow/activity/" + id),
-    onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
-    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
+    onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options),
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
@@ -189,6 +196,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
     icon: "share",
     iconColor: "blue",
+    hideOnCanExecute: true,
     onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
     contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
   }));
@@ -205,10 +213,62 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.CreateCaseActivityFromWorkflow, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.CreateCaseFromWorkflowEventTask, { isVisible: ctx => false }));
 
-  caseActivityOperation(CaseActivityOperation.Next, "primary");
-  caseActivityOperation(CaseActivityOperation.Approve, "success");
-  caseActivityOperation(CaseActivityOperation.Decline, "warning");
-  caseActivityOperation(CaseActivityOperation.Undo, "danger");
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Next, {
+    hideOnCanExecute: true,
+    color: "primary",
+    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    createButton: (eoc, group) => {
+      const wa = eoc.entity.workflowActivity as WorkflowActivityEntity;
+      const s = eoc.settings;
+      if (wa.type == "Task") {
+        return [{
+          order: s?.order ?? 0,
+          shortcut: e => eoc.onKeyDown(e),
+          button: <OperationButton eoc={eoc} group={group} />,
+        }];
+      } else if (wa.type == "Decision") {
+        return wa.decisionOptions.map(mle => ({
+          order: s?.order ?? 0,
+          shortcut: undefined,
+          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+        }));
+      }
+      else
+        return [];
+    },
+    contextual: 
+    {
+      settersConfig: coc => "NoDialog",
+      createMenuItems: coc => {
+        const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
+        if (wa.type == "Task") {
+
+          return [<OperationMenuItem coc={coc} />];
+
+        } else if (wa.type == "Decision") {
+          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
+        }
+        else
+          return [];
+      }
+    },
+    contextualFromMany: {
+      isVisible: ctx => true,
+      color: "primary"
+    },
+    
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
+    hideOnCanExecute: true,
+    color: "danger",
+    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    contextual: { isVisible: ctx => true },
+    contextualFromMany: {
+      isVisible: ctx => true,
+      color: "danger"
+    },
+  }));
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
     () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
@@ -410,21 +470,9 @@ public interface IWorkflowTransition
   }).done();
 }
 
-function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, color: BsColor) {
-  Operations.addSettings(new EntityOperationSettings(operation, {
-    hideOnCanExecute: true,
-    color: color,
-    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
-    contextual: { isVisible: ctx => true },
-    contextualFromMany: {
-      isVisible: ctx => true,
-      color: color
-    },
-  }));
-}
 
 function hide<T extends Entity>(type: Type<T>) {
-  Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
+  Navigator.addSettings(new EntitySettings(type, undefined, { isViewable: "Never", isCreable: "Never" }));
 }
 
 export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => void) {
@@ -464,7 +512,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
   let wf = FunctionalAdapter.innerRef(eoc.frame.entityComponent) as WorkflowHandle;
   wf.getXml()
     .then(xml => {
-      var model = WorkflowModel.New({
+      var wfModel = WorkflowModel.New({
         diagramXml: xml,
         entities: Dic.map(wf.workflowState!.entities, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
           bpmnElementId: bpmnId,
@@ -473,18 +521,18 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
       });
 
       var promise = eoc.entity.isNew ?
-        Promise.resolve<PreviewResult | undefined>(undefined) :
-        API.previewChanges(toLite(eoc.entity), model);
+        Promise.resolve < WorkflowReplacementModel | undefined> (undefined) :
+        API.previewChanges(toLite(eoc.entity), wfModel);
 
-      promise.then(pr => {
-        if (!pr || pr.model.replacements.length == 0)
-          saveAndSetErrors(eoc.entity, model, undefined);
+      promise.then(repoModel => {
+        if (!repoModel || repoModel.replacements.length == 0)
+          saveAndSetErrors(eoc.entity, wfModel, undefined);
         else
-          Navigator.view(pr.model, { extraProps: { previewTasks: pr.newTasks } }).then(replacementModel => {
+          Navigator.view(repoModel).then(replacementModel => {
             if (!replacementModel)
               return;
 
-            saveAndSetErrors(eoc.entity, model, replacementModel);
+            saveAndSetErrors(eoc.entity, wfModel, replacementModel);
           }).done();
       }).done();
     }).done();
@@ -537,15 +585,10 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
   });
 }
 
-export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
   return import("./Case/CaseFrameModal")
-    .then(NP => NP.default.openNavigate(entityOrPack, readOnly)) as Promise<void>;
-}
-
-export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
-  return import("./Case/CaseFrameModal")
-    .then(NP => NP.default.openView(entityOrPack, readOnly));
+    .then(NP => NP.default.openView(entityOrPack, options));
 
 }
 
@@ -570,7 +613,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
             .then(entity => {
               if (mainEntityStrategy == "Clone") {
                 return Operations.API.constructFromEntity(entity, coi.key)
-                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                  .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack!.entity));
               }
               else
                 return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
@@ -632,8 +675,8 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   return viewPromise.promise;
 }
 
-export function durationFormat(d: moment.Duration) {
-  return `${d.days()}d ${d.hours()}h ${d.minutes()}m ${d.seconds()}s`;
+export function durationFormat(d: Duration) {
+  return `${d.days}d ${d.hours}h ${d.minutes}m ${d.seconds}s`;
 }
 
 export namespace API {
@@ -662,7 +705,7 @@ export namespace API {
     issues: Array<WorkflowIssue>;
   }
 
-  export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
+  export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<WorkflowReplacementModel> {
     return ajaxPost({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
   }
 
@@ -746,11 +789,6 @@ export interface WorkflowConditionTestResponse {
 }
 
 export const DecisionResultValues = ["Approve", "Decline"];
-
-export interface PreviewResult {
-  model: WorkflowReplacementModel;
-  newTasks: PreviewTask[];
-}
 
 export interface PreviewTask {
   bpmnId: string;

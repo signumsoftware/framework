@@ -84,12 +84,12 @@ namespace Signum.React.Selenium
             selenium.Wait(() => EqualityComparer<T>.Default.Equals(lastValue = value(), expectedValue), () => "expression to be " + expectedValue + " but is " + lastValue, timeout);
         }
 
-        public static IWebElement TryFindElement(this RemoteWebDriver selenium, By locator)
+        public static IWebElement? TryFindElement(this RemoteWebDriver selenium, By locator)
         {
             return selenium.FindElements(locator).FirstOrDefault();
         }
 
-        public static IWebElement TryFindElement(this IWebElement element, By locator)
+        public static IWebElement? TryFindElement(this IWebElement element, By locator)
         {
             return element.FindElements(locator).FirstOrDefault();
         }
@@ -97,13 +97,13 @@ namespace Signum.React.Selenium
         public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(),
-                actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
+                actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
         }
 
         public static IWebElement WaitElementPresent(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return element.GetDriver().Wait(() => element.FindElements(locator).FirstOrDefault(),
-                actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
+                actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
         }
 
         public static void AssertElementPresent(this RemoteWebDriver selenium, By locator)
@@ -170,13 +170,13 @@ namespace Signum.React.Selenium
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(a => a.Displayed),
-                actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
+                actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
         }
 
         public static IWebElement WaitElementVisible(this IWebElement element, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return element.GetDriver().Wait(() => element.FindElements(locator).FirstOrDefault(a => a.Displayed),
-                actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
+                actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
         }
 
         public static void AssertElementVisible(this RemoteWebDriver selenium, By locator)
@@ -338,7 +338,7 @@ namespace Signum.React.Selenium
             return e.Follow(a => a.GetParent()).FirstEx(predicate);
         }
 
-        public static IWebElement TryGetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
+        public static IWebElement? TryGetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
         {
             return e.Follow(a => a.GetParent()).FirstOrDefault(predicate);
         }

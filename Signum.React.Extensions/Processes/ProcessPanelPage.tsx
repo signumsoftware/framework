@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
-import numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
@@ -8,6 +7,7 @@ import { ProcessEntity } from './Signum.Entities.Processes'
 import { SearchControl } from '@framework/Search';
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
+import { toNumberFormat } from '@framework/Reflection'
 
 export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
   const [state, reloadState] = useAPIWithReload(() => API.view(), []);
@@ -29,6 +29,8 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
     return <h2>ProcesLogic state (loading...) </h2>;
 
   const s = state;
+
+  var percentageFormat = toNumberFormat("P2");
 
   return (
     <div>
@@ -56,19 +58,12 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <table className="table">
           <thead>
             <tr>
-              <th>Process
-                              </th>
-              <th>State
-                              </th>
-              <th>Progress
-                              </th>
-              <th>MachineName
-                              </th>
-              <th>ApplicationName
-                              </th>
-              <th>IsCancellationRequested
-                              </th>
-
+              <th>Process</th>
+              <th>State</th>
+              <th>Progress</th>
+              <th>MachineName</th>
+              <th>ApplicationName</th>
+              <th>IsCancellationRequested</th>
             </tr>
           </thead>
           <tbody>
@@ -81,7 +76,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
               <tr key={i}>
                 <td> <EntityLink lite={item.process} inSearch={true} /> </td>
                 <td> {item.state} </td>
-                <td> {numbro(item.progress).format("0.00 %")} </td>
+                <td> {percentageFormat.format(item.progress)} </td>
                 <td> {item.machineName} </td>
                 <td> {item.applicationName} </td>
                 <td> {item.isCancellationRequested} </td>

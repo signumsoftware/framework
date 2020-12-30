@@ -19,6 +19,7 @@ export interface HtmlEditorProps {
   decorators?: draftjs.DraftDecorator[],
   plugins?: HtmlEditorPlugin[],
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
 }
 
 export interface HtmlEditorControllerProps {
@@ -60,7 +61,7 @@ export class HtmlEditorController {
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
-      if (this.binding.getValue() ?? "" == this.lastSave ?? "")
+      if ((this.binding.getValue() ?? "") == (this.lastSave ?? ""))
         this.lastSave = undefined;
       else
         this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
@@ -115,6 +116,7 @@ export default React.forwardRef(function HtmlEditor({
   toolbarButtons,
   decorators,
   plugins,
+  htmlAttributes,
   ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
   const textConverter = converter ?? new HtmlContentStateConverter({}, {});
@@ -156,7 +158,7 @@ export default React.forwardRef(function HtmlEditor({
 
   return (
     <>
-      <div className="sf-html-editor" onClick={() => c.editor.focus()}>
+      <div className="sf-html-editor" onClick={() => c.editor.focus()} {...htmlAttributes}>
         {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
 
         <draftjs.Editor

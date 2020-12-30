@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { RouteComponentProps } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -80,7 +80,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
         <br />
         ScriptRunnerPeriod: {srs.scriptRunnerPeriod} sec
                   <br />
-        NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : moment(srs.nextPlannedExecution).fromNow()})
+        NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : DateTime.fromISO(srs.nextPlannedExecution).toRelative()})
                   <br />
         IsCancelationRequested: {srs.isCancelationRequested}
         <br />
@@ -90,7 +90,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
       <h4>Next activities to execute</h4>
       <SearchControl
         showContextMenu={fo => "Basic"}
-        navigate={false}
+        view={false}
         findOptions={{
           queryName: CaseActivityEntity,
           filterOptions: [
@@ -131,7 +131,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
         <Tab title="Last executed activities" eventKey="lastActivities">
           <SearchControl
             showContextMenu={fo => "Basic"}
-            navigate={false}
+            view={false}
             findOptions={{
               queryName: CaseActivityEntity,
               filterOptions: [

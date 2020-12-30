@@ -258,7 +258,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         {
                             ICNTKEncoding encoding = Encodings.GetOrThrow(col.Encoding);
 
-                            encoding.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
+                            encoding.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }
@@ -360,7 +360,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
                         {
                             var enc = Encodings.GetOrThrow(col.Encoding);
-                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
+                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }

@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Engine;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Workflow
 {
@@ -46,7 +47,7 @@ namespace Signum.Engine.Workflow
             As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow == e));
 
         [AutoExpressionField]
-        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e) => 
+        public static WorkflowEventEntity? WorkflowStartEvent(this WorkflowEntity e) => 
             As.Expression(() => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault());
 
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
@@ -207,6 +208,12 @@ namespace Signum.Engine.Workflow
                 PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
 
                 WorkflowLogic.getConfiguration = getConfiguration;
+
+                UserAssetsImporter.Register<WorkflowEntity>("Workflow", WorkflowOperation.Save);
+                UserAssetsImporter.Register<WorkflowScriptEntity>("WorkflowScript", WorkflowScriptOperation.Save);
+                UserAssetsImporter.Register<WorkflowTimerConditionEntity>("WorkflowTimerCondition", WorkflowTimerConditionOperation.Save);
+                UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
+                UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
 
                 sb.Include<WorkflowEntity>()
                     .WithConstruct(WorkflowOperation.Create)
@@ -445,7 +452,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
                     }
@@ -502,7 +509,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Save);
                     }
@@ -558,7 +565,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (!e.IsNew) {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Save);
                     }
@@ -615,7 +622,7 @@ namespace Signum.Engine.Workflow
                     if (!e.IsNew)
                     {
 
-                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
                             ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
                     }
@@ -694,7 +701,7 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (e, args) =>
                     {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
+                        WorkflowLogic.ApplyDocument(e, args.TryGetArgC<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
                         DynamicCode.OnInvalidated?.Invoke();
                     }
                 }.Register();
@@ -747,7 +754,7 @@ namespace Signum.Engine.Workflow
 
                 new Execute(WorkflowOperation.Deactivate)
                 {
-                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : 
+                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()) : 
                         w.Cases().SelectMany(c => c.CaseActivities()).Any(ca => ca.DoneDate == null) ? CaseActivityMessage.ThereAreInprogressActivities.NiceToString() : null,
                     Execute = (w, args) =>
                     {
@@ -763,7 +770,7 @@ namespace Signum.Engine.Workflow
         {
             workflow.WorkflowEvents()
                 .Where(a => a.Type == WorkflowEventType.ScheduledStart)
-                .Select(a => a.ScheduledTask())
+                .Select(a => a.ScheduledTask()!)
                 .UnsafeUpdate()
                 .Set(a => a.Suspended, a => value)
                 .Execute();
@@ -793,7 +800,7 @@ namespace Signum.Engine.Workflow
             return wb.GetWorkflowModel();
         }
 
-        public static PreviewResult PreviewChanges(WorkflowEntity workflow, WorkflowModel model)
+        public static WorkflowReplacementModel PreviewChanges(WorkflowEntity workflow, WorkflowModel model)
         {
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
@@ -803,19 +810,19 @@ namespace Signum.Engine.Workflow
             return wb.PreviewChanges(document, model);
         }
 
-        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel? replacements, List<WorkflowIssue> issuesContainer)
+        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel? model, WorkflowReplacementModel? replacements, List<WorkflowIssue> issuesContainer)
         {
             if (issuesContainer.Any())
                 throw new InvalidOperationException("issuesContainer should be empty");
-
-            if (model == null)
-                throw new ArgumentNullException(nameof(model));
             
             var wb = new WorkflowBuilder(workflow);
             if (workflow.IsNew)
                 workflow.Save();
 
-            wb.ApplyChanges(model, replacements);
+            if (model != null)
+            {
+                wb.ApplyChanges(model, replacements);
+            }
             wb.ValidateGraph(issuesContainer);
 
             if (issuesContainer.Any(a => a.Type == WorkflowIssueType.Error))

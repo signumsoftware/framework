@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using System.Reflection;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Workflow
 {
@@ -24,12 +25,14 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
+        public WorkflowActivityType Type { get; set; }
+
         [StringLengthValidator(Min = 3, Max = 400, MultiLine = true)]
         public string? Comments { get; set; }
 
-        public WorkflowActivityType Type { get; set; }
-
         public bool RequiresOpen { get; set; }
+
+        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
 
         [Ignore, QueryableProperty]
         [NoRepeatValidator]
@@ -91,9 +94,14 @@ namespace Signum.Entities.Workflow
                 if (ViewName.HasText())
                 {
                     var dv = DynamicViewEntity.TryGetDynamicView(Lane.Pool.Workflow.MainEntityType.ToType(), ViewName);
-                    if(dv != null)
-                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
+                    if (dv != null)
+                        return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
                 }
+            }
+
+            if (pi.Name == nameof(DecisionOptions))
+            {
+                return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
             }
 
             return base.PropertyValidation(pi);
@@ -119,6 +127,8 @@ namespace Signum.Entities.Workflow
                 Timer = we.Timer,
                 BpmnElementId = we.BpmnElementId
             }).ToMList());
+
+            model.DecisionOptions.AssignMList(this.DecisionOptions);
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -137,6 +147,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
+            this.DecisionOptions.AssignMList(wModel.Type == WorkflowActivityType.Decision ? wModel.DecisionOptions : new MList<DecisionOptionEmbedded>());
             // We can not set boundary timers in model
             //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
@@ -171,6 +182,15 @@ namespace Signum.Entities.Workflow
         }
     }
 
+    [Serializable]
+    public class DecisionOptionEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string Name { get; set; }
+
+        public BootstrapStyle Style { get; set; }
+    }
+
     public class WorkflowActivityInfo
     {
         static readonly WorkflowActivityInfo Empty = new WorkflowActivityInfo();
@@ -198,7 +218,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptPartEmbedded : EmbeddedEntity
     {
-        public Lite<WorkflowScriptEntity>? Script { get; set; }
+        public Lite<WorkflowScriptEntity> Script { get; set; }
 
         public WorkflowScriptRetryStrategyEntity? RetryStrategy { get; set; }
 
@@ -310,6 +330,8 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
+        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
+
         [PreserveOrder]
         [NoRepeatValidator]
         public MList<WorkflowEventModel> BoundaryTimers { get; set; } = new MList<WorkflowEventModel>();
@@ -346,6 +368,11 @@ namespace Signum.Entities.Workflow
                     if (dv != null)
                         return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
                 }
+            }
+
+            if (pi.Name == nameof(DecisionOptions))
+            {
+                return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
             }
 
             return base.PropertyValidation(pi);

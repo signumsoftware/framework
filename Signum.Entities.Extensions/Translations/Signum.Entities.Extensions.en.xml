@@ -23,6 +23,7 @@
   <Type Name="AutoconfigureNeuralNetworkEntity" />
   <Type Name="BaseRulePack`1" />
   <Type Name="BasicPermission" />
+  <Type Name="BigStringMixin" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
   <Type Name="CalendarDayEntity" />
@@ -243,11 +244,6 @@
   <Type Name="NeuralNetworkInitializer" />
   <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
-  <Type Name="NewsletterDeliveryEntity" />
-  <Type Name="NewsletterEntity" />
-  <Type Name="NewsletterOperation" />
-  <Type Name="NewsletterProcess" />
-  <Type Name="NewsletterState" />
   <Type Name="NoteEntity" />
   <Type Name="NoteMessage" />
   <Type Name="NoteOperation" />
@@ -449,6 +445,11 @@
   <Type Name="ViewLogEntity" />
   <Type Name="ViewLogMessage" />
   <Type Name="ViewNamePropEmbedded" />
+  <Type Name="WebAuthnAssertionOptionsEntity" />
+  <Type Name="WebAuthnConfigurationEmbedded" />
+  <Type Name="WebAuthnCredentialEntity" />
+  <Type Name="WebAuthnCredentialOperation" />
+  <Type Name="WebAuthnMakeCredentialsOptionsEntity" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordModelEntity" />

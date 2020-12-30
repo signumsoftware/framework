@@ -56,7 +56,6 @@ namespace Signum.Entities.Chart
                 if (Set(ref chartScript, value))
                 {
                     this.GetChartScript().SynchronizeColumns(this, null);
-                    NotifyAllColumns();
                 }
             }
         }
@@ -72,14 +71,6 @@ namespace Signum.Entities.Chart
 
         [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
-
-        void NotifyAllColumns()
-        {
-            foreach (var item in Columns)
-            {
-                item.NotifyAll();
-            }
-        }
 
         [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
@@ -120,39 +111,38 @@ namespace Signum.Entities.Chart
             }
         }
 
-        public void InvalidateResults(bool needNewQuery)
-        {
-            Notify(() => Invalidator);
-        }
-
-        public bool Invalidator { get { return true; } }
-
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("UserChart",
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
-                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 new XAttribute("HideQuickLink", HideQuickLink),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", this.ChartScript.Key),
-                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-                Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
+                Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            DisplayName = element.Attribute("DisplayName").Value;
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            DisplayName = element.Attribute("DisplayName")!.Value;
+            Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
+            ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
-            Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));
-            ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
+            var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
+            Parameters.ForEach(p =>
+            {
+                var pxml = paramsXml.TryGetC(p.Name);
+                if (pxml != null)
+                    p.FromXml(pxml, ctx);
+            });
             ParseData(ctx.GetQueryDescription(Query));
         }
 

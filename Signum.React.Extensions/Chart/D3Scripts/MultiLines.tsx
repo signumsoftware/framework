@@ -27,14 +27,13 @@ export default function renderMultiLines({ data, width, height, parameters, load
   //xRule.debugX(chart)
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 20,
     content: '*',
     ticks: 4,
     _3: 5,
-    labels0: 15,
-    labels1: 15,
+    labels: 30,
     _4: 10,
     title: 15,
     _5: 5,
@@ -95,7 +94,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
             d={d3.line<PivotRow | undefined>()
               .defined(r => r?.values[s.key]?.value != null)
               .x(r => x(keyColumn.getKey(r!.rowValue))!)
-              .y(r => -y(r!.values[s.key].value))
+              .y(r => -y(r!.values[s.key].value)!)
               .curve(ChartUtils.getCurveByName(pInterpolate)!)
               (keyValues.map(k => rowByKey[keyColumn.getKey(k)]))!}
           />
@@ -103,7 +102,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
           {rowsInOrder
             .filter(r => r.values[s.key] != undefined)
             .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="hover"
-              transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value))}
+              transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
               r={15}
               fill="#fff"
               fillOpacity={0}
@@ -126,7 +125,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               stroke={s.color || color(s.key)}
               strokeWidth={2}
               fill="white"
-              transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value))}
+              transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
               r={5}
               shapeRendering="initial"
               onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
@@ -141,7 +140,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               .map(r => <text key={keyColumn.getKey(r.rowValue)} className="point-label sf-transition"
                 textAnchor="middle"
                 opacity={parameters["NumberOpacity"]}
-                transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value) - 8)}
+                transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)! - 8)}
                 onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
                 cursor="pointer"
                 shapeRendering="initial">

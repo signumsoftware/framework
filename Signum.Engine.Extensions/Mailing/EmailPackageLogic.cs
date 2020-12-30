@@ -14,6 +14,7 @@ using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Entities.Templating;
 using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -73,7 +74,7 @@ namespace Signum.Engine.Mailing
                                 From = m.From,
                                 Recipients = m.Recipients.ToMList(),
                                 Target = m.Target,
-                                Body = m.Body,
+                                Body = new BigStringEmbedded(m.Body.Text),
                                 IsBodyHtml = m.IsBodyHtml,
                                 Subject = m.Subject,
                                 Template = m.Template,
@@ -92,9 +93,9 @@ namespace Signum.Engine.Mailing
         public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol? converter)
         {
             if (converter == null)
-                return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template } }.CreateLines(targets));
+                return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity().SetOperationArgs(new object[] { template }).CreateLines(targets));
 
-            return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template, converter } }.CreateLines(targets));
+            return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity().SetOperationArgs(new object[] { template, converter }).CreateLines(targets));
         }
     }
 
@@ -105,7 +106,7 @@ namespace Signum.Engine.Mailing
         {
             PackageEntity package = (PackageEntity)executingProcess.Data!;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
             var template = args.GetArg<Lite<EmailTemplateEntity>>();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>

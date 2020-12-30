@@ -3,6 +3,7 @@ import { Lite, Entity } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
 import * as Navigator from '@framework/Navigator'
+import { getTypeInfo, tryGetTypeInfo } from '@framework/Reflection'
 
 export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmniboxResult>
 {
@@ -40,7 +41,16 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
           array.push(`'${result.toStr}': `);
           array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
         } else {
-          array.push(`${result.lite.id}: `);
+
+          var ti = tryGetTypeInfo(result.typeMatch.text);
+          if (ti?.members["Id"].type.name == "Guid") {
+            var id = result.lite.id as string;
+            array.push(<span className="guid">{id.substr(0, 4) + "…" + id.substring(id.length - 4)}</span>);
+          } else {
+            array.push(result.id);
+          }
+
+          array.push(": ");
           this.renderMatch(result.toStrMatch, array);
         }
       }

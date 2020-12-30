@@ -77,7 +77,7 @@ namespace Signum.Engine.Word
                     Execute = (wt, _) => {
                         if (!wt.IsNew)
                         {
-                            var oldFile = wt.InDBEntity(t => t.Template);
+                            var oldFile = wt.InDB(t => t.Template);
                             if (oldFile != null && !wt.Template.Is(oldFile))
                                 Transaction.PreRealCommit += dic => oldFile.Delete();
                         }
@@ -645,7 +645,7 @@ namespace Signum.Engine.Word
                                     toModify.Save();
                                     SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Initialized {se.FullClassName}");
                                 }
-                                else if (MemComparer.Equals(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
+                                else if (MemoryExtensions.SequenceEqual<byte>(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
                                 {
                                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.FullClassName}");
                                 }

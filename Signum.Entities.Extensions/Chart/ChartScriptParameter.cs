@@ -8,7 +8,8 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using System.Globalization;
 using System.Collections;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.Entities.Chart
 {
@@ -32,23 +33,21 @@ namespace Signum.Entities.Chart
 
         public List<ChartScriptParameter> Parameters = new List<ChartScriptParameter>();
 
-        class ChartScriptParameterGroupJsonConverter : JsonConverter
+        class ChartScriptParameterGroupJsonConverter : JsonConverter<ChartScriptParameterGroup>
         {
-            public override bool CanWrite => true;
-            public override bool CanRead => false;
-
-            public override bool CanConvert(Type objectType) => typeof(ChartScriptParameterGroup) == objectType;
-
-            public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) => throw new NotImplementedException();
-
-            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+            public override ChartScriptParameterGroup? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
+                throw new NotImplementedException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, ChartScriptParameterGroup value, JsonSerializerOptions options)
+            {  
                 var group = (ChartScriptParameterGroup)value!;
                 writer.WriteStartObject();
                 writer.WritePropertyName("name");
-                writer.WriteValue(group.Name);
+                writer.WriteStringValue(group.Name);
                 writer.WritePropertyName("parameters");
-                serializer.Serialize(writer, group.Parameters);
+                JsonSerializer.Serialize(writer, group.Parameters, options);
                 writer.WriteEndObject();
             }
         }
@@ -65,7 +64,12 @@ namespace Signum.Entities.Chart
         public string Name { get; set; }
         public int? ColumnIndex { get; set; }
         public ChartParameterType Type { get; set; }
+
+        [JsonIgnore]
         public IChartParameterValueDefinition ValueDefinition { get; set; }
+
+        [JsonPropertyName("valueDefinition")]
+        public object ValueDefinitionObj => ValueDefinition; //object required for polymorphisim
 
         public QueryToken? GetToken(IChartBase chartBase)
         {

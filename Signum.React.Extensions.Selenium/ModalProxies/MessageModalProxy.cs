@@ -74,6 +74,11 @@ namespace Signum.React.Selenium
 
             message.Click(button);
         }
+
+        public static MessageModalProxy AsMessageModal(this IWebElement element)
+        {
+            return new MessageModalProxy(element);
+        }
     }
 
     public enum MessageModalButton

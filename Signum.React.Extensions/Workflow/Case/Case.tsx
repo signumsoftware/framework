@@ -80,7 +80,7 @@ export default function CaseComponent(p: CaseComponentProps) {
           <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
             <SearchControl
               showContextMenu={fo => "Basic"}
-              navigate={false}
+              view={false}
               findOptions={{
                 queryName: CaseActivityEntity,
                 parentToken: CaseActivityEntity.token(e => e.case),
@@ -108,7 +108,7 @@ export default function CaseComponent(p: CaseComponentProps) {
           <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
             <SearchControl
               showContextMenu={fo => "Basic"}
-              navigate={false}
+              view={false}
               findOptions={{
                 queryName: CaseActivityEntity,
                 parentToken: CaseActivityEntity.token(e => e.case),

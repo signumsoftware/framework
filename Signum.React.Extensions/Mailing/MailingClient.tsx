@@ -10,7 +10,7 @@ import { PseudoType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity } from './Signum.Entities.Mailing'
 import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
-import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
+import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -31,11 +31,11 @@ export var allTypes: string[] = [];
 
 export function start(options: {
   routes: JSX.Element[],
-  newsletter: boolean,
   pop3Config: boolean,
   sendEmailTask: boolean,
   contextual: boolean,
   queryButton: boolean,
+  quickLinkInDefaultGroup?: boolean
 }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
@@ -81,11 +81,6 @@ export function start(options: {
 
   Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
 
-  if (options.newsletter) {
-    Navigator.addSettings(new EntitySettings(NewsletterEntity, e => import('./Newsletters/Newsletter')));
-    Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => import('./Newsletters/NewsletterDelivery')));
-  }
-
   if (options.sendEmailTask) {
     Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./Templates/SendEmailTask')));
   }
@@ -109,13 +104,18 @@ export function start(options: {
 
   API.getAllTypes().then(types => {
     allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("emailMessages",
-      () => EmailMessageEntity.nicePluralName(),
-      e => getEmailMessages(ctx.lite),
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
+      {
+        queryName: EmailMessageEntity,
+        parentToken: "Target",
+        parentValue: ctx.lite,
+      },
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),
         icon: "envelope",
-        iconColor: "orange"
+        iconColor: "orange",
+        color: "warning",
+        group: options.quickLinkInDefaultGroup ? undefined : null,
       }));
   }).done();
 
@@ -124,16 +124,6 @@ export function start(options: {
 
 }
 
-function getEmailMessages(target: Lite<IEmailOwnerEntity>) {
-  return Finder.find(
-    {
-      queryName: EmailMessageEntity,
-      parentToken: "Target",
-      parentValue: target,
-      columnOptionsMode: "Remove",
-      columnOptions: [{ token: "Target" }],
-    }).done();
-}
 
 
 export interface EmailModelSettings<T extends ModelEntity> {
@@ -194,7 +184,7 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
 export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
 
   Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
-    .then(pack => pack && Navigator.navigate(pack))
+    .then(pack => pack && Navigator.view(pack))
     .done();
 }
 

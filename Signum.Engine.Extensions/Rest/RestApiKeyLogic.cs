@@ -14,7 +14,7 @@ namespace Signum.Engine.Rest
     public class RestApiKeyLogic
     {
         public readonly static string ApiKeyQueryParameter = "apiKey";
-        public readonly static string ApiKeyHeaderParameter = "X-ApiKey";
+        public readonly static string ApiKeyHeader = "X-ApiKey";
 
         public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
         public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();

@@ -24,10 +24,16 @@ export interface IFilePath extends IFile
 
 export interface FilePathEntity extends IFilePath { }
 export interface FilePathEmbedded extends IFilePath {
-  entityId: Entities.PrimaryKey;
-  mListRowId: Entities.PrimaryKey | null;
+  entityId: number | string;
+  mListRowId: number | string | null;
   propertyRoute: string;
   rootType: string;
+}
+
+export const BigStringMixin = new Type<BigStringMixin>("BigStringMixin");
+export interface BigStringMixin extends Entities.MixinEntity {
+  Type: "BigStringMixin";
+  file: FilePathEmbedded | null;
 }
 
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");

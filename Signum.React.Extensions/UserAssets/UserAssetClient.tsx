@@ -12,6 +12,7 @@ import { QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
 import { softCast } from '@framework/Globals';
+import * as AppContext from '@framework/AppContext';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -19,13 +20,13 @@ export function start(options: { routes: JSX.Element[] }) {
     return;
 
   options.routes.push(<ImportRoute path="~/userAssets/import" onImportModule={() => import("./ImportAssetsPage")} />);
-
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
     key: "ImportUserAssets",
     onClick: () => Promise.resolve("~/userAssets/import")
   });
 
+  AppContext.clearSettingsActions.push(() => started = false);
   started = true;
 }
 

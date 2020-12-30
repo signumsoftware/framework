@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Dynamic
 {
     public static class DynamicCode
     {
-        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase!).LocalPath)!;
+        public static string AssemblyDirectory = Path.GetDirectoryName(typeof(Entity).Assembly.Location)!;
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenControllerNamespace = "Signum.React.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
@@ -46,7 +47,7 @@ namespace Signum.Entities.Dynamic
             typeof(object),
             typeof(System.IO.File),
             typeof(System.Attribute),
-            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
+            typeof(System.Runtime.AmbiguousImplementationException), 
             typeof(System.Linq.Enumerable),
             typeof(System.Linq.Queryable),
             typeof(System.Collections.Generic.List<>),
@@ -57,7 +58,7 @@ namespace Signum.Entities.Dynamic
             typeof(System.Net.HttpWebRequest),
             typeof(System.Linq.Expressions.Expression),
             typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
-            typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",
+            typeof(JsonConverter), //"System.Text.Json.dll",
             typeof(DocumentFormat.OpenXml.AlternateContent), //"DocumentFormat.OpenXml.dll",
             typeof(System.Text.RegularExpressions.Regex),
         };
@@ -85,7 +86,7 @@ namespace Signum.Entities.Dynamic
         public static IEnumerable<MetadataReference> GetCoreMetadataReferences()
         {
             string dd = typeof(Enumerable).GetType().Assembly.Location;
-            var coreDir = Directory.GetParent(dd);
+            var coreDir = Directory.GetParent(dd)!;
 
             return CoreAssemblyNames.Select(name => MetadataReference.CreateFromFile(Path.Combine(coreDir.FullName, name))).ToArray();
         }

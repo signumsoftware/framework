@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { BsColor } from '@framework/Components/Basic';
 import { classes } from '@framework/Globals'
-import numbro from 'numbro';
+import { toNumberFormat } from '@framework/Reflection';
 
 interface ProgressBarProps {
   value?: number | null; /*0...1*/
@@ -23,8 +23,10 @@ export default function ProgressBar(p : ProgressBarProps){
 
   const progressStyle = color != null ? "bg-" + color : "";
 
+  var numberFormat = toNumberFormat("P2");
+
   const fullMessage = [
-    (value == null || showPercentageInMessage === false ? undefined : `${numbro(value * 100).format("0.00")}%`),
+    (value == null || showPercentageInMessage === false ? undefined : numberFormat.format(value)),
     (message ? message : undefined)
   ].filter(a => a != null).join(" - ");
 

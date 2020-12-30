@@ -21,17 +21,11 @@ export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-interface UserQueryMenuState {
-  currentUserQuery?: Lite<UserQueryEntity>;
-  userQueries?: Lite<UserQueryEntity>[];
-  isOpen: boolean;
-}
-
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
-    let uq = window.location.search.tryAfter("userQuery=");
+    let uq = p.searchControl.props.tag == "SearchPage" ? window.location.search.tryAfter("userQuery=") : null;
     uq = uq && decodeURIComponent(uq.tryBefore("&") || uq);
     return uq ? parseLite(uq) as Lite<UserQueryEntity> : undefined;
   });
@@ -82,7 +76,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.groupResults = nfo.groupResults;
         ofo.pagination = nfo.pagination;
         ofo.systemTime = nfo.systemTime;
-        sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
+        if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
+          sc.setState({ showFilters: false });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -97,7 +92,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
-          sc.setState({ showFilters: !(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions)) });
+          if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
+            sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -112,7 +108,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleEdit() {
     Navigator.API.fetchAndForget(currentUserQuery!)
-      .then(userQuery => Navigator.navigate(userQuery))
+      .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
       .then(() => applyUserQuery(currentUserQuery!))
       .done();
@@ -174,7 +170,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light" >
+      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant={currentUserQuery ? "info" : "light"} >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

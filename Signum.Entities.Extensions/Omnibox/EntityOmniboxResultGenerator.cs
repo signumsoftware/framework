@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -106,20 +107,19 @@ namespace Signum.Entities.Omnibox
         }
     }
 
-    public class PrimaryKeyJsonConverter : JsonConverter
+    public class PrimaryKeyJsonConverter : JsonConverter<object>
     {
         public override bool CanConvert(Type objectType)
         {
             return true;
         }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
-            writer.WriteValue(value == null ? null : ((PrimaryKey)value).Object);
+            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)((PrimaryKey)value).Object);
         }
 
-        public override bool CanRead => false;
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

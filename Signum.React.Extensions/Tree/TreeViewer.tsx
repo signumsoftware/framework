@@ -164,12 +164,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (this.props.onDoubleClick)
       this.props.onDoubleClick(n, e);
     else
-      this.handleNavigate();
+      this.handleView();
   }
 
-  handleNavigate = () => {
+  handleView = () => {
     const node = this.state.selectedNode!;
-    Navigator.navigate(node.lite)
+    Navigator.view(node.lite)
       .then(() => this.search(false))
       .done();
   }
@@ -248,7 +248,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isNavigable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Navigator.isViewable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
       Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
@@ -318,7 +318,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   handleAddRoot = () => {
     Operations.API.construct(this.props.typeName, TreeOperation.CreateRoot)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;
@@ -331,7 +331,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   handleAddChildren = () => {
     var parent = this.state.selectedNode!;
     Operations.API.constructFromLite(parent.lite, TreeOperation.CreateChild)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;
@@ -349,7 +349,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     var sibling = this.state.selectedNode!;
 
     Operations.API.constructFromLite(sibling.lite, TreeOperation.CreateNextSibling)
-      .then(ep => Navigator.view(ep, { requiresSaveOperation: true }))
+      .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
           return;

@@ -56,7 +56,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       columnOptionsMode: "Remove",
     };
 
-    Finder.exploreOrNavigate(fo)
+    Finder.exploreOrView(fo)
       .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!))
       .then(alerts => setAlerts(alerts))
       .done();

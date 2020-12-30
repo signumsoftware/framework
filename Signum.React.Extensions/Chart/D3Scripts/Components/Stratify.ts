@@ -50,7 +50,7 @@ export function stratifyTokens(
 
         const parentValue = keyColumnParent.getValue(r);
 
-        const parentFolder = parentValue && folders[keyColumnParent.getKey(parentValue)];
+        const parentFolder = parentValue == null ? null : folders[keyColumnParent.getKey(parentValue)];
 
         if (parentFolder)
           return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent

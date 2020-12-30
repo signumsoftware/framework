@@ -31,11 +31,11 @@ namespace Signum.Engine.Workflow
             As.Expression(() => Database.Query<WorkflowEventTaskConditionResultEntity>().Where(a => a.WorkflowEventTask.Is(e)));
 
         [AutoExpressionField]
-        public static ScheduledTaskEntity ScheduledTask(this WorkflowEventEntity e) =>
+        public static ScheduledTaskEntity? ScheduledTask(this WorkflowEventEntity e) =>
             As.Expression(() => Database.Query<ScheduledTaskEntity>().SingleOrDefault(s => ((WorkflowEventTaskEntity)s.Task).Event.Is(e)));
 
         [AutoExpressionField]
-        public static WorkflowEventTaskEntity WorkflowEventTask(this WorkflowEventEntity e) =>
+        public static WorkflowEventTaskEntity? WorkflowEventTask(this WorkflowEventEntity e) =>
             As.Expression(() => Database.Query<WorkflowEventTaskEntity>().SingleOrDefault(et => et.Event.Is(e)));
 
         public static void Start(SchemaBuilder sb)
@@ -224,7 +224,7 @@ namespace Signum.Engine.Workflow
             var workflow = wet.GetWorkflow();
 
             if (workflow.HasExpired())
-                throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate.Value.ToString()));
+                throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(workflow, workflow.ExpirationDate!.Value.ToString()));
 
             using (Transaction tr = new Transaction())
             {

@@ -15,6 +15,8 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
 using System.Threading;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Signum.Engine.Json;
 
 namespace Signum.Engine.Processes
 {
@@ -192,8 +194,7 @@ namespace Signum.Engine.Processes
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationEntity()
             {
                 Operation = operation,
-                OperationArgs = operationArgs,
-            }.CreateLines(entities));
+            }.SetOperationArgs(operationArgs).CreateLines(entities));
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -207,6 +208,18 @@ namespace Signum.Engine.Processes
             TypeConditionLogic.Register<PackageLineEntity>(typeCondition,
                 pl => ((PackageOperationEntity)pl.Package.Entity).InCondition(typeCondition));
         }
+
+        public static object?[]? GetOperationArgs(this PackageEntity package)
+        {
+            return package.OperationArguments == null ? null : 
+                (object?[])JsonExtensions.FromJsonBytes<object[]>(package.OperationArguments, EntityJsonContext.FullJsonSerializerOptions);
+        }
+
+        public static PackageEntity SetOperationArgs(this PackageEntity package, object?[]? args)
+        {
+            package.OperationArguments = args == null ? null : JsonExtensions.ToJsonBytes(args, EntityJsonContext.FullJsonSerializerOptions);
+            return package;
+        }
     }
 
     public class PackageOperationAlgorithm : IProcessAlgorithm
@@ -217,7 +230,7 @@ namespace Signum.Engine.Processes
 
             OperationSymbol operationSymbol = package.Operation;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
@@ -260,7 +273,7 @@ namespace Signum.Engine.Processes
         {
             PackageEntity package = (PackageEntity)executingProcess.Data!;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
@@ -278,7 +291,7 @@ namespace Signum.Engine.Processes
         {
             PackageEntity package = (PackageEntity)executingProcess.Data!;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
 
             using (OperationLogic.AllowSave<T>())
                 executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
@@ -303,7 +316,7 @@ namespace Signum.Engine.Processes
         {
             PackageEntity package = (PackageEntity)executingProcess.Data!;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
@@ -329,7 +342,7 @@ namespace Signum.Engine.Processes
         {
             PackageEntity package = (PackageEntity)executingProcess.Data!;
 
-            var args = package.OperationArgs;
+            var args = package.GetOperationArgs();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {

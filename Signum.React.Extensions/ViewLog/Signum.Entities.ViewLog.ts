@@ -15,7 +15,7 @@ export interface ViewLogEntity extends Entities.Entity {
   viewAction: string;
   startDate: string;
   endDate: string;
-  data: string | null;
+  data: Basics.BigStringEmbedded;
 }
 
 export module ViewLogMessage {

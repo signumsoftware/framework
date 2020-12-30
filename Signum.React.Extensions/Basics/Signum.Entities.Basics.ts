@@ -6,6 +6,17 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 
 
+export const BootstrapStyle = new EnumType<BootstrapStyle>("BootstrapStyle");
+export type BootstrapStyle =
+  "Light" |
+  "Dark" |
+  "Primary" |
+  "Secondary" |
+  "Success" |
+  "Info" |
+  "Warning" |
+  "Danger";
+
 export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
   Type: "CultureInfo";

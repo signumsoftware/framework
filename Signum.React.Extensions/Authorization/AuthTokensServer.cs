@@ -15,12 +15,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Authorization;
+using Signum.Engine.Json;
+using System.Text.Json;
 
 namespace Signum.React.Authorization
 {
     public static class AuthTokenServer
     {
-        static Func<AuthTokenConfigurationEmbedded> Configuration;
+        public static Func<AuthTokenConfigurationEmbedded> Configuration;
 
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
@@ -58,7 +60,7 @@ namespace Signum.React.Authorization
 
         static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
-            var authHeader = ctx.HttpContext.Request.Headers["Signum_Authorization"].FirstOrDefault();
+            var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
             if (authHeader == null)
             {
                 return null;
@@ -80,7 +82,7 @@ namespace Signum.React.Authorization
             return new SignumAuthenticationResult { User = token.User };
         }
 
-        static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
+        public static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
         {
             var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
@@ -107,7 +109,6 @@ namespace Signum.React.Authorization
             return result;
         }
 
-        static BinaryFormatter formatter = new BinaryFormatter();
 
         public static Func<string, AuthToken> DeserializeAuthHeaderToken = (string authHeader) => DeserializeToken(authHeader.After("Bearer "));
 
@@ -121,7 +122,10 @@ namespace Signum.React.Authorization
 
                 using (var ms = new MemoryStream(array))
                 using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
-                    return (AuthToken)formatter.Deserialize(ds);
+                {
+                    var bytes = ds.ReadAllBytes();
+                    return JsonExtensions.FromJsonBytes<AuthToken>(bytes, EntityJsonContext.FullJsonSerializerOptions);
+                }
             }
             catch (Exception)
             {
@@ -140,17 +144,24 @@ namespace Signum.React.Authorization
             return SerializeToken(newToken);
         }
 
-        static string SerializeToken(AuthToken entity)
+        static string SerializeToken(AuthToken token)
         {
             using (HeavyProfiler.LogNoStackTrace("SerializeToken"))
             {
                 var array = new MemoryStream().Using(ms =>
                 {
                     using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Compress))
-                        formatter.Serialize(ds, entity);
+                    {
+                        using (Utf8JsonWriter writer = new Utf8JsonWriter(ds))
+                        {
+                            JsonSerializer.Serialize(writer, token, EntityJsonContext.FullJsonSerializerOptions);
+                        }
+                    }
 
                     return ms.ToArray();
                 });
+
+                //var str = Encoding.UTF8.GetString(array);
 
                 array = Encrypt(array);
 

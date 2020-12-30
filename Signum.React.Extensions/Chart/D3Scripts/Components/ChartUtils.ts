@@ -1,12 +1,11 @@
+import { DateTime, DurationUnit } from "luxon"
 import * as d3 from "d3"
-import * as moment from "moment"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
-import { formatAsDate } from "@framework/Lines/ValueLine";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 
@@ -129,16 +128,44 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     };
   }
 
-  function momentUnit(lastPart: string): moment.unitOfTime.Base {
+  function durationUnit(lastPart: string): DurationUnit {
     switch (lastPart) {
-      case "SecondStart": return "s";
-      case "MinuteStart": return "m";
-      case "HourStart": return "h";
-      case "Date": return "d";
-      case "WeekStart": return "w";
-      case "MonthStart": return "M";
+      case "SecondStart": return "second";
+      case "MinuteStart": return "minute";
+      case "HourStart": return "hour";
+      case "Date": return "day";
+      case "WeekStart": return "week";
+      case "MonthStart": return "month";
       default: throw new Error("Unexpected " + lastPart);
     }
+  }
+
+  function tryCeil(date: string | null | undefined, unit: DurationUnit) {
+    if (date == null)
+      return undefined;
+
+    return ceil(DateTime.fromISO(date), unit).toISO();
+  }
+
+
+  function ceil(date: DateTime, unit: DurationUnit) {
+
+    if (date.toMillis() == date.startOf(unit).toMillis())
+      return date;
+
+    return date.startOf(unit).plus({ [unit]: 1 });
+  }
+ 
+  function tryFloor(date: string | null | undefined, unit: DurationUnit) {
+    if (date == null)
+      return undefined;
+
+    return floor(DateTime.fromISO(date), unit).toISO();
+  }
+
+  function floor(date: DateTime, unit: DurationUnit) {
+
+    return date.startOf(unit);
   }
 
   const columnNomalized = normalizeToken(column.token!);  
@@ -163,8 +190,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Date" || column.type == "DateTime") {
 
-    const unit: moment.unitOfTime.Base | null = columnNomalized.lastPart != null ? momentUnit(columnNomalized.lastPart.key) :
-      columnNomalized.normalized.type.name == "Date" ? "d" : null;
+    const unit: DurationUnit | null = columnNomalized.lastPart != null ? durationUnit(columnNomalized.lastPart.key) :
+      columnNomalized.normalized.type.name == "Date" ? "day" : null;
 
     if (unit == null)
       return values;
@@ -173,7 +200,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       .map(f => {
         const pair = normalizeToken(f.token!);
 
-        const value = moment(f.value);
+        const value = DateTime.fromISO(f.value);
 
         //Date.MonthStart >  1.4.2000
         //             Min-> 1.5.2000
@@ -181,17 +208,18 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //             Min-> 1.4.2000
         //Date.MonthStart == 1.4.2000
         //             Min-> 1.4.2000
-        if (f.operation == "GreaterThan" && pair.lastPart != null) {
-          value.add(1, momentUnit(pair.lastPart.key));
-        }
 
-        return value.startOf(unit).format();
-      })) ?? d3.min(values as string[]);
+        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
+
+        const newValue = f.operation == "GreaterThan" ? floor(value, newUnit).plus({ [newUnit]: 1 }) : floor(value, newUnit);
+
+        return newValue.toISO();
+      })) ?? tryFloor(d3.min(values as string[]), unit);
 
     const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(a => {
         const pair = normalizeToken(a.token!);
-        let value = moment(a.value);
+        let value = DateTime.fromISO(a.value);
 
         //Date.MonthStart <  1.4.2000
         //             Max   1.4.2000
@@ -199,40 +227,31 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //                   1.5.2000
         //Date.MonthStart == 1.4.2000
         //             Max   1.5.2000
-        if ((a.operation == "LessThanOrEqual" || a.operation == "EqualTo"))
-          value.startOf(unit).add(1, pair.lastPart ? momentUnit(pair.lastPart.key) : unit);
 
-        var aligned = value.startOf(unit);
+        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
 
-        if (value != aligned)
-          value = aligned;
-        else
-          value.add(-1, unit);
+        const newValue = a.operation == "LessThan" ? ceil(value, newUnit) : floor(value, newUnit).plus({ [newUnit]: 1 }); 
 
-        return value.format();
-      }
-      )) ?? d3.min(values as string[]);
+        return newValue.toISO();
+      })) ?? tryCeil(d3.max(values as string[]), unit);
 
 
     if (min == undefined  || max == undefined)
       return values; 
 
-    const minMoment = moment(min).startOf(unit);
-    const maxMoment = moment(max).endOf(unit);
-
-
-    if (unit == null)
-      return values;
+    const minDate = DateTime.fromISO(min);
+    const maxDate = DateTime.fromISO(max);
+    let date = minDate;
 
     const allValues: string[] = [];
     const limit = isAuto ? values.length * 2 : null;
-    while (minMoment <= maxMoment) {
+    while (date < maxDate) {
 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "Date" ? formatAsDate(minMoment) : minMoment.format());
-      minMoment.add(1, unit);
+      allValues.push(column.token!.type.name == "Date" ? date.toISODate() : date.toISO());
+      date = date.plus({ [unit]: 1 });
     }
 
     return complete(values, allValues, column, insertPoint);

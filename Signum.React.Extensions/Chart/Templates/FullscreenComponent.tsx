@@ -7,7 +7,6 @@ import "../Chart.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TypeInfo } from '@framework/Reflection'
 
-
 interface FullscreenComponentProps {
   children: React.ReactNode;
   onReload?: (e: React.MouseEvent<any>) => void;

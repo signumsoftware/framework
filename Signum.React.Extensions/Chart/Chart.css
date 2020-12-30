@@ -21,8 +21,12 @@
     padding: 10px;
 }
 
-.sf-chart-tokens
-{
+.number-label{
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-chart-tokens {
     margin-bottom: 6px;
 }
 

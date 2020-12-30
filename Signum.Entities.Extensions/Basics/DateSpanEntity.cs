@@ -1,6 +1,8 @@
 using System;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Xml.Linq;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Basics
 {
@@ -61,7 +63,7 @@ namespace Signum.Entities.Basics
 
         public bool IsZero()
         {
-            return Days == 0 && Hours == 0 && Minutes == 0  && Seconds == 0;
+            return Days == 0 && Hours == 0 && Minutes == 0 && Seconds == 0;
         }
 
         [AutoExpressionField]
@@ -91,6 +93,25 @@ namespace Signum.Entities.Basics
             };
 
             return ds;
+        }
+
+
+        public XElement ToXml(string elementName)
+        {
+            return new XElement(elementName,
+                new XAttribute("Days", Days),
+                new XAttribute("Hours", Hours),
+                new XAttribute("Minutes", Minutes),
+                new XAttribute("Seconds", Seconds));
+        }
+
+
+        public void FromXml(XElement element)
+        {
+            Days = int.Parse(element.Attribute("Days")!.Value);
+            Hours = int.Parse(element.Attribute("Hours")!.Value);
+            Minutes = int.Parse(element.Attribute("Minutes")!.Value);
+            Seconds = int.Parse(element.Attribute("Seconds")!.Value);
         }
     }
 }

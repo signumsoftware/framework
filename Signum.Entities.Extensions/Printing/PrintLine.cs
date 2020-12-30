@@ -23,7 +23,7 @@ namespace Signum.Entities.Printing
         public DateTime? PrintedOn { get; set; }
 
         [ImplementedBy()]
-        public Lite<Entity> Referred { get; set; }
+        public Lite<Entity>? Referred { get; set; }
 
         public PrintLineState State { get; set; }
 

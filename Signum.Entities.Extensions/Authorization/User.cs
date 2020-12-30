@@ -14,7 +14,7 @@ namespace Signum.Entities.Authorization
             if (p.Length >= 5)
                 return null;
 
-            return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(p.Length);
+            return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(5);
         };
 
         public static string? OnValidatePassword(string password)
@@ -126,6 +126,7 @@ namespace Signum.Entities.Authorization
         {
         }
 
+        [UniqueIndex(AllowMultipleNulls = true)]
         public Guid? OID { get; set; }
     }
 }

@@ -93,7 +93,7 @@ namespace Signum.Entities.Dashboard
             return base.ChildPropertyValidation(sender, pi);
         }
 
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
         {
             if (sender == Parts)
                 foreach (var pp in Parts)
@@ -141,10 +141,10 @@ namespace Signum.Entities.Dashboard
             return new XElement("Dashboard",
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
-                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
-                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
+                EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+                DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
+                EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
                 new XAttribute("CombineSimilarRows", CombineSimilarRows),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
         }
@@ -152,13 +152,13 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            DisplayName = element.Attribute("DisplayName")!.Value;
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
             EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
             CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
-            Parts.Synchronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+            Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
         protected override string? PropertyValidation(PropertyInfo pi)

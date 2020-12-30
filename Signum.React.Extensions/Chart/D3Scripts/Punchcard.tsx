@@ -30,8 +30,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     content: '*',
     ticks: 4,
     _2: 5,
-    labels0: 15,
-    labels1: 15,
+    labels: 30,
     _3: 10,
     title: 15,
     _4: 5,
@@ -105,10 +104,10 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   if (colorColumn != null) {
     var scaleFunc = scaleFor(colorColumn, data.rows.map(colorColumn.getValue), 0, 1, parameters["ColorScale"]);
     var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorInterpolate"]);
-    color = v => colorInterpolator!(scaleFunc(v))
+    color = v => colorInterpolator!(scaleFunc(v)!)
   }
 
-  var opacity: null | ((row: number) => number) = null;
+  var opacity: null | ((row: number) => number | undefined) = null;
   if (opacityColumn != null) {
     opacity = scaleFor(opacityColumn, data.rows.map(opacityColumn.getValue), 0, 1, parameters["OpacityScale"]);
   }
@@ -127,31 +126,31 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if (shape == "Circle") {
 
       var circleSize = Math.min(x.bandwidth(), y.bandwidth()) * 0.45;
-      var area: (n: number) => number = column == null ?
+      var area: (n: number) => number | undefined = column == null ?
         (() => circleSize * circleSize) :
         scaleFor(column, data!.rows.map(column.getValue), 0, circleSize * circleSize, parameters["SizeScale"]);
 
       return {
-        numberOpacity: n => { return area(n) / (15 * 15); },
+        numberOpacity: n => { return area(n)! / (15 * 15); },
         renderer: r => <circle
           transform={translate(
             x(horizontalColumn.getValueKey(r))!,
             -y(verticalColumn.getValueKey(r))!
           ) + scaleTransform}
-          r={Math.sqrt(area(rowValue(r)))}
+          r={Math.sqrt(area(rowValue(r))!)}
           {...extra(r)} />
       };
     } else if (shape == "Rectangle") {
 
-      var area: (n: number) => number = column == null ?
+      var area: (n: number) => number | undefined = column == null ?
         (() => x.bandwidth() * y.bandwidth()) :
         scaleFor(column, data!.rows.map(column.getValue), 0, x.bandwidth() * y.bandwidth(), parameters["SizeScale"]);
       var ratio = x.bandwidth() / y.bandwidth();
-      var recWidth = (r: ChartRow) => Math.sqrt(area(rowValue(r)) * ratio);
-      var recHeight = (r: ChartRow) => Math.sqrt(area(rowValue(r)) / ratio);
+      var recWidth = (r: ChartRow) => Math.sqrt(area(rowValue(r))! * ratio);
+      var recHeight = (r: ChartRow) => Math.sqrt(area(rowValue(r))! / ratio);
 
       return {
-        numberOpacity: n => area(n) / (22 * 22),
+        numberOpacity: n => area(n)! / (22 * 22),
         renderer: r => <rect transform={translate(
           x(horizontalColumn.getValueKey(r))! - recWidth(r) / 2,
           -y(verticalColumn.getValueKey(r))! - recHeight(r) / 2
@@ -162,7 +161,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         />
       };
     } else if (shape == "ProgressBar") {
-      var progressWidth: (n: number) => number = column == null ?
+      var progressWidth: (n: number) => number | undefined = column == null ?
         () => x.bandwidth() :
         scaleFor(column, data!.rows.map(column.getValue), 0, x.bandwidth(), parameters["SizeScale"]);
 
@@ -181,7 +180,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       return undefined;
   }
 
-  var fillOpacity = (r: ChartRow) => parseFloat(parameters["FillOpacity"]) * (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1);
+  var fillOpacity = (r: ChartRow) => parseFloat(parameters["FillOpacity"]) * (opacity != null ? opacity(opacityColumn!.getValue(r))! : 1);
   
   var mainShape = configureShape(sizeColumn, r => sizeColumn ? sizeColumn.getValue(r) : 0,
     r => ({

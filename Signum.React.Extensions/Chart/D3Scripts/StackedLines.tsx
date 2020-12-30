@@ -28,14 +28,13 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
 
   var yRule = Rule.create({
-    _1: 5,
+    _1: 10,
     legend: 15,
     _2: 5,
     content: '*',
     ticks: 4,
     _3: 5,
-    labels0: 15,
-    labels1: 15,
+    labels: 30,
     _4: 10,
     title: 15,
     _5: 5,
@@ -91,8 +90,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var area = d3.area<d3.SeriesPoint<unknown>>()
     .x(v => x(keyColumn.getKey(v.data))!)
-    .y0(v => -y(v[0]))
-    .y1(v => -y(v[1]))
+    .y0(v => -y(v[0])!)
+    .y1(v => -y(v[1])!)
     .curve(ChartUtils.getCurveByName(pInterpolate) as d3.CurveFactory);
 
   var columnsByKey = pivot.columns.toObject(a => a.key);
@@ -123,9 +122,9 @@ export default function renderStackedLines({ data, width, height, parameters, lo
         {s.orderBy(v => keyColumn.getKey(v.data))
           .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined)
           .map(v => <rect key={keyColumn.getKey(v.data)} className="point sf-transition"
-            transform={translate(x(keyColumn.getKey(v.data))! - rectRadious, -y(v[1]))}
+            transform={translate(x(keyColumn.getKey(v.data))! - rectRadious, -y(v[1])!)}
             width={2 * rectRadious}
-            height={y(v[1]) - y(v[0])}
+            height={y(v[1])! - y(v[0])!}
             fill="#fff"
             fillOpacity={.1}
             stroke="none"
@@ -138,13 +137,14 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           s.orderBy(v => keyColumn.getKey(v.data))
-            .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined && (y(v[1]) - y(v[0])) > 10)
+            .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined && (y(v[1])! - y(v[0])!)! > 10)
             .map(v => <text key={keyColumn.getKey(v.data)}
               className="number-label sf-transition"
-              transform={translate(x(keyColumn.getKey(v.data))!, -y(v[1]) * 0.5 - y(v[0]) * 0.5)}
+              transform={translate(x(keyColumn.getKey(v.data))!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}
+              onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
               textAnchor="middle"
               fontWeight="bold">
               {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueNiceName}

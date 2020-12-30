@@ -75,7 +75,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
       {
         name: "ViewHistory",
         isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
           <TimeMachineLink lite={row.entity}
             inSearch={true}>
             {EntityControlMessage.View.niceToString()}
@@ -97,7 +97,7 @@ function isSystemVersioned(tr?: TypeReference) {
 }
 
 export function timeMachineRoute(lite: Lite<Entity>) {
-  return "~/timeMachine/" + lite.EntityType + "/" + lite.id;
+  return AppContext.toAbsoluteUrl("~/timeMachine/" + lite.EntityType + "/" + lite.id);
 }
 
 export namespace API {
@@ -142,11 +142,11 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
 
     event.preventDefault();
 
-    window.open(AppContext.toAbsoluteUrl(timeMachineRoute(lite)));
+    window.open(timeMachineRoute(lite));
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 
-  if (!Navigator.isNavigable(lite.EntityType, { isSearch: p.inSearch }))
+  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch }))
     return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
 
 

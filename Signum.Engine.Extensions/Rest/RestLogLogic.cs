@@ -71,7 +71,7 @@ namespace Signum.Engine.Rest
             };
 
             var request = new HttpRequestMessage(httpMethod, url);
-            var requestUriAbsoluteUri = request.RequestUri.AbsoluteUri;
+            var requestUriAbsoluteUri = request.RequestUri!.AbsoluteUri;
             if (requestUriAbsoluteUri.Contains("apiKey"))
             {
                 request.RequestUri = requestUriAbsoluteUri.After("apiKey=").Contains("&")

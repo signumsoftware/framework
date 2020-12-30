@@ -40,7 +40,7 @@ namespace Signum.React.Extensions.Selenium.Search
             var popup = this.CreateButton.Find().CaptureOnClick();
 
             if (SelectorModalProxy.IsSelector(popup))
-                popup = popup.GetDriver().CapturePopup(() => SelectorModalProxy.Select(popup, typeof(T)));
+                popup = popup.AsSelectorModal().SelectAndCapture<T>();
 
             return new FrameModalProxy<T>(popup).WaitLoaded();
         }

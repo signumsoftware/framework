@@ -8,6 +8,7 @@ using Signum.React.Facades;
 using Signum.Entities.Translation;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
+using Signum.Utilities;
 
 namespace Signum.React.Translation
 {
@@ -28,19 +29,22 @@ namespace Signum.React.Translation
             var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
             foreach (var lang in acceptedLanguages.Select(l => l.Value))
             {
-                var cleanLang = lang.Value.Contains('-') ? lang.Value.Split('-')[0] : lang.Value;
-                var culture = CultureInfoLogic.ApplicationCultures
-                    .FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
-                if (culture != null)
-                    return culture;
+                var cleanLang = lang.TryBefore('-');
+
+                if (cleanLang != null)
+                {
+                    culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
+
+                    if (culture != null)
+                        return culture;
+                }
             }
             return null;
         }
 
-
         public static string? ReadLanguageCookie(ActionContext ac)
         {
-            return ac.HttpContext.Request.Cookies.TryGetValue("language", out string value) ? value : null;
+            return ac.HttpContext.Request.Cookies.TryGetValue("language", out string? value) ? value : null;
         }
     }
 }

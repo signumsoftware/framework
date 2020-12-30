@@ -1,11 +1,12 @@
 import * as React from "react";
 import * as Services from '@framework/Services';
 import { ImportRoute } from "@framework/AsyncImport";
-import Login, { LoginWithWindowsButton } from "./Login/Login";
+import LoginPage, { LoginWithWindowsButton } from "./Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
 import { ajaxGet, ajaxPost, ServiceError } from "@framework/Services";
 import { is } from '@framework/Signum.Entities';
 import { ifError } from "@framework/Globals";
+import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 import { PermissionSymbol, UserEntity} from './Signum.Entities.Authorization';
 
@@ -23,21 +24,14 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     if (!authenticators.contains(loginWindowsAuthentication))
       throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
 
-    Login.customLoginButtons = () => <LoginWithWindowsButton />;
+    LoginPage.customLoginButtons = () => <LoginWithWindowsButton />;
   }
 
-  if (Options.windowsAuthentication) {
-    if (!authenticators.contains(loginWindowsAuthentication))
-      throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
-
-    Login.customLoginButtons = () => <LoginWithWindowsButton />;
-  }
-
-  options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
-  options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccess")} />);
+  options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/LoginPage")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePasswordPage")} />);
+  options.routes.push(<ImportRoute path="~/auth/changePasswordSuccess" onImportModule={() => import("./Login/ChangePasswordSuccessPage")} />);
   options.routes.push(<ImportRoute path="~/auth/resetPassword" onImportModule={() => import("./Login/ResetPassword")} />);
-  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmail")} />);
+  options.routes.push(<ImportRoute path="~/auth/forgotPasswordEmail" onImportModule={() => import("./Login/ForgotPasswordEmailPage")} />);
 
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;
@@ -78,19 +72,24 @@ var notifyLogout: boolean;
 
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
-export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
+const cookieName = "sfUser";
 
-  var myCookie = getCookie("sfUser");
+export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
+  var myCookie = Cookies.get(cookieName);
 
   if (!myCookie) {
     return Promise.resolve(undefined);
   }
-  else {
-    return API.loginFromCookie().then(au => {
-      au && console.log("loginFromCookie");
-      return au;
-    });
-  }
+
+  return API.loginFromCookie().then(au => {
+    if (au) {
+      console.log("loginFromCookie");
+    }
+    else {
+      Cookies.remove(cookieName);
+    }
+    return au;
+  });
 }
 
 export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
@@ -102,24 +101,6 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
     au && console.log("loginWindowsAuthentication");
     return au;
   }).catch(() => undefined);
-}
-
-function getCookie(name: string) {
-  var dc = document.cookie;
-  var prefix = name + "=";
-  var begin = dc.indexOf("; " + prefix);
-
-  if (begin == -1) {
-    begin = dc.indexOf(prefix);
-    if (begin != 0) return null;
-  }
-
-  var end = document.cookie.indexOf(";", begin + 2);
-  if (end == -1) {
-    end = dc.length;
-  }
-
-  return decodeURI(dc.substring(begin + prefix.length, end));
 }
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
@@ -146,6 +127,8 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
+
+  Cookies.remove(cookieName)
 
   API.logout().then(() => {
     logoutInternal();
@@ -184,7 +167,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
   if (options.headers == undefined)
     options.headers = {};
 
-  options.headers["Signum_Authorization"] = "Bearer " + token;
+  options.headers["Authorization"] = "Bearer " + token;
 
   return makeCall()
     .then(r => {
@@ -314,8 +297,8 @@ export module API {
     return ajaxPost({ url: `~/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
   }
 
-  export function loginWithAzureAD(jwt: string): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: "~/api/auth/loginWithAzureAD", avoidAuthToken: true }, jwt);
+  export function loginWithAzureAD(jwt: string, throwErrors: boolean): Promise<LoginResponse | undefined> {
+    return ajaxPost({ url: "~/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
   }
 
   export function refreshToken(oldToken: string): Promise<LoginResponse | undefined> {

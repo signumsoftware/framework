@@ -30,7 +30,7 @@ namespace Signum.Engine.Scheduler
             As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == t));
 
         [AutoExpressionField]
-        public static ScheduledTaskLogEntity LastExecution(this ITaskEntity t) => 
+        public static ScheduledTaskLogEntity? LastExecution(this ITaskEntity t) => 
             As.Expression(() => t.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault());
 
         [AutoExpressionField]

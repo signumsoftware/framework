@@ -27,7 +27,7 @@ namespace Signum.React.Selenium
         {
             var oldFilters = this.Filters();
             action();
-            var newFilter = this.Element.GetDriver().Wait(() => this.Filters().Skip(oldFilters.Count()).SingleOrDefault(), () => "new filter to appear");
+            var newFilter = this.Element.GetDriver().Wait(() => this.Filters().Skip(oldFilters.Count()).SingleOrDefault(), () => "new filter to appear")!;
 
             return newFilter;
         }

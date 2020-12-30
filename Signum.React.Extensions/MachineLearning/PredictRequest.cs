@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Signum.Engine.Basics;
 using Signum.Engine.MachineLearning;
 using Signum.Entities;
@@ -12,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.React.Facades;
+using System.Text.Json;
+using Signum.React.Json;
 
 namespace Signum.React.MachineLearning
 {
@@ -21,13 +21,13 @@ namespace Signum.React.MachineLearning
         {
             Dictionary<QueryToken, object?> filters = new Dictionary<QueryToken, object?>();
 
-            var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
+            var options = SignumServer.JsonSerializerOptions;
             var qd = QueryLogic.Queries.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
             foreach (var kvp in mainKeys)
             {
                 var qt = QueryUtils.Parse(kvp.Key, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
 
-                var obj = kvp.Value is JToken jt ? jt.ToObject(qt.Type, serializer) : ReflectionTools.ChangeType(kvp.Value, qt.Type);
+                var obj = kvp.Value is JsonElement jt ? jt.ToObject(qt.Type, options) : ReflectionTools.ChangeType(kvp.Value, qt.Type);
 
                 filters.Add(qt, obj);
             }
@@ -44,7 +44,7 @@ namespace Signum.React.MachineLearning
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
                 .Where(a => a.col!.Usage == PredictorColumnUsage.Input)
-                .Select(a => KeyValuePair.Create(a.col!, a.value))
+                .Select(a => KeyValuePair.Create(a.col!, (object?)a.value))
                 .ToDictionaryEx(),
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
@@ -201,11 +201,11 @@ namespace Signum.React.MachineLearning
 
         public static void ParseValues(this PredictRequestTS predict, PredictorPredictContext ctx)
         {
-            var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
+            var options = SignumServer.JsonSerializerOptions;
 
             for (int i = 0; i < ctx.Predictor.MainQuery.Columns.Count; i++)
             {
-                predict.columns[i].value = FixValue(predict.columns[i].value, ctx.Predictor.MainQuery.Columns[i].Token.Token, serializer);
+                predict.columns[i].value = FixValue(predict.columns[i].value, ctx.Predictor.MainQuery.Columns[i].Token.Token, options);
             }
 
             foreach (var tuple in ctx.SubQueryOutputCodifications.Values.ZipStrict(predict.subQueries, (sqCtx, table) => (sqCtx, table)))
@@ -218,42 +218,44 @@ namespace Signum.React.MachineLearning
                 {
                     for (int i = 0; i < splitKeys.Count; i++)
                     {
-                        row[i] = FixValue(row[i], splitKeys[i].Token.Token, serializer);
+                        row[i] = FixValue(row[i], splitKeys[i].Token.Token, options);
                     }
 
                     for (int i = 0; i < values.Count; i++)
                     {
                         var colIndex = i + splitKeys.Count;
-                        row[colIndex] = FixValue(row[colIndex], values[i].Token.Token, serializer);
+                        row[colIndex] = FixValue(row[colIndex], values[i].Token.Token, options);
                     }
                 }
             }
         }
 
-        static object? FixValue(object? value, QueryToken token, JsonSerializer serializer)
+        static object? FixValue(object? value, QueryToken token, JsonSerializerOptions options)
         {
-            if (!(value is JToken jt))
-                return ReflectionTools.ChangeType(value, token.Type);
+            if (value == null)
+                return null;
 
-            if (jt is JObject jo &&
-                jo.Property(nameof(PredictOutputTuple.original)) != null &&
-                jo.Property(nameof(PredictOutputTuple.predicted)) != null)
+            var elem = (JsonElement)value;
+
+            if (elem.ValueKind == JsonValueKind.Object &&
+                elem.TryGetProperty(nameof(PredictOutputTuple.original), out var original) &&
+                elem.TryGetProperty(nameof(PredictOutputTuple.predicted), out var predicted))
             {
                 return new PredictOutputTuple
                 {
-                    original = FixValue(jo[nameof(PredictOutputTuple.original)], token, serializer),
-                    predicted = FixValue(jo[nameof(PredictOutputTuple.predicted)], token, serializer),
+                    original = FixValue(original, token, options),
+                    predicted = FixValue(predicted, token, options),
                 };
             }
 
-            if(jt is JArray ja)
+            if(elem.ValueKind == JsonValueKind.Array)
             {
-                var list = ja.ToObject<List<AlternativePrediction>>();
-                var result = list.Select(val => ReflectionTools.ChangeType(val, token.Type));
+                var list = elem.ToObject<List<AlternativePrediction>>();
+                var result = list!.Select(val => ReflectionTools.ChangeType(val, token.Type));
                 return result;
             }
 
-            return jt.ToObject(token.Type, serializer);
+            return elem.ToObject(token.Type, options);
         }
     }
 

@@ -86,6 +86,10 @@ namespace Signum.Engine.Authorization
                         e.Lapsed = true;
                         var user = e.User;
 
+                        var error = UserEntity.OnValidatePassword(password);
+                        if (error != null)
+                            throw new ApplicationException(error);
+
                         user.PasswordHash = Security.EncodePassword(password);
                         using (AuthLogic.Disable())
                             user.Execute(UserOperation.Save);
@@ -100,7 +104,7 @@ namespace Signum.Engine.Authorization
                 //Remove old previous requests
                 var rpr = Database.Query<ResetPasswordRequestEntity>()
                      .Where(r => r.Code == code && !r.Lapsed)
-                     .SingleOrDefault();
+                     .SingleEx();
 
                 using (UserHolder.UserSession(rpr.User))
                 {
@@ -112,25 +116,36 @@ namespace Signum.Engine.Authorization
 
         public static ResetPasswordRequestEntity SendResetPasswordRequestEmail(string email)
         {
-            UserEntity user;
+            UserEntity? user;
             using (AuthLogic.Disable())
             {
                 user = Database.Query<UserEntity>()
                   .Where(u => u.Email == email && u.State != UserState.Disabled)
-                .SingleOrDefault();
+                  .SingleOrDefault();
 
                 if (user == null)
                     throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());
             }
-            var request= ResetPasswordRequest(user);
 
-            string url = EmailLogic.Configuration.UrlLeft+ @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
+            try
+            {
+                var request = ResetPasswordRequest(user);
 
-            using (AuthLogic.Disable())
-                new ResetPasswordRequestEmail(request, url).SendMail();
+                string url = EmailLogic.Configuration.UrlLeft + @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
 
-            return request;
+                using (AuthLogic.Disable())
+                    new ResetPasswordRequestEmail(request, url).SendMail();
+
+                return request;
+            }
+            catch (Exception ex)
+            {
+                ex.LogException();
+                throw new ApplicationException(LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString());
+            }
+
         }
+
         public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
         {
             using (AuthLogic.Disable())

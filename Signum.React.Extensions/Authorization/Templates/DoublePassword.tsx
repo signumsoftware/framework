@@ -12,12 +12,14 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
   function handlePasswordBlur(e: React.SyntheticEvent<any>) {
     const ctx = p.ctx;
 
-    if (newPass.current!.value && newPass2.current!.value && newPass.current!.value != newPass2.current!.value) {
-      ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString()
-    }
-    else {
-      ctx.error = undefined;
-      ctx.value = newPass.current!.value;
+    if (newPass.current!.value && newPass2.current!.value) {
+      if (newPass.current!.value != newPass2.current!.value) {
+        ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString()
+      }
+      else {
+        ctx.error = undefined;
+        ctx.value = newPass.current!.value;
+      }
     }
 
     ctx.frame!.revalidate();
@@ -36,10 +38,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean }) 
   return (
     <div>
       <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.NewPassword.niceToString()}>
-        <input type="password" ref={newPass} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
+        <input type="password" ref={newPass} autoComplete="off" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
       <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
-        <input type="password" ref={newPass2} autoComplete="asdfasdf" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
+        <input type="password" ref={newPass2} autoComplete="off" className={p.ctx.formControlClass} onBlur={handlePasswordBlur} />
       </FormGroup>
     </div>
   );

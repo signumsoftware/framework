@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace Signum.React.RestLog
             }
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
-            var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod), url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
+            var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod!), url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
 
             return RestLogLogic.RestDiffLog(result);
         }

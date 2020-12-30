@@ -564,7 +564,7 @@ namespace Signum.Engine.Translation
             this.Lite = entity;
             this.ElementRoute = route;
             this.Value = item.Element;
-            this.RowId = item.RowId.Value;
+            this.RowId = item.RowId!.Value;
         }
     }
 

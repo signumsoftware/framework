@@ -11,14 +11,7 @@ namespace Signum.Entities.Processes
         public string? Name { get; set; }
 
         [DbType(Size = int.MaxValue)]
-        public byte[]? OperationArguments { get; private set; }
-
-        [HiddenProperty]
-        public object?[]? OperationArgs
-        {
-            get { return OperationArguments != null ? (object?[])Serialization.FromBytes(OperationArguments) : null; }
-            set { OperationArguments = value == null ? null : Serialization.ToBytes(value); }
-        }
+        public byte[]? OperationArguments { get; set; }
 
         public override string ToString()
         {

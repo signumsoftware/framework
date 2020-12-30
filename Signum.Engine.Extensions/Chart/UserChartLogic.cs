@@ -30,7 +30,7 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                UserAssetsImporter.RegisterName<UserChartEntity>("UserChart");
+                UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
@@ -252,7 +252,7 @@ namespace Signum.Engine.Chart
                     {
                         retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
@@ -296,7 +296,7 @@ namespace Signum.Engine.Chart
                             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
                             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
 
-                            string answer = Console.ReadLine();
+                            string? answer = Console.ReadLine();
 
                             if (answer == null)
                                 throw new InvalidOperationException("Impossible to synchronize interactively without Console");
@@ -335,7 +335,7 @@ namespace Signum.Engine.Chart
             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
             SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
-            string answer = Console.ReadLine();
+            string? answer = Console.ReadLine();
 
             if (answer == null)
                 throw new InvalidOperationException("Impossible to synchronize interactively without Console");

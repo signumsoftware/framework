@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as moment from 'moment'
+import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
@@ -31,7 +31,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
     return (
       <div>
-        <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
+        <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={DateTime.fromISO(ctx.value.startDate).toRelative() ?? undefined} />
         <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
         <EntityLine ctx={ctx.subCtx(f => f.user)} />
         <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />

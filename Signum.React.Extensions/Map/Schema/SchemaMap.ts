@@ -53,6 +53,7 @@ export interface RelationInfo extends IRelationInfo {
   toTable: string;
   nullable: boolean;
   lite: boolean;
+  isVirtualMListBackReference?: boolean;
 }
 
 export interface MListRelationInfo extends IRelationInfo {
@@ -124,9 +125,10 @@ export class SchemaMapD3 {
       .data(map.allLinks)
       .enter().append<SVGPathElement>("path")
       .attr("class", "link")
-      .style("stroke-dasharray", d => (d as RelationInfo).lite ? "2, 2" : null)
+      .style("stroke-dasharray", d => (<RelationInfo>d).isVirtualMListBackReference? "4 4" : (d as RelationInfo).lite ? "2, 2" : null)
       .style("stroke", "black")
-      .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")");
+      .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")")
+      .attr("marker-start", d => (<RelationInfo>d).isVirtualMListBackReference ? "url(#virtual_mlist_arrow)" : null);
 
     this.selectedLinks();
 
@@ -134,16 +136,16 @@ export class SchemaMapD3 {
 
 
     const drag = d3.drag<SVGGElement, ITableInfo>()
-      .on("start", d => {
-        if (!d3.event.active)
+      .on("start", (e, d) => {
+        if (!e.active)
           this.simulation.alphaTarget(0.3).restart();
 
         d.fx = d.x;
         d.fy = d.y;
       })
-      .on("drag", d => {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
+      .on("drag", (e, d) => {
+        d.fx = e.x;
+        d.fy = e.y;
       })
       .on("end", d => {
         this.simulation.alphaTarget(0);
@@ -154,23 +156,22 @@ export class SchemaMapD3 {
       .enter()
       .append<SVGGElement>("svg:g").attr("class", "nodeGroup")
       .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName, true) ? "pointer" : null)
-      .on("click", d => {
+      .on("click", (e, d) => {
 
         this.selectedTable = this.selectedTable == d ? undefined : d;
 
         this.selectedLinks();
         this.selectedNode();
 
-        const event = d3.event;
-        if (event.defaultPrevented)
+        if (e.defaultPrevented)
           return;
 
-        if ((<any>event).ctrlKey && (d as TableInfo).typeName) {
+        if (e.ctrlKey && (d as TableInfo).typeName) {
           window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName }));
-          d3.event.preventDefault();
+          e.preventDefault();
         }
       })
-      .on("dblclick", d => {
+      .on("dblclick", (e, d) => {
         d.fx = null;
         d.fy = null;
         this.simulation.alpha(0.3).restart();

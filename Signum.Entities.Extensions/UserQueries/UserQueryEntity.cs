@@ -111,25 +111,25 @@ namespace Signum.Entities.UserQueries
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
-                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                !HideQuickLink ? null : new XAttribute("HideQuickLink", HideQuickLink),
-                IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
-                !AppendFilters ? null : new XAttribute("AppendFilters", AppendFilters),
-                !GroupResults ? null : new XAttribute("GroupResults", GroupResults),
-                ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
-                PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
+                EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+                !HideQuickLink ? null! : new XAttribute("HideQuickLink", HideQuickLink),
+                IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
+                !AppendFilters ? null! : new XAttribute("AppendFilters", AppendFilters),
+                !GroupResults ? null! : new XAttribute("GroupResults", GroupResults),
+                ElementsPerPage == null ? null! : new XAttribute("ElementsPerPage", ElementsPerPage),
+                PaginationMode == null ? null! : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
-                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
-                Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
-                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()));
+                Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Columns.IsNullOrEmpty() ? null! : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
-            DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+            DisplayName = element.Attribute("DisplayName")!.Value;
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
@@ -137,7 +137,7 @@ namespace Signum.Entities.UserQueries
             GroupResults = element.Attribute("GroupResults")?.Let(a => bool.Parse(a.Value)) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
-            ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
+            ColumnsMode = element.Attribute("ColumnsMode")!.Value.ToEnum<ColumnOptionsMode>();
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
             Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
@@ -187,8 +187,8 @@ namespace Signum.Entities.UserQueries
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
-            OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
+            Token = new QueryTokenEmbedded(element.Attribute("Token")!.Value);
+            OrderType = element.Attribute("OrderType")!.Value.ToEnum<OrderType>();
         }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
@@ -229,12 +229,12 @@ namespace Signum.Entities.UserQueries
         {
             return new XElement("Column",
                 new XAttribute("Token", Token.Token.FullKey()),
-                DisplayName.HasText() ? new XAttribute("DisplayName", DisplayName) : null);
+                DisplayName.HasText() ? new XAttribute("DisplayName", DisplayName) : null!);
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
+            Token = new QueryTokenEmbedded(element.Attribute("Token")!.Value);
             DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
@@ -357,8 +357,8 @@ namespace Signum.Entities.UserQueries
                 return new XElement("Filter",
                    new XAttribute("Indentation", Indentation),
                    new XAttribute("GroupOperation", GroupOperation),
-                   Token == null ? null : new XAttribute("Token", Token.Token.FullKey()),
-                   Pinned?.ToXml(ctx));
+                   Token == null ? null! : new XAttribute("Token", Token.Token.FullKey()),
+                   Pinned?.ToXml(ctx)!);
 
             }
             else
@@ -366,9 +366,9 @@ namespace Signum.Entities.UserQueries
                 return new XElement("Filter",
                     new XAttribute("Indentation", Indentation),
                     new XAttribute("Token", Token!.Token.FullKey()),
-                    new XAttribute("Operation", Operation),
-                    new XAttribute("Value", ValueString ?? ""),
-                    Pinned?.ToXml(ctx));
+                    new XAttribute("Operation", Operation!),
+                    ValueString == null ? null! : new XAttribute("Value", ValueString),
+                    Pinned?.ToXml(ctx)!);
             }
         }
 
@@ -437,11 +437,11 @@ namespace Signum.Entities.UserQueries
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Pinned",
-                Label.DefaultToNull()?.Let(l => new XAttribute("Label", l)),
-                Column?.Let(l => new XAttribute("Column", l)),
-                Row?.Let(l => new XAttribute("Row", l)),
-                Active == PinnedFilterActive.Always ? null : new XAttribute("Active", Active.ToString()),
-                SplitText == false ? null : new XAttribute("SplitText", SplitText)
+                Label.DefaultToNull()?.Let(l => new XAttribute("Label", l))!,
+                Column?.Let(l => new XAttribute("Column", l))!,
+                Row?.Let(l => new XAttribute("Row", l))!,
+                Active == PinnedFilterActive.Always ? null! : new XAttribute("Active", Active.ToString())!,
+                SplitText == false ? null! : new XAttribute("SplitText", SplitText)
             );
         }
     }

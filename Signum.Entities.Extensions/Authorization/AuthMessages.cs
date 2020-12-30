@@ -28,6 +28,8 @@ namespace Signum.Entities.Authorization
         RememberMe,
         IHaveForgottenMyPassword,
 
+        [Description("Show login form")]
+        ShowLoginForm,
 
         [Description("Login with Windows user")]
         LoginWithWindowsUser,
@@ -90,7 +92,22 @@ namespace Signum.Entities.Authorization
         [Description("The specified passwords don't match")]
         TheSpecifiedPasswordsDontMatch,
         TheUserStateMustBeDisabled,
-        TheUserIsNotLongerInTheDatabase
+        TheUserIsNotLongerInTheDatabase,
+
+        [Description("Register {0}")]
+        Register0,
+
+        [Description("Success")]
+        Success,
+
+        [Description("{0} has been successfully associated with user {1} in this device.")]
+        _0HasBeenSucessfullyAssociatedWithUser1InThisDevice,
+
+        [Description("Try to log-in with it!")]
+        TryToLogInWithIt,
+
+        [Description("Login with {0}")]
+        LoginWith0,
     }
 
     public enum AuthMessage

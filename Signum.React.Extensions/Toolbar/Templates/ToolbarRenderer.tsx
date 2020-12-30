@@ -203,16 +203,16 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
       case "Header":
       case "Item":
 
-        var HeaderOrItem =
+        var HeaderOrItem: typeof Dropdown.Item =
           (isNavbar ?
-            (res.type == "Header" ? NavDropdown.Header : NavDropdown.Item) :
-            (res.type == "Header" ? Dropdown.Header : Dropdown.Item));
+            (res.type == "Header" ? NavDropdown.Header as any : NavDropdown.Item) :
+            (res.type == "Header" ? Dropdown.Header as any : Dropdown.Item));
 
         if (res.elements && res.elements.length) {
           return [
             <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
               className={classes(menuItemN, "sf-cursor-pointer")}>
-              {getIcon(res)}{res.label ?? res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
+              {getIcon(res)}{res.label ?? res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-right"} className="arrow-align" />
             </HeaderOrItem>
           ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, isNavbar, topRes)) : [])
         }

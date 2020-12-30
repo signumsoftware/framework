@@ -41,11 +41,11 @@ export default function DashboardPage(p: DashboardPageProps) {
       {entityKey &&
         <div style={rtl ? { float: "right", textAlign: "right" } : undefined}>
           {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-            <h3>
-              {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                <span className="display-6">{getToString(entity)}</span>
-              }
+          <h3>
+            {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
+              <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
+              <span className="display-6">{getToString(entity)}</span>
+            }
               &nbsp;
             <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
             </h3>

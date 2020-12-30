@@ -44,7 +44,7 @@ namespace Signum.Engine.SMS
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
-            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations!.Value;
 
             if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
                 return new List<Filter>
@@ -119,7 +119,7 @@ namespace Signum.Engine.SMS
                         dbModels,
                         registeredModels.Keys,
                         entity => entity.FullClassName,
-                        type => type.FullName,
+                        type => type.FullName!,
                         (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(SMSModelEntity))
                         .ToDictionary();

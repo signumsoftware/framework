@@ -65,7 +65,7 @@ namespace Signum.Engine.Mailing
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
-            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations!.Value;
 
             if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
                 return new List<Filter>
@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
                         se.FullClassName,
                     });
 
-                UserAssetsImporter.RegisterName<EmailTemplateEntity>("EmailTemplate");
+                UserAssetsImporter.Register<EmailTemplateEntity>("EmailTemplate", EmailTemplateOperation.Save);
 
 
                 new Graph<EmailTemplateEntity>.ConstructFrom<EmailModelEntity>(EmailTemplateOperation.CreateEmailTemplateFromModel)
@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
                         dbModels,
                         registeredModels.Keys,
                         entity => entity.FullClassName,
-                        type => type.FullName,
+                        type => type.FullName!,
                         (entity, type) => KeyValuePair.Create(type, entity),
                         "caching " + nameof(EmailModelEntity))
                         .ToDictionary();

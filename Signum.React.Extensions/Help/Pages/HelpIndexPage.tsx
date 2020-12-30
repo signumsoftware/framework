@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
-import * as numbro from 'numbro'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'

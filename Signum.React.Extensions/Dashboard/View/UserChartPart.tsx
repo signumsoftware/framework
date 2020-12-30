@@ -17,10 +17,6 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 
-interface ResultOrError {
-
-}
-
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
@@ -46,7 +42,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
       </div>
     );
-
   }
 
   if (!chartRequest)
@@ -63,12 +58,13 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   const result = resultOrError?.result!;
 
-  function handleReload(e: React.MouseEvent<any>) {
-    e.preventDefault();
+  function handleReload(e?: React.MouseEvent<any>) {
+    e?.preventDefault();
     makeQuery();
   }
 
   const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+  const handleOnCreateNew = p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined;
 
   function handleCreateNew(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -76,7 +72,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     return SelectorModal.chooseType(typeInfos!)
       .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
         .then(props => Constructor.constructPack(ti.name, props)))
-      .then(pack => pack && Navigator.navigate(pack))
+      .then(pack => pack && Navigator.view(pack))
       .then(() => makeQuery())
       .done();
   }
@@ -91,16 +87,24 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         </label>}
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
-          <ChartTableComponent chartRequest={chartRequest} lastChartRequest={chartRequest}
-            resultTable={result.resultTable!} onOrderChanged={() => makeQuery()} />) :
+          <ChartTableComponent
+            chartRequest={chartRequest}
+            lastChartRequest={chartRequest}
+            resultTable={result.resultTable!}
+            onOrderChanged={() => makeQuery()}
+            onReload={handleReload}
+            typeInfos={typeInfos}
+            onCreateNew={handleOnCreateNew}
+          />) :
         <ChartRenderer
           chartRequest={chartRequest}
           lastChartRequest={chartRequest}
           data={result?.chartTable}
           loading={result === null}
           onReload={handleReload}
+          autoRefresh={p.part.autoRefresh}
           typeInfos={typeInfos}
-          onCreateNew={p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined}
+          onCreateNew={handleOnCreateNew}
         />
       }
     </div>

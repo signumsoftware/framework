@@ -11,6 +11,7 @@ using Signum.Engine.Basics;
 using Signum.React.Files;
 using System.IO;
 using Signum.React.Filters;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Authorization
 {
@@ -31,9 +32,8 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PermissionAuthLogic.SetPermissionRules(rules);
+            Schema.Current.InvalidateMetadata();
         }
-
-
 
         [HttpGet("api/authAdmin/typeRules/{roleId}")]
         public TypeRulePack GetTypeRules(string roleId)
@@ -67,6 +67,7 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             OperationAuthLogic.SetOperationRules(rules);
+            Schema.Current.InvalidateMetadata();
         }
 
 
@@ -85,6 +86,7 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PropertyAuthLogic.SetPropertyRules(rules);
+            Schema.Current.InvalidateMetadata();
         }
 
 
@@ -103,6 +105,7 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             QueryAuthLogic.SetQueryRules(rules);
+            Schema.Current.InvalidateMetadata();
         }
 
 

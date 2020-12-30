@@ -88,7 +88,7 @@ export class Rule<T extends string> {
 
   debugX() {
 
-    const keys = d3.keys(this.sizes);
+    const keys = Object.keys(this.sizes);
 
     //paint x-axis rule
 
@@ -117,7 +117,7 @@ export class Rule<T extends string> {
 
   debugY() {
 
-    const keys = d3.keys(this.sizes);
+    const keys = Object.keys(this.sizes);
 
     return (
       <>

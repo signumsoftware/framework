@@ -6,10 +6,22 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
+
+export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
+export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
+  Type: "CombinedUserChartPart";
+  userCharts: Entities.MList<Chart.UserChartEntity>;
+  showData: boolean;
+  allowChangeShowData: boolean;
+  combinePinnedFiltersWithSameLabel: boolean;
+  useSameScale: boolean;
+  requiresTitle: boolean;
+}
 
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
@@ -79,20 +91,9 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   row: number;
   startColumn: number;
   columns: number;
-  style: PanelStyle;
+  style: Signum.BootstrapStyle;
   content: IPartEntity;
 }
-
-export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
-export type PanelStyle =
-  "Light" |
-  "Dark" |
-  "Primary" |
-  "Secondary" |
-  "Success" |
-  "Info" |
-  "Warning" |
-  "Danger";
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
@@ -101,6 +102,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   showData: boolean;
   allowChangeShowData: boolean;
   createNew: boolean;
+  autoRefresh: boolean;
   requiresTitle: boolean;
 }
 

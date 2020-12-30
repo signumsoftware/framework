@@ -136,22 +136,22 @@ namespace Signum.Entities.Mailing
                 new XAttribute("DisableAuthorization", DisableAuthorization),
                 new XAttribute("Query", Query.Key),
                 new XAttribute("EditableMessage", EditableMessage),
-                Model == null ? null : new XAttribute("Model", Model.FullClassName),
+                Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.FullClassName),
                 new XAttribute("SendDifferentMessages", SendDifferentMessages),
-                MasterTemplate == null ? null : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
+                MasterTemplate == null ? null! : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
                 new XAttribute("GroupResults", GroupResults),
-                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
-                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
+                Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
                 new XAttribute("IsBodyHtml", IsBodyHtml),
-                From == null ? null : new XElement("From",
-                    From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null,
-                    From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null,
-                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null),
+                From == null ? null! : new XElement("From",
+                    From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null!,
+                    From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
+                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null!),
                 new XElement("Recipients", Recipients.Select(rec =>
                     new XElement("Recipient", new XAttribute("DisplayName", rec.DisplayName ?? ""),
                          new XAttribute("EmailAddress", rec.EmailAddress ?? ""),
                          new XAttribute("Kind", rec.Kind),
-                         rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()) : null
+                         rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!
                         )
                     )),
                 new XElement("Messages", Messages.Select(x =>
@@ -161,28 +161,28 @@ namespace Signum.Entities.Mailing
                         new XCData(x.Text)
                     ))),
 
-                this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))
+                this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))!
             );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Guid = Guid.Parse(element.Attribute("Guid").Value);
-            Name = element.Attribute("Name").Value;
+            Guid = Guid.Parse(element.Attribute("Guid")!.Value);
+            Name = element.Attribute("Name")!.Value;
             DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
-            EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
+            Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+            EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
             Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
-            SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
+            SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages")!.Value);
 
             MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
 
-            SendDifferentMessages = bool.Parse(element.Attribute("GroupResults").Value);
+            SendDifferentMessages = bool.Parse(element.Attribute("GroupResults")!.Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
-            IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
+            IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml")!.Value);
 
             From = element.Element("From")?.Let(from =>  new EmailTemplateContactEmbedded
             {
@@ -191,17 +191,17 @@ namespace Signum.Entities.Mailing
                 Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
             });
 
-            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
+            Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
             {
-                DisplayName = rep.Attribute("DisplayName").Value,
-                EmailAddress = rep.Attribute("EmailAddress").Value,
-                Kind = rep.Attribute("Kind").Value.ToEnum<EmailRecipientKind>(),
+                DisplayName = rep.Attribute("DisplayName")!.Value,
+                EmailAddress = rep.Attribute("EmailAddress")!.Value,
+                Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
                 Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value))
             }).ToMList();
 
-            Messages = element.Element("Messages").Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo").Value))
+            Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
             {
-                Subject = elem.Attribute("Subject").Value,
+                Subject = elem.Attribute("Subject")!.Value,
                 Text = elem.Value
             }).ToMList();
 

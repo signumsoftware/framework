@@ -28,17 +28,8 @@ namespace Signum.Entities.Chart
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        string? value;
-        [StringLengthValidator(Max = 50)]
-        public string? Value
-        {
-            get { return value; }
-            set
-            {
-                if (Set(ref this.value, value) && ParentChart != null)
-                    ParentChart.InvalidateResults(needNewQuery: false);
-            }
-        }
+        [StringLengthValidator(Max = 500)]
+        public string? Value { get; set; }
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
@@ -55,13 +46,13 @@ namespace Signum.Entities.Chart
         {
             return new XElement("Parameter",
                 new XAttribute("Name", this.Name),
-                new XAttribute("Value", this.Value ?? ""));
+                this.Value == null ? null! : new XAttribute("Value", this.Value));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Name = x.Attribute("Name").Value;
-            Value = x.Attribute("Value").Value?.DefaultText(null);
+            Name = x.Attribute("Name")!.Value;
+            Value = x.Attribute("Value")?.Value;
         }
 
         public override string ToString()

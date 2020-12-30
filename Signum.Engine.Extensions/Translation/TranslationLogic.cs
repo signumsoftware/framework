@@ -98,7 +98,7 @@ namespace Signum.Engine.Translation
             {
                 var doc = XDocument.Load(fileName);
 
-                HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t => t.Attribute("Name").Value).ToHashSet();
+                HashSet<string> oldNames = doc.Element("Translations")!.Elements("Type").Select(t => t.Attribute("Name")!.Value).ToHashSet();
 
                 Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)!); //cloning
 

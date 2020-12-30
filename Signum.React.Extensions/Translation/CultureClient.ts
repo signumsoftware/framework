@@ -12,14 +12,15 @@ export function loadCurrentCulture(): Promise<void> {
   return API.fetchCurrentCulture()
     .then(ci => {
       currentCulture = ci;
+      AppContext.setCurrentCulture(ci.name);
       onCultureLoaded.forEach(f => f(ci));
     });
 }
 
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
   API.setCurrentCulture(newCulture)
-    .then(() => reloadTypes())
     .then(() => loadCurrentCulture())
+    .then(() => reloadTypes())
     .then(() => AppContext.resetUI())
     .done();
 }

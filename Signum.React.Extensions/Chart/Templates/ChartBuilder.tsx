@@ -49,6 +49,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
     cc.displayName = null!;
     cc.format = null!;
     cc.modified = true;
+    ChartClient.synchronizeColumns(chart, chartScript!);
     forceUpdate();
     p.onTokenChange();
   }
