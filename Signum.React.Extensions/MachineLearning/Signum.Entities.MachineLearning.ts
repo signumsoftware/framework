@@ -204,9 +204,9 @@ export interface PredictorEpochProgressEntity extends Entities.Entity {
   trainingExamples: number;
   epoch: number;
   lossTraining: number | null;
-  evaluationTraining: number | null;
+  accuracyTraining: number | null;
   lossValidation: number | null;
-  evaluationValidation: number | null;
+  accuracyValidation: number | null;
 }
 
 export module PredictorFileType {
@@ -256,7 +256,7 @@ export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("Pred
 export interface PredictorMetricsEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMetricsEmbedded";
   loss: number | null;
-  evaluation: number | null;
+  accuracy: number | null;
 }
 
 export module PredictorOperation {

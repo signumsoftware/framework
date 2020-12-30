@@ -63,18 +63,19 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            Tensor inputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "input");
-            Tensor outputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "output");
+            Tensor inputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.InputCodifications.Count }, "inputPlaceholder");
+            Tensor outputPlaceholder = tf.placeholder(tf.float32, new[] { ctx.OutputCodifications.Count }, "outputPlaceholder");
 
             Tensor currentTensor = inputPlaceholder;
             nn.HiddenLayers.ForEach((layer, i) =>
             {
                 currentTensor = NetworkBuilder.DenseLayer(currentTensor, layer.Size, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
             });
-            Tensor calculatedOutputs = NetworkBuilder.DenseLayer(currentTensor, ctx.OutputCodifications.Count, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
-
-            Tensor loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, outputPlaceholder, calculatedOutputs);
-            Tensor accuracy = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, outputPlaceholder, calculatedOutputs);
+            Tensor output = NetworkBuilder.DenseLayer(currentTensor, ctx.OutputCodifications.Count, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
+            Tensor calculatedOutput = tf.identity(output, "calculatedOutput");
+            
+            Tensor loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, outputPlaceholder, calculatedOutput);
+            Tensor accuracy = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, outputPlaceholder, calculatedOutput);
 
             // prepare for training
             Optimizer optimizer = NetworkBuilder.GetOptimizer(nn);
@@ -277,7 +278,22 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
         {
-            return PredictMultiple(ctx, new List<PredictDictionary> { input }).SingleEx();
+            using (HeavyProfiler.LogNoStackTrace("Predict"))
+            {
+                lock (lockKey)
+                {
+                    var model = (TensorFlowModel)ctx.Model!;
+
+                    model.Session.as_default();
+                    model.Graph.as_default();
+
+                    NDArray inputValue = GetValueForPredict(ctx, input);
+                    NDArray outputValuesND = model.Session.run(model.CalculatedOutput, (model.InputPlaceholder, inputValue));
+                    float[] outputValues = outputValuesND.ToArray<float>();
+                    PredictDictionary dic = GetPredictionDictionary(outputValues, ctx, input.Options!);
+                    return dic;
+                }
+            }
         }
 
         public List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs)
@@ -287,19 +303,21 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 lock (lockKey)
                 {
                     var model = (TensorFlowModel)ctx.Model!;
-
+                    tf.compat.v1.disable_eager_execution();
                     model.Session.as_default();
                     model.Graph.as_default();
 
-                   
-                    NDArray inputValue = GetValueForPredict(ctx, inputs);
+                    var result = new List<PredictDictionary>();
+                    foreach (var input in inputs)
+                    {
+                        NDArray inputValue = GetValueForPredict(ctx, input);
+                        NDArray outputValuesND = model.Session.run(model.CalculatedOutput, (model.InputPlaceholder, inputValue));
+                        float[] outputValues = outputValuesND.ToArray<float>();
+                        PredictDictionary dic = GetPredictionDictionary(outputValues, ctx, input.Options!);
+                        result.Add(dic);
+                    }
 
-                    var outputValue = model.Session.run(model.Output, (model.Input, inputValue));
-                    throw new InvalidOperationException();
- 
-                    //IList<IList<float>> values = outputValue.ToMuliDimArray();
-                    //var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options!)).ToList();
-                    //return result;
+                    return result;
                 }
             }
         }
@@ -328,51 +346,46 @@ namespace Signum.Engine.MachineLearning.TensorFlow
             }
         }
 
-        private NDArray GetValueForPredict(PredictorPredictContext ctx, List<PredictDictionary> inputs)
+        private NDArray GetValueForPredict(PredictorPredictContext ctx, PredictDictionary input)
         {
-            using (HeavyProfiler.Log("GetValueForPredict", () => $"Inputs {inputs.Count} Codifications {ctx.InputCodifications.Count}"))
+            using (HeavyProfiler.Log("GetValueForPredict", () => $"Inputs Codifications {ctx.InputCodifications.Count}"))
             {
-                if (inputs.First().SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
+                if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
                     throw new Exception("Unexpected dictionary comparer");
 
-                float[] inputValues = new float[inputs.Count * ctx.InputCodifications.Count];
+                float[] inputValues = new float[ctx.InputCodifications.Count];
                 var groups = ctx.InputCodificationsByColumn;
-                for (int i = 0; i < inputs.Count; i++)
+
+                foreach (var kvp in groups)
                 {
-                    PredictDictionary input = inputs[i];
-                    int offset = i * ctx.InputCodifications.Count;
-
-                    foreach (var kvp in groups)
+                    PredictorColumnBase col = kvp.Key;
+                    object? value;
+                    if (col is PredictorColumnMain pcm)
                     {
-                        PredictorColumnBase col = kvp.Key;
-                        object? value;
-                        if (col is PredictorColumnMain pcm)
-                        {
-                            value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);
-                        }
-                        else if (col is PredictorColumnSubQuery pcsq)
-                        {
-                            var sq = input.SubQueries.GetOrThrow(pcsq.SubQuery);
+                        value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);
+                    }
+                    else if (col is PredictorColumnSubQuery pcsq)
+                    {
+                        var sq = input.SubQueries.GetOrThrow(pcsq.SubQuery);
 
-                            var dic = sq.SubQueryGroups.TryGetC(pcsq.Keys);
+                        var dic = sq.SubQueryGroups.TryGetC(pcsq.Keys);
 
-                            value = dic == null ? null : dic.GetOrThrow(pcsq.PredictorSubQueryColumn);
-                        }
-                        else
-                        {
-                            throw new UnexpectedValueException(col);
-                        }
+                        value = dic == null ? null : dic.GetOrThrow(pcsq.PredictorSubQueryColumn);
+                    }
+                    else
+                    {
+                        throw new UnexpectedValueException(col);
+                    }
 
-                        using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
-                        {
-                            var enc = Encodings.GetOrThrow(col.Encoding);
-                            enc.EncodeValue(value ?? TensorFlowDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, offset);
-                        }
+                    using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
+                    {
+                        var enc = Encodings.GetOrThrow(col.Encoding);
+                        enc.EncodeValue(value ?? TensorFlowDefault.GetDefaultValue(kvp.Value.FirstEx()), col, kvp.Value, inputValues, 0);
                     }
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return np.array(inputValues).reshape((inputs.Count, ctx.InputCodifications.Count));
+                    return np.array(inputValues);
             }
         }
 
@@ -405,20 +418,20 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
 
                 var graph = tf.Graph();
-                using (var sess = tf.Session(graph))
+                var sess = tf.Session(graph);
                 {
                     var saver = tf.train.import_meta_graph(Path.Combine(dir, $"{ModelFileName}.meta"));
                     saver.restore(sess, Path.Combine(dir, ModelFileName));
 
                     var array = graph.get_operations().Select(a=>a.name).ToArray();
 
-                    var input = graph.get_operation_by_name("input");
-                    var output = graph.get_operation_by_name("output");
+                    var inputPlaceholder = graph.get_operation_by_name("inputPlaceholder");
+                    var calculatedOutput = graph.get_operation_by_name("calculatedOutput");
 
                     ctx.Model = new TensorFlowModel
                     {
-                        Input = input,
-                        Output = output,
+                        InputPlaceholder = inputPlaceholder,
+                        CalculatedOutput = calculatedOutput,
                         Graph = graph,
                         Session = sess,
                     };
@@ -432,8 +445,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     class TensorFlowModel
     {
-        public Tensor Input { get; internal set; }
-        public Tensor Output { get; internal set; }
+        public Tensor InputPlaceholder { get; internal set; }
+        public Tensor CalculatedOutput { get; internal set; }
         public Graph Graph { get; internal set; }
         public Session Session { get; internal set; }
     }

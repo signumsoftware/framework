@@ -26,9 +26,9 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 switch (activation)
                 {
                     case NeuralNetworkActivation.None: return fullyConnected;
-                    case NeuralNetworkActivation.ReLU: return tf.nn.relu(fullyConnected, name + "ReLU");
-                    case NeuralNetworkActivation.Sigmoid: return tf.nn.sigmoid(fullyConnected, name + "Sigmoid");
-                    case NeuralNetworkActivation.Tanh: return tf.nn.tanh(fullyConnected, name + "Tanh");
+                    case NeuralNetworkActivation.ReLU: return tf.nn.relu(fullyConnected, "ReLU");
+                    case NeuralNetworkActivation.Sigmoid: return tf.nn.sigmoid(fullyConnected, "Sigmoid");
+                    case NeuralNetworkActivation.Tanh: return tf.nn.tanh(fullyConnected, "Tanh");
                     default: throw new InvalidOperationException("Unexpected activation " + activation);
                 }
             });
