@@ -37,7 +37,7 @@ namespace Signum.Entities.Mailing
 
         public DateTime? ReceptionNotified { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string? subject;
         [StringLengthValidator(AllowLeadingSpaces = true, AllowTrailingSpaces = true)]
         public string? Subject
@@ -46,7 +46,7 @@ namespace Signum.Entities.Mailing
             set { if (Set(ref subject, value)) CalculateHash(); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string? body;
         [StringLengthValidator(MultiLine = true)]
         public string? Body
@@ -94,7 +94,7 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.ReadyToSend,         false,         false,         false,                    null },
 {EmailMessageState.RecruitedForSending, false,         false,         false,                    null },
 {EmailMessageState.Sent,                false,         true,          false,                    null },
-{EmailMessageState.SentException,       true,          true,          false,                    null },
+{EmailMessageState.SentException,       true,          null,          false,                    null },
 {EmailMessageState.ReceptionNotified,   true,          true,          true,                     null },
 {EmailMessageState.Received,            false,         false,         false,                    false },
 {EmailMessageState.Outdated,            false,         false,         false,                    null },
@@ -130,7 +130,7 @@ namespace Signum.Entities.Mailing
         
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-        [SqlDbType(Size = int.MaxValue), ForceNotNullable]
+        [DbType(Size = int.MaxValue), ForceNotNullable]
         public string RawContent { get; set; }
 
         public DateTime SentDate { get; set; }
@@ -146,6 +146,7 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type { get; set; }
 
         FilePathEmbedded file;
+        //[DefaultFileType(nameof(EmailFileType.Attachment), nameof(EmailFileType))] is optional to register it
         public FilePathEmbedded File
         {
             get { return file; }
@@ -219,8 +220,11 @@ namespace Signum.Entities.Mailing
         }
 
         public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailRecipientEmbedded other)
+        public bool Equals(EmailRecipientEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
         }
 
@@ -255,7 +259,7 @@ namespace Signum.Entities.Mailing
         public EmailAddressEmbedded(EmailOwnerData data)
         {
             EmailOwner = data.Owner;
-            EmailAddress = data.Email;
+            EmailAddress = data.Email!;
             DisplayName = data.DisplayName;
         }
 
@@ -299,8 +303,11 @@ namespace Signum.Entities.Mailing
         }
 
         public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailAddressEmbedded other)
+        public bool Equals(EmailAddressEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
@@ -333,12 +340,12 @@ namespace Signum.Entities.Mailing
     public class EmailOwnerData : IEquatable<EmailOwnerData>
     {
         public Lite<IEmailOwnerEntity>? Owner { get; set; }
-        public string Email { get; set; }
+        public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
 
         public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
-        public bool Equals(EmailOwnerData other)
+        public bool Equals(EmailOwnerData? other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }

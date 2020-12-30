@@ -76,13 +76,15 @@ namespace Signum.Engine.Templating
         {
             if (Variable.HasText())
             {
-                if(variables.TryGetValue(Variable, out var value))
+                if (variables.TryGetValue(Variable, out var value))
                 {
                     if (value != null && value.Equals(this))
                         return;
 
-                    variables.Add(Variable, this);
+                    else throw new InvalidOperationException("Redeclaring variable " + Variable + " with another value");
                 }
+
+                variables.Add(Variable, this);
             } 
         }
 
@@ -118,7 +120,7 @@ namespace Signum.Engine.Templating
                         {
                             string v = token.TryBefore('.') ?? token;
 
-                            if (!tp.Variables.TryGetValue(v, out ValueProviderBase vp))
+                            if (!tp.Variables.TryGetValue(v, out ValueProviderBase? vp))
                             {
                                 tp.AddError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                                 return null;
@@ -388,7 +390,7 @@ namespace Signum.Engine.Templating
             {
                 string v = tokenString.TryBefore('.') ?? tokenString;
 
-                if (!variables.TryGetValue(v, out ValueProviderBase vp))
+                if (!variables.TryGetValue(v, out ValueProviderBase? vp))
                 {
                     addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                     return result;

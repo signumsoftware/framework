@@ -368,7 +368,7 @@ namespace Signum.Engine.Translation
             return (Func<T, R>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
         }
 
-        public static FilePair ExportExcelFile(Type type, CultureInfo culture)
+        public static FileContent ExportExcelFile(Type type, CultureInfo culture)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<TranslatedInstanceEntity>(userInterface: true);
             var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value
@@ -386,13 +386,13 @@ namespace Signum.Engine.Translation
                 Translated = r.Value.TranslatedText
             }).ToList();
 
-            return new FilePair(
+            return new FileContent(
                 fileName: "{0}.{1}.View.xlsx".FormatWith(TypeLogic.GetCleanName(type), culture.Name),
-                content: PlainExcelGenerator.WritePlainExcel<ExcelRow>(list)
+                bytes: PlainExcelGenerator.WritePlainExcel<ExcelRow>(list)
             );
         }
 
-        public static FilePair ExportExcelFileSync(Type type, CultureInfo culture)
+        public static FileContent ExportExcelFileSync(Type type, CultureInfo culture)
         {
             var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { TranslatedInstanceLogic.DefaultCulture });
 
@@ -408,9 +408,9 @@ namespace Signum.Engine.Translation
                             Translated = null
                         }).ToList();
 
-            return new FilePair(
+            return new FileContent(
                 fileName: "{0}.{1}.Sync.xlsx".FormatWith(TypeLogic.GetCleanName(type), culture.Name),
-                content: PlainExcelGenerator.WritePlainExcel(list)
+                bytes: PlainExcelGenerator.WritePlainExcel(list)
             );
         }
 
@@ -489,7 +489,7 @@ namespace Signum.Engine.Translation
 
 
 
-        public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo c)
+        public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo? c)
         {
             Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
                 .ToDictionary(a => (a.Culture, a.Key));
@@ -549,18 +549,6 @@ namespace Signum.Engine.Translation
         {
             Type = type;
             Culture = culture;
-        }
-    }
-
-    public class FilePair
-    {
-        public string FileName;
-        public byte[] Content;
-
-        public FilePair(string fileName, byte[] content)
-        {
-            FileName = fileName;
-            Content = content;
         }
     }
 
@@ -628,6 +616,11 @@ namespace Signum.Engine.Translation
         public override string ToString()
         {
             return Route.PropertyString().Replace("/", "[" + RowId + "].");
+        }
+
+        public string RouteRowId()
+        {
+            return Route.PropertyString() + (RowId == null ? null : ";" + RowId);
         }
 
         public override bool Equals(object? obj) => obj is IndexedPropertyRoute ipr && base.Equals(ipr);
@@ -705,6 +698,14 @@ namespace Signum.Engine.Translation
 
             return result;
         }
+
+        public string RouteAndRowId()
+        {
+            if(RowId.HasValue)
+                return Route.PropertyString() + ";" + RowId;
+
+            return Route.PropertyString();
+        }
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
@@ -716,10 +717,5 @@ namespace Signum.Engine.Translation
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-    public enum TranslatedSummaryState
-    {
-        Completed,
-        Pending,
-        None,
-    }
+
 }

@@ -136,11 +136,11 @@ namespace Signum.Engine.Dynamic
 
                             using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
                             {
-                                SqlMigrationRunner.ExecuteScript(title, e.Script);
+                                SqlPreCommandExtensions.ExecuteScript(title, e.Script);
                                 tr.Commit();
                             }
                         }
-                        catch(MigrationException ex)
+                        catch(ExecuteSqlScriptException ex)
                         {
                             ex.InnerException!.PreserveStackTrace();
                             throw ex.InnerException!;

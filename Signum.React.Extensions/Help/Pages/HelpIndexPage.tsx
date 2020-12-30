@@ -5,10 +5,11 @@ import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'
 import { SearchControl } from '@framework/Search';
-import { useAPI, useTitle } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity } from '../Signum.Entities.Help';
 import { getTypeInfo } from '@framework/Reflection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTitle } from '@framework/AppContext'
 
 
 export default function HelpIndexPage(p: RouteComponentProps<{}>) {
@@ -46,7 +47,7 @@ export default function HelpIndexPage(p: RouteComponentProps<{}>) {
 
         <h3 className="display-6">
           {HelpMessage.Appendices.niceToString()}
-          {Navigator.isCreable(AppendixHelpEntity, true, true) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }}><FontAwesomeIcon icon="plus" className="ml-2" /></Link>}
+          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }}><FontAwesomeIcon icon="plus" className="ml-2" /></Link>}
         </h3>
         <ul className="responsive-columns">
           {index.appendices.map(ap => <li key={ap.uniqueName}><Link to={Urls.appendixUrl(ap.uniqueName)} >{ap.title}</Link></li>)}

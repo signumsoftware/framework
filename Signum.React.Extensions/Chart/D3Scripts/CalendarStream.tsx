@@ -55,9 +55,9 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   var cellSizeY = (height - 20) / (horizontal ? numDaysY : numDaysX);
   var cellSize = Math.min(cellSizeX, cellSizeY);
 
-  var cleanDate = (d: Date) => d.toJSON().beforeLast(".");
+  var cleanDate = (d: Date) => d.toJSON().before("T");
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
@@ -66,7 +66,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   }, height);
   //yRule.debugY(chart);
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: '*',
     title: 14,
     _2: 4,
@@ -79,7 +79,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   var rowYByDate = data.rows.toObject(r => {
     var date = dateColumn.getValueKey(r);
-    return date.tryBefore("+") ?? date;
+    return date.tryBefore("T") ?? date;
   });
 
 
@@ -130,7 +130,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
               x={(horizontal ? week(d) : day(d)) * cellSize}
               y={(horizontal ? (6 - day(d)) : week(d)) * cellSize}
               cursor="pointer"
-              onClick={e => r == undefined ? null : onDrillDown(r)}>
+              onClick={e => r == undefined ? null : onDrillDown(r, e)}>
               <title>
                 {format(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
               </title>

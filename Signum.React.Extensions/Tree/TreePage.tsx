@@ -1,20 +1,15 @@
 import * as React from 'react'
 import { getTypeInfo } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
-import { FilterOption } from "@framework/FindOptions";
-import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { QueryString } from '@framework/QueryString'
 
-interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
-}
-
-export default function TreePage(p: TreePageProps) {
+export default function TreePage(p: RouteComponentProps<{ typeName: string }>) {
   var query = QueryString.parse(p.location.search);
 
   const filterOptions = React.useMemo(() => Finder.Decoder.decodeFilters(query), [query]);
@@ -24,10 +19,10 @@ export default function TreePage(p: TreePageProps) {
   function changeUrl() {
     var newPath = treeViewRef.current!.getCurrentUrl();
 
-    var currentLocation = Navigator.history.location;
+    var currentLocation = AppContext.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
-      Navigator.history.replace(newPath);
+      AppContext.history.replace(newPath);
   }
 
   var ti = getTypeInfo(p.match.params.typeName);
@@ -44,8 +39,9 @@ export default function TreePage(p: TreePageProps) {
       <TreeViewer ref={treeViewRef}
         initialShowFilters={true}
         typeName={ti.name}
-        allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
+        allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
+        showToolbar={true}
         key={ti.name}
         onSearch={() => changeUrl()} />
     </div>

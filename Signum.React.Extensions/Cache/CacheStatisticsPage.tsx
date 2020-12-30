@@ -3,7 +3,7 @@ import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
-import { useAPI, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
 
 export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
 

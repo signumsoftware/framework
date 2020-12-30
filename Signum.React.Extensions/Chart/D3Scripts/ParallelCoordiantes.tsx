@@ -34,7 +34,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
 
     const { data, width, height, parameters, loading, onDrillDown, initialLoad } = this.props;
     
-    var yRule = new Rule({
+    var yRule = Rule.create({
       _1: 5,
       title: 15,
       _2: 5,
@@ -46,7 +46,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
       _5: 5,
     }, height);
 
-    var xRule = new Rule({
+    var xRule = Rule.create({
       _1: 20,
       content: '*',
       _2: 20,
@@ -147,7 +147,7 @@ class ParallelCoordinatesImp extends React.Component<ChartScriptProps, ParallelC
             strokeWidth={1}
             stroke={selectedColumn.colorScale(r)}
             shapeRendering="initial"
-            onClick={e => onDrillDown(r)}
+            onClick={e => onDrillDown(r, e)}
             cursor="pointer"
             d={line(cords.map(c => ({ col: c, row: r })))!}>
             <title>

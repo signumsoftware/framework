@@ -81,6 +81,7 @@ namespace Signum.React.TypeHelp
 
         public static List<string> AditionalTypes = new List<string>
         {
+            "Date",
             "DateTime",
             "TimeSpan",
             "Guid",

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
@@ -16,7 +16,7 @@ import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
-import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals';
+import { IModalProps, openModal } from '@framework/Modals';
 
 export interface ToolbarMainRendererProps {
 }
@@ -87,7 +87,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
 
   if (tr.url) {
     return (
-      <a href="#" onMouseDown={e => { e.preventDefault(); Navigator.pushOrOpenInTab(tr.url!, e); }}>
+      <a href="#" onMouseDown={e => { e.preventDefault(); AppContext.pushOrOpenInTab(tr.url!, e); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}

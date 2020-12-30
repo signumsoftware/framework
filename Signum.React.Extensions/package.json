@@ -14,9 +14,14 @@
   "author": "Signum Software",
   "license": "MIT",
   "dependencies": {
-    "@types/react": "16.9.15",
-    "@types/codemirror": "0.0.80",
-    "@types/googlemaps": "3.38.1",
-    "@types/react-rte": "0.16.1"
+    "@types/codemirror": "0.0.95",
+    "@types/draft-js": "0.10.40",
+    "@types/googlemaps": "3.39.6",
+    "@types/react": "^16.9.41",
+    "draft-js": "0.11.5",
+    "draftjs-to-html": "0.9.1",
+    "html-to-draftjs": "1.5.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
   }
 }

@@ -9,8 +9,9 @@ import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { parseIcon } from '../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useFetchInState } from '@framework/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { CountIcon } from '../Toolbar/QueryToolbarConfig';
+import { useFetchInState } from '@framework/Navigator'
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {

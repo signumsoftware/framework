@@ -158,13 +158,14 @@ ${childrenString}
       formGroupHtmlAttributes: node.formGroupHtmlAttributes,
       visible: node.visible,
       readOnly: node.readOnly,
+      mandatory: node.mandatory,
       createOnFind: node.createOnFind,
       create: node.create,
       onCreate: node.onCreate,
       remove: node.remove,
       onRemove: node.onRemove,
       find: node.find,
-      ...(findMany ? { onFindMany: (node as EntityListBaseNode).onFindMany } : { onFind: node.onFind }),
+      ...(options.findMany ? { onFindMany: (node as EntityListBaseNode).onFindMany } : { onFind: node.onFind }),
       view: node.view,
       onView: node.onView,
       viewOnCreate: node.viewOnCreate,
@@ -394,7 +395,7 @@ export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNo
       </div>
     );
 
-  const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
+  const es = Navigator.getSettings(parentCtx.propertyRoute!.typeReference().name);
   if (vos.length) {
     const replacer = new ViewReplacer(result, parentCtx);
     vos.forEach(vo => vo.override(replacer));
@@ -750,6 +751,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
       : undefined),
     visible: evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull),
     readOnly: evaluateAndValidate(dn, parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
+    mandatory: evaluateAndValidate(dn, parentCtx, dn.node, n => n.mandatory, isBooleanOrNull),
     createOnFind: evaluateAndValidate(dn, parentCtx, dn.node, n => n.createOnFind, isBooleanOrNull),
     create: evaluateAndValidate(dn, parentCtx, dn.node, n => n.create, isBooleanOrNull),
     onCreate: evaluateAndValidate(dn, parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
@@ -809,6 +811,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       {options.isEntityLine && <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).itemHtmlAttributes)} />}
       <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={m ? m.type.name : undefined} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.createOnFind)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(modules.Reflection.New('" + typeName + "', { name: ''}))"} />

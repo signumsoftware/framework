@@ -11,13 +11,13 @@ import { FileUploader } from './FileUploader'
 import { Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
-import { EntityListBaseController, EntityListBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
-import { FetchAndRemember } from '../../../Framework/Signum.React/Scripts/Lines'
+import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
+import { FetchAndRemember } from '@framework/Lines'
 import { FileImage } from './FileImage';
-import { useController } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { useController } from '@framework/Lines/LineBase'
 import { center, wrap } from '../Map/Utils'
-import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals'
-import { useForceUpdate } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { openModal, IModalProps } from '@framework/Modals'
+import { useForceUpdate } from '@framework/Hooks'
 import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };
@@ -41,7 +41,7 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
 
     super.getDefaultProps(state);
 
-    const m = state.ctx.propertyRoute.member;
+    const m = state.ctx.propertyRoute?.member;
     if (m && m.defaultFileTypeInfo) {
 
       if (state.fileType == null)
@@ -113,7 +113,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
               dragAndDropMessage={p.dragAndDropMessage}
               fileType={p.fileType}
               onFileLoaded={c.handleFileLoaded}
-              typeName={p.ctx.propertyRoute.typeReference().name}
+              typeName={p.ctx.propertyRoute!.typeReference().name}
               buttonCss={p.ctx.buttonClass}
               divHtmlAttributes={{ className: "sf-file-line-new" }} />}
         </div>
@@ -125,7 +125,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
   function renderImage(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>) {
     const val = ctx.value!;
 
-    return ctx.propertyRoute.typeReference().isLite ?
+    return ctx.propertyRoute!.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
       <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} />;
   }

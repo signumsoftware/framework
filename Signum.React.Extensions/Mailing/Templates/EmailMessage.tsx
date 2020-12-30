@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailReceptionMixin, EmailFileType } from '../Signum.Entities.Mailing'
 import { EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import { FileLine } from '../../Files/FileLine'
-import IFrameRenderer from './IFrameRenderer'
+import IFrameRenderer from './IframeRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Tabs, Tab } from 'react-bootstrap';

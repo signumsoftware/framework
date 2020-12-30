@@ -84,9 +84,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity?>? getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -173,7 +173,7 @@ namespace Signum.Engine.Mailing
             return emailTemplate;
         }
 
-        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate)
+        static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate, PostRetrievingContext ctx)
         {
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -250,19 +250,19 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
-            return CreateEmailMessage(template, modifiableEntity, ref model);
+            return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this EmailTemplateEntity template, ModifiableEntity? modifiableEntity = null, IEmailModel? model = null, CultureInfo? cultureInfo = null)
         {
-            return CreateEmailMessage(template, modifiableEntity, ref model);
+            return CreateEmailMessage(template, modifiableEntity, ref model, cultureInfo);
         }
 
-        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model)
+        private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model, CultureInfo? cultureInfo = null)
         {
             Entity? entity = null;
             if (template.Model != null)
@@ -278,7 +278,10 @@ namespace Signum.Engine.Mailing
             }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, model).CreateEmailMessageInternal().ToList();
+            {
+                var emailBuilder = new EmailMessageBuilder(template, entity, model, cultureInfo);
+                return emailBuilder.CreateEmailMessageInternal().ToList();
+            }
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>

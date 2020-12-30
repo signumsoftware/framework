@@ -5,7 +5,7 @@ import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { SearchControl, ColumnOption } from '@framework/Search'
-import { QueryDescription } from '@framework/FindOptions'
+import { QueryDescription, ResultTable } from '@framework/FindOptions'
 import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
@@ -15,15 +15,18 @@ import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab, Modal } from 'react-bootstrap'
 import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { asUTC } from '@framework/SearchControl/SystemTimeEditor'
+import { QueryString } from '../../../../Framework/Signum.React/Scripts/QueryString'
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components'
+import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals'
 
-export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id?: string }>) {
+export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
 
   var params = p.match.params;
 
@@ -78,16 +81,9 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
 
       <br />
       <h5>Selected Versions</h5>
-      <Tabs id="timeMachineTabs">
-        {scl?.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d)).orderBy(a => a).flatMap((d, i, dates) => [
-          <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
-            <RenderEntityVersion lite={lite} asOf={d} />
-          </Tab>,
-          (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
-            <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i + 1]} />
-          </Tab>
-        ])}
-      </Tabs>
+      {scl?.state.selectedRows &&
+        <TimeMachineTabs lite={lite} versionDatesUTC={scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d))} />
+      }
     </div>
   );
 }
@@ -134,5 +130,60 @@ export function DiffEntityVersion(p: DiffEntityVersionProps) {
     </div>
   );
 }
+
+
+export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
+
+  return (
+    <Tabs id="timeMachineTabs">
+      {p.versionDatesUTC.orderBy(a => a).flatMap((d, i, dates) => [
+        <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
+          <RenderEntityVersion lite={p.lite} asOf={d} />
+        </Tab>,
+        (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
+          <DiffEntityVersion lite={p.lite} validFrom={d} validTo={dates[i + 1]} />
+        </Tab>
+      ])}
+    </Tabs>
+  );
+}
+
+
+interface TimeMachineModalProps extends IModalProps<boolean | undefined> {
+  lite: Lite<Entity>;
+  versionDatesUTC: string[]
+}
+
+export function TimeMachineModal(p: TimeMachineModalProps) {
+
+  const [show, setShow] = React.useState(true);
+  const answerRef = React.useRef<boolean | undefined>(undefined);
+
+  function handleCloseClicked() {
+    setShow(false);
+  }
+
+  function handleOnExited() {
+    p.onExited!(answerRef.current);
+  }
+
+  return (
+    <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
+      <div className="modal-header">
+        <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <TimeMachineTabs lite={p.lite} versionDatesUTC={p.versionDatesUTC} />
+      </div>
+    </Modal>
+  );
+}
+
+TimeMachineModal.show = (lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> => {
+  return openModal<boolean | undefined>(<TimeMachineModal lite={lite} versionDatesUTC={versionDatesUTC} />);
+};
 
 

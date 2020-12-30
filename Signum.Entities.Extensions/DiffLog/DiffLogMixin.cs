@@ -10,10 +10,10 @@ namespace Signum.Entities.DiffLog
         {
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? InitialState { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? FinalState { get; set; }
 
         public bool Cleaned { get; set; }

@@ -66,10 +66,16 @@ namespace Signum.Engine.ViewLog
 
                 QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+                ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
             }
         }
 
+        private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string url)
+        {
+            return ViewLogLogic.LogView(entity.ToLite(), url);
+        }
 
+  
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<ViewLogEntity>();
@@ -120,15 +126,17 @@ namespace Signum.Engine.ViewLog
         static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var dateLimit = parameters.GetDateLimitDelete(typeof(ViewLogEntity).ToTypeEntity());
-
-            if (dateLimit == null)
-                return;
-
-            Database.Query<ViewLogEntity>().Where(view => view.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit != null)
+                Database.Query<ViewLogEntity>().Where(view => view.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
+        public static IDisposable? LogView(Lite<IEntity> entity, string viewAction)
         {
+
+            if (entity == null || !LogType(entity.EntityType) || UserHolder.Current == null)
+                return null;
+
+
             var viewLog = new ViewLogEntity
             {
                 Target = (Lite<Entity>)entity.Clone(),

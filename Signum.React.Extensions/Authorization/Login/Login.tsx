@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { AuthMessage } from '../Signum.Entities.Authorization'
+import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import MessageModal from '@framework/Modals/MessageModal'
+import "./Login.css"
 
 export default function Login() {
 
@@ -53,20 +54,20 @@ export default function Login() {
       <form onSubmit={(e) => handleSubmit(e)}>
         <div className="row">
           <div className="col-md-6 offset-md-3">
-            <h2 className="sf-entity-title">{AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</h2>
-            <p>{AuthMessage.EnterYourUserNameAndPassword.niceToString()}</p>
+            <h2 className="sf-entity-title">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h2>
+            <p>{LoginAuthMessage.EnterYourUserNameAndPassword.niceToString()}</p>
             <hr />
           </div>
         </div>
         <div className="row">
           <div className="col-md-6 offset-md-3">
             <div className={classes("form-group", error("userName") && "has-error")}>
-              <label className="sr-only" htmlFor="userName">{AuthMessage.Username.niceToString()}</label>
+              <label className="sr-only" htmlFor="userName">{LoginAuthMessage.Username.niceToString()}</label>
               <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
                 </div>
-                <input type="text" className="form-control" id="userName" ref={userName} placeholder={AuthMessage.Username.niceToString()} />
+                <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} />
               </div>
               {error("userName") && <span className="help-block">{error("userName")}</span>}
             </div>
@@ -80,7 +81,7 @@ export default function Login() {
                 <div className="input-group-prepend">
                   <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
                 </div>
-                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder="Password" />
+                <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} />
               </div>
               {error("password") && <span className="help-block">{error("password")}</span>}
             </div>
@@ -89,9 +90,9 @@ export default function Login() {
         {AuthClient.Options.userTicket &&
           <div className="row">
             <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
-              <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-                <label>
-                  <input ref={rememberMe} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
+            <div className="form-check mb-2 mr-sm-2 mb-sm-0">
+              <label className="sf-remember-me">
+                  <input ref={rememberMe} name="remember" type="checkbox" /> {LoginAuthMessage.RememberMe.niceToString()}
                 </label>
               </div>
             </div>
@@ -100,13 +101,13 @@ export default function Login() {
 
         <div className="row" style={{ paddingTop: "1rem" }}>
           <div className="col-md-6 offset-md-3">
-            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? AuthMessage.SwitchUser.niceToString() : AuthMessage.Login.niceToString()}</button>
+            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</button>
             {error("login") && <span className="help-block" style={{ color: "red" }}>{error("login")}</span>}
             {AuthClient.Options.resetPassword &&
               <span>
                 &nbsp;
-                &nbsp;
-                <Link to="~/auth/forgotPasswordEmail">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+              &nbsp;
+                <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
               </span>
             }
           </div>
@@ -125,7 +126,7 @@ export function LoginWithWindowsButton() {
     return AuthClient.API.loginWindowsAuthentication(true)
       .then(lr => {
         if (lr == null) {
-          MessageModal.showError(AuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), AuthMessage.NoWindowsUserFound.niceToString()).done();
+          MessageModal.showError(LoginAuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), LoginAuthMessage.NoWindowsUserFound.niceToString()).done();
         } else {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
@@ -138,7 +139,7 @@ export function LoginWithWindowsButton() {
     <div className="row">
       <div className="col-md-6 offset-md-3 mt-4">
         <button onClick={e => { e.preventDefault(); onClick(); }} className="btn btn-info">
-          <FontAwesomeIcon icon={["fab", "windows"]} /> {AuthMessage.LoginWithWindowsUser.niceToString()}
+          <FontAwesomeIcon icon={["fab", "windows"]} /> {LoginAuthMessage.LoginWithWindowsUser.niceToString()}
         </button>
       </div>
     </div>

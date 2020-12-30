@@ -25,6 +25,7 @@
   <Type Name="BasicPermission" />
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
+  <Type Name="CalendarDayEntity" />
   <Type Name="CaseActivityEntity" />
   <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage" />
@@ -103,6 +104,7 @@
   <Type Name="DynamicExpressionEntity" />
   <Type Name="DynamicExpressionOperation" />
   <Type Name="DynamicExpressionTranslation" />
+  <Type Name="DynamicIsolationMixin" />
   <Type Name="DynamicMixinConnectionEntity" />
   <Type Name="DynamicMixinConnectionOperation" />
   <Type Name="DynamicPanelPermission" />
@@ -164,6 +166,7 @@
   <Type Name="EvalEmbedded`1" />
   <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
+  <Type Name="ExcelPermission" />
   <Type Name="ExcelReportEntity" />
   <Type Name="ExcelReportOperation" />
   <Type Name="ExchangeWebServiceEmbedded" />
@@ -185,6 +188,7 @@
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
   <Type Name="HolidayEmbedded" />
+  <Type Name="HtmlChartScript" />
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity" />
@@ -202,6 +206,7 @@
   <Type Name="IsolationMessage" />
   <Type Name="IsolationMixin" />
   <Type Name="IsolationOperation" />
+  <Type Name="IsolationStrategy" />
   <Type Name="ITaskEntity" />
   <Type Name="ITaskMessage" />
   <Type Name="ITaskOperation" />
@@ -221,6 +226,7 @@
   <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" />
   <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoginAuthMessage" />
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
@@ -248,6 +254,7 @@
   <Type Name="NoteTypeEntity" />
   <Type Name="NoteTypeOperation" />
   <Type Name="OmniboxMessage" />
+  <Type Name="OmniboxPermission" />
   <Type Name="OperationAllowed" />
   <Type Name="OperationAllowedRule" />
   <Type Name="OperationHelpEmbedded" />
@@ -436,6 +443,7 @@
   <Type Name="UserQueryPermission" />
   <Type Name="UserState" />
   <Type Name="UserTicketEntity" />
+  <Type Name="UserTreePartEntity" />
   <Type Name="ValueUserQueryElementEmbedded" />
   <Type Name="ValueUserQueryListPartEntity" />
   <Type Name="ViewLogEntity" />

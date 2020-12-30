@@ -2,6 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
@@ -33,6 +34,7 @@ interface TreeViewerProps {
   onSearch?: () => void;
   filterOptions: FilterOption[];
   initialShowFilters?: boolean;
+  showToolbar?: boolean;
 }
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
@@ -134,7 +136,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (ev.ctrlKey || ev.button == 1)
       window.open(path);
     else
-      Navigator.history.push(path);
+      AppContext.history.push(path);
   };
 
   getCurrentUrl() {
@@ -178,9 +180,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return (
       <div>
         {this.renderSearch()}
-        <br />
-        {this.renderToolbar()}
-        <br />
+        {this.props.showToolbar && <>
+          <br />
+          {this.renderToolbar()}
+          <br />
+        </>}
+        
         <div className="tree-container" ref={(t) => this.treeContainer = t!} >
           <ul>
             {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
@@ -243,9 +248,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isNavigable(type, undefined, true) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
-      Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
-      Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
+      Navigator.isNavigable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
+      Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
 
     if (this.state.currentMenuItems == undefined) {
@@ -393,7 +398,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           onClick={this.handleToggleFilters}
           title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><FontAwesomeIcon icon="filter" /></a>
         <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-        {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+        {Operations.tryGetOperationInfo(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
         <Dropdown
           onToggle={this.handleSelectedToggle}
           show={s.isSelectOpen}>
@@ -428,9 +433,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     });
 
     if (this.props.avoidChangeUrl)
-      window.open(Navigator.toAbsoluteUrl(path));
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      Navigator.pushOrOpenInTab(path, e);
+      AppContext.pushOrOpenInTab(path, e);
   }
 
   handleToggleFilters = () => {

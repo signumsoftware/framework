@@ -1,25 +1,27 @@
 import * as React from 'react'
 import * as History from 'history'
-import * as QueryString from 'query-string'
 import { classes } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
+import { ToolbarEntity } from "../Signum.Entities.Toolbar";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";
 import { NavDropdown, Dropdown } from 'react-bootstrap';
-import { Nav } from 'react-bootstrap';
+import { Nav, Navbar } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
-    return (location.pathname + location.search).startsWith(Navigator.toAbsoluteUrl(r.url));
+    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url));
 
   if (!r.content)
     return false;
@@ -41,8 +43,8 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
   return null;
 }
 
-
 export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
+  const forceUpdate = useForceUpdate();
   const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
   const responseRef = useUpdatedRef(response);
   const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
@@ -84,6 +86,19 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
     );
 
 
+  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
+
+    if (avoidCollapse.contains(res))
+      avoidCollapse.remove(res);
+    else
+    if (!expanded.contains(res))
+      expanded.push(res);
+    else
+      expanded.clear();
+
+    forceUpdate();
+  }
+
   function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
 
     switch (res.type) {
@@ -98,10 +113,18 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.elements && res.elements.length) {
           var title = res.label ?? res.content!.toStr;
           var icon = getIcon(res);
+
           return (
-            <NavDropdown id={"button" + index} title={!icon ? title : (<span>{icon}{title}</span>)}>
+            <Dropdown
+              onToggle={() => handleOnToggle(res)}
+              show={expanded.contains(res)}>
+              <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
+                {!icon ? title : (<span>{icon}{title}</span>)}
+              </Dropdown.Toggle>
+              <Dropdown.Menu alignRight={AppContext.isRtl()}>
                 {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
-            </NavDropdown>
+              </Dropdown.Menu>
+            </Dropdown>
           );
         }
 
@@ -109,8 +132,8 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           return (
             <Nav.Item>
               <Nav.Link
-                onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
-                onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+                onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+                onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 active={res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
               </Nav.Link>
@@ -197,8 +220,8 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
         if (res.url) {
           return [
             <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
-              onAuxClick={(e: React.MouseEvent<any>) => Navigator.pushOrOpenInTab(res.url!, e)}
+              onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+              onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
               className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
             </HeaderOrItem>
@@ -278,3 +301,17 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 
   return null;
 }
+
+const CustomToggle = React.forwardRef(function CustomToggle(p: { children: React.ReactNode, onClick: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+
+  return (
+    <a
+      ref={ref}
+      className="dropdown-toggle nav-link"
+      href="#"
+      onClick={e => { e.preventDefault(); p.onClick(e); }}>
+      {p.children}
+    </a>
+  );
+});
+

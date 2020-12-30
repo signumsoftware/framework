@@ -24,12 +24,12 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> Login([Required, FromBody] LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
-                return ModelError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                return ModelError("userName", LoginAuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(data.password))
-                return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("password", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
-            string authenticationType; 
+            string authenticationType;
             // Attempt to login
             UserEntity user;
             try
@@ -43,15 +43,15 @@ namespace Signum.React.Authorization
             {
                 if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
                 {
-                    return ModelError("login", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    return ModelError("login", LoginAuthMessage.InvalidUsernameOrPassword.NiceToString());
                 }
                 else if (e is IncorrectUsernameException)
                 {
-                    return ModelError("userName", AuthMessage.InvalidUsername.NiceToString());
+                    return ModelError("userName", LoginAuthMessage.InvalidUsername.NiceToString());
                 }
                 else if (e is IncorrectPasswordException)
                 {
-                    return ModelError("password", AuthMessage.InvalidPassword.NiceToString());
+                    return ModelError("password", LoginAuthMessage.InvalidPassword.NiceToString());
                 }
                 throw;
             }
@@ -60,23 +60,20 @@ namespace Signum.React.Authorization
                 return ModelError("login", e.Message);
             }
 
-            using (UserHolder.UserSession(user))
+            if (data.rememberMe == true)
             {
-                if (data.rememberMe == true)
-                {
-                    UserTicketServer.SaveCookie(ControllerContext);
-                }
-
-                AuthServer.OnUserPreLogin(ControllerContext, user);
-
-                AuthServer.AddUserSession(ControllerContext, user);
-
-                string? message = AuthLogic.OnLoginMessage();
-
-                var token = AuthTokenServer.CreateToken(user);
-
-                return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
+                UserTicketServer.SaveCookie(ControllerContext);
             }
+
+            AuthServer.OnUserPreLogin(ControllerContext, user);
+
+            AuthServer.AddUserSession(ControllerContext, user);
+
+            string? message = AuthLogic.OnLoginMessage();
+
+            var token = AuthTokenServer.CreateToken(user);
+
+            return new LoginResponse { message = message, userEntity = user, token = token, authenticationType = authenticationType };
         }
 
         [HttpGet("api/auth/loginFromApiKey")]
@@ -92,51 +89,42 @@ namespace Signum.React.Authorization
         [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
         public LoginResponse? LoginFromCookie()
         {
-            using (ScopeSessionFactory.OverrideSession())
-            {
-                if (!UserTicketServer.LoginFromCookie(ControllerContext))
-                    return null;
+            if (!UserTicketServer.LoginFromCookie(ControllerContext))
+                return null;
 
-                string? message = AuthLogic.OnLoginMessage();
+            string? message = AuthLogic.OnLoginMessage();
 
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
-            }
+            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
         }
 
         [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
         public LoginResponse? LoginWindowsAuthentication(bool throwError)
         {
-            using (ScopeSessionFactory.OverrideSession())
+            string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
+            if (error != null)
             {
-                string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
-                if(error != null)
-                {
-                    if (throwError)
-                        throw new InvalidOperationException(error);
+                if (throwError)
+                    throw new InvalidOperationException(error);
 
-                    return null;
-                }
-
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
-
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
+                return null;
             }
+
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
         public LoginResponse? LoginWithAzureAD([FromBody, Required]string jwt)
         {
-            using (ScopeSessionFactory.OverrideSession())
-            {   
-                if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
-                    return null;
+            if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt))
+                return null;
 
-                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
 
-                return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
-            }
+            return new LoginResponse { message = null, userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
         }
 
         [HttpGet("api/auth/currentUser")]
@@ -149,7 +137,7 @@ namespace Signum.React.Authorization
         [HttpPost("api/auth/logout")]
         public void Logout()
         {
-            AuthServer.UserLoggingOut?.Invoke(UserEntity.Current);
+            AuthServer.UserLoggingOut?.Invoke(ControllerContext, UserEntity.Current);
 
             UserTicketServer.RemoveCookie(ControllerContext);
         }
@@ -158,10 +146,10 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> ChangePassword([Required, FromBody] ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
-                return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(request.newPassword))
-                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var error = UserEntity.OnValidatePassword(request.newPassword);
             if (error.HasText())
@@ -170,7 +158,7 @@ namespace Signum.React.Authorization
             var user = UserEntity.Current;
 
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
-                return ModelError("oldPassword", AuthMessage.InvalidPassword.NiceToString());
+                return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
 
             user.PasswordHash = Security.EncodePassword(request.newPassword);
             using (AuthLogic.Disable())
@@ -187,7 +175,7 @@ namespace Signum.React.Authorization
         public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
-                return AuthMessage.PasswordMustHaveAValue.NiceToString();
+                return LoginAuthMessage.PasswordMustHaveAValue.NiceToString();
 
             try
             {
@@ -196,7 +184,7 @@ namespace Signum.React.Authorization
             catch (Exception ex)
             {
                 ex.LogException();
-                return AuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
+                return LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString();
             }
 
             return null;
@@ -206,9 +194,12 @@ namespace Signum.React.Authorization
         public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.newPassword))
-                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
+
+
+
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }

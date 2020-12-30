@@ -25,6 +25,10 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
+        [AutoExpressionField]
+        public static IQueryable<EmailMessageEntity> EmailMessages(this EmailPackageEntity e) =>
+            As.Expression(() => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(e)));
+
         static Func<EmailConfigurationEmbedded> getConfiguration = null!;
         public static EmailConfigurationEmbedded Configuration
         {
@@ -39,13 +43,13 @@ namespace Signum.Engine.Mailing
         }
 
         public static void Start(
-            SchemaBuilder sb,  
-            Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,  
+            SchemaBuilder sb,
+            Func<EmailConfigurationEmbedded> getConfiguration,
+            Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
             IFileTypeAlgorithm? attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {   
+            {
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
@@ -71,26 +75,41 @@ namespace Signum.Engine.Mailing
                     });
 
                 PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
-                
+
                 SenderManager = new EmailSenderManager(getEmailSenderConfiguration);
 
                 EmailGraph.Register();
 
+                QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
             }
+        }
+
+        public static void ExceptionLogic_DeletePackages(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        {
+            Database.Query<EmailPackageEntity>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack) && !pack.EmailMessages().Any())
+                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity());
-            if (dateLimit != null)
-                Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value).UnsafeDeleteChunksLog(parameters, sb, token);
+            void Remove(DateTime? dateLimit, bool withExceptions)
+            {
+                if (dateLimit == null)
+                    return;
 
-            dateLimit = parameters.GetDateLimitDeleteWithExceptions(typeof(EmailMessageEntity).ToTypeEntity());
-            if (dateLimit == null)
-                return;
+                var query = Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit.Value);
 
-            Database.Query<EmailMessageEntity>().Where(o => o.CreationDate < dateLimit!.Value && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
+                if (withExceptions)
+                    query = query.Where(a => a.Exception != null);
+
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
+
+            Remove(parameters.GetDateLimitDelete(typeof(EmailMessageEntity).ToTypeEntity()), withExceptions: false);
+            Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(EmailMessageEntity).ToTypeEntity()), withExceptions: true);
         }
 
         public static HashSet<Type> GetAllTypes()
@@ -230,7 +249,7 @@ namespace Signum.Engine.Mailing
         class EmailGraph : Graph<EmailMessageEntity, EmailMessageState>
         {
             public static void Register()
-            {            
+            {
                 GetState = m => m.State;
 
                 new Construct(EmailMessageOperation.CreateMail)
@@ -245,7 +264,7 @@ namespace Signum.Engine.Mailing
                 new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                 {
                     ToStates = { EmailMessageState.Created },
-                    CanConstruct = et => 
+                    CanConstruct = et =>
                     {
                         if (et.Model != null && EmailModelLogic.RequiresExtraParameters(et.Model))
                             return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(EmailModelEntity).NiceName(), et.Model);
@@ -330,9 +349,9 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
+        private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
 
-        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+        public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?,EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
         {
             this.getEmailSenderConfiguration = getEmailSenderConfiguration;
         }
@@ -361,7 +380,6 @@ namespace Signum.Engine.Mailing
                 {
                     if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
                         throw;
-
                     var exLog = ex.LogException().ToLite();
 
                     try
@@ -371,6 +389,7 @@ namespace Signum.Engine.Mailing
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;
                             email.Save();
+
                             tr.Commit();
                         }
                     }
@@ -385,7 +404,7 @@ namespace Signum.Engine.Mailing
         {
             var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
 
-            var config = getEmailSenderConfiguration(template, email.Target);
+            var config = getEmailSenderConfiguration(template, email.Target, email);
 
             if (config.SMTP != null)
             {
@@ -481,7 +500,7 @@ namespace Signum.Engine.Mailing
 
 
     public static class MimeMapping
-    {        
+    {
         public static string GetMimeType(string fileName)
         {
             var extension = Path.GetExtension(fileName);

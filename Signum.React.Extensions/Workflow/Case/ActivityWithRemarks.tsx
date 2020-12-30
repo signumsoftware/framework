@@ -5,11 +5,12 @@ import { Lite } from '@framework/Signum.Entities'
 import { CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagTypeEntity, CaseEntity } from '../Signum.Entities.Workflow'
 import { FindOptions } from '@framework/Search'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
 import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity } from '../../Alerts/Signum.Entities.Alerts'
 import InlineCaseTags from './InlineCaseTags'
+import { useAPI } from '@framework/Hooks'
 
 export interface ActivityWithRemarks {
   workflowActivity: Lite<WorkflowActivityEntity>;
@@ -25,12 +26,12 @@ export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemark
   data: ActivityWithRemarks;
 }
 
-function useStateFromProps<T>(propsValue: T, deps?: any[]): [T, (newValue: T) => void] {
+function useStateFromProps<T>(propsValue: T): [T, (newValue: T) => void] {
   var [val, setVal] = React.useState(propsValue);
 
   React.useEffect(() => {
     setVal(propsValue);
-  }, deps ?? [propsValue]);
+  }, [propsValue]);
 
   return [val, setVal];
 }
@@ -39,7 +40,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
 
   const [remarks, setRemarks] = useStateFromProps(p.data.remarks);
   const [alerts, setAlerts] = useStateFromProps(p.data.alerts);
-  const [tags, setTags] = useStateFromProps(p.data.tags, p.data.tags.map(t => t.id));
+  const tags = useAPI(() => Promise.resolve(p.data.tags), p.data.tags.map(t => t.id));
 
   function handleAlertsClick(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -48,7 +49,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       queryName: AlertEntity,
       filterOptions: [
         { token: AlertEntity.token(a => a.target), value: p.data.caseActivity },
-        { token: AlertEntity.token().entity(e => e.recipient), value: Navigator.currentUser },
+        { token: AlertEntity.token().entity(e => e.recipient), value: AppContext.currentUser },
         { token: AlertEntity.token().entity().expression("CurrentState"), value: "Alerted" }
       ],
       columnOptions: [{ token: AlertEntity.token(e => e.target) }],
@@ -87,7 +88,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
     <span>
       {p.data.workflowActivity.toStr}
       &nbsp;
-              <a href="#" onClick={handleRemarksClick} className={classes(
+      <a href="#" onClick={handleRemarksClick} className={classes(
         "case-icon",
         !remarks && "case-icon-ghost")}>
         <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} />
@@ -97,7 +98,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
         <FontAwesomeIcon icon={"bell"} />
       </a>}
       &nbsp;
-             <InlineCaseTags case={p.data.case} defaultTags={tags} />
+      <InlineCaseTags case={p.data.case} defaultTags={tags} />
     </span>
   );
 }

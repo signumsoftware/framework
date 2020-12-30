@@ -93,16 +93,13 @@ export default function ChartTableComponent(p : ChartTableProps){
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
     .map(co => ({
       column: co,
-      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co),
+      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co, undefined),
       resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
     }));
 
+  var hasEntity = !ChartClient.hasAggregates(chartRequest);
 
-  const ctx: Finder.CellFormatterContext = {
-    refresh: undefined
-  }
-
-  var hasEntity = ChartClient.hasAggregates(chartRequest);
+  var entityFormatter = qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(undefined)).last("EntityFormatRules").formatter;
 
   return (
     <table className="sf-search-results table table-hover table-sm">
@@ -113,22 +110,33 @@ export default function ChartTableComponent(p : ChartTableProps){
             <th key={i} data-column-name={col.column.token!.fullKey}
               onClick={e=>handleHeaderClick(e, col.column)}>
               <span className={"sf-header-sort " + orderClassName(col.column)} />
-              <span> {col.column.displayName ?? col.column.token!.niceName}</span>
+              <span> {col.column.displayName || col.column.token!.niceName}</span>
             </th>)}
         </tr>
       </thead>
       <tbody>
         {
-          resultTable.rows.map((row, i) =>
-            <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
-              {hasEntity && <td>{(qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
-              {columns.map((c, j) =>
-                <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                  {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
-                </td>)
-              }
-            </tr>
-          )
+          resultTable.rows.map((row, i) => {
+            const ctx: Finder.CellFormatterContext = {
+              refresh: undefined,
+              row: row,
+              rowIndex : i,
+            }
+            return (
+              <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
+                {hasEntity &&
+                  <td className={entityFormatter.cellClass}>
+                    {entityFormatter.formatter(row, resultTable.columns, undefined)}
+                  </td>
+                }
+                {columns.map((c, j) =>
+                  <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+                    {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+                  </td>)
+                }
+              </tr>
+            );
+          })
         }
       </tbody>
     </table>

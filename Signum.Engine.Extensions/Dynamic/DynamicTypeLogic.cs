@@ -529,7 +529,7 @@ namespace Signum.Engine.Dynamic
                      
                 }.NotNull().ToString(", ");
 
-                atts.Add($"SqlDbType({props})");
+                atts.Add($"DbType({props})");
             }
 
             if (property.ColumnName.HasText())
@@ -568,7 +568,8 @@ namespace Signum.Engine.Dynamic
 
         private string ParseTableName(string value)
         {
-            var objName = ObjectName.Parse(value);
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            var objName = ObjectName.Parse(value, isPostgres);
 
             return new List<string?>
             {

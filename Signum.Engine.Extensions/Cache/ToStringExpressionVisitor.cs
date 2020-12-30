@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 
@@ -15,6 +16,14 @@ namespace Signum.Engine.Cache
     class ToStringExpressionVisitor : ExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
+
+        CachedEntityExpression root;
+
+        public ToStringExpressionVisitor(ParameterExpression param, CachedEntityExpression root)
+        {
+            this.root = root;
+            this.replacements = new Dictionary<ParameterExpression, Expression> { { param, root } };
+        }
 
         public static Expression<Func<PrimaryKey, string>> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
         {
@@ -27,10 +36,9 @@ namespace Signum.Engine.Cache
 
             var pk = Expression.Parameter(typeof(PrimaryKey), "pk");
 
-            var visitor = new ToStringExpressionVisitor
-            {
-                replacements = { { param, new CachedEntityExpression(pk, typeof(T), constructor, null) } }
-            };
+            var root = new CachedEntityExpression(pk, typeof(T), constructor, null, null);
+
+            var visitor = new ToStringExpressionVisitor(param, root);
 
             var result = visitor.Visit(lambda.Body);
 
@@ -43,7 +51,9 @@ namespace Signum.Engine.Cache
 
             if (exp is CachedEntityExpression cee)
             {
-                Field field = cee.FieldEmbedded != null ? cee.FieldEmbedded.GetField(node.Member) :
+                Field field = 
+                    cee.FieldEmbedded != null ? cee.FieldEmbedded.GetField(node.Member) :
+                    cee.FieldMixin != null ? cee.FieldMixin.GetField(node.Member) :
                     ((Table)cee.Constructor.table).GetField(node.Member);
 
                 return BindMember(cee, field, cee.PrimaryKey);
@@ -121,7 +131,12 @@ namespace Signum.Engine.Cache
 
             if (field is FieldEmbedded fe)
             {
-                return new CachedEntityExpression(previousPrimaryKey!, fe.FieldType, constructor, fe);
+                return new CachedEntityExpression(previousPrimaryKey!, fe.FieldType, constructor, fe, null);
+            }
+
+            if (field is FieldMixin fm)
+            {
+                return new CachedEntityExpression(previousPrimaryKey!, fm.FieldType, constructor, null, fm);
             }
 
             if (field is FieldMList)
@@ -142,7 +157,7 @@ namespace Signum.Engine.Cache
                 CacheLogic.GetCachedTable(entityType).Constructor :
                 constructor.cachedTable.SubTables!.SingleEx(a => a.ParentColumn == column).Constructor;
 
-            return new CachedEntityExpression(pk, entityType, typeConstructor, null!);
+            return new CachedEntityExpression(pk, entityType, typeConstructor, null, null);
         }
 
         protected override Expression VisitUnary(UnaryExpression node)
@@ -156,12 +171,41 @@ namespace Signum.Engine.Cache
         }
 
         static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
-
+        
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            var obj = base.Visit(node.Object);
+            if (node.Method.DeclaringType == typeof(string) && node.Method.Name == nameof(string.Format) ||
+              node.Method.DeclaringType == typeof(StringExtensions) && node.Method.Name == nameof(StringExtensions.FormatWith))
+            {
+                var formatStr = Visit(node.Arguments[0]);
+                var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
 
+
+                return node.Update(null, new Sequence<Expression> { formatStr, remainging });
+            }
+
+            var obj = base.Visit(node.Object);
             var args = base.Visit(node.Arguments);
+
+            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce && ce.Type.IsEntity())
+            {
+                var table = (Table)ce.Constructor.table;
+
+                if (table.ToStrColumn != null)
+                {
+                    return BindMember(ce, (FieldValue)table.ToStrColumn, null);
+                }
+                else if(this.root != ce)
+                {
+                    var cachedTableType = typeof(CachedTable<>).MakeGenericType(table.Type);
+
+                    ConstantExpression tab = Expression.Constant(ce.Constructor.cachedTable, cachedTableType);
+
+                    var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString));
+
+                    return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
+                }
+            }
 
             LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
@@ -172,14 +216,11 @@ namespace Signum.Engine.Cache
                 return this.Visit(replace);
             }
 
-            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce)
+            if (node.Method.Name == nameof(Entity.Mixin) && obj is CachedEntityExpression cee)
             {
-                var table = (Table)ce.Constructor.table;
+                var mixin = ((Table)cee.Constructor.table).GetField(node.Method);
 
-                if (table.ToStrColumn == null)
-                    throw new InvalidOperationException("Impossible to get ToStrColumn from " + ce.ToString());
-
-                return BindMember(ce, (FieldValue)table.ToStrColumn, null);
+                return GetField(mixin, cee.Constructor, cee.PrimaryKey);
             }
 
             return node.Update(obj, args);
@@ -283,11 +324,12 @@ namespace Signum.Engine.Cache
         public readonly CachedTableConstructor Constructor;
         public readonly Expression PrimaryKey;
         public readonly FieldEmbedded? FieldEmbedded;
+        public readonly FieldMixin? FieldMixin;
 
         public readonly Type type;
         public override Type Type { get { return type; } }
 
-        public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded? embedded)
+        public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded? embedded, FieldMixin? mixin)
         {
             if (primaryKey == null)
                 throw new ArgumentNullException(nameof(primaryKey));
@@ -295,14 +337,18 @@ namespace Signum.Engine.Cache
             if (primaryKey.Type.UnNullify() != typeof(PrimaryKey))
                 throw new InvalidOperationException("primaryKey should be a PrimaryKey");
 
-            if (!type.IsEmbeddedEntity())
+            if (type.IsEmbeddedEntity())
             {
-                if (((Table)constructor.table).Type != type.CleanType())
-                    throw new InvalidOperationException("Wrong type");
+                this.FieldEmbedded = embedded ?? throw new ArgumentNullException(nameof(embedded));
+            }
+            else if (type.IsMixinEntity())
+            {
+                this.FieldMixin = mixin ?? throw new ArgumentNullException(nameof(mixin));
             }
             else
             {
-                this.FieldEmbedded = embedded ?? throw new ArgumentNullException(nameof(embedded));
+                if (((Table)constructor.table).Type != type.CleanType())
+                    throw new InvalidOperationException("Wrong type");
             }
 
             this.PrimaryKey = primaryKey;
@@ -321,7 +367,7 @@ namespace Signum.Engine.Cache
             if (pk == this.PrimaryKey)
                 return this;
 
-            return new CachedEntityExpression(pk, type, Constructor, FieldEmbedded);
+            return new CachedEntityExpression(pk, type, Constructor, FieldEmbedded, FieldMixin);
         }
 
         public override string ToString()

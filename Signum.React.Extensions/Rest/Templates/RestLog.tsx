@@ -5,7 +5,7 @@ import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/L
 import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
 
 export interface RestLogState {
@@ -17,7 +17,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
   constructor(props: { ctx: TypeContext<RestLogEntity> }) {
     super(props);
-    const prefix = Navigator.toAbsoluteUrl("~/api");
+    const prefix = AppContext.toAbsoluteUrl("~/api");
     const suffix = props.ctx.subCtx(f => f.url).value.after("/api");
     const queryParams = props.ctx.value.queryString.map(mle => `${mle.element.key}=${mle.element.value}`).join("&");
     this.state = {

@@ -12,6 +12,7 @@ using Signum.React.Facades;
 using Signum.Engine.Chart;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.Authorization;
 
 namespace Signum.React.Chart
 {
@@ -28,7 +29,7 @@ namespace Signum.React.Chart
             EntityJsonConverter.AfterDeserilization.Register((ChartRequestModel cr) =>
             {
                 if (cr.ChartScript != null)
-                    cr.GetChartScript().SynchronizeColumns(cr);
+                    cr.GetChartScript().SynchronizeColumns(cr, null);
 
                 if (cr.QueryName != null)
                 {
@@ -43,7 +44,7 @@ namespace Signum.React.Chart
             EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
                 if (uc.ChartScript != null)
-                    uc.GetChartScript().SynchronizeColumns(uc);
+                    uc.GetChartScript().SynchronizeColumns(uc, null);
 
                 if (uc.Query != null)
                 {
@@ -58,14 +59,13 @@ namespace Signum.React.Chart
 
             EntityPackTS.AddExtension += ep =>
             {
-                if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized())
+                if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(UserChartEntity)).MaxDB() == TypeAllowedBasic.None)
                     return;
 
                 var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
                 if (userCharts.Any())
                     ep.extension.Add("userCharts", userCharts);
             };
-
         }
 
         private static void CustomizeChartRequest()

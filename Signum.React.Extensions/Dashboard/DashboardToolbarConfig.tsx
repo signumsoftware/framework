@@ -5,7 +5,7 @@ import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
 import { parseIcon } from './Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import * as Navigator from '@framework/Navigator';
+import * as AppContext from '@framework/AppContext'
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
    
@@ -23,6 +23,6 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
   } 
 
   isCompatibleWithUrl(res: ToolbarResponse<DashboardEntity>, location: Location, query: any): boolean {
-    return location.pathname == Navigator.toAbsoluteUrl(DashboardClient.dashboardUrl(res.content!));
+    return location.pathname == AppContext.toAbsoluteUrl(DashboardClient.dashboardUrl(res.content!));
   }
 }

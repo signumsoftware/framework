@@ -8,7 +8,7 @@ import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 
 export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {

@@ -1,30 +1,31 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import numbro from 'numbro'
-import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript, HtmlChartScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
+import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
 
@@ -40,7 +41,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   });
 
   UserChartClient.start({ routes: options.routes });
-
+  ChartPaletteClient.start({ routes: options.routes });
 
   registerChartScriptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
   registerChartScriptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
@@ -58,7 +59,9 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScriptComponent(D3ChartScript.StackedBars, () => import("./D3Scripts/StackedBars"));
   registerChartScriptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
   registerChartScriptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
-  registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/Treemap"));
+  registerChartScriptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/TreeMap"));
+
+  registerChartScriptComponent(HtmlChartScript.PivotTable, () => import("./HtmlScripts/PivotTable"));
 
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;
@@ -67,21 +70,19 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   }
 }
 
-export interface ChartComponentProps {
+export interface ChartScriptProps {
   data?: ChartTable;
   parameters: { [name: string]: string },
   loading: boolean;
-  onDrillDown: (e: ChartRow) => void;
-}
-
-export interface ChartScriptProps extends ChartComponentProps {
+  onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   width: number;
   height: number;
   initialLoad: boolean;
+  chartRequest: ChartRequestModel;
 }
 
 interface ChartScriptModule {
-  default: (React.ComponentClass<ChartComponentProps>) | ((p: ChartScriptProps) => React.ReactNode);
+  default: ((p: ChartScriptProps) => React.ReactNode);
 }
 
 const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};
@@ -154,7 +155,7 @@ export interface EnumValue {
 }
 
 export interface StringValue {
-  defaultValue: number;
+  defaultValue: string;
 }
 
 
@@ -168,14 +169,6 @@ export function getChartScripts(): Promise<ChartScript[]> {
 
 export function getChartScript(symbol: ChartScriptSymbol): Promise<ChartScript> {
   return getChartScripts().then(cs => cs.single(a => a.symbol.key == symbol.key));
-}
-
-export let colorPalettes: string[];
-export function getColorPalettes(): Promise<string[]> {
-  if (colorPalettes)
-    return Promise.resolve(colorPalettes);
-
-  return API.fetchColorPalettes().then(cs => colorPalettes = cs);
 }
 
 export function hasAggregates(chartBase: IChartBase): boolean {
@@ -333,7 +326,7 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
@@ -410,6 +403,7 @@ export module Encoder {
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
         displayName: co.element.displayName,
+        format: co.element.format,
         orderByIndex: co.element.orderByIndex,
         orderByType: co.element.orderByType,
       }) as ChartColumnOption),
@@ -448,7 +442,7 @@ export module Encoder {
 
     encodeColumn(query, co.columnOptions);
 
-    return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+    return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
   }
 
@@ -591,12 +585,35 @@ export module API {
     return v => String(v);
   }
 
-  export function getColor(token: QueryToken): ((val: unknown) => string | null) {
+  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
+
+    var tis = tryGetTypeInfos(token.type);
+
+    if (tis[0] && tis[0].kind == "Enum") {
+      var typeName = tis[0].name;
+      return v => {
+        if (v == null)
+          return "#555";
+
+        var cp = palettes[typeName];
+        return cp && cp[v as string] || null;
+      }
+    }
+
+    if (tis.some(a => a && a.kind == "Entity")) {
+      return v => {
+        if (v == null)
+          return "#555";
+
+        var cp = palettes[(v as Lite<Entity>).EntityType];
+        return cp && cp[(v as Lite<Entity>).id!] || null;
+      };
+    }
 
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -618,14 +635,18 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = token.format && toMomentFormat(token.format);
+        var format = chartColumn.format ? toMomentFormat(chartColumn.format) :
+          token.format ? toMomentFormat(token.format) :
+            undefined;
         return date == null ? String(null) : moment(date).format(format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = token.format && toNumbroFormat(token.format);
+        var format = chartColumn.format ? toNumbroFormat(chartColumn.format) :
+          token.format ? toNumbroFormat(token.format) :
+            undefined;
         return number == null ? String(null) : numbro(number).format(format);
       };
 
@@ -642,7 +663,7 @@ export module API {
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
-  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
+  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette | null }): ExecuteChartResult {
 
     var cols = request.columns.map((mle, i) => {
       const token = mle.element.token && mle.element.token.token;
@@ -654,15 +675,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
-      const niceName = getNiceName(token);
-      const color = getColor(token);
-
+      const niceName = getNiceName(token, mle.element /*capture format by ref*/);
+      const color = getColor(token, palettes);
 
       return {
         name: "c" + i,
         displayName: scriptCol.displayName,
-        title: (mle.element.displayName ?? token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
+        title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
+        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -743,8 +764,20 @@ export module API {
 
       const queryRequest = getRequest(request);
 
+      var allTypes = request.columns
+        .map(c => c.element.token)
+        .notNull()
+        .map(a => a.token && a.token.type.name)
+        .notNull()
+        .flatMap(a => tryGetTypeInfos(a))
+        .notNull()
+        .distinctBy(a => a.name);
+
+      var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+        .then(list => list.toObject(a => a.type, a => a.palette));
+
       return Finder.API.executeQuery(queryRequest, abortSignal)
-        .then(rt => toChartResult(request, rt, chartScript));
+        .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
     });
   }
 
@@ -756,12 +789,6 @@ export module API {
   export function fetchScripts(): Promise<ChartScript[]> {
     return ajaxGet({
       url: "~/api/chart/scripts"
-    });
-  }
-
-  export function fetchColorPalettes(): Promise<string[]> {
-    return ajaxGet({
-      url: "~/api/chart/colorPalettes"
     });
   }
 }

@@ -43,7 +43,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator ValueElement
         {
-            get { return this.Element.WithLocator(By.CssSelector("tr.sf-filter-value *")); }
+            get { return this.Element.WithLocator(By.CssSelector("td.sf-filter-value *")); }
         }
 
         public FilterOperation Operation
@@ -59,15 +59,15 @@ namespace Signum.React.Selenium
 
         public ValueLineProxy ValueLine()
         {
-            return new ValueLineProxy(this.Element, null!);
+            return new ValueLineProxy(this.ValueElement.Find(), null!);
         }
 
         public EntityLineProxy EntityLine()
         {
-            return new EntityLineProxy(this.Element, null!);
+            return new EntityLineProxy(this.ValueElement.Find(), null!);
         }
 
-        internal void SetValue(object value)
+        internal void SetValue(object? value)
         {
             if (value == null)
                 return; //Hack

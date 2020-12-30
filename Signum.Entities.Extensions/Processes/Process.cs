@@ -5,6 +5,7 @@ using Signum.Utilities;
 using System.ComponentModel;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Entities.Processes
 {
@@ -98,7 +99,7 @@ namespace Signum.Entities.Processes
         [NumberBetweenValidator(0, 1), Format("p")]
         public decimal? Progress { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? Status { get; set; }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
@@ -205,7 +206,7 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ProcessExceptionLineEntity : Entity
     {
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? ElementInfo { get; set; }
 
         public Lite<IProcessLineDataEntity>? Line { get; set; }
@@ -213,5 +214,9 @@ namespace Signum.Entities.Processes
         public Lite<ProcessEntity> Process { get; set; }
         
         public Lite<ExceptionEntity> Exception { get; set; }
+
+        static Expression<Func<ProcessExceptionLineEntity, string>> ToStringExpression = pel => "ProcessExceptionLine (" + pel.Id + ")";
+        [ExpressionField("ToStringExpression")]
+        public override string ToString() => "ProcessExceptionLine (" + (this.IdOrNull == null ? "New" : this.Id.ToString()) + ")";
     }
 }

@@ -68,13 +68,11 @@ namespace Signum.Engine.UserQueries
         {
             var qr = new QueryRequest()
             {
-                QueryName = userQuery.Query.ToQueryName()
+                QueryName = userQuery.Query.ToQueryName(),
+                GroupResults = userQuery.GroupResults,
             };
-            if (!userQuery.AppendFilters)
-            {
-                qr.Filters = userQuery.Filters.ToFilterList();
-            }
 
+            qr.Filters = userQuery.Filters.ToFilterList();
             qr.Columns = MergeColumns(userQuery);
             qr.Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
 
@@ -120,19 +118,11 @@ namespace Signum.Engine.UserQueries
         }
 
 
-        static void UserQueryLogic_Retrieved(UserQueryEntity userQuery)
+        static void UserQueryLogic_Retrieved(UserQueryEntity userQuery, PostRetrievingContext ctx)
         {
-            object queryName;
-            try
-            {
-                queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
-            }
-            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
-            {
-                StartParameters.IgnoredCodeErrors.Add(ex);
-
+            object? queryName = userQuery.Query.ToQueryNameCatch();
+            if(queryName == null)
                 return;
-            }
 
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 

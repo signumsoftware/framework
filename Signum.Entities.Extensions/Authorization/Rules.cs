@@ -65,8 +65,11 @@ namespace Signum.Entities.Authorization
 
         public TypeAllowed Allowed { get; set; }
 
-        public bool Equals(RuleTypeConditionEmbedded other)
+        public bool Equals(RuleTypeConditionEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return this.Condition.Equals(other.Condition)
                 && this.Allowed == other.Allowed;
         }

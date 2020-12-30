@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ifError } from '@framework/Globals'
+import { ifError, Dic } from '@framework/Globals'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { Lite } from '@framework/Signum.Entities'
@@ -110,7 +111,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   function handleOnFullScreen(e: React.MouseEvent<any>) {
     e.preventDefault();
     ChartClient.Encoder.chartPathPromise(p.chartRequest)
-      .then(path => Navigator.history.push(path))
+      .then(path => AppContext.history.push(path))
       .done();
   }
 
@@ -122,7 +123,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       filterOptions: Finder.toFilterOptions(cr.filterOptions),
     });
 
-    Navigator.pushOrOpenInTab(path, e);
+    AppContext.pushOrOpenInTab(path, e);
   }
   const qd = queryDescription;
   if (qd == undefined)
@@ -133,6 +134,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   const loading = resultAndLoading?.loading;
   const result = resultAndLoading?.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
+
   return (
     <div>
       <h2>

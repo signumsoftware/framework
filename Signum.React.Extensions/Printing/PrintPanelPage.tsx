@@ -7,7 +7,7 @@ import * as Navigator from '@framework/Navigator'
 import { PrintLineState, PrintLineEntity, PrintPackageEntity } from './Signum.Entities.Printing'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
-import { useAPI } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI } from '@framework/Hooks'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 
 export default function PrintPanelPage(p: {}) {

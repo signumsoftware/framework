@@ -89,6 +89,8 @@ namespace Signum.Engine.Word
                     Delete = (e, _) => e.Delete(),
                 }.Register();
 
+                sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
+
                 PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
                 WordModelLogic.Start(sb);
@@ -162,6 +164,16 @@ namespace Signum.Engine.Word
             }
         }
 
+        private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
+        {
+            object? queryName = template.Query.ToQueryNameCatch();
+            if (queryName == null)
+                return;
+
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
+
+            template.ParseData(description);
+        }
 
         public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
         {
@@ -338,7 +350,7 @@ namespace Signum.Engine.Word
                                 var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity, parsedFileName);
 
                                 p.Switch("MakeQuery");
-                                renderer.MakeQuery();
+                                renderer.ExecuteQuery();
 
                                 p.Switch("RenderNodes");
                                 renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
@@ -574,7 +586,7 @@ namespace Signum.Engine.Word
             return result;
         }
 
-        public static void GenerateWordTemplates()
+        public static void GenerateDefaultTemplates()
         {
             var wordModels = Database.Query<WordModelEntity>().Where(se => !se.WordTemplates().Any()).ToList();
 

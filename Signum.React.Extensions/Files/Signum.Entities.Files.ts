@@ -4,14 +4,13 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns'
 
 export interface IFile
 {
-	__isFile__ : true; //only for type-checking
-    binaryFile?: string | null;
-    fileName?: string | null;
-    fullWebPath?: string | null;
+  __isFile__ : true; //only for type-checking
+  binaryFile?: string | null;
+  fileName?: string | null;
+  fullWebPath?: string | null;
 }
 
 export interface FileEntity extends IFile { }
@@ -19,12 +18,17 @@ export interface FileEmbedded extends IFile { }
 
 export interface IFilePath extends IFile
 {
-   fileType?: FileTypeSymbol | null;
-   suffix?: string | null;
+  fileType?: FileTypeSymbol | null;
+  suffix?: string | null;
 }
 
 export interface FilePathEntity extends IFilePath { }
-export interface FilePathEmbedded extends IFilePath { }
+export interface FilePathEmbedded extends IFilePath {
+  entityId: Entities.PrimaryKey;
+  mListRowId: Entities.PrimaryKey | null;
+  propertyRoute: string;
+  rootType: string;
+}
 
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
@@ -66,6 +70,7 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
   fileName: string;
   binaryFile: string;
+  hash: string | null;
   fileLength: number;
   suffix: string;
   calculatedDirectory: string | null;
@@ -73,11 +78,12 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");
-export interface FilePathEntity extends Patterns.LockableEntity {
+export interface FilePathEntity extends Entities.Entity {
   Type: "FilePath";
   creationDate: string;
   fileName: string;
   binaryFile: string;
+  hash: string | null;
   fileLength: number;
   suffix: string;
   calculatedDirectory: string | null;

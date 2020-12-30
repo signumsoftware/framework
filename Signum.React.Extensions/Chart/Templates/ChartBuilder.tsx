@@ -5,6 +5,7 @@ import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
+import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
@@ -22,7 +23,7 @@ export interface ChartBuilderProps {
 export default function ChartBuilder(p: ChartBuilderProps) {
   const forceUpdate = useForceUpdate();
 
-  const colorPalettes = useAPI(signal => ChartClient.getColorPalettes(), []);
+  const colorPalettes = useAPI(signal => ChartPaletteClient.getColorPaletteTypes(), []);
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
   function chartTypeImgClass(script: ChartScript): string {
@@ -46,6 +47,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   function handleTokenChange(cc: ChartColumnEmbedded) {
     cc.displayName = null!;
+    cc.format = null!;
     cc.modified = true;
     forceUpdate();
     p.onTokenChange();
@@ -70,60 +72,15 @@ export default function ChartBuilder(p: ChartBuilderProps) {
   }
 
 
-  function renderParameters(chartScript: ChartScript) {
-    var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+  
 
-    return (
-      <fieldset className="sf-chart-parameters">
-        <div className="row">
-          {
-            chartScript.parameterGroups.map((gr, i) =>
-              <div className="col-sm-2" key={i}>
-                <span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>
-                {gr.parameters.map((p, j) => parameterDic[p.name] ? getParameterValueLine(parameterDic[p.name], p, j) : <p key={p.name} className="text-danger">{p.name}</p>)}
-              </div>
-            )
-          }
-        </div>
-      </fieldset>
-    );
-  }
 
-  function getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, j: number) {
-    const chart = p.ctx.value;
-
-    const vl: ValueLineProps = {
-      ctx: ctx.subCtx(a => a.value, { labelColumns: { sm: 6 } }),
-      labelText: scriptParameter.name!,
-    };
-
-    if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
-      vl.valueLineType = "TextBox";
-    }
-    else if (scriptParameter.type == "Enum") {
-      vl.valueLineType = "ComboBox";
-
-      const tokenEntity = scriptParameter.columnIndex == undefined ? undefined : chart.columns[scriptParameter.columnIndex].element.token;
-
-      const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || tokenEntity == undefined || ChartClient.isChartColumnType(tokenEntity.token, a.typeFilter));
-      if (compatible.length <= 1)
-        vl.ctx.styleOptions.readOnly = true;
-
-      vl.comboBoxItems = compatible.map(ev => ({
-        value: ev.name,
-        label: ev.name
-      } as OptionItem));
-
-      vl.valueHtmlAttributes = { size: null as any };
-    }
-    vl.onChange = handleOnRedraw;
-
-    return <ValueLine key={j} {...vl} />;
-  }
 
   const chart = p.ctx.value;
 
   const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
+
+  var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
   return (
     <div className="row sf-chart-builder">
@@ -162,16 +119,114 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
                     queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
                     onRedraw={handleOnRedraw}
-                    onOrderChanged={handleOrderChart} colorPalettes={colorPalettes!} />)
+                    onOrderChanged={handleOrderChart} colorPalettes={colorPalettes!} columnIndex={i} parameterDic={parameterDic} />)
                 }
               </tbody>
             </table>
           </div>
         </div>
-        {chartScript && renderParameters(chartScript)}
+        {chartScript && <Parameters chart={p.ctx.value} chartScript={chartScript} parameterDic={parameterDic} columnIndex={null} onRedraw={handleOnRedraw} />}
       </div>
     </div >
   );
 }
 
+export function Parameters(props: {
+  chartScript: ChartScript,
+  chart: IChartBase,
+  onRedraw?: () => void,
+  parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
+  columnIndex: number | null
+}) {
+
+
+  var groups = props.chartScript.parameterGroups
+    .filter(gr => gr.parameters.some(param => param.columnIndex == props.columnIndex))
+    .map((gr, i) =>
+      <div className={props.columnIndex == null ? "col-sm-2" : "col-sm-3"} key={i} >
+        {gr.name && < span style={{ color: "gray", textDecoration: "underline" }}>{gr.name}</span>}
+        {gr.parameters
+          .filter(sp => sp.columnIndex == props.columnIndex)
+          .map((sp, j) => props.parameterDic[sp.name] ?
+            <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
+            <p key={sp.name} className="text-danger">{sp.name}</p>)}
+      </div>
+    );
+
+  if (groups.length == 0)
+    return null;
+
+  if (props.columnIndex == null)
+    return (
+      <fieldset className="sf-chart-parameters">
+        <div className="row">
+          {groups}
+        </div>
+      </fieldset>
+    );
+  else
+    return (
+      <div className="sf-chart-parameters">
+        <div className="row">
+          {groups}
+        </div>
+      </div>
+    );
+}
+
+function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
+
+  const forceUpdate = useForceUpdate();
+  const token = scriptParameter.columnIndex == undefined ? undefined :
+    chart.columns[scriptParameter.columnIndex].element.token?.token;
+
+  let resetValue: string | undefined = undefined;
+
+  const vl: ValueLineProps = {
+    ctx: ctx.subCtx(a => a.value),
+    labelText: scriptParameter.name!,
+  };
+
+  if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
+    vl.valueLineType = "TextBox";
+    vl.valueHtmlAttributes = { onBlur: onRedraw };
+  }
+  else if (scriptParameter.type == "Enum") {
+    vl.valueLineType = "ComboBox";
+    vl.type = { name: "string", isNotNullable: true };
+
+    const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
+
+    if (compatible.length <= 1)
+      vl.ctx.styleOptions.readOnly = true;
+
+    if (!compatible.some(c => c.name == ctx.value.value)) {
+      resetValue = compatible.firstOrNull()?.name;
+    }
+
+    vl.comboBoxItems = compatible.map(ev => ({
+      value: ev.name,
+      label: ev.name
+    } as OptionItem));
+
+    vl.valueHtmlAttributes = { size: null as any };
+    vl.onChange = onRedraw;
+  }
+
+  if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
+    vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
+
+  React.useEffect(() => {
+    if (resetValue !== undefined) {
+      ctx.value.value = resetValue;
+      forceUpdate();
+      if (onRedraw) {
+        onRedraw();
+      }
+    }
+
+  }, [resetValue])
+
+  return <ValueLine {...vl} />;
+}
 

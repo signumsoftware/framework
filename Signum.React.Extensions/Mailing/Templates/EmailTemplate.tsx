@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded } from '../Signum.Entities.Mailing'
@@ -7,25 +7,85 @@ import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templat
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
-import IFrameRenderer from './IFrameRenderer'
+import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
-import { useForceUpdate } from '@framework/Hooks'
+import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
+import { QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
+import { Tabs, Tab } from 'react-bootstrap';
 
-export default function EmailTemplate(p : { ctx: TypeContext<EmailTemplateEntity> }){
+export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
   const forceUpdate = useForceUpdate();
 
   function renderQueryPart() {
     const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
     const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
+    var canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
     return (
       <div>
-        <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()} getComponent={renderContact} />
-        <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()} getComponent={renderRecipient} />
-        <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} />
-        <EntityLine ctx={ec.subCtx(e => e.masterTemplate)} />
-        <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} />
+        <div className="mb-4">
+          <Tabs id={ctx.prefix + "tabs"}>
+            <Tab eventKey="recipients" title={ctx.niceName(a => a.recipients)}>
+              <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()} getComponent={renderContact} />
+              <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
+              <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()} getComponent={renderRecipient} />
+            </Tab>
+            <Tab eventKey="attachments" title={
+              <span style={{ fontWeight: ctx.value.attachments.length > 0 ? "bold" : undefined }}>
+                {ctx.niceName(a => a.attachments)}
+              </span>}>
+              <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} avoidFieldSet={true} onChange={() => forceUpdate()} />
+            </Tab>
+            <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
+              {ctx.niceName(a => a.query)}
+            </span>}>
 
+              <div className="row">
+                <div className="col-sm-4">
+                  <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox />
+                </div>
+                <div className="col-sm-4">
+                  <ValueLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
+                </div>
+                <div className="col-sm-4">
+                </div>
+              </div>
+
+              <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
+                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                queryKey={ctx.value.query!.key}
+                showUserFilters={true} />
+              <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+                {
+                  property: a => a.token,
+                  template: ctx => <QueryTokenEmbeddedBuilder
+                    ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                    queryKey={p.ctx.value.query!.key}
+                    subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+                },
+                { property: a => a.orderType }
+              ])} />
+            </Tab>
+            <Tab eventKey="applicable" title={
+              <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
+                {ctx.niceName(a => a.applicable)}
+              </span>}>
+              <EntityDetail ctx={ctx3.subCtx(e => e.applicable)} onChange={forceUpdate}
+                getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />
+            </Tab>
+          </Tabs>
+        </div>
+
+        <div className="row">
+          <div className="col-sm-4">
+            <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} inlineCheckbox={true} />
+          </div>
+          <div className="col-sm-4">
+            <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
+          </div>
+        </div>
+        <EntityLine ctx={ec.subCtx(e => e.masterTemplate)} />
         <div className="sf-email-replacements-container">
           <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEmbedded>) =>
             <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query!.key!} invalidate={() => forceUpdate()} />} />
@@ -108,19 +168,6 @@ export default function EmailTemplate(p : { ctx: TypeContext<EmailTemplateEntity
         remove={ctx.value.from == undefined &&
           (ctx.value.recipients == null || ctx.value.recipients.length == 0) &&
           (ctx.value.messages == null || ctx.value.messages.length == 0)} />
-      <div className="row">
-        <div className="col-sm-4">
-          <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
-        </div>
-        <div className="col-sm-4">
-          <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox={true} />
-        </div>
-        <div className="col-sm-4">
-          <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
-        </div>
-      </div>
-      {ctx3.value.query && <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
-        getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />}
 
       {ctx3.value.query && renderQueryPart()}
     </div>
@@ -133,9 +180,10 @@ export interface EmailTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentProps){
+export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentProps) {
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(false);
+  const showPreviewRef = useUpdatedRef(showPreview);
 
   function handlePreviewClick(e: React.FormEvent<any>) {
     e.preventDefault();
@@ -143,7 +191,7 @@ export function EmailTemplateMessageComponent(p : EmailTemplateMessageComponentP
   }
 
   function handleCodeMirrorChange() {
-    if (showPreview)
+    if (showPreviewRef.current)
       forceUpdate();
   }
 

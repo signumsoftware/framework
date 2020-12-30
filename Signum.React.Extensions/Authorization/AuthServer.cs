@@ -15,6 +15,7 @@ using Signum.React.Maps;
 using Microsoft.AspNetCore.Builder;
 using Signum.React.ApiControllers;
 using Signum.Engine;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Authorization
 {
@@ -24,9 +25,9 @@ namespace Signum.React.Authorization
 
         public static Action<ActionContext, UserEntity> UserPreLogin;
         public static Action<ActionContext, UserEntity> UserLogged;
-        public static Action<UserEntity> UserLoggingOut;
+        public static Action<ActionContext, UserEntity> UserLoggingOut;
 
-
+        
         public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
@@ -43,15 +44,36 @@ namespace Signum.React.Authorization
 
             if (TypeAuthLogic.IsStarted)
             {
-                ReflectionServer.AddTypeExtension += (ti, t) =>
+                ReflectionServer.TypeExtension += (ti, t) =>
                 {
                     if (typeof(Entity).IsAssignableFrom(t))
                     {
-                        var ta = UserEntity.Current != null ? TypeAuthLogic.GetAllowed(t) : null;
+                        if (UserEntity.Current == null)
+                            return null;
+                        
+                        var ta = TypeAuthLogic.GetAllowed(t);
 
-                        ti.Extension.Add("maxTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
-                        ti.Extension.Add("minTypeAllowed", ta == null ? TypeAllowedBasic.None : ta.MinUI());
-                        ti.RequiresEntityPack |= ta != null && ta.Conditions.Any();
+                        if (ta.MaxUI() == TypeAllowedBasic.None)
+                            return null;
+
+                        ti.Extension.Add("maxTypeAllowed", ta.MaxUI());
+                        ti.Extension.Add("minTypeAllowed", ta.MinUI());
+                        ti.RequiresEntityPack |= ta.Conditions.Any();
+
+                        return ti;
+                    }
+                    else
+                    {
+                        if (t.HasAttribute<AllowUnathenticatedAttribute>())
+                            return ti;
+
+                        if (UserEntity.Current == null)
+                            return null;
+
+                        if (!AuthServer.IsNamespaceAllowed(t))
+                            return null;
+
+                        return ti;
                     }
                 };
 
@@ -87,52 +109,94 @@ namespace Signum.React.Authorization
 
             if (QueryAuthLogic.IsStarted)
             {
-                ReflectionServer.AddTypeExtension += (ti, t) =>
+                ReflectionServer.TypeExtension += (ti, t) =>
                 {
                     if (ti.QueryDefined)
-                        ti.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(t));
+                    {
+                        var allowed = UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(t);
+                        if (allowed == QueryAllowed.None)
+                            ti.QueryDefined = false;
+
+                        ti.Extension.Add("queryAllowed", allowed);
+                    }
+
+                    return ti;
                 };
 
-                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
+                ReflectionServer.FieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.DeclaringType!.Name.EndsWith("Query"))
-                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)!));
+                    {
+                        var allowed = UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)!);
+
+                        if (allowed == QueryAllowed.None)
+                            return null;
+
+                        mi.Extension.Add("queryAllowed", allowed);
+                    }
+                    return mi;
                 };
 
             }
 
             if (PropertyAuthLogic.IsStarted)
             {
-                ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
+                ReflectionServer.PropertyRouteExtension += (mi, pr) =>
                 {
-                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? pr.GetNoUserPropertyAllowed() : pr.GetPropertyAllowed());
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                    if (allowed == PropertyAllowed.None)
+                        return null;
+
+                    mi.Extension.Add("propertyAllowed", allowed);
+                    return mi;
                 };
 
+                EntityJsonConverter.CanReadPropertyRoute = pr =>
+                {
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+
+                    return allowed == PropertyAllowed.None ? "Not allowed" : null;
+                };
+
+                EntityJsonConverter.CanWritePropertyRoute = pr =>
+                {
+                    var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+
+                    return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
+                };
             }
 
             if (OperationAuthLogic.IsStarted)
             {
-                ReflectionServer.AddOperationExtension += (oits, oi, type) =>
+                ReflectionServer.OperationExtension += (oits, oi, type) =>
                 {
-                    oits.Extension.Add("operationAllowed",
-                               UserEntity.Current == null ? false :
-                               OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true));
+                    var allowed = UserEntity.Current == null ? false :
+                               OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true);
+
+                    if (!allowed)
+                        return null;
+
+                    return oits;
                 };
 
             }
 
             if (PermissionAuthLogic.IsStarted)
             {
-                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
+                ReflectionServer.FieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
-                        mi.Extension.Add("permissionAllowed",
-                            UserEntity.Current == null ? false :
-                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)!));
+                    {
+                        var allowed = UserEntity.Current == null ? false :
+                            PermissionAuthLogic.IsAuthorized((PermissionSymbol)fi.GetValue(null)!);
+
+                        if (allowed == false)
+                            return null;
+                    }
+
+                    return mi;
                 };
-
             }
-
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);
             var pcs = PropertyConverter.GetPropertyConverters(typeof(UserEntity));
@@ -169,6 +233,26 @@ namespace Signum.React.Authorization
 
             SchemaMap.GetColorProviders += GetMapColors;
         }
+
+        public static ResetLazy<Dictionary<string, List<Type>>> entitiesByNamespace =
+            new ResetLazy<Dictionary<string, List<Type>>>(() => Schema.Current.Tables.Keys.Where(t => !EnumEntity.IsEnumEntity(t)).GroupToDictionary(t => t.Namespace!));
+
+        public static bool IsNamespaceAllowed(Type type)
+        {
+            var func = ReflectionServer.OverrideIsNamespaceAllowed.TryGetC(type.Namespace!);
+
+            if (func != null)
+                return func();
+
+            var typesInNamespace = entitiesByNamespace.Value.TryGetC(type.Namespace!);
+            if (typesInNamespace != null)
+                return typesInNamespace.Any(t => TypeAuthLogic.GetAllowed(t).MaxUI() > TypeAllowedBasic.None);
+
+
+            throw new InvalidOperationException(@$"Unable to determine whether the metadata for '{type.FullName}' should be delivered to the client for role '{RoleEntity.Current}' because there are no entities in the namespace '{type.Namespace!}'.");
+        }
+
+
 
         static GenericInvoker<Func<int>> giCountReadonly = new GenericInvoker<Func<int>>(() => CountReadonly<Entity>());
         public static int CountReadonly<T>() where T : Entity

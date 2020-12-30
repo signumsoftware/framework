@@ -148,7 +148,7 @@ namespace Signum.Entities.SMS
         public CultureInfoEntity? CultureInfo { get; set; }
 
         public override bool Equals(object? obj) => obj is SMSOwnerData sms && Equals(sms);
-        public bool Equals(SMSOwnerData other)
+        public bool Equals(SMSOwnerData? other)
         {
             return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
         }

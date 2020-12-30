@@ -21,7 +21,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string TypeName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string typeDefinition;
         [StringLengthValidator(Min = 3)]
         public string TypeDefinition

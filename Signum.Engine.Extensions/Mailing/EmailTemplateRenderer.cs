@@ -7,6 +7,7 @@ using Signum.Engine.Templating;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
+using Signum.Entities.UserQueries;
 using Signum.Utilities;
 
 namespace Signum.Engine.Mailing
@@ -19,8 +20,9 @@ namespace Signum.Engine.Mailing
         object queryName;
         QueryDescription qd;
         EmailSenderConfigurationEntity? smtpConfig;
+        CultureInfo? cultureInfo;
 
-        public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, IEmailModel? model)
+        public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, IEmailModel? systemEmail, CultureInfo? cultureInfo)
         {
             this.template = template;
             this.entity = entity;
@@ -28,7 +30,8 @@ namespace Signum.Engine.Mailing
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
             this.qd = QueryLogic.Queries.QueryDescription(queryName);
-            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (model?.UntypedEntity as Entity ?? entity)?.ToLite());
+            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (systemEmail?.UntypedEntity as Entity)?.ToLiteFat(), null);
+            this.cultureInfo = cultureInfo;
         }
 
         ResultTable table = null!;
@@ -49,11 +52,9 @@ namespace Signum.Engine.Mailing
                     {
                         var ci = EmailTemplateLogic.GetCultureInfo != null
                             ? EmailTemplateLogic.GetCultureInfo(entity ?? model?.UntypedEntity as Entity)
-                            : (recipients
-                                .Where(a => a.Kind == EmailRecipientKind.To)
-                                .Select(a => a.OwnerData.CultureInfo)
-                                .FirstOrDefault() ?? EmailLogic.Configuration.DefaultCulture
-                              ).ToCultureInfo();
+                            : this.cultureInfo ?? 
+                                recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
+                                EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
                         email = new EmailMessageEntity
                         {
@@ -309,15 +310,22 @@ namespace Signum.Engine.Mailing
                 var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = model != null ? model.GetFilters(qd) :
-                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) };
+                    entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) } :
+                    throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
+
+                filters.AddRange(template.Filters.ToFilterList());
+
+                var orders = model?.GetOrders(qd) ?? new List<Order>();
+                orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());
 
                 this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
                 {
                     QueryName = queryName,
+                    GroupResults = template.GroupResults,
                     Columns = columns,
                     Pagination = model?.GetPagination() ?? new Pagination.All(),
                     Filters = filters,
-                    Orders = model?.GetOrders(qd) ?? new List<Order>(),
+                    Orders = orders,
                 });
 
                 this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);

@@ -21,7 +21,19 @@ namespace Signum.Engine.Translation
         public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
          new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
+        public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectory = GetTargetDirectoryDefault;
+        public static string GetTargetDirectoryDefault(System.IO.FileInfo fi, string appName, string rootDir)
+        {
 
+            var targetDirectory =
+                      fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
+                      fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
+                      fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
+                      fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
+                      throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+
+            return targetDirectory;
+        }
 
         public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
@@ -140,20 +152,31 @@ namespace Signum.Engine.Translation
         {
             var currentDirectory = Directory.GetCurrentDirectory();
 
-            var rootDir = currentDirectory.Before(@".Load\bin");
+            var rootDir = currentDirectory.Before(@".Terminal\bin");
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin\").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
+            var parentDir = $@"{rootDir}\{appName}.React\bin\";
+
+            var reactDirs = new DirectoryInfo(parentDir).GetDirectories("Translations", SearchOption.AllDirectories).ToList();
+
+            if(reactDirs.Count == 0)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "No Translations directory found in: " + parentDir);
+                return;
+            }
+
+            var reactDir = reactDirs.Only() ??
+                reactDirs.ChooseConsole(
+                    message: $"More than one 'Translations' folder found in '{parentDir}'",
+                    getString: d => $"{d.FullName} ({d.GetFiles("*.xml").Max(a => (DateTime?)a.LastWriteTime)?.ToAgoString() ?? "-No Files-"})");
+
+            if (reactDir == null)
+                return;
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {
-                var targetDirectory =
-                    fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
-                    fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
-                    fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
-                    fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
-                    throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+                var targetDirectory = GetTargetDirectory(fi, appName, rootDir);
 
                 if (!Directory.Exists(targetDirectory))
                     Directory.CreateDirectory(targetDirectory);

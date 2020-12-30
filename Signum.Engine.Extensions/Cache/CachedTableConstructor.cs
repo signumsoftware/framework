@@ -49,7 +49,7 @@ namespace Signum.Engine.Cache
 
         internal string CreatePartialInnerJoin(IColumn column)
         {
-            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias, column.Name);
+            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias, column.Name.SqlEscape(Schema.Current.Settings.IsPostgres));
         }
 
         internal Type GetColumnType(IColumn column)
@@ -202,7 +202,7 @@ namespace Signum.Engine.Cache
 
                 cachedTable.subTables.Add(ctb);
 
-                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetMList"), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
+                return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList)), NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
             }
 
             throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));

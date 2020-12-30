@@ -255,7 +255,7 @@ namespace Signum.Engine.Templating
                 {
                     string v = tokenString.TryBefore('.') ?? tokenString;
 
-                    if (!Variables.TryGetValue(v, out ValueProviderBase prov))
+                    if (!Variables.TryGetValue(v, out ValueProviderBase? prov))
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
 
                     var provToken = prov as TokenValueProvider;

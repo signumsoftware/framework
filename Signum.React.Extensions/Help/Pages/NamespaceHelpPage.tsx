@@ -2,15 +2,15 @@ import * as React from 'react'
 import { RouteComponentProps, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
-import { useAPI, useTitle, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
+import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Entities.Help';
-import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
+import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetTypeInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
 import * as Operations from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
-import { getOperationInfo } from '../../../../Framework/Signum.React/Scripts/Operations';
+import { useTitle } from '@framework/AppContext';
 
 
 export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: string }>) {
@@ -43,7 +43,9 @@ export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: st
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>, onSuccess: () => void }) {
 
-  if (!Operations.isOperationAllowed(NamespaceHelpOperation.Save, NamespaceHelpEntity))
+  var oi = Operations.tryGetOperationInfo(NamespaceHelpOperation.Save, NamespaceHelpEntity);
+
+  if (!oi)
     return null;
 
   function onClick() {
@@ -55,5 +57,5 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
       .done();
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(NamespaceHelpOperation.Save, NamespaceHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;
 }

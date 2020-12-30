@@ -20,6 +20,7 @@ using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
 using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Workflow
 {
@@ -690,9 +691,9 @@ namespace Signum.Engine.Workflow
                         switch (timer.Type)
                         {
                             case WorkflowEventType.BoundaryForkTimer:
-                                ExecuteTimerFork(ca, timer);
-                                break;
                             case WorkflowEventType.BoundaryInterruptingTimer:
+                                ExecuteBoundaryTimer(ca, timer);
+                                break;
                             case WorkflowEventType.IntermediateTimer:
                                 ExecuteStep(ca, DoneType.Timeout, timer.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
                                 break;
@@ -835,16 +836,7 @@ namespace Signum.Engine.Workflow
                     SaveEntity(ca.Case.MainEntity);
                 }
 
-                ca.DoneBy = UserEntity.Current.ToLite();
-                ca.DoneDate = TimeZoneManager.Now;
-                ca.DoneType = doneType;
-                ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
-                ca.Save();
-
-                ca.Notifications()
-                   .UnsafeUpdate()
-                   .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
-                   .Execute();
+                ca.MakeDone(doneType);
 
                 var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
 
@@ -922,8 +914,24 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void ExecuteTimerFork(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
+            private static void ExecuteBoundaryTimer(CaseActivityEntity ca, WorkflowEventEntity boundaryEvent)
             {
+                switch (boundaryEvent.Type)
+                {
+                    case WorkflowEventType.BoundaryForkTimer:
+                        new CaseActivityExecutedTimerEntity
+                        {
+                            BoundaryEvent = boundaryEvent.ToLite(),
+                            CaseActivity = ca.ToLite(),
+                        }.Save();
+                        break;
+                    case WorkflowEventType.BoundaryInterruptingTimer:
+                        ca.MakeDone(DoneType.Timeout);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected Boundary Timer Type " + boundaryEvent.Type);
+                }
+
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
                 var @case = ca.Case;
@@ -934,16 +942,11 @@ namespace Signum.Engine.Workflow
                 };
 
                 ctx.ExecuteConnection(connection);
+
                 if (!FindNext(connection.To, ctx))
                     return;
 
-                CreateNextActivities(@case, ctx, ca);
-
-                new CaseActivityExecutedTimerEntity
-                {
-                    BoundaryEvent = boundaryEvent.ToLite(),
-                    CaseActivity = ca.ToLite(),
-                }.Save();
+                FinishStep(ca.Case, ctx, ca);
             }
 
             private static void ExecuteInitialStep(CaseEntity @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
@@ -1176,7 +1179,10 @@ namespace Signum.Engine.Workflow
                     if (caseActivity != null)
                     {
                         if (node.Is(ctx.CaseActivity!.WorkflowActivity))
-                            caseActivity = ctx.CaseActivity;
+                        {
+                            //caseActivity = ctx.CaseActivity;
+                            throw new InvalidOperationException("Unexpected BoundaryTimer with WorkflowEvent in CaseActivity");
+                        }
 
                         if (caseActivity.DoneDate.HasValue)
                             return BoolBox.True(caseActivity);
@@ -1258,7 +1264,13 @@ namespace Signum.Engine.Workflow
                             case WorkflowGatewayType.Inclusive:
                             case WorkflowGatewayType.Parallel:
 
-                                if (connections.All(wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)))
+                                var graph = WorkflowLogic.GetWorkflowNodeGraph(node.Lane.Pool.Workflow.ToLite());
+
+                                var trackGroups = connections.AgGroupToDictionary(
+                                    wc => graph.TrackId.GetOrThrow(wc.From), 
+                                    wcs => wcs.ToDictionaryEx(wc => wc, wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)));
+
+                                if (trackGroups.All(kvp => kvp.Value.Values.Any(a => a))) // Every Parallel gets implicit Exclusive Join behaviour for each Track ID group. 
                                     return BoolBox.True(null);
                                 else
                                     return BoolBox.False;
@@ -1332,6 +1344,20 @@ namespace Signum.Engine.Workflow
                     return true;
                 }
             }
+        }
+
+        private static void MakeDone(this CaseActivityEntity ca, DoneType doneType) 
+        {
+            ca.DoneBy = UserEntity.Current.ToLite();
+            ca.DoneDate = TimeZoneManager.Now;
+            ca.DoneType = doneType;
+            ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
+            ca.Save();
+
+            ca.Notifications()
+               .UnsafeUpdate()
+               .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+               .Execute();
         }
 
         private static void OverrideCaseActivityMixin(SchemaBuilder sb)

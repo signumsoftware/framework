@@ -13,7 +13,10 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
   Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
     isVisible: eoc => couldHaveNotes!(eoc.entity.Type),
-    contextual: { icon: "sticky-note", iconColor: "#0e4f8c", color: "info", isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
+    icon: "sticky-note",
+    iconColor: "#0e4f8c",
+    color: "info",
+    contextual: { isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
   }));
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
@@ -21,9 +24,8 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
     parentToken: NoteEntity.token(e => e.target),
     parentValue: ctx.lite
   }, {
-      isVisible: AuthClient.navigatorIsViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
-      icon: "sticky-note",
-      iconColor: "#337ab7",
-      isShy: true
-    }));
+    isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
+    icon: "sticky-note",
+    iconColor: "#337ab7",
+  }));
 }

@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { QueryRequest } from '@framework/FindOptions'
 import { Lite } from '@framework/Signum.Entities'
-import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelPermission } from './Signum.Entities.Excel'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
@@ -21,16 +21,19 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
     if (!ctx.searchControl.props.showBarExtension ||
-      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false) ||
-      !Navigator.isViewable(ExcelReportEntity))
+      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false))
       return undefined;
 
-    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} /> };
+    if (!(options.plainExcel && AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
+      !(options.excelReport && Navigator.isViewable(ExcelReportEntity)))
+      return undefined;
+
+    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport && Navigator.isViewable(ExcelReportEntity)} /> };
   });
 
   if (options.plainExcel) {
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel))
         return undefined;
 
       return (
@@ -47,7 +50,6 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 export namespace API {
 
   export function generatePlainExcel(request: QueryRequest, overrideFileName?: string): void {
-    debugger;
     ajaxPostRaw({ url: "~/api/excel/plain" }, request)
       .then(response => saveFile(response, overrideFileName))
       .done();

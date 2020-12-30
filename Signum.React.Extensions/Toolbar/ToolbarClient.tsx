@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
@@ -57,7 +58,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
-      Navigator.pushOrOpenInTab(url, e);
+      AppContext.pushOrOpenInTab(url, e);
     }).done();
   }
 }

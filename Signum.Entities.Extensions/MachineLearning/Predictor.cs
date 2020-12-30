@@ -25,7 +25,7 @@ namespace Signum.Entities.MachineLearning
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
 
-        
+
         public PredictorSettingsEmbedded Settings { get; set; }
 
         public PredictorAlgorithmSymbol Algorithm { get; set; }
@@ -77,7 +77,7 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        
+
         public QueryEntity Query { get; set; }
 
         public bool GroupResults { get; set; }
@@ -217,7 +217,7 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorColumnUsage Usage { get; set; }
 
-        
+
         public QueryTokenEmbedded Token { get; set; }
 
         public PredictorColumnEncodingSymbol Encoding { get; set; }
@@ -246,8 +246,11 @@ namespace Signum.Entities.MachineLearning
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
         public override bool Equals(object? obj) => obj is PredictorColumnEmbedded c && Equals(c);
-        public bool Equals(PredictorColumnEmbedded other)
+        public bool Equals(PredictorColumnEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
         }
 
@@ -311,13 +314,13 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        [NotNullValidator(Disabled =true)]
+        [NotNullValidator(Disabled = true)]
         public Lite<PredictorEntity> Predictor { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        
+
         public QueryEntity Query { get; set; }
 
         [PreserveOrder]
@@ -331,13 +334,11 @@ namespace Signum.Entities.MachineLearning
 
         public void ParseData(QueryDescription description)
         {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
 
-            if (Columns != null)
-                foreach (var a in Columns)
-                    a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+            foreach (var a in Columns)
+                a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
         public PredictorSubQueryEntity Clone() => new PredictorSubQueryEntity
@@ -362,7 +363,7 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorSubQueryColumnUsage Usage { get; set; }
 
-        
+
         public QueryTokenEmbedded Token { get; set; }
 
         public PredictorColumnEncodingSymbol Encoding { get; set; }
@@ -403,8 +404,11 @@ namespace Signum.Entities.MachineLearning
         public override string ToString() => $"{Usage} {Token} {Encoding}";
 
         public override bool Equals(object? obj) => obj is PredictorSubQueryColumnEmbedded c && Equals(c);
-        public bool Equals(PredictorSubQueryColumnEmbedded other)
+        public bool Equals(PredictorSubQueryColumnEmbedded? other)
         {
+            if (other == null)
+                return false;
+
             return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
         }
 

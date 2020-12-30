@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as moment from 'moment';
-import * as QueryString from 'query-string';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -12,9 +11,10 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
 import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { EntityOperationSettings, EntityOperationContext, assertOperationInfoAllowed } from '@framework/Operations'
+import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
@@ -50,7 +50,8 @@ import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { EntityLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
 import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
-import { FunctionalAdapter } from '../../../Framework/Signum.React/Scripts/Frames/FrameModal';
+import { FunctionalAdapter } from '@framework/Modals';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -103,9 +104,9 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   ]);
 
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
-    new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
-      Navigator.API.fetchAndForget(ctx.lite)
-        .then(ca => Navigator.navigate(ca.case, { extraProps: { caseActivity: ca } }))
+    new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
+      API.fetchCaseFlowPack(ctx.lite)
+        .then(result => Navigator.navigate(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
         .done();
     },
@@ -121,7 +122,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     queryName: CaseActivityEntity,
     defaultFilters: [
       { token: CaseActivityEntity.token(a => a.doneDate).expression("HasValue"), value: null, pinned: { active: "WhenHasValue", column: 1, label: "Is Done" } },
-      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { active: "WhenHasValue", column: 2, label: WorkflowActivityEntity.niceName() } },
+      { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity), pinned: { active: "WhenHasValue", column: 2, label: () => WorkflowActivityEntity.niceName() } },
       { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(w => w.lane.pool.workflow), pinned: { active: "WhenHasValue", column: 3 } },
       { token: CaseActivityEntity.token(a => a.case), pinned: { active: "WhenHasValue", column: 4 } },
     ]
@@ -177,7 +178,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Navigator.addSettings(new EntitySettings(CaseTagsModel, w => import('./Case/CaseTagsModel')));
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
-    onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
+    onNavigateRoute: (typeName, id) => AppContext.toAbsoluteUrl("~/workflow/activity/" + id),
     onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
     onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options?.readOnly),
   }));
@@ -210,7 +211,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   caseActivityOperation(CaseActivityOperation.Undo, "danger");
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
-    WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
+    () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
     workflowActivityMonitorUrl(ctx.lite),
     { icon: "tachometer-alt", iconColor: "green" }));
 
@@ -268,20 +269,21 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   })]);
 
   if (options.overrideCaseActivityMixin == true) {
+    if (Navigator.isViewable(SMSMessageEntity))
+      if (SMSMessageEntity.hasMixin(CaseActivityMixin))
+        Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
+          vr.insertAfterLine(a => a.referred, ctx => [
+            <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+          ]);
+        });
 
-    if (SMSMessageEntity.hasMixin(CaseActivityMixin))
-      Navigator.getSettings(SMSMessageEntity)!.overrideView(vr => {
-        vr.insertAfterLine(a => a.referred, ctx => [
-          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
-        ]);
-      });
-
-    if (EmailMessageEntity.hasMixin(CaseActivityMixin))
-      Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
-        vr.insertAfterLine(a => a.target, ctx => [
-          <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
-        ]);
-      });
+    if (Navigator.isViewable(EmailMessageEntity))
+      if (EmailMessageEntity.hasMixin(CaseActivityMixin))
+        Navigator.getSettings(EmailMessageEntity)!.overrideView(vr => {
+          vr.insertAfterLine(a => a.target, ctx => [
+            <EntityLine ctx={ctx.subCtx(CaseActivityMixin).subCtx(m => m.caseActivity)} readOnly={true} />
+          ]);
+        });
   }
 }
 
@@ -335,7 +337,7 @@ function registerCustomContexts() {
       cc.assignments["cctx"] = "actx?.subCtx(a => a.case)";
       return cc.createNewContext("cctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case)
   };
 
 
@@ -349,7 +351,7 @@ function registerCustomContexts() {
       cc.assignments["pcctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
       return cc.createNewContext("pcctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase)
   };
 
   DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
@@ -362,7 +364,7 @@ function registerCustomContexts() {
       cc.assignments["pmctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
       return cc.createNewContext("pmctx");
     },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase!.mainEntity)
+    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase!.mainEntity)
   };
 }
 
@@ -557,7 +559,6 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
 
       if (mainEntityStrategy == "Clone") {
         coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
-        assertOperationInfoAllowed(coi);
       }
 
       return Finder.find({ queryName: wf.mainEntityType!.cleanName })
@@ -640,6 +641,10 @@ export namespace API {
     return ajaxGet({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
   }
 
+  export function fetchCaseFlowPack(caseActivity: Lite<CaseActivityEntity>): Promise<CaseFlowEntityPack> {
+    return ajaxGet({ url: `~/api/workflow/caseFlowPack/${caseActivity.id}` });
+  }
+  
   export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
     return ajaxGet({ url: `~/api/workflow/tags/${caseLite.id}` });
   }
@@ -820,3 +825,7 @@ export interface WorkflowActivityMonitor {
   activities: WorkflowActivityStats[];
 }
 
+export interface CaseFlowEntityPack {
+  pack: EntityPack<CaseEntity>,
+  workflowActivity: IWorkflowNodeEntity;
+}

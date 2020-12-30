@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
 import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -16,14 +16,13 @@ import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import { RouteComponentProps } from "react-router";
-import * as QueryString from 'query-string';
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
-import { validate } from './View/NodeUtils';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
+import { QueryString } from '@framework/QueryString'
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -40,7 +39,7 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
 
 
   function handleSelect(key: any /*string*/) {
-    Navigator.history.push("~/dynamic/panel?step=" + key);
+    AppContext.history.push("~/dynamic/panel?step=" + key);
   }
 
   function handleErrorClick(e: React.MouseEvent<any>) {
@@ -56,11 +55,16 @@ export default function DynamicPanelPage(p: DynamicPanelProps) {
   return (
     <div>
       <h2>Dynamic Panel</h2>
-      {startErrors?.length && !restarting &&
-        <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-          <FontAwesomeIcon icon="exclamation-triangle" />
-          {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
-                    </div>
+      {restarting ? undefined :
+        startErrors?.length ?
+          <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
+            <FontAwesomeIcon icon="exclamation-triangle" />
+            {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
+        </div> :
+          <div role="alert" className="alert alert-success">
+            <FontAwesomeIcon icon="check-circle" />
+            {" "}The server is started successfully.
+        </div>
       }
       <Tabs activeKey={step ?? "search"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={handleSelect}>
         <Tab eventKey="search" title="Search">

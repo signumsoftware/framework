@@ -10,9 +10,9 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
-export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderLine({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
   
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -24,7 +24,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _2: parseFloat(parameters["NumberOpacity"]) > 0 ? 20 : 5,
     content: '*',
     ticks: 4,
@@ -51,7 +51,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
 
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
+  var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -64,7 +64,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
   var line = d3.line<unknown>()
     .defined(key => rowByKey[keyColumn.getKey(key)] != null)
     .x(key => x(keyColumn.getKey(key))!)
-    .y(key => rowByKey[keyColumn.getKey(key)] && -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
+    .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
   var color = parameters["Color"]!;// 'steelblue'
@@ -91,7 +91,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
             stroke="none"
             cursor="pointer"
             r={15}
-            onClick={e => onDrillDown(r)}>
+            onClick={e => onDrillDown(r, e)}>
             <title>
               {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
             </title>
@@ -108,7 +108,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
             strokeWidth={2}
             fill="white"
             r={5}
-            onClick={e => onDrillDown(rowByKey[keyColumn.getValueKey(r)])}
+            onClick={e => onDrillDown(rowByKey[keyColumn.getValueKey(r)], e)}
             cursor="pointer"
             shapeRendering="initial">
             <title>
@@ -126,7 +126,7 @@ export default function renderLine({ data, width, height, parameters, loading, o
               r={5}
               opacity={parseFloat(parameters["NumberOpacity"]!)}
               textAnchor="middle"
-              onClick={e => onDrillDown(r)}
+              onClick={e => onDrillDown(r, e)}
               cursor="pointer"
               shapeRendering="initial">
               {valueColumn.getValueNiceName(r)}

@@ -170,12 +170,12 @@ namespace Signum.Engine.Cache
             this.table = Schema.Current.Table(typeof(T));
 
             CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator);
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
+                    Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                     table.Name.ToString(),
                     ctr.currentAlias!.ToString());
 
@@ -212,20 +212,17 @@ namespace Signum.Engine.Cache
                 {
                     CacheLogic.AssertSqlDependencyStarted();
 
-                    var connector = (SqlConnector)Connector.Current;
-                    Table table = connector.Schema.Table(typeof(T));
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
+                    Table table = Connector.Current.Schema.Table(typeof(T));
 
                     Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             object obj = rowReader(fr);
                             result[idGetter(obj)] = obj; //Could be repeated joins
@@ -428,18 +425,18 @@ namespace Signum.Engine.Cache
             : base(controller)
         {
             this.table = table;
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             CachedTableConstructor ctr = this.Constructor= new CachedTableConstructor(this, aliasGenerator);
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
+                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                     table.Name.ToString(),
                     ctr.currentAlias!.ToString());
 
-                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -478,21 +475,17 @@ namespace Signum.Engine.Cache
                 return SqlServerRetry.Retry(() =>
                 {
                     CacheLogic.AssertSqlDependencyStarted();
-
-                    var connector = (SqlConnector)Connector.Current;
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
+                    
                     Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
 
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             object obj = rowReader(fr);
                             PrimaryKey parentId = parentIdGetter(obj);
@@ -540,7 +533,7 @@ namespace Signum.Engine.Cache
                 {
                     innerList.Add(activator(obj, retriever));
                 }
-                ((IMListPrivate)result).ExecutePostRetrieving();
+                ((IMListPrivate)result).ExecutePostRetrieving(null!);
 
             }
 
@@ -614,16 +607,16 @@ namespace Signum.Engine.Cache
             ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
             var expression = ToStringExpressionVisitor.GetToString(table, reader, columns);
-
+            var isPostgres = Schema.Current.Settings.IsPostgres;
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT {0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    columns.ToString(c => currentAlias + "." + c.Name.SqlEscape(), ", "),
+                    columns.ToString(c => currentAlias + "." + c.Name.SqlEscape(isPostgres), ", "),
                     table.Name.ToString(),
                     currentAlias.ToString());
 
-                select += this.lastPartialJoin + currentAlias + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + this.remainingJoins;
+                select += this.lastPartialJoin + currentAlias + "." + table.PrimaryKey.Name.SqlEscape(isPostgres) + "\r\n" + this.remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -643,20 +636,16 @@ namespace Signum.Engine.Cache
                 {
                     CacheLogic.AssertSqlDependencyStarted();
 
-                    var connector = (SqlConnector)Connector.Current;
-
-                    var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
-
                     Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
 
                     using (MeasureLoad())
-                    using (Connector.Override(subConnector))
+                    using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
                     using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
 
-                        ((SqlConnector)Connector.Current).ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
+                        Connector.Current.ExecuteDataReaderOptionalDependency(query, OnChange, fr =>
                         {
                             var kvp = rowReader(fr);
                             result[kvp.Key] = kvp.Value;
@@ -769,16 +758,25 @@ namespace Signum.Engine.Cache
                 return base.VisitUnary(node);
             }
 
+            static MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity e) => e.Mixin<MixinEntity>()).GetGenericMethodDefinition();
+
             protected override Expression VisitMember(MemberExpression node)
             {
                 if (node.Expression == param)
                 {
                     var field = table.GetField(node.Member);
-
                     var column = GetColumn(field);
-
                     columns.Add(column);
+                    return FieldReader.GetExpression(reader, columns.Count - 1, column.Type);
+                }
 
+                if (node.Expression is MethodCallExpression me && me.Method.IsInstantiationOf(miMixin))
+                {
+                    var type = me.Method.GetGenericArguments()[0];
+                    var mixin = table.Mixins!.GetOrThrow(type);
+                    var field = mixin.GetField(node.Member);
+                    var column = GetColumn(field);
+                    columns.Add(column);
                     return FieldReader.GetExpression(reader, columns.Count - 1, column.Type);
                 }
 

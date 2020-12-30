@@ -9,7 +9,7 @@ import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, Alternat
 import { Lite, Entity, EntityControlMessage } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
-import { getTypeInfos, ReadonlyBinding, getTypeInfo } from "@framework/Reflection";
+import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos } from "@framework/Reflection";
 import { IsByAll } from "@framework/Reflection";
 import { Dic } from "@framework/Globals";
 import { Binding } from "@framework/Reflection";
@@ -254,7 +254,7 @@ export function PredictValue(p : PredictValueProps){
       else
         return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={handleValueChange} />
     case "Enum":
-      const ti = getTypeInfos(token.type).single();
+      const ti = tryGetTypeInfos(token.type).single();
       if (!ti)
         throw new Error(`EnumType ${token.type.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);

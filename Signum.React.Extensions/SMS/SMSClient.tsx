@@ -20,7 +20,7 @@ import { QueryRequest, ColumnOption } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
-import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
+import { TypeEntity } from '@framework/Signum.Entities.Basics';
 
 export var allTypes: string[] = [];
 
@@ -37,10 +37,10 @@ export function start(options: { routes: JSX.Element[] }) {
   API.getAllTypes().then(types => {
     allTypes = types;
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
-      SMSMessageEntity.nicePluralName(),
+      () => SMSMessageEntity.nicePluralName(),
       e => getSMSMessages(ctx.lite),
       {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !AuthClient.navigatorIsReadOnly(SMSMessageEntity),
+        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(SMSMessageEntity),
         icon: "sms",
         iconColor: "green"
       }));

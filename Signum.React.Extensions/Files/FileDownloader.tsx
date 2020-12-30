@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as Services from '@framework/Services'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, isEntity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import * as QueryString from 'query-string'
 import { Type } from '@framework/Reflection';
-import { isLite } from '@framework/Signum.Entities';
 import "./Files.css"
+import { QueryString } from '@framework/QueryString'
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
 
@@ -83,12 +83,12 @@ export interface FileDownloaderConfiguration<T extends IFile> {
 }
 
 registerConfiguration(FileEntity, {
-  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
-  viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
+  fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
+  viewClick: (event, file) => viewUrl(event, AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
 });
 
 registerConfiguration(FilePathEntity, {
-  fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
+  fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
 registerConfiguration(FileEmbedded, {
@@ -97,7 +97,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
+  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId.Object}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId?.Object })}`)
 });
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {

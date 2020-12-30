@@ -22,10 +22,10 @@ namespace Signum.Engine.Chart.Scripts
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
-                new ChartScriptParameterGroup("Scale")
+                new ChartScriptParameterGroup()
                 {
+                    new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
                     new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-                    new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
                 },
                 new ChartScriptParameterGroup("Margin")
                 {

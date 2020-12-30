@@ -20,11 +20,15 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
+using Signum.Entities.Workflow;
+using Signum.Engine.Workflow;
 
 namespace Signum.Engine.UserAssets
 {
     public static class UserAssetsExporter
     {
+        public static Func<XDocument, XDocument>? PreExport = null;
+
         class ToXmlContext : IToXmlContext
         {
             public Dictionary<Guid, XElement> elements = new Dictionary<Guid, XElement>();
@@ -54,6 +58,12 @@ namespace Signum.Engine.UserAssets
             {
                 return symbol.RetrieveAndRemember().Key;
             }
+
+            public XElement GetFullWorkflowElement(WorkflowEntity workflow)
+            {
+                var wie = new WorkflowImportExport(workflow);
+                return wie.ToXml(this);
+            }
         }
 
         public static byte[] ToXml(params IUserAssetEntity[] entities)
@@ -68,6 +78,10 @@ namespace Signum.Engine.UserAssets
                 new XElement("Entities",
                     ctx.elements.Values));
 
+
+           if(PreExport!=null)
+                doc=PreExport(doc);
+
             return new MemoryStream().Using(s => { doc.Save(s); return s.ToArray(); });
         }
     }
@@ -76,6 +90,7 @@ namespace Signum.Engine.UserAssets
     {
         public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
         public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
+        public static Func<XDocument, XDocument>? PreImport = null;
 
         class PreviewContext : IFromXmlContext
         {
@@ -177,11 +192,23 @@ namespace Signum.Engine.UserAssets
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
+
+            public T SaveMaybe<T>(T entity) where T : Entity
+            {
+                return entity;
+            }
+
+            public void DeleteMaybe<T>(T entity) where T : Entity
+            {
+                return;
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
         {
             XDocument document = new MemoryStream(doc).Using(XDocument.Load);
+            if (PreImport != null)
+                document = PreImport(document);
 
             PreviewContext ctx = new PreviewContext(document);
 
@@ -290,6 +317,16 @@ namespace Signum.Engine.UserAssets
             {
                 return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
+
+            public T SaveMaybe<T>(T entity) where T : Entity
+            {
+                return entity.Save();
+            }
+
+            public void DeleteMaybe<T>(T entity) where T : Entity
+            {
+                entity.Delete();
+            }
         }
 
         public static void ImportConsole(string filePath)
@@ -314,6 +351,11 @@ namespace Signum.Engine.UserAssets
                 Import(bytes, preview);
                 SafeConsole.WriteLineColor(ConsoleColor.Green, $"Imported Succesfully");
             }
+        }
+
+        public static void ImportAll(byte[] document)
+        {
+            Import(document, Preview(document));
         }
 
         public static void Import(byte[] document, UserAssetPreviewModel preview)

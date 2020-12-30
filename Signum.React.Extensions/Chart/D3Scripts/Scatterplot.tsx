@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 5,
@@ -24,7 +24,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -51,7 +51,6 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
 
   var x = scaleFor(horizontalColumn, data.rows.map(horizontalColumn.getValue), 0, xRule.size('content'), parameters["HorizontalScale"]);
-
   var y = scaleFor(verticalColumn, data.rows.map(verticalColumn.getValue), 0, yRule.size('content'), parameters["VerticalScale"]);
 
   var pointSize = parseInt(parameters["PointSize"]);
@@ -68,6 +67,9 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number));
   }
 
+  var keyColumns: ChartClient.ChartColumn<any>[]= data.columns.entity ? [data.columns.entity] :
+    [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token  && a.token.queryTokenType != "Aggregate")
+
   return (
     <>
       <svg direction="ltr" width={width} height={height}>
@@ -75,7 +77,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
 
         {parameters["DrawingMode"] == "Svg" &&
-          data.rows.map((r, i) => <g key={i} className="shape-serie sf-transition"
+          data.rows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
             <circle className="shape sf-transition"
               transform={translate(x(horizontalColumn.getValue(r)), -y(verticalColumn.getValue(r)))}
@@ -83,7 +85,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
               fill={colorKeyColumn.getValueColor(r) ?? color(r)}
               shapeRendering="initial"
               r={pointSize}
-              onClick={e => onDrillDown(r)}
+              onClick={e => onDrillDown(r, e)}
               cursor="pointer">
               <title>
                 {colorKeyColumn.getValueNiceName(r) +
@@ -119,14 +121,14 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 }
 
 class CanvasScatterplot extends React.Component<{
-  xRule: Rule,
-  yRule: Rule,
+  xRule: Rule<"content">,
+  yRule: Rule<"content">,
   colorKeyColumn: ChartClient.ChartColumn<unknown>,
   horizontalColumn: ChartClient.ChartColumn<number>,
   verticalColumn: ChartClient.ChartColumn<number>,
   pointSize: number,
   data: ChartClient.ChartTable,
-  onDrillDown: (e: ChartRow) => void,
+  onDrillDown: (r: ChartRow, e: MouseEvent) => void,
   color: (val: ChartRow) => string,
   x: d3.ScaleContinuousNumeric<number, number>,
   y: d3.ScaleContinuousNumeric<number, number>,
@@ -198,7 +200,7 @@ class CanvasScatterplot extends React.Component<{
       const color = d3.rgb.apply(null, imageData.data).toString();
       const p = colorToData[color];
       if (p) {
-        onDrillDown(p);
+        onDrillDown(p, e);
       }
     });
   }

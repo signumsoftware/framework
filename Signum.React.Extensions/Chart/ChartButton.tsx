@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed } from '@framework/FindOptions'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
@@ -15,6 +16,12 @@ export interface ChartButtonProps {
 export default class ChartButton extends React.Component<ChartButtonProps> {
 
   handleOnMouseUp = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+
+    if (e.button == 2)
+      return;
+
+    e.persist();
 
     const sc = this.props.searchControl;
 
@@ -28,10 +35,10 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
         filterOptions: fo.filterOptions
       })
 
-      if (sc.props.avoidChangeUrl)
-        window.open(Navigator.toAbsoluteUrl(path));
+      if (sc.props.avoidChangeUrl || e.ctrlKey || e.button == 1)
+        window.open(AppContext.toAbsoluteUrl(path));
       else
-        Navigator.pushOrOpenInTab(path, e);
+        AppContext.pushOrOpenInTab(path, e);
     }).done();
   }
 

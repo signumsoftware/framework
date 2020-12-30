@@ -99,7 +99,7 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(Max = 100)]
         public string? Username { get; set; }
 
-        [StringLengthValidator(Max = 100)]
+        [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
         public string? Password { get; set; }
 
         public bool UseDefaultCredentials { get; set; } = true;
@@ -140,7 +140,7 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(Max = 100)]
         public string? Username { get; set; }
 
-        [StringLengthValidator(Max = 100)]
+        [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
         public string? Password { get; set; }
 
         public bool UseDefaultCredentials { get; set; } = true;

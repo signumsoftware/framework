@@ -22,10 +22,10 @@ namespace Signum.Engine.Chart.Scripts
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
-                new ChartScriptParameterGroup("Scale")
+                new ChartScriptParameterGroup()
                 {
-                    new ChartScriptParameter("CompleteHorizontalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
-                    new ChartScriptParameter("CompleteVerticalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
+                    new ChartScriptParameter("CompleteHorizontalValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                    new ChartScriptParameter("CompleteVerticalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
                 },
                 new ChartScriptParameterGroup("Size")
                 {
@@ -43,10 +43,10 @@ namespace Signum.Engine.Chart.Scripts
                     new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
                     new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("white") },
                 },
-                new ChartScriptParameterGroup("Arrange")
+                new ChartScriptParameterGroup()
                 {
-                    new ChartScriptParameter("XSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
-                    new ChartScriptParameter("YSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                    new ChartScriptParameter("XSort", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                    new ChartScriptParameter("YSort", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
                 },
                 new ChartScriptParameterGroup("Opacity")
                 {
@@ -54,8 +54,8 @@ namespace Signum.Engine.Chart.Scripts
                 },
                 new ChartScriptParameterGroup("Fill Color")
                 {
-                    new ChartScriptParameter("ColorScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                    new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
+                    new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
+                    new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
                     new ChartScriptParameter("FillColor", ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
                 },
                 new ChartScriptParameterGroup("Stroke")
@@ -63,14 +63,14 @@ namespace Signum.Engine.Chart.Scripts
                     new ChartScriptParameter("StrokeColor", ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
                     new ChartScriptParameter("StrokeWidth", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
                 },
-                new ChartScriptParameterGroup("Opacity")
+                new ChartScriptParameterGroup()
                 {
-                    new ChartScriptParameter("OpacityScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
+                    new ChartScriptParameter("OpacityScale", ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
                 },
                 new ChartScriptParameterGroup("Inner Size")
                 { 
-                    new ChartScriptParameter("InnerSizeType", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
-                    new ChartScriptParameter("InnerFillColor", ChartParameterType.String) {  ValueDefinition = new StringValue("red") },
+                    new ChartScriptParameter("InnerSizeType", ChartParameterType.Enum) { ColumnIndex = 5, ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
+                    new ChartScriptParameter("InnerFillColor", ChartParameterType.String) { ColumnIndex = 5, ValueDefinition = new StringValue("red") },
                 }
             };
         }      

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { ValueLine, EntityLine, RenderEntity } from '@framework/Lines'
-import { getTypeInfos, New } from '@framework/Reflection'
+import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
@@ -54,11 +54,9 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
 
     const title = (
       <div>
-        <div className="row">
-          <div className="col-sm-1">
-            {icon && <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} />}
-          </div>
-          <div className="col-sm-11">
+        <div className="d-flex">
+          {icon && <div className="mx-2"><FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} /> </div>}
+          <div style={{ flexGrow: 1 }} className="mr-2">
             <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
             <div className="row">
               <div className="col-sm-4">
@@ -112,7 +110,9 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
         </div>
       </div>
       <ValueLine ctx={sc.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
+      <div className="sf-dashboard-admin">
       <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
+    </div>
     </div>
   );
 }

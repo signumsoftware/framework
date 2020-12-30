@@ -8,7 +8,7 @@ export default function PredictorRegressionMetrics(p : { ctx: TypeContext<Predic
   function renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorRegressionMetricsEmbedded) => number | null | undefined) {
     const ctxT = ctx.subCtx(a => a.regressionTraining!);
     const ctxV = ctx.subCtx(a => a.regressionValidation!);
-    var unit = ctxT.subCtx(property).propertyRoute.member!.unit;
+    var unit = ctxT.subCtx(property).propertyRoute!.member!.unit;
 
     return (
       <tr>

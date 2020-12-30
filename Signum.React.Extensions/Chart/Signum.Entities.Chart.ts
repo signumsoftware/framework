@@ -31,7 +31,7 @@ export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
   Type: "ChartColor";
   related: Entities.Lite<Entities.Entity>;
-  color: Basics.ColorEmbedded | null;
+  color: string;
 }
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
@@ -39,6 +39,7 @@ export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
   token: UserAssets.QueryTokenEmbedded | null;
   displayName: string | null;
+  format: string | null;
   orderByIndex: number | null;
   orderByType: DynamicQuery.OrderType | null;
 }
@@ -89,6 +90,11 @@ export module ChartMessage {
   export const ChooseABasePalette = new MessageKey("ChartMessage", "ChooseABasePalette");
   export const DeletePalette = new MessageKey("ChartMessage", "DeletePalette");
   export const Preview = new MessageKey("ChartMessage", "Preview");
+  export const TypeNotFound = new MessageKey("ChartMessage", "TypeNotFound");
+  export const Type0NotFoundInTheDatabase = new MessageKey("ChartMessage", "Type0NotFoundInTheDatabase");
+  export const Reload = new MessageKey("ChartMessage", "Reload");
+  export const Maximize = new MessageKey("ChartMessage", "Maximize");
+  export const Minimize = new MessageKey("ChartMessage", "Minimize");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
@@ -152,6 +158,10 @@ export module D3ChartScript {
 export module GoogleMapsCharScript {
   export const Heatmap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Heatmap");
   export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Markermap");
+}
+
+export module HtmlChartScript {
+  export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
 }
 
 export const UserChartEntity = new Type<UserChartEntity>("UserChart");

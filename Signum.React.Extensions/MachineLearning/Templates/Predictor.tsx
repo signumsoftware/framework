@@ -24,16 +24,22 @@ import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { toFilterOptions } from '@framework/Finder';
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
 
-export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
-  handleClick = () => {
-    var p = this.props.ctx.value;
+export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<PredictorEntity> }, ref: React.Ref<IRenderButtons>) {
+
+  const p = ctx.value;
+  const queryDescription = useAPI(() => !p.mainQuery.query ? Promise.resolve(null) :
+    Finder.getQueryDescription(p.mainQuery.query.key), [p.mainQuery.query?.key]);
+
+  const forceUpdate = useForceUpdate();
+
+  function handleClick() {
 
     if (!p.mainQuery.groupResults) {
 
       Finder.find({
-        queryName: this.state.queryDescription!.queryKey,
+        queryName: queryDescription!.queryKey,
         columnOptionsMode: "Add",
         columnOptions: p.mainQuery.columns.map(mle => ({ token: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
       })
@@ -45,7 +51,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
       var fullKeys = p.mainQuery.columns.map(mle => mle.element.token!.tokenString!);
 
       Finder.findRow({
-        queryName: this.state.queryDescription!.queryKey,
+        queryName: queryDescription!.queryKey,
         groupResults: p.mainQuery.groupResults,
         columnOptionsMode: "Replace",
         columnOptions: fullKeys.map(fk => ({ token: fk }) as ColumnOption)
@@ -55,62 +61,39 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }
   }
 
-  renderButtons(ctx: ButtonsContext): ButtonBarElement[] {
-    if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
-      return [{
-        order: 10000,
-        button: <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
-      }];
-    } else {
-      return [];
+  React.useImperativeHandle(ref, () => ({
+    renderButtons(ctx: ButtonsContext): ButtonBarElement[] {
+      if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
+        return [{
+          order: 10000,
+          button: <button className="btn btn-info" onClick={handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
+        }];
+      } else {
+        return [];
+      }
     }
-  }
-
-  constructor(props: any) {
-    super(props);
-    this.state = { queryDescription: undefined };
-  }
-
-  componentWillMount() {
-
-    let p = this.props.ctx.value;
-    if (p.mainQuery.query)
-      this.loadData(p.mainQuery.query);
-  }
-
-  loadData(query: QueryEntity) {
-    Finder.getQueryDescription(query.key)
-      .then(qd => this.setState({ queryDescription: qd }))
-      .done();
-  }
+  }), [p?.state]);
 
 
-  handleQueryChange = () => {
 
-    const p = this.props.ctx.value;
+
+  function handleQueryChange() {
+
     p.mainQuery.filters.clear();
     p.mainQuery.columns.clear();
-
-    this.setState({
-      queryDescription: undefined
-    }, () => {
-      if (p.mainQuery.query)
-        this.loadData(p.mainQuery.query);
-    });
   }
 
-  handleGroupChange = () => {
+  function handleGroupChange() {
 
-    const p = this.props.ctx.value;
     p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token ?? null, p.mainQuery.groupResults)!);
     p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token ?? null, p.mainQuery.groupResults)!);
-    this.forceUpdate();
+    forceUpdate();
   }
 
 
-  handleCreate = () => {
+  function handleCreate() {
 
-    var mq = this.props.ctx.value.mainQuery;
+    var mq = p.mainQuery;
 
     var promise = !mq.groupResults ? Finder.parseSingleToken(mq.query!.key, "Entity", SubTokensOptions.CanElement).then(t => [t]) :
       Promise.resolve(mq.columns.map(a => a.element.token).filter(t => t != null && t.token != null && t.token.queryTokenType != "Aggregate").map(t => t!.token!));
@@ -130,36 +113,34 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }));
   }
 
-  handleAlgorithmChange = () => {
-    var pred = this.props.ctx.value;
-    var al = pred.algorithm;
+  function handleAlgorithmChange() {
+    var al = p.algorithm;
     if (al == null)
-      pred.algorithmSettings = null!;
+      p.algorithmSettings = null!;
     else {
       var init = PredictorClient.initializers[al.key];
 
       if (init != null)
-        init(pred);
+        init(p);
     }
 
-    this.forceUpdate();
+    forceUpdate();
   }
 
-  handleOnFinished = () => {
-    const ctx = this.props.ctx;
+  function handleOnFinished() {
     Navigator.API.fetchEntityPack(toLite(ctx.value))
       .then(pack => ctx.frame!.onReload(pack))
       .done();
   }
 
-  handlePreviewMainQuery = (e: React.MouseEvent<any>) => {
+  function handlePreviewMainQuery(e: React.MouseEvent<any>) {
     e.preventDefault();
     e.persist();
-    var mq = this.props.ctx.value.mainQuery;
+    var mq = p.mainQuery;
 
     var canAggregate = mq.groupResults ? SubTokensOptions.CanAggregate : 0;
 
-    FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate)
+    FilterBuilderEmbedded.toFilterOptionParsed(queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate)
       .then(filters => {
         var fo: FindOptions = {
           queryName: mq.query!.key,
@@ -176,106 +157,102 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
       .done();
   }
 
-  render() {
-    let ctx = this.props.ctx;
+  if (ctx.value.state != "Draft")
+    ctx = ctx.subCtx({ readOnly: true });
 
-    if (ctx.value.state != "Draft")
-      ctx = ctx.subCtx({ readOnly: true });
+  const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+  const ctxxs4 = ctx.subCtx({ labelColumns: 4 });
+  const ctxmq = ctxxs.subCtx(a => a.mainQuery);
+  const entity = ctx.value;
+  const queryKey = entity.mainQuery.query && entity.mainQuery.query.key;
 
-    const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
-    const ctxxs4 = ctx.subCtx({ labelColumns: 4 });
-    const ctxmq = ctxxs.subCtx(a => a.mainQuery);
-    const entity = ctx.value;
-    const queryKey = entity.mainQuery.query && entity.mainQuery.query.key;
+  var canAggregate = entity.mainQuery.groupResults ? SubTokensOptions.CanAggregate : 0;
 
-    var canAggregate = entity.mainQuery.groupResults ? SubTokensOptions.CanAggregate : 0;
-
-    return (
-      <div>
-        <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctxxs4.subCtx(e => e.name)} readOnly={this.props.ctx.readOnly} />
-            <ValueLine ctx={ctxxs4.subCtx(e => e.state, { readOnly: true })} />
-            <EntityLine ctx={ctxxs4.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
-          </div>
-          <div className="col-sm-6">
-            <EntityCombo ctx={ctxxs4.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
-            <EntityCombo ctx={ctxxs4.subCtx(f => f.resultSaver)} />
-            <EntityCombo ctx={ctxxs4.subCtx(f => f.publication)} readOnly={true} />
-          </div>
+  return (
+    <div>
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctxxs4.subCtx(e => e.name)} readOnly={ctx.readOnly} />
+          <ValueLine ctx={ctxxs4.subCtx(e => e.state, { readOnly: true })} />
+          <EntityLine ctx={ctxxs4.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
         </div>
-        {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-        <Tabs id="predictorTabs">
-          <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
-            <div>
-              <fieldset>
-                <legend>{ctxmq.niceName()}</legend>
-                <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
-                {queryKey && <div>
-                  <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleGroupChange} />
-
-                  <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
-                    queryKey={queryKey}
-                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                    showUserFilters={false} />
-                  <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
-                    { property: a => a.usage },
-                    {
-                      property: a => a.token,
-                      template: (cctx, row) => <QueryTokenEmbeddedBuilder
-                        ctx={cctx.subCtx(a => a.token)}
-                        queryKey={this.props.ctx.value.mainQuery.query!.key}
-                        subTokenOptions={SubTokensOptions.CanElement | canAggregate}
-                        onTokenChanged={() => { initializeColumn(ctx.value, cctx.value); row.forceUpdate() }} />,
-                      headerHtmlAttributes: { style: { width: "40%" } },
-                    },
-                    { property: a => a.encoding },
-                    { property: a => a.nullHandling },
-                  ])} />
-                  {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
-                </div>}
-
-              </fieldset>
-              {queryKey && <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={this.handleCreate}
-                getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
-                getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
-                  <div>
-                    {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={this.state.queryDescription} />}
-                  </div>
-                } />}
-            </div>
-          </Tab>
-          <Tab eventKey="settings" title={ctxxs.niceName(a => a.settings)}>
-            {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
-            <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
-          </Tab>
-          {
-            ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
-              <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: PredictorCodificationEntity.token(e => e.predictor), parentValue: ctx.value }} />
-            </Tab>
-          }
-          {
-            ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
-              {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
-              <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: PredictorEpochProgressEntity.token(e => e.predictor), parentValue: ctx.value }} />
-            </Tab>
-          }
-          {
-            ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
-              {ctx.value.resultTraining && ctx.value.resultValidation && <PredictorMetrics ctx={ctx} />}
-              {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx} />}
-              {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
-              {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
-              <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
-                <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
-              } />
-            </Tab>
-          }
-        </Tabs>
+        <div className="col-sm-6">
+          <EntityCombo ctx={ctxxs4.subCtx(f => f.algorithm)} onChange={handleAlgorithmChange} />
+          <EntityCombo ctx={ctxxs4.subCtx(f => f.resultSaver)} />
+          <EntityCombo ctx={ctxxs4.subCtx(f => f.publication)} readOnly={true} />
+        </div>
       </div>
-    );
-  }
-}
+      {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={handleOnFinished} />}
+      <Tabs id="predictorTabs" mountOnEnter={true} unmountOnExit={true} >
+        <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
+          <div>
+            <fieldset>
+              <legend>{ctxmq.niceName()}</legend>
+              <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={handleQueryChange} />
+              {queryKey && <div>
+                <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={handleGroupChange} />
+
+                <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
+                  queryKey={queryKey}
+                  subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                  showUserFilters={false} />
+                <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                  { property: a => a.usage },
+                  {
+                    property: a => a.token,
+                    template: (cctx, row) => <QueryTokenEmbeddedBuilder
+                      ctx={cctx.subCtx(a => a.token)}
+                      queryKey={p.mainQuery.query!.key}
+                      subTokenOptions={SubTokensOptions.CanElement | canAggregate}
+                      onTokenChanged={() => { initializeColumn(ctx.value, cctx.value); row.forceUpdate() }} />,
+                    headerHtmlAttributes: { style: { width: "40%" } },
+                  },
+                  { property: a => a.encoding },
+                  { property: a => a.nullHandling },
+                ])} />
+                {ctxmq.value.query && <a href="#" onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+              </div>}
+
+            </fieldset>
+            {queryKey && <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={handleCreate}
+              getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
+              getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
+                <div>
+                  {!queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={queryDescription} />}
+                </div>
+              } />}
+          </div>
+        </Tab>
+        <Tab eventKey="settings" title={ctxxs.niceName(a => a.settings)}>
+          {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
+          <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
+        </Tab>
+        {
+          ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
+            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: PredictorCodificationEntity.token(e => e.predictor), parentValue: ctx.value }} />
+          </Tab>
+        }
+        {
+          ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
+            {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
+            <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: PredictorEpochProgressEntity.token(e => e.predictor), parentValue: ctx.value }} />
+          </Tab>
+        }
+        {
+          ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
+            {ctx.value.resultTraining && ctx.value.resultValidation && <PredictorMetrics ctx={ctx} />}
+            {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx} />}
+            {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
+            {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
+            <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
+              <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
+            } />
+          </Tab>
+        }
+      </Tabs>
+    </div>
+  );
+});
 
 export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded | PredictorSubQueryColumnEmbedded) {
   var token = pc.token && pc.token.token;
@@ -301,39 +278,15 @@ interface TrainingProgressComponentState {
 
 export function TrainingProgressComponent(p: TrainingProgressComponentProps) {
 
-  const [trainingProgress, setTrainingProgress] = React.useState<PredictorClient.TrainingProgress | null>(null);
+  const tick = useInterval(500, 0, n => n + 1);
 
-  const timeoutHandle = React.useRef<number | null>(null);
-  const dismounted = React.useRef(false);
-  React.useEffect(() => {
-    return () => { dismounted.current = true };
-  });
+  const tp = useAPI<PredictorClient.TrainingProgress>((abort, prevState) => PredictorClient.API.getTrainingState(toLite(p.ctx.value))
+    .then(newState => {
+      if (prevState != null && prevState.state != newState.state)
+        p.onStateChanged();
+      return newState;
+    }), [tick, p.ctx.value], { avoidReset: true });
 
-  React.useEffect(() => {
-    loadData(toLite(p.ctx.value), null);
-
-    return () => {
-      if (timeoutHandle.current)
-        clearTimeout(timeoutHandle.current);
-    };
-  }, [p.ctx.value]);
-
-  function loadData(lite: Lite<PredictorEntity>, prev: PredictorClient.TrainingProgress | null) {
-    PredictorClient.API.getTrainingState(lite)
-      .then(progress => {
-        if (dismounted.current)
-          return;
-
-        setTrainingProgress(progress);
-        if (prev != null && prev.state != progress.state)
-          p.onStateChanged();
-        else
-          timeoutHandle.current = setTimeout(() => loadData(lite, progress), 500);
-      })
-      .done();
-  }
-
-  const tp = trainingProgress;
 
   return (
     <div>

@@ -12,9 +12,9 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -26,7 +26,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     legend: 15,
     _2: 5,
@@ -58,7 +58,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(v => v.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(v => v.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -95,11 +95,11 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
             fill={s.color || color(s.key)}
             transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(
               x(keyColumn.getKey(r.rowValue))! + xSubscale(s.key)!,
-              - y(r.values[s.key] && r.values[s.key].value)
+              - y(r.values[s.key].value)
             )}
             width={xSubscale.bandwidth()}
-            height={y(r.values[s.key] && r.values[s.key].value)}
-            onClick={e => onDrillDown(r.values[s.key].rowClick)}
+            height={y(r.values[s.key].value)}
+            onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.values[s.key].valueTitle}
@@ -108,12 +108,12 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           rowsInOrder
-            .filter(r => r.values[s.key] != undefined && y(r.values[s.key] && r.values[s.key].value) > 10)
+            .filter(r => r.values[s.key] != undefined && y(r.values[s.key].value) > 10)
             .map(r => <text key={keyColumn.getKey(r.rowValue)}
               className="number-label sf-transition"
               transform={translate(
                 x(keyColumn.getKey(r.rowValue))! + xSubscale.bandwidth() / 2 + xSubscale(s.key)!,
-                - y(r.values[s.key] && r.values[s.key].value) / 2
+                - y(r.values[s.key].value) / 2
               )}
               opacity={parameters["NumberOpacity"]}
               fill={parameters["NumberColor"]}

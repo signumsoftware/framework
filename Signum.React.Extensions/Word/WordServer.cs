@@ -14,6 +14,7 @@ using Signum.Entities.Word;
 using Signum.Engine.Word;
 using Signum.React.TypeHelp;
 using Microsoft.AspNetCore.Builder;
+using Signum.React.Extensions.Templating;
 
 namespace Signum.React.Word
 {
@@ -24,7 +25,7 @@ namespace Signum.React.Word
             TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
+            TemplatingServer.Start(app);
 
             CustomizeFiltersModel();
 
@@ -53,6 +54,15 @@ namespace Signum.React.Word
                         qd.Extension.Add("wordTemplates", templates);
                 }
             };
+
+            EntityJsonConverter.AfterDeserilization.Register((WordTemplateEntity uq) =>
+            {
+                if (uq.Query != null)
+                {
+                    var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
+                    uq.ParseData(qd);
+                }
+            });
         }
 
         private static void CustomizeFiltersModel()

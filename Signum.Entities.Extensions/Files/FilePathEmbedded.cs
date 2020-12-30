@@ -2,6 +2,8 @@ using System;
 using Signum.Utilities;
 using System.IO;
 using System.Linq.Expressions;
+using Signum.Services;
+using Signum.Entities;
 
 namespace Signum.Entities.Files
 {
@@ -47,6 +49,15 @@ namespace Signum.Entities.Files
         }
 
         [Ignore]
+        public PrimaryKey EntityId;
+        [Ignore]
+        public PrimaryKey? MListRowId;
+        [Ignore]
+        public string PropertyRoute;
+        [Ignore]
+        public string RootType;
+
+        [Ignore]
         byte[] binaryFile;
         [NotNullValidator(Disabled = true)]
         public byte[] BinaryFile
@@ -55,9 +66,14 @@ namespace Signum.Entities.Files
             set
             {
                 if (Set(ref binaryFile, value) && binaryFile != null)
+                {
                     FileLength = binaryFile.Length;
+                    Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
+                }
             }
         }
+
+        public string? Hash { get; private set; }
 
         public int FileLength { get; internal set; }
 
@@ -117,10 +133,8 @@ namespace Signum.Entities.Files
             return result;
         }
 
-        public override string ToString()
-        {
-            return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
-        }
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize(true)}");
 
         public static Action<FilePathEmbedded> OnPreSaving;
         protected override void PreSaving(PreSavingContext ctx)
@@ -132,7 +146,7 @@ namespace Signum.Entities.Files
         }
 
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             if (CalculatePrefixPair == null)
                 throw new InvalidOperationException("OnCalculatePrefixPair not set");

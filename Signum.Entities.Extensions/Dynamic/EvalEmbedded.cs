@@ -38,7 +38,7 @@ namespace Signum.Entities.Dynamic
             }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         string script;
         public string Script
         {

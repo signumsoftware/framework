@@ -6,7 +6,7 @@ import { Lite, toLite, newMListElement } from '@framework/Signum.Entities'
 import { is } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import SearchControl from '@framework/SearchControl/SearchControl'
+import * as AppContext from '@framework/AppContext'
 import { UserChartEntity, ChartRequestModel, ChartMessage, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView, { ChartRequestViewHandle } from '../Templates/ChartRequestView'
@@ -86,7 +86,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
     });
 
     const uc = await Navigator.view(UserChartEntity.New({
-      owner: Navigator.currentUser && toLite(Navigator.currentUser),
+      owner: AppContext.currentUser && toLite(AppContext.currentUser),
       query: query,
       chartScript: cr.chartScript,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
@@ -116,7 +116,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
               {uc.toStr}
             </Dropdown.Item>)
         }
-        {userCharts?.length && <Dropdown.Divider />}
+        {Boolean(userCharts?.length) && <Dropdown.Divider />}
         {crView.userChart && <Dropdown.Item onClick={handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
         <Dropdown.Item onClick={() => onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
       </Dropdown.Menu>

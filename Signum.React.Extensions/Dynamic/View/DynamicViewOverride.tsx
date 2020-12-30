@@ -18,7 +18,7 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { ModulesHelp } from "./ModulesHelp";
 import { EntityFrame } from '@framework/TypeContext'
-import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components'
+import { ErrorBoundary } from '@framework/Components'
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;

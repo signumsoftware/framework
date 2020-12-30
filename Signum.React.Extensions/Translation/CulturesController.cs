@@ -19,6 +19,7 @@ using System.Net;
 using Microsoft.AspNetCore.Http;
 using Signum.React.Authorization;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Signum.React.Translation
 {
@@ -63,7 +64,7 @@ namespace Signum.React.Translation
             ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
             {
                 Expires = DateTimeOffset.Now.AddYears(10),
-                Path = "/",
+                Path = new UrlHelper(ControllerContext).Content("~/"),
                 IsEssential = true,
                 Domain = Request.Host.Host
             });

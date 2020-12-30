@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using Signum.Utilities;
 
 namespace Signum.Entities.Processes
@@ -9,7 +10,7 @@ namespace Signum.Entities.Processes
         [StringLengthValidator(Max = 200)]
         public string? Name { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public byte[]? OperationArguments { get; private set; }
 
         [HiddenProperty]
@@ -55,6 +56,10 @@ namespace Signum.Entities.Processes
         public Lite<Entity>? Result { get; set; } //ConstructFrom only!
 
         public DateTime? FinishTime { get; set; }
+
+        static Expression<Func<PackageLineEntity, string>> ToStringExpression = pel => "PackageLine (" + pel.Id + ")";
+        [ExpressionField("ToStringExpression")]
+        public override string ToString() => "PackageLine (" + (this.IdOrNull == null ? "New" : this.Id.ToString()) + ")";
     }
 
     public enum PackageQuery

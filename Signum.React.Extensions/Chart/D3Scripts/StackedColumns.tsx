@@ -13,9 +13,9 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -27,7 +27,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     legend: 15,
     _2: 5,
@@ -59,7 +59,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var x = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -71,10 +71,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
     .offset(ChartUtils.getStackOffset(pStack)!)
     .order(ChartUtils.getStackOrder(parameters["Order"])!)
     .keys(pivot.columns.map(d => d.key))
-    .value(function (r, k) {
-      var v = r.values[k];
-      return v?.value ?? 0;
-    });
+    .value((r, k) => r.values[k]?.value ?? 0);
 
   var stackedSeries = stack(pivot.rows);
 
@@ -87,6 +84,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, pivot.columns.map(c => c.key));
+  var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :
     pStack == "zero" ? d3.format("") :
@@ -108,10 +106,10 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           .map(r => <rect key={keyColumn.getKey(r.data.rowValue)} className="shape sf-transition"
             transform={translate(x(keyColumn.getKey(r.data.rowValue))!, -y(r[1])) + (initialLoad ? scale(1, 0) : scale(1, 1))}
             stroke={x.bandwidth() > 4 ? '#fff' : undefined}
-            fill={color(s.key)}
+            fill={colorByKey[s.key] ?? color(s.key)}
             width={x.bandwidth()}
             height={y(r[1]) - y(r[0])}
-            onClick={e => onDrillDown(r.data.values[s.key].rowClick)}
+            onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
             cursor="pointer">
             <title>
               {r.data.values[s.key].valueTitle}
@@ -142,35 +140,35 @@ export default function renderStackedColumns({ data, width, height, parameters, 
       {x.bandwidth() > 15 && (
         parameters["Labels"] == "Margin" ?
           <g className="x-label" transform={translate(xRule.start('content'), yRule.start('labels'))}>
-            {rowsInOrder.map(r => <TextEllipsis key={keyColumn.getKey(r.rowValue)}
+            {keyValues.map(k => <TextEllipsis key={keyColumn.getKey(k)}
               maxWidth={yRule.size('labels')}
               padding={labelMargin}
               className="x-label sf-transition"
-              transform={translate(x(keyColumn.getKey(r.rowValue))! + x.bandwidth() / 2, 0) + rotate(-90)}
+              transform={translate(x(keyColumn.getKey(k))! + x.bandwidth() / 2, 0) + rotate(-90)}
               dominantBaseline="middle"
               fill="black"
               shapeRendering="geometricPrecision"
               textAnchor="end">
-              {keyColumn.getNiceName(r.rowValue)}
+              {keyColumn.getNiceName(k)}
             </TextEllipsis>)}
           </g> :
           parameters["Labels"] == "Inside" ?
             <g className="x-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
-              {pivot.rows.map((r, i) => {
+              {keyValues.map((k, i) => {
                 var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
                 var posy = y(maxValue);
 
-                return (<TextEllipsis key={keyColumn.getKey(r.rowValue)}
+                return (<TextEllipsis key={keyColumn.getKey(k)}
                   maxWidth={posy >= size / 2 ? posy : size - posy}
                   padding={labelMargin}
                   className="x-label sf-transition"
-                  transform={translate(x(keyColumn.getKey(r.rowValue))! + x.bandwidth() / 2, posy >= size / 2 ? 0 : -posy) + rotate(-90)}
+                  transform={translate(x(keyColumn.getKey(k))! + x.bandwidth() / 2, posy >= size / 2 ? 0 : -posy) + rotate(-90)}
                   dominantBaseline="middle"
                   fontWeight="bold"
                   fill={posy >= size / 2 ? '#fff' : '#000'}
                   dx={labelMargin}
                   textAnchor="start">
-                  {keyColumn.getNiceName(r.rowValue)}
+                  {keyColumn.getNiceName(k)}
                 </TextEllipsis>);
               })}
             </g> : undefined

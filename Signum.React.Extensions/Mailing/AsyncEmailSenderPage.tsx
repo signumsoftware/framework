@@ -5,7 +5,8 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Entities.Mailing'
-import { useTitle, useAPI, useAPIWithReload } from '../../../Framework/Signum.React/Scripts/Hooks'
+import { useAPI, useAPIWithReload } from '@framework/Hooks'
+import { useTitle } from '@framework/AppContext'
 
 export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 

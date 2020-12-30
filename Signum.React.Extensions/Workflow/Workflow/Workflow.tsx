@@ -44,7 +44,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     if (w.isNew) {
       require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
         updateState(WorkflowModel.New({
-          diagramXml: xml,
+          diagramXml: xml.default,
           entities: [],
         }));
         setIssues(undefined);
@@ -64,7 +64,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     setIssues: (value) => setIssues(value),
     getXml: () => bpmnModelerComponentRef.current!.getXml(),
     getSvg: () => bpmnModelerComponentRef.current!.getSvg()
-  } as WorkflowHandle), [bpmnModelerComponentRef.current]);
+  } as WorkflowHandle), [bpmnModelerComponentRef.current, workflowState]);
 
   function handleHighlightClick(e: React.MouseEvent<HTMLAnchorElement>, issue: API.WorkflowIssue) {
     e.preventDefault();
@@ -150,7 +150,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
           <div className="col-sm-6">
             <ValueLine ctx={ctx.subCtx(d => d.name)} />
             <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }))}
               find={false}
               onRemove={handleMainEntityTypeChange} />
             <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />

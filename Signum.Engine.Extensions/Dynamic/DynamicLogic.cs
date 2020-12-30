@@ -168,6 +168,24 @@ namespace Signum.Engine.Dynamic
             }
         }
 
+        public static void RegisterIsolations()
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenIsolationLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
+                mi.Invoke(null, null);
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
         public static void BeforeSchema(SchemaBuilder sb)
         {
             if (CodeGenError != null)
@@ -234,7 +252,7 @@ namespace Signum.Engine.Dynamic
             {
                 this.Column = d.Location.GetLineSpan().StartLinePosition.Character;
                 this.Line = d.Location.GetLineSpan().StartLinePosition.Line + 1;
-                this.FileContent = d.Location.SourceTree.ToString();
+                this.FileContent = d.Location.SourceTree!.ToString();
                 this.FileName = d.Location.SourceTree.FilePath;
                 this.ErrorNumber = d.Descriptor.Id;
                 this.ErrorText = d.GetMessage(null);

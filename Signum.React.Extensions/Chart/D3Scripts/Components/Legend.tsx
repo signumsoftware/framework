@@ -7,8 +7,8 @@ import { PivotTable } from './PivotTable';
 
 interface LegendProps {
   pivot: PivotTable;
-  xRule: Rule;
-  yRule: Rule;
+  xRule: Rule<"content">;
+  yRule: Rule<"legend">;
   color: d3.ScaleOrdinal<string, string>;
 }
 

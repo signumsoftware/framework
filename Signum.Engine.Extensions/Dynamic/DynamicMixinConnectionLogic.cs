@@ -37,7 +37,8 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static void WriteDynamicStarter(StringBuilder sb, int indent) {
+        public static void WriteDynamicStarter(StringBuilder sb, int indent) 
+        {
             // Nothing
         }
 

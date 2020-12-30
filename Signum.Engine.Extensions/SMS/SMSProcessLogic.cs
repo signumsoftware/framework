@@ -83,25 +83,32 @@ namespace Signum.Engine.SMS
                     if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
 
+                    var owners = (from od in sMSOwnerDatas
+                                  from n in od.TelephoneNumber.SplitNoEmpty(",")
+                                  select new { TelephoneNumber = n, SMSOwnerData = od });
+
+                    if (!owners.Any())
+                        return null;
+
                     SMSSendPackageEntity package = new SMSSendPackageEntity().Save();
 
                     var packLite = package.ToLite();
 
                     using (OperationLogic.AllowSave<SMSMessageEntity>())
-                        (from od in sMSOwnerDatas
-                         from n in od.TelephoneNumber.SplitNoEmpty(",")
-                         select new SMSMessageEntity
+                    {
+                        owners.Select(o =>
+                         new SMSMessageEntity
                          {
-                             DestinationNumber = n,
+                             DestinationNumber = o.TelephoneNumber,
                              SendPackage = packLite,
-                             Referred = od.Owner,
-
+                             Referred = o.SMSOwnerData.Owner,
                              Message = model.Message,
                              From = model.From,
                              Certified = model.Certified,
                              State = SMSMessageState.Created,
                          }).SaveList();
-
+                    }
+                    
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
                     process.Execute(ProcessOperation.Execute);
@@ -113,8 +120,11 @@ namespace Signum.Engine.SMS
 
 
 
-        private static ProcessEntity UpdateMessages(List<SMSMessageEntity> messages)
+        private static ProcessEntity? UpdateMessages(List<SMSMessageEntity> messages)
         {
+            if (!messages.Any())
+                return null;
+
             SMSUpdatePackageEntity package = new SMSUpdatePackageEntity().Save();
 
             var packLite = package.ToLite();

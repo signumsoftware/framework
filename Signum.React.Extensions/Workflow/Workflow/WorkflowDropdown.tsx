@@ -1,14 +1,24 @@
 
 import * as React from 'react'
+import { isRtl } from '@framework/AppContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { NavDropdown, Dropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
-import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
+import { LinkContainer } from '@framework/Components'
+import * as Navigator from '@framework/Navigator'
 
 export default function WorkflowDropdown(props: {}) {
+  
+  if (!Navigator.isViewable(WorkflowEntity))
+    return null;
+
+  return <WorkflowDropdownImp />;
+}
+
+function WorkflowDropdownImp(props: {}) {
   var starts = useAPI(signal => WorkflowClient.API.starts(), []);
 
   function getStarts(starts: WorkflowEntity[]) {
@@ -25,7 +35,7 @@ export default function WorkflowDropdown(props: {}) {
 
 
   return (
-    <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()}>
+    <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()} {...{ alignRight: isRtl()} as any}>
         <LinkContainer exact to={Options.getInboxUrl()}><Dropdown.Item>{CaseActivityQuery.Inbox.niceName()}</Dropdown.Item></LinkContainer>
         {starts.length > 0 && <Dropdown.Divider />}
         {starts.length > 0 && <Dropdown.Item disabled>{JavascriptMessage.create.niceToString()}</Dropdown.Item>}

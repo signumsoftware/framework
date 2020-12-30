@@ -11,6 +11,7 @@ using Signum.Entities.UserAssets;
 using OpenQA.Selenium;
 using System.Linq;
 using Signum.Utilities.ExpressionTrees;
+using Signum.React.Extensions.Selenium.Search;
 
 namespace Signum.React.Selenium
 {
@@ -272,7 +273,7 @@ namespace Signum.React.Selenium
 
         public static void SelectTab(this ILineContainer lineContainer, string eventKey)
         {
-            var element = lineContainer.Element.WaitElementVisible(By.CssSelector($"li.nav-item[data-eventkey={eventKey}] a"));
+            var element = lineContainer.Element.WaitElementVisible(By.CssSelector($"a.nav-item[data-rb-event-key={eventKey}]"));
 
             element.ScrollTo();
             element.Click();
@@ -285,6 +286,15 @@ namespace Signum.React.Selenium
             var element = lineContainer.Element.FindElement(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
 
             return new SearchControlProxy(element);
+        }
+
+        public static ValueSearchControlLineProxy GetSearchControlLine(this ILineContainer lineContainer, object queryName)
+        {
+            string queryKey = QueryUtils.GetKey(queryName);
+
+            var element = lineContainer.Element.FindElement(By.CssSelector("[data-value-query-key={0}]".FormatWith(queryKey)));
+
+            return new ValueSearchControlLineProxy(element);
         }
     }
 

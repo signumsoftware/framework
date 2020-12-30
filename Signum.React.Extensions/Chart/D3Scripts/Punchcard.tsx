@@ -11,9 +11,9 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest}: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -25,7 +25,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     content: '*',
     ticks: 4,
@@ -60,7 +60,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
     var values = Dic.getValues(dictionary).map(array => column.getValue(array[0]));
 
-    var extendedValues = ChartUtils.completeValues(column, values, completeValues, "After");
+    var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest.filterOptions, "After");
     switch (shortType) {
       case "Ascending": return extendedValues.orderBy(a => a);
       case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));
@@ -224,7 +224,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
         .map(r =>
           <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
           cursor="pointer"
-          onClick={e => onDrillDown(r)}>
+          onClick={e => onDrillDown(r, e)}>
           {mainShape?.renderer(r)}
           {innerShape?.renderer(r)}
           {
@@ -254,7 +254,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           </title>
           </g>
         )}
-      </g>>
+      </g>
       <XAxis xRule={xRule} yRule={yRule} />
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>

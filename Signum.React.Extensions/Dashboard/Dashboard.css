@@ -73,7 +73,7 @@ fieldset.sf-grid-repeater-field
 /*Preview*/
 
 div.row-control-panel {
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 /*.sf-hide{
@@ -91,4 +91,13 @@ div.row-control-panel {
 .large {
     font-size: large;
     font-weight: bold;
+}
+
+.sf-dashboard-admin .sf-grid-repeater-field,
+.sf-dashboard-view {
+    background: #fdfdfd;
+}
+
+.sf-fullscreen-component .sf-search-control{
+    width: 100%;
 }

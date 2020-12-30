@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Entity, JavascriptMessage, entityInfo, getToString, toLite, EntityPack } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
-import { ValidationErrors, ValidationErrorHandle } from '@framework/Frames/ValidationErrors'
+import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
@@ -18,8 +19,8 @@ import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import { FunctionalAdapter } from '@framework/Frames/FrameModal';
 import * as AuthClient from '../../Authorization/AuthClient'
+import { FunctionalAdapter } from '@framework/Modals'
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -59,7 +60,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   }
 
   componentWillUnmount() {
-    Navigator.setTitle();
+    AppContext.setTitle();
     window.removeEventListener("keydown", this.hanldleKeyDown);
   }
 
@@ -70,7 +71,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
   load(props: CaseFramePageProps) {
     this.loadEntity(props)
-      .then(() => this.state.pack && Navigator.setTitle(this.state.pack!.activity.case.toStr))
+      .then(() => this.state.pack && AppContext.setTitle(this.state.pack!.activity.case.toStr))
       .then(() => this.loadComponent())
       .done();
   }
@@ -87,7 +88,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
         .then(pack => {
           if (!pack)
-            Navigator.history.goBack();
+            AppContext.history.goBack();
           else
             this.setState({ pack, refreshCount: 0 });
         });
@@ -105,7 +106,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   }
 
   onClose() {
-    Navigator.history.push(WorkflowClient.getDefaultInboxUrl());
+    AppContext.history.push(WorkflowClient.getDefaultInboxUrl());
   }
 
   entityComponent?: React.Component<any, any> | null;
@@ -132,6 +133,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var pack = this.state.pack;
 
     const activityFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
@@ -139,7 +141,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         if (newPack) {
           let newActivity = newPack.entity as CaseActivityEntity;
           if (pack.activity.isNew && !newActivity.isNew) {
-            Navigator.history.push("~/workflow/activity/" + newActivity.id);
+            AppContext.history.push("~/workflow/activity/" + newActivity.id);
             return;
           }
           else {
@@ -157,6 +159,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       },
       refreshCount: this.state.refreshCount,
       allowChangeEntity: false,
+      prefix: "caseFrame"
     };
 
 
@@ -166,7 +169,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       <div className="normal-control">
         {this.renderTitle()}
         <CaseFromSenderInfo current={pack.activity} />
-        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
+        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
           {this.renderMainEntity()}
         </div>
@@ -193,8 +196,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     );
   }
 
-  validationErrorsTop?: ValidationErrorHandle | null;
-  validationErrorsBottom?: ValidationErrorHandle | null;
+  validationErrorsTop?: ValidationErrorsHandle | null;
+  validationErrorsBottom?: ValidationErrorsHandle | null;
 
   getMainTypeInfo(): TypeInfo {
     return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -205,6 +208,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
     const mainFrame: EntityFrame = {
+      tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
       pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity },
@@ -226,6 +230,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       },
       refreshCount: this.state.refreshCount,
       allowChangeEntity: false,
+      prefix: "caseFrame"
     };
 
     var ti = this.getMainTypeInfo();

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Signum.Entities.Translation;
 
 namespace Signum.React.Translation
 {

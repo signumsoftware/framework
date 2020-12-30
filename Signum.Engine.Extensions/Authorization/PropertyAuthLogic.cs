@@ -89,7 +89,6 @@ namespace Signum.Engine.Authorization
 
                         var property = routes.GetOrCreate(route, () => new PropertyRouteEntity
                          {
-                             Route = route,
                              RootType = TypeLogic.TypeToEntity[route.RootType],
                              Path = route.PropertyString()
                          }.Save());
@@ -167,11 +166,11 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleEntity.Current, route);
         }
 
-        public static PropertyAllowed GetNoUserPropertyAllowed(this PropertyRoute route)
+        public static PropertyAllowed GetAllowUnathenticated(this PropertyRoute route)
         {
-            var hasAttr = route.RootType.HasAttribute<AllowedNoUserAttribute>() ||
-                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowedNoUserAttribute>()) ||
-                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowedNoUserAttribute>());
+            var hasAttr = route.RootType.HasAttribute<AllowUnathenticatedAttribute>() ||
+                (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowUnathenticatedAttribute>()) ||
+                (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowUnathenticatedAttribute>());
 
             return hasAttr ? PropertyAllowed.Write : PropertyAllowed.None;
         }
@@ -280,8 +279,11 @@ namespace Signum.Engine.Authorization
         {
             return pr =>
             {
+                if (AuthLogic.GetDefaultAllowed(role))
+                    return PropertyAllowed.Write;
+
                 if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
-                    return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Write : PropertyAllowed.None;
+                    return PropertyAllowed.None;
 
                 var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
 

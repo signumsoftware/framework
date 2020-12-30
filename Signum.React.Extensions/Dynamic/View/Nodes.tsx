@@ -6,7 +6,8 @@ import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Enti
 import { classes, Dic } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
-import { TypeInfo, MemberInfo, getTypeInfo, getTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
+import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
@@ -36,7 +37,7 @@ import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ValueLineController } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
+import { ValueLineController } from '@framework/Lines/ValueLine'
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -309,7 +310,7 @@ NodeUtils.register<ImageNode>({
   initialize: dn => { dn.src = "~/images/logo.png"; },
   renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ ?? "")).etc(20) : ""}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("img", node.htmlAttributes && { src: node.src }),
-  render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)} src={Navigator.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} />,
+  render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)} src={AppContext.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} />,
   renderDesigner: dn => (<div>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.src)} type="string" defaultValue={null} />
     <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
@@ -452,11 +453,11 @@ function getTypes(route: PropertyRoute | undefined): string[] | ((query: string)
   if (tr.name == IsByAll)
     return autoCompleteType;
 
-  var types = getTypeInfos(tr);
+  var types = tryGetTypeInfos(tr);
   if (types.length == 0 || types[0] == undefined)
     return [];
 
-  return types.map(a => a.name);
+  return types.map(a => a!.name);
 }
 
 function autoCompleteType(query: string): string[] {
@@ -475,6 +476,7 @@ export interface LineBaseNode extends BaseNode {
   onChange?: Expression<() => void>;
   labelHtmlAttributes?: HtmlAttributesExpression;
   formGroupHtmlAttributes?: HtmlAttributesExpression;
+  mandatory?: ExpressionOrValue<boolean>;
 }
 
 export interface ValueLineNode extends LineBaseNode {
@@ -504,6 +506,7 @@ NodeUtils.register<ValueLineNode>({
     unitText: node.unitText,
     formatText: node.formatText,
     readOnly: node.readOnly,
+    mandatory: node.mandatory,
     inlineCheckbox: node.inlineCheckbox,
     valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
     comboBoxItems: node.comboBoxItems,
@@ -520,6 +523,7 @@ NodeUtils.register<ValueLineNode>({
     unitText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
     formatText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+    mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
     valueLineType={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
     comboBoxItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
@@ -539,6 +543,7 @@ NodeUtils.register<ValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m?.unit ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m?.format ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
@@ -1374,7 +1379,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
 
     if (dn.node.valueToken && !dn.node.findOptions) {
       if (ctx) {
-        var name = ctx.propertyRoute.typeReference().name;
+        var name = ctx.propertyRoute!.typeReference().name;
         if (!isTypeEntity(name))
           return DynamicViewValidationMessage.ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity.niceToString(name);
       }
@@ -1522,7 +1527,7 @@ NodeUtils.register<ButtonNode>({
 
     var ti = dn.route && getTypeInfo(dn.route.typeReference().name);
 
-    var operations = (ti?.operations && Dic.getValues(ti.operations).filter(o => o.operationAllowed).map(o => o.key)) ?? [];
+    var operations = (ti?.operations && Dic.getValues(ti.operations).map(o => o.key)) ?? [];
 
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
@@ -1589,7 +1594,7 @@ export namespace NodeConstructor {
         return result;
     }
 
-    const tis = getTypeInfos(tr);
+    const tis = tryGetTypeInfos(tr);
     const ti = tis.firstOrNull();
 
     if (tr.isCollection) {

@@ -5,10 +5,10 @@ import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
-import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
+import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
@@ -68,13 +68,13 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         })));
       }
 
-      function toPinnedQueryFilterEmbedded(pinned: PinnedFilter): PinnedQueryFilterEmbedded {
+      function toPinnedQueryFilterEmbedded(p: PinnedFilter): PinnedQueryFilterEmbedded {
         return PinnedQueryFilterEmbedded.New({
-          label: pinned.label,
-          column: pinned.column,
-          row: pinned.row,
-          active: pinned.active,
-          splitText: pinned.splitText,
+          label: typeof p.label == "function" ? p.label() : p.label,
+          column: p.column,
+          row: p.row,
+          active: p.active,
+          splitText: p.splitText,
         });
       }
     }
@@ -163,32 +163,37 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
 
         const pinned = gr.key.pinned;
 
-        return {
+        const filterCondition: FilterConditionOptionParsed = {
           token: completer.get(gr.key.token!.tokenString),
-          operation: gr.key.operation,
+          operation: gr.key.operation ?? "EqualTo",
           value: gr.key.valueString,
           frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilter(pinned),
-        } as FilterConditionOptionParsed;
+          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+        };
+
+        return filterCondition;
       }
       else {
 
         const pinned = gr.key.pinned;
 
-        return {
-          token: gr.key.token ? completer.get(gr.key.token.tokenString) : null,
+        const filterGroup: FilterGroupOptionParsed = {
+          token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
           groupOperation: gr.key.groupOperation!,
           filters: toFilterList(gr.elements, indent + 1),
-          value: gr.key.valueString,
+          value: gr.key.valueString ?? undefined,
           frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilter(pinned),
-        } as FilterGroupOptionParsed;
+          expanded: false,
+          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+        };
+
+        return filterGroup;
       }
     });
 
-    function toPinnedFilter(pinned: PinnedQueryFilterEmbedded): PinnedFilter {
+    function toPinnedFilterParsed(pinned: PinnedQueryFilterEmbedded): PinnedFilterParsed {
       return {
-        label: pinned.label ?? undefined,
+        label: pinned.label ||  undefined,
         column: pinned.column ?? undefined,
         row: pinned.row ?? undefined,
         active: pinned.active || undefined,
@@ -337,7 +342,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   const type = p.type;
 
   if (p.filterType == "Enum") {
-    const ti = getTypeInfos(type).single();
+    const ti = tryGetTypeInfos(type).single();
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);

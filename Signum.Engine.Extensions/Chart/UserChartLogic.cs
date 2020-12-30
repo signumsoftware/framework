@@ -80,19 +80,11 @@ namespace Signum.Engine.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartEntity userChart)
+        static void ChartLogic_Retrieved(UserChartEntity userChart, PostRetrievingContext ctx)
         {
-            object queryName;
-            try
-            {
-                queryName = QueryLogic.ToQueryName(userChart.Query.Key);
-            }
-            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
-            {
-                StartParameters.IgnoredCodeErrors.Add(ex);
-
+            object? queryName = userChart.Query.ToQueryNameCatch();
+            if (queryName == null)
                 return;
-            }
 
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 

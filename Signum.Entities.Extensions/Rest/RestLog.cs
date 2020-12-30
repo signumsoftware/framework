@@ -13,7 +13,7 @@ namespace Signum.Entities.Rest
         [StringLengthValidator(Max = 100)]
         public string? HttpMethod { get; set; }
 
-        [ForceNotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, DbType(Size = MaxValue)]
         public string Url { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -22,7 +22,7 @@ namespace Signum.Entities.Rest
 
         public DateTime? ReplayDate { get; set; }
 
-        [SqlDbType(Size = MaxValue)]
+        [DbType(Size = MaxValue)]
         public string? RequestBody { get; set; }
 
         [PreserveOrder]
@@ -30,33 +30,33 @@ namespace Signum.Entities.Rest
 
         public Lite<IUserEntity>? User { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? UserHostAddress { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? UserHostName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [DbType(Size = int.MaxValue)]
         public string? Referrer { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string Controller { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ControllerName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string Action { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? MachineName { get; set; }
 
-        [SqlDbType(Size = 100)]
+        [DbType(Size = 100)]
         public string? ApplicationName { get; set; }
 
         public Lite<ExceptionEntity>? Exception { get; set; }
 
-        [SqlDbType(Size = MaxValue)]
+        [DbType(Size = MaxValue)]
         public string? ResponseBody { get; set; }
 
         public RestLogReplayState? ReplayState { get; set; }
@@ -67,7 +67,6 @@ namespace Signum.Entities.Rest
 
         static Expression<Func<RestLogEntity, double?>> DurationExpression =
           log => (double?)(log.EndDate - log.StartDate).TotalMilliseconds;
-
         [Unit("ms"), ExpressionField("DurationExpression")]
         public double? Duration => DurationExpression.Evaluate(this);
     }
@@ -75,10 +74,10 @@ namespace Signum.Entities.Rest
     [Serializable]
     public class QueryStringValueEmbedded : EmbeddedEntity
     {
-        [ForceNotNullable, SqlDbType(Size = MaxValue)]
+        [ForceNotNullable, DbType(Size = MaxValue)]
         public string Key { get; set; }
 
-        [SqlDbType(Size = MaxValue)]
+        [DbType(Size = MaxValue)]
         public string Value { get; set; }
     }
 

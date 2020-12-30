@@ -9,12 +9,22 @@ import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
+export interface Pop3ConfigurationEntity {
+    newPassword: string;
+}
 
+export interface SmtpNetworkDeliveryEmbedded {
+    newPassword: string;
+}
+
+export interface ExchangeWebServiceEmbedded {
+    newPassword: string;
+}
 
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
@@ -231,6 +241,9 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   sendDifferentMessages: boolean;
   from: EmailTemplateContactEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
+  groupResults: boolean;
+  filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+  orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml: boolean;
@@ -371,6 +384,7 @@ export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITas
 export module Pop3ConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.Save");
   export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.ReceiveEmails");
+  export const ReceiveLastEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.ReceiveLastEmails");
 }
 
 export const Pop3ReceptionEntity = new Type<Pop3ReceptionEntity>("Pop3Reception");
@@ -380,6 +394,9 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
   startDate: string;
   endDate: string | null;
   newEmails: number;
+  serverEmails: number;
+  lastServerMessageUID: string | null;
+  mailsFromDifferentAccounts: boolean;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;
 }
 
@@ -395,7 +412,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   Type: "SendEmailTask";
   name: string;
   emailTemplate: Entities.Lite<EmailTemplateEntity>;
-  uniqueTarget: Entities.Lite<Entities.Entity>;
+  uniqueTarget: Entities.Lite<Entities.Entity> | null;
   targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
   modelConverter: Templating.ModelConverterSymbol | null;
 }

@@ -12,9 +12,9 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
-  var xRule = new Rule({
+  var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
@@ -26,7 +26,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
   }, width);
   //xRule.debugX(chart)
 
-  var yRule = new Rule({
+  var yRule = Rule.create({
     _1: 5,
     legend: 15,
     _2: 5,
@@ -61,7 +61,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
   var x = scaleFor(valueColumn0, allValues, 0, xRule.size('content'), parameters["Scale"]);
 
-  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+  var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions,  ChartUtils.insertPoint(keyColumn, valueColumn0));
 
   var y = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -95,7 +95,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
               transform={translate(0, -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
               height={ySubscale.bandwidth()}
               width={x(r.values[s.key] && r.values[s.key].value)}
-              onClick={e => onDrillDown(r.values[s.key].rowClick)}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
               <title>
                 {r.values[s.key].valueTitle}
@@ -109,7 +109,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
             .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value) > 16)
             .map(r => <text key={keyColumn.getKey(r.rowValue)} className="number-label sf-transition"
               transform={translate(
-                x(r.values[s.key] && r.values[s.key].value) / 2,
+                x(r.values[s.key]?.value) / 2,
                 -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
               )}
               opacity={parameters["NumberOpacity"]}

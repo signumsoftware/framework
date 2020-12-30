@@ -55,7 +55,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    this.GetChartScript().SynchronizeColumns(this);
+                    this.GetChartScript().SynchronizeColumns(this, null);
                     NotifyAllColumns();
                 }
             }
@@ -92,13 +92,11 @@ namespace Signum.Entities.Chart
 
         internal void ParseData(QueryDescription description)
         {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
+            foreach (var f in Filters)
+                f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
 
-            if (Columns != null)
-                foreach (var c in Columns)
-                    c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+            foreach (var c in Columns)
+                c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
         static Func<QueryEntity, object> ToQueryName;
@@ -110,11 +108,11 @@ namespace Signum.Entities.Chart
             ToQueryEntity = toQueryEntity;
         }
 
-        protected override void PostRetrieving()
+        protected override void PostRetrieving(PostRetrievingContext ctx)
         {
             try
             {
-                this.GetChartScript().SynchronizeColumns(this);
+                this.GetChartScript().SynchronizeColumns(this, ctx);
             }
             catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
             {

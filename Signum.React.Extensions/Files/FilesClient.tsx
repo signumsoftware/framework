@@ -31,11 +31,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   customTypeComponent[type.typeName] = ctx => {
-    const tr = ctx.propertyRoute.typeReference();
+    const tr = ctx.propertyRoute!.typeReference();
     if (tr.isCollection)
       return <MultiFileLine ctx={ctx} />;
 
-    var m = ctx.propertyRoute.member;
+    var m = ctx.propertyRoute!.member;
     if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
       return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
 
@@ -53,7 +53,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     isApplicable: c => c.token!.type.name == type.typeName && isImage(c.token!.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
       isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
-        <FileThumbnail file={cell as IFile & ModifiableEntity } />)
+        <FileThumbnail file={cell as IFile & ModifiableEntity} />)
   });
 }
 
@@ -62,7 +62,7 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
-  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs}/>
+  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs} />
 }
 
 FileThumbnail.defaultProps = {
