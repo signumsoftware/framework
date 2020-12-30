@@ -45,6 +45,7 @@ Signum.React let you write a Single Page Application using React, Bootstrap and 
 Signum Framework doesn't use any numeric versioning, since is distributed as source code we just use Git commit hashes.
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
+* [2020.12.31 Replacing CNTK with TensorFlow.NET and back to Any CPU](https://github.com/signumsoftware/framework/commit/4f28e79349892c7f5045172c9e2e1d4b374b6dac#commitcomment-45536021)
 * [2020.12.20 Upgrade to react 17.0, react-widgets 5.0.0-beta.22, d3 6.0 etc..](https://github.com/signumsoftware/framework/commit/760bdebd1f8457a505a4921ba09c10ac3097f911#commitcomment-45284544)
 * [2020.12.08 UI Improvements in FrameModal and FramePage](https://github.com/signumsoftware/framework/commit/b08684db4c8e7630ad47ca957dd47b71d4064d5a#comments)
 * [2020.11.24 Update to Typescript 4.1](https://github.com/signumsoftware/framework/commit/9379e400b232dac4e8bf284eee8fbded43f78e2b#comments)
