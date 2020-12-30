@@ -28,14 +28,14 @@ namespace Signum.Upgrade.Upgrades
                     @"Signum.Engine.MachineLearning.CNTK\Signum.Engine.MachineLearning.CNTK.csproj",
                     @"Signum.Engine.MachineLearning.TensorFlow\Signum.Engine.MachineLearning.TensorFlow.csproj");
 
-            });
+            }, WarningLevel.Warning);
 
             uctx.ChangeCodeFile(@"Southwind.React/Southwind.React.csproj", file =>
             {
                 file.ReplaceLine(a => a.Contains("CNTK.CPUOnly"),
                     @"<PackageReference Include=""SciSharp.TensorFlow.Redist"" Version=""2.3.1"" />"
                     );
-            });
+            }, WarningLevel.Warning);
 
             uctx.ChangeCodeFile(@"Southwind.Logic/Starter.cs", file =>
             {
@@ -47,7 +47,7 @@ namespace Signum.Upgrade.Upgrades
           @"CNTKPredictorAlgorithm.NeuralNetwork, new CNTKNeuralNetworkPredictorAlgorithm()",
           @"TensorFlowPredictorAlgorithm.NeuralNetworkGraph, new TensorFlowNeuralNetworkPredictor()");
 
-            });
+            }, WarningLevel.Warning);
 
             uctx.ChangeCodeFile(@"Southwind.Terminal/SouthwindMigrations.cs", file =>
             {
@@ -67,21 +67,7 @@ namespace Signum.Upgrade.Upgrades
                     a => a.Contains("LearningRate = 0.1,"),
                     a => a.Contains("LearningUnitGain = false,"),
                     @"LearningRate = 0.0001,");
-            });
-
-            uctx.ChangeCodeFile(@"*.csproj", file =>
-            {
-                file.RemoveAllLines(a => a.Contains("<Platforms>"));
-                file.ReplaceBetweenIncluded(
-                    a => a.Contains("<PropertyGroup Condition="),
-                    a => a.Contains("</PropertyGroup>"),
-                    "");
-            });
-
-            uctx.ChangeCodeFile(@"Southwind.sln", file =>
-            {
-                file.Replace("x64", "Any CPU");
-            });
+            }, WarningLevel.Warning);
         }
     }
 }
