@@ -9,6 +9,7 @@ using Signum.Entities.Translation;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
@@ -29,11 +30,12 @@ namespace Signum.React.Translation
             var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
             foreach (var lang in acceptedLanguages.Select(l => l.Value))
             {
-                var cleanLang = lang.TryBefore('-');
+                var dashIndex = lang.IndexOf('-');
+                var cleanLang = dashIndex == -1 ? new string(lang) : new string(lang.AsSpan().Slice(0, dashIndex));
 
                 if (cleanLang != null)
                 {
-                    culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
+                    var culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
 
                     if (culture != null)
                         return culture;

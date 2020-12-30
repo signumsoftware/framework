@@ -25,7 +25,6 @@ namespace Signum.Entities.Authorization
         Logout,
         EnterYourUserNameAndPassword,
         Username,
-        RememberMe,
         IHaveForgottenMyPassword,
 
         [Description("Show login form")]

@@ -127,7 +127,6 @@ export module LoginAuthMessage {
   export const Logout = new MessageKey("LoginAuthMessage", "Logout");
   export const EnterYourUserNameAndPassword = new MessageKey("LoginAuthMessage", "EnterYourUserNameAndPassword");
   export const Username = new MessageKey("LoginAuthMessage", "Username");
-  export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
   export const ShowLoginForm = new MessageKey("LoginAuthMessage", "ShowLoginForm");
   export const LoginWithWindowsUser = new MessageKey("LoginAuthMessage", "LoginWithWindowsUser");
@@ -153,6 +152,19 @@ export module LoginAuthMessage {
   export const InvalidUsername = new MessageKey("LoginAuthMessage", "InvalidUsername");
   export const InvalidPassword = new MessageKey("LoginAuthMessage", "InvalidPassword");
   export const AnErrorOccurredRequestNotProcessed = new MessageKey("LoginAuthMessage", "AnErrorOccurredRequestNotProcessed");
+  export const Remember = new MessageKey("LoginAuthMessage", "Remember");
+  export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
+  export const ResetPassword = new MessageKey("LoginAuthMessage", "ResetPassword");
+  export const ResetPasswordCode = new MessageKey("LoginAuthMessage", "ResetPasswordCode");
+  export const ResetPasswordCodeHasBeenSent = new MessageKey("LoginAuthMessage", "ResetPasswordCodeHasBeenSent");
+  export const ResetPasswordSuccess = new MessageKey("LoginAuthMessage", "ResetPasswordSuccess");
+  export const Save = new MessageKey("LoginAuthMessage", "Save");
+  export const TheConfirmationCodeThatYouHaveJustSentIsInvalid = new MessageKey("LoginAuthMessage", "TheConfirmationCodeThatYouHaveJustSentIsInvalid");
+  export const ThePasswordMustHaveAtLeast5Characters = new MessageKey("LoginAuthMessage", "ThePasswordMustHaveAtLeast5Characters");
+  export const ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin = new MessageKey("LoginAuthMessage", "ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin");
+  export const ThereSNotARegisteredUserWithThatEmailAddress = new MessageKey("LoginAuthMessage", "ThereSNotARegisteredUserWithThatEmailAddress");
+  export const TheSpecifiedPasswordsDontMatch = new MessageKey("LoginAuthMessage", "TheSpecifiedPasswordsDontMatch");
+  export const TheUserStateMustBeDisabled = new MessageKey("LoginAuthMessage", "TheUserStateMustBeDisabled");
   export const TheUserIsNotLongerInTheDatabase = new MessageKey("LoginAuthMessage", "TheUserIsNotLongerInTheDatabase");
   export const Register0 = new MessageKey("LoginAuthMessage", "Register0");
   export const Success = new MessageKey("LoginAuthMessage", "Success");

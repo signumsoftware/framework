@@ -111,7 +111,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-        public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery]bool throwErrors = true)
+        public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery] bool throwErrors = true)
         {
             if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
                 return null;
@@ -166,7 +166,7 @@ namespace Signum.React.Authorization
 
 
         [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
-        public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
+        public string? ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
                 return LoginAuthMessage.EnterYourUserEmail.NiceToString();
@@ -184,7 +184,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]
-        public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
+        public ActionResult<LoginResponse> ResetPassword([Required, FromBody] ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
@@ -192,7 +192,7 @@ namespace Signum.React.Authorization
             var error = UserEntity.OnValidatePassword(request.newPassword);
             if (error != null)
                 return ModelError("newPassword", error);
-            
+
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
@@ -231,15 +231,15 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/SetPassword"), SignumAllowAnonymous]
-        public ActionResult SetPassword([Required] [FromBody] SetPasswordRequest request)
+        public ActionResult SetPassword([Required][FromBody] SetPasswordRequest request)
         {
             using (UserHolder.UserSession(AuthLogic.SystemUser!))
             {
                 if (string.IsNullOrEmpty(request.password))
-                    return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                    return ModelError("password", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
                 if (string.IsNullOrEmpty(request.confirmPassword))
-                    return ModelError("confirmPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                    return ModelError("confirmPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
                 var error = UserEntity.OnValidatePassword(request.password);
                 if (error != null)
@@ -250,7 +250,7 @@ namespace Signum.React.Authorization
 
                 if (entity == null || entity.Lapsed)
                     return BadRequest();
-                
+
                 if (entity.User.State == UserState.Disabled)
                     entity.User.Execute(UserOperation.Enable);
 
@@ -307,7 +307,7 @@ namespace Signum.React.Authorization
             public string code { get; set; }
             public string newPassword { get; set; }
         }
-                
+
         public class ForgotPasswordRequest
         {
             public string eMail { get; set; }
