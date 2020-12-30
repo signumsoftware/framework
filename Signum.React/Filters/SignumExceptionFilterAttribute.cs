@@ -36,7 +36,7 @@ namespace Signum.React.Filters
         {
             //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
             //TODO: Make it more eficiently when https://github.com/aspnet/AspNetCore/issues/14396
-            var body = ReadAllBody(precontext.HttpContext); 
+            var body = ReadAllBody(precontext.HttpContext);
 
             var context = await next();
 
@@ -62,10 +62,10 @@ namespace Signum.React.Filters
                         e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                         e.Session = new BigStringEmbedded();
                     });
-                    
+
                     if (ExpectsJsonResult(context))
                     {
-                        var statusCode = GetStatus(context.Exception.GetType()); 
+                        var statusCode = GetStatus(context.Exception.GetType());
                         var error = CustomHttpErrorFactory(context.Exception);
 
                         var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
@@ -75,7 +75,7 @@ namespace Signum.React.Filters
                             var response = context.HttpContext.Response;
                             response.StatusCode = (int)statusCode;
                             response.ContentType = "application/json";
-                            await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                            await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
                             context.ExceptionHandled = true;
                         }
                     }
@@ -89,9 +89,9 @@ namespace Signum.React.Filters
             {
                 return getValue()?.TryStart(size);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return (e.GetType().Name + ":"  + e.Message).TryStart(size);
+                return (e.GetType().Name + ":" + e.Message).TryStart(size);
             }
         }
 
@@ -174,7 +174,7 @@ namespace Signum.React.Filters
                     }
                 }
             }
-            
+
             return next();
         }
     }
