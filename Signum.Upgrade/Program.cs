@@ -40,6 +40,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201210_NavigatorView(),
                 new Upgrade_20201220_React17(),
                 new Upgrade_20201223_IndexErrorHandling(),
+                new Upgrade_20201230_TensorFlow(),
             }.Run(uctx);
         }
     }
