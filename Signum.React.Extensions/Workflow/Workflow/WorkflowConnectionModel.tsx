@@ -1,17 +1,32 @@
 import * as React from 'react'
 import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage, ConnectionType } from '../Signum.Entities.Workflow'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { ValueLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
+import { useForceUpdate } from '@framework/Hooks';
 
 export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<WorkflowConnectionModel> }){
   var ctx = p.ctx;
   const forceUpdate = useForceUpdate();
+
+  function handleDecisionChange(e: React.SyntheticEvent<HTMLSelectElement>) {
+    ctx.value.decisionOption = ctx.value.decisionOptions.find(d => d.element.name == (e.currentTarget as HTMLSelectElement).value)?.element ?? null;
+    ctx.value.modified = true;
+    forceUpdate();
+  };
+
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
-      <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
+      <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOption = null; forceUpdate(); }} />
 
-      {ctx.value.type == "Decision" ? <ValueLine ctx={ctx.subCtx(e => e.decisionOptionName)} mandatory /> : null}
+      {ctx.value.type == "Decision" &&
+        < FormGroup ctx={ctx.subCtx(e => e.decisionOption)} labelText={ctx.niceName(e => e.decisionOption)}>
+        {
+          <select value={ctx.value.decisionOption?.name ? ctx.value.decisionOption.name : ""} className="form-control" onChange={handleDecisionChange} >
+            <option value="" />
+            {(ctx.value.decisionOptions ?? []).map((d, i) => <option key={i} value={d.element.name} selected={d.element.name == ctx.value.decisionOption?.name}>{d.element.name}</option>)}
+            </select>
+          }
+        </FormGroup>}
 
       {ctx.value.needCondition ?
         ctx.value.mainEntityType ?

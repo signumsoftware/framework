@@ -437,7 +437,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
   from: IWorkflowNodeEntity;
   to: IWorkflowNodeEntity;
   name: string | null;
-  decisionOptionName: string | null;
+  decisionOption: DecisionOptionEmbedded | null;
   bpmnElementId: string;
   type: ConnectionType;
   condition: Entities.Lite<WorkflowConditionEntity> | null;
@@ -451,13 +451,14 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
   Type: "WorkflowConnectionModel";
   mainEntityType: Basics.TypeEntity;
   name: string | null;
-  decisionOptionName: string | null;
+  decisionOption: DecisionOptionEmbedded | null;
   needCondition: boolean;
   needOrder: boolean;
   type: ConnectionType;
   condition: Entities.Lite<WorkflowConditionEntity> | null;
   action: Entities.Lite<WorkflowActionEntity> | null;
   order: number | null;
+  decisionOptions: Entities.MList<DecisionOptionEmbedded>;
 }
 
 export module WorkflowConnectionOperation {

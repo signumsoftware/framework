@@ -126,8 +126,10 @@ namespace Signum.Engine.Workflow
                     c.Name.HasText() ? new XAttribute("Name", c.Name) : null!,
                     new XAttribute("Type", c.Type.ToString()),
                     new XAttribute("From", c.From.BpmnElementId),
-                    new XAttribute("To", c.To.BpmnElementId),
-                    c.DecisionOptionName == null ? null! : new XAttribute("CustomDecisionName", c.DecisionOptionName!),
+                    new XAttribute("To", c.To.BpmnElementId),                
+                    c.DecisionOption == null ? null! : new XElement("DecisionOption",
+                        new XAttribute("Name", c.DecisionOption.Name),
+                        new XAttribute("Style", c.DecisionOption.Style.ToString())),
                     c.Condition == null ? null! : new XAttribute("Condition", ctx.Include(c.Condition)),
                     c.Action == null ? null! : new XAttribute("Action", ctx.Include(c.Action)),
                     c.Order == null ? null! : new XAttribute("Order", c.Order),
@@ -355,7 +357,17 @@ namespace Signum.Engine.Workflow
                                 using (Sync(this.connections, element.Elements("Connection"), ctx, WorkflowConnectionOperation.Save, WorkflowConnectionOperation.Delete, (conn, xml) =>
                                 {
                                     conn.Name = xml.Attribute("Name")?.Value;
-                                    conn.DecisionOptionName = xml.Attribute("CustomDecisionName")?.Value;
+                                    conn.DecisionOption = conn.DecisionOption.CreateOrAssignEmbedded(xml.Element("DecisionOption"), (cdoe, elem) =>
+                                    {
+                                        cdoe.Name = elem.Attribute("Name")!.Value;
+                                        cdoe.Style = Enum.Parse<BootstrapStyle>(elem.Attribute("Style")!.Value);
+                                    });
+
+                                    if (conn.DecisionOption != null)
+                                    {
+                                        conn.DecisionOption.Name = xml.Attribute("DecisionOptionName")!.Value;
+                                        conn.DecisionOption.Style = xml.Attribute("DecisionOptionStyle")!.Value.ToEnum<BootstrapStyle>();
+                                    }
                                     conn.Type = xml.Attribute("Type")!.Value.ToEnum<ConnectionType>();
                                     conn.From = GetNode(xml.Attribute("From")!.Value);
                                     conn.To = GetNode(xml.Attribute("To")!.Value);
