@@ -180,18 +180,6 @@ namespace Signum.React.Selenium
                 actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
         }
 
-        public static ReadOnlyCollection<IWebElement> WaitElementsVisible(this RemoteWebDriver selenium, By locator, TimeSpan? timeout = null)
-        {
-            return new WebDriverWait(selenium, timeout ?? DefaultTimeout)
-                .Until(SeleniumExtras.WaitHelpers.ExpectedConditions.VisibilityOfAllElementsLocatedBy(locator));
-        }
-
-        public static ReadOnlyCollection<IWebElement> WaitElementsVisible(this IWebElement element, By locator, TimeSpan? timeout = null)
-        {
-            return new WebDriverWait(element.GetDriver(), timeout ?? DefaultTimeout)
-                .Until(SeleniumExtras.WaitHelpers.ExpectedConditions.VisibilityOfAllElementsLocatedBy(locator));
-        }
-
         public static void AssertElementVisible(this RemoteWebDriver selenium, By locator)
         {
             var elements = selenium.FindElements(locator);
