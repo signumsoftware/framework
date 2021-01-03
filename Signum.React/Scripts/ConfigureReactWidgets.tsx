@@ -58,7 +58,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
     century: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? 'yyyy') + ' - ' + DateTime.fromJSDate(endOfCentury(date)).toFormat(format ?? 'yyyy'),
 
     firstOfWeek: function firstOfWeek(): number {
-      var day = fistDay[Settings.defaultLocale?.tryAfter("-") ?? "ES"];
+      var day = firstDay[Settings.defaultLocale?.tryAfter("-") ?? "ES"];
 
       switch (day) {
         case "sun": return 0;
@@ -97,7 +97,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
 }
 
 //https://github.com/unicode-cldr/cldr-core/blob/master/supplemental/weekData.json#L61
-const fistDay: { [isoCode: string]: "mon" | "sat" | "sun" | "fri" } = {
+export const firstDay: { [isoCode: string]: "mon" | "sat" | "sun" | "fri" } = {
   "001": "mon",
   "AD": "mon",
   "AE": "sat",
