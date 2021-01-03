@@ -5,7 +5,6 @@
 		<RootNamespace>Signum.Engine</RootNamespace>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
-		<Platforms>x64;x86;AnyCPU</Platforms>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>
 

@@ -124,6 +124,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
                 x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2,
                 -y(r[0])! * 0.5 - y(r[1])! * 0.5
               )}
+              onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}

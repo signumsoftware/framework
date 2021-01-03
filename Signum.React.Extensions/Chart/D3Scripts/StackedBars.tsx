@@ -127,6 +127,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
                 x(r[0])! * 0.5 + x(r[1])! * 0.5,
                 y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
               )}
+              onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
               opacity={parameters["NumberOpacity"]}

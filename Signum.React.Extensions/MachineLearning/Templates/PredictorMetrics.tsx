@@ -33,7 +33,7 @@ export default function PredictorRegressionMetrics(p : { ctx: TypeContext<Predic
         </thead>
         <tbody>
           {renderRow(ctx, a => a.loss)}
-          {renderRow(ctx, a => a.evaluation)}
+          {renderRow(ctx, a => a.accuracy)}
         </tbody>
       </table>
     </fieldset>
