@@ -385,7 +385,7 @@ namespace Signum.Engine.Workflow
 
 
             var declaredOptionNames = Activities.Values.Where(a => a.Type == WorkflowActivityType.Decision).SelectMany(d => d.DecisionOptions).Select(o => o.Name).ToHashSet();
-            var usedOptionNames = Connections.Values.Where(a => a.Type == ConnectionType.Decision).Select(d => d.DecisionOption?.Name).ToHashSet();
+            var usedOptionNames = Connections.Values.Where(a => a.Type == ConnectionType.Decision).Select(d => d.DecisionOptionName).ToHashSet();
 
             foreach (var wa in Activities.Values)
             {
@@ -441,9 +441,9 @@ namespace Signum.Engine.Workflow
 
             foreach (var wc in Connections.Values)
             {
-                if (wc.Type == ConnectionType.Decision && wc.DecisionOption != null && !declaredOptionNames.Contains(wc.DecisionOption.Name))
+                if (wc.Type == ConnectionType.Decision && wc.DecisionOptionName.HasText() && !declaredOptionNames.Contains(wc.DecisionOptionName))
                 {
-                    issues.AddError(wc, WorkflowValidationMessage.DecisionOptionName0IsNotDeclaredInAnyActivity.NiceToString(wc.DecisionOption.Name));
+                    issues.AddError(wc, WorkflowValidationMessage.DecisionOptionName0IsNotDeclaredInAnyActivity.NiceToString(wc.DecisionOptionName));
                 }
             }
 

@@ -392,5 +392,7 @@ namespace Signum.Entities.Workflow
         InprogressWorkflowActivities,
         OpenCaseActivityStats,
         LocateWorkflowActivityInDiagram,
+        Approve,
+        Decline,
     }
 }

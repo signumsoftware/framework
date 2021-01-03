@@ -1,6 +1,6 @@
 /// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel, DecisionOptionEmbedded } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel, DecisionOptionEmbedded, ActivityWithRemarks } from '../Signum.Entities.Workflow'
 import Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -139,8 +139,13 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     cusRenderer.getDecisionStyle = con => {
       var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      return mod?.type == "Decision" ?
-        mod?.decisionOption?.style : undefined;
+      if (mod?.type == "Decision") {
+        return (((con.businessObject as BPMN.ConnectionModdleElemnet).sourceRef as any).incoming as BPMN.DiElement[])
+          .filter(c => (c as any).sourceRef.$type == "bpmn:Task" || (c as any).sourceRef.$type == "bpmn:UserTask")
+          .map(c => this.getModel((c as any).sourceRef as any) as WorkflowActivityModel)
+          .flatMap(a => a.decisionOptions).find(dco => dco.element.name == mod?.decisionOptionName)?.element.style;
+      }
+      return undefined;
     }
 
     conIcons.show();

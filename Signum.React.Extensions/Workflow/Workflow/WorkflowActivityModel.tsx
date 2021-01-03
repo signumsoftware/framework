@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, DecisionOptionEmbedded, 
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, DecisionOptionEmbedded, WorkflowActivityMessage, 
 } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
@@ -122,8 +122,8 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
     if (wa.type == "Decision")
     {
       if (ctx.value.decisionOptions.length == 0) {
-        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: "Approve", style: "Success" })));
-        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: "Decline", style: "Danger" })));
+        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Approve.niceToString(), style: "Success" })));
+        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Decline.niceToString(), style: "Danger" })));
       }
     }
     else

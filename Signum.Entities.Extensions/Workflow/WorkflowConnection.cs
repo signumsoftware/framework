@@ -21,7 +21,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
 
-        public DecisionOptionEmbedded? DecisionOption { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? DecisionOptionName { get; set; }
 
         public string? GetName() => Name;
 
@@ -45,7 +46,7 @@ namespace Signum.Entities.Workflow
             {
                 MainEntityType = this.From!.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
-                DecisionOption = this.DecisionOption,
+                DecisionOptionName = this.DecisionOptionName,
                 Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
@@ -59,7 +60,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowConnectionModel)model;
             this.Name = wModel.Name;
-            this.DecisionOption = wModel.Type == ConnectionType.Decision ? wModel.DecisionOption : null;
+            this.DecisionOptionName = wModel.Type == ConnectionType.Decision ? wModel.DecisionOptionName : null;
             this.Type = wModel.Type;
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
@@ -71,14 +72,14 @@ namespace Signum.Entities.Workflow
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
-        internal string? DoneDecision() => Type == ConnectionType.Decision ? DecisionOption?.Name : (string?)null;
+        internal string? DoneDecision() => Type == ConnectionType.Decision ? DecisionOptionName : (string?)null;
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
 
-            if(pi.Name == nameof(DecisionOption))
+            if(pi.Name == nameof(DecisionOptionName))
             {
-                return (pi, DecisionOption).IsSetOnlyWhen(Type == ConnectionType.Decision);
+                return (pi, DecisionOptionName).IsSetOnlyWhen(Type == ConnectionType.Decision);
             }
 
             return base.PropertyValidation(pi);
@@ -110,7 +111,8 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }
 
-        public DecisionOptionEmbedded? DecisionOption { get; set; }
+        [StringLengthValidator(Min = 3, Max = 100)]
+        public string? DecisionOptionName { get; set; }
 
         public bool NeedCondition { get; set; }
 
@@ -128,7 +130,7 @@ namespace Signum.Entities.Workflow
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(DecisionOption) && DecisionOption == null && Type == ConnectionType.Decision)
+            if(pi.Name == nameof(DecisionOptionName) && DecisionOptionName == null && Type == ConnectionType.Decision)
             {
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
