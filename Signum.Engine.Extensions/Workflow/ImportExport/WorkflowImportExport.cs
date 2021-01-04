@@ -335,9 +335,9 @@ namespace Signum.Engine.Workflow
                             ev.Timer = ev.Timer.CreateOrAssignEmbedded(xml.Element("Timer"), (time, xml) =>
                             {
                                 time.Duration = time.Duration.CreateOrAssignEmbedded(xml.Element("Duration"), (ts, xml) => ts.FromXml(xml));
-                                time.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowTimerConditionEntity)ctx.GetEntity((Guid)a)).ToLite());
+                                time.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowTimerConditionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
                             });
-                            ev.BoundaryOf = xml.Attribute("BoundaryOf")?.Let(a =>activities.GetOrThrow(a.Value).ToLite());
+                            ev.BoundaryOf = xml.Attribute("BoundaryOf")?.Let(a =>activities.GetOrThrow(a.Value).ToLiteFat());
 
                             SetXmlDiagram(ev, xml);
                         }))
@@ -359,8 +359,8 @@ namespace Signum.Engine.Workflow
                                     conn.Type = xml.Attribute("Type")!.Value.ToEnum<ConnectionType>();
                                     conn.From = GetNode(xml.Attribute("From")!.Value);
                                     conn.To = GetNode(xml.Attribute("To")!.Value);
-                                    conn.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowConditionEntity)ctx.GetEntity((Guid)a)).ToLite());
-                                    conn.Action = xml.Attribute("Action")?.Let(a => ((WorkflowActionEntity)ctx.GetEntity((Guid)a)).ToLite());
+                                    conn.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowConditionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
+                                    conn.Action = xml.Attribute("Action")?.Let(a => ((WorkflowActionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
                                     conn.Order = (int?)xml.Attribute("Order");
                                     SetXmlDiagram(conn, xml);
                                 }))
