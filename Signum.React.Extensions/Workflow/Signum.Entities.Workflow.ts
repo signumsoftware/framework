@@ -359,6 +359,8 @@ export module WorkflowActivityMessage {
   export const InprogressWorkflowActivities = new MessageKey("WorkflowActivityMessage", "InprogressWorkflowActivities");
   export const OpenCaseActivityStats = new MessageKey("WorkflowActivityMessage", "OpenCaseActivityStats");
   export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
+  export const Approve = new MessageKey("WorkflowActivityMessage", "Approve");
+  export const Decline = new MessageKey("WorkflowActivityMessage", "Decline");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
@@ -458,6 +460,7 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
   condition: Entities.Lite<WorkflowConditionEntity> | null;
   action: Entities.Lite<WorkflowActionEntity> | null;
   order: number | null;
+  decisionOptions: Entities.MList<DecisionOptionEmbedded>;
 }
 
 export module WorkflowConnectionOperation {
