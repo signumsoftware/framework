@@ -16,7 +16,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
-            uctx.ChangeCodeFile(@"*.csproj", file =>
+            uctx.ForeachCodeFile(@"*.csproj", file =>
             {
                 file.RemoveAllLines(a => a.Contains("<Platforms>"));
                 file.ReplaceBetweenIncluded(

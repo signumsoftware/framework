@@ -18,7 +18,7 @@ namespace Signum.Upgrade.Upgrades
         {
 
    
-            uctx.ChangeCodeFile(@"Southwind.React\webpack.config.polyfills.js", file =>
+            uctx.ChangeCodeFile(@"Southwind.React\Views\Home\Index.cshtml", file =>
             {
                 file.InsertAfterFirstLine(a => a.Contains(@"})(window.navigator.userAgent.toLowerCase());"),
     @"/**
@@ -59,7 +59,7 @@ window.onerror = function (message, filename, lineno, colno, error) {
 @"(function () {
     var scriptToLoad = [");
 
-                file.ReplaceLine(a => a.Contains("loadNextScript();"),
+                file.ReplaceLine(a => a.Trim() == "loadNextScript();",
 @"  loadNextScript();
 })();");
 
