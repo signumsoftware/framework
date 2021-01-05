@@ -408,7 +408,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (e.Condition != null && e.From != null)
                     {
-                        var conditionType = Conditions.Value.GetOrThrow(e.Condition).MainEntityType;
+                        var conditionType = (e.Condition.EntityOrNull ?? Conditions.Value.GetOrThrow(e.Condition)).MainEntityType;
                         var workflowType = e.From.Lane.Pool.Workflow.MainEntityType;
 
                         if (!conditionType.Is(workflowType))
