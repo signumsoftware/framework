@@ -141,6 +141,9 @@ namespace Signum.React.Selenium
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
                     value.ToString();
 
+            if (str.HasText() && format.HasText() && format.ToUpper() == "P")
+                str = str.Replace("%", "").Trim();
+
             SetStringValue(str);
         }
     }
