@@ -100,6 +100,11 @@ namespace Signum.React.Selenium
             RowElement(lite).CombineCss(" .sf-td-selection").Find().Click();
         }
 
+        public void SelectAllRows()
+        {
+            SelectRow(0.To(RowsCount()).ToArray());
+        }
+
         public WebElementLocator HeaderElement
         {
             get { return this.Element.WithLocator(By.CssSelector("thead > tr > th")); }
