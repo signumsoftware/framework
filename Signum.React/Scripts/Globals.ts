@@ -887,7 +887,7 @@ String.prototype.firstLower = function () {
   return this[0].toLowerCase() + this.substring(1);
 };
 
-String.prototype.trimStart = function (char) {
+String.prototype.trimStart = function (this: string, char: string) {
   let result = this;
 
   if (!char)
@@ -903,7 +903,7 @@ String.prototype.trimStart = function (char) {
   return result;
 };
 
-String.prototype.trimEnd = function (char) {
+String.prototype.trimEnd = function (this: string, char: string) {
   let result = this;
 
   if (!char)
