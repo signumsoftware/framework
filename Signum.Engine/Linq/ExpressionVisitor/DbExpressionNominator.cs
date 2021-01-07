@@ -393,11 +393,12 @@ namespace Signum.Engine.Linq
                 new SqlConstantExpression(ToPostgres(format), typeof(string))
                 }));
 
+
             return Add(new SqlFunctionExpression(typeof(string), null, "Format", new[] {
                 obj,
                 new SqlConstantExpression(format, typeof(string)),
-                new SqlConstantExpression(culture.Name)
-            }));
+                culture.Name.HasText() ? new SqlConstantExpression(culture.Name) : null,
+            }.NotNull()));
         }
 
         //https://database.guide/list-of-the-custom-date-time-format-strings-supported-by-the-format-function-in-sql-server/
