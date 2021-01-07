@@ -570,16 +570,14 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 
   function handleOnBlur(e: React.FocusEvent<any>) {
     if (!p.readonly) {
-      const input = e.currentTarget as HTMLInputElement;
-      let value = ValueLineController.autoFixString(input.value, false);
+      if (text != null) {
+        let value = ValueLineController.autoFixString(text, false);
 
-      //if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
-      //  value = value + ",00";
-
-      const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
-      setText(undefined);
-      if (result != p.value)
-        p.onChange(result);
+        const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
+        setText(undefined);
+        if (result != p.value)
+          p.onChange(result);
+      }
     }
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
