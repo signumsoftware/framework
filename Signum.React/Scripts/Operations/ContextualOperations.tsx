@@ -201,6 +201,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 export interface OperationMenuItemProps {
   coc: ContextualOperationContext<any>;
   onOperationClick?: (coc: ContextualOperationContext<Entity>) => void;
+  onClick?: (me: React.MouseEvent<any>) => void; /*used to hide contextual menu*/
   extraButtons?: React.ReactNode;
   children?: React.ReactNode;
   color?: BsColor;
@@ -208,9 +209,8 @@ export interface OperationMenuItemProps {
   iconColor?: string;
 }
 
-export function OperationMenuItem({ coc, onOperationClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
+export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
   const text = children ?? OperationMenuItem.getText(coc);
-
 
   if (color == null)
     color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
@@ -223,11 +223,13 @@ export function OperationMenuItem({ coc, onOperationClick, extraButtons, color, 
 
   const disabled = !!coc.canExecute;
 
-  const onClick = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
+  const operationClickOrDefault = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
-    onClick(coc);
+    operationClickOrDefault(coc);
+    if (onClick)
+      onClick(me);
   }
 
   const item = (
