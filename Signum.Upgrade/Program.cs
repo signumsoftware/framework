@@ -42,6 +42,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201223_IndexErrorHandling(),
                 new Upgrade_20201230_TensorFlow(),
                 new Upgrade_20201231_AnyCPU(),
+                new Upgrade_20210108_RemoveLangVersion(),
             }.Run(uctx);
         }
     }
