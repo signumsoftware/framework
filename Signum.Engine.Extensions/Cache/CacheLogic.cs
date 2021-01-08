@@ -495,7 +495,7 @@ namespace Signum.Engine.Cache
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !ExecutionMode.IsCacheDisabled && !IsDisabledInTransaction(typeof(T)); }
+                get { return !GloballyDisabled && !ExecutionMode.IsCacheDisabled && !IsDisabledInTransaction(typeof(T)) && SystemTime.Current == null; }
             }
 
             private void AssertEnabled()
