@@ -1109,8 +1109,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
       if (val == null)
         return null;
-
-      var dt = DateTime.fromISO(val);
+      var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
       return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
     }
