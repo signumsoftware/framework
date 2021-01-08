@@ -116,6 +116,29 @@ export default class ImagePlugin implements HtmlEditorPlugin{
       return "handled"
     }
 
+    var oldPasteText = props.handlePastedText;
+    props.handlePastedText = (text, html, editorState) => {
+      if (html) {
+        var node = document.createElement('html')
+        node.innerHTML = html;
+        var array = Array.from(node.getElementsByTagName("img"));
+        if (array.length && array.every(a => a.src.startsWith("data:"))) {
+          var blobs = array.map(a => dataURItoBlob(a.src));
+          Promise.all(blobs.map(img => this.imageConverter.uploadData(img)))
+            .then(datas => {
+              var newState = datas.reduce<draftjs.EditorState>((state, data) => this.addImage(state, data), controller.editorState);
+              controller.setEditorState(newState);
+            }).done();
+
+          return "handled";
+        }
+      }
+
+      if (oldPasteText)
+        return oldPasteText(text, html, editorState);
+
+      return "not-handled";
+    };
     props.handleDroppedFiles = (selection, files) => {
       const imageFiles = files.filter(a => a.type.startsWith("image/"));
       if (imageFiles.length == 0)
@@ -131,6 +154,31 @@ export default class ImagePlugin implements HtmlEditorPlugin{
       return "handled"
     }
   }
+}
+
+function dataURItoBlob(dataURI: string) {
+  // convert base64 to raw binary data held in a string
+  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+  var byteString = atob(dataURI.after(','));
+
+  // separate out the mime component
+  var mimeString = dataURI.between('data:', ";");
+
+  // write the bytes of the string to an ArrayBuffer
+  var ab = new ArrayBuffer(byteString.length);
+
+  // create a view into the buffer
+  var ia = new Uint8Array(ab);
+
+  // set the bytes of the buffer to the correct values
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  // write the ArrayBuffer to a blob, and you're done
+  var blob = new Blob([ab], { type: mimeString });
+  return blob;
+
 }
 
 function ImageComponent(p: { contentState: draftjs.ContentState, block: draftjs.ContentBlock, blockProps: { imageConverter: ImageConverter<any> } }) {
