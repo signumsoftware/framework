@@ -17,8 +17,8 @@ namespace Signum.Upgrade.Upgrades
         public override void Execute(UpgradeContext uctx)
         {
 
-   
-            uctx.ChangeCodeFile(@"Southwind.React\webpack.config.polyfills.js", file =>
+
+            uctx.ChangeCodeFile(@"Southwind.React\Views\Home\Index.cshtml", file =>
             {
                 file.InsertAfterFirstLine(a => a.Contains(@"})(window.navigator.userAgent.toLowerCase());"),
     @"/**
