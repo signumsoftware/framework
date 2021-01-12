@@ -80,11 +80,12 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   const buttons = (
     <span className="input-group-append">
+      {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
-      {c.props.extraButtons && c.props.extraButtons(c)}
+      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
     </span>
   );
 

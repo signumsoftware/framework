@@ -55,11 +55,12 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
     const hasValue = !!p.ctx.value;
     const buttons = (
       <span className="ml-1 float-right">
+        {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!hasValue && c.renderCreateButton(false)}
         {!hasValue && c.renderFindButton(false)}
         {hasValue && c.renderViewButton(false, p.ctx.value!)}
         {hasValue && c.renderRemoveButton(false, p.ctx.value!)}
-        {p.extraButtons && p.extraButtons(c)}
+        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
       </span>
     );
     return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;

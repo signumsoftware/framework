@@ -17,7 +17,7 @@ namespace Signum.Utilities
     public static class Csv
     {
         // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
-        public static Encoding DefaultEncoding => Encoding.UTF8; 
+        public static Encoding DefaultEncoding => Encoding.UTF8;
 
         public static CultureInfo? DefaultCulture = null;
 
@@ -197,7 +197,7 @@ namespace Signum.Utilities
                         sr.ReadLine();
 
                     var line = skipLines;
-                    while(true)
+                    while (true)
                     {
                         string? csvLine = sr.ReadLine();
 
@@ -214,7 +214,7 @@ namespace Signum.Utilities
                                 t = ReadObject<T>(m, members, parsers);
                             }
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             e.Data["row"] = line;
 
@@ -246,7 +246,10 @@ namespace Signum.Utilities
                             T? t = null;
                             try
                             {
-                                t = ReadObject<T>(m, members, parsers);
+                                if (options?.Constructor != null)
+                                    t = options.Constructor(m);
+                                else
+                                    t = ReadObject<T>(m, members, parsers);
                             }
                             catch (Exception e)
                             {
@@ -347,7 +350,7 @@ namespace Signum.Utilities
             return t;
         }
 
-     
+
 
         static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
@@ -412,7 +415,7 @@ namespace Signum.Utilities
             Type? baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
-                if (!s.HasText()) 
+                if (!s.HasText())
                     return null;
 
                 type = baseType;
@@ -434,10 +437,11 @@ namespace Signum.Utilities
         }
     }
 
-    public class CsvReadOptions<T> where T: class
+    public class CsvReadOptions<T> where T : class
     {
         public Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? ParserFactory;
         public bool AsumeSingleLine = false;
+        public Func<Match, T>? Constructor;
         public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }

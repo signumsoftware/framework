@@ -128,11 +128,12 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
   const buttons = (
     <span className="input-group-append">
+      {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
-      {c.props.extraButtons && c.props.extraButtons(c)}
+      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
     </span>
   );
 
