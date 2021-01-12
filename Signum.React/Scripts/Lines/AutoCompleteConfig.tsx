@@ -115,7 +115,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     if (isEntity(entity))
       return toLite(entity, entity.isNew) as Lite<T>;
 
-    throw new Error("Impossible to convert to Lite");
+    throw new Error("Impossible to convert to Lite {0}".formatWith(entity.Type));
   }
 }
 

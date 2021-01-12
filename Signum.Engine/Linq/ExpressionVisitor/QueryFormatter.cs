@@ -19,6 +19,8 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class QueryFormatter : DbExpressionVisitor
     {
+        public static readonly ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?> PostFormatter = Statics.ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?>("QueryFormatterPostFormatter");
+
         Schema schema = Schema.Current;
         bool isPostgres = Schema.Current.Settings.IsPostgres;
 
@@ -88,7 +90,7 @@ namespace Signum.Engine.Linq
 
             var sqlpc = new SqlPreCommandSimple(qf.sb.ToString(), parameters);
 
-            return sqlpc;
+            return PostFormatter.Value == null ? sqlpc : PostFormatter.Value.Invoke(sqlpc);
         }
 
         protected enum Indentation
@@ -1107,5 +1109,23 @@ namespace Signum.Engine.Linq
             return new InvalidOperationException("Unexepected expression on sql {0}".FormatWith(expression.ToString()));
         }
 
+    }
+
+
+    public class QueryPostFormatter : IDisposable
+    {
+        Func<SqlPreCommandSimple, SqlPreCommandSimple>? prePostFormatter = null;
+
+        public QueryPostFormatter(Func<SqlPreCommandSimple, SqlPreCommandSimple> postFormatter)
+        {
+            prePostFormatter = QueryFormatter.PostFormatter.Value;
+
+            QueryFormatter.PostFormatter.Value = postFormatter;
+        }
+
+        public void Dispose()
+        {
+            QueryFormatter.PostFormatter.Value = prePostFormatter;
+        }
     }
 }
