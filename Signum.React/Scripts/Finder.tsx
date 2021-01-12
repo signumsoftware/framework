@@ -393,7 +393,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
 }
 
 
-static const tokensToIgnore = [
+export const tokensToIgnore = [
   "Id",
   "Entity.Id",
   "Ticks",
