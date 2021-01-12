@@ -392,6 +392,16 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     }) as ColumnOptionParsed));
 }
 
+
+static const tokensToIgnore = [
+  "Id",
+  "Entity.Id",
+  "Ticks",
+  "Entity.Ticks",
+  "ToStr",
+  "Entity.ToStr",
+];
+
 export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[]): Promise<any> {
 
   function getMemberForToken(ti: TypeInfo, fullKey: string) {
@@ -411,6 +421,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
+      tokensToIgnore.contains(fo.token.fullKey) ||
       fo.operation != "EqualTo" ||
       fo.pinned && fo.pinned.active == "Checkbox_StartUnchecked" ||
       fo.pinned && fo.pinned.active == "WhenHasValue" && fo.value == null)
