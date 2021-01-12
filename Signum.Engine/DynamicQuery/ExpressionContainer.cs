@@ -36,7 +36,9 @@ namespace Signum.Engine.DynamicQuery
             var dic = RegisteredExtensions.TryGetValue(parentType);
 
             IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
-                dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType).Select(v => v.CreateToken(parent));
+                dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType)
+                .Where(ei => ei.IsApplicable == null || ei.IsApplicable(parent))
+                .Select(v => v.CreateToken(parent));
 
             var pr = parentType.IsEntity() && !parentType.IsAbstract ? PropertyRoute.Root(parentType) :
                 parentType.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
@@ -251,6 +253,7 @@ namespace Signum.Engine.DynamicQuery
         public readonly Type Type;
         public readonly Type SourceType;
         public readonly string Key;
+        public Func<QueryToken, bool>? IsApplicable;
         public bool IsProjection;
         public bool Inherit = true;
 
