@@ -1,6 +1,7 @@
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
+using System.Collections.ObjectModel;
 
 namespace Signum.React.Selenium
 {
@@ -40,7 +41,12 @@ namespace Signum.React.Selenium
 
         public virtual int ItemsCount()
         {
-            return this.ItemsContainerElement.CombineCss(" fieldset.sf-repeater-element").FindElements().Count;
+            return this.Items().Count;
+        }
+
+        public virtual ReadOnlyCollection<IWebElement> Items()
+        {
+            return this.ItemsContainerElement.CombineCss(" fieldset.sf-repeater-element").FindElements();
         }
 
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
