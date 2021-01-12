@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import { Dic, areEqual, classes } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
-import { SearchMessage } from '../Signum.Entities'
+import { SearchMessage, Lite } from '../Signum.Entities'
 import { isNumber } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toMomentFormat, getTypeInfos } from '../Reflection'
@@ -422,7 +422,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     }
     else {
 
-      if (!areEqual(f.token, newToken, a => a.filterType) || !areEqual(f.token, newToken, a => a.preferEquals)) {
+      if (!areEqual(f.token, newToken, a => a.filterType) ||
+        !areEqual(f.token, newToken, a => a.preferEquals) ||
+        newToken.filterType == "Lite" && f.value != null && newToken.type.name != IsByAll && !getTypeInfos(newToken.type.name).some(t => t.name == (f.value as Lite<any>).EntityType)) {
         f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
