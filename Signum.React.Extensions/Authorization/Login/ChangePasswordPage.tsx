@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { classes, Dic } from '@framework/Globals'
+import { classes, Dic, ifError } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
@@ -37,10 +37,10 @@ export default function ChangePasswordPage() {
           AppContext.resetUI();
           AppContext.history.push(AppContext.toAbsoluteUrl("~/auth/changePasswordSuccess"));
         })
-        .catch((e: ValidationError) => {
+        .catch(ifError(ValidationError, e => {
           if (e.modelState)
             setModelState(e.modelState).done();
-        })
+        }))
         .done();
 
     }).done();
