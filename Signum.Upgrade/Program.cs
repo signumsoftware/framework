@@ -43,6 +43,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201230_TensorFlow(),
                 new Upgrade_20201231_AnyCPU(),
                 new Upgrade_20210108_RemoveLangVersion(),
+                new Upgrade_20210113_TimezoneInDockerfile(),
             }.Run(uctx);
         }
     }
