@@ -423,6 +423,12 @@ namespace Signum.Engine.Json
 
                     Factory.AfterDeserilization.Invoke(mod);
 
+                    if(Factory.Strategy == EntityJsonConverterStrategy.Full)
+                    {
+                        if (!markedAsModified)
+                            mod.SetCleanModified(isSealed: false);
+                    }
+
                     return (T)(IModifiableEntity)mod;
                 }
             }
@@ -614,7 +620,7 @@ namespace Signum.Engine.Json
                         ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
 
                     if (!identityInfo.Modified!.Value)
-                        ((Entity)result).SetCleanModified(false);
+                        ((Entity)result).SetCleanModified(isSealed: false);
 
                     if (identityInfo.IsNew != true)
                         ((Entity)result).SetIsNew(false);
