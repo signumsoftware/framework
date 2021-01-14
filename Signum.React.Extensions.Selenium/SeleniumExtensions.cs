@@ -330,7 +330,7 @@ namespace Signum.React.Selenium
 
         public static IWebElement GetParent(this IWebElement e)
         {
-            return e.FindElement(By.XPath(".."));
+            return e.FindElement(By.XPath("./.."));
         }
 
         public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
