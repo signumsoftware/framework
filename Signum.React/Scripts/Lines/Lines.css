@@ -24,6 +24,11 @@ input[type=checkbox].form-control {
     overflow: hidden;
 }
 
+.form-control.readonly{
+    background-color: #e9ecef; /*Not included in bootstrap*/
+}
+
+
     .form-control.readonly.readonly-textarea {
         height: initial !important;
         white-space: pre-wrap;
