@@ -43,6 +43,8 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
             <span style={{ color: "Red" }}> STOPPED </span>
           }</strong>
         <br />
+        MachineName: {state.machineName}
+        <br />
         CurrentProcessIdentifier: {state.currentProcessIdentifier}
         <br />
         AsyncSenderPeriod: {state.asyncSenderPeriod} sec

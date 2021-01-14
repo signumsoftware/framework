@@ -60,6 +60,7 @@ export interface SchedulerState {
   running: boolean;
   schedulerMargin: string;
   nextExecution: string;
+  machineName: string;
   queue: SchedulerItemState[];
   runningTask: SchedulerRunningTaskState[];
 }

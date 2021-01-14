@@ -229,6 +229,7 @@ export module API {
 export interface AsyncEmailSenderState {
   asyncSenderPeriod: number;
   running: boolean;
+  machineName: string;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;
   queuedItems: number;

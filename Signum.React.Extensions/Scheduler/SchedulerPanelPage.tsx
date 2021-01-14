@@ -64,6 +64,8 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
         <br />
         SchedulerMargin: {s.schedulerMargin}
         <br />
+        MachineName: {s.machineName}
+        <br />
         NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : DateTime.fromISO(s.nextExecution).toRelative()})
         <br />
         <InMemoryQueue queue={s.queue} onReload={reloadState} />
