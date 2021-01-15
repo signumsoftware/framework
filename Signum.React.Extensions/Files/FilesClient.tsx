@@ -58,7 +58,14 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   });
 }
 
-export const extensionInfo: { [ext: string]: { icon: IconName, color: string, mimeType?: string, browserView?: boolean } } = {
+export interface ExtensionInfo {
+  icon: IconName;
+  color: string;
+  mimeType?: string;
+  browserView?: boolean;
+}
+
+export const extensionInfo: { [ext: string]: ExtensionInfo } = {
 
   ["jpg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg", browserView: true },
   ["jpeg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg", browserView: true },

@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import { extensionInfo } from './FilesClient'
+import { ExtensionInfo, extensionInfo } from './FilesClient'
 import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
@@ -34,7 +34,7 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   function handleOnClick(e: React.MouseEvent, save: boolean) {
     const entityOrLite = p.entityOrLite;
-    var promise = isModifiableEntity(entityOrLite) ? Promise.resolve(entityOrLite) :
+    const promise = isModifiableEntity(entityOrLite) ? Promise.resolve(entityOrLite) :
       Navigator.API.fetchAndRemember(entityOrLite as Lite<IFile & Entity>);
 
     promise.then(entity => {
@@ -65,7 +65,7 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   const fileName = getFileName(toStr); //Hacky
 
-  var info = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
+  const info: ExtensionInfo | undefined = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
 
   return (
     <div {...p.htmlAttributes}>
@@ -73,7 +73,7 @@ export function FileDownloader(p: FileDownloaderProps) {
         href="#"
         onClick={e => {
           e.preventDefault();
-          handleOnClick(e, p.download == "SaveAs" || p.download == "ViewOrSave" && !info.browserView);
+          handleOnClick(e, p.download == "SaveAs" || p.download == "ViewOrSave" && !(info?.browserView));
         }}
         title={toStr ?? undefined}
         target="_blank"
