@@ -25,6 +25,8 @@ namespace Signum.Engine.Workflow
     {
         public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
+        public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
+
         [AutoExpressionField]
         public static bool HasExpired(this WorkflowEntity w) => 
             As.Expression(() => w.ExpirationDate.HasValue && w.ExpirationDate.Value < TimeZoneManager.Now);
@@ -237,6 +239,9 @@ namespace Signum.Engine.Workflow
                 sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
+
+                Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(WorkflowEntity)));
 
 
                 sb.Include<WorkflowPoolEntity>()

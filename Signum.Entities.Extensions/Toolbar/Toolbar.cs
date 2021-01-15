@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
+using Signum.Entities.Workflow;
 
 namespace Signum.Entities.Toolbar
 {

@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.UserAssets;
 using Signum.Engine.UserQueries;
+using Signum.Engine.Workflow;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -14,6 +15,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Toolbar;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Workflow;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -64,6 +66,7 @@ namespace Signum.Engine.Toolbar
                 RegisterDelete<QueryEntity>(sb);
                 RegisterDelete<DashboardEntity>(sb);
                 RegisterDelete<ToolbarMenuEntity>(sb);
+                RegisterDelete<WorkflowEntity>(sb);
 
                 Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToDictionary(a => a.ToLite()),
                    new InvalidateWith(typeof(ToolbarEntity)));
@@ -246,6 +249,7 @@ namespace Signum.Engine.Toolbar
             { typeof(UserQueryEntity), a => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); } },
             { typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
+            { typeof(WorkflowEntity), a => { var wf = WorkflowLogic.Workflows.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf) && WorkflowLogic.GetWorkflowNodeGraph(wf.ToLite()).IsStartCurrentUser(); } },
         };
 
         static bool IsQueryAllowed(Lite<QueryEntity> query)
