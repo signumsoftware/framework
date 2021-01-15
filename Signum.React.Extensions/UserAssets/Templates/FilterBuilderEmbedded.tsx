@@ -278,12 +278,12 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
   if (p.filterType == "Lite") {
     if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
     else
-      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
   }
   else if (p.filterType == "Embedded") {
-    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
   }
   else
     throw new Error("Unexpected Filter Type");
