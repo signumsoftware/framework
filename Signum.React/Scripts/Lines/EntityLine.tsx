@@ -14,6 +14,7 @@ import { useController } from './LineBase'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
+  avoidLink?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
@@ -198,7 +199,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     if (p.ctx.readOnly)
       return <FormControlReadonly ctx={p.ctx}>{str}</FormControlReadonly>
 
-    if (p.navigate && p.view) {
+    if (p.view && !p.avoidLink) {
       return (
         <a ref={e => setLinkOrSpan(e)}
           href="#" onClick={c.handleViewClick}

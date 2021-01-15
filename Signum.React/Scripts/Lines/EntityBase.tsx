@@ -15,7 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
   viewOnCreate?: boolean;
-  navigate?: boolean;
   create?: boolean;
   createOnFind?: boolean;
   find?: boolean;
