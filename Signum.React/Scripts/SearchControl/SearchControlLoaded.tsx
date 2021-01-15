@@ -75,7 +75,9 @@ export interface SearchControlLoadedProps {
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
-  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>;
+  //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
+  onCreate?: () => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<any> | ModifiableEntity | undefined) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -630,6 +632,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .then(ti => ti ? ti.name : undefined);
   }
 
+  handleCreated = (entity: EntityPack<any> | ModifiableEntity | undefined) => {
+    if (this.props.onCreateFinished) {
+      this.props.onCreateFinished(entity);
+    } else {
+      if (!this.props.avoidAutoRefresh)
+        this.doSearch(true);
+    }
+  }
+ 
   handleCreate = (ev: React.MouseEvent<any>) => {
 
     if (!this.props.create)
@@ -639,7 +650,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (onCreate) {
       onCreate()
-        .then(val => val == false || this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+        .then(val => {
+          if (val != "no_change")
+            this.handleCreated(val);
+        })
         .done();
     }
     else {
@@ -675,7 +689,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
                   .then(props => Constructor.constructPack(tn, props)!),
               }))
-              .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
+              .then(entity => entity && this.handleCreated(entity))
               .done();
           }
         }

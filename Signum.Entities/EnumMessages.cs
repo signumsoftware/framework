@@ -221,7 +221,11 @@ namespace Signum.Entities
         [Description("{0} of {1} elements")]
         PaginationPages_0Of01lements,
         [Description("{0} {1} elements")]
-        PaginationFirst_01Elements
+        PaginationFirst_01Elements,
+        [Description("Return new entity?")]
+        ReturnNewEntity,
+        [Description("Do you want to return the new {0} ({1})?")]
+        DoYouWantToSelectTheNew01_G
     }
 
     public enum SelectorMessage

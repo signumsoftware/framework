@@ -268,8 +268,6 @@ export class ContextualOperationContext<T extends Entity> {
 
   createMenuItems(): React.ReactElement[]{
 
-    debugger;
-
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 

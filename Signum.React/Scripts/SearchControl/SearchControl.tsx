@@ -58,7 +58,9 @@ export interface SearchControlProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
-  onCreate?: () => Promise<void | boolean | EntityPack<any> /*convinience*/ | ModifiableEntity /*convinience*/>; //return false to avoid autoRefresh
+  //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
+  onCreate?: () => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<any> | ModifiableEntity | undefined) => void;
   styleContext?: StyleContext;
 }
 
@@ -204,6 +206,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         simpleFilterBuilder={p.simpleFilterBuilder}
 
         onCreate={p.onCreate}
+        onCreateFinished={p.onCreateFinished}
         onNavigated={p.onNavigated}
         onSearch={p.onSearch}
         onDoubleClick={p.onDoubleClick}
