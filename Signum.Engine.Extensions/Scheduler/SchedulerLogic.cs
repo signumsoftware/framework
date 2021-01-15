@@ -496,7 +496,7 @@ namespace Signum.Engine.Scheduler
                 Running = Running,
                 SchedulerMargin = SchedulerMargin,
                 NextExecution = NextExecution,
-
+                MachineName = Environment.MachineName,          
                 Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
                 {
                     ScheduledTask = p.ScheduledTask.ToLite(),
@@ -529,6 +529,7 @@ namespace Signum.Engine.Scheduler
         public TimeSpan SchedulerMargin;
         public DateTime? NextExecution;
         public List<SchedulerItemState> Queue;
+        public string MachineName;
 
         public List<SchedulerRunningTaskState> RunningTask; 
     }
