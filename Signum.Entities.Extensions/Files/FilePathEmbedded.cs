@@ -87,7 +87,7 @@ namespace Signum.Entities.Files
         public int FileLength { get; internal set; }
 
         [AutoExpressionField]
-        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
 
         [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
@@ -143,7 +143,7 @@ namespace Signum.Entities.Files
         }
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize(true)}");
+        public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize()}");
 
         public static Action<FilePathEmbedded> OnPreSaving;
         protected override void PreSaving(PreSavingContext ctx)

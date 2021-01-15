@@ -58,15 +58,15 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   });
 }
 
-export const extensionInfo: { [ext: string]: { icon: IconName, color: string, mimeType?: string } } = {
+export const extensionInfo: { [ext: string]: { icon: IconName, color: string, mimeType?: string, browserView?: boolean } } = {
 
-  ["jpg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg" },
-  ["jpeg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg" },
-  ["gif"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/gif" },
-  ["png"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/png" },
-  ["bmp"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/bmp" },
-  ["tiff"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/tiff" },
-  ["svg"]: { icon: "file-image", color: "#21618C", mimeType: "image/svg+xml" },
+  ["jpg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg", browserView: true },
+  ["jpeg"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/jpeg", browserView: true },
+  ["gif"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/gif", browserView: true },
+  ["png"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/png", browserView: true },
+  ["bmp"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/bmp", browserView: true },
+  ["tiff"]: { icon: "file-image", color: "#5DADE2", mimeType: "image/tiff", browserView: true },
+  ["svg"]: { icon: "file-image", color: "#21618C", mimeType: "image/svg+xml", browserView: true },
   ["psd"]: { icon: "file-image", color: "#21618C" },
   ["ai"]: { icon: "file-image", color: "#21618C"},
 
@@ -79,10 +79,10 @@ export const extensionInfo: { [ext: string]: { icon: IconName, color: string, mi
   ["ppt"]: { icon: "file-powerpoint", color: "rgb(207 66 36)", mimeType: "application/vnd.ms-powerpoint" },
   ["pptx"]: { icon: "file-powerpoint", color: "rgb(207 66 36)", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
 
-  ["pdf"]: { icon: "file-pdf", color: "#b30b00", mimeType: "application/pdf" },
+  ["pdf"]: { icon: "file-pdf", color: "#b30b00", mimeType: "application/pdf", browserView: true},
 
-  ["html"]: { icon: "file-code", color: "#373377", mimeType: "text/html" },
-  ["xml"]: { icon: "file-code", color: "#373377", mimeType: "text/xml" },
+  ["html"]: { icon: "file-code", color: "#373377", mimeType: "text/html", browserView: true },
+  ["xml"]: { icon: "file-code", color: "#373377", mimeType: "text/xml", browserView: true},
   ["css"]: { icon: "file-code", color: "#373377", mimeType: "text/css" },
   ["js"]: { icon: "file-code", color: "#373377", mimeType: "text/javascript" },
   ["jsx"]: { icon: "file-code", color: "#373377", mimeType: "text/plain" },
@@ -101,28 +101,28 @@ export const extensionInfo: { [ext: string]: { icon: IconName, color: string, mi
   ["rar"]: { icon: "file-archive", color: "#F5B041", mimeType: "application/vnd.rar" },
   ["7z"]: { icon: "file-archive", color: "#F5B041", mimeType: "application/x-7z-compressed" },
 
-  ["txt"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain"  },
+  ["txt"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true },
   ["rtf"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain"  },
-  ["info"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain"  },
-  ["log"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain"  },
+  ["info"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true  },
+  ["log"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true},
 
   ["csv"]: { icon: "file-csv", color: "#566573", mimeType: "text/plain"  },
 
-  ["avi"]: { icon: "file-video", color: "red", mimeType: "video/x-msvideo" },
-  ["mkv"]: { icon: "file-video", color: "red", mimeType: "video/x-matroska" },
-  ["mpeg"]: { icon: "file-video", color: "red", mimeType: "video/mpeg" },
-  ["mpg"]: { icon: "file-video", color: "red", mimeType: "video/mpeg" },
-  ["mp4"]: { icon: "file-video", color: "red", mimeType: "video/mpeg"  },
+  ["avi"]: { icon: "file-video", color: "red", mimeType: "video/x-msvideo", browserView: true },
+  ["mkv"]: { icon: "file-video", color: "red", mimeType: "video/x-matroska", browserView: true },
+  ["mpeg"]: { icon: "file-video", color: "red", mimeType: "video/mpeg", browserView: true },
+  ["mpg"]: { icon: "file-video", color: "red", mimeType: "video/mpeg", browserView: true},
+  ["mp4"]: { icon: "file-video", color: "red", mimeType: "video/mpeg", browserView: true  },
   ["ogg"]: { icon: "file-video", color: "red", mimeType: "video/ogg" },
   ["ogv"]: { icon: "file-video", color: "red", mimeType: "video/ogg" },
   ["mov"]: { icon: "file-video", color: "red", mimeType: "video/quicktime" },
   ["webm"]: { icon: "file-video", color: "red", mimeType: "video/webm" },
   ["wmv"]: { icon: "file-video", color: "red", mimeType: "video/x-ms-asf" },
 
-  ["mp3"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/mpeg" },
-  ["weba"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/webm" },
-  ["wav"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/wav" },
-  ["wma"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/x-ms-wma" },
+  ["mp3"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/mpeg", browserView: true },
+  ["weba"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/webm", browserView: true},
+  ["wav"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/wav", browserView: true},
+  ["wma"]: { icon: "file-audio", color: "#BA4A00", mimeType: "audio/x-ms-wma", browserView: true },
 };
 
 

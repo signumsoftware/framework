@@ -73,7 +73,7 @@ export function FileDownloader(p: FileDownloaderProps) {
         href="#"
         onClick={e => {
           e.preventDefault();
-          handleOnClick(e, p.download == "SaveAs");
+          handleOnClick(e, p.download == "SaveAs" || p.download == "ViewOrSave" && !info.browserView);
         }}
         title={toStr ?? undefined}
         target="_blank"
