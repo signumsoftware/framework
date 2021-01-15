@@ -746,6 +746,7 @@ export class Binding<T> implements IBinding<T> {
 
     return this.parentObject[this.member];
   }
+
   setValue(val: T) {
 
     if (!this.parentObject)
@@ -755,8 +756,9 @@ export class Binding<T> implements IBinding<T> {
     this.parentObject[this.member] = val;
 
     if ((this.parentObject as ModifiableEntity).Type) {
-      if (oldVal !== val || Array.isArray(oldVal))
+      if (oldVal !== val && !sameEntity(oldVal, val) || Array.isArray(oldVal)) {
         (this.parentObject as ModifiableEntity).modified = true;
+      }
     }
   }
 
@@ -794,6 +796,7 @@ export class Binding<T> implements IBinding<T> {
     }
   }
 }
+
 
 export class ReadonlyBinding<T> implements IBinding<T> {
   constructor(
@@ -957,6 +960,28 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
   result = result.filter((m, i) => !(m.type == "Member" && m.name == "element" && i > 0 && result[i - 1].type == "Indexer"));
 
   return result;
+}
+
+//slighliy different to is, and prevents webpack cycle
+function sameEntity(a: any, b: any) {
+
+  if (a === b)
+    return true;
+
+  if (a == undefined || b == undefined)
+    return false;
+
+  if ((a as Entity).Type && (b as Entity).Type) {
+    return (a as Entity).Type == (b as Entity).Type &&
+      (a as Entity).id == (b as Entity).id;
+  }
+
+  if ((a as Lite<Entity>).EntityType && (b as Lite<Entity>).EntityType) {
+    return (a as Lite<Entity>).EntityType == (b as Lite<Entity>).EntityType &&
+      (a as Lite<Entity>).id == (b as Lite<Entity>).id;
+  }
+
+  return false;
 }
 
 export function getFieldMembers(field: string): LambdaMember[] {
