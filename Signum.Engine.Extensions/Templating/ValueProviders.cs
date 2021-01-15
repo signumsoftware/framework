@@ -713,13 +713,17 @@ namespace Signum.Engine.Templating
     {
         string? fieldOrPropertyChain;
         List<MemberInfo>? Members;
-        ValueProviderBase Parent; 
+        ValueProviderBase Parent;
 
         public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
         {
             this.Parent = parent;
 
-            this.Members = ParsedModel.GetMembers(ParentType()!, fieldOrPropertyChain, addError);
+            var pt = ParentType();
+            if (pt == null)
+                addError(false, $"Impossible to continue with {fieldOrPropertyChain} (parentType is null)");
+            else
+                this.Members = ParsedModel.GetMembers(pt, fieldOrPropertyChain, addError);
         }
 
         private Type? ParentType()
