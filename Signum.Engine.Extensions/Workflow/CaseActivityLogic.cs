@@ -634,7 +634,8 @@ namespace Signum.Engine.Workflow
                 new Execute(CaseActivityOperation.Next)
                 {
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
-                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
+                    //!ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() :
+                    null,
                     FromStates = { CaseActivityState.PendingNext },
                     ToStates = { CaseActivityState.Done },
                     CanBeModified = true,
@@ -783,6 +784,10 @@ namespace Signum.Engine.Workflow
                         using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca }))
                         {
                             var script = ((WorkflowActivityEntity)ca.WorkflowActivity).Script!.Script!.RetrieveFromCache();
+
+                            if (ca.ScriptExecution == null)
+                                ca.ScriptExecution = GetScriptExecution(ca.WorkflowActivity);
+
                             script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
                             {
                                 CaseActivity = ca,
@@ -985,12 +990,20 @@ namespace Signum.Engine.Workflow
                     WorkflowActivity = workflowActivity,
                     OriginalWorkflowActivityName = workflowActivity.GetName()!,
                     Case = @case,
-                    ScriptExecution = workflowActivity is WorkflowActivityEntity w && w.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
-                    {
-                        NextExecution = TimeZoneManager.Now,
-                        RetryCount = 0,
-                    } : null
+                    ScriptExecution = GetScriptExecution(workflowActivity)
                 }.Save();
+            }
+
+
+            private static ScriptExecutionEmbedded? GetScriptExecution(IWorkflowNodeEntity workflowActivity)
+            {
+                return workflowActivity is WorkflowActivityEntity w && w.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
+                {
+                    NextExecution = TimeZoneManager.Now,
+                    RetryCount = 0,
+                } : null;
+
+
             }
 
             private static void TryToRecompose(CaseEntity childCase)
