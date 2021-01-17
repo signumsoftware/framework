@@ -483,6 +483,11 @@ namespace Signum.Entities.DynamicQuery
         {
             return Expression.Lambda<Func<object, Lite<Entity>>>(Replacemens.Single(a=>a.Key.FullKey() == "Entity").Value, Parameter);
         }
+
+        public Expression<Func<object, Entity>> GetEntityFullSelector()
+        {
+            return Expression.Lambda<Func<object, Entity>>(Replacemens.Single(a => a.Key.FullKey() == "Entity").Value.ExtractEntity(false), Parameter);
+        }
     }
 
 

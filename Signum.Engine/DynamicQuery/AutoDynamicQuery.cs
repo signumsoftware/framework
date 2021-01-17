@@ -202,6 +202,25 @@ namespace Signum.Engine.DynamicQuery
             return result.TryTake(request.Count);
         }
 
+        public override IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request)
+        {
+            var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
+
+            DQueryable<T> query = Query
+             .ToDQueryable(GetQueryDescription())
+             .SelectMany(request.Multiplications)
+             .OrderBy(request.Orders)
+             .Where(request.Filters)
+             .Select(new List<Column> { ex });
+
+            var result = query.Query.Select(query.Context.GetEntityFullSelector());
+
+            if (request.Multiplications.Any())
+                result = result.Distinct();
+
+            return result.TryTake(request.Count);
+        }
+
         public override DQueryable<object> GetDQueryable(DQueryableRequest request)
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
