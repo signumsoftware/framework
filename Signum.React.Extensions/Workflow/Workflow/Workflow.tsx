@@ -4,6 +4,7 @@ import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMess
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
 import { API } from '../WorkflowClient'
+import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
 import MessageModal from "@framework/Modals/MessageModal";
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
@@ -176,5 +177,21 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     </div>
   );
 });
+
+export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
+
+  if (iconName == "none")
+    return null as any as undefined;
+
+  if (iconName == null)
+    return undefined;
+
+  var result = {
+    prefix: iconName.tryBefore(" ") as IconPrefix,
+    iconName: iconName.tryAfter(" fa-") as IconName,
+  };
+
+  return result.iconName && result.prefix && result;
+}
 
 export default Workflow;

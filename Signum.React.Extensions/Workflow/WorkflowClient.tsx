@@ -5,7 +5,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import {
-  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity
+  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
@@ -364,6 +364,10 @@ function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promis
 export function workflowActivityMonitorUrl
   (workflow: Lite<WorkflowEntity>) {
   return `~/workflow/activityMonitor/${workflow.id}`;
+}
+
+export function workflowStartUrl(lite: Lite<WorkflowEntity>, entity?: Lite<Entity>) {
+  return "~/workflow/new/" + lite.id + "/CreateNew";
 }
 
 function registerCustomContexts() {

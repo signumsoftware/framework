@@ -480,7 +480,7 @@ namespace Signum.Engine.Workflow
 
                     var notifications = actors.Distinct().SelectMany(a =>
                     Database.Query<UserEntity>()
-                    .Where(u => WorkflowLogic.IsUserActorConstant.Evaluate(u, a))
+                    .Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a))
                     .Select(u => new CaseNotificationEntity
                     {
                         CaseActivity = caseActivity.ToLite(),

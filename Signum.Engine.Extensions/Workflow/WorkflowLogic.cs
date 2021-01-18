@@ -25,6 +25,8 @@ namespace Signum.Engine.Workflow
     {
         public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
+        public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
+
         [AutoExpressionField]
         public static bool HasExpired(this WorkflowEntity w) => 
             As.Expression(() => w.ExpirationDate.HasValue && w.ExpirationDate.Value < TimeZoneManager.Now);
@@ -132,6 +134,8 @@ namespace Signum.Engine.Workflow
             return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count, excludes);
         }
 
+
+
         public static WorkflowNodeGraph GetWorkflowNodeGraph(Lite<WorkflowEntity> workflow)
         {
             var graph = WorkflowGraphLazy.Value.GetOrThrow(workflow);
@@ -237,6 +241,9 @@ namespace Signum.Engine.Workflow
                 sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
+
+                Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(WorkflowEntity)));
 
 
                 sb.Include<WorkflowPoolEntity>()
@@ -776,22 +783,17 @@ namespace Signum.Engine.Workflow
                 .Execute();
         }
 
-        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
-         actor.Is(userConstant) ||
-          (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
+        public static Func<UserEntity, Lite<Entity>, bool> IsUserActor = (user, actor) =>
+            actor.Is(user) ||
+            (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(user.Role).Contains((Lite<RoleEntity>)actor));
 
-        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorConstant = (user, actorConstant) =>
+        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorForNotifications = (user, actorConstant) =>
             actorConstant.Is(user) ||
            (actorConstant is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actorConstant).Contains(user.Role));
 
-
         public static List<WorkflowEntity> GetAllowedStarts()
         {
-            return (from w in Database.Query<WorkflowEntity>()
-                    let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
-                    let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where !w.HasExpired() && a.Lane.Actors.Any(b => IsUserConstantActor.Evaluate(UserEntity.Current, b))
-                    select w).ToList();
+            return WorkflowGraphLazy.Value.Values.Where(wg => wg.IsStartCurrentUser()).Select(wg => wg.Workflow).ToList();
         }
 
         public static WorkflowModel GetWorkflowModel(WorkflowEntity workflow)

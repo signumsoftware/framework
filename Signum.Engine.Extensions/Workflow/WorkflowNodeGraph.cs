@@ -6,6 +6,9 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Signum.Entities.Authorization;
+using System.Linq.Expressions;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow
 {
@@ -21,6 +24,28 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
+        public bool IsStartCurrentUser()
+        {
+            if (Workflow.HasExpired())
+                return false;
+
+            if (Workflow.MainEntityStrategies.Count == 0)
+                return false;
+
+            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start).Select(s => NextConnections(s).SingleEx().To);
+
+            return act.Any(a =>
+            {
+                if (a.Lane.ActorsEval != null)
+                {
+                    var actors = a.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
+
+                    return actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+                }
+
+                return a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+            });
+        }
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {
