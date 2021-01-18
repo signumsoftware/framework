@@ -1,3 +1,4 @@
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +17,15 @@ namespace Signum.Engine.Translation
         public string Name => "Azure";
 
         public Func<string?> AzureKey;
+        public Func<string?>? Region;
         public Func<string?>? Proxy { get; set; }
 
-        public AzureTranslator(Func<string?> azureKey, Func<string?>? proxy = null)
+        public AzureTranslator(Func<string?> azureKey, Func<string?>? region = null, Func<string?>? proxy = null)
         {
             this.AzureKey = azureKey;
+            this.Region = region;
             this.Proxy = proxy;
         }
-
 
         public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
         {
@@ -44,7 +46,9 @@ namespace Signum.Engine.Translation
                 request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from={from}&to={to}");
                 request.Content = new StringContent(text, Encoding.UTF8, "application/json");
                 request.Headers.Add("Ocp-Apim-Subscription-Key", azureKey);
-                //request.Headers.Add("Ocp-Apim-Subscription-Region", region);
+                var region = Region?.Invoke();
+                if (region.HasText())
+                    request.Headers.Add("Ocp-Apim-Subscription-Region", region);
 
                 var response = await client.SendAsync(request);
 

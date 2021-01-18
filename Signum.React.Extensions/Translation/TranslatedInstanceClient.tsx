@@ -7,6 +7,7 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { QueryString } from '@framework/QueryString';
 import { Lite, Entity } from '@framework/Signum.Entities';
 import { DiffBlock } from '../DiffLog/DiffLogClient';
+import { AutomaticTranslation } from './TranslationClient';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -107,11 +108,6 @@ export interface PropertyRouteConflic {
   automaticTranslations: AutomaticTranslation[];
 }
 
-export interface AutomaticTranslation {
-  translatorName: string;
-  text: string;
-}
-
 export interface TranslatedInstanceViewType {
   type: string;
   masterCulture: string;
@@ -125,7 +121,7 @@ export interface TranslatedInstanceViewType {
   }[]
 }
 
-export interface TranslatedPairView{
+export interface TranslatedPairView {
   translatedText: string;
   originalText: string;
   diff?: DiffBlock;

@@ -204,18 +204,26 @@ namespace Signum.React.Translation
                 typeDescription = t.TypeConflict == null || (tc == null && !isTarget) ? null : /*Message, Symbol, etc...*/
                 new LocalizedDescriptionTS
                 {
-                    description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count >= 2 ? t.TypeConflict.Select(a => a.Value.Translated).Distinct().Only() : null),
+                    description = tc?.Original.Description ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a=>a.Value.AutomaticTranslations)) : null),
                     pluralDescription = tc?.Original.PluralDescription,
                     gender = tc?.Original.Gender?.ToString(),
-                    translatedDescription = tc?.Translated,
+                    automaticTranslations = tc?.AutomaticTranslations.ToArray(),
                 },
                 members = t.MemberConflicts.EmptyIfNull().Where(kvp=> kvp.Value.ContainsKey(ci) || isTarget).Select(kvp => new LocalizedMemberTS
                 {
                     name = kvp.Key,
-                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget && kvp.Value.Count >= 2 ? kvp.Value.Select(a => a.Value.Translated).Distinct().Only() : null),
-                    translatedDescription = kvp.Value.TryGetC(ci)?.Translated
+                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget ? DisctincOnly(kvp.Value.SelectMany(a => a.Value.AutomaticTranslations)) : null),
+                    automaticTranslations = kvp.Value.TryGetC(ci)?.AutomaticTranslations.ToArray()
                 }).ToDictionary(a => a.name),
             };
+        }
+
+        string? DisctincOnly(IEnumerable<AutomaticTranslation> automaticTranslations)
+        {
+            if (automaticTranslations.Count() >= 2)
+                return automaticTranslations.Select(a => a.Text).Distinct().Only();
+
+            return null;
         }
 
         public class AssemblyResultTS
@@ -267,15 +275,15 @@ namespace Signum.React.Translation
         {
             public string? gender;
             public string? description;
-            public string? translatedDescription;
             public string? pluralDescription;
+            public AutomaticTranslation[]? automaticTranslations;
         }
 
         public class LocalizedMemberTS
         {
             public string name;
             public string? description;
-            public string? translatedDescription;
+            public AutomaticTranslation[]? automaticTranslations;
         }
 
 

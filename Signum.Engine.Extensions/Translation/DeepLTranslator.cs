@@ -16,11 +16,9 @@ namespace Signum.Engine.Translation
 
         public Func<string?> DeepLApiKey;
 
-        public ITranslator? FallbackTranslator;
-
         public Func<string?>? Proxy { get; }
 
-        public DeepLTranslator(Func<string?> deepLKey, ITranslator? fallbackTranslator)
+        public DeepLTranslator(Func<string?> deepLKey)
         {
             this.DeepLApiKey = deepLKey;
         }
@@ -31,14 +29,13 @@ namespace Signum.Engine.Translation
         {
             var apiKey = DeepLApiKey();
 
-            if(String.IsNullOrEmpty(apiKey))
+            if(string.IsNullOrEmpty(apiKey))
             {
                 return null;
             }
 
             using (DeepLClient client = new DeepLClient(apiKey))
             {
-
                 if (supportedLanguages == null)
                     supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
 
