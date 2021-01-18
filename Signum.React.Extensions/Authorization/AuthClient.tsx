@@ -78,7 +78,8 @@ const cookieName = "sfUser";
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
 
-  var myCookie = Cookies.get(cookieName);
+  //var myCookie = Cookies.get(cookieName);
+  var myCookie = getCookie(cookieName);
 
   if (!myCookie) {
     return Promise.resolve(undefined);
@@ -105,6 +106,28 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
     return au;
   }).catch(() => undefined);
 }
+
+function getCookie(name: string) {
+ 
+  var dc = document.cookie;
+  var prefix = name ;
+  var begin = dc.indexOf(prefix);
+
+  if (begin == -1) {
+    begin = dc.indexOf(prefix);
+    if (begin != 0) return null;
+  }
+
+  var indexOfEqual = dc.indexOf("=",begin);
+
+  var end = document.cookie.indexOf(";", begin + 2);
+  if (end == -1) {
+    end = dc.length;
+  }
+
+  return decodeURI(dc.substring(indexOfEqual+1, end));
+}
+
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
 

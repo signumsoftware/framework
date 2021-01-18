@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Signum.Engine.Basics;
 using Signum.Engine.Templating;
 using Signum.Entities;
@@ -46,7 +47,24 @@ namespace Signum.Engine.Mailing
 
             foreach (EmailAddressEmbedded from in GetFrom())
             {
-                foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
+                var recipientsEnumerable = GetRecipients();
+                if (recipientsEnumerable.IsNullOrEmpty())
+                {
+                    EmailMessageEntity email = CreateEmailMessageInternal(from, new List<EmailOwnerRecipientData>());
+                    yield return email;
+                }
+                else
+
+                    foreach (List<EmailOwnerRecipientData> recipients in recipientsEnumerable)
+                    {
+                        EmailMessageEntity email = CreateEmailMessageInternal(from, recipients);
+
+                        yield return email;
+                    }
+            }
+        }
+
+        private EmailMessageEntity CreateEmailMessageInternal(EmailAddressEmbedded from, List<EmailOwnerRecipientData> recipients)
                 {
                     EmailMessageEntity email;
                     try
@@ -103,10 +121,7 @@ namespace Signum.Engine.Mailing
                         throw;
                     }
 
-
-                    yield return email;
-                }
-            }
+            return email;
         }
             
         TextTemplateParser.BlockNode TextNode(EmailTemplateMessageEmbedded message)
@@ -203,7 +218,8 @@ namespace Signum.Engine.Mailing
                     CultureInfo = null,
                     Email = tr.EmailAddress!,
                     DisplayName = tr.DisplayName
-                }) { Kind = tr.Kind }));
+                })
+                { Kind = tr.Kind }));
 
                 if (model != null)
                     recipients.AddRange(model.GetRecipients());
