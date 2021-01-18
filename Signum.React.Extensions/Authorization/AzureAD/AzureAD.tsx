@@ -59,6 +59,10 @@ export function signIn(ctx: LoginContext) {
 }
 
 export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
+
+  if (location.search.contains("avoidAD"))
+    return Promise.resolve(undefined);
+
   return myMSALObj.acquireTokenSilent(userRequest).then(res => {
     const rawIdToken = res.idToken.rawIdToken;
 
@@ -67,7 +71,8 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     if (e.errorCode == "user_login_error")
       return Promise.resolve(undefined);
 
-    throw e;
+    console.log(e);
+    return Promise.resolve(undefined);
   }));
 }
 
