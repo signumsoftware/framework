@@ -67,13 +67,13 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     const rawIdToken = res.idToken.rawIdToken;
 
     return AuthClient.API.loginWithAzureAD(rawIdToken, false);
-  }).catch(ifError(Msal.ClientAuthError, e => {
-    if (e.errorCode == "user_login_error")
+  }).catch(e => {
+    if (e instanceof Msal.InteractionRequiredAuthError || e instanceof Msal.ClientAuthError && e.errorCode == "user_login_error")
       return Promise.resolve(undefined);
 
     console.log(e);
     return Promise.resolve(undefined);
-  }));
+  });
 }
 
 export function signOut() {
