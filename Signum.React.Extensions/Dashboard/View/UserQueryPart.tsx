@@ -8,7 +8,6 @@ import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { parseIcon } from '../Admin/Dashboard';
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
@@ -17,6 +16,7 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
 import SelectorModal from '@framework/SelectorModal'
 import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics'
+import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 

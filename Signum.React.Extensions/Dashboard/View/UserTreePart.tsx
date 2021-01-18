@@ -9,7 +9,6 @@ import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserTreePartEntity } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { parseIcon } from '../Admin/Dashboard';
 import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { TreeViewer } from '../../Tree/TreeViewer'

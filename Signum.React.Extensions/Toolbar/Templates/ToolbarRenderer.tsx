@@ -13,10 +13,10 @@ import * as PropTypes from "prop-types";
 import { NavDropdown, Dropdown } from 'react-bootstrap';
 import { Nav, Navbar } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {

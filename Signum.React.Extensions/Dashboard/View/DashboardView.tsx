@@ -7,9 +7,9 @@ import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
-import { parseIcon } from '../Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 

@@ -1,7 +1,6 @@
 
 import * as React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { ValueLine, EntityLine, RenderEntity } from '@framework/Lines'
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
@@ -9,7 +8,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
-import { IconTypeaheadLine } from "../../Basics/Templates/IconTypeahead";
+import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
 import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString } from '@framework/Signum.Entities';
@@ -116,28 +115,4 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
     </div>
   );
 }
-
-
-export function iconToString(icon: IconProp) {
-  return typeof icon == "string" ? "fas fa-" + icon :
-    Array.isArray(icon) ? icon[0] + " fa-" + icon[1] :
-      icon.prefix + " fa-" + icon.iconName;
-}
-
-export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
-
-  if (iconName == "none")
-    return null as any as undefined;
-
-  if (iconName == null)
-    return undefined;
-
-  var result = {
-    prefix: iconName.tryBefore(" ") as IconPrefix,
-    iconName: iconName.tryAfter(" fa-") as IconName,
-  };
-
-  return result.iconName && result.prefix && result;
-}
-
 

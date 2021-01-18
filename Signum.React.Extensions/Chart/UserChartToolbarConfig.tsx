@@ -5,9 +5,9 @@ import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
 import { UserChartEntity } from './Signum.Entities.Chart'
-import { parseIcon } from '../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { liteKey } from '@framework/Signum.Entities'
+import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
   constructor() {
