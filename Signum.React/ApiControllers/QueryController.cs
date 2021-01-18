@@ -122,6 +122,12 @@ namespace Signum.React.ApiControllers
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
+        [HttpPost("api/query/entitiesFullWithFilter"), ProfilerActionSplitter]
+        public async Task<List<Entity>> GetEntitiesFullWithFilter([Required, FromBody] QueryEntitiesRequestTS request, CancellationToken token)
+        {
+            return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest()).ToListAsync();
+        }
+
         [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
         public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
         {

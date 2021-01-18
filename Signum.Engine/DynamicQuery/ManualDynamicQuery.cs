@@ -141,5 +141,10 @@ namespace Signum.Engine.DynamicQuery
         {
             throw new NotImplementedException();
         }
+
+        public override IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

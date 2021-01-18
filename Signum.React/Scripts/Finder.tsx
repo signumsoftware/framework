@@ -921,6 +921,31 @@ export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filte
   );
 }
 
+export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<T[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]> {
+  return getQueryDescription(queryName).then(qd =>
+    parseFilterOptions(filterOptions, false, qd)
+      .then(fops =>
+        parseOrderOptions(orderOptions, false, qd).then(oop =>
+          API.fetchEntitiesFullWithFilters({
+
+            queryKey: qd.queryKey,
+
+            filters: toFilterRequests(fops),
+
+            orders: oop.map(oo => ({
+              token: oo.token!.fullKey,
+              orderType: oo.orderType
+            }) as OrderRequest),
+
+            count: count
+          })
+        )
+      )
+  );
+}
+
 export function expandParentColumn(fo: FindOptions): FindOptions {
 
   if (!fo.parentToken)
@@ -1274,6 +1299,10 @@ export module API {
 
   export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
     return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
+  }
+
+  export function fetchEntitiesFullWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
+    return ajaxPost({ url: "~/api/query/entitiesFullWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
