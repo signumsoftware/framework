@@ -55,7 +55,7 @@ namespace Signum.Engine.Translation
         }
 
 
-        private static LocalizedAssemblyChanges Translate(ITranslator translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)
+        private static LocalizedAssemblyChanges Translate(ITranslator[] translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)
         {
             List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups =
                 (from t in types
@@ -174,9 +174,9 @@ namespace Signum.Engine.Translation
     {
         public LocalizedType Type { get; set; }
 
-        public Dictionary<CultureInfo, TypeNameConflict>? TypeConflict;
+        public List<TypeNameConflict>? TypeConflict;
 
-        public Dictionary<string, Dictionary<CultureInfo, MemberNameConflict>> MemberConflicts { get; set; }
+        public Dictionary<string, List<MemberNameConflict>> MemberConflicts { get; set; }
 
         public override string ToString()
         {
@@ -194,7 +194,10 @@ namespace Signum.Engine.Translation
 
     public class TypeNameConflict
     {
-        public LocalizedType Original;
+        public string Original;
+        public CultureInfo Culture;
+        public string TranslatorName; 
+
         public string? Translated;
 
         public override string ToString()
@@ -205,7 +208,10 @@ namespace Signum.Engine.Translation
 
     public class MemberNameConflict
     {
-        public string? Original;
+        public string Original;
+        public CultureInfo Culture;
+        public string TranslatorName;
+
         public string? Translated;
 
         public override string ToString()

@@ -92,7 +92,7 @@ namespace Signum.React.Translation
             var c = CultureInfo.GetCultureInfo(culture);
 
             int totalInstances;
-            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationServer.Translator, t, c, out totalInstances);
+            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationServer.Translators, t, c, out totalInstances);
 
             var sd = new StringDistance();
 

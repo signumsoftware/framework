@@ -9,7 +9,7 @@ namespace Signum.Engine.Translation
 {
     public interface ITranslator
     {
-        List<string?> TranslateBatch(List<string> list, string from, string to);
+        List<string?>? TranslateBatch(List<string> list, string from, string to);
 
         bool AutoSelect();
     }
@@ -47,14 +47,8 @@ namespace Signum.Engine.Translation
 
     public class AlreadyTranslatedTranslator : ITranslator
     {
-        ITranslator Inner;
-
-        public AlreadyTranslatedTranslator(ITranslator inner)
+        public AlreadyTranslatedTranslator()
         {
-            if (inner == null)
-                throw new ArgumentNullException(nameof(inner));
-
-            this.Inner = inner;
         }
 
         public List<string?> TranslateBatch(List<string> list, string from, string to)
@@ -69,18 +63,7 @@ namespace Signum.Engine.Translation
                                      select KeyValuePair.Create(g.Key, only))
                                      .ToDictionary();
 
-            var dic = list.Distinct().ToDictionary(l => l, l => alreadyTranslated.TryGetC(l));
-
-            if (dic.Any(kvp => kvp.Value == null))
-            {
-                var subList = dic.Where(kvp => kvp.Value == null).Select(kvp => kvp.Key).ToList();
-
-                var subResult = Inner.TranslateBatch(subList, from, to);
-
-                dic.SetRange(subList, subResult);
-            }
-
-            return list.Select(s => (string?)dic.GetOrThrow(s)).ToList();
+            return list.Select(s => (string?)alreadyTranslated.TryGetC(s)).ToList();
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
@@ -129,9 +112,12 @@ namespace Signum.Engine.Translation
             this.Inner = inner;
         }
 
-        public List<string?> TranslateBatch(List<string> list, string from, string to)
+        public List<string?>? TranslateBatch(List<string> list, string from, string to)
         {
             var result = Inner.TranslateBatch(list, from, to);
+
+            if (result == null)
+                return result;
 
             TranslationReplacementPack? pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
             if (pack == null)

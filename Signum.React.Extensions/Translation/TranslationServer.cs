@@ -14,14 +14,14 @@ namespace Signum.React.Translation
 {
     public class TranslationServer
     {
-        public static ITranslator Translator;
+        public static ITranslator[] Translators;
 
-        public static void Start(IApplicationBuilder app, ITranslator translator)
+        public static void Start(IApplicationBuilder app, params ITranslator[] translators)
         {
             ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-            Translator = translator;
+            Translators = translators;
         }
 
         public static CultureInfo? GetCultureRequest(ActionContext actionContext)

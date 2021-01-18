@@ -14,7 +14,7 @@ namespace Signum.Engine.Translation
     {
         public Func<string?> DeepLApiKey;
 
-        public ITranslator? fallbackTranslator;
+        public ITranslator? FallbackTranslator;
 
         public Func<string?>? Proxy { get; }
 
@@ -25,29 +25,24 @@ namespace Signum.Engine.Translation
 
         List<SupportedLanguage>? supportedLanguages;
 
-        public async Task<List<string?>> TranslateBatchAsync(List<string> list, string from, string to)
+        public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
         {
             var apiKey = DeepLApiKey();
 
-            if(apiKey == null)
+            if(String.IsNullOrEmpty(apiKey))
             {
-                if (fallbackTranslator != null)
-                    return fallbackTranslator.TranslateBatch(list, from, to);
-
-                throw new Exception("Neither DeeplApiKey or fallbackTranslator set");
+                return null;
             }
 
             using (DeepLClient client = new DeepLClient(apiKey))
             {
+
                 if (supportedLanguages == null)
                     supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
 
-                if(! supportedLanguages.Any(a=>a.LanguageCode == to))
+                if (!supportedLanguages.Any(a => a.LanguageCode == to.ToUpper()))
                 {
-                    if (fallbackTranslator != null)
-                        return fallbackTranslator.TranslateBatch(list, from, to);
-
-                    throw new Exception($"Translating to {to} is not supported by DeepL and no fallbackTranslator is set");
+                    return null;
                 }
 
                 var translation = await client.TranslateAsync(list, sourceLanguageCode: from.ToUpper(), targetLanguageCode: to.ToUpper());
@@ -58,9 +53,9 @@ namespace Signum.Engine.Translation
 
         public bool AutoSelect() => true;
 
-        public List<string?> TranslateBatch(List<string> list, string from, string to) 
+        public List<string?>? TranslateBatch(List<string> list, string from, string to) 
         {
-            var result = Task.Run<List<string?>>(async () =>
+            var result = Task.Run(async () =>
             {
                 return await this.TranslateBatchAsync(list, from, to);
             }).Result;
