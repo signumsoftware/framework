@@ -13,6 +13,8 @@ namespace Signum.Engine.Translation
     // https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-translate
     public class AzureTranslator : ITranslator
     {
+        public string Name => "Azure";
+
         public Func<string?> AzureKey;
         public Func<string?>? Proxy { get; set; }
 

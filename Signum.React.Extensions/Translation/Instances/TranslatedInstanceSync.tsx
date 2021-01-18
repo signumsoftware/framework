@@ -215,7 +215,8 @@ export function TranslationProperty({ property }: { property: PropertyChange }) 
     <span>
       <select value={property.translatedText ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
         {initialElementIf(property.translatedText == undefined).concat(
-          Object.entries(property.support).map(([c, rc]) => <option key={c} value={rc.automaticTranslation}>{rc.automaticTranslation}</option>))}
+          Object.entries(property.support)
+            .flatMap(([c, rc]) => rc.automaticTranslations.map(at => <option key={c + at.translatorName} title={"from " + c + " using " + at.translatorName} value={at.text}>{at.text}</option>)))}
       </select>
         &nbsp;
       <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>

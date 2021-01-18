@@ -12,6 +12,8 @@ namespace Signum.Engine.Translation
 {
     public class DeepLTranslator : ITranslator
     {
+        public string Name => "DeepL";
+
         public Func<string?> DeepLApiKey;
 
         public ITranslator? FallbackTranslator;

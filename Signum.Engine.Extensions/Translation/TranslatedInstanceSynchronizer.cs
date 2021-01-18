@@ -36,9 +36,21 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, PropertyRouteConflict> gr in memberGroups)
             {
-                var result = translators.TranslateBatch(gr.Select(a => a.Original).ToList(), gr.Key.Name, targetCulture.Name);
+                var originals = gr.Select(a => a.Original).ToList();
 
-                gr.ZipForeach(result, (sp, translated) => sp.AutomaticTranslation = translated);
+                foreach (var tr in translators)
+                {
+                    var result = tr.TranslateBatch(originals, gr.Key.Name, targetCulture.Name);
+                    if(result != null)
+                    {
+                        gr.ZipForeach(result, (sp, translated) =>
+                        {
+                            if (translated != null)
+                                sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
+                        });
+                    }
+
+                }
             }
 
             return new TypeInstancesChanges(type, instances);

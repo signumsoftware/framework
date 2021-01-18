@@ -9,9 +9,9 @@ namespace Signum.Engine.Translation
 {
     public interface ITranslator
     {
-        List<string?>? TranslateBatch(List<string> list, string from, string to);
+        string Name { get; }
 
-        bool AutoSelect();
+        List<string?>? TranslateBatch(List<string> list, string from, string to);
     }
 
     public interface ITranslatorWithFeedback: ITranslator
@@ -21,32 +21,28 @@ namespace Signum.Engine.Translation
 
     public class EmptyTranslator : ITranslator
     {
+        public string Name => "Empty";
+
         public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => (string?)null).ToList();
-        }
-
-        public bool AutoSelect()
-        {
-            return false;
         }
     }
 
     public class MockTranslator : ITranslator
     {
+        public string Name => "Mock";
+
         public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => (string?)"In{0}({1})".FormatWith(to, text)).ToList();
-        }
-
-        public bool AutoSelect()
-        {
-            return false;
         }
     }
 
     public class AlreadyTranslatedTranslator : ITranslator
     {
+        public string Name => "Already";
+
         public AlreadyTranslatedTranslator()
         {
         }
@@ -93,16 +89,13 @@ namespace Signum.Engine.Translation
                     yield return KeyValuePair.Create(item.Value, toMember);
             }
         }
-
-        public bool AutoSelect()
-        {
-            return true;
-        }
     }
 
     public class ReplacerTranslator : ITranslatorWithFeedback
     {
         ITranslator Inner;
+
+        public string Name => Inner.Name + " (with repacements)";
 
         public ReplacerTranslator(ITranslator inner)
         {
@@ -148,11 +141,6 @@ namespace Signum.Engine.Translation
         public void Feedback(string culture, string wrongTranslation, string fixedTranslation)
         {
             TranslationReplacementLogic.ReplacementFeedback(CultureInfo.GetCultureInfo(culture), wrongTranslation, fixedTranslation);
-        }
-
-        public bool AutoSelect()
-        {
-            return Inner.AutoSelect();
         }
     }
 

@@ -473,7 +473,6 @@ namespace Signum.Engine.Translation
                                       OldTranslation = old?.TranslatedText,
 
                                       Original = str,
-                                      AutomaticTranslation = null
                                   }
                               }).AgGroupToDictionary(a => new IndexedPropertyRoute(a.Route!, a.RowId), g => g.ToDictionary(a => a.Culture!, a => a.Conflict!));
 
@@ -581,9 +580,7 @@ namespace Signum.Engine.Translation
             return "{0} {1} {2} -> {3}".FormatWith(Culture, Key.Instance, Key.Route, TranslatedText);
         }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class InstanceChanges
     {
         public Lite<Entity> Instance { get; set; }
@@ -600,7 +597,6 @@ namespace Signum.Engine.Translation
             return RouteConflicts.Values.Sum(dic => dic[TranslatedInstanceLogic.DefaultCulture].Original.Length);
         }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public struct IndexedPropertyRoute : IEquatable<IndexedPropertyRoute>
     {
@@ -636,23 +632,20 @@ namespace Signum.Engine.Translation
         }
     }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class PropertyRouteConflict
     {
         public string? OldOriginal;
         public string? OldTranslation;
 
         public string Original;
-        public string? AutomaticTranslation;
+        public List<AutomaticTranslation> AutomaticTranslations = new List<AutomaticTranslation>();
 
         public override string ToString()
         {
-            return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslation);
+            return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslations.Count);
         }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     class ExcelRow
     {
         public string Instance; 
@@ -661,7 +654,6 @@ namespace Signum.Engine.Translation
         public string Original; 
         public string? Translated; 
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public struct LocalizedInstanceKey : IEquatable<LocalizedInstanceKey>
     {
@@ -708,7 +700,6 @@ namespace Signum.Engine.Translation
         }
     }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class TranslatedTypeSummary
     {
         public Type Type;
@@ -716,6 +707,4 @@ namespace Signum.Engine.Translation
         public TranslatedSummaryState? State;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
-
-
 }

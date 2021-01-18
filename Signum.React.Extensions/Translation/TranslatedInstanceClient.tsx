@@ -104,7 +104,12 @@ export interface PropertyRouteConflic {
   oldTranslation?: string;
   diff?: DiffBlock;
   original: string;
-  automaticTranslation?: string;
+  automaticTranslations: AutomaticTranslation[];
+}
+
+export interface AutomaticTranslation {
+  translatorName: string;
+  text: string;
 }
 
 export interface TranslatedInstanceViewType {
