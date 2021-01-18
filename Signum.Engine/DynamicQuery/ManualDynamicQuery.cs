@@ -132,7 +132,7 @@ namespace Signum.Engine.DynamicQuery
             return  Expression.Lambda<Func<object, Lite<IEntity>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
 
-        public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
+        public override IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request)
         {
             throw new NotImplementedException();
         }

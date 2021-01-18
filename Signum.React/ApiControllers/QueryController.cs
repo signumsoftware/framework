@@ -116,10 +116,10 @@ namespace Signum.React.ApiControllers
             return result;
         }
 
-        [HttpPost("api/query/entitiesWithFilter"), ProfilerActionSplitter]
-        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+        [HttpPost("api/query/entitiesLiteWithFilter"), ProfilerActionSplitter]
+        public async Task<List<Lite<Entity>>> GetEntitiesLiteWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
-            return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
+            return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
         [HttpPost("api/query/entitiesFullWithFilter"), ProfilerActionSplitter]

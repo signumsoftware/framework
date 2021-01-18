@@ -79,7 +79,7 @@ namespace Signum.Engine.DynamicQuery
         Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request);
         Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
 
-        IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
+        IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request);
         IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request);
         DQueryable<object> GetDQueryable(DQueryableRequest request);
     }
@@ -140,7 +140,7 @@ namespace Signum.Engine.DynamicQuery
         public abstract Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
 
-        public abstract IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
+        public abstract IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request);
         public abstract IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request);
         public abstract DQueryable<object> GetDQueryable(DQueryableRequest request);
 

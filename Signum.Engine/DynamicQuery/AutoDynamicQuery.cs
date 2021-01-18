@@ -183,7 +183,7 @@ namespace Signum.Engine.DynamicQuery
             return (Lite<Entity>?)result;
         }
 
-        public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
+        public override IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
