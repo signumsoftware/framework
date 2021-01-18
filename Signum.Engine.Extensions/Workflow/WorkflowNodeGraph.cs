@@ -26,15 +26,26 @@ namespace Signum.Engine.Workflow
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
         public bool IsStartCurrentUser()
         {
-            return (from w in Database.Query<WorkflowEntity>() where w.Id == Workflow.Id
-                    let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
-                    let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where !w.HasExpired() && a.Lane.Actors.Any(b => IsUserConstantActor.Evaluate(UserEntity.Current, b)) select w).Any();
-        }
+            if (Workflow.HasExpired())
+                return false;
 
-        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
-         actor.Is(userConstant) ||
-          (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
+            if (Workflow.MainEntityStrategies.Count == 0)
+                return false;
+
+            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start).Select(s => NextConnections(s).SingleEx().To);
+
+            return act.Any(a =>
+            {
+                if (a.Lane.ActorsEval != null)
+                {
+                    var actors = a.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
+
+                    return actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+                }
+
+                return a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+            });
+        }
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {

@@ -249,7 +249,7 @@ namespace Signum.Engine.Toolbar
             { typeof(UserQueryEntity), a => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); } },
             { typeof(UserChartEntity), a => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); } },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
-            { typeof(WorkflowEntity), a => { var wf = WorkflowLogic.Workflows.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf) && WorkflowLogic.GetWorkflowNodeGraph(wf.ToLite()).IsStartCurrentUser(); } },
+            { typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
         };
 
         static bool IsQueryAllowed(Lite<QueryEntity> query)
