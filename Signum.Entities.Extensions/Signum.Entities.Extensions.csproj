@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageReference Include="Unofficial.Microsoft.SqlServer.Types" Version="1.2.0" />
+    <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.3.0" />
   </ItemGroup>
 
   <ItemGroup>

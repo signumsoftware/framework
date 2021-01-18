@@ -4,6 +4,7 @@ import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
 import { LoginAuthMessage } from "../Signum.Entities.Authorization";
+import { ifError } from "../../../../Framework/Signum.React/Scripts/Globals";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
@@ -30,7 +31,7 @@ var msalConfig: Msal.Configuration = {
   }
 };
 
-var requestObj = {
+var userRequest: Msal.AuthenticationParameters = {
   scopes: ["user.read"]
 };
 
@@ -38,7 +39,7 @@ var myMSALObj = new Msal.UserAgentApplication(msalConfig);
 
 export function signIn(ctx: LoginContext) {
   ctx.setLoading("azureAD");
-  myMSALObj.loginPopup(requestObj)
+  myMSALObj.loginPopup(userRequest)
     .then(a => {
       return AuthClient.API.loginWithAzureAD(a.idToken.rawIdToken, true);
     }).then(r => {
@@ -58,11 +59,16 @@ export function signIn(ctx: LoginContext) {
 }
 
 export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
-  var rawIdToken = localStorage.getItem("msal.idtoken");
-  if (!rawIdToken)
-    return Promise.resolve(undefined);
+  return myMSALObj.acquireTokenSilent(userRequest).then(res => {
+    const rawIdToken = res.idToken.rawIdToken;
 
-  return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+    return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+  }).catch(ifError(Msal.ClientAuthError, e => {
+    if (e.errorCode == "user_login_error")
+      return Promise.resolve(undefined);
+
+    throw e;
+  }));
 }
 
 export function signOut() {

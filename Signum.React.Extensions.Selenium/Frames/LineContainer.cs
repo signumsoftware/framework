@@ -112,13 +112,13 @@ namespace Signum.React.Selenium
             lineContainer.LineLocator(property).ElementLocator.WaitNoPresent();
         }
 
-        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
+        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property, IWebElement? element = null)
             where T : IModifiableEntity
             where S : IModifiableEntity
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new LineContainer<S>(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+            return new LineContainer<S>(element ?? lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
      

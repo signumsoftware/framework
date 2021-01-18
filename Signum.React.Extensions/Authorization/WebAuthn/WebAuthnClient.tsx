@@ -67,7 +67,6 @@ export function register() {
       if (options.authenticatorSelection?.authenticatorAttachment === null)
         options.authenticatorSelection.authenticatorAttachment = undefined;
 
-      debugger;
       return navigator.credentials.create({
         publicKey: options
       }).then(credential => {
