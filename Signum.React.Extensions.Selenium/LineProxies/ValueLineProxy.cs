@@ -50,14 +50,14 @@ namespace Signum.React.Selenium
                 return;
             }
 
-            IWebElement password = this.Element.TryFindElement(By.CssSelector(" input[type=password]"));
+            IWebElement? password = this.Element.TryFindElement(By.CssSelector(" input[type=password]"));
             if (password != null)
             {
                 password.SafeSendKeys(value);
                 return;
             }
 
-            IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+            IWebElement? select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
             {
                 select.SelectElement().SelectByValue(value);

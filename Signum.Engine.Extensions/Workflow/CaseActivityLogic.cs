@@ -610,7 +610,7 @@ namespace Signum.Engine.Workflow
                 new Execute(CaseActivityOperation.Next)
                 {
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
-                    //!ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() :
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() :
                     null,
                     FromStates = { CaseActivityState.Pending },
                     ToStates = { CaseActivityState.Done },
@@ -978,8 +978,6 @@ namespace Signum.Engine.Workflow
                     NextExecution = TimeZoneManager.Now,
                     RetryCount = 0,
                 } : null;
-
-
             }
 
             private static void TryToRecompose(CaseEntity childCase)

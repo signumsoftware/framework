@@ -315,18 +315,14 @@ namespace Signum.Engine.Mailing
             var templates = EmailModelToTemplates.Value.TryGetC(emailModelEntity.ToLite()).EmptyIfNull();
             templates = templates.Where(isAllowed);
 
-
             if (templates.IsNullOrEmpty())
-                return CreateDefaultEamilTemplate(emailModelEntity);
-            
-
+                return CreateDefaultEmailTemplate(emailModelEntity);
          
             return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for EmailModel {0}".FormatWith(emailModelEntity));
         }
 
-        public static EmailTemplateEntity CreateDefaultEamilTemplate(EmailModelEntity emailModelEntity)
+        public static EmailTemplateEntity CreateDefaultEmailTemplate(EmailModelEntity emailModelEntity)
         {
-            using (ExecutionMode.Global())
             using (AuthLogic.Disable())
             using (OperationLogic.AllowSave<EmailTemplateEntity>())
             using (Transaction tr = Transaction.ForceNew())
