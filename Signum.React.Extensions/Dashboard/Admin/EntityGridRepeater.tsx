@@ -224,9 +224,10 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
         <div>
           <span>{p.labelText}</span>
           <span className="float-right ml-2">
+            {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
-            {p.extraButtons && p.extraButtons(c)}
+            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
           </span>
         </div>
       </legend>
