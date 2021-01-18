@@ -23,7 +23,6 @@ namespace Signum.React.Authorization
     public static class AuthTokenServer
     {
         public static Func<AuthTokenConfigurationEmbedded> Configuration;
-        static Func<AuthTokenConfigurationEmbedded> Configuration;
         public static Action<UserEntity, AuthToken?, AuthToken?> OnAuthToken;
 
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -80,7 +79,8 @@ namespace Signum.React.Authorization
                 ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUser);
                 return new SignumAuthenticationResult { User = token.User };
             }
-            else {
+            else
+            {
                 OnAuthToken?.Invoke(token.User, token, null);
             }
 
