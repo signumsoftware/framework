@@ -155,6 +155,16 @@
   <Type Name="BigStringMixin">
     <Member Name="File" Description="Datei" />
   </Type>
+  <Type Name="BootstrapStyle" Description="Bootstrap-Stil">
+    <Member Name="Danger" Description="Gefahr" />
+    <Member Name="Dark" Description="Dunkel" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="Light" Description="Licht" />
+    <Member Name="Primary" Description="Primäre" />
+    <Member Name="Secondary" Description="Sekundären" />
+    <Member Name="Success" Description="Erfolg" />
+    <Member Name="Warning" Description="Warnung" />
+  </Type>
   <Type Name="BpmnEntityPairEmbedded" Description="Bpmn Entitätenpaar">
     <Member Name="BpmnElementId" Description="Bpmn Elemente Id" />
     <Member Name="Model" Description="Modell" />
@@ -200,10 +210,8 @@
   </Type>
   <Type Name="CaseActivityMixin" />
   <Type Name="CaseActivityOperation">
-    <Member Name="Approve" Description="Genehmigen" />
     <Member Name="CreateCaseActivityFromWorkflow" Description="Erstelle eine Vorgangsaktivität vom Arbeitsablauf" />
     <Member Name="CreateCaseFromWorkflowEventTask" Description="Erstelle eine Vorgangsaktivität vom Arbeitsablauf Event Task" />
-    <Member Name="Decline" Description="Rückgang" />
     <Member Name="Delete" Description="Löschen" />
     <Member Name="FixCaseDescriptions" Description="Vorgangsbeschreibung beheben" />
     <Member Name="Jump" Description="Springen" />
@@ -224,8 +232,6 @@
   <Type Name="CaseActivityState" Description="Vorgangsaktivität Zustand">
     <Member Name="Done" Description="Abgeschlossen" />
     <Member Name="New" Description="Neu" />
-    <Member Name="PendingDecision" Description="Ausstehende Entscheidung" />
-    <Member Name="PendingNext" Description="Ausstehende weiter" />
   </Type>
   <Type Name="CaseActivityTask">
     <Member Name="Timeout" Description="Timeout" />
@@ -353,7 +359,7 @@
   </Type>
   <Type Name="ChartPaletteModel" Description="Diagrammpalette">
     <Member Name="Colors" Description="Farben" />
-    <Member Name="Type" Description="Typ" />
+    <Member Name="TypeName" Description="Typname" />
   </Type>
   <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
     <Member Name="Name" Description="Name" />
@@ -367,7 +373,6 @@
     <Member Name="ChartScript" Description="Diagrammskript" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Filters" Description="Filter" />
-    <Member Name="Invalidator" Description="Invalidator" />
     <Member Name="Multiplications" Description="Multiplikationen" />
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="QueryName" Description="Abfrage-Name" />
@@ -377,7 +382,6 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
-  <Type Name="CNTKPredictorAlgorithm" />
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
@@ -465,6 +469,7 @@
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
   </Type>
+  <Type Name="DecisionOptionEmbedded" />
   <Type Name="DefaultColumnEncodings" />
   <Type Name="DefaultState">
     <Member Name="All" Description="Alle" />
@@ -596,8 +601,6 @@
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
   <Type Name="DoneType" Description="Fertigstellungstypen">
-    <Member Name="Approve" Description="Genehmigen" />
-    <Member Name="Decline" Description="Rückgang" />
     <Member Name="Jump" Description="Springen" />
     <Member Name="Next" Description="Nächstes" />
     <Member Name="ScriptFailure" Description="Skriptfehler" />
@@ -1447,7 +1450,6 @@
   <Type Name="NeuralNetworkEvalFunction" />
   <Type Name="NeuralNetworkHidenLayerEmbedded" />
   <Type Name="NeuralNetworkInitializer" />
-  <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
   <Type Name="NewTasksEmbedded" />
   <Type Name="NoteEntity" Description="Notiz" PluralDescription="Notizen" Gender="f">
@@ -1547,16 +1549,6 @@
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Style" Description="Stil" />
     <Member Name="Title" Description="Titel" />
-  </Type>
-  <Type Name="PanelStyle" Description="Dashboardstil">
-    <Member Name="Danger" Description="Gefahr" />
-    <Member Name="Dark" Description="Dark" />
-    <Member Name="Info" Description="Info" />
-    <Member Name="Light" Description="Light" />
-    <Member Name="Primary" Description="Primary" />
-    <Member Name="Secondary" Description="Secondary" />
-    <Member Name="Success" Description="Erfolg" />
-    <Member Name="Warning" Description="Warnung" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Passwortablaufintervall" PluralDescription="Passwortablaufintervalle" Gender="m">
     <Member Name="Days" Description="Tage" />
@@ -2147,6 +2139,8 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
+  <Type Name="TensorFlowOptimizer" />
+  <Type Name="TensorFlowPredictorAlgorithm" />
   <Type Name="TimeMachineMessage">
     <Member Name="CompareVersions" Description="Versionen vergleichen" />
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
@@ -2383,7 +2377,6 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
-    <Member Name="Invalidator" Description="Invalidator" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="Query" Description="Abfrage" />
@@ -2394,6 +2387,7 @@
   </Type>
   <Type Name="UserChartPartEntity" Description="Benutzerdiagramm Teil" PluralDescription="Benutzerdiagramm Teilen" Gender="n">
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
+    <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
