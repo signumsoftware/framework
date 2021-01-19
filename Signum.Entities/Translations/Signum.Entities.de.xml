@@ -154,6 +154,7 @@
     <Member Name="chooseAType" Description="Wählen Sie einen Typ" />
     <Member Name="chooseAValue" Description="Wählen Sie einen Wert" />
     <Member Name="create" Description="Erstellen" />
+    <Member Name="Date" Description="Datum" />
     <Member Name="deactivateTimeMachine" Description="Zeitmaschine deaktivieren" />
     <Member Name="editColumn" Description="Spalte bearbeiten" />
     <Member Name="error" Description="Fehler" />
@@ -190,6 +191,7 @@
     <Member Name="showPeriod" Description="Zeit zeigen" />
     <Member Name="showPreviousOperation" Description="Vorherige Operation zeigen" />
     <Member Name="showRecords" Description="Datensätze anzeigen" />
+    <Member Name="Time" Description="Zeit" />
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
@@ -204,7 +206,6 @@
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
-    <Member Name="Save" Description="Speichern" />
     <Member Name="SaveChangesFirst" Description="Erst Änderungen speichern" />
     <Member Name="ViewForType0IsNotAllowed" Description="Anzeigen des Typs {0} ist nicht zulässig" />
   </Type>
@@ -217,7 +218,6 @@
     <Member Name="FixErrors" Description="Fehler beheben" />
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
-    <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen diese Änderungen verloren gehen?" />
     <Member Name="Main" Description="Haupt" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
@@ -225,8 +225,6 @@
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />
     <Member Name="The0HasErrors1" Description="{0} hat Fehler: {1}" />
-    <Member Name="ThereAreChanges" Description="Es gibt Änderungen" />
-    <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Trotzdem weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
     <Member Name="Type0Id1" Description="{0} {1}" />
   </Type>
@@ -349,11 +347,37 @@
     <Member Name="No0Found" Description="Keine(n) {0} gefunden" />
     <Member Name="Quicklinks" Description="Quick links" />
   </Type>
+  <Type Name="ReactWidgetsMessage">
+    <Member Name="CreateOption" Description="Erstellungsoption" />
+    <Member Name="CreateOption0" Description="Erstellungsoption {0}" />
+    <Member Name="DateButton" Description="Datum wählen" />
+    <Member Name="DecrementValue" Description="Wert dekrementieren" />
+    <Member Name="EmptyFilter" Description="Der Filter liefert keine Ergebnisse" />
+    <Member Name="EmptyList" Description="Es sind keine Einträge in dieser Liste vorhanden" />
+    <Member Name="FilterPlaceholder" Description="" />
+    <Member Name="IncrementValue" Description="Wert inkrementieren" />
+    <Member Name="MoveBack" Description="Zurück navigieren" />
+    <Member Name="MoveForward" Description="Vorwärts navigieren" />
+    <Member Name="MoveToday" Description="Heute" />
+    <Member Name="NoneSelected" Description="keine ausgewählten Elemente" />
+    <Member Name="OpenCombobox" Description="Combobox öffnen" />
+    <Member Name="OpenDropdown" Description="Dropdown öffnen" />
+    <Member Name="Placeholder" Description="" />
+    <Member Name="RemoveLabel" Description="Ausgewähltes Element entfernen" />
+    <Member Name="SelectedItems0" Description="Ausgewählte Elemente: {0}" />
+    <Member Name="TagsLabel" Description="Ausgewählte Elemente" />
+    <Member Name="TimeButton" Description="Zeit wählen" />
+  </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Decke" />
     <Member Name="Floor" Description="Boden" />
     <Member Name="Round" Description="Runde" />
     <Member Name="RoundMiddle" Description="Runde Mitte" />
+  </Type>
+  <Type Name="SaveChangesMessage">
+    <Member Name="LoseChanges" Description="Änderungen verlieren" />
+    <Member Name="ThereAreChanges" Description="Es gibt Änderungen" />
+    <Member Name="YoureTryingToCloseAnEntityWithChanges" Description="Sie versuchen, eine Entität mit Änderungen zu schließen" />
   </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} von {2} Ergebnis[sen]." />
@@ -371,6 +395,7 @@
     <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
     <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) zurückgeben?" />
     <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />
@@ -401,6 +426,7 @@
     <Member Name="Query0NotRegistered" Description="Abfrage {0} ist nicht in der QueryLogic.Queries registriert." />
     <Member Name="Refresh" Description="Aktualisieren" />
     <Member Name="Rename" Description="Umbenennen" />
+    <Member Name="ReturnNewEntity" Description="Neue Entität zurückgeben?" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
     <Member Name="SplitText" Description="Text aufteilen" />
