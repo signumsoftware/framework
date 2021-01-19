@@ -72,6 +72,7 @@ export interface SearchControlLoadedProps {
   avoidAutoRefresh: boolean;
   avoidChangeUrl: boolean;
   refreshKey: any;
+  extraOptions: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;

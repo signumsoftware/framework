@@ -49,6 +49,7 @@ export interface SearchControlProps {
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
   refreshKey?: any;
+  extraOptions?: any;
   enableAutoFocus?: boolean;
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
@@ -201,6 +202,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
         refreshKey={p.refreshKey}
+        extraOptions={p.extraOptions}
 
         enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
         simpleFilterBuilder={p.simpleFilterBuilder}
