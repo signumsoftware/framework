@@ -19,10 +19,10 @@ declare global {
 }
 
 var msalConfig: Msal.Configuration = {
-
   auth: {
     clientId: window.__azureApplicationId!, //This is your client ID
     authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
+    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
     postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
   },
   cache: {
