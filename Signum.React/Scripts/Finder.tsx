@@ -111,7 +111,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     .then(rr => rr?.entity);
 
   if (modalOptions?.autoSelectIfOne)
-    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
+    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
         if (data.length == 1)
           return Promise.resolve(data[0]);
@@ -161,7 +161,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     .then(rows => rows?.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne)
-    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
         if (data.length == 1)
           return Promise.resolve(data);
@@ -784,7 +784,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrView(findOptions: FindOptions): Promise<void> {
-  return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
+  return fetchEntitiesLiteWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
       return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
@@ -896,14 +896,39 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   }
 }
 
-export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
+export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
         parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesWithFilters({
+          API.fetchEntitiesLiteWithFilters({
+
+            queryKey: qd.queryKey,
+
+            filters: toFilterRequests(fops),
+
+            orders: oop.map(oo => ({
+              token: oo.token!.fullKey,
+              orderType: oo.orderType
+            }) as OrderRequest),
+
+            count: count
+          })
+        )
+      )
+  );
+}
+
+export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<T[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]> {
+  return getQueryDescription(queryName).then(qd =>
+    parseFilterOptions(filterOptions, false, qd)
+      .then(fops =>
+        parseOrderOptions(orderOptions, false, qd).then(oop =>
+          API.fetchEntitiesFullWithFilters({
 
             queryKey: qd.queryKey,
 
@@ -1272,8 +1297,12 @@ export module API {
     return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
-  export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
+  export function fetchEntitiesLiteWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+    return ajaxPost({ url: "~/api/query/entitiesLiteWithFilter" }, request);
+  }
+
+  export function fetchEntitiesFullWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
+    return ajaxPost({ url: "~/api/query/entitiesFullWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
