@@ -27,13 +27,13 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor ?? "dodgerblue");
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>) {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
       Navigator.API.fetchAndForget(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-        .then(fo => Finder.explore(fo))
+        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content }}}))
         .done();
     }
   }
