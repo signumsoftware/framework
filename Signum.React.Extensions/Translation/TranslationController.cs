@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Translation;
 using System.Text.Json.Serialization;
+using static Signum.React.Translation.TranslationController;
 
 namespace Signum.React.Translation
 {
@@ -101,11 +102,7 @@ namespace Signum.React.Translation
                      members = t.Members!.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
-                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
-                 {
-                     localizedTypes.cultures = g.ToDictionary(a => a.culture);
-                     return localizedTypes;
-                 })))
+                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS(g.ToDictionary(a => a.culture))))
                  .ToDictionaryEx("types");
 
 
@@ -173,11 +170,9 @@ namespace Signum.React.Translation
             {
                 totalTypes = totalTypes,
                 cultures = cultures.Select(c => c.ToCulturesTS()).ToDictionary(a => a.name),
-                types = changes.Types.Select(t => t.Type.Type.ToLocalizableTypeTS().Let(localizedTypes =>
-                {
-                    localizedTypes.cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)));
-                    return localizedTypes;
-                })).ToDictionary(lt => lt.type),
+                types = changes.Types
+                .Select(t => t.Type.Type.ToLocalizableTypeTS(cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)))))
+                .ToDictionary(lt => lt.type),
             };
         }
 
@@ -332,7 +327,7 @@ namespace Signum.React.Translation
 
     public static class Extensions
     {
-        public static TranslationController.LocalizableTypeTS ToLocalizableTypeTS(this Type type)
+        public static TranslationController.LocalizableTypeTS ToLocalizableTypeTS(this Type type, Dictionary<string, LocalizedTypeTS> cultures)
         {
             var options = LocalizedAssembly.GetDescriptionOptions(type);
             return new TranslationController.LocalizableTypeTS()
@@ -342,6 +337,7 @@ namespace Signum.React.Translation
                 hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription),
                 hasMembers = options.IsSet(DescriptionOptions.Members),
                 hasGender = options.IsSet(DescriptionOptions.Gender),
+                cultures = cultures,
             };
         }
 
