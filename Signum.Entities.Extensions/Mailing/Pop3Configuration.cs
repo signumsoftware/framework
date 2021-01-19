@@ -91,8 +91,7 @@ namespace Signum.Entities.Mailing
         
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-        [UniqueIndex]
-        
+        //[UniqueIndex]
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }
