@@ -44,6 +44,7 @@ namespace Signum.Upgrade
                 new Upgrade_20201231_AnyCPU(),
                 new Upgrade_20210108_RemoveLangVersion(),
                 new Upgrade_20210113_TimezoneInDockerfile(),
+                new Upgrade_20210119_DeepL(),
             }.Run(uctx);
         }
     }
