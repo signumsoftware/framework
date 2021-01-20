@@ -211,7 +211,7 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
 
 
 export interface HtmlEditorPlugin {
-  getDecorators?(controller: HtmlEditorController): [draftjs.DraftDecorator];
+  getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
   getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
   expandConverter?(converter: IContentStateConverter): void;
   expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): void;
