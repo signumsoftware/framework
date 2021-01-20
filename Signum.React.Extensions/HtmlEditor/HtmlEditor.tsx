@@ -138,7 +138,19 @@ export default React.forwardRef(function HtmlEditor({
   const editorProps = props as draftjs.EditorProps;
 
   if (editorProps.keyBindingFn == undefined)
-    editorProps.keyBindingFn = draftjs.getDefaultKeyBinding;
+    editorProps.keyBindingFn = e => {
+
+      if (e.keyCode === 9) {
+        const newEditorState = draftjs.RichUtils.onTab(e, c.editorState, 6 /* maxDepth */)
+        if (newEditorState !== c.editorState) {
+          c.setEditorState(newEditorState)
+        }
+
+        return null;
+      }
+
+      return draftjs.getDefaultKeyBinding(e);;
+    };
 
   if (editorProps.handleKeyCommand == undefined)
     editorProps.handleKeyCommand = command => {
@@ -164,12 +176,6 @@ export default React.forwardRef(function HtmlEditor({
           ref={c.setRefs}
           editorState={c.editorState}
           readOnly={readOnly}
-          onTab={event => {
-            var newEditorState = draftjs.RichUtils.onTab(event, c.editorState, 6 /* maxDepth */);
-            if (newEditorState !== c.editorState) {
-              c.setEditorState(newEditorState)
-            }
-          }}
           onBlur={() => c.saveHtml()}
           onChange={ev => c.setEditorState(ev)}
           {...props}
