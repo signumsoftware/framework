@@ -124,8 +124,8 @@ export module Converter {
         label: typeof e.label == "function" ? e.label() : e.label,
         column: e.column,
         row: e.row,
-        active: e.active,
-        splitText: e.splitText
+        active: e.active ?? "Always",
+        splitText: e.splitText ?? false
       });
     }
 
