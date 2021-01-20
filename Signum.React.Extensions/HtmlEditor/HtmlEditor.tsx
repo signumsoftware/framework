@@ -48,6 +48,11 @@ export class HtmlEditorController {
   readOnly?: boolean;
   initialContentState: draftjs.ContentState = null!;
 
+  createWithContentAndDecorators(contentState: draftjs.ContentState): draftjs.EditorState {
+    return draftjs.EditorState.createWithContent(contentState,
+      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators));
+  }
+
   init(p: HtmlEditorControllerProps) {
 
     this.binding = p.binding;
@@ -56,16 +61,14 @@ export class HtmlEditorController {
     this.plugins = p.plugins ?? [];
     this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
 
-    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(
-      p.converter!.textToContentState(this.binding.getValue() ?? ""),
-      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators)));
+    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => this.createWithContentAndDecorators(this.converter!.textToContentState(this.binding.getValue() ?? "")));
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
       var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
       this.initialContentState = contentState;
-      this.setEditorState(draftjs.EditorState.createWithContent(contentState));
+      this.setEditorState(this.createWithContentAndDecorators(contentState));
     }, [this.binding.getValue()]);
 
     React.useEffect(() => {
