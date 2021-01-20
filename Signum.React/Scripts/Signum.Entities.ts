@@ -421,8 +421,10 @@ export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperat
 export type PropertyOperation =
   "Set" |
   "AddElement" |
+  "AddNewElement" |
   "ChangeElements" |
-  "RemoveElements" |
+  "RemoveElement" |
+  "RemoveElementsWhere" |
   "ModifyEntity" |
   "CreateNewEntity";
 

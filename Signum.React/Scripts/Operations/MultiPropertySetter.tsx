@@ -145,9 +145,18 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
 }
 
 
+function isPart(typeName: string) {
+  var tis = tryGetTypeInfos(typeName);
+  return tis != null && tis.length == 1 && (tis[0]?.entityKind == "Part" || tis[0]?.entityKind == "SharedPart");
+}
+
 export function getPropertyOperations(type: TypeReference): PropertyOperation[] {
+
+  if (type.isCollection && (type.isEmbedded || isPart(type.name)))
+    return ["AddNewElement", "ChangeElements", "RemoveElementsWhere"];
+
   if (type.isCollection)
-    return ["AddElement", "ChangeElements", "RemoveElements"];
+    return ["AddElement", "RemoveElement"];
 
   if (type.isEmbedded)
     return ["Set", "CreateNewEntity", "ModifyEntity"]
@@ -238,18 +247,6 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     return Promise.resolve(undefined);
   }
 
-  function showValue(o: PropertyOperation) {
-    return o == "Set";
-  }
-
-  function showPredicate(o: PropertyOperation) {
-    return o == "ChangeElements" || o == "RemoveElements";
-  }
-
-  function showSetters(o: PropertyOperation) {
-    return o == "AddElement" || o == "ChangeElements" || o == "CreateNewEntity" || o == "ModifyEntity";
-  }
-
   const pr = React.useMemo(() => p.setter.property == null ? null : p.root.addMembers(p.setter.property),
     [p.root, p.setter.property]);
 
@@ -258,8 +255,9 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   var filterType = p.isPredicate && pr ? getFilterType(pr.typeReference()) : null;
   var fOperations = filterType ? filterOperations[filterType] : null;
 
-  var subRoot = pr && (pr.typeReference().isEmbedded ? (pr.typeReference().isCollection ? pr.addMember("Indexer", "Item", true) :  pr) :
-    p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null); 
+  var subRoot = pr &&
+    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : PropertyRoute.root(getTypeInfo(pr.typeReference().name))):
+      p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null);;
 
   return (
     <>
@@ -328,6 +326,19 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   function handleValueChange() {
     p.onSetterChanged();
   }
+}
+
+
+function showValue(o: PropertyOperation) {
+  return o == "Set" || o == "AddElement" || o == "RemoveElement";
+}
+
+function showPredicate(o: PropertyOperation) {
+  return o == "ChangeElements" || o == "RemoveElementsWhere";
+}
+
+function showSetters(o: PropertyOperation) {
+  return o == "AddNewElement" || o == "ChangeElements" || o == "CreateNewEntity" || o == "ModifyEntity";
 }
 
 export function createSetterValueControl(ctx: TypeContext<any>, handleValueChange: () => void): React.ReactElement<any> {
