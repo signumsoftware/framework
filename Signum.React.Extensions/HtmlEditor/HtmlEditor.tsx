@@ -45,6 +45,7 @@ export class HtmlEditorController {
   plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  initialContentState: draftjs.ContentState = null!;
 
   init(p: HtmlEditorControllerProps) {
 
@@ -61,10 +62,9 @@ export class HtmlEditorController {
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
-      if (this.lastSave && (this.lastSave.value ?? "" == (this.binding.getValue() ?? "")))
-        this.lastSave = undefined;
-      else
-        this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
+      var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
+      this.initialContentState = contentState;
+      this.setEditorState(draftjs.EditorState.createWithContent(contentState));
     }, [this.binding.getValue()]);
 
     React.useEffect(() => {
@@ -84,9 +84,9 @@ export class HtmlEditorController {
 
   saveHtml() {
     if (!this.readOnly) {
-      var value = this.converter.contentStateToText(this.editorState.getCurrentContent());
-      if (value ?? "" != this.binding.getValue() ?? "") {
-        this.lastSave = { value };
+      var newContent = this.editorState.getCurrentContent();
+      if (newContent != this.initialContentState) {
+        var value = this.converter.contentStateToText(newContent);
         this.binding.setValue(value);
       }
     }
@@ -101,8 +101,6 @@ export class HtmlEditorController {
 
     return React.createElement(React.Fragment, undefined, <Separator />, ...buttons);
   }
-
-  lastSave: { value: string | undefined } | undefined;
 
   setRefs!: (editor: draftjs.Editor | null) => void;
 }
