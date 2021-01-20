@@ -3,6 +3,7 @@ import * as draftjs from 'draft-js';
 import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './HtmlEditor.css'
+import 'draft-js/dist/Draft.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 
@@ -163,6 +164,12 @@ export default React.forwardRef(function HtmlEditor({
           ref={c.setRefs}
           editorState={c.editorState}
           readOnly={readOnly}
+          onTab={event => {
+            var newEditorState = draftjs.RichUtils.onTab(event, c.editorState, 6 /* maxDepth */);
+            if (newEditorState !== c.editorState) {
+              c.setEditorState(newEditorState)
+            }
+          }}
           onBlur={() => c.saveHtml()}
           onChange={ev => c.setEditorState(ev)}
           {...props}
