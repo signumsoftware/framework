@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
   EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
 } from '@framework/Lines'
-import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
+import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
@@ -31,9 +31,8 @@ import { Tab, Tabs, Button } from 'react-bootstrap';
 import { FileImageLine } from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { ColorTypeahead } from '../../Basics/Templates/ColorTypeahead';
-import { IconTypeahead } from '../../Basics/Templates/IconTypeahead';
+import { IconTypeahead, parseIcon } from '../../Basics/Templates/IconTypeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
@@ -1228,7 +1227,7 @@ export interface SearchControlNode extends BaseNode {
   allowSelection?: ExpressionOrValue<boolean>;
   allowChangeColumns?: ExpressionOrValue<boolean>;
   create?: ExpressionOrValue<boolean>;
-  onCreate?: Expression<() => Promise<void | boolean>>;
+  onCreate?: Expression<() => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">>;
   navigate?: ExpressionOrValue<boolean>;
   refreshKey?: Expression<number | string | undefined>;
   maxResultsHeight?: Expression<number | string>;

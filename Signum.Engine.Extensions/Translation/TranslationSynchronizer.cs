@@ -12,7 +12,7 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 800;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity>? role, string? @namespace, out int totalTypes)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator[] translators, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity>? role, string? @namespace, out int totalTypes)
         {
             var types = GetMergeChanges(target, master, support);
 
@@ -27,7 +27,7 @@ namespace Signum.Engine.Translation
             if (types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
                 types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
-            var result = Translate(translator, target, types);
+            var result = Translate(translators, target, types);
 
             return result;
         }
@@ -55,7 +55,7 @@ namespace Signum.Engine.Translation
         }
 
 
-        private static LocalizedAssemblyChanges Translate(ITranslator translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)
+        private static LocalizedAssemblyChanges Translate(ITranslator[] translators, LocalizedAssembly target, List<LocalizedTypeChanges> types)
         {
             List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups =
                 (from t in types
@@ -65,9 +65,22 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
-                List<string?> result = translator.TranslateBatch(gr.Select(a => a.Original.Description!).ToList(), gr.Key.Name, target.Culture.Name);
+                var valid = gr.Where(a => a.Original.Description != null);
 
-                gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
+                var originalDescriptions = valid.Select(a => a.Original.Description!).ToList();
+                foreach (var tr in translators)
+                {
+                    var translations = tr.TranslateBatch(originalDescriptions, gr.Key.Name, target.Culture.Name);
+                    if (translations != null)
+                    {
+                        valid.ZipForeach(translations, (sp, translated) =>
+                        {
+                            if (translated != null)
+                                sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
+                        });
+                    }
+
+                }
             }
 
             List<IGrouping<CultureInfo, MemberNameConflict>> memberGroups =
@@ -79,9 +92,21 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, MemberNameConflict> gr in memberGroups)
             {
-                var result = translator.TranslateBatch(gr.Select(a => a.Original!).ToList(), gr.Key.Name, target.Culture.Name);
+                var valid = gr.Where(a => a.Original != null).ToList();
+                var originalDescriptions = valid.Select(a => a.Original!).ToList();
 
-                gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
+                foreach (var tr in translators)
+                {
+                    var translations = tr.TranslateBatch(originalDescriptions, gr.Key.Name, target.Culture.Name);
+                    if (translations != null)
+                    {
+                        gr.ZipForeach(translations, (sp, translated) =>
+                        {
+                            if (translated != null)
+                                sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
+                        });
+                    }
+                }
             }
 
             return new LocalizedAssemblyChanges
@@ -195,22 +220,30 @@ namespace Signum.Engine.Translation
     public class TypeNameConflict
     {
         public LocalizedType Original;
-        public string? Translated;
+
+        public List<AutomaticTranslation> AutomaticTranslations = new List<AutomaticTranslation>();
 
         public override string ToString()
         {
-            return "Conflict {0} -> {1}".FormatWith(Original, Translated);
+            return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslations.Count);
         }
+    }
+
+    public class AutomaticTranslation
+    {
+        public string TranslatorName;
+        public string Text;
     }
 
     public class MemberNameConflict
     {
         public string? Original;
-        public string? Translated;
+
+        public List<AutomaticTranslation> AutomaticTranslations = new List<AutomaticTranslation>();
 
         public override string ToString()
         {
-            return "Conflict {0} -> {1}".FormatWith(Original, Translated);
+            return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslations.Count);
         }
     }
 

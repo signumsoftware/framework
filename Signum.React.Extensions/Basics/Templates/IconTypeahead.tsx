@@ -6,9 +6,9 @@ import { Typeahead } from '@framework/Components'
 import { TypeContext } from '@framework/TypeContext'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
 import { TypeaheadOptions } from '@framework/Components/Typeahead'
+import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 
 export interface IconTypeaheadLineProps {
   ctx: TypeContext<string | null | undefined>;
@@ -99,3 +99,26 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     />
   );
 }
+
+export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
+
+  if (iconName == "none")
+    return null as any as undefined;
+
+  if (iconName == null)
+    return undefined;
+
+  var result = {
+    prefix: iconName.tryBefore(" ") as IconPrefix,
+    iconName: iconName.tryAfter(" fa-") as IconName,
+  };
+
+  return result.iconName && result.prefix && result;
+}
+
+export function iconToString(icon: IconProp) {
+  return typeof icon == "string" ? "fas fa-" + icon :
+    Array.isArray(icon) ? icon[0] + " fa-" + icon[1] :
+      icon.prefix + " fa-" + icon.iconName;
+}
+

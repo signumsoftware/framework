@@ -41,7 +41,7 @@ export interface MixinComboProps {
 export function MixinCombo(p : MixinComboProps){
   const forceUpdate = useForceUpdate();
   function handleGetItems(query: string) {
-    return Finder.fetchEntitiesWithFilters(
+    return Finder.fetchEntitiesLiteWithFilters(
       DynamicTypeEntity,
       [
         { token: DynamicTypeEntity.token().entity(e => e.baseType), operation: "EqualTo", value: "MixinEntity" },

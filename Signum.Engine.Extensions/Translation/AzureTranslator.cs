@@ -1,69 +1,68 @@
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Signum.Engine.Translation
 {
-    //https://msdn.microsoft.com/en-us/library/ff512422.aspx
+    // https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-translate
     public class AzureTranslator : ITranslator
     {
-        public string AzureKey;
-        public Func<string?>? Proxy { get; }
+        public string Name => "Azure";
 
-        public AzureTranslator(string azureKey, Func<string?>? proxy = null)
+        public Func<string?> AzureKey;
+        public Func<string?>? Region;
+        public Func<string?>? Proxy { get; set; }
+
+        public AzureTranslator(Func<string?> azureKey, Func<string?>? region = null, Func<string?>? proxy = null)
         {
             this.AzureKey = azureKey;
+            this.Region = region;
             this.Proxy = proxy;
         }
 
-
-        static readonly XNamespace Ns = XNamespace.Get("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2");
-        static readonly XNamespace ArrayNs = XNamespace.Get("http://schemas.microsoft.com/2003/10/Serialization/Arrays");
-        
-
-        public async Task<List<string?>> TranslateBatchAsync(List<string> list, string from, string to)
+        public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
         {
-            string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy?.Invoke());
-            
-            var body =
-                new XElement("TranslateArrayRequest",
-                    new XElement("AppId"),
-                    new XElement("From", from),
-                    new XElement("Options",
-                        new XElement(Ns + "ContentType", "text/html")
-                    ),
-                    new XElement("Texts",
-                        list.Select(str => new XElement(ArrayNs + "string", str))
-                    ),
-                    new XElement("To", to)
-                );
+            var azureKey = AzureKey();
+
+            if (string.IsNullOrEmpty(azureKey))
+            {
+                return null;
+            }
+
+            object[] body = list.Select(s => new { Text = s }).ToArray();
+            var text = JsonSerializer.Serialize(body);
 
             using (var client = ExtendedHttpClient.GetClientWithProxy(Proxy?.Invoke()))
             using (var request = new HttpRequestMessage())
             {
                 request.Method = HttpMethod.Post;
-                request.RequestUri = new Uri("https://api.microsofttranslator.com/v2/Http.svc/TranslateArray");
-                request.Content = new StringContent(body.ToString(), Encoding.UTF8, "text/xml");
-                request.Headers.Add("Authorization", authToken);
+                request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from={from}&to={to}");
+                request.Content = new StringContent(text, Encoding.UTF8, "application/json");
+                request.Headers.Add("Ocp-Apim-Subscription-Key", azureKey);
+                var region = Region?.Invoke();
+                if (region.HasText())
+                    request.Headers.Add("Ocp-Apim-Subscription-Region", region);
 
                 var response = await client.SendAsync(request);
 
                 response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
-                XDocument doc = XDocument.Parse(responseBody);
-                var result = doc.Descendants(Ns + "TranslateArrayResponse").Select(r => (string?)r.Element(Ns + "TranslatedText")!.Value).ToList();
-                return result;
+                var responseBody = await response.Content.ReadAsByteArrayAsync();
+                TranslationResult[] deserializedOutput = JsonSerializer.Deserialize<TranslationResult[]>(responseBody, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true })!;
+
+                return deserializedOutput.Select(a => (string?)a.Translations.Single().Text).ToList();
             }
         }
 
-        public List<string?> TranslateBatch(List<string> list, string from, string to)
+        public List<string?>? TranslateBatch(List<string> list, string from, string to)
         {
-            var result = Task.Run<List<string?>>(async () =>
+            var result = Task.Run(async () =>
             {
                 return await this.TranslateBatchAsync(list, from, to);
             }).Result;
@@ -74,25 +73,6 @@ namespace Signum.Engine.Translation
         public bool AutoSelect() => true;
     }
 
-    public static class AzureAccessToken
-    {
-        public static async Task<string> GetAccessTokenAsync(string subscriptionKey, string? proxy)
-        {
-            using (var client = ExtendedHttpClient.GetClientWithProxy(proxy))
-            using (var request = new HttpRequestMessage())
-            {
-
-                request.Method = HttpMethod.Post;
-                request.RequestUri = new Uri("https://api.cognitive.microsoft.com/sts/v1.0/issueToken");
-                request.Content = new StringContent(string.Empty);
-                request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Key", subscriptionKey);
-                var response = await client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-                var token = await response.Content.ReadAsStringAsync();
-                return "Bearer " + token;
-            }
-        }
-    }
 
     public static class ExtendedHttpClient
     {
@@ -112,4 +92,49 @@ namespace Signum.Engine.Translation
             return client;
         }
     }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    /// <summary>
+    /// The C# classes that represents the JSON returned by the Translator Text API.
+    /// </summary>
+    public class TranslationResult
+    {
+        public DetectedLanguage DetectedLanguage { get; set; }
+        public TextResult SourceText { get; set; }
+        public Translation[] Translations { get; set; }
+    }
+
+    public class DetectedLanguage
+    {
+        public string Language { get; set; }
+        public float Score { get; set; }
+    }
+
+    public class TextResult
+    {
+        public string Text { get; set; }
+        public string Script { get; set; }
+    }
+
+    public class Translation
+    {
+        public string Text { get; set; }
+        public TextResult Transliteration { get; set; }
+        public string To { get; set; }
+        public Alignment Alignment { get; set; }
+        public SentenceLength SentLen { get; set; }
+    }
+
+    public class Alignment
+    {
+        public string Proj { get; set; }
+    }
+
+    public class SentenceLength
+    {
+        public int[] SrcSentLen { get; set; }
+        public int[] TransSentLen { get; set; }
+    }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
 }

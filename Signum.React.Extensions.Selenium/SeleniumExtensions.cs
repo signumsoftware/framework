@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -288,6 +289,7 @@ namespace Signum.React.Selenium
                 case "By.CssSelector": return after;
                 case "By.Id": return "#" + after;
                 case "By.Name": return "[name=" + after + "]";
+                case "By.ClassName[Contains]": return "." + after;
                 default: throw new InvalidOperationException("Impossible to combine: " + str);
             }
         }
@@ -330,7 +332,7 @@ namespace Signum.React.Selenium
 
         public static IWebElement GetParent(this IWebElement e)
         {
-            return e.FindElement(By.XPath(".."));
+            return e.FindElement(By.XPath("./.."));
         }
 
         public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)

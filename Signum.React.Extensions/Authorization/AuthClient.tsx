@@ -73,12 +73,10 @@ var notifyLogout: boolean;
 
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
-const cookieName = "sfUser";
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
-
-  var myCookie = Cookies.get(cookieName);
+  var myCookie = Options.getCookie();
 
   if (!myCookie) {
     return Promise.resolve(undefined);
@@ -89,7 +87,7 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
       console.log("loginFromCookie");
     }
     else {
-      Cookies.remove(cookieName);
+      Options.removeCookie();
     }
     return au;
   });
@@ -132,7 +130,7 @@ export function logout() {
   if (user == null)
     return;
 
-  Cookies.remove(cookieName)
+  Options.removeCookie()
 
   API.logout().then(() => {
     logoutInternal();
@@ -264,6 +262,10 @@ export function logoutOtherTabs(user: UserEntity) {
 
 
 export namespace Options {
+
+  export function getCookie() { return Cookies.get("sfUser"); }
+  export function removeCookie() { return Cookies.remove("sfUser"); }
+
   export let onLogout: () => void = () => {
     throw new Error("onLogout should be defined (check Main.tsx in Southwind)");
   }

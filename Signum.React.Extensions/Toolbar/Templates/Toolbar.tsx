@@ -6,6 +6,7 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fixToolbarElementType } from './ToolbarElement';
 import { MList } from '@framework/Signum.Entities';
+import { parseIcon } from '../../Basics/Templates/IconTypeahead';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
   const ctx = p.ctx;
@@ -37,7 +38,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
         header: "Icon",
         headerHtmlAttributes: { style: { width: "5%" } },
         template: ctx => {
-          var icon = Dashboard.parseIcon(ctx.value.iconName);
+          var icon = parseIcon(ctx.value.iconName);
           var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
           return icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
         },

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Translation;
 using System.Text.Json.Serialization;
+using static Signum.React.Translation.TranslationController;
 
 namespace Signum.React.Translation
 {
@@ -101,11 +102,7 @@ namespace Signum.React.Translation
                      members = t.Members!.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
-                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS().Let(localizedTypes => 
-                 {
-                     localizedTypes.cultures = g.ToDictionary(a => a.culture);
-                     return localizedTypes;
-                 })))
+                 select KeyValuePair.Create(g.Key.Name, g.Key.ToLocalizableTypeTS(g.ToDictionary(a => a.culture))))
                  .ToDictionaryEx("types");
 
 
@@ -167,17 +164,15 @@ namespace Signum.React.Translation
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), null, @namespace, out int totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translators, target, master, reference.Values.ToList(), null, @namespace, out int totalTypes);
 
             return new AssemblyResultTS
             {
                 totalTypes = totalTypes,
                 cultures = cultures.Select(c => c.ToCulturesTS()).ToDictionary(a => a.name),
-                types = changes.Types.Select(t => t.Type.Type.ToLocalizableTypeTS().Let(localizedTypes =>
-                {
-                    localizedTypes.cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)));
-                    return localizedTypes;
-                })).ToDictionary(lt => lt.type),
+                types = changes.Types
+                .Select(t => t.Type.Type.ToLocalizableTypeTS(cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)))))
+                .ToDictionary(lt => lt.type),
             };
         }
 
@@ -204,18 +199,26 @@ namespace Signum.React.Translation
                 typeDescription = t.TypeConflict == null || (tc == null && !isTarget) ? null : /*Message, Symbol, etc...*/
                 new LocalizedDescriptionTS
                 {
-                    description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count >= 2 ? t.TypeConflict.Select(a => a.Value.Translated).Distinct().Only() : null),
+                    description = tc?.Original.Description ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a=>a.Value.AutomaticTranslations)) : null),
                     pluralDescription = tc?.Original.PluralDescription,
                     gender = tc?.Original.Gender?.ToString(),
-                    translatedDescription = tc?.Translated,
+                    automaticTranslations = tc?.AutomaticTranslations.ToArray(),
                 },
                 members = t.MemberConflicts.EmptyIfNull().Where(kvp=> kvp.Value.ContainsKey(ci) || isTarget).Select(kvp => new LocalizedMemberTS
                 {
                     name = kvp.Key,
-                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget && kvp.Value.Count >= 2 ? kvp.Value.Select(a => a.Value.Translated).Distinct().Only() : null),
-                    translatedDescription = kvp.Value.TryGetC(ci)?.Translated
+                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget ? DisctincOnly(kvp.Value.SelectMany(a => a.Value.AutomaticTranslations)) : null),
+                    automaticTranslations = kvp.Value.TryGetC(ci)?.AutomaticTranslations.ToArray()
                 }).ToDictionary(a => a.name),
             };
+        }
+
+        string? DisctincOnly(IEnumerable<AutomaticTranslation> automaticTranslations)
+        {
+            if (automaticTranslations.Count() >= 2)
+                return automaticTranslations.Select(a => a.Text).Distinct().Only();
+
+            return null;
         }
 
         public class AssemblyResultTS
@@ -267,15 +270,15 @@ namespace Signum.React.Translation
         {
             public string? gender;
             public string? description;
-            public string? translatedDescription;
             public string? pluralDescription;
+            public AutomaticTranslation[]? automaticTranslations;
         }
 
         public class LocalizedMemberTS
         {
             public string name;
             public string? description;
-            public string? translatedDescription;
+            public AutomaticTranslation[]? automaticTranslations;
         }
 
 
@@ -324,7 +327,7 @@ namespace Signum.React.Translation
 
     public static class Extensions
     {
-        public static TranslationController.LocalizableTypeTS ToLocalizableTypeTS(this Type type)
+        public static TranslationController.LocalizableTypeTS ToLocalizableTypeTS(this Type type, Dictionary<string, LocalizedTypeTS> cultures)
         {
             var options = LocalizedAssembly.GetDescriptionOptions(type);
             return new TranslationController.LocalizableTypeTS()
@@ -334,6 +337,7 @@ namespace Signum.React.Translation
                 hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription),
                 hasMembers = options.IsSet(DescriptionOptions.Members),
                 hasGender = options.IsSet(DescriptionOptions.Gender),
+                cultures = cultures,
             };
         }
 

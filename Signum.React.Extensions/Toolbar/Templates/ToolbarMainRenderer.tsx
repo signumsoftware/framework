@@ -10,13 +10,13 @@ import './Toolbar.css'
 import * as PropTypes from "prop-types";
 import { Collapse, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '@framework/Modals';
+import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 
 export interface ToolbarMainRendererProps {
 }

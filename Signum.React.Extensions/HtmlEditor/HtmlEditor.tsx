@@ -3,6 +3,7 @@ import * as draftjs from 'draft-js';
 import { IBinding } from '@framework/Reflection';
 import { HtmlContentStateConverter } from './HtmlContentStateConverter';
 import './HtmlEditor.css'
+import 'draft-js/dist/Draft.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 
@@ -45,6 +46,12 @@ export class HtmlEditorController {
   plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  initialContentState: draftjs.ContentState = null!;
+
+  createWithContentAndDecorators(contentState: draftjs.ContentState): draftjs.EditorState {
+    return draftjs.EditorState.createWithContent(contentState,
+      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators));
+  }
 
   init(p: HtmlEditorControllerProps) {
 
@@ -54,17 +61,14 @@ export class HtmlEditorController {
     this.plugins = p.plugins ?? [];
     this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
 
-    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => draftjs.EditorState.createWithContent(
-      p.converter!.textToContentState(this.binding.getValue() ?? ""),
-      this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators)));
+    [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => this.createWithContentAndDecorators(this.converter!.textToContentState(this.binding.getValue() ?? "")));
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
-      if (this.lastSave && (this.lastSave.value ?? "" == (this.binding.getValue() ?? "")))
-        this.lastSave = undefined;
-      else
-        this.setEditorState(draftjs.EditorState.createWithContent(this.converter.textToContentState(this.binding.getValue() ?? "")));
+      var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
+      this.initialContentState = contentState;
+      this.setEditorState(this.createWithContentAndDecorators(contentState));
     }, [this.binding.getValue()]);
 
     React.useEffect(() => {
@@ -84,9 +88,9 @@ export class HtmlEditorController {
 
   saveHtml() {
     if (!this.readOnly) {
-      var value = this.converter.contentStateToText(this.editorState.getCurrentContent());
-      if (value ?? "" != this.binding.getValue() ?? "") {
-        this.lastSave = { value };
+      var newContent = this.editorState.getCurrentContent();
+      if (newContent != this.initialContentState) {
+        var value = this.converter.contentStateToText(newContent);
         this.binding.setValue(value);
       }
     }
@@ -101,8 +105,6 @@ export class HtmlEditorController {
 
     return React.createElement(React.Fragment, undefined, <Separator />, ...buttons);
   }
-
-  lastSave: { value: string | undefined } | undefined;
 
   setRefs!: (editor: draftjs.Editor | null) => void;
 }
@@ -139,7 +141,19 @@ export default React.forwardRef(function HtmlEditor({
   const editorProps = props as draftjs.EditorProps;
 
   if (editorProps.keyBindingFn == undefined)
-    editorProps.keyBindingFn = draftjs.getDefaultKeyBinding;
+    editorProps.keyBindingFn = e => {
+
+      if (e.keyCode === 9) {
+        const newEditorState = draftjs.RichUtils.onTab(e, c.editorState, 6 /* maxDepth */)
+        if (newEditorState !== c.editorState) {
+          c.setEditorState(newEditorState)
+        }
+
+        return null;
+      }
+
+      return draftjs.getDefaultKeyBinding(e);;
+    };
 
   if (editorProps.handleKeyCommand == undefined)
     editorProps.handleKeyCommand = command => {
@@ -197,7 +211,7 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
 
 
 export interface HtmlEditorPlugin {
-  getDecorators?(controller: HtmlEditorController): [draftjs.DraftDecorator];
+  getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
   getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
   expandConverter?(converter: IContentStateConverter): void;
   expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): void;

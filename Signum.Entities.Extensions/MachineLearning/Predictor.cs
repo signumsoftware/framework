@@ -378,9 +378,9 @@ namespace Signum.Entities.MachineLearning
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
-            stateValidator.Validate(this, pi);
 
-            return base.PropertyValidation(pi);
+
+            return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
         public static StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage> stateValidator =

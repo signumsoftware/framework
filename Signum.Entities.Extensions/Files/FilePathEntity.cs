@@ -70,7 +70,7 @@ namespace Signum.Entities.Files
         public int FileLength { get; internal set; }
 
         [AutoExpressionField]
-        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize(true));
+        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
 
         [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
         public string Suffix { get; set; }
@@ -125,7 +125,7 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
+            return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize());
         }
 
         protected override void PostRetrieving(PostRetrievingContext ctx)

@@ -4,6 +4,7 @@ import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
 import { LoginAuthMessage } from "../Signum.Entities.Authorization";
+import { ifError } from "../../../../Framework/Signum.React/Scripts/Globals";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
@@ -18,10 +19,10 @@ declare global {
 }
 
 var msalConfig: Msal.Configuration = {
-
   auth: {
     clientId: window.__azureApplicationId!, //This is your client ID
     authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
+    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
     postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
   },
   cache: {
@@ -30,7 +31,7 @@ var msalConfig: Msal.Configuration = {
   }
 };
 
-var requestObj = {
+var userRequest: Msal.AuthenticationParameters = {
   scopes: ["user.read"]
 };
 
@@ -38,7 +39,7 @@ var myMSALObj = new Msal.UserAgentApplication(msalConfig);
 
 export function signIn(ctx: LoginContext) {
   ctx.setLoading("azureAD");
-  myMSALObj.loginPopup(requestObj)
+  myMSALObj.loginPopup(userRequest)
     .then(a => {
       return AuthClient.API.loginWithAzureAD(a.idToken.rawIdToken, true);
     }).then(r => {
@@ -58,11 +59,21 @@ export function signIn(ctx: LoginContext) {
 }
 
 export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
-  var rawIdToken = localStorage.getItem("msal.idtoken");
-  if (!rawIdToken)
+
+  if (location.search.contains("avoidAD"))
     return Promise.resolve(undefined);
 
-  return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+  return myMSALObj.acquireTokenSilent(userRequest).then(res => {
+    const rawIdToken = res.idToken.rawIdToken;
+
+    return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+  }).catch(e => {
+    if (e instanceof Msal.InteractionRequiredAuthError || e instanceof Msal.ClientAuthError && e.errorCode == "user_login_error")
+      return Promise.resolve(undefined);
+
+    console.log(e);
+    return Promise.resolve(undefined);
+  });
 }
 
 export function signOut() {

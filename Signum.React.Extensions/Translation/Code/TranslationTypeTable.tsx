@@ -96,7 +96,10 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
 
   function renderEdit() {
 
-    const translatedMembers = Dic.getValues(type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
+    const translatedMembers = Dic.getValues(type.cultures)
+      .filter(lt => lt.members[member.name]?.automaticTranslations)
+      .flatMap(lt => lt.members[member.name].automaticTranslations.map(at => ({ culture: lt.culture, translatorName: at.translatorName, text: at.text })));
+
     if (!translatedMembers.length || avoidCombo)
       return (<TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={member.description ?? ""}
         onChange={e => { member.description = e.currentTarget.value; forceUpdate(); }}
@@ -106,8 +109,8 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
     return (
       <span>
         <select value={member.description ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
-          {initialElementIf(member.description == undefined).concat(
-            translatedMembers.map(a => <option key={a.culture} value={a.member.translatedDescription}>{a.member.translatedDescription}</option>))}
+          {initialElementIf(!member.description).concat(
+            translatedMembers.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
         </select>
         &nbsp;
                 <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
@@ -178,7 +181,10 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     const { loc } = p;
     const td = loc.typeDescription!;
 
-    const translatedTypes = Dic.getValues(p.type.cultures).filter(a => a.typeDescription != null && a.typeDescription.translatedDescription != null);
+    const translatedTypes = Dic.getValues(p.type.cultures)
+      .filter(a => a.typeDescription?.automaticTranslations)
+      .flatMap(a => a.typeDescription!.automaticTranslations.map(at => ({ text: at.text, translatorName: at.translatorName, culture: a.culture })));
+
     if (!translatedTypes.length || avoidCombo)
       return (
         <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
@@ -189,8 +195,8 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     return (
       <span>
         <select value={td.description ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
-          {initialElementIf(td.description == undefined).concat(
-            translatedTypes.map(a => <option key={a.culture} value={a.typeDescription!.translatedDescription}>{a.typeDescription!.translatedDescription}</option>))}
+          {initialElementIf(!td.description).concat(
+            translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
         </select>
         &nbsp;
                 <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>
@@ -209,7 +215,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
       <th className="smallCell monospaceCell">
         {type.hasGender && (edit ?
           <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }}>
-            {initialElementIf(td.gender == undefined).concat(
+            {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
           (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull()))

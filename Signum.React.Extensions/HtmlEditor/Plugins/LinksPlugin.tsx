@@ -4,6 +4,20 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IContentStateConverter, HtmlEditorController, HtmlEditorPlugin } from "../HtmlEditor"
 import { HtmlEditorButton } from '../HtmlEditorButtons';
 
+function extractLinks(text: string): { from: number, to: number }[]{
+  const linkRegex = /https?:\/\/([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+  const result = [];
+  let m: RegExpExecArray | null;
+  do {
+    m = linkRegex.exec(text);
+    if (m) {
+      result.push({ from: m.index, to: m.index + m[0].length });
+    }
+  } while (m);
+
+  return result;
+}
+
 export default class LinksPlugin implements HtmlEditorPlugin {
 
   setLink(controller: HtmlEditorController) {
@@ -35,19 +49,30 @@ export default class LinksPlugin implements HtmlEditorPlugin {
     controller.setEditorState(draftjs.RichUtils.toggleLink(newEditorState, newSelection, newEntityKey))
   }
 
-  getDecorators(controller: HtmlEditorController): [draftjs.DraftDecorator] {
-    return [{
-      component: DraftLink,
-      strategy: (contentBlock, callback, contentState) => {
-        contentBlock.findEntityRanges(
-          (character) => {
-            const entityKey = character.getEntity();
-            return (entityKey !== null && contentState.getEntity(entityKey).getType() === 'LINK');
-          },
-          callback
-        );
+  getDecorators(controller: HtmlEditorController): draftjs.DraftDecorator[] {
+    return [
+      {
+        component: DraftLink,
+        strategy: (contentBlock, callback, contentState) => {
+          contentBlock.findEntityRanges(
+            (character) => {
+              const entityKey = character.getEntity();
+              return (entityKey !== null && contentState.getEntity(entityKey).getType() === 'LINK');
+            },
+            callback
+          );
+        }
+      },
+      {
+        component: AutoDraftLink,
+        strategy: (contentBlock, callback, contentState) => {
+          var links = extractLinks(contentBlock.getText());
+          for (const link of links) {
+            callback(link.from, link.to);
+          }
+        }
       }
-    }]
+    ];
   }
 
   getToolbarButtons(controller: HtmlEditorController) {
@@ -96,8 +121,9 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
 
 
-export function DraftLink({ contentState, entityKey, children }: { contentState: draftjs.ContentState, entityKey: string, children: React.ReactChildren }) {
-  const { url } = contentState.getEntity(entityKey).getData();
+export function DraftLink({ contentState, entityKey, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactChildren }) {
+  const { url } = contentState.getEntity(entityKey)?.getData();
+
   return (
     <a
       className="link"
@@ -109,6 +135,23 @@ export function DraftLink({ contentState, entityKey, children }: { contentState:
       aria-label={url}
     >
       {children}
+    </a>
+  );
+}
+
+export function AutoDraftLink({ decoratedText }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactChildren }) {
+
+  return (
+    <a
+      className="link"
+      href={decoratedText}
+      title="Press [Ctrl] + click to follow the link"
+      rel="noopener noreferrer"
+      target="_blank"
+      onClick={e => { if (e.ctrlKey) { e.preventDefault(); window.open(decoratedText); } }}
+      aria-label={decoratedText}
+    >
+      {decoratedText}
     </a>
   );
 }

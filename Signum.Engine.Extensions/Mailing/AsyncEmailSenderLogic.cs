@@ -30,6 +30,7 @@ namespace Signum.Engine.Mailing
             {
                 Running = running,
                 CurrentProcessIdentifier = processIdentifier,
+                MachineName = Environment.MachineName,
                 AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
                 NextPlannedExecution = nextPlannedExecution,
                 IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
@@ -246,14 +247,16 @@ namespace Signum.Engine.Mailing
         }
     }
 
-
+#pragma warning disable CS8618 // Das Non-Nullable-Feld ist nicht initialisiert. Deklarieren Sie das Feld ggf. als "Nullable".
     public class AsyncEmailSenderState
     {
         public int AsyncSenderPeriod;
         public bool Running;
+        public string MachineName;
         public bool IsCancelationRequested;
         public DateTime? NextPlannedExecution;
         public long QueuedItems;
         public Guid CurrentProcessIdentifier;
     }
+#pragma warning restore CS8618 // Das Non-Nullable-Feld ist nicht initialisiert. Deklarieren Sie das Feld ggf. als "Nullable".
 }

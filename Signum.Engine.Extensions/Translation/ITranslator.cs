@@ -9,9 +9,9 @@ namespace Signum.Engine.Translation
 {
     public interface ITranslator
     {
-        List<string?> TranslateBatch(List<string> list, string from, string to);
+        string Name { get; }
 
-        bool AutoSelect();
+        List<string?>? TranslateBatch(List<string> list, string from, string to);
     }
 
     public interface ITranslatorWithFeedback: ITranslator
@@ -21,40 +21,30 @@ namespace Signum.Engine.Translation
 
     public class EmptyTranslator : ITranslator
     {
+        public string Name => "Empty";
+
         public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => (string?)null).ToList();
-        }
-
-        public bool AutoSelect()
-        {
-            return false;
         }
     }
 
     public class MockTranslator : ITranslator
     {
+        public string Name => "Mock";
+
         public List<string?> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => (string?)"In{0}({1})".FormatWith(to, text)).ToList();
-        }
-
-        public bool AutoSelect()
-        {
-            return false;
         }
     }
 
     public class AlreadyTranslatedTranslator : ITranslator
     {
-        ITranslator Inner;
+        public string Name => "Already";
 
-        public AlreadyTranslatedTranslator(ITranslator inner)
+        public AlreadyTranslatedTranslator()
         {
-            if (inner == null)
-                throw new ArgumentNullException(nameof(inner));
-
-            this.Inner = inner;
         }
 
         public List<string?> TranslateBatch(List<string> list, string from, string to)
@@ -69,18 +59,7 @@ namespace Signum.Engine.Translation
                                      select KeyValuePair.Create(g.Key, only))
                                      .ToDictionary();
 
-            var dic = list.Distinct().ToDictionary(l => l, l => alreadyTranslated.TryGetC(l));
-
-            if (dic.Any(kvp => kvp.Value == null))
-            {
-                var subList = dic.Where(kvp => kvp.Value == null).Select(kvp => kvp.Key).ToList();
-
-                var subResult = Inner.TranslateBatch(subList, from, to);
-
-                dic.SetRange(subList, subResult);
-            }
-
-            return list.Select(s => (string?)dic.GetOrThrow(s)).ToList();
+            return list.Select(s => (string?)alreadyTranslated.TryGetC(s)).ToList();
         }
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
@@ -110,16 +89,13 @@ namespace Signum.Engine.Translation
                     yield return KeyValuePair.Create(item.Value, toMember);
             }
         }
-
-        public bool AutoSelect()
-        {
-            return true;
-        }
     }
 
     public class ReplacerTranslator : ITranslatorWithFeedback
     {
         ITranslator Inner;
+
+        public string Name => Inner.Name + " (with repacements)";
 
         public ReplacerTranslator(ITranslator inner)
         {
@@ -129,9 +105,12 @@ namespace Signum.Engine.Translation
             this.Inner = inner;
         }
 
-        public List<string?> TranslateBatch(List<string> list, string from, string to)
+        public List<string?>? TranslateBatch(List<string> list, string from, string to)
         {
             var result = Inner.TranslateBatch(list, from, to);
+
+            if (result == null)
+                return result;
 
             TranslationReplacementPack? pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
             if (pack == null)
@@ -162,11 +141,6 @@ namespace Signum.Engine.Translation
         public void Feedback(string culture, string wrongTranslation, string fixedTranslation)
         {
             TranslationReplacementLogic.ReplacementFeedback(CultureInfo.GetCultureInfo(culture), wrongTranslation, fixedTranslation);
-        }
-
-        public bool AutoSelect()
-        {
-            return Inner.AutoSelect();
         }
     }
 

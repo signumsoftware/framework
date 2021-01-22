@@ -178,20 +178,4 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
   );
 });
 
-export function parseIcon(iconName: string | undefined | null): IconProp | undefined {
-
-  if (iconName == "none")
-    return null as any as undefined;
-
-  if (iconName == null)
-    return undefined;
-
-  var result = {
-    prefix: iconName.tryBefore(" ") as IconPrefix,
-    iconName: iconName.tryAfter(" fa-") as IconName,
-  };
-
-  return result.iconName && result.prefix && result;
-}
-
 export default Workflow;
