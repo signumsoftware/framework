@@ -23,6 +23,7 @@ import Notify from './Frames/Notify';
 import { FilterOperation } from "./Signum.Entities.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
+import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -228,15 +229,26 @@ export class ContextualOperationContext<T extends Entity> {
     this.context = context;
   }
 
-
-  getSearchControlColumnValue(tokenName: string): unknown {
+  getSearchControlColumnValue(tokenName: string, throwIfNotFound = true): unknown {
     if (!(this.context.container instanceof SearchControlLoaded))
       return undefined;
 
-    var sc = this.context.container;
-    var row = sc.state.selectedRows!.first();
-    var val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
-    return val;
+    const sc = this.context.container;
+    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
+    if (colIndex == null) {
+      const row = sc.state.selectedRows!.first();
+      const val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
+      return val;
+    }
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return filter?.value;
+
+    if (throwIfNotFound)
+      throw new Error(`No column '${tokenName}' found`);
+
+    return undefined;
   }
 
   isVisibleInContextualMenu(): boolean {
