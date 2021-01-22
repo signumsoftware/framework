@@ -4,19 +4,16 @@ import { BootstrapStyle } from "../../Basics/Signum.Entities.Basics";
 import { ConnectionType } from '../Signum.Entities.Workflow'
 import * as BpmnUtils from './BpmnUtils'
 
-function BootstrapStyleToColor(style: BootstrapStyle): string {
-  switch (style) {
-    case "Light": return "#f8f9fa";
-    case "Dark": return "#343a40";
-    case "Primary": return "#007bff";
-    case "Secondary": return "#6c757d";
-    case "Success": return "#28a745";
-    case "Info": return "#17a2b8";
-    case "Warning": return "#ffc107";
-    case "Danger": return "#dc3545";
-    default: return "black";
-  }
-}
+const bootstrapStyleToColor: { [style: string /* BootstrapStyle*/]: string } = {
+  "Light": "#f8f9fa",
+  "Dark": "#343a40",
+  "Primary": "#007bff",
+  "Secondary": "#6c757d",
+  "Success": "#28a745",
+  "Info": "#17a2b8",
+  "Warning": "#ffc107",
+  "Danger": "#dc3545",
+};
 
 export class CustomRenderer extends BpmnRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
@@ -24,19 +21,19 @@ export class CustomRenderer extends BpmnRenderer {
     super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
   }
 
-  getConnectionType!: (element: BPMN.DiElement) => ConnectionType | undefined;
-  getDecisionStyle!: (element: BPMN.DiElement) => BootstrapStyle| undefined;
+  getConnectionType!: (element: BPMN.Connection) => ConnectionType | undefined;
+  getDecisionStyle!: (element: BPMN.Connection) => BootstrapStyle | undefined;
 
-  drawConnection(visuals: any, element: BPMN.DiElement) {
+  drawConnection(visuals: any, element: BPMN.Connection) {
     var result = super.drawConnection(visuals, element);
-    var ct = this.getConnectionType && this.getConnectionType(element);
-    var cs = this.getDecisionStyle && this.getDecisionStyle(element);
+    var ct = this.getConnectionType(element);
+    var ds = this.getDecisionStyle(element);
 
     if (ct && ct != "Normal")
       result.style.setProperty('stroke',
-          ct == "Jump" ? "blue" :
+        ct == "Jump" ? "blue" :
           ct == "ScriptException" ? "magenta" :
-            ct == "Decision" && cs ? BootstrapStyleToColor(cs) :
+            ct == "Decision" && ds ? (bootstrapStyleToColor[ds] ?? "black") :
               "gray");
 
     return result;
@@ -86,3 +83,5 @@ export class CustomRenderer extends BpmnRenderer {
 
 export var __init__ = ['customRenderer'];
 export var customRenderer = ['type', CustomRenderer];
+
+

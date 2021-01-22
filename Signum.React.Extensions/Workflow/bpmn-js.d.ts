@@ -139,6 +139,8 @@ declare namespace BPMN {
     bounds: BoundsElement;
     lanes: ModdleElement[];
     eventDefinitions?: ModdleElement[];
+    incoming?: ConnectionModdleElemnet[];
+    outgoing?: ConnectionModdleElemnet[];
   }
 
   interface BoundsElement extends ModdleElement {
@@ -245,7 +247,7 @@ declare module 'bpmn-js/lib/draw/BpmnRenderer' {
     constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number);
 
     drawShape(visuals: any, element: BPMN.DiElement): SVGElement;
-    drawConnection(visuals: any, element: BPMN.DiElement): SVGElement;
+    drawConnection(visuals: any, element: BPMN.Connection): SVGElement;
   }
 }
 

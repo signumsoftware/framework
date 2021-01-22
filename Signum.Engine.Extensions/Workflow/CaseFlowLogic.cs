@@ -182,7 +182,7 @@ namespace Signum.Engine.Workflow
                 case DoneType.Next: 
                 case DoneType.ScriptSuccess:
                 case DoneType.Recompose:
-                    return path.All(a => a.Type == ConnectionType.Normal && (a.DoneDecision() == null || a.DoneDecision() == doneDecision));
+                    return path.All(a => a.Type == ConnectionType.Normal || doneDecision != null && (a.DoneDecision() == doneDecision));
                 case DoneType.Jump: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
                 case DoneType.ScriptFailure: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
                 case DoneType.Timeout:

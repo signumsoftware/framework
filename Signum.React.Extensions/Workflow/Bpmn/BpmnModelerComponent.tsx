@@ -137,16 +137,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       return mod?.type ?? undefined;
     }
 
-    cusRenderer.getDecisionStyle = con => {
-      var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-      if (mod?.type == "Decision") {
-        return (((con.businessObject as BPMN.ConnectionModdleElemnet).sourceRef as any).incoming as BPMN.DiElement[])
-          .filter(c => (c as any).sourceRef.$type == "bpmn:Task" || (c as any).sourceRef.$type == "bpmn:UserTask")
-          .map(c => this.getModel((c as any).sourceRef as any) as WorkflowActivityModel)
-          .flatMap(a => a.decisionOptions).find(dco => dco.element.name == mod?.decisionOptionName)?.element.style;
-      }
-      return undefined;
-    }
+    cusRenderer.getDecisionStyle = con => BpmnUtils.findDecisionStyle(con, this.props.entities);
 
     conIcons.show();
   }

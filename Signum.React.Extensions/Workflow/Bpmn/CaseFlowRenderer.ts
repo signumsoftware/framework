@@ -19,7 +19,7 @@ export class CaseFlowRenderer extends CustomRenderer {
   viewer!: NavigatedViewer;
   caseFlowColor?: CaseFlowColor;
 
-  drawConnection(visuals: any, element: BPMN.DiElement) {
+  drawConnection(visuals: any, element: BPMN.Connection) {
 
     const path = super.drawConnection(visuals, element);
 

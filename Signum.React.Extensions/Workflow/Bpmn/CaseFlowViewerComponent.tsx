@@ -121,6 +121,8 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
       return mod?.type || undefined;
     }
 
+    caseFlowRenderer.getDecisionStyle = con => BpmnUtils.findDecisionStyle(con, this.props.entities);
+
     caseFlowRenderer.viewer = this.viewer;
     caseFlowRenderer.caseFlow = this.props.caseFlow;
     caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.activities).map(a => a.map(a => a.duration || 0).sum()).max()!;
