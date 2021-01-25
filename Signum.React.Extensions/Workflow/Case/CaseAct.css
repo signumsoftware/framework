@@ -9,6 +9,10 @@ div.workflow-buttons {
         margin-bottom: 0px;
     }
 
+    div.workflow-buttons .btn {
+        margin-right: 10px;
+    }
+
 
 .case-main-entity .sf-widgets {
     margin-top: 0px;
