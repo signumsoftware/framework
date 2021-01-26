@@ -86,6 +86,10 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
   return (fo as FilterGroupOptionParsed).groupOperation != undefined;
 }
 
+export function isActive(fo: FilterOptionParsed) {
+  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+}
+
 export interface FilterConditionOptionParsed {
   token?: QueryToken;
   frozen: boolean;
@@ -234,10 +238,8 @@ export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | 
 
 export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | undefined {
 
-  if (fop.pinned) {
-    if (fop.pinned.active == "Checkbox_StartUnchecked" ||
-      fop.pinned.active == "WhenHasValue" && fop.value == null)
-      return undefined;
+  if (!isActive(fop)) {
+    return undefined;
   }
 
   if (isFilterGroupOptionParsed(fop)) {

@@ -773,21 +773,15 @@ namespace Signum.Utilities
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
-        public static string ToComputerSize(this long value)
-        {
-            return ToComputerSize(value, false);
-        }
-
         static readonly string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-        static readonly string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
-        public static string ToComputerSize(this long value, bool useAbbreviations)
+        public static string ToComputerSize(this long value)
         {
             double valor = value;
             long i;
-            for (i = 0; i < magnitudes.Length && valor >= 1024; i++)
+            for (i = 0; i < abbreviations.Length && valor >= 1024; i++)
                 valor /= 1024.0;
 
-            return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
+            return "{0:#,###.00} {1}".FormatWith(valor, abbreviations[i]);
         }
         
         public static string Combine(this string separator, params object?[] elements)

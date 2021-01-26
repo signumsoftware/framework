@@ -421,8 +421,10 @@ export const PropertyOperation = new EnumType<PropertyOperation>("PropertyOperat
 export type PropertyOperation =
   "Set" |
   "AddElement" |
+  "AddNewElement" |
   "ChangeElements" |
-  "RemoveElements" |
+  "RemoveElement" |
+  "RemoveElementsWhere" |
   "ModifyEntity" |
   "CreateNewEntity";
 
@@ -515,6 +517,8 @@ export module SearchMessage {
   export const PaginationAll_0Elements = new MessageKey("SearchMessage", "PaginationAll_0Elements");
   export const PaginationPages_0Of01lements = new MessageKey("SearchMessage", "PaginationPages_0Of01lements");
   export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
+  export const ReturnNewEntity = new MessageKey("SearchMessage", "ReturnNewEntity");
+  export const DoYouWantToSelectTheNew01_G = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
 }
 
 export module SelectorMessage {

@@ -116,7 +116,7 @@ namespace Signum.Engine.DynamicQuery
             ExecuteUniqueEntity,
             QueryDescription,
             GetEntities,
-            GetDQueryable
+            GetDQueryable,
         }
 
         public ResultTable ExecuteQuery(QueryRequest request)
@@ -160,9 +160,14 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.QueryDescription, queryName, null, dqb => dqb.GetDescription());
         }
 
-        public IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
+        public IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request)
         {
-            return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntities(request));
+            return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntitiesLite(request));
+        }
+
+        public IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request)
+        {
+            return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntitiesFull(request));
         }
 
         public DQueryable<object> GetDQueryable(DQueryableRequest request)

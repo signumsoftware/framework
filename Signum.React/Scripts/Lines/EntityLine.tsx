@@ -14,6 +14,7 @@ import { useController } from './LineBase'
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
+  avoidLink?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
@@ -47,7 +48,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
           if (this.currentItem)
             this.setCurrentItem(undefined);
         } else {
-          if (!this.currentItem || !is(this.currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>)) {
+          if (!this.currentItem || !is(this.currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>) || getToString(this.currentItem.entity) != getToString(entity)) {
             var ci = { entity: entity!, item: undefined as unknown }
             this.setCurrentItem(ci);
 
@@ -198,7 +199,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     if (p.ctx.readOnly)
       return <FormControlReadonly ctx={p.ctx}>{str}</FormControlReadonly>
 
-    if (p.navigate && p.view) {
+    if (p.view && !p.avoidLink) {
       return (
         <a ref={e => setLinkOrSpan(e)}
           href="#" onClick={c.handleViewClick}

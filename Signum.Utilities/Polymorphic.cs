@@ -83,7 +83,7 @@ namespace Signum.Utilities
 
     public class Polymorphic<T> where T : class
     {
-        Dictionary<Type, T> definitions = new Dictionary<Type, T>();
+        ConcurrentDictionary<Type, T> definitions = new ConcurrentDictionary<Type, T>();
         ConcurrentDictionary<Type, T?> cached = new ConcurrentDictionary<Type, T?>();
 
         PolymorphicMerger<T> merger;
@@ -198,12 +198,12 @@ namespace Signum.Utilities
 
         public Dictionary<Type, T> ExportDefinitions()
         {
-            return this.definitions;
+            return this.definitions.ToDictionary();
         }
 
         public void ImportDefinitions(Dictionary<Type, T> dic)
         {
-            this.definitions = dic;
+            this.definitions = new ConcurrentDictionary<Type, T>(dic);
             this.ClearCache();
         }
     }
