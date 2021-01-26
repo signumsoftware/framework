@@ -103,7 +103,7 @@
     <Member Name="ViewAsyncEmailSenderPanel" Description="View async email sender panel" />
   </Type>
   <Type Name="AuthAdminMessage">
-    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos se han encontrado en el gráfico de Roles debido a las relaciones:" />
+    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="Se han encontrado {0} ciclos en el grafo de Roles debido a las relaciones:" />
     <Member Name="_0InDB" Description="{0} (en BD solamente)" />
     <Member Name="_0InUI" Description="{0} (en IU)" />
     <Member Name="_0of1" Description="{0} de {1}" />
@@ -123,7 +123,7 @@
     <Member Name="ResetChanges" Description="Resetear cambios" />
     <Member Name="Save" Description="Guardar" />
     <Member Name="SwitchTo" Description="Cambiar a" />
-    <Member Name="TheUserStateMustBeDisabled" Description="El estado de usuario debe estar deshabilitado" />
+    <Member Name="TheUserStateMustBeDisabled" Description="El estado de usuario debe ser deshabilitado" />
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthEmailMessage">
@@ -1612,6 +1612,36 @@
     <Member Name="SaveProgressEvery" Description="Guardar progreso cada" />
     <Member Name="SaveValidationProgressEvery" Description="Guardar el progreso de validación cada" />
   </Type>
+  <Type Name="NewsletterDeliveryEntity" Description="Entrega de Newsletter">
+    <Member Name="Newsletter" Description="Newsletter" />
+    <Member Name="Recipient" Description="Destinatario" />
+    <Member Name="SendDate" Description="Fecha de envío" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="NewsletterEntity" Description="Newsletter">
+    <Member Name="DisplayFrom" Description="Visualizarlo desde" />
+    <Member Name="From" Description="De" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Subject" Description="Asunto" />
+    <Member Name="Text" Description="Texto" />
+  </Type>
+  <Type Name="NewsletterOperation">
+    <Member Name="AddRecipients" Description="Agregar destinatarios" />
+    <Member Name="Clone" Description="Clonar" />
+    <Member Name="RemoveRecipients" Description="Quitar destinatarios" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Send" Description="Enviar" />
+  </Type>
+  <Type Name="NewsletterProcess">
+    <Member Name="SendNewsletter" Description="Enviar boletín" />
+  </Type>
+  <Type Name="NewsletterState" Description="Estado de la newsletter">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Saved" Description="Guardado" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
   <Type Name="NewTasksEmbedded" Description="Nuevas tareas">
     <Member Name="BpmnId" Description="Bpmn id" />
     <Member Name="Name" Description="Nombre" />
@@ -2145,7 +2175,7 @@
   <Type Name="QueryTokenEmbedded" Description="Token de consulta">
     <Member Name="TokenString" Description="Cadena del token" />
   </Type>
-  <Type Name="ResetPasswordRequestEntity" Description="Solicitud de restablecimiento de contraseña" Gender="f">
+  <Type Name="ResetPasswordRequestEntity" Description="Solicitud reseteo contraseña" Gender="f">
     <Member Name="Code" Description="Código" />
     <Member Name="Lapsed" Description="Caducado" />
     <Member Name="RequestDate" Description="Fecha de solicitud" />
@@ -2817,13 +2847,13 @@
     <Member Name="New" Description="Nuevo" />
     <Member Name="Saved" Description="Guardado" />
   </Type>
-  <Type Name="UserTicketEntity" Description="Ticket usuario" Gender="m">
+  <Type Name="UserTicketEntity" Description="Ticket de usuario" Gender="m">
     <Member Name="ConnectionDate" Description="Fecha de conexión" />
     <Member Name="Device" Description="Dispositivo" />
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Usuario" />
   </Type>
-  <Type Name="UserTreePartEntity" Description="Parte del árbol de usuario" Gender="f">
+  <Type Name="UserTreePartEntity" Description="Parte árbol de usuario" Gender="f">
     <Member Name="RequiresTitle" Description="Requiere título" />
     <Member Name="UserQuery" Description="Consulta de usuario" />
   </Type>

@@ -55,6 +55,7 @@ namespace Signum.React.Authorization
         {
             ac.HttpContext.Response.Cookies.Append(CookieName, "", new CookieOptions()
             {
+                Domain = ac.HttpContext.Request.Host.Host,
                 Path = new UrlHelper(ac).Content("~/"),
                 Expires = DateTime.Now.AddDays(-1)
             });

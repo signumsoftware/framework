@@ -50,6 +50,13 @@ namespace Signum.React.Selenium
                 return;
             }
 
+			IWebElement? password = this.Element.TryFindElement(By.CssSelector(" input[type=password]"));
+            if (password != null)
+            {
+                password.SafeSendKeys(value);
+                return;
+            }
+
             IWebElement? select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
             {
@@ -133,6 +140,9 @@ namespace Signum.React.Selenium
             var str = value == null ? null :
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
                     value.ToString();
+
+            if (str.HasText() && format.HasText() && format.ToUpper() == "P")
+                str = str.Replace("%", "").Trim();
 
             SetStringValue(str);
         }
