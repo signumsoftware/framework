@@ -391,6 +391,16 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     }) as ColumnOptionParsed));
 }
 
+
+export const tokensToIgnore = [
+  "Id",
+  "Entity.Id",
+  "Ticks",
+  "Entity.Ticks",
+  "ToStr",
+  "Entity.ToStr",
+];
+
 export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
 
   const ti = getTypeInfo(type);
@@ -416,6 +426,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
+      tokensToIgnore.contains(fo.token.fullKey) ||
       fo.operation != "EqualTo" ||
       fo.pinned && fo.pinned.active == "Checkbox_StartUnchecked" ||
       fo.pinned && fo.pinned.active == "WhenHasValue" && fo.value == null)
@@ -501,7 +512,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
 
   const qs = getSettings(fo.queryKey);
 
-  const defPagination = qs?.pagination ?? defaultPagination;
+  const defPagination = qs?.pagination ?? Settings.defaultPagination;
 
   function equalsPagination(p1: Pagination, p2: Pagination) {
     return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
@@ -700,7 +711,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     var result: FindOptionsParsed = {
       queryKey: qd.queryKey,
       groupResults: fo.groupResults == true,
-      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? defaultPagination,
+      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Settings.defaultPagination,
       systemTime: fo.systemTime,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
@@ -1226,6 +1237,17 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
 
+
+
+export module Settings {
+
+  export let defaultPagination: Pagination = {
+    mode: "Paginate",
+    elementsPerPage: 20,
+    currentPage: 1,
+  };
+}
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
@@ -1492,11 +1514,7 @@ export module ButtonBarQuery {
 
 }
 
-export let defaultPagination: Pagination = {
-  mode: "Paginate",
-  elementsPerPage: 20,
-  currentPage: 1,
-};
+
 
 export interface QuerySettings {
   queryName: PseudoType | QueryKey;

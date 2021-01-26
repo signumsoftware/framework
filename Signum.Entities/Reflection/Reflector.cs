@@ -172,6 +172,15 @@ namespace Signum.Entities.Reflection
             return typeof(ModelEntity).IsAssignableFrom(t);
         }
 
+
+        public static Type? GetEntityTypeOfLite(this Type liteType)
+        {
+            if (liteType.IsLite() == false)
+                return null;
+
+            return liteType.GenericTypeArguments.FirstOrDefault();
+        }
+
         public static FieldInfo[] InstanceFieldsInOrder(Type type)
         {
             using (HeavyProfiler.LogNoStackTrace("Reflector", () => type.Name))
