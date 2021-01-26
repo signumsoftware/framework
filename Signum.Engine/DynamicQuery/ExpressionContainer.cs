@@ -86,7 +86,7 @@ namespace Signum.Engine.DynamicQuery
                });
 
             IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
-                dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType)
+                dic.Values.Where(ei => ei.Inherit || compatibleTypes.Contains(ei.SourceType))
                 .Where(ei => ei.IsApplicable == null || ei.IsApplicable(parent))
                 .Select(v => v.CreateToken(parent));
 
