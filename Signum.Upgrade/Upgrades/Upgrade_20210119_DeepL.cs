@@ -42,7 +42,7 @@ public class TranslationConfigurationEmbedded : EmbeddedEntity
 public TranslationConfigurationEmbedded Translation { get; set; }");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.React/App/Agile360/Templates/ApplicationConfiguration.tsx", file =>
+            uctx.ChangeCodeFile(@"Southwind.React/App/Southwind/Templates/ApplicationConfiguration.tsx", file =>
             {
                 file.InsertAfterLastLine(a => a.Contains("</Tab>"),
 @"<Tab eventKey=""translation"" title={ctx.niceName(a => a.translation)}>
@@ -77,7 +77,7 @@ public TranslationConfigurationEmbedded Translation { get; set; }");
 }},");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.Test.Environment/BasicLoader.cs", file =>
+            uctx.ChangeCodeFile(@"Southwind.Test.Environment\SouthwindEnvironment.cs", file =>
                 {
                     file.InsertBeforeFirstLine(a => a.Contains("Folders = new FoldersConfigurationEmbedded"),
     @$"Translation = new TranslationConfigurationEmbedded
