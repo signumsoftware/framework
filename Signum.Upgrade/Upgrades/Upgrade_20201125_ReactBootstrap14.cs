@@ -25,7 +25,7 @@ namespace Signum.Upgrade.Upgrades
 
                 file.UpdateNpmPackage("react", "16.14.0");
                 file.UpdateNpmPackage("react-bootstrap", "1.4.0");
-                file.UpdateNpmPackage("react", "16.14.0");
+                file.UpdateNpmPackage("react-dom", "16.14.0");
             });
         }
     }
