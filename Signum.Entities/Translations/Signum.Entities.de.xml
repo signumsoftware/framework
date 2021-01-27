@@ -279,10 +279,12 @@
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
     <Member Name="AddElement" Description="Element hinzufügen" />
+    <Member Name="AddNewElement" Description="Neues Element hinzufügen" />
     <Member Name="ChangeElements" Description="Elemente ändern" />
     <Member Name="CreateNewEntity" Description="Neue Entität erstellen" />
     <Member Name="ModifyEntity" Description="Entität modifizieren" />
-    <Member Name="RemoveElements" Description="Elemente löschen" />
+    <Member Name="RemoveElement" Description="Element entfernen" />
+    <Member Name="RemoveElementsWhere" Description="Elemente entfernen, wenn" />
     <Member Name="Set" Description="Setzen" />
   </Type>
   <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute">
