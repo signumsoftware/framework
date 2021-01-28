@@ -142,7 +142,7 @@ export function overrideAutocomplete(ti: TypeInfo) {
   var es = getEntitySetting(ti.name);
 
   if (!es.autocomplete)
-    es.autocomplete = new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac));
+    es.autocomplete = fo => fo ? null : new LiteAutocompleteConfig((ac, str) => API.findTreeLiteLikeByName(ti.name, str, 5, ac));
 
   if (!es.autocompleteDelay)
     es.autocompleteDelay = 750;
