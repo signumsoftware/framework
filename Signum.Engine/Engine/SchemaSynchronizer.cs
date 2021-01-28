@@ -1209,7 +1209,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 //BLACKLIST!!
                 case SqlDbType.Binary:
                 case SqlDbType.VarBinary:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Float:
                         case SqlDbType.Real:
@@ -1226,11 +1226,11 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
                 case SqlDbType.NChar:
                 case SqlDbType.NVarChar:
-                    return fromType != SqlDbType.Image;
+                    return toType != SqlDbType.Image;
 
                 case SqlDbType.DateTime:
                 case SqlDbType.SmallDateTime:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.UniqueIdentifier:
                         case SqlDbType.Image:
@@ -1244,18 +1244,18 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                     }
 
                 case SqlDbType.Date:
-                    if (fromType == SqlDbType.Time)
+                    if (toType == SqlDbType.Time)
                         return false;
                     goto case SqlDbType.DateTime2;
 
                 case SqlDbType.Time:
-                    if (fromType == SqlDbType.Date)
+                    if (toType == SqlDbType.Date)
                         return false;
                     goto case SqlDbType.DateTime2;
 
                 case SqlDbType.DateTimeOffset:
                 case SqlDbType.DateTime2:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Decimal:
                         case SqlDbType.Float:
@@ -1288,7 +1288,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 case SqlDbType.Money:
                 case SqlDbType.SmallMoney:
                 case SqlDbType.Bit:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Date:
                         case SqlDbType.Time:
@@ -1306,7 +1306,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                     }
 
                 case SqlDbType.Timestamp:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.NChar:
                         case SqlDbType.NVarChar:
@@ -1325,7 +1325,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                             return true;
                     }
                 case SqlDbType.Variant:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Timestamp:
                         case SqlDbType.Image:
@@ -1340,7 +1340,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
                 //WHITELIST!!
                 case SqlDbType.UniqueIdentifier:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Binary:
                         case SqlDbType.VarBinary:
@@ -1355,7 +1355,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                             return false;
                     }
                 case SqlDbType.Image:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Binary:
                         case SqlDbType.Image:
@@ -1367,7 +1367,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                     }
                 case SqlDbType.NText:
                 case SqlDbType.Text:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Char:
                         case SqlDbType.VarChar:
@@ -1382,7 +1382,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                     }
                 case SqlDbType.Xml:
                 case SqlDbType.Udt:
-                    switch (fromType)
+                    switch (toType)
                     {
                         case SqlDbType.Binary:
                         case SqlDbType.VarBinary:
