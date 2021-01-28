@@ -472,10 +472,14 @@ namespace Signum.React.ApiControllers
                     SetSetters(mod, setter.Setters!, pr);
                     SetProperty(entity, pr, route, mod);
                 }
-                else if (setter.Operation == PropertyOperation.ModifyEntity)
+                else if (setter.Operation == PropertyOperation.Set)
                 {
                     var value = ConvertObject(setter.Value, pr, options);
                     SetProperty(entity, pr, route, value);
+                }
+                else
+                {
+                    throw new UnexpectedValueException(setter.Operation);
                 }
             }
         }

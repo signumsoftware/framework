@@ -515,41 +515,34 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  var config: AutocompleteConfig<any> | null = null;
-
-  if (findOptions)
-    config = new FindOptionsAutocompleteConfig(findOptions, {
-      getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
-    });
+  var result: AutocompleteConfig<any> | null | undefined = null;
 
   const types = tryGetTypeInfos(type);
-  var delay: number | undefined;
 
-  if (types.length == 1 && types[0] != null) {
-    var s = getSettings(types[0]);
+  var s = types.length == 1 && types[0] != null ? getSettings(types[0]) : null;
 
-    if (s) {
-      if (s.autocomplete) {
-        config = s.autocomplete;
-      }
-
-      delay = s.autocompleteDelay;
-    }
+  if (s && s.autocomplete) {
+    result = s.autocomplete(findOptions)
   }
 
-  if (!config) {
-    config = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
-      types: type.name,
-      subString: subStr,
-      count: 5
-    }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
+  if (!result) {
+    if (findOptions)
+      result = new FindOptionsAutocompleteConfig(findOptions, {
+        getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
+      });
+    else
+      result = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
+        types: type.name,
+        subString: subStr,
+        count: 5
+      }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
-  if (!config.getItemsDelay) {
-    config.getItemsDelay = delay;
+  if (!result.getItemsDelay && s?.autocompleteDelay) {
+    result.getItemsDelay = s.autocompleteDelay;
   }
 
-  return config;
+  return result;
 }
 
 export interface ViewOptions {
@@ -771,7 +764,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   modalSize?: BsSize;
 
-  autocomplete?: AutocompleteConfig<any>;
+  autocomplete?: (fo: FindOptions) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
 
@@ -816,7 +809,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   modalSize?: BsSize;
 
-  autocomplete?: AutocompleteConfig<any>;
+  autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
 

@@ -32,8 +32,8 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   focusNext!: React.MutableRefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController>;
 
-  init(p: EntityLineProps) {
-    super.init(p);
+  init(pro: EntityLineProps) {
+    super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
     const mounted = useMounted();
@@ -75,7 +75,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
       }
 
       return undefined;
-    }, [p.ctx.value]);
+    }, [pro.ctx.value]);
 
   }
 
