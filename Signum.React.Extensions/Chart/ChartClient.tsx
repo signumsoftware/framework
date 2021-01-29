@@ -639,9 +639,7 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = chartColumn.format ? toLuxonFormat(chartColumn.format) :
-          token.format ? toLuxonFormat(token.format) :
-            "F";
+        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "Date" | "DateTime");
         return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
       };
 
