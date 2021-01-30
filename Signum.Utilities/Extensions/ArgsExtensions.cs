@@ -42,13 +42,7 @@ namespace Signum.Utilities
                 else if (obj is string s && typeof(T).IsEnum && Enum.IsDefined(typeof(T), s))
                     yield return (T)Enum.Parse(typeof(T), s);
                 else if (obj is IComparable && ReflectionTools.IsNumber(obj.GetType()) && ReflectionTools.IsNumber(typeof(T)))
-                {
-                    if (ReflectionTools.IsDecimalNumber(obj.GetType()) &&
-                        !ReflectionTools.IsDecimalNumber(typeof(T)))
-                        throw new InvalidOperationException($"Converting {obj} ({obj.GetType().TypeName()}) to {typeof(T).GetType().TypeName()} would lose precision");
-
                     yield return ReflectionTools.ChangeType<T>(obj);
-                }
                 else if (obj is List<object> list)
                 {
                     var type = typeof(T).ElementType();
