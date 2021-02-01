@@ -32,8 +32,8 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   focusNext!: React.MutableRefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController>;
 
-  init(p: EntityLineProps) {
-    super.init(p);
+  init(pro: EntityLineProps) {
+    super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
     const mounted = useMounted();
@@ -75,7 +75,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
       }
 
       return undefined;
-    }, [p.ctx.value]);
+    }, [pro.ctx.value]);
 
   }
 
@@ -168,7 +168,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
       return renderInput ? renderInput(fcr) : fcr;
     }
 

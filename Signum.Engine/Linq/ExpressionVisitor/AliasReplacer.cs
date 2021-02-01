@@ -24,6 +24,16 @@ namespace Signum.Engine.Linq
             return ap.Visit(source);
         }
 
+        protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression request)
+        {
+            var ag = (AggregateExpression)this.Visit(request.Aggregate);
+            var newAlias = aliasMap.TryGetC(request.GroupByAlias) ?? request.GroupByAlias;
+            if (ag != request.Aggregate || request.GroupByAlias != newAlias)
+                return new AggregateRequestsExpression(newAlias, ag);
+
+            return request;
+        }
+
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
             if(aliasMap.ContainsKey(column.Alias))
@@ -52,6 +62,27 @@ namespace Signum.Engine.Linq
                 return new SelectExpression(newAlias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
 
             return select;
+        }
+
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
+            Alias newAlias = aliasMap.TryGetC(sqlFunction.Alias) ?? sqlFunction.Alias;
+            if (args != sqlFunction.Arguments || sqlFunction.Alias != newAlias)
+                return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, newAlias, args);
+            return sqlFunction;
+        }
+
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            SourceWithAliasExpression left = (SourceWithAliasExpression)this.VisitSource(set.Left)!;
+            SourceWithAliasExpression right = (SourceWithAliasExpression)this.VisitSource(set.Right)!;
+            Alias newAlias = aliasMap.TryGetC(set.Alias) ?? set.Alias;
+            if (left != set.Left || right != set.Right || newAlias != set.Alias)
+            {
+                return new SetOperatorExpression(set.Operator, left, right, newAlias);
+            }
+            return set;
         }
 
         protected internal override Expression VisitEntity(EntityExpression ee)

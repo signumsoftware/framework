@@ -1660,7 +1660,7 @@ export const formatRules: FormatRule[] = [
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
-      const luxonFormat = toLuxonFormat(col.token!.format);
+      const luxonFormat = toLuxonFormat(col.token!.format, col.token!.type.name as "Date" | "DateTime");
       return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
