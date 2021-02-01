@@ -347,10 +347,16 @@ namespace Signum.Engine.Processes
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 var result = ((F)(object)line.Target).ConstructFrom(Symbol, args);
-                if (result.IsNew)
-                    result.Save();
+                if (result != null)
+                {
+                    if (result.IsNew)
+                    {
+                        using (OperationLogic.AllowSave<T>())
+                            result.Save();
+                    }
 
-                line.Result = ((Entity)(IEntity)result).ToLite();
+                    line.Result = ((Entity)(IEntity)result).ToLite();
+                }
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
