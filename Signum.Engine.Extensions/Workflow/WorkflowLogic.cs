@@ -105,7 +105,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static WorkflowEntity Workflow(this CaseActivityEntity ca) => 
-            As.Expression(() => ca.WorkflowActivity.Lane.Pool.Workflow);
+            As.Expression(() => ca.Case.Workflow);
 
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {

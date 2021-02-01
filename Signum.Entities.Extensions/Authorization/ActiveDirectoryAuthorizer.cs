@@ -26,6 +26,8 @@ namespace Signum.Entities.Authorization
 
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
 
+        public ActiveDirectoryAccountEmbedded? ActiveDirectoryAccount { get; set; }
+
         public bool AutoCreateUsers { get; set; }
 
         [PreserveOrder, NoRepeatValidator]
@@ -43,9 +45,20 @@ namespace Signum.Entities.Authorization
         public Lite<RoleEntity> Role { get; set; }
     }
 
+    [Serializable]
+    public class ActiveDirectoryAccountEmbedded : EmbeddedEntity
+    {
+        public string Username { get; set; }
+
+        public string Password { get; set; }
+    }
+
     public enum ActiveDirectoryAuthorizerMessage
     {
         [Description("Active Directory user '{0}' is not associated with a user in this application.")]
         ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication,
+
+        [Description("No login user is set in Application configuration for Active directory")]
+        ActiveDirectoryNoLoginUser,
     }
 }

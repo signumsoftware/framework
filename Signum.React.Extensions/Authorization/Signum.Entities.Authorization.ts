@@ -12,8 +12,16 @@ export interface UserEntity {
     newPassword: string;
 }
 
+export const ActiveDirectoryAccountEmbedded = new Type<ActiveDirectoryAccountEmbedded>("ActiveDirectoryAccountEmbedded");
+export interface ActiveDirectoryAccountEmbedded extends Entities.EmbeddedEntity {
+  Type: "ActiveDirectoryAccountEmbedded";
+  username: string;
+  password: string;
+}
+
 export module ActiveDirectoryAuthorizerMessage {
   export const ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication = new MessageKey("ActiveDirectoryAuthorizerMessage", "ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication");
+  export const ActiveDirectoryNoLoginUser = new MessageKey("ActiveDirectoryAuthorizerMessage", "ActiveDirectoryNoLoginUser");
 }
 
 export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
@@ -27,6 +35,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   loginWithActiveDirectoryRegistry: boolean;
   loginWithAzureAD: boolean;
   allowMatchUsersBySimpleUserName: boolean;
+  activeDirectoryAccount: ActiveDirectoryAccountEmbedded | null;
   autoCreateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;

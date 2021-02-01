@@ -393,7 +393,7 @@ namespace Signum.Engine.Cache
             {
                 using (Transaction tr = Transaction.None())
                 {
-                    Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
+                    Executor.ExecuteNonQuery("ALTER DATABASE [{0}] SET ENABLE_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
 
                     tr.Commit();
                 }
@@ -402,7 +402,7 @@ namespace Signum.Engine.Cache
             {
                 using (Transaction tr = Transaction.None())
                 {
-                    Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
+                    Executor.ExecuteNonQuery("ALTER DATABASE [{0}] SET NEW_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
 
                     tr.Commit();
                 }
