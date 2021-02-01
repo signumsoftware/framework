@@ -428,8 +428,8 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
-      else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
-        f.value = f.value && trimDateToFormat(f.value, toLuxonFormat(newToken.format));
+      else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
+        f.value = f.value && trimDateToFormat(f.value, newToken);
       }
     }
     f.token = newToken ?? undefined;
@@ -442,13 +442,16 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     forceUpdate();
   }
 
-  function trimDateToFormat(date: string, momentFormat: string | undefined) {
+  function trimDateToFormat(date: string, newToken: QueryToken) {
 
-    if (!momentFormat)
+    var luxonFormat = toLuxonFormat(newToken.format, newToken.type.name as "Date" | "DateTime");
+
+    if (!luxonFormat)
       return date;
 
-    const formatted = DateTime.fromISO(date).toFormat(momentFormat);
-    return DateTime.fromFormat(formatted, momentFormat).toISO();
+    const formatted = DateTime.fromISO(date).toFormat(luxonFormat);
+    const dateTime = DateTime.fromFormat(formatted, luxonFormat);
+    return newToken.type.name == "Date" ? dateTime.toISODate() : dateTime.toISO();
   }
 
 

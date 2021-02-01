@@ -106,6 +106,7 @@ namespace Signum.Engine
             var sqlBuilder = connector.SqlBuilder;
 
             var cmd = list.NotNull()
+                .Select(dbn => new DatabaseName(null, dbn, connector.Schema.Settings.IsPostgres))
                 .Where(db => !SnapshotIsolationEnabled(db))
                 .Select(db => SqlPreCommand.Combine(Spacing.Simple,
                     sqlBuilder.SetSingleUser(db),
@@ -117,10 +118,10 @@ namespace Signum.Engine
             return cmd;
         }
 
-        private static bool SnapshotIsolationEnabled(string dbName)
+        private static bool SnapshotIsolationEnabled(DatabaseName dbName)
         {
             //SQL Server Replication makes it hard to do ALTER DATABASE statments, so we are conservative even if Generate should not have Synchronize behaviour
-            var result = Database.View<SysDatabases>().Where(s => s.name == dbName).Select(a => a.is_read_committed_snapshot_on && a.snapshot_isolation_state).SingleOrDefaultEx();
+            var result = Database.View<SysDatabases>().Where(s => s.name == dbName.Name).Select(a => a.is_read_committed_snapshot_on && a.snapshot_isolation_state).SingleOrDefaultEx();
             return result;
         }
     }

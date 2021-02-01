@@ -77,7 +77,7 @@ public TranslationConfigurationEmbedded Translation { get; set; }");
 }},");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.Test.Environment\SouthwindEnvironment.cs", file =>
+            uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
                 {
                     file.InsertBeforeFirstLine(a => a.Contains("Folders = new FoldersConfigurationEmbedded"),
     @$"Translation = new TranslationConfigurationEmbedded

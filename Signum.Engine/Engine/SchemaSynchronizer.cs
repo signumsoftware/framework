@@ -881,7 +881,12 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
             var results = Database.View<SysDatabases>()
                 .Where(d => list.Contains(d.name))
-                .Select(d => new { d.name, d.snapshot_isolation_state, d.is_read_committed_snapshot_on }).ToList();
+                .Select(d => new
+                {
+                    name = new DatabaseName(null, d.name, Connector.Current.Schema.Settings.IsPostgres),
+                    d.snapshot_isolation_state,
+                    d.is_read_committed_snapshot_on
+                }).ToList();
 
             var cmd = replacements.WithReplacedDatabaseName().Using(_ => results.Select((a, i) =>
                 SqlPreCommand.Combine(Spacing.Simple,
@@ -898,11 +903,11 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 new SqlPreCommandSimple("use {0} -- Stop Snapshot".FormatWith(Connector.Current.DatabaseName())));
         }
 
-        public static SqlPreCommandSimple DisconnectUsers(string databaseName, string variableName)
+        public static SqlPreCommandSimple DisconnectUsers(DatabaseName databaseName, string variableName)
         {
             return new SqlPreCommandSimple(@"DECLARE @{1} VARCHAR(7000)
 SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
-EXEC(@{1})".FormatWith(databaseName, variableName));
+EXEC(@{1})".FormatWith(databaseName.Name, variableName));
         }
     }
 

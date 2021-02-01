@@ -628,7 +628,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
 
-  const luxonFormat = toLuxonFormat(s.formatText);
+  const luxonFormat = toLuxonFormat(s.formatText, vl.props.type?.name as "Date" | "DateTime");
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
   const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";

@@ -85,10 +85,20 @@ namespace Signum.React.Facades
                 {
                     switch (mc.Method.Name)
                     {
-                        case "ToShortDateString": return ToJavascriptToString(param, mc.Object!, "d");
-                        case "ToShortTimeString": return ToJavascriptToString(param, mc.Object!, "t");
-                        case "ToLongDateString": return ToJavascriptToString(param, mc.Object!, "D");
-                        case "ToLongTimeString": return ToJavascriptToString(param, mc.Object!, "T");
+                        case nameof(DateTime.ToShortDateString): return ToJavascriptToString(param, mc.Object!, "d");
+                        case nameof(DateTime.ToShortTimeString): return ToJavascriptToString(param, mc.Object!, "t");
+                        case nameof(DateTime.ToLongDateString): return ToJavascriptToString(param, mc.Object!, "D");
+                        case nameof(DateTime.ToLongTimeString): return ToJavascriptToString(param, mc.Object!, "T");
+                    }
+                }
+
+                if (mc.Method.DeclaringType == typeof(Date))
+                {
+                    switch (mc.Method.Name)
+                    {
+                        case  nameof(Date.ToShortString): return ToJavascriptToString(param, mc.Object!, "d");
+                        case  nameof(Date.ToLongString): return ToJavascriptToString(param, mc.Object!, "D");
+                        case  nameof(Date.ToString): return ToJavascriptToString(param, mc.Object!, "d");
                     }
                 }
 
@@ -142,7 +152,10 @@ namespace Signum.React.Facades
             string? formatFull = format == null ? null : (", '" + format + "'");
 
             if (expr.Type.UnNullify() == typeof(DateTime))
-                return "dateToString(" + r + formatFull + ")";
+                return "dateToString(" + r + ", 'DateTime'" +  formatFull + ")";
+
+            if (expr.Type.UnNullify() == typeof(Date))
+                return "dateToString(" + r + ", 'Date'" + formatFull + ")";
 
             if (expr.Type.UnNullify() == typeof(TimeSpan))
                 return "durationToString(" + r + formatFull + ")";
