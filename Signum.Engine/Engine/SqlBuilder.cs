@@ -604,22 +604,22 @@ FROM {1} as [table];".FormatWith(
                 tableName, value ? "ON" : "OFF"));
         }
 
-        public SqlPreCommandSimple SetSingleUser(string databaseName)
+        public SqlPreCommandSimple SetSingleUser(DatabaseName databaseName)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
         }
 
-        public SqlPreCommandSimple SetMultiUser(string databaseName)
+        public SqlPreCommandSimple SetMultiUser(DatabaseName databaseName)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".FormatWith(databaseName));
         }
 
-        public SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
+        public SqlPreCommandSimple SetSnapshotIsolation(DatabaseName databaseName, bool value)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }
 
-        public SqlPreCommandSimple MakeSnapshotIsolationDefault(string databaseName, bool value)
+        public SqlPreCommandSimple MakeSnapshotIsolationDefault(DatabaseName databaseName, bool value)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1};".FormatWith(databaseName, value ? "ON" : "OFF"));
         }

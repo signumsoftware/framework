@@ -105,6 +105,7 @@ namespace SearchPage {
   export let marginDown = 130;
   export let minHeight = 600;
   export let showFilters = (fo: FindOptions, qs: Finder.QuerySettings | undefined) => {
+    debugger;
     var allFilters = [
       ...fo.filterOptions ?? [],
       ... (fo.includeDefaultFilters ?? true) ? qs?.defaultFilters ?? [] : []
