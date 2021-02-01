@@ -18,7 +18,6 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
             <ValueLine ctx={ctxb.subCtx(n => n.domainServer)} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithWindowsAuthenticator)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithActiveDirectoryRegistry)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
-            <EntityLine ctx={ctx.subCtx(n => n.activeDirectoryAccount)} />
           </fieldset>
         </div>
         <div className="col-sm-6">
