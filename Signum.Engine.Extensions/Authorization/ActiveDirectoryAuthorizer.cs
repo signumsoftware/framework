@@ -7,7 +7,6 @@ using System;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security.Claims;
-using System.DirectoryServices;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Engine.Authorization
@@ -61,8 +60,6 @@ namespace Signum.Engine.Authorization
     {
         public Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
-        public  virtual PrincipalContext? PrincipalContext { get; set; }
-
         public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig)
         {
             this.GetConfig = getConfig;
@@ -110,8 +107,6 @@ namespace Signum.Engine.Authorization
 
                                 if (user != null)
                                 {
-                                    var accountName = domainName + @"\" + localName;
-                                 
                                     AuthLogic.OnUserLogingIn(user);
                                     return user;
                                 }

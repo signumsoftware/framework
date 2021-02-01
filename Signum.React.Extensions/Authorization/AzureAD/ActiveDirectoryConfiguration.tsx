@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ActiveDirectoryConfigurationEmbedded } from '../Signum.Entities.Authorization';
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function AlertType(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }) {
+export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }) {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
   const ctxb = ctx.subCtx({ formGroupStyle: "Basic" });

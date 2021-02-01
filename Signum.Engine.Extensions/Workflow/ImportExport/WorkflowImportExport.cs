@@ -259,7 +259,7 @@ namespace Signum.Engine.Workflow
         {
             this.workflow.Name = element.Attribute("Name")!.Value;
             this.workflow.MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
-            this.workflow.MainEntityStrategies.Synchronize(element.Attribute("MainEntityStrategies")!.Value.Split(",").Where(a => a.IsEmpty() == false).Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToList());
+            this.workflow.MainEntityStrategies.Synchronize(element.Attribute("MainEntityStrategies")!.Value.SplitNoEmpty(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToList());
             this.workflow.ExpirationDate = element.Attribute("ExpirationDate")?.Let(ed => DateTime.ParseExact(ed.Value, "o", CultureInfo.InvariantCulture));
 
             if(!ctx.IsPreview)
