@@ -113,8 +113,8 @@ namespace Signum.React.Selenium
 
         public virtual void Logout()
         {
-            Selenium.FindElement(By.Id("sfLoginDropdown")).Click();
-            Selenium.FindElement(By.Id("sf-auth-logout")).Click();    //SelectElement();
+            Selenium.WaitElementPresent(By.Id("sfLoginDropdown")).Click();
+            Selenium.WaitElementPresent(By.Id("sf-auth-logout")).Click();    //SelectElement();
             Selenium.Wait(() => GetCurrentUser() == null);
             Selenium.Url = Url("Auth/Login");
             Selenium.WaitElementVisible(By.CssSelector(".sf-login"));
