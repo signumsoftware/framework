@@ -49,6 +49,7 @@ namespace Signum.Engine.UserQueries
                         uq.DisplayName,
                         uq.Query,
                         uq.EntityType,
+                        uq.Owner,
                     });
 
                 sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;

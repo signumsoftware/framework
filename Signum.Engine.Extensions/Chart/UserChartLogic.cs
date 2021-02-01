@@ -45,6 +45,7 @@ namespace Signum.Engine.Chart
                         uq.EntityType,
                         uq.DisplayName,
                         uq.ChartScript,
+                        uq.Owner,
                     });
 
                 sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
