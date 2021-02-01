@@ -184,6 +184,16 @@ namespace Signum.Engine.Cache
                     bindings.Add(assigment);
                 }
 
+                if (fe.Mixins != null)
+                {
+                    foreach (var mixin in fe.Mixins.Values)
+                    {
+                        ParameterExpression mixParam = Expression.Parameter(mixin.FieldType);
+                        var mixBlock = MaterializeMixin(embParam, mixin, mixParam);
+                        bindings.Add(mixBlock);
+                    }
+                }
+
                 bindings.Add(embParam);
 
                 Expression block = Expression.Block(new[] { embParam }, bindings);
