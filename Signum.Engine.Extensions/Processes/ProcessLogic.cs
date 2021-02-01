@@ -98,6 +98,8 @@ namespace Signum.Engine.Processes
                         Entity = p,
                         p.Process,
                         p.Line,
+                        ((PackageLineEntity)p.Line!.Entity).Target,
+                        ((PackageLineEntity)p.Line!.Entity).Result,
                         p.ElementInfo,
                         p.Exception,
                     });

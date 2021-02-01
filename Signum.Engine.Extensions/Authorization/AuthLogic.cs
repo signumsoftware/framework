@@ -389,7 +389,7 @@ namespace Signum.Engine.Authorization
 
                 foreach (var kvp in rolesXml)
                 {
-                    var r = rolesDic[kvp.Key];
+                    var r = rolesDic.GetOrThrow(kvp.Key);
 
                     var current = GetMergeStrategy(r);
                     var should = kvp.Value.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
@@ -401,7 +401,7 @@ namespace Signum.Engine.Authorization
                         roles.Value.RelatedTo(r),
                         kvp.Value.Attribute("Contains")!.Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries),
                         sr => sr.ToString()!,
-                        s => rolesDic[s].ToString()!,
+                        s => rolesDic.GetOrThrow(s).ToString()!,
                         (sr, s) => 0,
                         "subRoles of {0}".FormatWith(r));
                 }

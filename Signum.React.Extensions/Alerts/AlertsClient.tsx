@@ -9,6 +9,7 @@ import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
+import { ajaxGet } from '../../../Framework/Signum.React/Scripts/Services'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
@@ -77,3 +78,18 @@ function chooseDate(): Promise<DateTime | undefined> {
     }
   });
 }
+
+
+
+export module API {
+
+  export function myAlerts(): Promise<AlertEntity[]> {
+    return ajaxGet({ url: "~/api/alerts/myAlerts", avoidNotifyPendingRequests: true });
+  }
+
+  export function myAlertsCount(): Promise<NumAlerts> {
+    return ajaxGet({ url: "~/api/alerts/myAlertsCount", avoidNotifyPendingRequests : true });
+  }
+}
+
+export interface NumAlerts { numAlerts: number, lastAlert?: string };

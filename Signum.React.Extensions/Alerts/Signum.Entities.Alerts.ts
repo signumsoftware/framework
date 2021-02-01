@@ -43,6 +43,12 @@ export module AlertMessage {
   export const CustomDelay = new MessageKey("AlertMessage", "CustomDelay");
   export const DelayDuration = new MessageKey("AlertMessage", "DelayDuration");
   export const MyActiveAlerts = new MessageKey("AlertMessage", "MyActiveAlerts");
+  export const YouDoNotHaveAnyActiveAlert = new MessageKey("AlertMessage", "YouDoNotHaveAnyActiveAlert");
+  export const _0SimilarAlerts = new MessageKey("AlertMessage", "_0SimilarAlerts");
+  export const _0HiddenAlerts = new MessageKey("AlertMessage", "_0HiddenAlerts");
+  export const ViewMore = new MessageKey("AlertMessage", "ViewMore");
+  export const CloseAll = new MessageKey("AlertMessage", "CloseAll");
+  export const AllMyAlerts = new MessageKey("AlertMessage", "AllMyAlerts");
 }
 
 export module AlertOperation {
@@ -67,6 +73,7 @@ export interface AlertTypeEntity extends Basics.SemiSymbol {
 
 export module AlertTypeOperation {
   export const Save : Entities.ExecuteSymbol<AlertTypeEntity> = registerSymbol("Operation", "AlertTypeOperation.Save");
+  export const Delete : Entities.DeleteSymbol<AlertTypeEntity> = registerSymbol("Operation", "AlertTypeOperation.Delete");
 }
 
 export const DelayOption = new EnumType<DelayOption>("DelayOption");

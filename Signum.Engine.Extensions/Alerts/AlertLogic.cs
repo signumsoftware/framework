@@ -46,11 +46,13 @@ namespace Signum.Engine.Alerts
                     {
                         Entity = a,
                         a.Id,
-                        a.AlertType,
                         a.AlertDate,
+                        a.AlertType,
+                        a.State,
                         a.Title,
                         Text = a.Text.Etc(100),
                         a.Target,
+                        a.Recipient,
                         a.CreationDate,
                         a.CreatedBy,
                         a.AttendedDate,
@@ -61,6 +63,7 @@ namespace Signum.Engine.Alerts
 
                 sb.Include<AlertTypeEntity>()
                     .WithSave(AlertTypeOperation.Save)
+                    .WithDelete(AlertTypeOperation.Delete)
                     .WithQuery(() => t => new
                     {
                         Entity = t,
@@ -94,12 +97,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType);
         }
 
-        public static AlertEntity? CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlert(entity.ToLiteFat(), text, alertType, alertDate, user, title);
+            return CreateAlert(entity.ToLiteFat(), text, alertType, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
@@ -107,7 +110,7 @@ namespace Signum.Engine.Alerts
             var result = new AlertEntity
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = user ?? UserHolder.Current?.ToLite(),
+                CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
                 Text = text,
                 Title = title,
                 Target = (Lite<Entity>)entity,
@@ -118,21 +121,21 @@ namespace Signum.Engine.Alerts
             return result.Execute(AlertOperation.Save);
         }
 
-        public static AlertEntity? CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null)
+        public static AlertEntity? CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, user);
+            return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? user = null) where T : class, IEntity
+        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
 
             using (Transaction tr = Transaction.ForceNew())
             {
-                var alerta = entity.CreateAlert(text, alertType, alertDate, user);
+                var alert = entity.CreateAlert(text, alertType, alertDate, createdBy);
 
-                return tr.Commit(alerta);
+                return tr.Commit(alert);
             }
         }
 

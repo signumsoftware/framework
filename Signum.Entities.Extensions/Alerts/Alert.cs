@@ -114,6 +114,7 @@ namespace Signum.Entities.Alerts
     public static class AlertTypeOperation
     {
         public static ExecuteSymbol<AlertTypeEntity> Save;
+        public static DeleteSymbol<AlertTypeEntity> Delete;
     }
 
     public enum AlertMessage
@@ -138,5 +139,13 @@ namespace Signum.Entities.Alerts
         CustomDelay,
         DelayDuration,
         MyActiveAlerts,
+        YouDoNotHaveAnyActiveAlert,
+        [Description("{0} similar alerts")]
+        _0SimilarAlerts,
+        [Description("{0} hidden alerts")]
+        _0HiddenAlerts,
+        ViewMore,
+        CloseAll,
+        AllMyAlerts,
     }
 }
