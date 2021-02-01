@@ -136,7 +136,7 @@ namespace Signum.Engine.Disconnected
                 .ToList();
 
             conflicts = conflicts.Where(c => c.SeedInterval.Contains(isMin ? dm.SeedMin : dm.SeedMax) ||
-                dm.SeedInterval.Subset(c.SeedInterval) || c.SeedInterval.Subset(dm.SeedInterval)).ToList();
+                dm.SeedInterval.IsSubset(c.SeedInterval) || c.SeedInterval.IsSubset(dm.SeedInterval)).ToList();
 
             if (conflicts.Any())
                 return DisconnectedMessage._0OverlapsWith1.NiceToString(pi.NiceName(), conflicts.CommaAnd(s => "{0} {1}".FormatWith(s.Machine, s.SeedInterval)));
