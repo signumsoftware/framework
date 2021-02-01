@@ -69,9 +69,9 @@ namespace Signum.Utilities.DataStructures
             return new Interval<T>(minVal, maxVal);
         }
 
-        public bool Subset(Interval<T> other)
+        public bool IsSubset(Interval<T> smallInterval)
         {
-            return this.min.CompareTo(other.min) <= 0 && other.max.CompareTo(this.max) <= 0;
+            return this.min.CompareTo(smallInterval.min) <= 0 && smallInterval.max.CompareTo(this.max) <= 0;
         }
 
 
