@@ -7,6 +7,7 @@ using System;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security.Claims;
+using System.DirectoryServices;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Engine.Authorization
@@ -60,6 +61,8 @@ namespace Signum.Engine.Authorization
     {
         public Func<ActiveDirectoryConfigurationEmbedded> GetConfig;
 
+        public  virtual PrincipalContext? PrincipalContext { get; set; }
+
         public ActiveDirectoryAuthorizer(Func<ActiveDirectoryConfigurationEmbedded> getConfig)
         {
             this.GetConfig = getConfig;
@@ -95,7 +98,7 @@ namespace Signum.Engine.Authorization
                     {
                         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
                         {
-                            if (pc.ValidateCredentials(localName + "@" + domainName, password))
+                            if (pc.ValidateCredentials(localName + "@" + domainName, password, ContextOptions.Negotiate))
                             {
                                 UserEntity? user = AuthLogic.RetrieveUser(userName);
 
@@ -104,8 +107,11 @@ namespace Signum.Engine.Authorization
                                     user = OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                                 }
 
+
                                 if (user != null)
                                 {
+                                    var accountName = domainName + @"\" + localName;
+                                 
                                     AuthLogic.OnUserLogingIn(user);
                                     return user;
                                 }
@@ -155,7 +161,7 @@ namespace Signum.Engine.Authorization
                 State = UserState.Saved,
             };
 
-            if(ctx is AzureClaimsAutoCreateUserContext ac)
+            if (ctx is AzureClaimsAutoCreateUserContext ac)
             {
                 var mixin = result.TryMixin<UserOIDMixin>();
                 if (mixin != null)
