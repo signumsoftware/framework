@@ -37,7 +37,7 @@ namespace Signum.React.Authorization
                 .GroupBy(a => a.Recipient) //To make two aggregates in one query
                 .Select(gr => new MyAlertCountResult
                 {
-                    LastAlert = gr.Max(a => a.CreationDate),
+                    LastAlert = gr.Max(a => (DateTime?)a.CreationDate),
                     NumAlerts = gr.Count()
                 }).SingleOrDefault();
 
@@ -48,7 +48,7 @@ namespace Signum.React.Authorization
         public class MyAlertCountResult 
         {
             public int NumAlerts;
-            public DateTime LastAlert;
+            public DateTime? LastAlert;
         }
     }
 }

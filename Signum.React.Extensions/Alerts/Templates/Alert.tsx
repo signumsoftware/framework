@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity } from '../Signum.Entities.Alerts'
 
-export default function Alert(p : { ctx: TypeContext<AlertEntity> }){
+export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
   const e = p.ctx;
 
   const ec = e.subCtx({ labelColumns: { sm: 2 } });

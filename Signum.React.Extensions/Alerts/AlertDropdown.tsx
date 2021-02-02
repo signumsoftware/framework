@@ -15,45 +15,18 @@ import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Entities.Ale
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
-import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
-import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal'
-import { EntityLink } from '../../../Framework/Signum.React/Scripts/Search'
+import { classes, Dic } from '@framework/Globals'
+import MessageModal from '@framework/Modals/MessageModal'
+import { EntityLink } from '@framework/Search'
+
+
 
 
 
 export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) => void, className?: string; }) {
 
 
-  function formatText(a: AlertEntity) {
-    if (!a.target)
-      return a.text;
-
-    if (a.text.contains("[Target]"))
-      return (
-        <>
-          {a.text.before("[Target]")}
-          <EntityLink lite={a.target} />
-          {a.text.after("[Target]")}
-        </>
-      );
-
-    if (a.text.contains("[Target:"))
-      return (
-        <>
-          {a.text.before("[Target:")}
-          <EntityLink lite={a.target}>{a.text.after("[Target:").beforeLast("]")}</EntityLink>
-          {a.text.afterLast("]")}
-        </>
-      );
-
-    return (
-      <>
-        {a.text}
-        <br />
-        <EntityLink lite={a.target} />
-      </>
-    );
-  }
+ 
 
   var icon = p.alert.alertType && p.alert.alertType.key && AlertToast.icons[p.alert.alertType.key]
 
@@ -112,8 +85,6 @@ export default function AlertDropdown(props: { checkForChangesEvery?: number, ke
 
 function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor: number }) {
 
-
-
   const forceUpdate = useForceUpdate();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [ringing, setRinging] = React.useState<boolean>(false);
@@ -126,21 +97,27 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
   const isOpenRef = useUpdatedRef(isOpen);
 
   var [countResult, reloadCount] = useAPIWithReload<AlertsClient.NumAlerts>((signal, oldResult) => AlertsClient.API.myAlertsCount().then(res => {
-    if (oldResult) {
-      if (res.lastAlert != null && (oldResult.lastAlert == null || oldResult.lastAlert < res.lastAlert)) {
-
+    if (res.lastAlert != null) {
+      if (oldResult == null || oldResult.lastAlert == null || oldResult.lastAlert < res.lastAlert) {
         if (!ringingRef.current)
           setRinging(true);
-
-        if (isOpenRef.current) {
-          AlertsClient.API.myAlerts()
-            .then(als => {
-              setAlerts(als);
-            })
-            .done();
-        }
       }
+
+      if (isOpenRef.current) {
+        AlertsClient.API.myAlerts()
+          .then(als => {
+            setAlerts(als);
+          })
+          .done();
+      }
+
+    } else {
+      if (!ringingRef.current)
+        setRinging(false);
+
+      setAlerts([]);
     }
+
     return res;
   }), [ticks], { avoidReset: true });
 
@@ -253,7 +230,6 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
                       { token: AlertEntity.token().entity(a => a.id) },
                       { token: AlertEntity.token().entity(a => a.alertDate) },
                       { token: AlertEntity.token().entity(a => a.alertType) },
-                      { token: AlertEntity.token().entity(a => a.target) },
                       { token: AlertEntity.token(a => a.text) },
                       { token: AlertEntity.token().entity(a => a.target) },
                       { token: AlertEntity.token().entity().expression("CurrentState") },

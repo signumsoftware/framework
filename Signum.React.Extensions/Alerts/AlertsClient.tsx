@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { DateTime } from 'luxon'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
@@ -9,7 +10,10 @@ import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
-import { ajaxGet } from '../../../Framework/Signum.React/Scripts/Services'
+import { ajaxGet } from '@framework/Services'
+import * as Finder from '@framework/Finder'
+import { Entity, Lite } from '@framework/Signum.Entities'
+import { EntityLink } from '@framework/Search'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
@@ -44,6 +48,15 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
     contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() }
   }));
+
+  Finder.registerPropertyFormatter(AlertEntity.tryPropertyRoute(a => a.text), new Finder.CellFormatter((cell, ctx) => {
+    return formatText(cell, ctx.row.columns[ctx.columns.indexOf("Target")]);
+  }));
+
+  Finder.addSettings({
+    queryName: AlertEntity,
+    hiddenColumns: [{ token: "Target" }]
+  })
 }
 
 function chooseDate(): Promise<DateTime | undefined> {
@@ -79,6 +92,37 @@ function chooseDate(): Promise<DateTime | undefined> {
   });
 }
 
+
+export function formatText(text: string, target?: Lite<Entity>) {
+  if (!target)
+    return text;
+
+  if (text.contains("[Target]"))
+    return (
+      <>
+        {text.before("[Target]")}
+        <EntityLink lite={target} />
+        {text.after("[Target]")}
+      </>
+    );
+
+  if (text.contains("[Target:"))
+    return (
+      <>
+        {text.before("[Target:")}
+        <EntityLink lite={target}>{text.after("[Target:").beforeLast("]")}</EntityLink>
+        {text.afterLast("]")}
+      </>
+    );
+
+  return (
+    <>
+      {text}
+      <br />
+      <EntityLink lite={target} />
+    </>
+  );
+}
 
 
 export module API {
