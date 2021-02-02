@@ -974,11 +974,13 @@ function sameEntity(a: any, b: any) {
 
   if ((a as Entity).Type && (b as Entity).Type) {
     return (a as Entity).Type == (b as Entity).Type &&
+      (a as Entity).id != null && (b as Entity).id != null &&
       (a as Entity).id == (b as Entity).id;
   }
 
   if ((a as Lite<Entity>).EntityType && (b as Lite<Entity>).EntityType) {
     return (a as Lite<Entity>).EntityType == (b as Lite<Entity>).EntityType &&
+      (a as Lite<Entity>).id != null && (b as Lite<Entity>).id != null &&
       (a as Lite<Entity>).id == (b as Lite<Entity>).id;
   }
 
