@@ -104,12 +104,13 @@ namespace Signum.Engine.Mailing
                             Model = model
                         });
 
-                    email.Body = new BigStringEmbedded(TextNode(message).Print(
+                    var body= new BigStringEmbedded(TextNode(message).Print(
                         new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                         {
                             IsHtml = template.IsBodyHtml,
                             Model = model,
                         }));
+                    email.Body = body;
                 }
 
             }

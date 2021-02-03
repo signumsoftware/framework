@@ -68,13 +68,14 @@ namespace Signum.Engine.Mailing
 
                         foreach (var m in messages.Select(m => m.RetrieveAndForget()))
                         {
+                            var body  = new BigStringEmbedded(m.Body.Text);
                             new EmailMessageEntity()
                             {
                                 Package = emailPackage.ToLite(),
                                 From = m.From,
                                 Recipients = m.Recipients.ToMList(),
                                 Target = m.Target,
-                                Body = new BigStringEmbedded(m.Body.Text),
+                                Body = body,
                                 IsBodyHtml = m.IsBodyHtml,
                                 Subject = m.Subject,
                                 Template = m.Template,
