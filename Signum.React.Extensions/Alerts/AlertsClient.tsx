@@ -93,7 +93,7 @@ function chooseDate(): Promise<DateTime | undefined> {
 }
 
 
-export function formatText(text: string, target?: Lite<Entity>) {
+export function formatText(text: string, target: Lite<Entity> | null) {
   if (!target)
     return text;
 
