@@ -32,6 +32,10 @@ interface FilterBuilderProps {
 
 export default function FilterBuilder(p: FilterBuilderProps) {
 
+
+
+  const [showInactiveFilters, setShowDisabledFilters] = React.useState<boolean>(false)
+
   const forceUpdate = useForceUpdatePromise();
 
   function handlerNewFilter(e: React.MouseEvent<any>, isGroup: boolean) {
@@ -111,7 +115,9 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
-                showPinnedFilters={p.showPinnedFilters || false} disableValue={false} /> :
+                showPinnedFilters={p.showPinnedFilters || false}
+                showInactiveFilters={showInactiveFilters}
+                disableValue={false} /> :
               <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
@@ -160,6 +166,7 @@ export interface FilterGroupComponentsProps {
   lastToken: QueryToken | undefined;
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFilters: boolean;
+  showInactiveFilters: boolean;
   disableValue: boolean;
 }
 
@@ -314,6 +321,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
                     lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
                     showPinnedFilters={p.showPinnedFilters}
+                    showInactiveFilters={p.showInactiveFilters}
                     disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   /> :
 
@@ -400,6 +408,7 @@ export interface FilterConditionComponentProps {
   onFilterChanged: () => void;
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFilters: boolean;
+  showInactiveFilters: boolean;
   disableValue: boolean;
 }
 
@@ -471,11 +480,12 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
   const readOnly = f.frozen || p.readOnly;
 
-  const opacity = isFilterActive(f) ? undefined : 0.4;
+  if (!isFilterActive(f) && !p.showInactiveFilters)
+    return null;
 
   return (
     <>
-      <tr className="sf-filter-condition" style={{ opacity: opacity }}>
+      <tr className="sf-filter-condition">
         <td>
           {!readOnly &&
             <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
