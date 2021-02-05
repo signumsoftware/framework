@@ -24,6 +24,11 @@ let current: GlobalModalContainerHandles;
   
 const modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
+export function isStarted() {
+  return current != null;
+}
+
+
 interface GlobalModalContainerHandles {
   pushModal(element: React.ReactElement<any>) : Promise<any>;
   popModal(element: React.ReactElement<any>): Promise<any>;
@@ -85,6 +90,7 @@ export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise
     return current.pushModal(cloned);
   });
 }
+
 
 
 
