@@ -124,7 +124,6 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
         <div>
         <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
           subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
-          showUserFilters={false}
           />
           <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorSubQueryColumnEmbedded>([
             {

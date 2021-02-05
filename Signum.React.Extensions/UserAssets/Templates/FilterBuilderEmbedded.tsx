@@ -22,7 +22,7 @@ interface FilterBuilderEmbeddedProps {
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
-  showUserFilters: boolean
+  showPinnedFilterOptions?: boolean
 }
 
 export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
@@ -138,8 +138,9 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           subTokensOptions={p.subTokenOptions}
           readOnly={p.ctx.readOnly}
           onFiltersChanged={handleFiltersChanged}
-          renderValue={handleRenderValue}
-          showPinnedFilters={p.showUserFilters} />
+          showPinnedFiltersOptions={p.showPinnedFilterOptions}
+          showPinnedFiltersOptionsButton={false}
+          renderValue={handleRenderValue} />
       }
     </div>
   );
