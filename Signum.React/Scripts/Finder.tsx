@@ -582,7 +582,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
       ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
-      (a.value == b.value || is(a.value, b.value)) &&
+      (a.value == b.value || is(a.value, b.value, false, false)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       equalFilters((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
   });

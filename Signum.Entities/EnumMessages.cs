@@ -225,7 +225,11 @@ namespace Signum.Entities
         [Description("Return new entity?")]
         ReturnNewEntity,
         [Description("Do you want to return the new {0} ({1})?")]
-        DoYouWantToSelectTheNew01_G
+        DoYouWantToSelectTheNew01_G,
+        [Description("Show pinned filter options")]
+        ShowPinnedFiltersOptions,
+        [Description("Hide pinned filter options")]
+        HidePinnedFiltersOptions,
     }
 
     public enum SelectorMessage

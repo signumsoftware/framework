@@ -519,6 +519,8 @@ export module SearchMessage {
   export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
   export const ReturnNewEntity = new MessageKey("SearchMessage", "ReturnNewEntity");
   export const DoYouWantToSelectTheNew01_G = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
+  export const ShowPinnedFiltersOptions = new MessageKey("SearchMessage", "ShowPinnedFiltersOptions");
+  export const HidePinnedFiltersOptions = new MessageKey("SearchMessage", "HidePinnedFiltersOptions");
 }
 
 export module SelectorMessage {

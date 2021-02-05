@@ -39,16 +39,18 @@ VersionChangedAlert.defaultProps = { blink: true };
 
 export function VersionInfo() {
   return (
-    <OverlayTrigger
-      placement={"bottom"}
-      overlay={
-        <Tooltip id={`tooltip-buildId`}>
-          <VersionInfoTooltip />
-        </Tooltip>
-      }
-    >
-      <FontAwesomeIcon icon="info-circle" className="sf-version-info d-lg-block d-none" />
-    </OverlayTrigger>
+    <div className="nav-link">
+      <OverlayTrigger
+        placement={"bottom"}
+        overlay={
+          <Tooltip id={`tooltip-buildId`}>
+            <VersionInfoTooltip />
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon="info-circle" className="sf-version-info" />
+      </OverlayTrigger>
+    </div>
   );
 }
 
