@@ -339,14 +339,14 @@ namespace Signum.Engine.Mailing
                     ToStates = { EmailMessageState.Created },
                     Construct = (m, _) =>
                     {
-                        var body = new BigStringEmbedded(m.Body.Text);
+                       
                         return new EmailMessageEntity
                         {
                             From = m.From!.Clone(),
                             Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
                             Target = m.Target,
                             Subject = m.Subject,
-                            Body = body,
+                            Body = new BigStringEmbedded(m.Body.Text),
                             IsBodyHtml = m.IsBodyHtml,
                             Template = m.Template,
                             EditableMessage = m.EditableMessage,
