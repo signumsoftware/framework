@@ -410,15 +410,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
               this.state.showFilters ? <FilterBuilder
-                queryDescription={qd}
-                filterOptions={fo.filterOptions}
-                lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-                onTokenChanged={this.handleFilterTokenChanged}
-                onFiltersChanged={this.handleFiltersChanged}
-                onHeightChanged={this.handleHeightChanged}
-                showPinnedFilters={true}
-
+              queryDescription={qd}
+              filterOptions={fo.filterOptions}
+              lastToken={this.state.lastToken}
+              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              onTokenChanged={this.handleFilterTokenChanged}
+              onFiltersChanged={this.handleFiltersChanged}
+              onHeightChanged={this.handleHeightChanged}
+              showPinnedFiltersOptions={false}
+              showPinnedFiltersOptionsButton={true}
               /> :
                 sfb ? <div className="simple-filter-builder">{sfb}</div> :
                   <AutoFocus disabled={!this.props.enableAutoFocus}>
