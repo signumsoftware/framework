@@ -47,7 +47,7 @@ export function VersionInfo() {
         </Tooltip>
       }
     >
-      <span className="sf-version-info d-lg-block d-none">v{VersionFilter.initialVersion}</span>
+      <FontAwesomeIcon icon="info-circle" className="sf-version-info d-lg-block d-none" />
     </OverlayTrigger>
   );
 }
@@ -58,6 +58,8 @@ function VersionInfoTooltip(p: {}) {
 
   return (
     <div style={{ whiteSpace: "nowrap" }}>
+      Version {VersionFilter.initialVersion}
+      <br/>
       {bt.toFormat("DDDD")}
       <br />
       {bt.toFormat("tt")} ({bt.toRelative()})
