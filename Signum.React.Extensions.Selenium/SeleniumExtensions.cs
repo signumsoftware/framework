@@ -397,9 +397,12 @@ namespace Signum.React.Selenium
             new Actions(element.GetDriver()).MoveToElement(element).Perform();
             while(element.GetAttribute("value").Length > 0)
                 element.SendKeys(Keys.Backspace);
-            element.SendKeys(text);
+
+            if (text.HasText())
+                element.SendKeys(text);
+    
             Thread.Sleep(0);
-            element.GetDriver().Wait(() => element.GetAttribute("value") == text);
+            element.GetDriver().Wait(() => element.GetAttribute("value") == (text ?? ""));
         }
 
         public static string Value(this IWebElement e) => e.GetAttribute("value");
