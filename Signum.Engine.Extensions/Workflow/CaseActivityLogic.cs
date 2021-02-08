@@ -399,21 +399,21 @@ namespace Signum.Engine.Workflow
         public class WorkflowExecuteStepContext
         {
             public CaseEntity Case;
-            public CaseActivityEntity? CaseActivity;
+            public CaseActivityEntity? PreviousCaseActivity;
             public List<WorkflowActivityEntity> ToActivities = new List<WorkflowActivityEntity>();
             public List<WorkflowEventEntity> ToIntermediateEvents = new List<WorkflowEventEntity>();
             public bool IsFinished { get; set; }
             public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
 
-            public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? caseActivity)
+            public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? previous)
             {
                 Case = @case;
-                CaseActivity = caseActivity;
+                PreviousCaseActivity = previous;
             }
 
             public void ExecuteConnection(WorkflowConnectionEntity connection)
             {
-                var wctx = new WorkflowTransitionContext(Case, CaseActivity, connection);
+                var wctx = new WorkflowTransitionContext(Case, PreviousCaseActivity, connection);
 
                 WorkflowLogic.OnTransition?.Invoke(Case.MainEntity, wctx);
 
@@ -431,13 +431,13 @@ namespace Signum.Engine.Workflow
         {
             var doneDecission = wc.DoneDecision();
 
-            if (doneDecission != null && doneDecission != ctx.CaseActivity?.DoneDecision)
+            if (doneDecission != null && doneDecission != ctx.PreviousCaseActivity?.DoneDecision)
                 return false;
 
             if (wc.Condition != null)
             {
                 var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(ctx.Case.MainEntity, new WorkflowTransitionContext(ctx.Case, ctx.CaseActivity, wc));
+                var result = alg.EvaluateUntyped(ctx.Case.MainEntity, new WorkflowTransitionContext(ctx.Case, ctx.PreviousCaseActivity, wc));
 
 
                 return result;
@@ -921,7 +921,7 @@ namespace Signum.Engine.Workflow
                 var ctx = new WorkflowExecuteStepContext(@case, ca)
                 {
                     Case = @case,
-                    CaseActivity = ca,
+                    PreviousCaseActivity = ca,
                 };
 
                 ctx.ExecuteConnection(connection);
@@ -1137,8 +1137,8 @@ namespace Signum.Engine.Workflow
 
                     if (caseActivity != null)
                     {
-                        if (node.Is(ctx.CaseActivity!.WorkflowActivity))
-                            caseActivity = ctx.CaseActivity;
+                        if (node.Is(ctx.PreviousCaseActivity!.WorkflowActivity))
+                            caseActivity = ctx.PreviousCaseActivity;
 
                         if (caseActivity.DoneDate.HasValue)
                             return BoolBox.True(caseActivity);
@@ -1166,7 +1166,7 @@ namespace Signum.Engine.Workflow
 
                     if (caseActivity != null)
                     {
-                        if (node.Is(ctx.CaseActivity!.WorkflowActivity))
+                        if (node.Is(ctx.PreviousCaseActivity!.WorkflowActivity))
                         {
                             //caseActivity = ctx.CaseActivity;
                             throw new InvalidOperationException("Unexpected BoundaryTimer with WorkflowEvent in CaseActivity");
