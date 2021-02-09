@@ -690,7 +690,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
                   .then(props => Constructor.constructPack(tn, props)!),
               }))
-              .then(entity => entity && this.handleCreated(entity))
+              .then(entity => this.handleCreated(entity))
               .done();
           }
         }
