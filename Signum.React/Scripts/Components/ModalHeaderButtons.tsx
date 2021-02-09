@@ -14,12 +14,8 @@ interface ModalIconProps {
 
 interface ModalHeaderButtonsProps {
   onClose?: () => void;
-  onOk?: () => void;
-  okDisabled?: boolean;
-  onCancel?: () => void;
   closeBeforeTitle?: boolean;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  okButtonProps?: ModalIconProps;
   closeButtonProps?: ModalIconProps;
   children?: React.ReactNode;
 }
@@ -38,6 +34,29 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
         {p.children}
       </h4>
       {!p.closeBeforeTitle && close}
+    </div>
+  );
+}
+
+
+interface ModalFooterButtonsProps {
+  onOk?: () => void;
+  okDisabled?: boolean;
+  onCancel?: () => void;
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  okButtonProps?: ModalIconProps;
+  cancelButtonProps?: ModalIconProps;
+  children?: React.ReactNode;
+}
+
+
+export function ModalFooterButtons(p: ModalFooterButtonsProps) {
+
+  return (
+    <div className="modal-footer" {...p.htmlAttributes}>
+      <h4 className="modal-title" >
+        {p.children}
+      </h4>
       {(p.onCancel || p.onOk) &&
         <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
           {p.onOk && <button
@@ -47,9 +66,9 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
           </button>
           }
           {p.onCancel && <button
-            className={classes("btn", "btn-" + (p.closeButtonProps?.color ?? "light"), "sf-entity-button sf-close-button sf-cancel-button", p.closeButtonProps?.classes)}
+          className={classes("btn", "btn-" + (p.cancelButtonProps?.color ?? "light"), "sf-entity-button sf-close-button sf-cancel-button", p.cancelButtonProps?.classes)}
             onClick={p.onCancel}>
-            {renderButton(JavascriptMessage.cancel.niceToString(), p.closeButtonProps)}
+          {renderButton(JavascriptMessage.cancel.niceToString(), p.cancelButtonProps)}
           </button>
           }
         </div>

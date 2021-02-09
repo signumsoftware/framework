@@ -6,7 +6,7 @@ import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflecti
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
 import { Entity, EntityPack, getToString, isEntityPack, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
-import { ModalHeaderButtons } from '../Components/ModalHeaderButtons';
+import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { namespace } from 'd3';
 import { useForceUpdate } from '../Hooks';
@@ -117,11 +117,7 @@ function SearchModal(p: SearchModalProps) {
 
   return (
     <Modal size="lg" show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
-      <ModalHeaderButtons
-        onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}
-        onOk={p.findMode == "Find" ? handleOkClicked : undefined}
-        onCancel={p.findMode == "Find" ? handleCancelClicked : undefined}
-        okDisabled={!okEnabled}>
+      <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
           &nbsp;
@@ -153,6 +149,12 @@ function SearchModal(p: SearchModalProps) {
           {...p.searchControlProps}
         />
       </div>
+      {p.findMode == "Find" &&
+        <ModalFooterButtons
+          onOk={handleOkClicked}
+          onCancel={handleCancelClicked}
+          okDisabled={!okEnabled} />
+      }
     </Modal>
   );
 }
