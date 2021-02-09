@@ -15,18 +15,18 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 
-export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
+export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => import('./Templates/AlertType')));
 
-  const couldHaveAlerts = options.couldHaveAlerts ?? (typeName => true);
+  const couldHaveAlerts = options.showAlerts ?? ((typeName, when) => true);
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
-    isVisible: ctx => couldHaveAlerts(ctx.entity.Type),
+    isVisible: ctx => couldHaveAlerts(ctx.entity.Type, "CreateAlert"),
     icon: "bell",
     iconColor: "darkorange",
     color: "warning",
-    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
+    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
@@ -34,7 +34,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     parentToken: AlertEntity.token(e => e.target),
     parentValue: ctx.lite
   }, {
-    isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType),
+    isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
     icon: "bell",
     iconColor: "orange",
   }));
