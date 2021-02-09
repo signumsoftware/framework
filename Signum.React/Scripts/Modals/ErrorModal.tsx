@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { openModal, IModalProps } from '../Modals';
+import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, NormalWindowMessage, ConnectionMessage } from '../Signum.Entities'
@@ -12,7 +12,7 @@ import MessageModal from './MessageModal';
 import { namespace } from 'd3';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
-interface ErrorModalProps extends IModalProps<undefined> {
+interface ErrorModalProps extends Modals.IModalProps<undefined> {
   error: any;
 }
 
@@ -121,7 +121,27 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
-ErrorModal.showAppropriateError = (error: any): Promise<void> => {
+ErrorModal.register = () => {
+
+  var oldOnError = window.onerror;
+  window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
+
+    if (Modals.isStarted())
+      ErrorModal.showErrorModal(error);
+    else if (oldOnError != null) {
+      if (error instanceof ServiceError)
+        oldOnError(message, filename, lineno, colno, {
+          name: error.httpError.exceptionType! + " (ExceptionID " + error.httpError.exceptionId! + ")",
+          message: error.httpError.exceptionMessage!,
+          stack: error.httpError.stackTrace!,
+        });
+      else
+        oldOnError(message, filename, lineno, colno, error);
+    }
+  };
+}
+
+ErrorModal.showErrorModal = (error: any): Promise<void> => {
   if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
@@ -139,7 +159,7 @@ ErrorModal.showAppropriateError = (error: any): Promise<void> => {
       style: "warning"
     }).then(() => undefined);
 
-  return openModal<void>(<ErrorModal error={error} />);
+  return Modals.openModal<void>(<ErrorModal error={error} />);
 }
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
