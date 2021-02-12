@@ -112,7 +112,7 @@ table.sf-search-results > tbody > tr > td {
     border-radius: 4px;
 }
 
-    .sf-column-editor.error {
+    .sf-column-editor .error {
         background: #f2dede;
     }
 
@@ -205,10 +205,7 @@ td.centered-cell {
 
 .sf-header-sort.desc,
 .sf-header-sort.asc {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    margin: 2px;
+    margin: 4px;
     vertical-align: middle;
     border-right: 6px solid transparent;
     border-left: 6px solid transparent;

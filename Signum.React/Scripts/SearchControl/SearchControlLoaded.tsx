@@ -91,6 +91,7 @@ export interface SearchControlLoadedProps {
 
 export interface SearchControlLoadedState {
   resultTable?: ResultTable;
+  summaryResultTable?: ResultTable;
   simpleFilterBuilder?: React.ReactElement<any>;
   selectedRows?: ResultRow[];
   markedRows?: MarkedRowsDictionary;
@@ -165,6 +166,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   componentWillUnmount() {
     this.isUnmounted = true;
     this.abortableSearch.abort();
+    this.abortableSearchSummary.abort();
   }
 
 
@@ -188,6 +190,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return Finder.getQueryRequest(fo, qs);
   }
 
+  getSummaryQueryRequest(): QueryRequest | null {
+    const fo = this.props.findOptions;
+
+    return Finder.getSummaryQueryRequest(fo);
+  }
+
   // MAIN
   doSearchPage1() {
     const fo = this.props.findOptions;
@@ -204,6 +212,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   resetResults(continuation: () => void) {
     this.setState({
       resultTable: undefined,
+      summaryResultTable: undefined,
       resultFindOptions: undefined,
       selectedRows: [],
       currentMenuItems: undefined,
@@ -212,6 +221,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
+  abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
 
   doSearch(dataChanged?: boolean): Promise<void> {
 
@@ -227,9 +237,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
       var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
-      return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
+
+      const qr = this.getQueryRequest();
+      const qrSummary = this.getSummaryQueryRequest();
+
+      return Promise.all([this.abortableSearch.getData(qr),
+        qrSummary == null ? Promise.resolve<ResultTable | undefined>(undefined) : this.abortableSearchSummary.getData(qrSummary)
+      ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
+          summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
           selectedRows: [],
           currentMenuItems: undefined,
@@ -1109,6 +1126,34 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   renderHeaders(): React.ReactNode {
 
+    var rt = this.state.summaryResultTable;
+    var scl = this;
+
+    function getSummary(summaryToken: QueryToken | undefined) {
+
+      if (rt == null || summaryToken == undefined)
+        return null;
+
+      var colIndex = rt.columns.indexOf(summaryToken.fullKey);
+
+      if (colIndex == -1)
+        return null;
+
+      const val = rt.rows[0].columns[colIndex];
+
+      var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
+
+      return (
+          <div className="ml-auto">{formatter.formatter(val, {
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.doSearch(true).done(),
+            systemTime: scl.props.findOptions.systemTime
+          })}</div>
+      );
+    }
+
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-th-selection">
@@ -1134,9 +1179,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             onDragOver={e => this.handlerHeaderDragOver(e, i)}
             onDragEnter={e => this.handlerHeaderDragOver(e, i)}
             onDrop={this.handleHeaderDrop}>
-            <span className={"sf-header-sort " + this.orderClassName(co)} />
-            {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key" /></span>}
-            <span> {co.displayName}</span></th>
+            <div className="d-flex" style={{ alignItems: "center" }}>
+              {this.orderIcon(co)}
+              {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key" className="mr-1" /></span>}
+              {co.displayName}
+            </div>
+            {getSummary(co.summaryToken)}
+          </th>
         )}
       </tr>
     );
@@ -1157,7 +1206,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return true;
   }
 
-  orderClassName(column: ColumnOptionParsed) {
+  orderIcon(column: ColumnOptionParsed) {
 
     if (column.token == undefined)
       return "";
@@ -1174,7 +1223,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (orders.indexOf(o))
       asc += " l" + orders.indexOf(o);
 
-    return asc;
+    return <span className={"mr-1 sf-header-sort " + asc} />;
   }
 
   //ROWS
@@ -1317,7 +1366,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const columns = this.props.findOptions.columnOptions.map(co => ({
       columnOption: co,
-      cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co, this),
+      cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
     }));
 

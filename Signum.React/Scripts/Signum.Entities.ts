@@ -521,6 +521,8 @@ export module SearchMessage {
   export const DoYouWantToSelectTheNew01_G = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
   export const ShowPinnedFiltersOptions = new MessageKey("SearchMessage", "ShowPinnedFiltersOptions");
   export const HidePinnedFiltersOptions = new MessageKey("SearchMessage", "HidePinnedFiltersOptions");
+  export const SummaryHeader = new MessageKey("SearchMessage", "SummaryHeader");
+  export const SummaryHeaderMustBeAnAggregate = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
 }
 
 export module SelectorMessage {
