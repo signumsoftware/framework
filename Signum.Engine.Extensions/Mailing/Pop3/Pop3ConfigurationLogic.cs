@@ -318,6 +318,8 @@ namespace Signum.Engine.Mailing.Pop3
                             });
                         }
 
+                        email.SetCalculateHash();
+
                         var duplicateList = Database.Query<EmailMessageEntity>()
                                .Where(a => a.BodyHash == email.BodyHash)
                                .Select(a => new { l = a.ToLite(), date = (DateTime?)a.Mixin<EmailReceptionMixin>().ReceptionInfo!.ReceivedDate, bh = a.BodyHash, suid = a.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
@@ -491,6 +493,7 @@ namespace Signum.Engine.Mailing.Pop3
                                 Kind = EmailRecipientKind.To,
                             });
                         }
+                        email.SetCalculateHash();
 
                         Lite<EmailMessageEntity>? duplicate = Database.Query<EmailMessageEntity>()
                             .Where(a => a.BodyHash == email.BodyHash)
