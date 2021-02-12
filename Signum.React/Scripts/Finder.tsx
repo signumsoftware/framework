@@ -130,7 +130,16 @@ export namespace Options {
     return import("./SearchControl/SearchModal");
   }
 
-  export let entityColumnHeader : () => React.ReactChild = () => "";
+  export let entityColumnHeader: () => React.ReactChild = () => "";
+
+  export const tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+
+  export let defaultPagination: Pagination = {
+    mode: "Paginate",
+    elementsPerPage: 20,
+    currentPage: 1,
+  };
+
 }
 
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
@@ -401,14 +410,6 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
 }
 
 
-export const tokensToIgnore = [
-  "Id",
-  "Entity.Id",
-  "Ticks",
-  "Entity.Ticks",
-  "ToStr",
-  "Entity.ToStr",
-];
 
 export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
 
@@ -435,7 +436,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
-      tokensToIgnore.contains(fo.token.fullKey) ||
+      Options.tokenCanSetPropery(fo.token) ||
       fo.operation != "EqualTo" ||
       !isActive(fo))
       return null;
@@ -520,7 +521,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
 
   const qs = getSettings(fo.queryKey);
 
-  const defPagination = qs?.pagination ?? Settings.defaultPagination;
+  const defPagination = qs?.pagination ?? Options.defaultPagination;
 
   function equalsPagination(p1: Pagination, p2: Pagination) {
     return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
@@ -720,7 +721,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     var result: FindOptionsParsed = {
       queryKey: qd.queryKey,
       groupResults: fo.groupResults == true,
-      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Settings.defaultPagination,
+      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
       systemTime: fo.systemTime,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
@@ -1304,15 +1305,6 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
 }
 
 
-
-export module Settings {
-
-  export let defaultPagination: Pagination = {
-    mode: "Paginate",
-    elementsPerPage: 20,
-    currentPage: 1,
-  };
-}
 
 export module API {
 
