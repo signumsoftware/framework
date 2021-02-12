@@ -1144,10 +1144,23 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
       if (val == null)
         return null;
-      var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
-      return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
+      if (typeof val == "string") {
+
+        var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
+
+        if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
+          return dt.toISO();
+
+        if (val.length > 10 && token.type.name == "Date") //DateTime -> Date
+          return dt.toISODate();
+
+        return val;
+      }
+
+      return val;
     }
+
     case "Lite":
       {
         const lite = convertToLite(val);
