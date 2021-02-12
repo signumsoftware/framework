@@ -107,7 +107,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
 
 
   function handleViewNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
-    p.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
+    p.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value != "" ? (e.currentTarget as HTMLSelectElement).value : null;
     p.ctx.value.modified = true;
     forceUpdate();
   };

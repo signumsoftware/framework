@@ -1,7 +1,19 @@
 /// <reference path="../bpmn-js.d.ts" />
 import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import { BootstrapStyle } from "../../Basics/Signum.Entities.Basics";
 import { ConnectionType } from '../Signum.Entities.Workflow'
 import * as BpmnUtils from './BpmnUtils'
+
+const bootstrapStyleToColor: { [style: string /* BootstrapStyle*/]: string } = {
+  "Light": "#f8f9fa",
+  "Dark": "#343a40",
+  "Primary": "#007bff",
+  "Secondary": "#6c757d",
+  "Success": "#28a745",
+  "Info": "#17a2b8",
+  "Warning": "#ffc107",
+  "Danger": "#dc3545",
+};
 
 export class CustomRenderer extends BpmnRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
@@ -9,19 +21,20 @@ export class CustomRenderer extends BpmnRenderer {
     super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
   }
 
-  getConnectionType!: (element: BPMN.DiElement) => ConnectionType | undefined;
+  getConnectionType!: (element: BPMN.Connection) => ConnectionType | undefined;
+  getDecisionStyle!: (element: BPMN.Connection) => BootstrapStyle | undefined;
 
-  drawConnection(visuals: any, element: BPMN.DiElement) {
+  drawConnection(visuals: any, element: BPMN.Connection) {
     var result = super.drawConnection(visuals, element);
-    var ct = this.getConnectionType && this.getConnectionType(element);
+    var ct = this.getConnectionType(element);
+    var ds = this.getDecisionStyle(element);
 
     if (ct && ct != "Normal")
       result.style.setProperty('stroke',
-        ct == "Approve" ? "#0c9c01" :
-          ct == "Decline" ? "#c71a01" :
-            ct == "Jump" ? "blue" :
-              ct == "ScriptException" ? "magenta" :
-                "gray");
+        ct == "Jump" ? "blue" :
+          ct == "ScriptException" ? "magenta" :
+            ct == "Decision" && ds ? (bootstrapStyleToColor[ds] ?? "black") :
+              "gray");
 
     return result;
   }
@@ -70,3 +83,5 @@ export class CustomRenderer extends BpmnRenderer {
 
 export var __init__ = ['customRenderer'];
 export var customRenderer = ['type', CustomRenderer];
+
+

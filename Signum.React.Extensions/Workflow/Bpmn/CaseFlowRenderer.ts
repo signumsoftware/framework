@@ -19,7 +19,7 @@ export class CaseFlowRenderer extends CustomRenderer {
   viewer!: NavigatedViewer;
   caseFlowColor?: CaseFlowColor;
 
-  drawConnection(visuals: any, element: BPMN.DiElement) {
+  drawConnection(visuals: any, element: BPMN.Connection) {
 
     const path = super.drawConnection(visuals, element);
 
@@ -164,8 +164,6 @@ function getDoneColor(doneType: DoneType) {
     case "Timeout": return "gold";
     case "ScriptSuccess": return "green";
     case "ScriptFailure": return "violet";
-    case "Approve": return "darkgreen";
-    case "Decline": return "darkred";
     case "Next": return "#ff7504";
     default: return "magenta";
   }

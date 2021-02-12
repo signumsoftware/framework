@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -50,15 +51,33 @@ namespace Signum.Entities.Tree
         }
     }
 
+    public class TreeTypeJsonConverter : JsonConverter<object>
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)QueryNameJsonConverter.GetQueryKey(value));
+        }
+
+        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class TreeOmniboxResult : OmniboxResult
     {
-        [JsonConverter(typeof(QueryNameJsonConverter))]
+        [JsonConverter(typeof(TreeTypeJsonConverter))]
         public Type Type { get; set; }
         public OmniboxMatch TypeMatch { get; set; }
 
         public override string ToString()
         {
-            return Type.NicePluralName().ToOmniboxPascal();
+            return Type.NiceName().ToOmniboxPascal();
         }
     }
 }

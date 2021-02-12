@@ -10,10 +10,10 @@ import { symbolNiceName, toNumberFormat } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import {
   PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
-  PredictorAlgorithmSymbol, CNTKPredictorAlgorithm,
+  PredictorAlgorithmSymbol,
   PredictorResultSaverSymbol, PredictorSimpleResultSaver,
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
-  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity
+  PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
 } from './Signum.Entities.MachineLearning'
 import * as QuickLinks from '@framework/QuickLinks'
 import { QueryToken } from '@framework/FindOptions';
@@ -34,9 +34,9 @@ export function start(options: { routes: JSX.Element[] }) {
   }
 
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationTraining), numbericCellFormatter("#5DADE2"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyTraining), numbericCellFormatter("#5DADE2"));
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.evaluationValidation), numbericCellFormatter("#D98880"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
 
   QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadCsv.name,
@@ -95,17 +95,14 @@ export function start(options: { routes: JSX.Element[] }) {
     settings: PredictorSettingsEmbedded.New(),
   }));
 
-  registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
+  registerInitializer(TensorFlowPredictorAlgorithm.NeuralNetworkGraph, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
     predictionType: "Regression",
-    lossFunction: "SquaredError",
+    lossFunction: "MeanSquaredError",
     evalErrorFunction: "MeanAbsoluteError",
 
-    learner: "MomentumSGD",
+    optimizer: "Adam",
 
-    learningRate: 0.1,
-    learningMomentum: 0.01,
-    learningUnitGain: false,
-    learningVarianceMomentum: 0.001,
+    learningRate: 0.01,
 
     minibatchSize: 1000,
     numMinibatches: 100,
@@ -151,10 +148,6 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 }
 
 export namespace API {
-
-  export function availableDevices(algorithm: PredictorAlgorithmSymbol): Promise<string[]> {
-    return ajaxGet({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
-  }
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
@@ -214,9 +207,9 @@ export interface EpochProgress {
   trainingExamples: number;
   epoch: number;
   lossTraining: number;
-  evaluationTraining: number;
+  accuracyTraining: number;
   lossValidation?: number;
-  evaluationValidation?: number;
+  accuracyValidation?: number;
 }
 
 function fromObjectArray(array: (number | undefined)[]): EpochProgress {
@@ -225,9 +218,9 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
     trainingExamples: array[1]!,
     epoch: array[2]!,
     lossTraining: array[3]!,
-    evaluationTraining: array[4]!,
+    accuracyTraining: array[4]!,
     lossValidation: array[5],
-    evaluationValidation: array[6],
+    accuracyValidation: array[6],
   }
 }
 

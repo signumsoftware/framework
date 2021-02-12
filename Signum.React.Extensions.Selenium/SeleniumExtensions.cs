@@ -332,7 +332,7 @@ namespace Signum.React.Selenium
 
         public static IWebElement GetParent(this IWebElement e)
         {
-            return e.FindElement(By.XPath(".."));
+            return e.FindElement(By.XPath("./.."));
         }
 
         public static IWebElement GetAscendant(this IWebElement e, Func<IWebElement, bool> predicate)
@@ -434,19 +434,16 @@ namespace Signum.React.Selenium
 
         public static void SafeClick(this IWebElement element)
         {
-            if (!element.Displayed || element.Location.Y < 150)//Nav
-            {
-                element.ScrollTo();
-            }
-
+            element.ScrollTo();
             element.Click();
         }
 
-        public static void ScrollTo(this IWebElement element)
+        public static IWebElement ScrollTo(this IWebElement element)
         {
             IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
             js.ExecuteScript("arguments[0].scrollIntoView(false);", element);
             Thread.Sleep(500);
+            return element;
         }
 
         public static void LoseFocus(this IWebElement element)

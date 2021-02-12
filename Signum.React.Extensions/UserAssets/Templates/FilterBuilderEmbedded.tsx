@@ -22,7 +22,7 @@ interface FilterBuilderEmbeddedProps {
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
-  showUserFilters: boolean
+  showPinnedFilterOptions?: boolean
 }
 
 export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
@@ -138,8 +138,9 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           subTokensOptions={p.subTokenOptions}
           readOnly={p.ctx.readOnly}
           onFiltersChanged={handleFiltersChanged}
-          renderValue={handleRenderValue}
-          showPinnedFilters={p.showUserFilters} />
+          showPinnedFiltersOptions={p.showPinnedFilterOptions}
+          showPinnedFiltersOptionsButton={false}
+          renderValue={handleRenderValue} />
       }
     </div>
   );
@@ -278,12 +279,12 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
   if (p.filterType == "Lite") {
     if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
     else
-      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
   }
   else if (p.filterType == "Embedded") {
-    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
   }
   else
     throw new Error("Unexpected Filter Type");

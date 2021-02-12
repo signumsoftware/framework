@@ -20,6 +20,7 @@ using Signum.Entities.Basics;
 using System.Text;
 using System.Threading;
 using Microsoft.Exchange.WebServices.Data;
+using Signum.Entities.Files;
 
 namespace Signum.Engine.Mailing
 {
@@ -130,6 +131,16 @@ namespace Signum.Engine.Mailing
             }
 
             return new HashSet<Type>();
+        }
+
+        public static EmailMessageEntity WithAttachment(this EmailMessageEntity email, FilePathEmbedded filePath, string? contentId = null)
+        {
+            email.Attachments.Add(new EmailAttachmentEmbedded
+            {
+                ContentId = contentId ?? Guid.NewGuid().ToString(),
+                File = filePath,
+            });
+            return email;
         }
 
         public static void SendMail(this IEmailModel model)

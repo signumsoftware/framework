@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { DateTime } from 'luxon'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
@@ -9,19 +10,23 @@ import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
+import { ajaxGet } from '@framework/Services'
+import * as Finder from '@framework/Finder'
+import { Entity, Lite } from '@framework/Signum.Entities'
+import { EntityLink } from '@framework/Search'
 
-export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
+export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => import('./Templates/AlertType')));
 
-  const couldHaveAlerts = options.couldHaveAlerts ?? (typeName => true);
+  const couldHaveAlerts = options.showAlerts ?? ((typeName, when) => true);
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
-    isVisible: ctx => couldHaveAlerts(ctx.entity.Type),
+    isVisible: ctx => couldHaveAlerts(ctx.entity.Type, "CreateAlert"),
     icon: "bell",
     iconColor: "darkorange",
     color: "warning",
-    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
+    contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
@@ -29,7 +34,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     parentToken: AlertEntity.token(e => e.target),
     parentValue: ctx.lite
   }, {
-    isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType),
+    isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
     icon: "bell",
     iconColor: "orange",
   }));
@@ -43,6 +48,15 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
     contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() }
   }));
+
+  Finder.registerPropertyFormatter(AlertEntity.tryPropertyRoute(a => a.text), new Finder.CellFormatter((cell, ctx) => {
+    return formatText(cell, ctx.row.columns[ctx.columns.indexOf("Target")]);
+  }));
+
+  Finder.addSettings({
+    queryName: AlertEntity,
+    hiddenColumns: [{ token: "Target" }]
+  })
 }
 
 function chooseDate(): Promise<DateTime | undefined> {
@@ -77,3 +91,49 @@ function chooseDate(): Promise<DateTime | undefined> {
     }
   });
 }
+
+
+export function formatText(text: string, target: Lite<Entity> | null) {
+  if (!target)
+    return text;
+
+  if (text.contains("[Target]"))
+    return (
+      <>
+        {text.before("[Target]")}
+        <EntityLink lite={target} />
+        {text.after("[Target]")}
+      </>
+    );
+
+  if (text.contains("[Target:"))
+    return (
+      <>
+        {text.before("[Target:")}
+        <EntityLink lite={target}>{text.after("[Target:").beforeLast("]")}</EntityLink>
+        {text.afterLast("]")}
+      </>
+    );
+
+  return (
+    <>
+      {text}
+      <br />
+      <EntityLink lite={target} />
+    </>
+  );
+}
+
+
+export module API {
+
+  export function myAlerts(): Promise<AlertEntity[]> {
+    return ajaxGet({ url: "~/api/alerts/myAlerts", avoidNotifyPendingRequests: true });
+  }
+
+  export function myAlertsCount(): Promise<NumAlerts> {
+    return ajaxGet({ url: "~/api/alerts/myAlertsCount", avoidNotifyPendingRequests : true });
+  }
+}
+
+export interface NumAlerts { numAlerts: number, lastAlert?: string };

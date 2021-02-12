@@ -6,6 +6,9 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Signum.Entities.Authorization;
+using System.Linq.Expressions;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow
 {
@@ -21,6 +24,28 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
+        public bool IsStartCurrentUser()
+        {
+            if (Workflow.HasExpired())
+                return false;
+
+            if (Workflow.MainEntityStrategies.Count == 0)
+                return false;
+
+            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start).Select(s => NextConnections(s).SingleEx().To);
+
+            return act.Any(a =>
+            {
+                if (a.Lane.ActorsEval != null)
+                {
+                    var actors = a.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
+
+                    return actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+                }
+
+                return a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+            });
+        }
 
         public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
         {
@@ -202,7 +227,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (g.Type == WorkflowGatewayType.Exclusive || g.Type == WorkflowGatewayType.Inclusive)
                     {
-                        if (NextConnections(g).Any(c => IsDecision(c.Type)))
+                        if (NextConnections(g).Any(c => c.Type == ConnectionType.Decision))
                         {
                             List<WorkflowActivityEntity> previousActivities = new List<WorkflowActivityEntity>();
 
@@ -384,6 +409,9 @@ namespace Signum.Engine.Workflow
             }
 
 
+            var declaredOptionNames = Activities.Values.Where(a => a.Type == WorkflowActivityType.Decision).SelectMany(d => d.DecisionOptions).Select(o => o.Name).ToHashSet();
+            var usedOptionNames = Connections.Values.Where(a => a.Type == ConnectionType.Decision).Select(d => d.DecisionOptionName).ToHashSet();
+
             foreach (var wa in Activities.Values)
             {
                 var fanIn = PreviousConnections(wa).Count();
@@ -416,10 +444,31 @@ namespace Signum.Engine.Workflow
                         issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
 
+                if(wa.Type == WorkflowActivityType.Decision)
+                {
+                    foreach (var item in wa.DecisionOptions)
+                    {
+                        if (!usedOptionNames.Contains(item.Name))
+                        {
+                            issues.AddWarning(wa, WorkflowValidationMessage.DecisionOption0IsDeclaredButNeverUsedInAConnection.NiceToString(item.Name));
+                        }
+                    }
+                }
+
                 if (wa.Type == WorkflowActivityType.CallWorkflow || wa.Type == WorkflowActivityType.DecompositionWorkflow)
                 {
                     if (NextConnections(wa).Any(a => a.Type != ConnectionType.Normal))
                         issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
+                }
+            }
+
+
+
+            foreach (var wc in Connections.Values)
+            {
+                if (wc.Type == ConnectionType.Decision && wc.DecisionOptionName.HasText() && !declaredOptionNames.Contains(wc.DecisionOptionName))
+                {
+                    issues.AddError(wc, WorkflowValidationMessage.DecisionOptionName0IsNotDeclaredInAnyActivity.NiceToString(wc.DecisionOptionName));
                 }
             }
 
@@ -432,12 +481,7 @@ namespace Signum.Engine.Workflow
 
         private bool IsNormalOrDecision(ConnectionType type)
         {
-            return type == ConnectionType.Normal || IsDecision(type);
-        }
-
-        private bool IsDecision(ConnectionType type)
-        {
-            return type == ConnectionType.Approve || type == ConnectionType.Decline;
+            return type == ConnectionType.Normal || type == ConnectionType.Decision;
         }
 
         public bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
@@ -471,8 +515,12 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowIssuesExtensions
     {
+        public static void AddWarning(this List<WorkflowIssue> issues, IWorkflowObjectEntity? node, string message)
+        {
+            issues.Add(new WorkflowIssue(WorkflowIssueType.Warning, node?.BpmnElementId, message));
+        }
 
-        public static void AddError(this List<WorkflowIssue> issues, IWorkflowNodeEntity? node, string message)
+        public static void AddError(this List<WorkflowIssue> issues, IWorkflowObjectEntity? node, string message)
         {
             issues.Add(new WorkflowIssue(WorkflowIssueType.Error, node?.BpmnElementId, message));
         }

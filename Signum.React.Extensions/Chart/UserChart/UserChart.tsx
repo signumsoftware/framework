@@ -42,7 +42,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
       }
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
-        showUserFilters={true}
+        showPinnedFilterOptions={true}
       />
       <ChartBuilder queryKey={queryKey} ctx={p.ctx}
           onInvalidate={() => forceUpdate()} 

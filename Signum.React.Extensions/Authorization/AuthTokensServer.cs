@@ -79,7 +79,8 @@ namespace Signum.React.Authorization
                 ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUser);
                 return new SignumAuthenticationResult { User = token.User };
             }
-            else {
+            else
+            {
                 OnAuthToken?.Invoke(token.User, token, null);
             }
 

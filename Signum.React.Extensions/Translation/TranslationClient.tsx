@@ -96,14 +96,19 @@ export interface LocalizedType {
 }
 
 export interface LocalizedDescription {
-  gender: string;
-  description: string;
-  pluralDescription: string;
-  translatedDescription: string;
+  gender?: string;
+  description?: string;
+  pluralDescription?: string;
+  automaticTranslations: AutomaticTranslation[];
 }
 
 export interface LocalizedMember {
   name: string;
-  description: string;
-  translatedDescription: string;
+  description?: string;
+  automaticTranslations: AutomaticTranslation[];
+}
+
+export interface AutomaticTranslation {
+  translatorName: string;
+  text: string;
 }

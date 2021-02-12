@@ -152,9 +152,9 @@ namespace Signum.Engine.MachineLearning
                         e.Epoch,
                         e.Ellapsed,
                         e.LossTraining,
-                        e.EvaluationTraining,
+                        e.AccuracyTraining,
                         e.LossValidation,
-                        e.EvaluationValidation,
+                        e.AccuracyValidation,
                     });
 
                 FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
@@ -336,11 +336,11 @@ namespace Signum.Engine.MachineLearning
                     {
                         if (lastWithProgress)
                             Console.WriteLine();
-                        Console.WriteLine(message);
+                        SafeConsole.WriteLineColor(ConsoleColor.White, message);
                     }
                     else
                     {
-                        SafeConsole.WriteSameLine($"{progress:P} - {message}");
+                        SafeConsole.WriteLineColor(ConsoleColor.White, $"{progress:P} - {message}");
                         lastWithProgress = true;
                     }
                 };

@@ -1,93 +1,92 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
+  <PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<TypeScriptBuildMode>true</TypeScriptBuildMode>
-		<OutputType>Library</OutputType>
-		<StartupObject></StartupObject>
-		<Nullable>enable</Nullable>
-		<WarningsAsErrors>nullable</WarningsAsErrors>
-		<Platforms>x64;x86;AnyCPU;linux64;win64;win86</Platforms>
-	</PropertyGroup>
+    <TypeScriptBuildMode>true</TypeScriptBuildMode>
+    <OutputType>Library</OutputType>
+    <StartupObject></StartupObject>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+  </PropertyGroup>
 
-	<PropertyGroup>
-		<NoWarn>8618</NoWarn>
-	</PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>8618</NoWarn>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Platform)'=='win64'">
-		<!--https://github.com/dotnet/core/issues/1039-->
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<PlatformTarget>x64</PlatformTarget>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='win64'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Platform)'=='win86'">
-		<!--https://github.com/dotnet/core/issues/1039-->
-		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
-		<PlatformTarget>x86</PlatformTarget>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='win86'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Platform)'=='linux64'">
-		<!--https://github.com/dotnet/core/issues/1039-->
-		<RuntimeIdentifier>linux-64</RuntimeIdentifier>
-		<PlatformTarget>x64</PlatformTarget>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='linux64'">
+    <!--https://github.com/dotnet/core/issues/1039-->
+    <RuntimeIdentifier>linux-64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
 
 
-	<ItemGroup>
+  <ItemGroup>
 		<PackageReference Include="Fido2" Version="1.1.0" />
 		<PackageReference Include="Fido2.Models" Version="1.1.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.8.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.1.2">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
-	</ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.1.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
+  </ItemGroup>
 
-	<ItemGroup>
+  <ItemGroup>
 		<PackageReference Include="Signum.TSGenerator" Version="5.0.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
-	</ItemGroup>
+  </ItemGroup>
 
-	<ItemGroup>
-		<DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
-		<ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
-		<ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj" />
-		<ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
-		<ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
-		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Properties\" />
-	</ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="**\*.tsx" />
+    <TypeScriptCompile Include="**\*.ts" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<TypeScriptCompile Include="**\*.tsx" />
-		<TypeScriptCompile Include="**\*.ts" />
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Remove="ts_out\**" />
+    <EmbeddedResource Remove="ts_out\**" />
+    <None Remove="ts_out\**" />
+    <TypeScriptCompile Remove="node_modules\**" />
+    <TypeScriptCompile Remove="ts_out\**" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Compile Remove="ts_out\**" />
-		<EmbeddedResource Remove="ts_out\**" />
-		<None Remove="ts_out\**" />
-		<TypeScriptCompile Remove="node_modules\**" />
-		<TypeScriptCompile Remove="ts_out\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="Authorization\AuthClient.tsx" />
-		<None Remove="Authorization\Templates\DoublePassword.tsx" />
-		<None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
-		<None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
-		<None Remove="Chart\HtmlScripts\PivotTable.tsx" />
-		<None Remove="Dashboard\View\UserTreePart.tsx" />
-		<None Remove="Files\ImageModal.tsx" />
-		<None Remove="Files\MultiFileImageLine.tsx" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="Authorization\AuthClient.tsx" />
+    <None Remove="Authorization\Templates\DoublePassword.tsx" />
+    <None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
+    <None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
+    <None Remove="Chart\HtmlScripts\PivotTable.tsx" />
+    <None Remove="Dashboard\View\UserTreePart.tsx" />
+    <None Remove="Files\ImageModal.tsx" />
+    <None Remove="Files\MultiFileImageLine.tsx" />
+  </ItemGroup>
 </Project>

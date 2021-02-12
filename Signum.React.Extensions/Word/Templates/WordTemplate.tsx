@@ -76,8 +76,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             </div>
             <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              queryKey={ctx.value.query!.key}
-              showUserFilters={true} />
+              queryKey={ctx.value.query!.key}/>
             <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
               {
                 property: a => a.token,

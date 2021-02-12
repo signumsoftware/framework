@@ -114,6 +114,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                 x(keyColumn.getKey(r.rowValue))! + xSubscale.bandwidth() / 2 + xSubscale(s.key)!,
                 - y(r.values[s.key].value)! / 2
               )}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               opacity={parameters["NumberOpacity"]}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"

@@ -175,7 +175,7 @@ namespace Signum.Engine.Files
                 throw new InvalidOperationException($"{route.RootType} is already included in the Schema. You need to call BigStringLogic.Register earlier in your Starter.Start method.");
 
             if(route.PropertyInfo!.GetCustomAttribute<NotifyChildPropertyAttribute>() == null)
-                throw new InvalidOperationException($"BigString  {route.RootType} {route.PropertyString()} should have a [NotifyChildPropertyAttribute].");
+                throw new InvalidOperationException($"BigString {route} should have a [NotifyChildPropertyAttribute]."); 
 
             if (config.Mode == BigStringMode.Database)
                 sb.Schema.Settings.FieldAttributes(route.Add(typeof(BigStringMixin)).Add(piFile))!.Add(new IgnoreAttribute());

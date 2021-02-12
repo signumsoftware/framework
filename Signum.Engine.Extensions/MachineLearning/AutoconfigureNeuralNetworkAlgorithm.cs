@@ -70,14 +70,12 @@ namespace Signum.Engine.MachineLearning
 
             if (conf.ExploreLearner)
             {
-                nnChild.Learner = r.NextBool() ? nnFather.Learner : nnMother.Learner;
+                nnChild.Optimizer = r.NextBool() ? nnFather.Optimizer : nnMother.Optimizer;
             }
 
             if (conf.ExploreLearningValues)
             {
                 nnChild.LearningRate = r.NextBool() ? nnFather.LearningRate : nnMother.LearningRate;
-                nnChild.LearningMomentum = r.NextBool() ? nnFather.LearningMomentum : nnMother.LearningMomentum;
-                nnChild.LearningVarianceMomentum = r.NextBool() ? nnFather.LearningVarianceMomentum : nnMother.LearningVarianceMomentum;
             }
 
             if (conf.ExploreHiddenLayers)
@@ -151,7 +149,7 @@ namespace Signum.Engine.MachineLearning
             if (conf.ExploreLearner)
             {
                 if (r.NextDouble() < mutationProbability)
-                    nns.Learner = r.NextElement(EnumExtensions.GetValues<NeuralNetworkLearner>());
+                    nns.Optimizer = r.NextElement(EnumExtensions.GetValues<TensorFlowOptimizer>());
             }
 
             if (conf.ExploreLearningValues)
@@ -165,12 +163,6 @@ namespace Signum.Engine.MachineLearning
 
                 if (r.NextDouble() < mutationProbability)
                     nns.LearningRate = IncrementOrDecrement(nns.LearningRate);
-
-                if (r.NextDouble() < mutationProbability)
-                    nns.LearningMomentum = IncrementOrDecrement(nns.LearningMomentum ?? 0.01);
-
-                if (r.Next() < mutationProbability)
-                    nns.LearningVarianceMomentum = IncrementOrDecrement(nns.LearningVarianceMomentum ?? 0.01);
             }
 
             if (conf.ExploreHiddenLayers)
@@ -215,9 +207,6 @@ namespace Signum.Engine.MachineLearning
                 if (r.NextDouble() < mutationProbability)
                     nns.OutputInitializer = r.NextElement(EnumExtensions.GetValues<NeuralNetworkInitializer>());
             }
-
-            nns.LearningUnitGain = false; //better to deverge than to stay flat
-
         }
     }
 }

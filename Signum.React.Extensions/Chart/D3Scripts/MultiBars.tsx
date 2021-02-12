@@ -112,6 +112,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                 x(r.values[s.key]?.value)! / 2,
                 -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
               )}
+              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               opacity={parameters["NumberOpacity"]}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"

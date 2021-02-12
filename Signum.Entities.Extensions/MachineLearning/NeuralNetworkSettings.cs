@@ -23,21 +23,15 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation OutputActivation { get; set; }
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
-        public NeuralNetworkLearner Learner { get; set; }
+        public TensorFlowOptimizer Optimizer { get; set; }
 
         public NeuralNetworkEvalFunction LossFunction { get; set; }
         public NeuralNetworkEvalFunction EvalErrorFunction { get; set; }
 
         [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public double LearningRate { get; set; } = 0.2;
-
-        [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public double? LearningMomentum { get; set; } = null;
-
-        public bool? LearningUnitGain { get; set; }
-
-        [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public double? LearningVarianceMomentum { get; set; } = null;
+        public double LearningRate { get; set; } = 0.001f;
+        
+        public double LearningEpsilon { get; set; } = 1e-8f;
 
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int MinibatchSize { get; set; } = 1000;
@@ -80,7 +74,7 @@ namespace Signum.Entities.MachineLearning
 
             string? Validate(NeuralNetworkEvalFunction function)
             {
-                bool lossIsClassification = function == NeuralNetworkEvalFunction.CrossEntropyWithSoftmax || function == NeuralNetworkEvalFunction.ClassificationError;
+                bool lossIsClassification = function == NeuralNetworkEvalFunction.sigmoid_cross_entropy_with_logits || function == NeuralNetworkEvalFunction.ClassificationError;
                 bool typeIsClassification = this.PredictionType == PredictionType.Classification || this.PredictionType == PredictionType.MultiClassification;
 
                 if (lossIsClassification != typeIsClassification)
@@ -114,11 +108,8 @@ namespace Signum.Entities.MachineLearning
 
             LossFunction = LossFunction,
             EvalErrorFunction = EvalErrorFunction,
-            Learner = Learner,
+            Optimizer = Optimizer,
             LearningRate = LearningRate,
-            LearningMomentum = LearningMomentum,
-            LearningUnitGain = LearningUnitGain,
-            LearningVarianceMomentum = LearningVarianceMomentum,
 
             MinibatchSize = MinibatchSize,
             NumMinibatches = NumMinibatches,
@@ -164,35 +155,32 @@ namespace Signum.Entities.MachineLearning
 
     public enum NeuralNetworkInitializer
     {
-        Zero,
-        GlorotNormal,
-        GlorotUniform,
-        HeNormal,
-        HeUniform,
-        Normal,
-        TruncateNormal,
-        Uniform,
-        Xavier,
+        glorot_uniform_initializer,
+        ones_initializer,
+        zeros_initializer,
+        random_uniform_initializer,
+        orthogonal_initializer,
+        random_normal_initializer,
+        truncated_normal_initializer,
+        variance_scaling_initializer,
     }
 
-    public enum NeuralNetworkLearner
+    public enum TensorFlowOptimizer
     {
         Adam,
-        AdaDelta,
-        AdaGrad,
-        FSAdaGrad,
-        RMSProp,
-        MomentumSGD,
-        SGD,
+        GradientDescentOptimizer,
     }
 
     public enum NeuralNetworkEvalFunction
     {
-        CrossEntropyWithSoftmax,
+        softmax_cross_entropy_with_logits_v2,
+        softmax_cross_entropy_with_logits,
+        sigmoid_cross_entropy_with_logits,
         ClassificationError,
-        SquaredError,
+        MeanSquaredError,
         MeanAbsoluteError,
         MeanAbsolutePercentageError,
+
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]

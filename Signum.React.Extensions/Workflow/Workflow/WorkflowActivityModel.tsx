@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, CustomDecissionOptionEmbedded, 
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, DecisionOptionEmbedded, WorkflowActivityMessage, 
 } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
@@ -119,6 +119,16 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
       wa.script = null;
     }
 
+    if (wa.type == "Decision")
+    {
+      if (ctx.value.decisionOptions.length == 0) {
+        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Approve.niceToString(), style: "Success" })));
+        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Decline.niceToString(), style: "Danger" })));
+      }
+    }
+    else
+      wa.decisionOptions = [];
+
     wa.modified = true;
 
     forceUpdate();
@@ -219,21 +229,9 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
-
         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
 
-        <ValueLine ctx={ctx.subCtx(a => a.hasCustomOptions)} onChange={forceUpdate}/>
-
-        {ctx.value.hasCustomOptions ? <EntityTable ctx={ctx.subCtx(a => a.customDecissionOptions)}
-          columns={EntityTable.typedColumns<CustomDecissionOptionEmbedded>([
-            {
-              property: c => c.name,
-            },
-            {
-              property: c => c.style,
-            },
-          ])}
-        /> : null}
+        {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
 
           {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}

@@ -185,7 +185,7 @@ namespace Signum.Engine.Workflow
             if (sqlDependencyRegistered)
                 return;
             
-            var query = Database.Query<CaseActivityEntity>().Where(m => !m.Workflow().HasExpired() && m.ScriptExecution != null).Select(m => m.Id);
+            var query = Database.Query<CaseActivityEntity>().Where(m => m.DoneDate == null && m.ScriptExecution != null).Select(m => m.Id);
             sqlDependencyRegistered = true;
             query.ToListWithInvalidation(typeof(CaseActivityEntity), "WorkflowScriptRunner ReadyToExecute dependency", a => {
                 sqlDependencyRegistered = false;

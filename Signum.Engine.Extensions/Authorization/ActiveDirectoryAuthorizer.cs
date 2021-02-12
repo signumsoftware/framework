@@ -95,7 +95,7 @@ namespace Signum.Engine.Authorization
                     {
                         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
                         {
-                            if (pc.ValidateCredentials(localName + "@" + domainName, password))
+                            if (pc.ValidateCredentials(localName + "@" + domainName, password, ContextOptions.Negotiate))
                             {
                                 UserEntity? user = AuthLogic.RetrieveUser(userName);
 
@@ -103,6 +103,7 @@ namespace Signum.Engine.Authorization
                                 {
                                     user = OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                                 }
+
 
                                 if (user != null)
                                 {
@@ -155,7 +156,7 @@ namespace Signum.Engine.Authorization
                 State = UserState.Saved,
             };
 
-            if(ctx is AzureClaimsAutoCreateUserContext ac)
+            if (ctx is AzureClaimsAutoCreateUserContext ac)
             {
                 var mixin = result.TryMixin<UserOIDMixin>();
                 if (mixin != null)

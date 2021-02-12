@@ -8,7 +8,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, OperationMessage } from '@framework/Signum.Entities'
-import { EntityOperationSettings } from '@framework/Operations'
+import { ContextualOperationContext, EntityOperationSettings } from '@framework/Operations'
 import { GraphExplorer, OperationType } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as ContextualOperations from '@framework/Operations/ContextualOperations'
@@ -56,68 +56,42 @@ export function register<T extends Entity>(...settings: Operations.ContextualOpe
 
 function monkeyPatchCreateContextualMenuItem() {
 
-  const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
+  const base = ContextualOperationContext.prototype.createMenuItems;
 
-  ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>) => void) => {
+  ContextualOperationContext.prototype.createMenuItems = function(this: Operations.ContextualOperationContext<any>): React.ReactElement[] {
+
+    if (this.settings?.createMenuItems)
+      return this.settings.createMenuItems(this);
 
     if (!Navigator.isViewable(PackageOperationEntity))
-      return base(coc, defaultClick);
+      return base.call(this);
 
-    if (coc.operationInfo.operationType == "Constructor" ||
-      coc.operationInfo.operationType == "ConstructorFromMany")
-      return base(coc, defaultClick);
+    if (this.operationInfo.operationType == "Constructor" ||
+      this.operationInfo.operationType == "ConstructorFromMany")
+      return base.call(this);
 
-    if (coc.context.lites.length <= 1)
-      return base(coc, defaultClick);
+    if (this.context.lites.length <= 1)
+      return base.call(this);
 
-    const processSettings = processOperationSettings[coc.operationInfo.key];
+    const processSettings = processOperationSettings[this.operationInfo.key];
+
     if (processSettings != undefined) {
-      if (processSettings.isVisible && !processSettings.isVisible(coc))
-        return base(coc, defaultClick);
+      if (processSettings.isVisible && !processSettings.isVisible(this))
+        return base.call(this);
 
-      if (processSettings.hideOnCanExecute && coc.canExecute != undefined)
-        return base(coc, defaultClick);
-    }
-
-    const text = coc.settings && coc.settings.text ? coc.settings.text() :
-      coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
-        <>{ContextualOperations.MenuItemConstructor.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2 text-muted">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
-
-    const color = coc.settings?.color || coc.entityOperationSettings?.color || Operations.Defaults.getColor(coc.operationInfo);
-    const icon = coc.settings?.icon;
-
-    const disabled = !!coc.canExecute;
-
-    const onClick = (me: React.MouseEvent<any>) => {
-      coc.event = me;
-      coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
+      if (processSettings.hideOnCanExecute && this.canExecute != undefined)
+        return base.call(this);
     }
 
     const processOnClick = (me: React.MouseEvent<any>) => {
-      coc.event = me;
-      processSettings?.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
+      this.event = me;
+      processSettings?.onClick ? processSettings.onClick!(this) : defaultConstructProcessFromMany(this)
     }
 
-
-    let innerRef: HTMLElement | null;
-
-    var item = (
-      <Dropdown.Item
-        className={disabled ? "disabled" : undefined}
-        onClick={disabled ? undefined : onClick}
-        data-operation={coc.operationInfo.key}>
-        {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor} /> :
-          color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-        {(icon != null || color != null) && " "}
-        {text}
-        <span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog" /></span>
-      </Dropdown.Item>
-    );
-
-    if (!coc.canExecute)
-      return item;
-
-    return (<OverlayTrigger overlay={<Tooltip id="processTooltip" placement="right">{coc.canExecute}</Tooltip>}>{item}</OverlayTrigger>);
+    return [
+      <ContextualOperations.OperationMenuItem coc={this}
+        extraButtons={<span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog" /></span>} />
+    ];
   };
 }
 

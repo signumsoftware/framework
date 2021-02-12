@@ -16,31 +16,34 @@ import * as Operations from '@framework/Operations';
 import { useAPI } from '@framework/Hooks'
 import { FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
+import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
+}
+
+function decodeUserQueryFromUrl() {
+  var userQueryKey = QueryString.parse(window.location.search)["userQuery"];
+  return userQueryKey && parseLite(userQueryKey);
 }
 
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
-    let uq = p.searchControl.props.tag == "SearchPage" ? window.location.search.tryAfter("userQuery=") : null;
-    uq = uq && decodeURIComponent(uq.tryBefore("&") || uq);
-    return uq ? parseLite(uq) as Lite<UserQueryEntity> : undefined;
+    let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
+    return uq;
   });
 
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
 
   React.useEffect(() => {
-    const userQuery = window.location.search.tryAfter("userQuery=");
-    if (userQuery) {
-      const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") ?? userQuery)) as Lite<UserQueryEntity>;
-      setCurrentUserQuery(uq);
-      Navigator.API.fillToStrings(uq)
+    if (currentUserQuery && currentUserQuery.toStr == null) {
+      Navigator.API.fillToStrings(currentUserQuery)
+        .then(() => setCurrentUserQuery(currentUserQuery))
         .done();
     }
-  }, []);
+  }, [currentUserQuery]);
 
   const oldExtraParams = React.useRef(p.searchControl.extraParams);
   React.useEffect(() => {
@@ -56,9 +59,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     setIsOpen(isOpen);
   }
 
-  function reloadList(): Promise<void> {
+  function reloadList(): Promise<Lite<UserQueryEntity>[]> {
     return UserQueryClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
-      .then(list => setUserQueries(list));
+      .then(list => { setUserQueries(list); return list; });
   }
 
   function handleBackToDefault() {
@@ -93,7 +96,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-            sc.setState({ showFilters: false });
+            sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -110,7 +113,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     Navigator.API.fetchAndForget(currentUserQuery!)
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
-      .then(() => applyUserQuery(currentUserQuery!))
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
       .done();
   }
 

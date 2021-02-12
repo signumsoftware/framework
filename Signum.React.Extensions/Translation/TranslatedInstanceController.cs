@@ -92,7 +92,7 @@ namespace Signum.React.Translation
             var c = CultureInfo.GetCultureInfo(culture);
 
             int totalInstances;
-            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationServer.Translator, t, c, out totalInstances);
+            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationServer.Translators, t, c, out totalInstances);
 
             var sd = new StringDistance();
 
@@ -115,8 +115,8 @@ namespace Signum.React.Translation
                                 Original = c.Value.Original,
                                 OldOriginal = c.Value.OldOriginal,
                                 OldTranslation = c.Value.OldTranslation,
-                                Diff = c.Value.OldOriginal == null || c.Value.Original == null || c.Value.OldOriginal.Equals(c.Value.Original) ? null : sd.DiffText(c.Value.OldOriginal, c.Value.Original), 
-                                AutomaticTranslation = c.Value.AutomaticTranslation,
+                                Diff = c.Value.OldOriginal == null || c.Value.Original == null || c.Value.OldOriginal.Equals(c.Value.Original) ? null : sd.DiffText(c.Value.OldOriginal, c.Value.Original),
+                                AutomaticTranslations = c.Value.AutomaticTranslations.ToArray(),
                             })
                         }
                     )
@@ -233,7 +233,7 @@ namespace Signum.React.Translation
         public string? OldTranslation;
 
         public string Original;
-        public string? AutomaticTranslation;
+        public AutomaticTranslation[]? AutomaticTranslations;
 
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? Diff { get; set; }
     }

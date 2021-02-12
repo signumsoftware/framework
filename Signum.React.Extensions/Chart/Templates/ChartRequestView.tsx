@@ -149,8 +149,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         <div>
           <FilterBuilder filterOptions={cr.filterOptions} queryDescription={queryDescription!}
             subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-            lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFilters={true} />
-
+            lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFiltersOptionsButton={true} />
         </div>
         <div className="sf-control-container">
           <ChartBuilder queryKey={cr.queryKey} ctx={tc}

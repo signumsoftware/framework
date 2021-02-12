@@ -3,7 +3,7 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
+import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
@@ -34,7 +34,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
 
   var content = ctx2.value.content;
 
-  var icon = Dashboard.parseIcon(ctx4.value.iconName);
+  var icon = parseIcon(ctx4.value.iconName);
 
   return (
     <div>

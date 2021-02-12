@@ -23,8 +23,8 @@ namespace Signum.React.Selenium
             var container = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));
 
             var selector = key.HasText() ?
-                By.CssSelector("li > span[data-token='" + key + "']") :
-                By.CssSelector("li > span:not([data-token])");
+                By.CssSelector("div > span[data-token='" + key + "']") :
+                By.CssSelector("div > span:not([data-token])");
 
             var elem = container.WaitElementVisible(selector);
             elem.ScrollTo();

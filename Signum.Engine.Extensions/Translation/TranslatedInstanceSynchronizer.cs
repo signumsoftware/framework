@@ -10,7 +10,7 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 4000;
 
-        public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
+        public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator[] translators, Type type, CultureInfo targetCulture, out int totalInstances)
         {
             var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
@@ -22,12 +22,12 @@ namespace Signum.Engine.Translation
             if (instances.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
                 instances = instances.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
-            return TranslateInstances(translator, type, targetCulture, instances);
+            return TranslateInstances(translators, type, targetCulture, instances);
         }
 
 
 
-        private static TypeInstancesChanges TranslateInstances(ITranslator translator, Type type, CultureInfo targetCulture, List<InstanceChanges> instances)
+        private static TypeInstancesChanges TranslateInstances(ITranslator[] translators, Type type, CultureInfo targetCulture, List<InstanceChanges> instances)
         {
             List<IGrouping<CultureInfo, PropertyRouteConflict>> memberGroups = (from t in instances
                                                                                 from rcKVP in t.RouteConflicts
@@ -36,9 +36,21 @@ namespace Signum.Engine.Translation
 
             foreach (IGrouping<CultureInfo, PropertyRouteConflict> gr in memberGroups)
             {
-                var result = translator.TranslateBatch(gr.Select(a => a.Original).ToList(), gr.Key.Name, targetCulture.Name);
+                var originals = gr.Select(a => a.Original).ToList();
 
-                gr.ZipForeach(result, (sp, translated) => sp.AutomaticTranslation = translated);
+                foreach (var tr in translators)
+                {
+                    var result = tr.TranslateBatch(originals, gr.Key.Name, targetCulture.Name);
+                    if(result != null)
+                    {
+                        gr.ZipForeach(result, (sp, translated) =>
+                        {
+                            if (translated != null)
+                                sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
+                        });
+                    }
+
+                }
             }
 
             return new TypeInstancesChanges(type, instances);

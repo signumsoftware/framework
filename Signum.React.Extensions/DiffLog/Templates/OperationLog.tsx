@@ -41,7 +41,7 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
 
 export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
-  const result = useAPI(() => API.diffLog(p.ctx.value.id!), [p.ctx.value.id]);
+  const result = useAPI(() => API.diffLog(p.ctx.value.id!), [p.ctx.value.id], { avoidReset: true });
 
   var mctx = p.ctx.subCtx(DiffLogMixin);
 
@@ -49,11 +49,16 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderPrev(prev: Lite<OperationLogEntity>) {
     return (
       <Tab eventKey="prev" className="linkTab" title={
-        <LinkContainer to={Navigator.navigateRoute(prev)}>
+        <LinkContainer to={Navigator.navigateRoute(prev)} onClick={e => {
+          if (!(e.ctrlKey || e.button == 1)) {
+            Navigator.API.fetchEntityPack(prev).then(ep => p.ctx.frame!.onReload(ep)).done();
+            e.preventDefault();
+          }
+        }}>
           <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
-            {DiffLogMessage.PreviousLog.niceToString()}
+             <FontAwesomeIcon icon="arrow-circle-left" />
             &nbsp;
-                        <FontAwesomeIcon icon="external-link-alt" />
+            {DiffLogMessage.PreviousLog.niceToString()}
           </span>
         </LinkContainer> as any
       }>
@@ -136,11 +141,16 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderNext(next: Lite<OperationLogEntity>) {
     return (
       <Tab eventKey="next" className="linkTab" title={
-        <LinkContainer to={Navigator.navigateRoute(next)}>
+        <LinkContainer to={Navigator.navigateRoute(next)} onClick={e => {
+          if (!(e.ctrlKey || e.button == 1)) {
+            Navigator.API.fetchEntityPack(next).then(ep => p.ctx.frame!.onReload(ep)).done();
+            e.preventDefault();
+          }
+        }}>
           <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString()}>
             {DiffLogMessage.NextLog.niceToString()}
             &nbsp;
-                        <FontAwesomeIcon icon="external-link-alt" />
+              <FontAwesomeIcon icon="arrow-circle-right" />
           </span>
         </LinkContainer> as any}>
       </Tab>
@@ -150,7 +160,10 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderCurrentEntity(target: Lite<Entity>) {
     return (
       <Tab eventKey="next" className="linkTab" title={
-        <LinkContainer to={Navigator.navigateRoute(target)}>
+        <LinkContainer to={Navigator.navigateRoute(target)} onClick={e => {
+          e.preventDefault();
+          window.open(Navigator.navigateRoute(target));
+        }}>
           <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString()}>
             {DiffLogMessage.CurrentEntity.niceToString()}
             &nbsp;
@@ -162,7 +175,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   }
   const target = p.ctx.value.target;
   return (
-    <Tabs id="diffTabs" defaultActiveKey="diff">
+    <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
       {result?.prev && renderPrev(result.prev)}
       {result?.diffPrev && renderPrevDiff(result.diffPrev)}
       {renderInitialState()}

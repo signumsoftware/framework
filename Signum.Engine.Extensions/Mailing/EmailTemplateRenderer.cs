@@ -54,13 +54,14 @@ namespace Signum.Engine.Mailing
                     yield return email;
                 }
                 else
-
+                {
                     foreach (List<EmailOwnerRecipientData> recipients in recipientsEnumerable)
                     {
                         EmailMessageEntity email = CreateEmailMessageInternal(from, recipients);
 
                         yield return email;
                     }
+                }
             }
         }
 

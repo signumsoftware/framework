@@ -69,12 +69,12 @@ namespace Signum.Engine.Basics
 
         public static CultureInfoEntity ToCultureInfoEntity(this CultureInfo ci)
         {
-            return CultureInfoToEntity.Value.GetOrThrow(ci.Name.Substring(0, 2));
+            return CultureInfoToEntity.Value.GetOrThrow(ci.Name);
         }
 
         public static CultureInfoEntity? TryGetCultureInfoEntity(this CultureInfo ci)
         {
-            return CultureInfoToEntity.Value.TryGetC(ci.Name.Substring(0, 2));
+            return CultureInfoToEntity.Value.TryGetC(ci.Name);
         }
 
         public static IEnumerable<CultureInfo> ApplicationCultures => EntityToCultureInfo.Value.Values;

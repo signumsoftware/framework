@@ -3,9 +3,9 @@ import { Location } from 'history'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
-import { parseIcon } from './Admin/Dashboard';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import * as AppContext from '@framework/AppContext'
+import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
    

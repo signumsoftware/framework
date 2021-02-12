@@ -7,9 +7,9 @@ using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.MachineLearning.CNTK
+namespace Signum.Engine.MachineLearning.TensorFlow
 {
-    public interface ICNTKEncoding
+    public interface ITensorFlowEncoding
     {
         string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         List<PredictorCodification> GenerateCodifications(ResultColumn rc, PredictorColumnBase column);
@@ -17,7 +17,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         void EncodeValue(object? value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset); //Span<T>
     }
 
-    public class NoneCNTKEncoding : ICNTKEncoding
+    public class NoneTFEncoding : ITensorFlowEncoding
     {
         public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
@@ -49,7 +49,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    public class OneHotCNTKEncoding : ICNTKEncoding
+    public class OneHotTFEncoding : ITensorFlowEncoding
     {
         public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
@@ -116,7 +116,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    public abstract class BaseNormalizeCNTKEncoding : ICNTKEncoding
+    public abstract class BaseNormalizeTFEncoding : ITensorFlowEncoding
     {
         public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
@@ -157,7 +157,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    public class NormalizeZScoreCNTKEncoding : BaseNormalizeCNTKEncoding
+    public class NormalizeZScoreTFEncoding : BaseNormalizeTFEncoding
     {
         public override float EncodeSingleValue(object? value, PredictorCodification c)
         {
@@ -171,7 +171,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    public class NormalizeMinMaxCNTKEncoding : BaseNormalizeCNTKEncoding
+    public class NormalizeMinMaxTFEncoding : BaseNormalizeTFEncoding
     {
         public override float EncodeSingleValue(object? value, PredictorCodification c)
         {
@@ -185,7 +185,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    class NormalizeLogCNTKEncoding : BaseNormalizeCNTKEncoding
+    class NormalizeLogTFEncoding : BaseNormalizeTFEncoding
     {
         public float MinLog = -5;
 
@@ -202,7 +202,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    public class SplitWordsCNTKEncoding : ICNTKEncoding
+    public class SplitWordsTFEncoding : ITensorFlowEncoding
     {
         public string? ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity? subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
