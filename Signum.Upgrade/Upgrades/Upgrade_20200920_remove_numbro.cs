@@ -13,7 +13,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Remove Numbro.js and use Intl directly";
 
-        public override string SouthwindCommitHash => "3b138c66d53d6dce2cd3ee19411eec1f105f5fe4";
 
         public override void Execute(UpgradeContext uctx)
         {

@@ -423,6 +423,12 @@ namespace Signum.Engine.Json
 
                     Factory.AfterDeserilization.Invoke(mod);
 
+                    if(Factory.Strategy == EntityJsonConverterStrategy.Full)
+                    {
+                        if (!markedAsModified)
+                            mod.SetCleanModified(isSealed: false);
+                    }
+
                     return (T)(IModifiableEntity)mod;
                 }
             }
@@ -499,7 +505,31 @@ namespace Signum.Engine.Json
                     }
                     catch (Exception e)
                     {
-                        entity.SetTemporalError(pi, this.Factory.GetErrorMessage(pi, e));
+                        switch (reader.TokenType)
+                        {
+                            //Probably won't be able to continue deserialization
+                            case JsonTokenType.None:
+                            case JsonTokenType.StartObject:
+                            case JsonTokenType.StartArray:
+                            case JsonTokenType.PropertyName:
+                                throw;
+
+                            //Probably will be able to continue
+                            case JsonTokenType.EndObject:
+                            case JsonTokenType.EndArray:
+                            case JsonTokenType.Comment:
+                            case JsonTokenType.String:
+                            case JsonTokenType.Number:
+                            case JsonTokenType.True:
+                            case JsonTokenType.False:
+                            case JsonTokenType.Null:
+                            default:
+                                {
+                                    e.LogException();
+                                    entity.SetTemporalError(pi, this.Factory.GetErrorMessage(pi, e));
+                                    break;
+                                }
+                        }
                     }
                 }
             }
@@ -590,7 +620,7 @@ namespace Signum.Engine.Json
                         ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
 
                     if (!identityInfo.Modified!.Value)
-                        ((Entity)result).SetCleanModified(false);
+                        ((Entity)result).SetCleanModified(isSealed: false);
 
                     if (identityInfo.IsNew != true)
                         ((Entity)result).SetIsNew(false);

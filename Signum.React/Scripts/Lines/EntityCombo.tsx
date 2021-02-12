@@ -80,11 +80,12 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   const buttons = (
     <span className="input-group-append">
+      {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
-      {c.props.extraButtons && c.props.extraButtons(c)}
+      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
     </span>
   );
 
@@ -184,7 +185,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       if (fo) {
         Finder.expandParentColumn(fo);
         var limit = fo?.pagination?.elementsPerPage ?? 999;
-        Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
+        Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
           .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
           .done();
       }

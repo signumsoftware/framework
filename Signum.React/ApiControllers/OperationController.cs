@@ -415,6 +415,12 @@ namespace Signum.React.ApiControllers
                     {
                         case PropertyOperation.AddElement:
                             {
+                                var value = ConvertObject(setter.Value, elementPr, options);
+                                ((IList)mlist).Add(value);
+                            }
+                            break;
+                        case PropertyOperation.AddNewElement:
+                            {
                                 var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
                                 SetSetters(item, setter.Setters!, elementPr);
                                 ((IList)mlist).Add(item);
@@ -430,7 +436,7 @@ namespace Signum.React.ApiControllers
                                 }
                             }
                             break;
-                        case PropertyOperation.RemoveElements:
+                        case PropertyOperation.RemoveElementsWhere:
                             {
                                 var predicate = GetPredicate(setter.Predicate!, elementPr, options);
                                 var toRemove = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
@@ -438,6 +444,12 @@ namespace Signum.React.ApiControllers
                                 {
                                     ((IList)mlist).Remove(item);
                                 }
+                            }
+                            break;
+                        case PropertyOperation.RemoveElement:
+                            {
+                                var value = ConvertObject(setter.Value, elementPr, options);
+                                ((IList)mlist).Remove(value);
                             }
                             break;
                         default:
@@ -460,10 +472,14 @@ namespace Signum.React.ApiControllers
                     SetSetters(mod, setter.Setters!, pr);
                     SetProperty(entity, pr, route, mod);
                 }
-                else
+                else if (setter.Operation == PropertyOperation.Set)
                 {
                     var value = ConvertObject(setter.Value, pr, options);
                     SetProperty(entity, pr, route, value);
+                }
+                else
+                {
+                    throw new UnexpectedValueException(setter.Operation);
                 }
             }
         }

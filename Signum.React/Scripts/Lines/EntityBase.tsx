@@ -15,7 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
   viewOnCreate?: boolean;
-  navigate?: boolean;
   create?: boolean;
   createOnFind?: boolean;
   find?: boolean;
@@ -26,7 +25,8 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
-  extraButtons?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
+  extraButtonsBefore?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
+  extraButtonsAfter?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
   liteToString?: (e: any /*T*/) => string;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
@@ -68,7 +68,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   static propEquals(prevProps: EntityBaseProps, nextProps: EntityBaseProps): boolean {
     if (
       nextProps.getComponent || prevProps.getComponent ||
-      nextProps.extraButtons || prevProps.extraButtons)
+      nextProps.extraButtonsAfter || prevProps.extraButtonsAfter ||
+      nextProps.extraButtonsBefore || prevProps.extraButtonsBefore)
       return false;
 
     return LineBaseController.propEquals(prevProps, nextProps);

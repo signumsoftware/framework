@@ -10,7 +10,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -111,7 +111,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     .then(rr => rr?.entity);
 
   if (modalOptions?.autoSelectIfOne)
-    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
+    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
         if (data.length == 1)
           return Promise.resolve(data[0]);
@@ -161,7 +161,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     .then(rows => rows?.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne)
-    return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
         if (data.length == 1)
           return Promise.resolve(data);
@@ -428,8 +428,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
       fo.token == null ||
       tokensToIgnore.contains(fo.token.fullKey) ||
       fo.operation != "EqualTo" ||
-      fo.pinned && fo.pinned.active == "Checkbox_StartUnchecked" ||
-      fo.pinned && fo.pinned.active == "WhenHasValue" && fo.value == null)
+      !isActive(fo))
       return null;
 
     const mi = getMemberForToken(ti, fo.token!.fullKey);
@@ -583,7 +582,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
     return (a.token && a.token.toString()) == (b.token && b.token.toString()) &&
       (a as FilterGroupOption).groupOperation == (b as FilterGroupOption).groupOperation &&
       ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
-      (a.value == b.value || is(a.value, b.value)) &&
+      (a.value == b.value || is(a.value, b.value, false, false)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
       equalFilters((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
   });
@@ -784,7 +783,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrView(findOptions: FindOptions): Promise<void> {
-  return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
+  return fetchEntitiesLiteWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
       return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
@@ -896,14 +895,39 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   }
 }
 
-export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
+export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
         parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesWithFilters({
+          API.fetchEntitiesLiteWithFilters({
+
+            queryKey: qd.queryKey,
+
+            filters: toFilterRequests(fops),
+
+            orders: oop.map(oo => ({
+              token: oo.token!.fullKey,
+              orderType: oo.orderType
+            }) as OrderRequest),
+
+            count: count
+          })
+        )
+      )
+  );
+}
+
+export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<T[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]> {
+  return getQueryDescription(queryName).then(qd =>
+    parseFilterOptions(filterOptions, false, qd)
+      .then(fops =>
+        parseOrderOptions(orderOptions, false, qd).then(oop =>
+          API.fetchEntitiesFullWithFilters({
 
             queryKey: qd.queryKey,
 
@@ -1120,8 +1144,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
       if (val == null)
         return null;
-
-      var dt = DateTime.fromISO(val);
+      var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
       return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
     }
@@ -1273,8 +1296,12 @@ export module API {
     return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
-  export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
+  export function fetchEntitiesLiteWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+    return ajaxPost({ url: "~/api/query/entitiesLiteWithFilter" }, request);
+  }
+
+  export function fetchEntitiesFullWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
+    return ajaxPost({ url: "~/api/query/entitiesFullWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
@@ -1633,7 +1660,7 @@ export const formatRules: FormatRule[] = [
     name: "Date",
     isApplicable: col => col.token!.filterType == "DateTime",
     formatter: col => {
-      const luxonFormat = toLuxonFormat(col.token!.format);
+      const luxonFormat = toLuxonFormat(col.token!.format, col.token!.type.name as "Date" | "DateTime");
       return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },

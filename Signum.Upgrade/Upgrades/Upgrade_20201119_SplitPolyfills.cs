@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "Split polyfills and optional IE support";
 
-        public override string SouthwindCommitHash => "a8741df38773572072e4f842104dcc3e60b259ce";
 
         public override void Execute(UpgradeContext uctx)
         {

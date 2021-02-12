@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "replace Navigator.navigate by Navigator.view";
 
-        public override string SouthwindCommitHash => "";
 
         public override void Execute(UpgradeContext uctx)
         {

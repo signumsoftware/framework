@@ -163,22 +163,22 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, options, constructor).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, options, constructor).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, options).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, Func<Match, T>? constructor = null) where T : class, new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -246,9 +246,8 @@ namespace Signum.Utilities
                             T? t = null;
                             try
                             {
-
-                                if (constructor != null)
-                                    t = constructor(m);
+                                if (options?.Constructor != null)
+                                    t = options.Constructor(m);
                                 else
                                     t = ReadObject<T>(m, members, parsers);
                             }
@@ -442,6 +441,7 @@ namespace Signum.Utilities
     {
         public Func<CsvMemberInfo<T>, CultureInfo, Func<string, object?>?>? ParserFactory;
         public bool AsumeSingleLine = false;
+        public Func<Match, T>? Constructor;
         public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }

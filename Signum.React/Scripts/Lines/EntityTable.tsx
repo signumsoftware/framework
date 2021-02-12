@@ -244,9 +244,10 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
   function renderButtons() {
     const buttons = (
       <span className="ml-2">
+        {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
-        {c.props.extraButtons && c.props.extraButtons(c)}
+        {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
       </span>
     );
 

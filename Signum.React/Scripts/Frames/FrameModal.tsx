@@ -20,7 +20,7 @@ import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { useStateWithPromise, useForceUpdate } from '../Hooks'
 import { Modal } from 'react-bootstrap'
-import { ModalHeaderButtons } from '../Components/ModalHeaderButtons'
+import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons'
 import WidgetEmbedded from './WidgetEmbedded'
 import SaveChangesModal from '../Modals/SaveChangesModal';
 
@@ -215,14 +215,16 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
-        <ModalHeaderButtons
-          onClose={p.buttons == "close" ? handleCancelClicked : undefined}
-          onOk={p.buttons == "ok_cancel" ? handleOkClicked : undefined}
-          onCancel={p.buttons == "ok_cancel" ? handleCancelClicked : undefined}
-        okDisabled={!packComponent}>
+        <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
         </ModalHeaderButtons>
-      {packComponent && renderBody(packComponent)}
+        {packComponent && renderBody(packComponent)}
+        {p.buttons == "ok_cancel" && <ModalFooterButtons
+          onOk={handleOkClicked}
+          onCancel={handleCancelClicked}
+          okDisabled={!packComponent}>
+        </ModalFooterButtons>
+        }
       </Modal>
     );
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
@@ -29,6 +29,18 @@ namespace Signum.Engine.Linq
         {
             this.aliases.Add(table.Alias);
             return base.VisitTable(table);
+        }
+
+        protected internal override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            this.aliases.Add(set.Alias);
+            return base.VisitSetOperator(set);
+        }
+
+        protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
+        {
+            this.aliases.Add(sqlFunction.Alias);
+            return base.VisitSqlTableValuedFunction(sqlFunction);
         }
     }
 

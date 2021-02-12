@@ -74,10 +74,10 @@ export type OperationType =
 
 //https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
-export function toLuxonFormat(format: string | undefined): string {
+export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTime"): string {
 
   if (!format)
-    return "F";
+    return type == "Date" ? "D" : "F";
   
   switch (format) {
     case "d": return "D"; // toFormatWithFixes
@@ -338,12 +338,12 @@ export function numberToString(val: any, format?: string) {
   return toNumberFormat(format).format(val);
 }
 
-export function dateToString(val: any, format?: string) {
+export function dateToString(val: any, type: "Date" | "DateTime", format?: string) {
   if (val == null)
     return "";
 
   var m = DateTime.fromISO(val);
-  return m.toFormat(toLuxonFormat(format));
+  return m.toFormat(toLuxonFormat(format, type));
 }
 
 export function durationToString(val: any, format?: string) {
@@ -746,6 +746,7 @@ export class Binding<T> implements IBinding<T> {
 
     return this.parentObject[this.member];
   }
+
   setValue(val: T) {
 
     if (!this.parentObject)
@@ -755,8 +756,9 @@ export class Binding<T> implements IBinding<T> {
     this.parentObject[this.member] = val;
 
     if ((this.parentObject as ModifiableEntity).Type) {
-      if (oldVal !== val || Array.isArray(oldVal))
+      if (oldVal !== val && !sameEntity(oldVal, val) || Array.isArray(oldVal)) {
         (this.parentObject as ModifiableEntity).modified = true;
+      }
     }
   }
 
@@ -794,6 +796,7 @@ export class Binding<T> implements IBinding<T> {
     }
   }
 }
+
 
 export class ReadonlyBinding<T> implements IBinding<T> {
   constructor(
@@ -912,7 +915,8 @@ const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(ret
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
-const getMixinRegex = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
+const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
+const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
@@ -934,7 +938,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Mixin" });
       body = m[1];
     }
-    else if (m = getMixinRegex.exec(body)) {
+    else if (m = getMixinRegex.exec(body) ?? getMixinRegexOld.exec(body)) {
       result.push({ name: m[2], type: "Mixin" });
       body = m[1];
     }
@@ -957,6 +961,30 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
   result = result.filter((m, i) => !(m.type == "Member" && m.name == "element" && i > 0 && result[i - 1].type == "Indexer"));
 
   return result;
+}
+
+//slighliy different to is, and prevents webpack cycle
+function sameEntity(a: any, b: any) {
+
+  if (a === b)
+    return true;
+
+  if (a == undefined || b == undefined)
+    return false;
+
+  if ((a as Entity).Type && (b as Entity).Type) {
+    return (a as Entity).Type == (b as Entity).Type &&
+      (a as Entity).id != null && (b as Entity).id != null &&
+      (a as Entity).id == (b as Entity).id;
+  }
+
+  if ((a as Lite<Entity>).EntityType && (b as Lite<Entity>).EntityType) {
+    return (a as Lite<Entity>).EntityType == (b as Lite<Entity>).EntityType &&
+      (a as Lite<Entity>).id != null && (b as Lite<Entity>).id != null &&
+      (a as Lite<Entity>).id == (b as Lite<Entity>).id;
+  }
+
+  return false;
 }
 
 export function getFieldMembers(field: string): LambdaMember[] {

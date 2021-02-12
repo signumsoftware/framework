@@ -317,17 +317,13 @@ ul.sf-context-menu li a:not([disabled]) {
 }
 
 
-.sf-query-token-part .rw-btn rw-btn-select {
-    width: 1.4em;
-}
-
-
-.sf-query-token-part .rw-input.rw-dropdown-list-input {
-    cursor: pointer;
-}
-
 .sf-query-token-part .rw-list-empty, .rw-list-option, .rw-list-optgroup {
     padding: 0 .5em;
+}
+
+/* [data-intent=keyboard] */.rw-list-option.rw-state-focus:not(.rw-state-selected) {
+    background-color: #e9ecef;
+    border-color: #e9ecef;
 }
 
 .sf-hide-group-button{

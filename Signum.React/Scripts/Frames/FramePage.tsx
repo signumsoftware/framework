@@ -189,7 +189,7 @@ export default function FramePage(p: FramePageProps) {
           setState({
             pack: packEntity,
             getComponent: state.getComponent,
-            refreshCount: state.refreshCount + 1
+            refreshCount: state.refreshCount + 1,
           }).then(callback).done();
         }
       }
@@ -219,7 +219,7 @@ export default function FramePage(p: FramePageProps) {
 
   return (
     <div className="normal-control">
-      <Prompt when={true} message={() => hasChanges(state)}/>
+      <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true}/>
       {renderTitle()}
       {renderWidgets(wc)}
       {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
@@ -254,15 +254,15 @@ export default function FramePage(p: FramePageProps) {
 function hasChanges(state: FramePageState) {
 
   if (state.avoidPrompt)
-    return true;
+    return false;
 
   const entity = state.pack.entity;
   const ge = GraphExplorer.propagateAll(entity);
   if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
-    return JavascriptMessage.loseCurrentChanges.niceToString();
+    return true
   }
 
-  return true;
+  return false;
 }
 
 

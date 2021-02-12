@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "update react and react-bootstrap to 1.5";
 
-        public override string SouthwindCommitHash => "2eeb91f342a5b5cbc37b875e652c4732066e691b";
 
         public override void Execute(UpgradeContext uctx)
         {

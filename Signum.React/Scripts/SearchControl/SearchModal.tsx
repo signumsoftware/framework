@@ -5,12 +5,13 @@ import { FindOptions, FindMode, ResultRow, ModalFindOptions } from '../FindOptio
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
-import { SearchMessage } from '../Signum.Entities';
-import { ModalHeaderButtons } from '../Components/ModalHeaderButtons';
+import { Entity, EntityPack, getToString, isEntityPack, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
+import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { namespace } from 'd3';
 import { useForceUpdate } from '../Hooks';
 import SearchControlLoaded from './SearchControlLoaded';
+import MessageModal from '../Modals/MessageModal';
 
 interface SearchModalProps extends IModalProps<ResultRow[] | undefined> {
   findOptions: FindOptions;
@@ -18,6 +19,7 @@ interface SearchModalProps extends IModalProps<ResultRow[] | undefined> {
   isMany: boolean;
   title?: React.ReactNode;
   message?: React.ReactNode;
+  avoidReturnCreate?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
@@ -72,6 +74,35 @@ function SearchModal(p: SearchModalProps) {
     handleOkClicked();
   }
 
+  function handleCreateFinished(entity: EntityPack<any> | ModifiableEntity | undefined) {
+
+    const scl = searchControl.current!.searchControlLoaded!;
+    if (p.findMode == "Find" && entity != null && !p.avoidReturnCreate && !p.findOptions.groupResults && !p.onOKClicked) {
+      const e = isEntityPack(entity) ? entity.entity as Entity : entity as Entity;
+      const ti = getTypeInfo(e.Type);
+      MessageModal.show({
+        buttons: "yes_no",
+        style: "success",
+        customIcon: "check-square",
+        title: SearchMessage.ReturnNewEntity.niceToString(),
+        message: SearchMessage.DoYouWantToSelectTheNew01_G.niceToString().forGenderAndNumber(ti.gender).formatHtml(ti.niceName, <strong>{getToString(e)}</strong>)
+      }).then(b => {
+        if (b == "yes") {
+          selectedRows.current = [{ entity: toLite(e), columns: [] }];
+          okPressed.current = true;
+          setShow(false);
+        } else {
+          if (!scl.props.avoidAutoRefresh)
+            scl.doSearch(true);
+        }
+      }).done();
+
+    } else {
+      if (!scl.props.avoidAutoRefresh)
+        scl.doSearch(true);
+    }
+  }
+
   function onResize() {
     var sc = searchControl.current;
     var scl = sc?.searchControlLoaded;
@@ -86,11 +117,7 @@ function SearchModal(p: SearchModalProps) {
 
   return (
     <Modal size="lg" show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
-      <ModalHeaderButtons
-        onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}
-        onOk={p.findMode == "Find" ? handleOkClicked : undefined}
-        onCancel={p.findMode == "Find" ? handleCancelClicked : undefined}
-        okDisabled={!okEnabled}>
+      <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
           &nbsp;
@@ -116,11 +143,18 @@ function SearchModal(p: SearchModalProps) {
           largeToolbarButtons={true}
           maxResultsHeight={"none"}
           enableAutoFocus={true}
+          onCreateFinished={handleCreateFinished}
           onHeighChanged={onResize}
           onDoubleClick={p.findMode == "Find" ? handleDoubleClick : undefined}
           {...p.searchControlProps}
         />
       </div>
+      {p.findMode == "Find" &&
+        <ModalFooterButtons
+          onOk={handleOkClicked}
+          onCancel={handleCancelClicked}
+          okDisabled={!okEnabled} />
+      }
     </Modal>
   );
 }

@@ -887,7 +887,7 @@ String.prototype.firstLower = function () {
   return this[0].toLowerCase() + this.substring(1);
 };
 
-String.prototype.trimStart = function (char) {
+String.prototype.trimStart = function (this: string, char: string) {
   let result = this;
 
   if (!char)
@@ -903,7 +903,7 @@ String.prototype.trimStart = function (char) {
   return result;
 };
 
-String.prototype.trimEnd = function (char) {
+String.prototype.trimEnd = function (this: string, char: string) {
   let result = this;
 
   if (!char)
@@ -1239,4 +1239,17 @@ export class KeyGenerator {
     }
     return result;
   }
+}
+
+export function roundTwoDecimals(num: number) {
+
+  var round3 = Math.round(num * 1000000) / 1000000; //convert 0.0049999999999 -> 0.005
+
+  var round3m100 = round3 * 100;
+
+  var mod = round3m100 % 10; //Simulate Midpoint to Even (C# decimal default) instead of Midpoint to +Inf (JS behaviour)
+  if (mod == 0.5 || mod == 2.5 || mod == 4.5 || mod == 6.5 || mod == 8.5)
+    round3m100 -= 0.001;
+
+  return Math.round(round3m100) / 100; //https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
 }

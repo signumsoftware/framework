@@ -7,7 +7,6 @@
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
-    <Platforms>x64;x86;win86;win64;AnyCPU;linux64</Platforms>
     <UserSecretsId>7b3bfbd4-af24-4a37-a213-f5f281fa39f5</UserSecretsId>
   </PropertyGroup>
 
@@ -31,7 +30,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.1.2">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.1.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -39,7 +38,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="5.0.0" />
+    <PackageReference Include="Npgsql" Version="5.0.3" />
     <PackageReference Include="Signum.Analyzer" Version="2.7.0" />
     <PackageReference Include="Signum.TSGenerator" Version="5.0.0" />
   </ItemGroup>

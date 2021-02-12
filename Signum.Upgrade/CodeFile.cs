@@ -317,8 +317,23 @@ namespace Signum.Upgrade
         public void UpdateNpmPackage(string packageName, string version)
         {
             AssertExtension(".json");
-            this.ReplaceLine(condition: a => a.Contains(@$"""{packageName}"""),
-                text: @$"""{packageName}"": ""{version}"",");
+
+            ProcessLines(lines =>
+            {
+
+                var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"""));
+                if (pos == -1)
+                {
+                    Warning(@$"Unable to find a line with ""{packageName}"" to upgrade it to {version}");
+                    return false;
+                }
+                var indent = GetIndent(lines[pos]);
+                lines.RemoveRange(pos, 1);
+
+                var comma = lines[pos].Trim().StartsWith("}") ? "" : ", ";
+                lines.Insert(pos, IndentAndReplace(@$"""{packageName}"": ""{version}""" + comma, indent));
+                return true;
+            });
         }
 
         public void UpdateNugetReference(string packageName, string version)

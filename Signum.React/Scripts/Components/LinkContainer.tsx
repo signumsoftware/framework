@@ -2,12 +2,13 @@ import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import * as H from 'history';
 import { Route, match, __RouterContext as RouterContext, matchPath, RouteComponentProps } from 'react-router';
+import { Link } from 'react-router-dom';
 
 const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
 
 interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to: H.LocationDescriptor;
+  to: H.LocationDescriptor<any>;
   replace?: boolean;
   onClick?: (e: React.MouseEvent<any>) => void;
   innerRef?: (e: any) => void;
@@ -42,6 +43,7 @@ export function LinkContainer(p: LinkContainerProps) {
     }
   }
 
+
   const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = p;// eslint-disable-line no-unused-vars
 
   return (
@@ -62,7 +64,7 @@ export function LinkContainer(p: LinkContainerProps) {
         var path = typeof to === 'object' ? to.pathname : to;
 
         const match = path ? matchPath(path, { exact, strict }) : null;
-        const isActive = !!(getIsActive ? getIsActive(match, context.location as any) : match);
+        const isActive = !!(getIsActive ? getIsActive(match, context.location) : match);
 
         return React.cloneElement(
           child,

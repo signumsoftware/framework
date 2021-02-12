@@ -39,16 +39,18 @@ VersionChangedAlert.defaultProps = { blink: true };
 
 export function VersionInfo() {
   return (
-    <OverlayTrigger
-      placement={"bottom"}
-      overlay={
-        <Tooltip id={`tooltip-buildId`}>
-          <VersionInfoTooltip />
-        </Tooltip>
-      }
-    >
-      <span className="sf-version-info d-lg-block d-none">v{VersionFilter.initialVersion}</span>
-    </OverlayTrigger>
+    <div className="nav-link">
+      <OverlayTrigger
+        placement={"bottom"}
+        overlay={
+          <Tooltip id={`tooltip-buildId`}>
+            <VersionInfoTooltip />
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon icon="info-circle" className="sf-version-info" />
+      </OverlayTrigger>
+    </div>
   );
 }
 
@@ -58,6 +60,8 @@ function VersionInfoTooltip(p: {}) {
 
   return (
     <div style={{ whiteSpace: "nowrap" }}>
+      Version {VersionFilter.initialVersion}
+      <br/>
       {bt.toFormat("DDDD")}
       <br />
       {bt.toFormat("tt")} ({bt.toRelative()})

@@ -12,7 +12,6 @@ namespace Signum.Upgrade.Upgrades
     {
         public override string Description => "add az webapp restart to publichToAzure.ps1";
 
-        public override string SouthwindCommitHash => "";
 
         public override void Execute(UpgradeContext uctx)
         {

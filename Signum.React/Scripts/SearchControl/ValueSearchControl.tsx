@@ -165,7 +165,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     }
 
     if (this.props.onRender)
-      return this.props.onRender(this.state.value, this);
+      return this.props.onRender(this.state.value, this)!;
 
    
 
@@ -284,7 +284,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         const numbroFormat = toNumberFormat(this.props.format ?? token.format);
         return numbroFormat.format(value);
       case "DateTime":
-        const momentFormat = toLuxonFormat(this.props.format ?? token.format);
+        const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "Date" | "DateTime");
         return DateTime.fromISO(value).toFormatFixed(momentFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;

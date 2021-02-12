@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
-import * as DropdownList from 'react-widgets/lib/DropdownList'
+import { DropdownList } from 'react-widgets'
 import { StyleContext } from '../Lines';
 import { useAPI } from '../Hooks';
 
@@ -110,13 +110,15 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
         <DropdownList
           disabled={p.readOnly}
           filter="contains"
+          focusFirstItem={true}
           data={subTokens ?? []}
+          placeholder={p.selectedToken == null ? "..." : undefined}
           value={p.selectedToken}
           onChange={handleOnChange}
-          valueField="fullKey"
+          dataKey="fullKey"
           textField="toStr"
-          valueComponent={QueryTokenItem}
-          itemComponent={QueryTokenOptionalItem}
+          renderValue={a => <QueryTokenItem item={a.item} />}
+          renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
           defaultOpen={p.defaultOpen}
           busy={!p.readOnly && subTokens == undefined}
         />

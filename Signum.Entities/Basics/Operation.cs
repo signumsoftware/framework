@@ -252,8 +252,10 @@ namespace Signum.Entities
     {
         Set,
         AddElement,
+        AddNewElement,
         ChangeElements,
-        RemoveElements,
+        RemoveElement,
+        RemoveElementsWhere,
         ModifyEntity,
         CreateNewEntity,
     }

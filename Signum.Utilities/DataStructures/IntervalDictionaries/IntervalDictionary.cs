@@ -311,7 +311,7 @@ namespace Signum.Utilities.DataStructures
 #pragma warning disable CS8629 // Nullable value type may be null.
             Interval<K>[] keys = collection.SelectMany(a => a.interval.Elements()).Distinct().OrderBy().BiSelectS((min, max) => new Interval<K>(min.Value, max.Value)).ToArray();
 #pragma warning restore CS8629 // Nullable value type may be null.
-            return new IntervalDictionary<K, VR>(keys.Select(k => KeyValuePair.Create(k, mixer(k, collection.Where(a => a.interval.Subset(k)).Select(a => a.value)))));
+            return new IntervalDictionary<K, VR>(keys.Select(k => KeyValuePair.Create(k, mixer(k, collection.Where(a => a.interval.IsSubset(k)).Select(a => a.value)))));
         }
 
         public static IntervalDictionary<K, VR> Filter<K, V, VR>(this IntervalDictionary<K, V> me, Interval<K> filter, Func<Interval<K>, V, VR> mapper)
