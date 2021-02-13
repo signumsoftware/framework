@@ -45,6 +45,15 @@ namespace Signum.Entities.Reflection
             DescriptionManager.Invalidate();
         }
 
+
+        public static Type? GetEntityTypeOfLite(this Type liteType)
+        {
+            if (liteType.IsLite() == false)
+                return null;
+
+            return liteType.GenericTypeArguments.FirstOrDefault();
+        }
+
         static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
         {
             return !arg.HasAttribute<HiddenPropertyAttribute>() || arg.HasAttribute<DescriptionAttribute>();
