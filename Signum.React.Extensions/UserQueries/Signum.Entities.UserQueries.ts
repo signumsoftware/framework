@@ -25,6 +25,7 @@ export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnEmbedded";
   token: UserAssets.QueryTokenEmbedded;
   displayName: string | null;
+  summaryToken: UserAssets.QueryTokenEmbedded | null;
 }
 
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");

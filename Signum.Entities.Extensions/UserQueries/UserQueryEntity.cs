@@ -210,8 +210,7 @@ namespace Signum.Entities.UserQueries
 
     [Serializable]
     public class QueryColumnEmbedded : EmbeddedEntity
-    {
-        
+    {   
         public QueryTokenEmbedded Token { get; set; }
 
         string? displayName;
@@ -221,22 +220,27 @@ namespace Signum.Entities.UserQueries
             set { Set(ref displayName, value); }
         }
 
+        public QueryTokenEmbedded? SummaryToken { get; set; }
+
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
                 new XAttribute("Token", Token.Token.FullKey()),
+                SummaryToken != null ? new XAttribute("SummaryToken", SummaryToken.Token.FullKey()) : null!,
                 DisplayName.HasText() ? new XAttribute("DisplayName", DisplayName) : null!);
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
             Token = new QueryTokenEmbedded(element.Attribute("Token")!.Value);
+            SummaryToken = element.Attribute("SummaryToken")?.Value.Let(val => new QueryTokenEmbedded(val));
             DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             Token.ParseData(context, description, options);
+            SummaryToken?.ParseData(context, description, options | SubTokensOptions.CanAggregate);
         }
 
         protected override string? PropertyValidation(PropertyInfo pi)
@@ -244,6 +248,12 @@ namespace Signum.Entities.UserQueries
             if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
                 return QueryUtils.CanColumn(Token.Token);
+            }
+
+            if (pi.Name == nameof(SummaryToken) && SummaryToken != null && SummaryToken.ParseException == null)
+            {
+                return QueryUtils.CanColumn(SummaryToken.Token) ?? 
+                    (SummaryToken.Token is not AggregateToken ? SearchMessage.SummaryHeaderMustBeAnAggregate.NiceToString() : null);
             }
 
             return base.PropertyValidation(pi);

@@ -64,12 +64,41 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
               {
                 property: a => a.token,
-                template: ctx => <QueryTokenEmbeddedBuilder
-                  ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                  queryKey={p.ctx.value.query!.key}
-                  subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+                template: (ctx, row) =>
+                  <div>
+                    <QueryTokenEmbeddedBuilder
+                      ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                      queryKey={p.ctx.value.query!.key}
+                      onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
+                      subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+
+                    <div className="row">
+                      <div className="col-sm-6">
+                      </div>
+                      <div className="col-sm-6">
+                      </div>
+                    </div>
+
+
+                    <div className="d-flex">
+                      <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
+                        <input type="checkbox" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                          ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
+                          row.forceUpdate();
+                        }} /> {SearchMessage.SummaryHeader.niceToString()}
+                      </label>
+                      <div className="flex-grow-1">
+                        {ctx.value.summaryToken &&
+                          <QueryTokenEmbeddedBuilder
+                            ctx={ctx.subCtx(a => a.summaryToken, { formGroupStyle: "SrOnly" })}
+                            queryKey={p.ctx.value.query!.key}
+                            subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
+                        }
+                      </div>
+                    </div>
+                  </div>
               },
-              { property: a => a.displayName }
+              { property: a => a.displayName, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.displayName)} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }} /> },
             ])} />
             <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
               {
