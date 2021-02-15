@@ -687,6 +687,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               .then(props => Constructor.constructPack(tn, props))
               .then(pack => pack && Navigator.view(pack!, {
                 getViewPromise: getViewPromise as any,
+                buttons: "close",
                 createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
                   .then(props => Constructor.constructPack(tn, props)!),
               }))
@@ -1284,7 +1285,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           var vp = getViewPromise && getViewPromise(null);
           AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
         } else {
-          Navigator.view(lite, { getViewPromise: getViewPromise })
+          Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
             .then(() => {
               this.handleOnNavigated(lite);
             }).done();
