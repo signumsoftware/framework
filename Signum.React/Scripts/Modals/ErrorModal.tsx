@@ -127,7 +127,7 @@ ErrorModal.register = () => {
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
     if (Modals.isStarted())
-      ErrorModal.showErrorModal(error);
+      ErrorModal.showErrorModal(error).done();
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
         oldOnError(message, filename, lineno, colno, {
