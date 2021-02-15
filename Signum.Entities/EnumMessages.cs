@@ -230,6 +230,10 @@ namespace Signum.Entities
         ShowPinnedFiltersOptions,
         [Description("Hide pinned filter options")]
         HidePinnedFiltersOptions,
+        [Description("Summary header")]
+        SummaryHeader,
+        [Description("Summary header must be an aggregate (like Sum, Count, etc..)")]
+        SummaryHeaderMustBeAnAggregate,
     }
 
     public enum SelectorMessage

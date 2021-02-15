@@ -78,8 +78,6 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
   return Navigator.toEntityPack(result);
 }
 
-
-
 function asPromise<T>(valueOrPromise: T | Promise<T>) {
   if (valueOrPromise && (valueOrPromise as Promise<T>).then)
     return valueOrPromise as Promise<T>;
