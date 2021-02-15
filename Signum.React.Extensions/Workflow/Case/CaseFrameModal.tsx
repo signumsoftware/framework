@@ -30,7 +30,6 @@ interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<C
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;
   readOnly?: boolean;
-  buttons?: Navigator.ViewButtons;
 }
 
 interface CaseFrameModalState {
@@ -89,25 +88,6 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       .then(c => this.setState({ getComponent: c }));
   }
 
-  handleCloseClicked = () => {
-
-    if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-      MessageModal.show({
-        title: SaveChangesMessage.ThereAreChanges.niceToString(),
-        message: JavascriptMessage.loseCurrentChanges.niceToString(),
-        buttons: "yes_no",
-        icon: "warning",
-        style: "warning"
-      }).then(result => {
-        if (result != "yes")
-          return;
-
-        this.setState({ show: false });
-      }).done();
-    }
-    else
-      this.setState({ show: false });
-  }
 
   hasChanges() {
 
@@ -119,7 +99,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   }
 
   okClicked: boolean = false;
-  handleCancelClicked = () => {
+  handleCloseClicked = () => {
     if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
       MessageModal.show({
         title: SaveChangesMessage.ThereAreChanges.niceToString(),
@@ -132,21 +112,6 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
           this.setState({ show: false });
       }).done();
     } else {
-      this.setState({ show: false });
-    }
-  }
-
-  handleOkClicked = () => {
-    if (this.hasChanges()) {
-      MessageModal.show({
-        title: SaveChangesMessage.ThereAreChanges.niceToString(),
-        message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
-        buttons: "ok",
-        style: "warning",
-        icon: "warning"
-      }).done();
-    } else {
-      this.okClicked = true;
       this.setState({ show: false });
     }
   }
@@ -164,12 +129,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var pack = this.state.pack;
 
     return (
-      <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+      <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control" >
         <ModalHeaderButtons htmlAttributes={{ style: { display: "block" } }} closeBeforeTitle={true}
-          onClose={this.props.buttons == "close" ? this.handleCancelClicked : undefined}
-          onOk={this.props.buttons == "ok_cancel" ? this.handleOkClicked : undefined}
-          onCancel={this.props.buttons == "ok_cancel" ? this.handleCancelClicked : undefined}
-          okDisabled={!pack}>
+          onClose={this.handleCloseClicked}>
           {this.renderTitle()}
         </ModalHeaderButtons>
         {pack && this.renderBody()}
@@ -344,7 +306,6 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     return openModal<CaseActivityEntity>(<CaseFrameModal
       entityOrPack={entityOrPack}
       readOnly={options?.readOnly ?? false}
-      buttons={options?.buttons ?? "close"}
     />);
   }
 }

@@ -71,24 +71,22 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
 
     options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
 
-    Finder.entityFormatRules.push(
-      {
-        name: "ViewHistory",
-        isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-        formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
-          <TimeMachineLink lite={row.entity}
-            inSearch={true}>
-            {EntityControlMessage.View.niceToString()}
-          </TimeMachineLink>
-        )
-      });
+    Finder.entityFormatRules.push({
+      name: "ViewHistory",
+      isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
+      formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        <TimeMachineLink lite={row.entity}
+          inSearch={true}>
+          {EntityControlMessage.View.niceToString()}
+        </TimeMachineLink>
+      )
+    });
 
-    Finder.formatRules.push(
-      {
-        name: "Lite",
-        isApplicable: (col, sc) => col.token!.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(col.token!.type),
-        formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />)
-      });
+    Finder.formatRules.push({
+      name: "Lite",
+      isApplicable: (qt, sc) => qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type),
+      formatter: qt => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />)
+    });
   }
 }
 

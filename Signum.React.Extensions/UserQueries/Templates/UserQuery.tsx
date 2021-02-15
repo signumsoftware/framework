@@ -7,7 +7,9 @@ import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
-import { useForceUpdate } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
+import { SearchMessage } from '@framework/Signum.Entities'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -36,19 +38,23 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
       {query &&
         (<div>
-          <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()} />
+          <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
+            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(ctx.value.entityType?.toStr ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
           {
             p.ctx.value.entityType &&
-            <div>
-              <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
-              <p className="messageEntity col-sm-offset-2">
-                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-              </p>
+            <div className="row">
+              <div className="col-sm-4 offset-sm-2">
+                <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
+              </div>
+              <div className="col-sm-4">
+                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<pre style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></pre>)}
+              </div>
             </div>
-          }
-          <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
-        <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
-        <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
+        }
+        <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+            helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+          <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
+          <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
@@ -58,12 +64,41 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
               {
                 property: a => a.token,
-                template: ctx => <QueryTokenEmbeddedBuilder
-                  ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                  queryKey={p.ctx.value.query!.key}
-                  subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+                template: (ctx, row) =>
+                  <div>
+                    <QueryTokenEmbeddedBuilder
+                      ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                      queryKey={p.ctx.value.query!.key}
+                      onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
+                      subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+
+                    <div className="row">
+                      <div className="col-sm-6">
+                      </div>
+                      <div className="col-sm-6">
+                      </div>
+                    </div>
+
+
+                    <div className="d-flex">
+                      <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
+                        <input type="checkbox" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                          ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
+                          row.forceUpdate();
+                        }} /> {SearchMessage.SummaryHeader.niceToString()}
+                      </label>
+                      <div className="flex-grow-1">
+                        {ctx.value.summaryToken &&
+                          <QueryTokenEmbeddedBuilder
+                            ctx={ctx.subCtx(a => a.summaryToken, { formGroupStyle: "SrOnly" })}
+                            queryKey={p.ctx.value.query!.key}
+                            subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
+                        }
+                      </div>
+                    </div>
+                  </div>
               },
-              { property: a => a.displayName }
+              { property: a => a.displayName, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.displayName)} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }} /> },
             ])} />
             <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
               {

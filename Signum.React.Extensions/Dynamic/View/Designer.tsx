@@ -13,7 +13,7 @@ import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import { Typeahead } from '@framework/Components';
 import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
-import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
+import { ModalFooterButtons, ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { ModulesHelp } from './ModulesHelp';
 
 export interface ExpressionOrValueProps {
@@ -403,14 +403,16 @@ export function DesignerModal(p: DesignerModalProps) {
 
     return (
     <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
-        <ModalHeaderButtons
-        onOk={handleOkClicked}
-        onCancel={handleCancelClicked}>
+        <ModalHeaderButtons>
         {p.title}
         </ModalHeaderButtons>
         <div className="modal-body">
         {p.mainComponent()}
         </div>
+        <ModalFooterButtons
+          onOk={handleOkClicked}
+          onCancel={handleCancelClicked}>
+        </ModalFooterButtons>
       </Modal>
     );
   }

@@ -98,7 +98,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
     .map(co => ({
       column: co,
-      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co, undefined),
+      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined),
       resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
     }));
 

@@ -130,12 +130,17 @@ namespace Signum.Engine.UserQueries
             userQuery.ParseData(description);
         }
 
-        public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName)
+        public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName, bool appendFilterOnly = false)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
-                .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
+                .Where(e =>
+                {
+                    var uq = UserQueries.Value.GetOrThrow(e);
+                    return isAllowed(uq) && (!appendFilterOnly || uq.AppendFilters);
+                })
+                .ToList();
         }
 
         public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType)
