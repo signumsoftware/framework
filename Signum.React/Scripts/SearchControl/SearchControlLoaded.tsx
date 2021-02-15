@@ -1145,7 +1145,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 
       return (
-          <div className="ml-auto">{formatter.formatter(val, {
+        <div className={formatter.cellClass}>{formatter.formatter(val, {
             columns: rt.columns,
             row: rt.rows[0],
             rowIndex: 0,

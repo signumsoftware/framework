@@ -134,11 +134,11 @@ table.sf-search-results th.sf-current-column {
         border-bottom: 2px solid #a94442;
     }
 
-td.numeric-cell {
+.numeric-cell {
     text-align: right
 }
 
-td.centered-cell {
+.centered-cell {
     text-align: center
 }
 
