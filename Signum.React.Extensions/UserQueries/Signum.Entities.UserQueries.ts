@@ -67,13 +67,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
 }
 
 export module UserQueryMessage {
-  export const AreYouSureToRemove0 = new MessageKey("UserQueryMessage", "AreYouSureToRemove0");
   export const Edit = new MessageKey("UserQueryMessage", "Edit");
-  export const MyQueries = new MessageKey("UserQueryMessage", "MyQueries");
-  export const RemoveUserQuery = new MessageKey("UserQueryMessage", "RemoveUserQuery");
-  export const _0ShouldBeEmptyIf1IsSet = new MessageKey("UserQueryMessage", "_0ShouldBeEmptyIf1IsSet");
-  export const _0ShouldBeNullIf1Is2 = new MessageKey("UserQueryMessage", "_0ShouldBeNullIf1Is2");
-  export const _0ShouldBeSetIf1Is2 = new MessageKey("UserQueryMessage", "_0ShouldBeSetIf1Is2");
   export const UserQueries_CreateNew = new MessageKey("UserQueryMessage", "UserQueries_CreateNew");
   export const UserQueries_Edit = new MessageKey("UserQueryMessage", "UserQueries_Edit");
   export const UserQueries_BackToDefault = new MessageKey("UserQueryMessage", "UserQueries_BackToDefault");
@@ -82,6 +76,9 @@ export module UserQueryMessage {
   export const _0IsNotFilterable = new MessageKey("UserQueryMessage", "_0IsNotFilterable");
   export const Use0ToFilterCurrentEntity = new MessageKey("UserQueryMessage", "Use0ToFilterCurrentEntity");
   export const Preview = new MessageKey("UserQueryMessage", "Preview");
+  export const MakesTheUserQueryAvailableInContextualMenuWhenGrouping0 = new MessageKey("UserQueryMessage", "MakesTheUserQueryAvailableInContextualMenuWhenGrouping0");
+  export const MakesTheUserQueryAvailableAsAQuickLinkOf0 = new MessageKey("UserQueryMessage", "MakesTheUserQueryAvailableAsAQuickLinkOf0");
+  export const TheSelected0 = new MessageKey("UserQueryMessage", "TheSelected0");
 }
 
 export module UserQueryOperation {

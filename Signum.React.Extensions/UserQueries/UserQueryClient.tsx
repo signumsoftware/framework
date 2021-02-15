@@ -1,5 +1,7 @@
 import * as React from 'react'
+import { Dropdown } from 'react-bootstrap'
 import { ajaxPost, ajaxGet } from '@framework/Services';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -7,7 +9,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination } from '@framework/FindOptions'
+import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserQueryEntity, UserQueryPermission, UserQueryMessage,
@@ -17,6 +19,9 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
+import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu';
+import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems';
+import { SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/Search';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -65,6 +70,8 @@ export function start(options: { routes: JSX.Element[] }) {
       }).done();
     }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
+  onContextualItems.push(getGroupUserQueriesContextMenu);
+
   Constructor.registerConstructor<QueryFilterEmbedded>(QueryFilterEmbedded, () => QueryFilterEmbedded.New({ token: QueryTokenEmbedded.New() }));
   Constructor.registerConstructor<QueryOrderEmbedded>(QueryOrderEmbedded, () => QueryOrderEmbedded.New({ token: QueryTokenEmbedded.New() }));
   Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token: QueryTokenEmbedded.New() }));
@@ -72,6 +79,53 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
 }
 
+function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
+  if (!(cic.container instanceof SearchControlLoaded))
+    return undefined;
+
+  if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+    return undefined;
+
+  const resFO = cic.container.state.resultFindOptions;
+
+  if (resFO == null)
+    return undefined;
+
+  if (cic.container.state.selectedRows?.length != 1)
+    return undefined;
+
+  return API.forQueryAppendFilters(resFO.queryKey)
+    .then(uqs => {
+      if (uqs.length == 0)
+        return undefined;
+
+      return ({
+        header: UserQueryEntity.nicePluralName(),
+        menuItems: uqs.map(uq =>
+          <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, cic)}>
+            <FontAwesomeIcon icon={["far", "list-alt"]} className="icon" color="dodgerblue" />
+            {uq.toStr}
+          </Dropdown.Item>
+        )
+      } as MenuItemBlock);
+    });
+}
+
+function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParsed, cic: ContextualItemsContext<Entity>): void {
+  var sc = cic.container as SearchControlLoaded;
+
+  Navigator.API.fetchAndForget(uq)
+    .then(uqe => Converter.toFindOptions(uqe, undefined)
+      .then(fo => {
+
+        var filters = SearchControlLoaded.getGroupFilters(sc.state.selectedRows!.single(), resFo);
+
+        fo.filterOptions = [...filters, ...fo.filterOptions ?? []];
+
+        return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
+          .then(() => cic.markRows({}));
+      })).done();
+}
 
 export module Converter {
 
@@ -95,8 +149,9 @@ export module Converter {
       fo.columnOptionsMode = uq.columnsMode;
 
       fo.columnOptions = (uq.columns ?? []).map(f => ({
-        token: f.element.token!.tokenString,
-        displayName: f.element.displayName
+        token: f.element.token.tokenString,
+        displayName: f.element.displayName,
+        summaryToken: f.element.summaryToken?.tokenString
       }) as ColumnOption);
 
       fo.orderOptions = (uq.orders ?? []).map(f => ({
@@ -140,6 +195,10 @@ export module API {
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet({ url: "~/api/userQueries/forQuery/" + queryKey });
+  }
+
+  export function forQueryAppendFilters(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
+    return ajaxGet({ url: "~/api/userQueries/forQueryAppendFilters/" + queryKey });
   }
 }
 

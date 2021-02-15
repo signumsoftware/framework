@@ -71,11 +71,7 @@ namespace Signum.Entities.UserQueries
         {
             if (pi.Name == nameof(ElementsPerPage))
             {
-                if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm => pm.NiceToString()) ?? "");
-
-                if (ElementsPerPage == null && ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode!.NiceToString());
+                return (pi, ElementsPerPage).IsSetOnlyWhen(PaginationMode == DynamicQuery.PaginationMode.Firsts || PaginationMode == DynamicQuery.PaginationMode.Paginate);
             }
 
             return base.PropertyValidation(pi);
@@ -473,74 +469,11 @@ namespace Signum.Entities.UserQueries
                 }
             }).ToList();
         }
-
-        public static (ColumnOptionsMode mode, MList<QueryColumnEmbedded> columns) SmartColumns(List<Column> current, QueryDescription qd)
-        {
-            var ideal = (from cd in qd.Columns
-                         where !cd.IsEntity
-                         select cd).ToList();
-
-            foreach (var item in current)
-            {
-                if (item.Token.NiceName() == item.DisplayName)
-                    item.DisplayName = null;
-            }
-
-            if (current.Count < ideal.Count)
-            {
-                List<Column> toRemove = new List<Column>();
-                int j = 0;
-                for (int i = 0; i < ideal.Count; i++)
-                {
-                    if (j < current.Count && current[j].Similar(ideal[i]))
-                        j++;
-                    else
-                        toRemove.Add(new Column(ideal[i], qd.QueryName));
-                }
-
-                if (toRemove.Count + current.Count == ideal.Count)
-                    return (mode: ColumnOptionsMode.Remove, columns: toRemove.Select(c => new QueryColumnEmbedded { Token = new QueryTokenEmbedded(c.Token) }).ToMList());
-            }
-            else
-            {
-                if (current.Zip(ideal).All(t => t.First.Similar(t.Second)))
-                    return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEmbedded
-                    {
-                        Token = new QueryTokenEmbedded(c.Token),
-                        DisplayName = c.DisplayName
-                    }).ToMList());
-
-            }
-
-            return (mode: ColumnOptionsMode.Replace, columns: current.Select(c => new QueryColumnEmbedded
-            {
-                Token = new QueryTokenEmbedded(c.Token),
-                DisplayName = c.DisplayName
-            }).ToMList());
-        }
-
-        static bool Similar(this Column column, ColumnDescription other)
-        {
-            return column.Token is ColumnToken && ((ColumnToken)column.Token).Column.Name == other.Name && column.DisplayName == null;
-        }
-
     }
 
     public enum UserQueryMessage
     {
-        [Description("Are you sure to remove '{0}'?")]
-        AreYouSureToRemove0,
         Edit,
-        [Description("My Queries")]
-        MyQueries,
-        [Description("Remove User Query?")]
-        RemoveUserQuery,
-        [Description("{0} should be empty if {1} is set")]
-        _0ShouldBeEmptyIf1IsSet,
-        [Description("{0} should be null if {1} is '{2}'")]
-        _0ShouldBeNullIf1Is2,
-        [Description("{0} should be set if {1} is '{2}'")]
-        _0ShouldBeSetIf1Is2,
         [Description("Create")]
         UserQueries_CreateNew,
         [Description("Edit")]
@@ -555,6 +488,12 @@ namespace Signum.Entities.UserQueries
         _0IsNotFilterable,
         [Description("Use {0} to filter current entity")]
         Use0ToFilterCurrentEntity,
-        Preview
+        Preview,
+        [Description("Makes the user query available in the contextual menu when grouping {0}")]
+        MakesTheUserQueryAvailableInContextualMenuWhenGrouping0,
+        [Description("Makes the user query available as quick link of {0}")]
+        MakesTheUserQueryAvailableAsAQuickLinkOf0,
+        [Description("the selected {0}")]
+        TheSelected0,
     }
 }

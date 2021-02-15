@@ -7,7 +7,9 @@ import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
-import { useForceUpdate } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
+import { SearchMessage } from '@framework/Signum.Entities'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -36,19 +38,23 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
       {query &&
         (<div>
-          <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()} />
+          <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
+            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(ctx.value.entityType?.toStr ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
           {
             p.ctx.value.entityType &&
-            <div>
-              <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
-              <p className="messageEntity col-sm-offset-2">
-                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-              </p>
+            <div className="row">
+              <div className="col-sm-4 offset-sm-2">
+                <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
+              </div>
+              <div className="col-sm-4">
+                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<pre style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></pre>)}
+              </div>
             </div>
-          }
-          <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
-        <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
-        <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
+        }
+        <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+            helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+          <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
+          <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
