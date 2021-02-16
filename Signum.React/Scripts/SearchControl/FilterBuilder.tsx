@@ -394,8 +394,13 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 }
 
 function isFilterActive(fo: FilterOptionParsed) {
-  return fo.pinned == null ||
-    fo.pinned.active == null /*Always*/ ||
+  if (fo.pinned == null)
+    return true;
+
+  if (fo.pinned.splitText && (fo.value == null || fo.value == ""))
+    return false;
+
+  return fo.pinned.active == null /*Always*/ ||
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_StartChecked" ||
     fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
