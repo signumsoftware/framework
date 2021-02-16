@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@framework/Components';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
+import { translated } from '../../Translation/TranslatedInstanceTools'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
 
@@ -193,7 +194,7 @@ export function PanelPart(p: PanelPartProps) {
     });
   }
 
-  const titleText = part.title ?? getToString(content);
+  const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
   const defaultIcon = renderer.defaultIcon(content);
   const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
   const color = part.iconColor ?? defaultIcon?.iconColor;
