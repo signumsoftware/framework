@@ -13,6 +13,7 @@ import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
 import { softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
+import { translated } from '../Translation/TranslatedInstanceTools'
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -143,26 +144,26 @@ export module Converter {
     });
   }
 
-  export function toQueryFilterItem(e: QueryFilterEmbedded): API.QueryFilterItem  {
+  export function toQueryFilterItem(qf: QueryFilterEmbedded): API.QueryFilterItem  {
 
-    function toPinnedFilter(e: PinnedQueryFilterEmbedded): PinnedFilter {
+    function toPinnedFilter(pqf: PinnedQueryFilterEmbedded): PinnedFilter {
       return ({
-        label: e.label == null ? undefined : e.label,
-        column: e.column == null ? undefined : e.column,
-        row: e.row == null ? undefined : e.row,
-        active: e.active,
-        splitText: e.splitText
+        label: pqf.label == null ? undefined : translated(pqf, e => e.label) ?? undefined,
+        column: pqf.column == null ? undefined : pqf.column,
+        row: pqf.row == null ? undefined : pqf.row,
+        active: pqf.active,
+        splitText: pqf.splitText
       })
     }
 
     return ({
-      isGroup: e.isGroup,
-      groupOperation: e.groupOperation ?? undefined,
-      tokenString: e.token ? e.token.tokenString! : undefined,
-      operation: e.operation ?? undefined,
-      valueString: e.valueString ?? undefined,
-      pinned: e.pinned ? toPinnedFilter(e.pinned) : undefined,
-      indentation: e.indentation!,
+      isGroup: qf.isGroup,
+      groupOperation: qf.groupOperation ?? undefined,
+      tokenString: qf.token ? qf.token.tokenString! : undefined,
+      operation: qf.operation ?? undefined,
+      valueString: qf.valueString ?? undefined,
+      pinned: qf.pinned ? toPinnedFilter(qf.pinned) : undefined,
+      indentation: qf.indentation!,
     });
   }
 
