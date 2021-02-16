@@ -115,7 +115,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
           {config.getIcon(tr)}
         </div>
         <div className="card-body">
-          <h5 className="card-title">{config.getLabel(tr)}</h5>
+          <h5 className="card-title">{tr.label}</h5>
         </div>
       </div>
     </a>
