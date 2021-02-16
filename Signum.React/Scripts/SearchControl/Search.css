@@ -205,7 +205,10 @@ table.sf-search-results th.sf-current-column {
 
 .sf-header-sort.desc,
 .sf-header-sort.asc {
-    margin: 4px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin: 2px;
     vertical-align: middle;
     border-right: 6px solid transparent;
     border-left: 6px solid transparent;
