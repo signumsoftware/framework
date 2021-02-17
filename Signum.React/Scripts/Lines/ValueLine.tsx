@@ -627,11 +627,11 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const s = vl.props;
-
-  const luxonFormat = toLuxonFormat(s.formatText, vl.props.type?.name as "Date" | "DateTime");
+  const type = vl.props.type!.name as "Date" | "DateTime";
+  const luxonFormat = toLuxonFormat(s.formatText, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : type == "DateTime";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -644,7 +644,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
     const m = date && DateTime.fromJSDate(date);
     vl.setValue(m == null || !m.isValid ? null :
-      vl.props.type!.name == "Date" ? m.toISODate() :
+      type == "Date" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
           m.toISO());
   };
