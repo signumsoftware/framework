@@ -60,7 +60,7 @@ namespace Signum.React.Selenium
             IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
             {
-                select.SelectElement().SelectByValue(value);
+                select.SelectElement().SelectByValue(value ?? "");
                 return;
             }
 
