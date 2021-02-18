@@ -9,6 +9,9 @@ using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.Engine.Json;
+using System.Text.Json;
+using Signum.Engine.Translation;
 
 namespace Signum.React.UserQueries
 {
@@ -38,7 +41,6 @@ namespace Signum.React.UserQueries
                 if (userQueries.Any())
                     ep.extension.Add("userQueries", userQueries);
             };
-
         }
     }
 }

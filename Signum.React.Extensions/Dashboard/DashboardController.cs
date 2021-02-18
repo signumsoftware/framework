@@ -6,6 +6,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
 using Signum.Entities.Dashboard;
 using Signum.Engine.Dashboard;
+using System.Linq;
 
 namespace Signum.React.Dashboard
 {

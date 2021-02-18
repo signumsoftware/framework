@@ -210,7 +210,7 @@ namespace Signum.Entities.Chart
         [Description("My Charts")]
         MyCharts,
         CreateNew,
-        EditUserChart,
+        Edit,
         ViewPalette,
         [Description("Chart for")]
         ChartFor,

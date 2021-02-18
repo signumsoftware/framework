@@ -16,10 +16,6 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     super(type);
   }
 
-  getLabel(res: ToolbarResponse<QueryEntity>) {
-    return res.label ?? getQueryNiceName(res.content!.toStr!);
-  }
-
   getIcon(element: ToolbarResponse<QueryEntity>) {
 
     if (element.iconName == "count")

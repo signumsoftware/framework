@@ -47,10 +47,6 @@ export abstract class ToolbarConfig<T extends Entity> {
     return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
   }
 
-  getLabel(element: ToolbarResponse<T>) {
-    return element.label ?? element.content!.toStr;
-  }
-
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
   abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
 

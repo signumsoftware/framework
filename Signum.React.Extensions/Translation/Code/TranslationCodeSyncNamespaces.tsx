@@ -67,7 +67,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
 
   return (
     <div>
-      <h2>{TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
       {renderTable()}
     </div>
   );

@@ -139,7 +139,7 @@ export function DraftLink({ contentState, entityKey, children }: { contentState:
   );
 }
 
-export function AutoDraftLink({ decoratedText }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactChildren }) {
+export function AutoDraftLink({ decoratedText, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactChildren }) {
 
   return (
     <a
@@ -151,7 +151,7 @@ export function AutoDraftLink({ decoratedText }: { contentState: draftjs.Content
       onClick={e => { if (e.ctrlKey) { e.preventDefault(); window.open(decoratedText); } }}
       aria-label={decoratedText}
     >
-      {decoratedText}
+      {children}
     </a>
   );
 }

@@ -64,6 +64,8 @@ namespace Signum.Entities.Translation
         NewTranslations,
 
         BackToTranslationStatus,
+
+        ThisFieldIsTranslatable,
     }
 
     public enum TranslationJavascriptMessage

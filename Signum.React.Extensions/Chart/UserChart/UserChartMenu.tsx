@@ -7,13 +7,14 @@ import { is } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { UserChartEntity, ChartRequestModel, ChartMessage, ChartColumnEmbedded } from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartRequestModel, ChartMessage, ChartColumnEmbedded, UserChartOperation } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView, { ChartRequestViewHandle } from '../Templates/ChartRequestView'
 import { getQueryKey } from '@framework/Reflection';
 import * as UserAssetClient from '../../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { tryGetOperationInfo } from '../../../../Framework/Signum.React/Scripts/Operations'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
@@ -35,18 +36,24 @@ export default function UserChartMenu(p : UserChartMenuProps){
     }
   }, [isOpen, p.chartRequestView && p.chartRequestView.userChart]);
 
-  React.useEffect(() => {
-    var uc = p.chartRequestView.userChart;
-    if (uc?.toStr == null) {
-      Navigator.API.fillToStrings(uc)
-        .then(() => forceUpdate())
-        .done();
-    }
-  }, [p.chartRequestView!.userChart])
-
   function reloadList() {
     UserChartClient.API.forQuery(p.chartRequestView.chartRequest.queryKey)
-      .then(list => setUserCharts(list))
+      .then(list => {
+        setUserCharts(list);
+        const userChart = p.chartRequestView.userChart;
+
+        if (userChart && userChart.toStr == null) {
+          const similar = list.singleOrNull(a => is(a, userChart));
+          if (similar) {
+            userChart.toStr = similar.toStr;
+            forceUpdate();
+          } else {
+            Navigator.API.fillToStrings(userChart)
+              .then(() => forceUpdate())
+              .done();
+          }
+        }
+      })
       .done();
   }
 
@@ -102,6 +109,8 @@ export default function UserChartMenu(p : UserChartMenuProps){
   const crView = p.chartRequestView;
   const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : crView.userChart.toStr
 
+  var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
+
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
@@ -117,8 +126,8 @@ export default function UserChartMenu(p : UserChartMenuProps){
             </Dropdown.Item>)
         }
         {Boolean(userCharts?.length) && <Dropdown.Divider />}
-        {crView.userChart && <Dropdown.Item onClick={handleEdit}>{ChartMessage.EditUserChart.niceToString()}</Dropdown.Item>}
-        <Dropdown.Item onClick={() => onCreate().done()}>{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>
+        {crView.userChart && canSave &&<Dropdown.Item onClick={handleEdit}><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={() => onCreate().done()}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

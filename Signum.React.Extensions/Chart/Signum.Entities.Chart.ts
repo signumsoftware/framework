@@ -73,7 +73,7 @@ export module ChartMessage {
   export const CreatePalette = new MessageKey("ChartMessage", "CreatePalette");
   export const MyCharts = new MessageKey("ChartMessage", "MyCharts");
   export const CreateNew = new MessageKey("ChartMessage", "CreateNew");
-  export const EditUserChart = new MessageKey("ChartMessage", "EditUserChart");
+  export const Edit = new MessageKey("ChartMessage", "Edit");
   export const ViewPalette = new MessageKey("ChartMessage", "ViewPalette");
   export const ChartFor = new MessageKey("ChartMessage", "ChartFor");
   export const ChartOf0 = new MessageKey("ChartMessage", "ChartOf0");

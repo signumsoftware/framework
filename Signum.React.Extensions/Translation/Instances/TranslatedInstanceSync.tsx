@@ -76,15 +76,25 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
 
   useTitle(message);
 
+  if (result && result.totalInstances == 0) {
+    return (
+      <div>
+        <div className="mb-2">
+          <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
+        </div>
+        {result && result.totalInstances == 0 && <Link to={`~/translatedInstance/status`}>
+          {TranslationMessage.BackToTranslationStatus.niceToString()}
+        </Link>}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-2">
-        <h2>{message}</h2>
+        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
       </div>
       {result && result.totalInstances > 0 && renderTable()}
-      {result && result.totalInstances == 0 && <Link to={`~/translatedInstance/status`}>
-        {TranslationMessage.BackToTranslationStatus.niceToString()}
-      </Link>}
     </div>
   );
 }
@@ -153,7 +163,7 @@ export function TranslatedInstances(p: { data: TypeInstancesChanges, cultures: {
                         <tr key={c}>
                           <td className="leftCell">{c}</td>
                           <td className="monospaceCell">
-                            {rc.diff ? <DiffDocumentSimple diff={rc.diff} /> : <pre>{rc.original}</pre>}
+                            {rc.diff ? <DiffDocumentSimple diff={rc.diff} /> : <pre className="mb-0">{rc.original}</pre>}
                           </td>
                         </tr>
                       );

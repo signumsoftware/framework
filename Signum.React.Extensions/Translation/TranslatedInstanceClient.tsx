@@ -1,13 +1,21 @@
 import * as React from 'react'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
-import { TranslationPermission, TranslatedSummaryState, TranslateableRouteType } from './Signum.Entities.Translation'
+import * as AppContext from '@framework/AppContext';
+import { TranslationPermission, TranslatedSummaryState, TranslateableRouteType, TranslationMessage } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { QueryString } from '@framework/QueryString';
-import { Lite, Entity } from '@framework/Signum.Entities';
+import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
+import * as CultureClient from './CultureClient'
 import { DiffBlock } from '../DiffLog/DiffLogClient';
 import { AutomaticTranslation } from './TranslationClient';
+import { Binding, tasks } from '../../../Framework/Signum.React/Scripts/Lines';
+import { LineBaseController, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase';
+import { ValueLineController, ValueLineProps } from '../../../Framework/Signum.React/Scripts/Lines/ValueLine';
+import { classes } from '../../../Framework/Signum.React/Scripts/Globals';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getLambdaMembers } from '@framework/Reflection';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -17,6 +25,8 @@ export function start(options: { routes: JSX.Element[] }) {
     onClick: () => Promise.resolve("~/translatedInstance/status")
   });
 
+  tasks.push(taskSetTranslatableIcon)
+
   options.routes.push(
     <ImportRoute path="~/translatedInstance/status" onImportModule={() => import("./Instances/TranslatedInstanceStatus")} />,
     <ImportRoute path="~/translatedInstance/view/:type/:culture?" onImportModule={() => import("./Instances/TranslatedInstanceView")} />,
@@ -24,6 +34,56 @@ export function start(options: { routes: JSX.Element[] }) {
   );
 }
 
+export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
+    const vProps = state as ValueLineProps;
+
+    if (state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field" &&
+      state.ctx.propertyRoute.member!.translatable) {
+      if (!vProps.extraButtons)
+        vProps.extraButtons = vlc => <TranslateButton controller={lineBase} />;
+
+      if (!vProps.helpText) {
+        var binding = (vProps.ctx.binding as Binding<string>);
+        var value = binding.parentObject[binding.member + "_translated"];
+        if (value != null)
+          vProps.helpText = <><strong>{CultureClient.currentCulture.name}:</strong> {value}</>;
+      }
+    }
+  }
+}
+
+function TranslateButton(p: { controller: ValueLineController }) {
+
+  var culture = CultureClient.currentCulture.name.tryBefore("-") ?? CultureClient.currentCulture.name;
+
+  var ctx = p.controller.props.ctx.tryFindRootEntity();
+
+  return (
+    <a href="#" className={classes("sf-line-button sf-view", "btn input-group-text")}
+      onClick={e => {
+        e.preventDefault();
+
+        const url =
+          ctx == null ? `~/translatedInstance/status/` :
+          (ctx.value as Entity).id == null ? `~/translatedInstance/view/${ctx.value.Type}/${culture}` :
+            `~/translatedInstance/view/${ctx.value.Type}/${culture}?filter=${ctx.value.Type};${(ctx.value as Entity).id}`;
+
+        window.open(AppContext.toAbsoluteUrl(url));
+      }}
+      title={p.controller.props.ctx.titleLabels ? TranslationMessage.ThisFieldIsTranslatable.niceToString() : undefined}>
+      <FontAwesomeIcon icon="language" />
+    </a>
+  );
+}
+
+declare module '@framework/Reflection' {
+
+  export interface MemberInfo {
+    translatable: boolean;
+  }
+}
 
 export module API {
 

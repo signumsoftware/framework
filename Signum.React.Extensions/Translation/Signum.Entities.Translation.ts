@@ -64,6 +64,7 @@ export module TranslationMessage {
   export const NewTypes = new MessageKey("TranslationMessage", "NewTypes");
   export const NewTranslations = new MessageKey("TranslationMessage", "NewTranslations");
   export const BackToTranslationStatus = new MessageKey("TranslationMessage", "BackToTranslationStatus");
+  export const ThisFieldIsTranslatable = new MessageKey("TranslationMessage", "ThisFieldIsTranslatable");
 }
 
 export module TranslationPermission {

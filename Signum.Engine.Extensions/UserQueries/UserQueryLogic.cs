@@ -3,6 +3,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
 using Signum.Entities;
@@ -135,11 +136,9 @@ namespace Signum.Engine.UserQueries
             var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
-                .Where(e =>
-                {
-                    var uq = UserQueries.Value.GetOrThrow(e);
-                    return isAllowed(uq) && (!appendFilterOnly || uq.AppendFilters);
-                })
+                .Select(lite => UserQueries.Value.GetOrThrow(lite))
+                .Where(uq => isAllowed(uq) && (!appendFilterOnly || uq.AppendFilters))
+                .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
                 .ToList();
         }
 
@@ -148,15 +147,28 @@ namespace Signum.Engine.UserQueries
             var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
             return UserQueriesByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
+                 .Select(lite => UserQueries.Value.GetOrThrow(lite))
+                 .Where(uq => isAllowed(uq))
+                 .Select(uq => uq.ToLite(TranslatedInstanceLogic.TranslatedField(uq, d => d.DisplayName)))
+                 .ToList();
         }
 
         public static List<Lite<UserQueryEntity>> Autocomplete(string subString, int limit)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
-            return UserQueries.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
-                .Select(a => a.Key).Autocomplete(subString, limit).ToList();
+            return UserQueries.Value.Values
+                .Where(uq => uq.EntityType == null && isAllowed(uq))
+                 .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+                 .Autocomplete(subString, limit)
+                 .ToList();
+        }
+
+        public static void RegisterTranslatableRoutes()
+        {
+            TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.DisplayName);
+            TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
+            TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
         }
 
         public static UserQueryEntity RetrieveUserQuery(this Lite<UserQueryEntity> userQuery)
