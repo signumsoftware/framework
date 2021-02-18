@@ -464,6 +464,7 @@ namespace Signum.Engine.Templating
 
         public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, Action<bool, string> addError)
         {
+            this.fieldOrPropertyChain = fieldOrPropertyChain;
             if (modelType == null)
             {
                 addError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
