@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { Dic, areEqual, classes } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage, Lite } from '../Signum.Entities'
-import { isNumber } from '../Lines/ValueLine'
+import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
@@ -453,19 +453,6 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     forceUpdate();
   }
-
-  function trimDateToFormat(date: string, newToken: QueryToken) {
-
-    var luxonFormat = toLuxonFormat(newToken.format, newToken.type.name as "Date" | "DateTime");
-
-    if (!luxonFormat)
-      return date;
-
-    const formatted = DateTime.fromISO(date).toFormat(luxonFormat);
-    const dateTime = DateTime.fromFormat(formatted, luxonFormat);
-    return newToken.type.name == "Date" ? dateTime.toISODate() : dateTime.toISO();
-  }
-
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
     const operation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;

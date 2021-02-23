@@ -11,7 +11,7 @@ import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
-import { isPrefix } from '../FindOptions'
+import { isPrefix, QueryToken } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -631,7 +631,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const luxonFormat = toLuxonFormat(s.formatText, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : type == "DateTime";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "Date" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -642,11 +642,12 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     );
 
   const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
+
     const m = date && DateTime.fromJSDate(date);
     vl.setValue(m == null || !m.isValid ? null :
       type == "Date" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
-          m.toISO());
+          trimDateToFormat(m, "DateTime", s.formatText));
   };
 
   const htmlAttributes = {
@@ -669,6 +670,24 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       )}
     </FormGroup>
   );
+}
+
+export function trimDateToFormat(date: string, token: QueryToken): string;
+export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): string;
+export function trimDateToFormat(date: string | DateTime, typeOrToken: QueryToken | "Date" | "DateTime", format?: string | undefined): string {
+
+  const f = (typeOrToken as QueryToken).type ? (typeOrToken as QueryToken).format : format;
+  const type = ((typeOrToken as QueryToken).type ? (typeOrToken as QueryToken).type.name : typeOrToken) as "Date" | "DateTime";
+  const str = (typeof date === "string") ? date : (type == "Date" ? date.toISODate() : date.toISO());
+
+  const luxonFormat = toLuxonFormat(f, type);
+
+  if (!luxonFormat)
+    return str; 
+
+  const formatted = DateTime.fromISO(str).toFormat(luxonFormat);
+  const dateTime = DateTime.fromFormat(formatted, luxonFormat);
+  return type == "Date" ? dateTime.toISODate() : dateTime.toISO();
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
