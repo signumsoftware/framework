@@ -2,13 +2,6 @@
 import BpmnReplaceMenuProvider from "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider"
 import * as BpmnUtils from './BpmnUtils'
 
-interface ReplaceOptions {
-  actionName: string;
-  className: string;
-  label: string;
-  target: BPMN.DiElement;
-}
-
 export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
   static $inject = ['popupMenu', 'modeling', 'moddle', 'bpmnReplace', 'rules', 'translate'];
   constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any) {
@@ -19,23 +12,55 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     return [];
   }
 
-  _createEntries(element: BPMN.DiElement, replaceOptions: ReplaceOptions[]) {
+  getPopupMenuEntries(element: BPMN.DiElement) {
+
     if (BpmnUtils.isGatewayAnyKind(element.type))
-      return super._createEntries(element, replaceOptions.filter(a =>
-        a.actionName == "replace-with-parallel-gateway" ||
-        a.actionName == "replace-with-inclusive-gateway" ||
-        a.actionName == "replace-with-exclusive-gateway"));
+      return this.entriesOrUpdaterGateways;
 
     if (element.type == "bpmn:IntermediateThrowEvent")
-      return super._createEntries(element, replaceOptions.filter(a =>
-        a.actionName == "replace-with-timer-intermediate-catch"));
+      return this.entriesOrUpdaterIntermediateEvents;
 
     if (element.type == "bpmn:BoundaryEvent")
-      return super._createEntries(element, replaceOptions.filter(a =>
-        a.actionName == "replace-with-timer-boundary" ||
-        a.actionName == "replace-with-non-interrupting-timer-boundary"));
+      return this.entriesOrUpdaterBoundaryEvents;
 
-    return [];
+    return this.entriesOrUpdaterEmpty;
+  }
+
+  entriesOrUpdaterGateways(entries: BPMN.EntriesObject) {
+    
+    Object.keys(entries)
+      .filter(key => key != "replace-with-parallel-gateway" &&
+        key != "replace-with-inclusive-gateway" &&
+        key != "replace-with-exclusive-gateway")
+      .forEach(key => delete entries[key]);
+
+    return entries;
+  }
+
+  entriesOrUpdaterIntermediateEvents(entries: BPMN.EntriesObject) {
+
+    Object.keys(entries)
+      .filter(key => key != "replace-with-timer-intermediate-catch")
+      .forEach(key => delete entries[key]);
+
+    return entries;
+  }
+
+  entriesOrUpdaterBoundaryEvents(entries: BPMN.EntriesObject) {
+
+    Object.keys(entries)
+      .filter(key => key != "replace-with-timer-boundary" &&
+        key != "replace-with-non-interrupting-timer-boundary")
+      .forEach(key => delete entries[key]);
+
+    return entries;
+  }
+
+  entriesOrUpdaterEmpty(entries: BPMN.EntriesObject) {
+
+    Object.keys(entries).forEach(key => delete entries[key]);
+
+    return entries;
   }
 }
 
