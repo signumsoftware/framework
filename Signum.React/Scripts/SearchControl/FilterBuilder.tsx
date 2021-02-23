@@ -135,10 +135,10 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                   </a>
 
-                {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
+                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
                     className="sf-line-button ml-3"
-                  onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                  <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
+                    onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
                   </a>
                   }
                 </td>
@@ -441,7 +441,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
-        f.value = f.value && trimDateToFormat(f.value, newToken);
+        if (f.value) {
+          const type = newToken.type.name as "Date" | "DateTime";
+          const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
+          f.value = type == "Date" ? date.toISODate() : date.toISO();
+        }
       }
     }
     f.token = newToken ?? undefined;

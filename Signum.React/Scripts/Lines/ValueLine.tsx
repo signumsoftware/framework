@@ -643,11 +643,15 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
   const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
 
-    const m = date && DateTime.fromJSDate(date);
+    var m = date && DateTime.fromJSDate(date);
+
+    if (m)
+      m = trimDateToFormat(m, type, s.formatText);
+
     vl.setValue(m == null || !m.isValid ? null :
       type == "Date" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
-          trimDateToFormat(m, "DateTime", s.formatText));
+          m.toISO());
   };
 
   const htmlAttributes = {
@@ -672,22 +676,15 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   );
 }
 
-export function trimDateToFormat(date: string, token: QueryToken): string;
-export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): string;
-export function trimDateToFormat(date: string | DateTime, typeOrToken: QueryToken | "Date" | "DateTime", format?: string | undefined): string {
+export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): DateTime {
 
-  const f = (typeOrToken as QueryToken).type ? (typeOrToken as QueryToken).format : format;
-  const type = ((typeOrToken as QueryToken).type ? (typeOrToken as QueryToken).type.name : typeOrToken) as "Date" | "DateTime";
-  const str = (typeof date === "string") ? date : (type == "Date" ? date.toISODate() : date.toISO());
-
-  const luxonFormat = toLuxonFormat(f, type);
+  const luxonFormat = toLuxonFormat(format, type);
 
   if (!luxonFormat)
-    return str; 
+    return date; 
 
-  const formatted = DateTime.fromISO(str).toFormat(luxonFormat);
-  const dateTime = DateTime.fromFormat(formatted, luxonFormat);
-  return type == "Date" ? dateTime.toISODate() : dateTime.toISO();
+  const formatted = date.toFormat(luxonFormat);
+  return DateTime.fromFormat(formatted, luxonFormat);
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
