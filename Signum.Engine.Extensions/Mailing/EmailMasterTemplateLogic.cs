@@ -68,7 +68,9 @@ namespace Signum.Engine.Mailing
 
         public static Lite<EmailMasterTemplateEntity>? GetDefaultMasterTemplate()
         {
-            var result = Database.Query<EmailMasterTemplateEntity>().Select(emt => emt.ToLite()).FirstOrDefault();
+
+
+            var result = Database.Query<EmailMasterTemplateEntity>().Where(a => a.IsDefault).Select(emt => emt.ToLite()).FirstOrDefault();
 
             if (result != null)
                 return result;
@@ -77,6 +79,8 @@ namespace Signum.Engine.Mailing
                 return null;
 
             var newTemplate = CreateDefaultMasterTemplate();
+
+            newTemplate.IsDefault = true;
 
             using (OperationLogic.AllowSave<EmailMasterTemplateEntity>())
                 return newTemplate.Save().ToLite();

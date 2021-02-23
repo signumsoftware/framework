@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
+using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {
@@ -17,12 +18,13 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        public bool IsDefault { get; set; }
+
         [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
-
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
