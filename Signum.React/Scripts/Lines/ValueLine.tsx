@@ -28,6 +28,8 @@ export interface ValueLineProps extends LineBaseProps {
   columnCount?: number;
   columnWidth?: number;
   showTimeBox?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 export interface OptionItem {
@@ -664,6 +666,8 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
             includeTime={showTime}
             inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+            min={s.minDate}
+            max={s.maxDate}
           />
         </div>
       )}
