@@ -1169,7 +1169,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               i == this.state.dragColumnIndex && "sf-draggin",
               co == this.state.editingColumn && "sf-current-column",
               !this.canOrder(co) && "noOrder",
-              co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
+              co.token && co.token.type.isCollection && "error",
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
             data-column-name={co.token && co.token.fullKey}
