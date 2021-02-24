@@ -129,7 +129,8 @@ table.sf-search-results th.sf-current-column {
     border-bottom: 2px solid #aaa;
 }
 
-    table.sf-search-results th.sf-current-column.error {
+    table.sf-search-results th.sf-current-column.error,
+    table.sf-search-results th.error {
         background-color: #f2dede;
         border-bottom: 2px solid #a94442;
     }
