@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { Dic, areEqual, classes } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage, Lite } from '../Signum.Entities'
-import { isNumber } from '../Lines/ValueLine'
+import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
@@ -135,10 +135,10 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                   </a>
 
-                {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
+                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
                     className="sf-line-button ml-3"
-                  onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                  <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
+                    onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
                   </a>
                   }
                 </td>
@@ -446,7 +446,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
-        f.value = f.value && trimDateToFormat(f.value, newToken);
+        if (f.value) {
+          const type = newToken.type.name as "Date" | "DateTime";
+          const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
+          f.value = type == "Date" ? date.toISODate() : date.toISO();
+        }
       }
     }
     f.token = newToken ?? undefined;
@@ -458,19 +462,6 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     forceUpdate();
   }
-
-  function trimDateToFormat(date: string, newToken: QueryToken) {
-
-    var luxonFormat = toLuxonFormat(newToken.format, newToken.type.name as "Date" | "DateTime");
-
-    if (!luxonFormat)
-      return date;
-
-    const formatted = DateTime.fromISO(date).toFormat(luxonFormat);
-    const dateTime = DateTime.fromFormat(formatted, luxonFormat);
-    return newToken.type.name == "Date" ? dateTime.toISODate() : dateTime.toISO();
-  }
-
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
     const operation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;
