@@ -564,11 +564,14 @@ export default function renderPivotTable({ data, width, height, parameters, load
       <>
         {
           grhList.map(grh => {
+
+            var newFilters = [...filters, ...grh?.getFilters(false) ?? []];
+
             var grNext = gor && grh && (gor as RowDictionary)[grh.getKey()]?.dicOrRows;
             if (isLast)
-              return <Cell key={grh?.getKey()} style={valueStyle} isSummary={isSummary} gor={grNext} filters={[...filters, ...grh?.getFilters(false) ?? []]} />;
+              return <Cell key={grh?.getKey()} style={valueStyle} isSummary={isSummary} gor={grNext} filters={newFilters} />;
             else
-              return <CellGroup key={grh?.getKey()} gor={grNext} filters={filters} grhList={grh?.subGroups ?? empty} level={level + 1} isSummary={isSummary} />;
+              return <CellGroup key={grh?.getKey()} gor={grNext} filters={newFilters} grhList={grh?.subGroups ?? empty} level={level + 1} isSummary={isSummary} />;
           })
         }
         {horStyles[level].subTotal == "yes" && <Cell isSummary={(isSummary ?? 0) + (horStyles.length - level)} style={valueStyle}
