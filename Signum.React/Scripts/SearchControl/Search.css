@@ -321,7 +321,12 @@ ul.sf-context-menu li a:not([disabled]) {
     padding: 0 .5em;
 }
 
-/* [data-intent=keyboard] */.rw-list-option.rw-state-focus:not(.rw-state-selected) {
+.sf-prefix-btn {
+    padding: 0px 2px;
+    vertical-align: text-bottom;
+}
+
+/* [data-intent=keyboard] */ .rw-list-option.rw-state-focus:not(.rw-state-selected) {
     background-color: #e9ecef;
     border-color: #e9ecef;
 }
