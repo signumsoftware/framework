@@ -133,7 +133,7 @@ export function EmailMessageComponent(p : EmailMessageComponentProps){
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </a>
-        {showPreview && <IFrameRenderer style={{ width: "100%", height: "150px" }} html={ec.value.body.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", height: "450px" }} html={ec.value.body.text} />}
       </div>
     </div>
   );
