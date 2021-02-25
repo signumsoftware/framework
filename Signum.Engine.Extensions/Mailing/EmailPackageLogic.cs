@@ -68,6 +68,7 @@ namespace Signum.Engine.Mailing
 
                         foreach (var m in messages.Select(m => m.RetrieveAndForget()))
                         {
+                            
                             new EmailMessageEntity()
                             {
                                 Package = emailPackage.ToLite(),
