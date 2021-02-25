@@ -339,7 +339,7 @@ namespace Signum.Engine.Mailing
                 throw new InvalidOperationException($"No EmailTemplate for {emailModel} found and DefaultTemplateConstructor = null");
 
             EmailTemplateEntity template = info.DefaultTemplateConstructor.Invoke();
-            if (template.MasterTemplate != null)
+            if (template.MasterTemplate == null)
                 template.MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate();
 
             if (template.Name == null)
