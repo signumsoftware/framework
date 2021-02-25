@@ -111,7 +111,6 @@ namespace Signum.Engine.Mailing
                             IsHtml = template.IsBodyHtml,
                             Model = model,
                         }));
-                    
                 }
 
             }
