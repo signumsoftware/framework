@@ -112,7 +112,7 @@ table.sf-search-results > tbody > tr > td {
     border-radius: 4px;
 }
 
-    .sf-column-editor.error {
+    .sf-column-editor .error {
         background: #f2dede;
     }
 
@@ -129,16 +129,17 @@ table.sf-search-results th.sf-current-column {
     border-bottom: 2px solid #aaa;
 }
 
-    table.sf-search-results th.sf-current-column.error {
+    table.sf-search-results th.sf-current-column.error,
+    table.sf-search-results th.error {
         background-color: #f2dede;
         border-bottom: 2px solid #a94442;
     }
 
-td.numeric-cell {
+.numeric-cell {
     text-align: right
 }
 
-td.centered-cell {
+.centered-cell {
     text-align: center
 }
 

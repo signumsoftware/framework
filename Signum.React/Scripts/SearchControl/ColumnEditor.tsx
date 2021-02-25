@@ -16,8 +16,14 @@ interface ColumnEditorProps {
 
 export default function ColumnEditor(p: ColumnEditorProps) {
 
+  function handleSummaryTokenChanged(newToken: QueryToken | undefined) {
+    p.columnOption.summaryToken = newToken;
+    p.onChange(undefined);
+  }
+
   function handleTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.token = newToken;
+    p.columnOption.summaryToken = undefined;
     p.columnOption.displayName = newToken?.niceName;
     p.onChange(newToken);
   }
@@ -27,16 +33,23 @@ export default function ColumnEditor(p: ColumnEditorProps) {
     p.onChange(undefined);
   }
 
+  function handleSummaryCheck() {
+    co.summaryToken = co.summaryToken ? undefined : co.token;
+    p.onChange(undefined);
+  }
+
   const co = p.columnOption;
 
   const isCollection = co.token && co.token.type.isCollection;
 
+  const summaryNotAggregate = co.summaryToken != null && co.summaryToken.queryTokenType != "Aggregate";
+
   return (
-    <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
-      title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+    <div className="sf-column-editor">
       <button type="button" className="close" aria-label="Close" onClick={p.close} ><span aria-hidden="true">×</span></button>
-      <div className="d-flex">
-        <label htmlFor="inputEmail3" className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "100px" }}>{SearchMessage.Field.niceToString()}</label>
+      <div className={classes("d-flex", isCollection ? "error" : undefined)}
+        title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>
         <div className="flex-grow-1">
           <div className="rw-widget-xs">
             <QueryTokenBuilder
@@ -49,11 +62,29 @@ export default function ColumnEditor(p: ColumnEditorProps) {
         </div>
       </div>
       <div className="d-flex">
-        <label htmlFor="inputEmail3" className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "100px" }}>{SearchMessage.DisplayName.niceToString()}</label>
+        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>{SearchMessage.DisplayName.niceToString()}</label>
         <div className="flex-grow-1">
           <input className="form-control form-control-xs"
             value={co.displayName || ""}
             onChange={handleOnChange} />
+        </div>
+      </div>
+      <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
+        title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
+        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
+          <input type="checkbox" disabled={co.token ==null} checked={co.summaryToken != null} onChange={handleSummaryCheck} className="mr-1" />
+          {SearchMessage.SummaryHeader.niceToString()}
+        </label>
+        <div className="flex-grow-1">
+          <div className="rw-widget-xs">
+            {co.summaryToken && <QueryTokenBuilder
+              queryToken={co.summaryToken!}
+              onTokenChange={handleSummaryTokenChanged}
+              queryKey={p.queryDescription.queryKey}
+              subTokenOptions={p.subTokensOptions | SubTokensOptions.CanAggregate}
+              readOnly={false} />
+            }
+          </div>
         </div>
       </div>
     </div>

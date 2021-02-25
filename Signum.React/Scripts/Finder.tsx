@@ -130,7 +130,16 @@ export namespace Options {
     return import("./SearchControl/SearchModal");
   }
 
-  export let entityColumnHeader : () => React.ReactChild = () => "";
+  export let entityColumnHeader: () => React.ReactChild = () => "";
+
+  export const tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+
+  export let defaultPagination: Pagination = {
+    mode: "Paginate",
+    elementsPerPage: 20,
+    currentPage: 1,
+  };
+
 }
 
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
@@ -305,7 +314,7 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
 export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
   const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-    c.token!.fullKey == d.name && (c.displayName == d.displayName);
+    c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null;
 
   ideal = ideal.filter(a => a.name != "Entity");
 
@@ -331,13 +340,21 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
     return {
       mode: "Add",
-      columns: current.slice(ideal.length).map(c => ({ token: c.token!.fullKey, displayName: c.token!.niceName == c.displayName ? undefined : c.displayName }) as ColumnOption)
+      columns: current.slice(ideal.length).map(c => ({
+        token: c.token!.fullKey,
+        displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
+        summaryToken: c.summaryToken?.fullKey,
+      }) as ColumnOption)
     };
   }
 
   return {
     mode: "Replace",
-    columns: current.map(c => ({ token: c.token!.fullKey, displayName: c.token!.niceName == c.displayName ? undefined : c.displayName }) as ColumnOption),
+    columns: current.map(c => ({
+      token: c.token!.fullKey,
+      displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
+      summaryToken: c.summaryToken?.fullKey
+    }) as ColumnOption),
   };
 }
 
@@ -388,18 +405,11 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
+      summaryToken: co.summaryToken && completer.get(co.summaryToken.toString())
     }) as ColumnOptionParsed));
 }
 
 
-export const tokensToIgnore = [
-  "Id",
-  "Entity.Id",
-  "Ticks",
-  "Entity.Ticks",
-  "ToStr",
-  "Entity.ToStr",
-];
 
 export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], avoidCustom?: boolean): Promise<any> {
 
@@ -426,7 +436,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
-      tokensToIgnore.contains(fo.token.fullKey) ||
+      !Options.tokenCanSetPropery(fo.token) ||
       fo.operation != "EqualTo" ||
       !isActive(fo))
       return null;
@@ -511,7 +521,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
 
   const qs = getSettings(fo.queryKey);
 
-  const defPagination = qs?.pagination ?? Settings.defaultPagination;
+  const defPagination = qs?.pagination ?? Options.defaultPagination;
 
   function equalsPagination(p1: Pagination, p2: Pagination) {
     return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
@@ -678,7 +688,6 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
-
   if (!fo.groupResults && (!fo.orderOptions || fo.orderOptions.length == 0)) {
     var defaultOrder = getDefaultOrder(qd, qs);
 
@@ -702,20 +711,23 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   if (fo.orderOptions)
     fo.orderOptions.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
-  if (fo.columnOptions)
+  if (fo.columnOptions) {
     fo.columnOptions.forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+  }
 
   return completer.finished().then(() => {
 
     var result: FindOptionsParsed = {
       queryKey: qd.queryKey,
       groupResults: fo.groupResults == true,
-      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Settings.defaultPagination,
+      pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
       systemTime: fo.systemTime,
 
       columnOptions: (fo.columnOptions ?? []).map(co => ({
         token: completer.get(co.token.toString()),
-        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName
+        displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
+        summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -741,6 +753,25 @@ export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): Quer
       .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
+    systemTime: fo.systemTime,
+  };
+}
+
+export function getSummaryQueryRequest(fo: FindOptionsParsed): QueryRequest | null {
+
+  var summaryTokens = fo.columnOptions.filter(a => a.summaryToken != undefined).map(a => a.summaryToken!)
+    .filter(a => a.queryTokenType == "Aggregate");
+
+  if (summaryTokens.length == 0)
+    return null;
+
+  return {
+    queryKey: fo.queryKey,
+    groupResults: true,
+    filters: toFilterRequests(fo.filterOptions),
+    columns: summaryTokens.map(sqt => ({ token: sqt.fullKey, displayName: sqt.niceName! })),
+    orders: [],
+    pagination: { mode: "All" }, //Should be 1 result anyway
     systemTime: fo.systemTime,
   };
 }
@@ -1144,10 +1175,23 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
       if (val == null)
         return null;
-      var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
-      return token.type.name == "Date" ? dt.toISODate() : dt.toISO();
+      if (typeof val == "string") {
+
+        var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
+
+        if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
+          return dt.toISO();
+
+        if (val.length > 10 && token.type.name == "Date") //DateTime -> Date
+          return dt.toISODate();
+
+        return val;
+      }
+
+      return val;
     }
+
     case "Lite":
       {
         const lite = convertToLite(val);
@@ -1261,15 +1305,6 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
 }
 
 
-
-export module Settings {
-
-  export let defaultPagination: Pagination = {
-    mode: "Paginate",
-    elementsPerPage: 20,
-    currentPage: 1,
-  };
-}
 
 export module API {
 
@@ -1392,8 +1427,13 @@ export module Encoder {
   }
 
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
-    if (columnOptions)
-      columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : ""));
+    if (columnOptions) {
+      columnOptions.forEach((co, i) => {
+        query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : "");
+        if (co.summaryToken)
+          query["summary" + i] = co.summaryToken.toString();
+      });
+    }
   }
 
   export function stringValue(value: any): string {
@@ -1498,25 +1538,29 @@ export module Decoder {
     return str.replace("#|#", "~");
   }
 
-  export function valuesInOrder(query: any, prefix: string): string[] {
+  export function valuesInOrder(query: any, prefix: string): { index: number, value: string }[] {
     const regex = new RegExp("^" + prefix + "(\\d*)$");
 
     return Dic.getKeys(query).map(s => regex.exec(s))
-      .filter(r => !!r).map(r => r!).orderBy(a => parseInt(a[1])).map(s => query[s[0]]);
+      .filter(r => !!r)
+      .map(r => ({ index: parseInt(r![1]), value: query[r![0]] }))
+      .orderBy(a => a.index);   
   }
 
   export function decodeOrders(query: any): OrderOption[] {
-    return valuesInOrder(query, "order").map(val => ({
-      orderType: val[0] == "-" ? "Descending" : "Ascending",
-      token: val[0] == "-" ? val.tryAfter("-") : val
+    return valuesInOrder(query, "order").map(p => ({
+      orderType: p.value[0] == "-" ? "Descending" : "Ascending",
+      token: p.value[0] == "-" ? p.value.tryAfter("-") : p.value
     } as OrderOption));
   }
 
   export function decodeColumns(query: any): ColumnOption[] {
+    var summary = valuesInOrder(query, "summary");
 
-    return valuesInOrder(query, "column").map(val => ({
-      token: val.tryBefore("~") ?? val,
-      displayName: unscapeTildes(val.tryAfter("~"))
+    return valuesInOrder(query, "column").map(p => ({
+      token: p.value.tryBefore("~") ?? p.value,
+      displayName: unscapeTildes(p.value.tryAfter("~")),
+      summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
     }) as ColumnOption);
   }
 }
@@ -1576,8 +1620,8 @@ export interface SimpleFilterBuilderContext {
 
 export interface FormatRule {
   name: string;
-  formatter: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => CellFormatter;
-  isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
+  formatter: (column: QueryToken, sc: SearchControlLoaded | undefined) => CellFormatter;
+  isApplicable: (column: QueryToken, sc: SearchControlLoaded | undefined) => boolean;
 }
 
 export class CellFormatter {
@@ -1596,22 +1640,20 @@ export interface CellFormatterContext {
 }
 
 
-export function getCellFormatter(qs: QuerySettings | undefined, co: ColumnOptionParsed, sc: SearchControlLoaded | undefined): CellFormatter | undefined {
-  if (!co.token)
-    return undefined;
+export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined): CellFormatter {
 
-  const result = qs?.formatters && qs.formatters[co.token.fullKey];
+  const result = qs?.formatters && qs.formatters[qt.fullKey];
 
   if (result)
     return result;
 
-  const prRoute = registeredPropertyFormatters[co.token.propertyRoute!];
+  const prRoute = registeredPropertyFormatters[qt.propertyRoute!];
   if (prRoute)
     return prRoute;
 
-  const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
+  const rule = formatRules.filter(a => a.isApplicable(qt, sc)).last("FormatRules");
 
-  return rule.formatter(co, sc);
+  return rule.formatter(qt, sc);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
@@ -1625,49 +1667,49 @@ export function registerPropertyFormatter(pr: PropertyRoute | undefined, formate
 export const formatRules: FormatRule[] = [
   {
     name: "Object",
-    isApplicable: col => true,
-    formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
+    isApplicable: qt => true,
+    formatter: qt => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
   },
   {
     name: "Password",
-    isApplicable: col => col.token?.format == "Password",
-    formatter: col => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
+    isApplicable: qt => qt.format == "Password",
+    formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
   },
   {
     name: "Enum",
-    isApplicable: col => col.token!.filterType == "Enum",
-    formatter: col => new CellFormatter(cell => {
+    isApplicable: qt => qt.filterType == "Enum",
+    formatter: qt => new CellFormatter(cell => {
       if (cell == undefined)
         return undefined;
 
-      var ei = getEnumInfo(col.token!.type.name, cell);
+      var ei = getEnumInfo(qt.type.name, cell);
 
       return <span>{ei ? ei.niceName : cell}</span>
     })
   },
   {
     name: "Lite",
-    isApplicable: col => col.token!.filterType == "Lite",
-    formatter: col => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+    isApplicable: qt => qt.filterType == "Lite",
+    formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
   },
 
   {
     name: "Guid",
-    isApplicable: col => col.token!.filterType == "Guid",
-    formatter: col => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    isApplicable: qt => qt.filterType == "Guid",
+    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
-    isApplicable: col => col.token!.filterType == "DateTime",
-    formatter: col => {
-      const luxonFormat = toLuxonFormat(col.token!.format, col.token!.type.name as "Date" | "DateTime");
+    isApplicable: qt => qt.filterType == "DateTime",
+    formatter: qt => {
+      const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
       return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
     name: "SystemValidFrom",
-    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidFrom",
-    formatter: col => {
+    isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
+    formatter: qt => {
       return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
@@ -1682,8 +1724,8 @@ export const formatRules: FormatRule[] = [
   },
   {
     name: "SystemValidTo",
-    isApplicable: col => col.token!.fullKey.tryAfterLast(".") == "SystemValidTo",
-    formatter: col => {
+    isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidTo",
+    formatter: qt => {
       return new CellFormatter((cell: string | undefined, ctx) => {
         if (cell == undefined || cell == "")
           return "";
@@ -1698,23 +1740,23 @@ export const formatRules: FormatRule[] = [
   },
   {
     name: "Number",
-    isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
-    formatter: col => {
-      const numberFormat = toNumberFormat(col.token!.format);
+    isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
+    formatter: qt => {
+      const numberFormat = toNumberFormat(qt.format);
       return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell)}</span>, "numeric-cell");
     }
   },
   {
     name: "Number with Unit",
-    isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
-    formatter: col => {
-      const numberFormat = toNumberFormat(col.token!.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+    isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
+    formatter: qt => {
+      const numberFormat = toNumberFormat(qt.format);
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
     }
   },
   {
     name: "Bool",
-    isApplicable: col => col.token!.filterType == "Boolean",
+    isApplicable: qt => qt.filterType == "Boolean",
     formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
   },
 ];

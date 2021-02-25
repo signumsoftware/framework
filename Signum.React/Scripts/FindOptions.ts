@@ -139,11 +139,14 @@ export interface OrderOptionParsed {
 export interface ColumnOption {
   token: string | QueryTokenString<any>;
   displayName?: string | (() => string);
+  summaryToken?: string | QueryTokenString<any>;
 }
 
 export interface ColumnOptionParsed {
   token?: QueryToken;
   displayName?: string;
+  summaryToken?: QueryToken;
+
 }
 
 export const DefaultPagination: Pagination = {

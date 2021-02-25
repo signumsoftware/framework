@@ -161,20 +161,20 @@ namespace Signum.Engine.Json
             return true;
         }
 
-        public virtual (PropertyRoute pr, ModifiableEntity? mod) GetCurrentPropertyRoute(ModifiableEntity mod)
+        public virtual (PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId) GetCurrentPropertyRoute(ModifiableEntity mod)
         {
             var tup = EntityJsonContext.CurrentPropertyRouteAndEntity;
 
             if (mod is IRootEntity re)
-                tup = (PropertyRoute.Root(mod.GetType()), mod);
+                tup = (PropertyRoute.Root(mod.GetType()), mod, null);
             if (tup == null)
             {
                 var embedded = (EmbeddedEntity)mod;
                 var route = GetCurrentPropertyRouteEmbedded(embedded);
-                return (route, embedded);
+                return (route, embedded, null);
             }
             else if (tup.Value.pr.Type.ElementType() == mod.GetType())
-                tup = (tup.Value.pr.Add("Item"), null); //We have a custom MListConverter but not for other simple collections
+                tup = (tup.Value.pr.Add("Item"), null, null); //We have a custom MListConverter but not for other simple collections
 
             return tup.Value;
         }
@@ -297,7 +297,7 @@ namespace Signum.Engine.Json
                     {
                         var prm = tup.pr.Add(m.GetType());
 
-                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((prm, m)))
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((prm, m, null)))
                         {
                             writer.WritePropertyName(m.GetType().Name);
                             JsonSerializer.Serialize(writer, m, options);
@@ -335,7 +335,7 @@ namespace Signum.Engine.Json
                         return;
                 }
 
-                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, mod)))
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, mod, null)))
                 {
                     writer.WritePropertyName(lowerCaseName);
                     var val = pc.GetValue!(mod);
@@ -385,7 +385,7 @@ namespace Signum.Engine.Json
                                         reader.Read();
 
                                         var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
-                                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin)))
+                                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin, null)))
                                             converter.Read(ref reader, mixin.GetType(), options, mixin);
 
                                         reader.Read();
@@ -454,7 +454,7 @@ namespace Signum.Engine.Json
 
                 var pr = parentRoute.Add(pi);
 
-                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity)))
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity, null)))
                 {
                     try
                     {

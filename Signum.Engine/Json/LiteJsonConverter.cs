@@ -39,7 +39,10 @@ namespace Signum.Engine.Json
             if (lite.EntityOrNull != null)
             {
                 writer.WritePropertyName("entity");
-                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((PropertyRoute.Root(lite.Entity.GetType()), (ModifiableEntity)(IEntity)lite.EntityOrNull)))
+
+                var pr = PropertyRoute.Root(lite.Entity.GetType());
+                var entity = (ModifiableEntity)(IEntity)lite.EntityOrNull;
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity, null)))
                     JsonSerializer.Serialize(writer, lite.Entity, options);
             }
 
