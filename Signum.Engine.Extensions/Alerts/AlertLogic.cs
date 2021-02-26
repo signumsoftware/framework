@@ -14,6 +14,7 @@ using Signum.Entities.Alerts;
 using System.Linq.Expressions;
 using Signum.Engine.Extensions.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Alerts
 {
@@ -153,6 +154,17 @@ namespace Signum.Engine.Alerts
 
             TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
                 a => a.Recipient.Is(UserEntity.Current));
+        }
+
+        public static void AttendAllAlerts(Lite<Entity> target, AlertTypeEntity alertType)
+        {
+            using (AuthLogic.Disable())
+            {
+                Database.Query<AlertEntity>()
+                    .Where(a => a.Target.Is(target) && a.AlertType == alertType && a.State == AlertState.Saved)
+                    .ToList()
+                    .ForEach(a => a.Execute(AlertOperation.Attend));
+            }
         }
     }
 
