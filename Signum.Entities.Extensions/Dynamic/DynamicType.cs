@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -311,7 +310,7 @@ namespace Signum.Entities.Dynamic
                 case "DateTimePrecision": return typeof(DateTimePrecision);
                 case "TimeSpanPrecision": return typeof(TimeSpanPrecision);
                 case "StringCase": return typeof(StringCase);
-                default: return typeof(DynamicValidator);
+                default: return typeof(DefaultDynamicValidator);
             }
         }
 
@@ -440,6 +439,10 @@ namespace Signum.Entities.Dynamic
             {
                 return Value(TextCase);
             }
+        }
+
+        public class DefaultDynamicValidator : DynamicValidator
+        {
         }
     }
 }
