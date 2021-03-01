@@ -125,7 +125,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
     if (ringing) {
       var handler = setTimeout(() => {
         setRinging(false);
-      }, 60 * 1000);
+      }, props.keepRingingFor);
 
       return () => { clearTimeout(handler) };
     }
