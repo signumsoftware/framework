@@ -352,7 +352,7 @@
     <Member Name="Data" Description="Daten" />
     <Member Name="DeletePalette" Description="Palette löschen" />
     <Member Name="DrawChart" Description="Diagramm chart" />
-    <Member Name="EditUserChart" Description="Benutzerdiagramm bearbeiten" />
+    <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Maximize" Description="Maximieren" />
     <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
@@ -1759,6 +1759,7 @@
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="SummaryToken" Description="Zusammenfassung Token" />
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryColumnHelpEmbedded" Description="Abfrage Spaltenhilfe">
@@ -2241,6 +2242,7 @@
     <Member Name="Search" Description="Suchen" />
     <Member Name="Sync" Description="sync" />
     <Member Name="Synchronize0In1" Description="Synchronisieren {0} in {1} " />
+    <Member Name="ThisFieldIsTranslatable" Description="Dieses Feld ist übersetzbar" />
     <Member Name="Type" Description="Typ" />
     <Member Name="View" Description="anzeigen" />
     <Member Name="View0In1" Description="Anzeige {0} in {1}" />
@@ -2439,15 +2441,12 @@
   </Type>
   <Type Name="UserQueryMessage">
     <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
-    <Member Name="_0ShouldBeEmptyIf1IsSet" Description="{0} sollte leer sein, wenn {1} angegeben ist" />
-    <Member Name="_0ShouldBeNullIf1Is2" Description="{0} sollte null sein, wenn {1} &quot;{2}&quot; ist" />
-    <Member Name="_0ShouldBeSetIf1Is2" Description="{0} sollte angegeben werden, wenn {1} &quot;{2}&quot; ist" />
-    <Member Name="AreYouSureToRemove0" Description="Sind Sie sicher, dass Sie &quot;{0}&quot; entfernen möchten?" />
     <Member Name="Edit" Description="Bearbeiten" />
-    <Member Name="MyQueries" Description="Meine Abfragen" />
+    <Member Name="MakesTheUserQueryAvailableAsAQuickLinkOf0" Description="Stellt die Benutzerabfrage als Quicklink von {0} zur Verfügung" />
+    <Member Name="MakesTheUserQueryAvailableInContextualMenuWhenGrouping0" Description="Macht die Benutzerabfrage im Kontextmenü beim Gruppieren verfügbar {0}" />
     <Member Name="Preview" Description="Vorschau" />
-    <Member Name="RemoveUserQuery" Description="Benutzerabfrage entfernen?" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
+    <Member Name="TheSelected0" Description="die ausgewählte {0}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
     <Member Name="UserQueries_BackToDefault" Description="Zurück zum Standard" />
     <Member Name="UserQueries_CreateNew" Description="Erstellen" />
