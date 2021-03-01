@@ -27,7 +27,7 @@ namespace Signum.Entities.Mailing
 
         [ImplementedByAll]
         public Lite<Entity>? Target { get; set; }
-        
+
         public EmailAddressEmbedded From { get; set; }
 
         public Lite<EmailTemplateEntity>? Template { get; set; }
@@ -44,25 +44,31 @@ namespace Signum.Entities.Mailing
         public string? Subject
         {
             get { return subject; }
-            set { if (Set(ref subject, value)) CalculateHash(); }
+            set { if (Set(ref subject, value)) SetCalculateHash(); }
         }
 
         [DbType(Size = int.MaxValue)]
         BigStringEmbedded body = new BigStringEmbedded();
         [NotifyChildProperty]
-        public BigStringEmbedded Body 
+        public BigStringEmbedded Body
         {
             get { return body; }
-            set { if (Set(ref body, value)) CalculateHash(); }
+            set { if (Set(ref body, value)) SetCalculateHash(); }
         }
 
         static readonly char[] spaceChars = new[] { '\r', '\n', ' ' };
 
-        void CalculateHash()
+
+        public string CalculateHash()
         {
             var str = subject + body.Text;
 
-            BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str.Trim(spaceChars))));
+            return Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str.Trim(spaceChars))));
+        }
+
+        public void SetCalculateHash()
+        {
+            BodyHash = CalculateHash();
         }
 
         [StringLengthValidator(Min = 1, Max = 150)]
@@ -88,7 +94,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailAttachmentEmbedded> Attachments { get; set; } = new MList<EmailAttachmentEmbedded>();
 
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
-            m => m.State,       m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
+            m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
             {
 {EmailMessageState.Created,             false,         false,         false,                    null },
 {EmailMessageState.Draft,               false,         false,         false,                    null },
@@ -107,6 +113,13 @@ namespace Signum.Entities.Mailing
         protected override string? PropertyValidation(PropertyInfo pi)
         {
             return validator.Validate(this, pi);
+        }
+
+
+        protected override void PreSaving(PreSavingContext ctx)
+        {
+            SetCalculateHash();
+            base.PreSaving(ctx);    
         }
     }
 
@@ -128,7 +141,7 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(Min = 1, Max = 100)]
         public string UniqueId { get; set; }
 
-        
+
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
         [DbType(Size = int.MaxValue), ForceNotNullable]

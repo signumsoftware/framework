@@ -23,7 +23,7 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
     e.preventDefault();
 
-    setModelState({ ...validateNewPassword(false) }).then(ms => {
+    setModelState({ ...validateNewPassword(true) }).then(ms => {
 
       if (ms && Dic.getValues(ms).some(array => array.length > 0))
         return;
@@ -61,8 +61,8 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
     return {
       ["newPassword"]:
         !isSecond ? [] :
-          !newPassword.current!.value && !newPassword2.current!.value ? [LoginAuthMessage .PasswordMustHaveAValue.niceToString()] :
-            newPassword2.current!.value != newPassword.current!.value ? [LoginAuthMessage .PasswordsAreDifferent.niceToString()] :
+          !newPassword.current!.value && !newPassword2.current!.value ? [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] :
+            newPassword2.current!.value != newPassword.current!.value ? [LoginAuthMessage.PasswordsAreDifferent.niceToString()] :
               []
     };
   }
@@ -75,8 +75,8 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
   if (success || code == "OK") {
     return (
       <div>
-        <h2 className="sf-entity-title">{LoginAuthMessage .PasswordChanged.niceToString()}</h2>
-        <p>{LoginAuthMessage .PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+        <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
+        <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
       </div>
     );
   }
@@ -86,20 +86,20 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
       <div className="row">
         <div className="offset-sm-2 col-sm-6">
           <h2 className="sf-entity-title">{LoginAuthMessage.ChangePassword.niceToString()}</h2>
-          <p>{LoginAuthMessage .NewPassword.niceToString()}</p>
+          <p>{LoginAuthMessage.NewPassword.niceToString()}</p>
         </div>
       </div>
       <div>
 
         <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{LoginAuthMessage .EnterTheNewPassword.niceToString()}</label>
+          <label className="col-form-label col-sm-2">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
           <div className="col-sm-4">
             <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
           </div>
         </div>
         <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{LoginAuthMessage .ConfirmNewPassword.niceToString()}</label>
+          <label className="col-form-label col-sm-2">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
           <div className="col-sm-4">
             <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
             {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}

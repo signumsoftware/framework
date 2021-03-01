@@ -17,6 +17,7 @@ import { FullscreenComponent } from '../../Chart/Templates/FullscreenComponent'
 import SelectorModal from '@framework/SelectorModal'
 import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
+import { translated } from '../../Translation/TranslatedInstanceTools'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
@@ -28,7 +29,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
   if (p.part.renderMode == "BigValue") {
     return <BigValueSearchCounter
       findOptions={fo}
-      text={p.partEmbedded.title ?? undefined}
+      text={translated(p.partEmbedded, a => a.title) || translated(p.part.userQuery, a => a.displayName)}
       style={p.partEmbedded.style}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
@@ -102,7 +103,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
         </div>
         <div className={classes("flip", isRTL ? "text-left" : "text-right")}>
-          <h6 className="large">{p.text ?? getQueryNiceName(p.findOptions.queryName)}</h6>
+          <h6 className="large">{p.text || getQueryNiceName(p.findOptions.queryName)}</h6>
         </div>
       </div>
     </div>
