@@ -95,6 +95,7 @@ export module CaseActivityMessage {
   export const ThereAreInprogressActivities = new MessageKey("CaseActivityMessage", "ThereAreInprogressActivities");
   export const ShowHelp = new MessageKey("CaseActivityMessage", "ShowHelp");
   export const HideHelp = new MessageKey("CaseActivityMessage", "HideHelp");
+  export const HardCanceled = new MessageKey("CaseActivityMessage", "HardCanceled");
 }
 
 export const CaseActivityMixin = new Type<CaseActivityMixin>("CaseActivityMixin");
@@ -180,6 +181,7 @@ export type CaseNotificationState =
 
 export module CaseOperation {
   export const SetTags : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.SetTags");
+  export const Cancel : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Cancel");
 }
 
 export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");
