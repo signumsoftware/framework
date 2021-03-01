@@ -86,6 +86,7 @@ export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("Em
 export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "EmailMasterTemplate";
   name: string;
+  isDefault: boolean;
   messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
   guid: string;
 }
