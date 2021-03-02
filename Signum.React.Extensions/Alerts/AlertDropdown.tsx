@@ -125,7 +125,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
     if (ringing) {
       var handler = setTimeout(() => {
         setRinging(false);
-      }, 60 * 1000);
+      }, props.keepRingingFor);
 
       return () => { clearTimeout(handler) };
     }
@@ -186,8 +186,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
   }
 
   var alertsGroups = alerts == null ? null :
-    alerts.orderByDescending(a => a.alertDate).groupBy(a => a.alertType == null ? "none" : a.alertType.id + "-" + a.createdBy?.id)
-      .orderBy(a => a.key);
+    alerts.orderByDescending(a => a.alertDate).groupBy(a => a.alertType == null ? "none" : a.alertType.id + "-" + a.createdBy?.id);
     
 
   return (

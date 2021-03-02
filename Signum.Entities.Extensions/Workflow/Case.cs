@@ -14,7 +14,7 @@ namespace Signum.Entities.Workflow
 
         public CaseEntity? ParentCase { get; set; }
 
-        [StringLengthValidator(Min = 3, Max = 100)]
+        [StringLengthValidator(Min = 1, Max = 100)]
         public string Description { get; set; }
 
         [ImplementedByAll]
@@ -32,6 +32,7 @@ namespace Signum.Entities.Workflow
     public static class CaseOperation
     {
         public static readonly ExecuteSymbol<CaseEntity> SetTags;
+        public static readonly ExecuteSymbol<CaseEntity> Cancel;
     }
 
     public interface ICaseMainEntity : IEntity

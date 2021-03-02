@@ -142,11 +142,26 @@ namespace Signum.Engine.Workflow
                 foreach (var last in lasts)
                 {
                     var from = gr.GetNode(last.WorkflowActivity);
-                    foreach (var end in ends)
+                    var compatibleEnds = ends.Select(end => GetSyncPaths(last, from, end)).NotNull().ToList();
+
+                    if (compatibleEnds.Count != 0)
                     {
-                        var paths = GetSyncPaths(last, from, end);
-                        if (paths != null)
-                            connections.AddRange(paths);
+                        foreach (var path in compatibleEnds)
+                        {
+                            connections.AddRange(path);
+                        }
+                    }
+                    else //Cancel Case
+                    {
+                        var firstEnd = ends.FirstOrDefault();
+                        if(firstEnd != null)
+                        {
+                            connections.Add(new CaseConnectionStats
+                            {
+                                FromBpmnElementId = from.BpmnElementId,
+                                ToBpmnElementId = firstEnd.BpmnElementId,
+                            }.WithDone(last));
+                        }
                     }
                 }
             }

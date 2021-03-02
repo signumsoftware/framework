@@ -12,9 +12,10 @@
         overflow: auto;
     }
 
-.html-editor .public-DraftEditor-content {
-    min-height: 140px;
-}
+    .sf-html-editor .public-DraftEditor-content {
+        min-height: 140px;
+        padding: 0 10px;
+    }
 
 .sf-draft-toolbar {
     border: 1px solid #ddd;
