@@ -44,9 +44,7 @@ namespace Signum.Entities.Mailing
 
         public EmailModelEntity? Model { get; set; }
 
-        public bool SendDifferentMessages { get; set; }
-
-        public EmailTemplateContactEmbedded? From { get; set; }
+        public EmailTemplateFromEmbedded? From { get; set; }
 
         [NoRepeatValidator]
         public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
@@ -137,7 +135,6 @@ namespace Signum.Entities.Mailing
                 new XAttribute("Query", Query.Key),
                 new XAttribute("EditableMessage", EditableMessage),
                 Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.FullClassName),
-                new XAttribute("SendDifferentMessages", SendDifferentMessages),
                 MasterTemplate == null ? null! : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
@@ -146,14 +143,20 @@ namespace Signum.Entities.Mailing
                 From == null ? null! : new XElement("From",
                     From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null!,
                     From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
-                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null!),
+                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null!,
+                    new XAttribute("WhenMany", From.WhenMany),
+                    new XAttribute("WhenEmpty", From.WhenEmpty)
+                         ),
                 new XElement("Recipients", Recipients.Select(rec =>
-                    new XElement("Recipient", new XAttribute("DisplayName", rec.DisplayName ?? ""),
-                         new XAttribute("EmailAddress", rec.EmailAddress ?? ""),
+                    new XElement("Recipient",
+                         rec.DisplayName.HasText()? new XAttribute("DisplayName", rec.DisplayName) : null!,
+                         rec.EmailAddress.HasText()? new XAttribute("EmailAddress", rec.EmailAddress) : null!,
                          new XAttribute("Kind", rec.Kind),
-                         rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!
-                        )
-                    )),
+                         rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!,
+                         new XAttribute("WhenMany", rec.WhenEmpty),
+                         new XAttribute("WhenEmpty", rec.WhenEmpty)
+                    )
+                )),
                 new XElement("Messages", Messages.Select(x =>
                     new XElement("Message",
                         new XAttribute("CultureInfo", x.CultureInfo.Name),
@@ -174,21 +177,22 @@ namespace Signum.Entities.Mailing
             Query = ctx.GetQuery(element.Attribute("Query")!.Value);
             EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
             Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
-            SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages")!.Value);
 
             MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
 
-            SendDifferentMessages = bool.Parse(element.Attribute("GroupResults")!.Value);
+            GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
             IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml")!.Value);
 
-            From = element.Element("From")?.Let(from =>  new EmailTemplateContactEmbedded
+            From = element.Element("From")?.Let(from => new EmailTemplateFromEmbedded
             {
                 DisplayName = from.Attribute("DisplayName")?.Value,
                 EmailAddress = from.Attribute("EmailAddress")?.Value,
                 Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
+                WhenMany = from.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult,
+                WhenEmpty = from.Attribute("WhenEmpty")?.Value.ToEnum<WhenEmptyFromBehaviour>() ?? WhenEmptyFromBehaviour.NoMessage,
             });
 
             Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
@@ -196,7 +200,9 @@ namespace Signum.Entities.Mailing
                 DisplayName = rep.Attribute("DisplayName")!.Value,
                 EmailAddress = rep.Attribute("EmailAddress")!.Value,
                 Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
-                Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value))
+                Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value)),
+                WhenMany = rep.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients,
+                WhenEmpty = rep.Attribute("WhenEmpty")?.Value?.ToEnum<WhenEmptyRecipientsBehaviour>() ?? WhenEmptyRecipientsBehaviour.ThrowException,
             }).ToMList();
 
             Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
@@ -212,14 +218,16 @@ namespace Signum.Entities.Mailing
 
     }
 
-    [Serializable]
-    public class EmailTemplateContactEmbedded : EmbeddedEntity
-    {
-        public QueryTokenEmbedded? Token { get; set; }
 
+    [Serializable]
+    public abstract class EmailTemplateContactEmbedded : EmbeddedEntity
+    {
         public string? EmailAddress { get; set; }
 
         public string? DisplayName { get; set; }
+
+        public QueryTokenEmbedded? Token { get; set; }
+
 
         public override string ToString()
         {
@@ -242,18 +250,59 @@ namespace Signum.Entities.Mailing
 
             return null;
         }
+
     }
+
 
     [Serializable]
     public class EmailTemplateRecipientEmbedded : EmailTemplateContactEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
 
+        public WhenEmptyRecipientsBehaviour WhenEmpty { get; set; }
+        public WhenManyRecipiensBehaviour WhenMany { get; set; }
+
         public override string ToString()
         {
             return "{0} {1} <{2}>".FormatWith(Kind.NiceToString(), DisplayName, EmailAddress);
         }
     }
+
+
+    public enum WhenEmptyRecipientsBehaviour
+    {
+        ThrowException,
+        NoMessage,
+        NoRecipients
+    }
+
+    public enum WhenManyRecipiensBehaviour
+    {
+        SplitMessages,
+        KeepOneMessageWithManyRecipients,
+    }
+
+    [Serializable]
+    public class EmailTemplateFromEmbedded : EmailTemplateContactEmbedded
+    {
+        public WhenEmptyFromBehaviour WhenEmpty { get; set; }
+        public WhenManyFromBehaviour WhenMany { get; set; }
+    }
+
+
+    public enum WhenEmptyFromBehaviour
+    {
+        ThrowException,
+        NoMessage,
+        DefaultFrom
+    }
+
+    public enum WhenManyFromBehaviour
+    {
+        SplitMessages,
+        FistResult,
+    }
+
 
     [Serializable]
     public class EmailTemplateMessageEmbedded : EmbeddedEntity

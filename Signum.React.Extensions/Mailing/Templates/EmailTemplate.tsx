@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded, EmailTemplateFromEmbedded } from '../Signum.Entities.Mailing'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
@@ -14,6 +14,7 @@ import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
+import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -27,9 +28,12 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
         <div className="mb-4">
           <Tabs id={ctx.prefix + "tabs"}>
             <Tab eventKey="recipients" title={ctx.niceName(a => a.recipients)}>
-              <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()} getComponent={renderContact} />
-              <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
-              <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()} getComponent={renderRecipient} />
+              <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
+                onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenEmpty: "ThrowException", whenMany: "SplitMessages" }))}
+                getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
+              <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()}
+                onCreate={() => Promise.resolve(EmailTemplateRecipientEmbedded.New({ whenEmpty: "ThrowException", whenMany: "SplitMessages" }))}
+                getComponent={rctx => <EmailTemplateRecipient ctx={rctx} query={p.ctx.value.query} />} />
             </Tab>
             <Tab eventKey="attachments" title={
               <span style={{ fontWeight: ctx.value.attachments.length > 0 ? "bold" : undefined }}>
@@ -93,69 +97,8 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
     );
   }
 
-  function renderContact(ec: TypeContext<EmailTemplateContactEmbedded>) {
-    const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
-    return (
-      <div>
-        <div className="row">
-          <div className="col-sm-2" >
-            <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
-              <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
-            </FormGroup>
-          </div>
-          <div className="col-sm-10">
-            {p.ctx.value.query &&
-              <QueryTokenEmbeddedBuilder
-                ctx={sc.subCtx(a => a.token)}
-                queryKey={p.ctx.value.query.key}
-                subTokenOptions={SubTokensOptions.CanElement}
-                helpText="Expression pointing to an EmailOwnerData (recommended)" />
-            }
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-5 offset-sm-2">
-            <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" />
-          </div>
-          <div className="col-sm-5">
-            <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" />
-          </div>
-        </div>
-      </div>
-    );
-  };
 
-  function renderRecipient(ec: TypeContext<EmailTemplateRecipientEmbedded>) {
-    const sc = ec.subCtx({ formGroupStyle: "Basic" });
-
-    return (
-      <div>
-        <div className="row">
-          <div className="col-sm-2" >
-            <ValueLine ctx={sc.subCtx(a => a.kind)} />
-          </div>
-          <div className="col-sm-10">
-            {p.ctx.value.query &&
-              <QueryTokenEmbeddedBuilder
-                ctx={sc.subCtx(a => a.token)}
-                queryKey={p.ctx.value.query.key}
-                subTokenOptions={SubTokensOptions.CanElement}
-                helpText="Expression pointing to an EmailOwnerData (recommended)" />
-            }
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-5 offset-sm-2">
-            <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" />
-          </div>
-          <div className="col-sm-5">
-            <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" />
-          </div>
-        </div>
-      </div>
-    );
-  };
   const ctx = p.ctx;
   const ctx3 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
@@ -172,6 +115,101 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
     </div>
   );
 }
+
+function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, query: QueryEntity | undefined  }) {
+  const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
+
+  const forceUpdate = useForceUpdate();
+
+  return (
+    <div>
+      <div className="row">
+        <div className="col-sm-2" >
+          <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
+            <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
+          </FormGroup>
+        </div>
+        <div className="col-sm-10">
+          {p.query && !p.ctx.value.emailAddress &&
+            <QueryTokenEmbeddedBuilder
+              ctx={sc.subCtx(a => a.token)}
+              queryKey={p.query.key}
+              subTokenOptions={SubTokensOptions.CanElement}
+              onTokenChanged={forceUpdate}
+              helpText="Expression pointing to an EmailOwnerData (recommended)" />
+          }
+
+          {Boolean(p.ctx.value.token) && <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.whenEmpty)} />
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+            </div>
+          </div>
+          }
+
+          {!p.ctx.value.token && <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" onChange={forceUpdate} />
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" onChange={forceUpdate} />
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+     
+    </div>
+  );
+};
+
+function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbedded>, query: QueryEntity | undefined }) {
+  const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
+  const forceUpdate = useForceUpdate();
+
+  return (
+    <div>
+      <div className="row">
+        <div className="col-sm-2" >
+          <ValueLine ctx={sc.subCtx(a => a.kind)} />
+        </div>
+        <div className="col-sm-10">
+          {p.query && !p.ctx.value.emailAddress &&
+            <QueryTokenEmbeddedBuilder
+              ctx={sc.subCtx(a => a.token)}
+              queryKey={p.query.key}
+              subTokenOptions={SubTokensOptions.CanElement}
+              onTokenChanged={forceUpdate}
+              helpText="Expression pointing to an EmailOwnerData (recommended)" />
+          }
+
+          {Boolean(p.ctx.value.token) && <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.whenEmpty)} />
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+            </div>
+          </div>
+          }
+
+          {!p.ctx.value.token && <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" onChange={forceUpdate} />
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" onChange={forceUpdate} />
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export interface EmailTemplateMessageComponentProps {
   ctx: TypeContext<EmailTemplateMessageEmbedded>;

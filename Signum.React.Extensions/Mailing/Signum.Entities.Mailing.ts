@@ -222,12 +222,10 @@ export module EmailSenderConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
 }
 
-export const EmailTemplateContactEmbedded = new Type<EmailTemplateContactEmbedded>("EmailTemplateContactEmbedded");
 export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
-  Type: "EmailTemplateContactEmbedded";
-  token: UserAssets.QueryTokenEmbedded | null;
   emailAddress: string | null;
   displayName: string | null;
+  token: UserAssets.QueryTokenEmbedded | null;
 }
 
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");
@@ -239,8 +237,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   disableAuthorization: boolean;
   query: Signum.QueryEntity;
   model: EmailModelEntity | null;
-  sendDifferentMessages: boolean;
-  from: EmailTemplateContactEmbedded | null;
+  from: EmailTemplateFromEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
   groupResults: boolean;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
@@ -250,6 +247,13 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   isBodyHtml: boolean;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
+}
+
+export const EmailTemplateFromEmbedded = new Type<EmailTemplateFromEmbedded>("EmailTemplateFromEmbedded");
+export interface EmailTemplateFromEmbedded extends EmailTemplateContactEmbedded {
+  Type: "EmailTemplateFromEmbedded";
+  whenEmpty: WhenEmptyFromBehaviour;
+  whenMany: WhenManyFromBehaviour;
 }
 
 export module EmailTemplateMessage {
@@ -284,7 +288,10 @@ export module EmailTemplateOperation {
 
 export const EmailTemplateRecipientEmbedded = new Type<EmailTemplateRecipientEmbedded>("EmailTemplateRecipientEmbedded");
 export interface EmailTemplateRecipientEmbedded extends EmailTemplateContactEmbedded {
+  Type: "EmailTemplateRecipientEmbedded";
   kind: EmailRecipientKind;
+  whenEmpty: WhenEmptyRecipientsBehaviour;
+  whenMany: WhenManyRecipiensBehaviour;
 }
 
 export module EmailTemplateViewMessage {
@@ -403,6 +410,28 @@ export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
   enableSSL: boolean;
   clientCertificationFiles: Entities.MList<ClientCertificationFileEmbedded>;
 }
+
+export const WhenEmptyFromBehaviour = new EnumType<WhenEmptyFromBehaviour>("WhenEmptyFromBehaviour");
+export type WhenEmptyFromBehaviour =
+  "ThrowException" |
+  "NoMessage" |
+  "DefaultFrom";
+
+export const WhenEmptyRecipientsBehaviour = new EnumType<WhenEmptyRecipientsBehaviour>("WhenEmptyRecipientsBehaviour");
+export type WhenEmptyRecipientsBehaviour =
+  "ThrowException" |
+  "NoMessage" |
+  "NoRecipients";
+
+export const WhenManyFromBehaviour = new EnumType<WhenManyFromBehaviour>("WhenManyFromBehaviour");
+export type WhenManyFromBehaviour =
+  "SplitMessages" |
+  "FistResult";
+
+export const WhenManyRecipiensBehaviour = new EnumType<WhenManyRecipiensBehaviour>("WhenManyRecipiensBehaviour");
+export type WhenManyRecipiensBehaviour =
+  "SplitMessages" |
+  "KeepOneMessageWithManyRecipients";
 
 export namespace External {
 
