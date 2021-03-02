@@ -163,32 +163,28 @@ namespace Signum.Engine.Workflow
 
                 new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
                 {
-                    CanExecute = e => e.FinishDate == null ? null : "Already done",
-                    Execute = (e, _) =>
+                    CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
+                    Execute = (c, _) =>
                     {
-                        var currentActivity = Database.Query<CaseActivityEntity>().Where(a => a.Case == e && a.DoneBy == null).FirstOrDefault();
+                        var currentActivities = c.CaseActivities().Where(a => a.DoneBy == null).ToList();
 
-                        if (currentActivity != null)
+                        foreach (var ca in currentActivities)
                         {
-                            currentActivity.DoneBy = UserEntity.Current.ToLite();
-                            currentActivity.DoneDate = DateTime.Now;
-                            currentActivity.DoneType = DoneType.Jump;
-                            currentActivity.DoneDecision = CaseActivityMessage.HardCanceled.NiceToString();
+                            ca.DoneBy = UserEntity.Current.ToLite();
+                            ca.DoneDate = DateTime.Now;
+                            ca.DoneType = DoneType.Jump;
+                            ca.DoneDecision = CaseActivityMessage.CanceledCase.NiceToString();
 
-                            foreach(var notification in  currentActivity.Notifications().ToList())
+                            foreach (var notification in ca.Notifications().ToList())
                             {
                                 notification.State = CaseNotificationState.DoneByOther;
-
                                 notification.Save();
                             }
-
-                            currentActivity!.Save();
                         }
 
-                        e.FinishDate = DateTime.Now;
-                        e.Save();
+                        c.FinishDate = DateTime.Now;
+                        c.Save();
                     }
-
                 }.Register();
                 
 

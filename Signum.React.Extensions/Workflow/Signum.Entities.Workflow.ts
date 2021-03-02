@@ -95,7 +95,8 @@ export module CaseActivityMessage {
   export const ThereAreInprogressActivities = new MessageKey("CaseActivityMessage", "ThereAreInprogressActivities");
   export const ShowHelp = new MessageKey("CaseActivityMessage", "ShowHelp");
   export const HideHelp = new MessageKey("CaseActivityMessage", "HideHelp");
-  export const HardCanceled = new MessageKey("CaseActivityMessage", "HardCanceled");
+  export const CanceledCase = new MessageKey("CaseActivityMessage", "CanceledCase");
+  export const AlreadyFinished = new MessageKey("CaseActivityMessage", "AlreadyFinished");
 }
 
 export const CaseActivityMixin = new Type<CaseActivityMixin>("CaseActivityMixin");
