@@ -22,6 +22,7 @@ using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
 using System.Xml.Linq;
 using Signum.Engine.Authorization;
+using Signum.Engine;
 
 namespace Signum.Engine.Workflow
 {
@@ -158,6 +159,38 @@ namespace Signum.Engine.Workflow
                         }).SaveList();
                     },
                 }.Register();
+
+
+                new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
+                {
+                    CanExecute = e => e.FinishDate == null ? null : "Already done",
+                    Execute = (e, _) =>
+                    {
+                        var currentActivity = Database.Query<CaseActivityEntity>().Where(a => a.Case == e && a.DoneBy == null).FirstOrDefault();
+
+                        if (currentActivity != null)
+                        {
+                            currentActivity.DoneBy = UserEntity.Current.ToLite();
+                            currentActivity.DoneDate = DateTime.Now;
+                            currentActivity.DoneType = DoneType.Jump;
+                            currentActivity.DoneDecision = CaseActivityMessage.HardCanceled.NiceToString();
+
+                            foreach(var notification in  currentActivity.Notifications().ToList())
+                            {
+                                notification.State = CaseNotificationState.DoneByOther;
+
+                                notification.Save();
+                            }
+
+                            currentActivity!.Save();
+                        }
+
+                        e.FinishDate = DateTime.Now;
+                        e.Save();
+                    }
+
+                }.Register();
+                
 
                 sb.Include<CaseActivityEntity>()
                     .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)

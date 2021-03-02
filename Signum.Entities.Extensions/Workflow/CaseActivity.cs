@@ -168,6 +168,8 @@ namespace Signum.Entities.Workflow
         ThereAreInprogressActivities,
         ShowHelp,
         HideHelp,
+        [Description("Hard canceled")]
+        HardCanceled
     }
 
 
