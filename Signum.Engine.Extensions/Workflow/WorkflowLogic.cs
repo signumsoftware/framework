@@ -755,7 +755,7 @@ namespace Signum.Engine.Workflow
                     {
                         w.ExpirationDate = null;
                         w.Save();
-                        w.SuspendWorkflowScheduledTasks(false);
+                        w.SuspendWorkflowScheduledTasks(suspended: false);
                     }
                 }.Register();
 
@@ -767,19 +767,19 @@ namespace Signum.Engine.Workflow
                     {
                         w.ExpirationDate = args.GetArg<DateTime>();
                         w.Save();
-                        w.SuspendWorkflowScheduledTasks(true);
+                        w.SuspendWorkflowScheduledTasks(suspended: true);
                     }
                 }.Register();
             }
         }
 
-        public static void SuspendWorkflowScheduledTasks(this WorkflowEntity workflow, bool value)
+        public static void SuspendWorkflowScheduledTasks(this WorkflowEntity workflow, bool suspended)
         {
             workflow.WorkflowEvents()
                 .Where(a => a.Type == WorkflowEventType.ScheduledStart)
                 .Select(a => a.ScheduledTask()!)
                 .UnsafeUpdate()
-                .Set(a => a.Suspended, a => value)
+                .Set(a => a.Suspended, a => suspended)
                 .Execute();
         }
 
