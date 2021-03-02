@@ -48,6 +48,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210205_ErrorHandling(),
                 new Upgrade_20210210_UpgradeNugets(),
                 new Upgrade_20210216_RegisterTranslatableRoutes(),
+                new Upgrade_20210302_TypeScript42(),
             }.Run(uctx);
         }
     }

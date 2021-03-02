@@ -436,7 +436,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
-      Options.tokenCanSetPropery(fo.token) ||
+      !Options.tokenCanSetPropery(fo.token) ||
       fo.operation != "EqualTo" ||
       !isActive(fo))
       return null;

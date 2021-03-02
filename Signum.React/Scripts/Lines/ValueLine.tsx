@@ -11,7 +11,7 @@ import TextArea from '../Components/TextArea';
 import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
-import { isPrefix } from '../FindOptions'
+import { isPrefix, QueryToken } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -28,6 +28,8 @@ export interface ValueLineProps extends LineBaseProps {
   columnCount?: number;
   columnWidth?: number;
   showTimeBox?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 export interface OptionItem {
@@ -631,7 +633,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
   const luxonFormat = toLuxonFormat(s.formatText, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : type == "DateTime";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "Date" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -642,7 +644,12 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     );
 
   const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
-    const m = date && DateTime.fromJSDate(date);
+
+    var m = date && DateTime.fromJSDate(date);
+
+    if (m)
+      m = trimDateToFormat(m, type, s.formatText);
+
     vl.setValue(m == null || !m.isValid ? null :
       type == "Date" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
@@ -664,11 +671,24 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
             includeTime={showTime}
             inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+            min={s.minDate}
+            max={s.maxDate}
           />
         </div>
       )}
     </FormGroup>
   );
+}
+
+export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): DateTime {
+
+  const luxonFormat = toLuxonFormat(format, type);
+
+  if (!luxonFormat)
+    return date; 
+
+  const formatted = date.toFormat(luxonFormat);
+  return DateTime.fromFormat(formatted, luxonFormat);
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
