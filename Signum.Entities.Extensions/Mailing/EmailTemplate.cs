@@ -145,7 +145,7 @@ namespace Signum.Entities.Mailing
                     From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
                     From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null!,
                     new XAttribute("WhenMany", From.WhenMany),
-                    new XAttribute("WhenEmpty", From.WhenEmpty)
+                    new XAttribute("WhenNone", From.WhenNone)
                          ),
                 new XElement("Recipients", Recipients.Select(rec =>
                     new XElement("Recipient",
@@ -153,8 +153,8 @@ namespace Signum.Entities.Mailing
                          rec.EmailAddress.HasText()? new XAttribute("EmailAddress", rec.EmailAddress) : null!,
                          new XAttribute("Kind", rec.Kind),
                          rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!,
-                         new XAttribute("WhenMany", rec.WhenEmpty),
-                         new XAttribute("WhenEmpty", rec.WhenEmpty)
+                         new XAttribute("WhenMany", rec.WhenMany),
+                         new XAttribute("WhenNone", rec.WhenNone)
                     )
                 )),
                 new XElement("Messages", Messages.Select(x =>
@@ -192,7 +192,7 @@ namespace Signum.Entities.Mailing
                 EmailAddress = from.Attribute("EmailAddress")?.Value,
                 Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
                 WhenMany = from.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult,
-                WhenEmpty = from.Attribute("WhenEmpty")?.Value.ToEnum<WhenEmptyFromBehaviour>() ?? WhenEmptyFromBehaviour.NoMessage,
+                WhenNone = from.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage,
             });
 
             Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
@@ -202,7 +202,7 @@ namespace Signum.Entities.Mailing
                 Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
                 Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value)),
                 WhenMany = rep.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients,
-                WhenEmpty = rep.Attribute("WhenEmpty")?.Value?.ToEnum<WhenEmptyRecipientsBehaviour>() ?? WhenEmptyRecipientsBehaviour.ThrowException,
+                WhenNone = rep.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException,
             }).ToMList();
 
             Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
@@ -259,7 +259,7 @@ namespace Signum.Entities.Mailing
     {
         public EmailRecipientKind Kind { get; set; }
 
-        public WhenEmptyRecipientsBehaviour WhenEmpty { get; set; }
+        public WhenNoneRecipientsBehaviour WhenNone { get; set; }
         public WhenManyRecipiensBehaviour WhenMany { get; set; }
 
         public override string ToString()
@@ -269,7 +269,7 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum WhenEmptyRecipientsBehaviour
+    public enum WhenNoneRecipientsBehaviour
     {
         ThrowException,
         NoMessage,
@@ -285,12 +285,12 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailTemplateFromEmbedded : EmailTemplateContactEmbedded
     {
-        public WhenEmptyFromBehaviour WhenEmpty { get; set; }
+        public WhenNoneFromBehaviour WhenNone { get; set; }
         public WhenManyFromBehaviour WhenMany { get; set; }
     }
 
 
-    public enum WhenEmptyFromBehaviour
+    public enum WhenNoneFromBehaviour
     {
         ThrowException,
         NoMessage,

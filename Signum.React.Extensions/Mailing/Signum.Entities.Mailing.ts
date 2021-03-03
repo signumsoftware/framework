@@ -252,7 +252,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
 export const EmailTemplateFromEmbedded = new Type<EmailTemplateFromEmbedded>("EmailTemplateFromEmbedded");
 export interface EmailTemplateFromEmbedded extends EmailTemplateContactEmbedded {
   Type: "EmailTemplateFromEmbedded";
-  whenEmpty: WhenEmptyFromBehaviour;
+  whenNone: WhenNoneFromBehaviour;
   whenMany: WhenManyFromBehaviour;
 }
 
@@ -290,7 +290,7 @@ export const EmailTemplateRecipientEmbedded = new Type<EmailTemplateRecipientEmb
 export interface EmailTemplateRecipientEmbedded extends EmailTemplateContactEmbedded {
   Type: "EmailTemplateRecipientEmbedded";
   kind: EmailRecipientKind;
-  whenEmpty: WhenEmptyRecipientsBehaviour;
+  whenNone: WhenNoneRecipientsBehaviour;
   whenMany: WhenManyRecipiensBehaviour;
 }
 
@@ -411,18 +411,6 @@ export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
   clientCertificationFiles: Entities.MList<ClientCertificationFileEmbedded>;
 }
 
-export const WhenEmptyFromBehaviour = new EnumType<WhenEmptyFromBehaviour>("WhenEmptyFromBehaviour");
-export type WhenEmptyFromBehaviour =
-  "ThrowException" |
-  "NoMessage" |
-  "DefaultFrom";
-
-export const WhenEmptyRecipientsBehaviour = new EnumType<WhenEmptyRecipientsBehaviour>("WhenEmptyRecipientsBehaviour");
-export type WhenEmptyRecipientsBehaviour =
-  "ThrowException" |
-  "NoMessage" |
-  "NoRecipients";
-
 export const WhenManyFromBehaviour = new EnumType<WhenManyFromBehaviour>("WhenManyFromBehaviour");
 export type WhenManyFromBehaviour =
   "SplitMessages" |
@@ -432,6 +420,18 @@ export const WhenManyRecipiensBehaviour = new EnumType<WhenManyRecipiensBehaviou
 export type WhenManyRecipiensBehaviour =
   "SplitMessages" |
   "KeepOneMessageWithManyRecipients";
+
+export const WhenNoneFromBehaviour = new EnumType<WhenNoneFromBehaviour>("WhenNoneFromBehaviour");
+export type WhenNoneFromBehaviour =
+  "ThrowException" |
+  "NoMessage" |
+  "DefaultFrom";
+
+export const WhenNoneRecipientsBehaviour = new EnumType<WhenNoneRecipientsBehaviour>("WhenNoneRecipientsBehaviour");
+export type WhenNoneRecipientsBehaviour =
+  "ThrowException" |
+  "NoMessage" |
+  "NoRecipients";
 
 export namespace External {
 
