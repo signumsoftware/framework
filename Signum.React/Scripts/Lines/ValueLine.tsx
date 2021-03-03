@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker } from 'react-widgets'
+import { CalendarProps } from 'react-widgets/lib/Calendar'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
@@ -28,6 +29,7 @@ export interface ValueLineProps extends LineBaseProps {
   columnCount?: number;
   columnWidth?: number;
   showTimeBox?: boolean;
+  calendarProps?: Partial<CalendarProps>;
 }
 
 export interface OptionItem {
@@ -669,6 +671,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
             includeTime={showTime}
             inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+            calendarProps={s.calendarProps}
           />
         </div>
       )}
