@@ -49,19 +49,25 @@
     <Member Name="Title" Description="Título" />
   </Type>
   <Type Name="AlertMessage">
+    <Member Name="_0HiddenAlerts" Description="{0} alertas ocultas" />
+    <Member Name="_0SimilarAlerts" Description="{0} alertas similares" />
     <Member Name="Alert" Description="Alerta" />
     <Member Name="Alerts" Description="Alertas" />
     <Member Name="Alerts_Attended" Description="Atendidas" />
     <Member Name="Alerts_Future" Description="Futuras" />
     <Member Name="Alerts_NotAttended" Description="No atendidas" />
+    <Member Name="AllMyAlerts" Description="Todas mis alertas" />
     <Member Name="CheckedAlerts" Description="Atendidas" />
+    <Member Name="CloseAll" Description="Cerrar todo" />
     <Member Name="CreateAlert" Description="Crear alerta" />
     <Member Name="CustomDelay" Description="Retraso personalizado" />
     <Member Name="DelayDuration" Description="Duración del retraso" />
     <Member Name="FutureAlerts" Description="Futuras" />
     <Member Name="MyActiveAlerts" Description="Mis alertas activas" />
     <Member Name="NewAlert" Description="Nueva alerta" />
+    <Member Name="ViewMore" Description="Ver más" />
     <Member Name="WarnedAlerts" Description="Alertadas" />
+    <Member Name="YouDoNotHaveAnyActiveAlert" Description="No tiene ninguna alerta activa" />
   </Type>
   <Type Name="AlertOperation">
     <Member Name="Attend" Description="Atender" />
@@ -78,6 +84,7 @@
   </Type>
   <Type Name="AlertTypeEntity" Description="Tipo de alerta" />
   <Type Name="AlertTypeOperation">
+    <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="AllowedRule`2">
@@ -178,6 +185,16 @@
   <Type Name="BigStringMixin">
     <Member Name="File" Description="Archivo" />
   </Type>
+  <Type Name="BootstrapStyle" Description="Estilo bootstrap">
+    <Member Name="Danger" Description="Peligro" />
+    <Member Name="Dark" Description="Oscuro" />
+    <Member Name="Info" Description="Información" />
+    <Member Name="Light" Description="Luz" />
+    <Member Name="Primary" Description="Primaria" />
+    <Member Name="Secondary" Description="Secundaria" />
+    <Member Name="Success" Description="Éxito" />
+    <Member Name="Warning" Description="Advertencia" />
+  </Type>
   <Type Name="BpmnEntityPairEmbedded" Description="Par de entidad de BPMN">
     <Member Name="BpmnElementId" Description="Id de elemento BPMN" />
     <Member Name="Model" Description="Modelo" />
@@ -193,6 +210,7 @@
     <Member Name="Case" Description="Caso" />
     <Member Name="DoneBy" Description="Realizado por" />
     <Member Name="DoneDate" Description="Fecha hecho" />
+    <Member Name="DoneDecision" Description="Decisión hecha" />
     <Member Name="DoneType" Description="Tipo de hecho" />
     <Member Name="Duration" Description="Duración" />
     <Member Name="DurationRatio" Description="Ratio de duración" />
@@ -242,10 +260,8 @@
     <Member Name="CaseActivity" Description="Actividad de caso" />
   </Type>
   <Type Name="CaseActivityOperation">
-    <Member Name="Approve" Description="Aprobar" />
     <Member Name="CreateCaseActivityFromWorkflow" Description="Crear actividad de caso desde flujo de trabajo" />
     <Member Name="CreateCaseFromWorkflowEventTask" Description="Crear caso desde evento de tarea de flujo de trabajo" />
-    <Member Name="Decline" Description="Declinar" />
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="FixCaseDescriptions" Description="Arreglar descripciones de caso" />
     <Member Name="Jump" Description="Salto" />
@@ -267,8 +283,7 @@
   <Type Name="CaseActivityState" Description="Estado de actividad de caso">
     <Member Name="Done" Description="Hecho" />
     <Member Name="New" Description="Nuevo" />
-    <Member Name="PendingDecision" Description="Decisión pendiente" />
-    <Member Name="PendingNext" Description="Próxima pendiente" />
+    <Member Name="Pending" Description="Pendiente" />
   </Type>
   <Type Name="CaseActivityTask">
     <Member Name="Timeout" Description="Timeout" />
@@ -419,9 +434,6 @@
     <Member Name="CertFileType" Description="Tipo de archivo de certificado" />
     <Member Name="FullFilePath" Description="Ruta completa del archivo" />
   </Type>
-  <Type Name="CNTKPredictorAlgorithm">
-    <Member Name="NeuralNetwork" Description="Red neuronal" />
-  </Type>
   <Type Name="CombinedUserChartPartEntity" Description="Parte del gráfico de usuario combinado">
     <Member Name="AllowChangeShowData" Description="Permitir cambio de datos mostrados" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Combinar filtros anclados con la misma etiqueta" />
@@ -431,9 +443,7 @@
     <Member Name="UseSameScale" Description="Usar la misma escala" />
   </Type>
   <Type Name="ConnectionType" Description="Tipo de conexión">
-    <Member Name="Approve" Description="Aprobar" />
-    <Member Name="CustomOption" Description="Opción personalizada" />
-    <Member Name="Decline" Description="Declinar" />
+    <Member Name="Decision" Description="Decisión" />
     <Member Name="Jump" Description="Salto" />
     <Member Name="Normal" Description="Normal" />
     <Member Name="ScriptException" Description="Excepción de script" />
@@ -451,20 +461,6 @@
   <Type Name="CultureInfoOperation">
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
-  </Type>
-  <Type Name="CustomDecissionOptionEmbedded" Description="Opción de decisión personalizada">
-    <Member Name="Name" Description="Nombre" />
-    <Member Name="Style" Description="Estilo" />
-  </Type>
-  <Type Name="CustomDecissionStyle" Description="Estilo de decisión personalizado">
-    <Member Name="Danger" Description="Peligro" />
-    <Member Name="Dark" Description="Oscuro" />
-    <Member Name="Info" Description="Info" />
-    <Member Name="Light" Description="Claro" />
-    <Member Name="Primary" Description="Primaria" />
-    <Member Name="Secondary" Description="Secundaria" />
-    <Member Name="Success" Description="Éxito" />
-    <Member Name="Warning" Description="Advertencia" />
   </Type>
   <Type Name="D3ChartScript">
     <Member Name="Bars" Description="Barras" />
@@ -529,6 +525,10 @@
     <Member Name="Days" Description="Días" />
     <Member Name="Months" Description="Meses" />
     <Member Name="Years" Description="Años" />
+  </Type>
+  <Type Name="DecisionOptionEmbedded" Description="Opción de decisión">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Style" Description="Estilo" />
   </Type>
   <Type Name="DefaultColumnEncodings">
     <Member Name="None" Description="Ninguno" />
@@ -668,8 +668,6 @@
     <Member Name="LastOnlineTicks" Description="Últimos ticks online" />
   </Type>
   <Type Name="DoneType" Description="Tipo de hecho">
-    <Member Name="Approve" Description="Aprobar" />
-    <Member Name="Decline" Description="Declinar" />
     <Member Name="Jump" Description="Salto" />
     <Member Name="Next" Description="Siguiente" />
     <Member Name="Recompose" Description="Recomponer" />
@@ -1563,10 +1561,12 @@
   </Type>
   <Type Name="NeuralNetworkEvalFunction" Description="Función de eval de red neuronal">
     <Member Name="ClassificationError" Description="Error de clasificación" />
-    <Member Name="CrossEntropyWithSoftmax" Description="Entropía cruzada con softmax" />
     <Member Name="MeanAbsoluteError" Description="Error absoluto medio" />
     <Member Name="MeanAbsolutePercentageError" Description="Error porcentual absoluto medio" />
-    <Member Name="SquaredError" Description="Error cuadrado" />
+    <Member Name="MeanSquaredError" Description="Error cuadrado medio" />
+    <Member Name="sigmoid_cross_entropy_with_logits" Description="entropía cruzada sigmoide con logits" />
+    <Member Name="softmax_cross_entropy_with_logits" Description="entropía cruzada softmax con logits" />
+    <Member Name="softmax_cross_entropy_with_logits_v2" Description="entropía cruzada softmax con logits v2" />
   </Type>
   <Type Name="NeuralNetworkHidenLayerEmbedded" Description="Capa oculta de red neuronal">
     <Member Name="Activation" Description="Activación" />
@@ -1574,73 +1574,31 @@
     <Member Name="Size" Description="Tamaño" />
   </Type>
   <Type Name="NeuralNetworkInitializer" Description="Inicializador de red neuronal">
-    <Member Name="GlorotNormal" Description="Glorot normal" />
-    <Member Name="GlorotUniform" Description="Glorot uniforme" />
-    <Member Name="HeNormal" Description="He normal" />
-    <Member Name="HeUniform" Description="He uniforme" />
-    <Member Name="Normal" Description="Normal" />
-    <Member Name="TruncateNormal" Description="Truncar normal" />
-    <Member Name="Uniform" Description="Uniforme" />
-    <Member Name="Xavier" Description="Xavier" />
-    <Member Name="Zero" Description="Cero" />
-  </Type>
-  <Type Name="NeuralNetworkLearner" Description="Aprendiz de red neuronal">
-    <Member Name="AdaDelta" Description="ADA Delta" />
-    <Member Name="AdaGrad" Description="ADA Grad" />
-    <Member Name="Adam" Description="Adán" />
-    <Member Name="FSAdaGrad" Description="FS ADA Grad" />
-    <Member Name="MomentumSGD" Description="Momentum SGD" />
-    <Member Name="RMSProp" Description="RMS prop" />
-    <Member Name="SGD" Description="Sgd" />
+    <Member Name="glorot_uniform_initializer" Description="inicializador de uniforme glorot" />
+    <Member Name="ones_initializer" Description="inicializador de unos" />
+    <Member Name="orthogonal_initializer" Description="inicializador ortogonal" />
+    <Member Name="random_normal_initializer" Description="inicializador normal aleatorio" />
+    <Member Name="random_uniform_initializer" Description="inicializador uniforme aleatorio" />
+    <Member Name="truncated_normal_initializer" Description="inicializador normal truncado" />
+    <Member Name="variance_scaling_initializer" Description="inicializador de escalado de varianza" />
+    <Member Name="zeros_initializer" Description="inicializador de ceros" />
   </Type>
   <Type Name="NeuralNetworkSettingsEntity" Description="La configuración de red neuronal">
     <Member Name="BestResultFromLast" Description="El mejor resultado de la última" />
     <Member Name="Device" Description="Dispositivo" />
     <Member Name="EvalErrorFunction" Description="Función de error eval" />
     <Member Name="HiddenLayers" Description="Capas ocultas" />
-    <Member Name="Learner" Description="Aprendiz" />
-    <Member Name="LearningMomentum" Description="El impulso de aprendizaje" />
+    <Member Name="LearningEpsilon" Description="Aprendizaje epsilon" />
     <Member Name="LearningRate" Description="Tasa de aprendizaje" />
-    <Member Name="LearningUnitGain" Description="La ganancia de unidad de aprendizaje" />
-    <Member Name="LearningVarianceMomentum" Description="Aprendizaje del momento de la varianza" />
     <Member Name="LossFunction" Description="Función de pérdida" />
     <Member Name="MinibatchSize" Description="Tamaño de minibatch" />
     <Member Name="NumMinibatches" Description="Num minibatches" />
+    <Member Name="Optimizer" Description="Optimizador" />
     <Member Name="OutputActivation" Description="Activación de salida" />
     <Member Name="OutputInitializer" Description="Inicializador de salida" />
     <Member Name="PredictionType" Description="Tipo de predicción" />
     <Member Name="SaveProgressEvery" Description="Guardar progreso cada" />
     <Member Name="SaveValidationProgressEvery" Description="Guardar el progreso de validación cada" />
-  </Type>
-  <Type Name="NewsletterDeliveryEntity" Description="Entrega de Newsletter">
-    <Member Name="Newsletter" Description="Newsletter" />
-    <Member Name="Recipient" Description="Destinatario" />
-    <Member Name="SendDate" Description="Fecha de envío" />
-    <Member Name="Sent" Description="Enviado" />
-  </Type>
-  <Type Name="NewsletterEntity" Description="Newsletter">
-    <Member Name="DisplayFrom" Description="Visualizarlo desde" />
-    <Member Name="From" Description="De" />
-    <Member Name="Name" Description="Nombre" />
-    <Member Name="Query" Description="Consulta" />
-    <Member Name="State" Description="Estado" />
-    <Member Name="Subject" Description="Asunto" />
-    <Member Name="Text" Description="Texto" />
-  </Type>
-  <Type Name="NewsletterOperation">
-    <Member Name="AddRecipients" Description="Agregar destinatarios" />
-    <Member Name="Clone" Description="Clonar" />
-    <Member Name="RemoveRecipients" Description="Quitar destinatarios" />
-    <Member Name="Save" Description="Guardar" />
-    <Member Name="Send" Description="Enviar" />
-  </Type>
-  <Type Name="NewsletterProcess">
-    <Member Name="SendNewsletter" Description="Enviar boletín" />
-  </Type>
-  <Type Name="NewsletterState" Description="Estado de la newsletter">
-    <Member Name="Created" Description="Creado" />
-    <Member Name="Saved" Description="Guardado" />
-    <Member Name="Sent" Description="Enviado" />
   </Type>
   <Type Name="NewTasksEmbedded" Description="Nuevas tareas">
     <Member Name="BpmnId" Description="Bpmn id" />
@@ -1744,16 +1702,6 @@
     <Member Name="StartColumn" Description="Columna Inicio" />
     <Member Name="Style" Description="Estilo" />
     <Member Name="Title" Description="Título" />
-  </Type>
-  <Type Name="PanelStyle" Description="Estilo del panel">
-    <Member Name="Danger" Description="Peligro" />
-    <Member Name="Dark" Description="Oscuro" />
-    <Member Name="Info" Description="Info" />
-    <Member Name="Light" Description="Claro" />
-    <Member Name="Primary" Description="Primaria" />
-    <Member Name="Secondary" Description="Secundaria" />
-    <Member Name="Success" Description="Éxito" />
-    <Member Name="Warning" Description="ADVERTENCIA" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Intervalo caducidad contraseña">
     <Member Name="Days" Description="Días" />
@@ -1877,11 +1825,11 @@
     <Member Name="User" Description="Usuario" />
   </Type>
   <Type Name="PredictorEpochProgressEntity" Description="Progreso de etapa de predictor">
+    <Member Name="AccuracyTraining" Description="Entrenamiento de precisión" />
+    <Member Name="AccuracyValidation" Description="Validación de precisión" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="Ellapsed" Description="Transcurrido" />
     <Member Name="Epoch" Description="Etapa" />
-    <Member Name="EvaluationTraining" Description="Entrenamiento de evaluación" />
-    <Member Name="EvaluationValidation" Description="Validación de evaluación" />
     <Member Name="LossTraining" Description="Entrenamiento de pérdida" />
     <Member Name="LossValidation" Description="Validación de pérdidas" />
     <Member Name="Predictor" Description="Predictor" />
@@ -1926,7 +1874,7 @@
     <Member Name="TsvMetadata" Description="Metadatos TSV" />
   </Type>
   <Type Name="PredictorMetricsEmbedded" Description="Métricas del predictor">
-    <Member Name="Evaluation" Description="Evaluación" />
+    <Member Name="Accuracy" Description="Precisión" />
     <Member Name="Loss" Description="Pérdida" />
   </Type>
   <Type Name="PredictorOperation">
@@ -2513,6 +2461,13 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sólo puede agregar bloques 'Foreach' con campos de colección" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Tienes que añadir el token 'Elemento' para usar Foreach en campos de colección" />
   </Type>
+  <Type Name="TensorFlowOptimizer" Description="Optimizador de Tensor flow">
+    <Member Name="Adam" Description="Adán" />
+    <Member Name="GradientDescentOptimizer" Description="Optimizador de descenso de gradiente" />
+  </Type>
+  <Type Name="TensorFlowPredictorAlgorithm">
+    <Member Name="NeuralNetworkGraph" Description="Gráfico de red neuronal" />
+  </Type>
   <Type Name="TimeMachineMessage">
     <Member Name="CompareVersions" Description="Comparar versiones" />
     <Member Name="EntityDeleted" Description="[Entidad eliminada]" />
@@ -2970,9 +2925,8 @@
     <Member Name="BoundaryTimers" Description="Los temporizadores de límite" />
     <Member Name="BpmnElementId" Description="Id de elemento BPMN" />
     <Member Name="Comments" Description="Comentarios" />
-    <Member Name="CustomDecissionOptions" Description="Opciones de decisión personalizadas" />
+    <Member Name="DecisionOptions" Description="Opciones de decisión" />
     <Member Name="EstimatedDuration" Description="Duración estimada" />
-    <Member Name="HasCustomOptions" Description="Tiene opciones personalizadas" />
     <Member Name="Lane" Description="Calle" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="RequiresOpen" Description="Requiere abrir" />
@@ -2986,9 +2940,11 @@
   </Type>
   <Type Name="WorkflowActivityMessage">
     <Member Name="ActivityIs" Description="La actividad es" />
+    <Member Name="Approve" Description="Aprobar" />
     <Member Name="AverageDuration" Description="Duración media" />
     <Member Name="CaseFlow" Description="Flujo de casos" />
     <Member Name="ChooseADestinationForWorkflowJumping" Description="Elija un destino para el salto de flujo de trabajo" />
+    <Member Name="Decline" Description="Rechazar" />
     <Member Name="DuplicateViewNameFound0" Description="Nombre de vista duplicado encontrado: {0}" />
     <Member Name="InprogressWorkflowActivities" Description="Actividades de flujo de trabajo en curso" />
     <Member Name="LocateWorkflowActivityInDiagram" Description="Localizar la actividad del flujo de trabajo en el diagrama" />
@@ -2998,9 +2954,8 @@
   <Type Name="WorkflowActivityModel" Description="Actividad de flujo de trabajo">
     <Member Name="BoundaryTimers" Description="Temporizadores de límite" />
     <Member Name="Comments" Description="Comentarios" />
-    <Member Name="CustomDecissionOptions" Description="Opciones de decisión personalizadas" />
+    <Member Name="DecisionOptions" Description="Opciones de decisión" />
     <Member Name="EstimatedDuration" Description="Duración estimada" />
-    <Member Name="HasCustomOptions" Description="Tiene opciones personalizadas" />
     <Member Name="MainEntityType" Description="Tipo de entidad principal" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="RequiresOpen" Description="Requiere abrir" />
@@ -3053,7 +3008,7 @@
     <Member Name="Action" Description="Acción" />
     <Member Name="BpmnElementId" Description="Id de elemento BPMN" />
     <Member Name="Condition" Description="Condición" />
-    <Member Name="CustomOptionName" Description="Nombre de la opción personalizada" />
+    <Member Name="DecisionOptionName" Description="Nombre de la opción de decisión" />
     <Member Name="From" Description="Desde" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Order" Description="Orden" />
@@ -3064,7 +3019,8 @@
   <Type Name="WorkflowConnectionModel" Description="Conexión de flujo de trabajo">
     <Member Name="Action" Description="Acción" />
     <Member Name="Condition" Description="Condición" />
-    <Member Name="CustomOptionName" Description="Nombre de la opción personalizada" />
+    <Member Name="DecisionOptionName" Description="Nombre de la opción de decisión" />
+    <Member Name="DecisionOptions" Description="Opciones de decisión" />
     <Member Name="MainEntityType" Description="Tipo de entidad principal" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NeedCondition" Description="Necesidad de condición" />
@@ -3311,6 +3267,8 @@
     <Member Name="Activity0ShouldBeDecision" Description="La actividad '{0}' debe ser decisión." />
     <Member Name="Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways" Description="La actividad '{0}' con el tipo de decisión debe ir a una pasarela exclusiva o inclusiva." />
     <Member Name="BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2" Description="El temporizador de límite '{0}' de la actividad '{1}' debería tener exactamente una conexión de tipo '{2}'" />
+    <Member Name="DecisionOption0IsDeclaredButNeverUsedInAConnection" Description="La opción de decisión '{0}' se declara pero nunca se utiliza en una conexión" />
+    <Member Name="DecisionOptionName0IsNotDeclaredInAnyActivity" Description="El nombre de opción de decisión '{0}' no se declara en ninguna actividad" />
     <Member Name="DelayActivitiesShouldHaveExactlyOneInterruptingTimer" Description="Las actividades de retardo deben tener exactamente un temporizador de interrupción" />
     <Member Name="FinishEventIsRequired" Description="Evento final es necesario" />
     <Member Name="Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast" Description="La puerta de enlace '{0}' debe tener una condición o decisión en cada salida, excepto la última." />
