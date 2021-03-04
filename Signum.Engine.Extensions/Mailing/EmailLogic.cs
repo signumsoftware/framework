@@ -292,9 +292,6 @@ namespace Signum.Engine.Mailing
                         if (et.Model != null && EmailModelLogic.RequiresExtraParameters(et.Model))
                             return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(EmailModelEntity).NiceName(), et.Model);
 
-                        if (et.SendDifferentMessages)
-                            return ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo(() => et.SendDifferentMessages).NiceName());
-
                         return null;
                     },
                     Construct = (et, args) =>

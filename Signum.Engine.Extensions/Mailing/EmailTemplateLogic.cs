@@ -441,7 +441,7 @@ namespace Signum.Engine.Mailing
                 {
                     try
                     {
-                        return table.InsertSqlSync(EmailModelLogic.CreateDefaultTemplate(se), includeCollections: true);
+                        return table.InsertSqlSync(EmailModelLogic.CreateDefaultTemplateInternal(se), includeCollections: true);
                     }
                     catch (Exception e)
                     {
@@ -466,7 +466,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    EmailModelLogic.CreateDefaultTemplate(se).Save();
+                    EmailModelLogic.CreateDefaultTemplateInternal(se).Save();
                 }
                 catch (Exception ex)
                 {
@@ -493,7 +493,7 @@ namespace Signum.Engine.Mailing
 
         internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
         {
-            var newTemplate = EmailModelLogic.CreateDefaultTemplate(et.Model!);
+            var newTemplate = EmailModelLogic.CreateDefaultTemplateInternal(et.Model!);
 
             newTemplate.SetId(et.IdOrNull);
             newTemplate.SetIsNew(false);
