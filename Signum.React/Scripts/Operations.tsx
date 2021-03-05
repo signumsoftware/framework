@@ -235,9 +235,9 @@ export class ContextualOperationContext<T extends Entity> {
 
     const sc = this.context.container;
     const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex == null) {
+    if (colIndex != null) {
       const row = sc.state.selectedRows!.first();
-      const val = row.columns[sc.state.resultTable!.columns.indexOf(tokenName)];
+      const val = row.columns[colIndex];
       return val;
     }
 
