@@ -312,6 +312,11 @@ namespace Signum.Utilities
             return date.ToLongDateString();
         }
 
+        public static string ToIsoString(this DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        }
+
         public static string ToAgoString(this DateTime dateTime)
         {
             return ToAgoString(dateTime, dateTime.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now);
