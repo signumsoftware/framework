@@ -239,6 +239,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     contextual: 
     {
       settersConfig: coc => "NoDialog",
+      isVisible: ctx => true,
       createMenuItems: coc => {
         const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
         if (wa.type == "Task") {
