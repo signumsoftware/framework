@@ -27,7 +27,7 @@ export default function LoginPage() {
   const [showLoginForm, setShowLoginForm] = React.useState<boolean>(LoginPage.showLoginForm == "yes");
 
   return (
-    <div className="container">
+    <div className="container sf-login-page">
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <h2 className="sf-entity-title">{AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}</h2>
