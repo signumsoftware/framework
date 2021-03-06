@@ -76,10 +76,7 @@ export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>>
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
 
-  //var myCookie = Options.getCookie();
-  
-  const cookieName = "sfUser";
-  var myCookie = getCookie(cookieName);
+  var myCookie = Options.getCookie();
 
   if (!myCookie) {
     return Promise.resolve(undefined);
@@ -95,29 +92,6 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
     return au;
   });
 }
-
-
-
-function getCookie(name: string) {
-  var dc = document.cookie;
-  var prefix = name;
-  var begin = dc.indexOf(prefix);
-
-  if (begin == -1) {
-    begin = dc.indexOf(prefix);
-    if (begin != 0) return null;
-  }
-
-  var indexOfEqual = dc.indexOf("=", begin);
-
-  var end = document.cookie.indexOf(";", begin + 2);
-  if (end == -1) {
-    end = dc.length;
-  }
-
-  return decodeURI(dc.substring(indexOfEqual + 1, end));
-}
-
 
 export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
 
