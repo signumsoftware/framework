@@ -263,7 +263,7 @@ export function logoutOtherTabs(user: UserEntity) {
 
 export namespace Options {
 
-  export function getCookie() { return Cookies.get("sfUser"); }
+  export function getCookie(): string | null { return Cookies.get("sfUser"); }
   export function removeCookie() { return Cookies.remove("sfUser"); }
 
   export let onLogout: () => void = () => {
