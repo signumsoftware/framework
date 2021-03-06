@@ -17,12 +17,12 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
   if (Options.userTicket) {
     if (!authenticators.contains(loginFromCookie))
-      throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
+      throw new Error("call AuthClient.registerUserTicketAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
   }
 
   if (Options.windowsAuthentication) {
     if (!authenticators.contains(loginWindowsAuthentication))
-      throw new Error("call AuthClient.registerWindowsAuthenticator in Main.tsx before AuthClient.autoLogin");
+      throw new Error("call AuthClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
 
     LoginPage.customLoginButtons = () => <LoginWithWindowsButton />;
   }
@@ -293,11 +293,11 @@ export namespace Options {
   export function removeCookie() { return Cookies.remove("sfUser"); }
 
   export let onLogout: () => void = () => {
-    throw new Error("onLogout should be defined (check Main.tsx in Southwind)");
+    throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
   }
 
   export let onLogin: (url?: string) => void = (url?: string) => {
-    throw new Error("onLogin should be defined (check Main.tsx in Southwind)");
+    throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
   }
 
   export let disableWindowsAuthentication: boolean;
