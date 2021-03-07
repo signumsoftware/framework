@@ -19,7 +19,7 @@ import { clearWidgets } from "./Frames/Widgets";
 import { clearCustomConstructors } from "./Constructor";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
-import { ErrorModalOptions } from "./Modals/ErrorModal";
+import { ErrorModalOptions, renderServiceMessageDefault, renderValidationMessageDefault, renderMessageDefault } from "./Modals/ErrorModal";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -35,6 +35,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
+  ErrorModalOptions.renderServiceMessage = se => renderServiceMessageDefault(se);
+  ErrorModalOptions.renderValidationMessage = ve => renderValidationMessageDefault(ve);
+  ErrorModalOptions.renderMessage = e => renderMessageDefault(e);
 }
 
 export namespace NavigatorManager {
