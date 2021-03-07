@@ -42,7 +42,7 @@ namespace Signum.React.Authorization
                 Role = UserEntity.Current == null ? null : RoleEntity.Current,
             };
 
-            AuthLogic.OnRulesChanged += () => ReflectionServer.cache.Clear();
+            AuthLogic.OnRulesChanged += ReflectionServer.InvalidateCache;
 
             if (TypeAuthLogic.IsStarted)
             {
