@@ -19,12 +19,6 @@ interface ErrorModalProps extends Modals.IModalProps<undefined> {
 export default function ErrorModal(p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
-  const [showDetails, setShowDetails] = React.useState(false);
-
-  function handleShowStackTrace(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    setShowDetails(!showDetails);
-  }
 
   function handleOnExited() {
     p.onExited!(undefined);
@@ -55,14 +49,6 @@ export default function ErrorModal(p: ErrorModalProps) {
         {se ? ErrorModalOptions.renderServiceMessage(se) :
           ve ? ErrorModalOptions.renderValidationMessage(ve) :
             ErrorModalOptions.renderMessage(e)}
-
-        {
-          se?.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
-          <div>
-            <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
-            {showDetails && <pre>{se.httpError.stackTrace}</pre>}
-          </div>
-        }
       </div>
 
       <div className="modal-footer">
@@ -151,9 +137,22 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
 }
 
 export function renderServiceMessageDefault(se: ServiceError) {
+
+  const [showDetails, setShowDetails] = React.useState(false);
+
+  function handleShowStackTrace(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    setShowDetails(!showDetails);
+  }
+
   return (
     <div>
       {textDanger(se.httpError.exceptionMessage)}
+      {se.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
+        <div>
+          <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+          {showDetails && <pre>{se.httpError.stackTrace}</pre>}
+        </div>}
     </div>
   );
 }
