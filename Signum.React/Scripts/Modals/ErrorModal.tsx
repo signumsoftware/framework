@@ -52,9 +52,9 @@ export default function ErrorModal(p: ErrorModalProps) {
       </div>
 
       <div className="modal-body">
-        {se ? renderServiceMessage(se) :
-          ve ? renderValidationeMessage(ve) :
-            renderMessage(e)}
+        {se ? ErrorModalOptions.renderServiceMessage(se) :
+          ve ? ErrorModalOptions.renderValidationMessage(ve) :
+            ErrorModalOptions.renderMessage(e)}
 
         {
           se?.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
@@ -98,26 +98,6 @@ export default function ErrorModal(p: ErrorModalProps) {
         <FontAwesomeIcon icon="exclamation-triangle" /> {NormalWindowMessage.ThereAreErrors.niceToString()}
       </span>
     );
-  }
-
-  function renderServiceMessage(se: ServiceError) {
-    return (
-      <div>
-        {textDanger(se.httpError.exceptionMessage)}
-      </div>
-    );
-  }
-
-  function renderValidationeMessage(ve: ValidationError) {
-    return (
-      <div>
-        {textDanger(Dic.getValues(ve.modelState).join("\n"))}
-      </div>
-    );
-  }
-
-  function renderMessage(e: any) {
-    return textDanger(e.message ? e.message : e);
   }
 }
 
@@ -170,6 +150,26 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
+export function renderServiceMessageDefault(se: ServiceError) {
+  return (
+    <div>
+      {textDanger(se.httpError.exceptionMessage)}
+    </div>
+  );
+}
+
+export function renderValidationMessageDefault(ve: ValidationError) {
+  return (
+    <div>
+      {textDanger(Dic.getValues(ve.modelState).join("\n"))}
+    </div>
+  );
+}
+
+export function renderMessageDefault(e: any) {
+  return textDanger(e.message ? e.message : e);
+}
+
 export namespace ErrorModalOptions {
   export function getExceptionUrl(exceptionId: number | string): string | undefined {
     return undefined;
@@ -177,5 +177,17 @@ export namespace ErrorModalOptions {
 
   export function isExceptionViewable() {
     return false;
+  }
+
+  export function renderServiceMessage(se: ServiceError): React.ReactNode {
+    return undefined;
+  }
+
+  export function renderValidationMessage(ve: ValidationError): React.ReactNode {
+    return undefined;
+  }
+
+  export function renderMessage(e: any): React.ReactNode {
+    return undefined;
   }
 }
