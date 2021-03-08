@@ -52,9 +52,9 @@ export default function ErrorModal(p: ErrorModalProps) {
       </div>
 
       <div className="modal-body">
-        {se ? renderServiceMessage(se) :
-          ve ? renderValidationeMessage(ve) :
-            renderMessage(e)}
+        {se ? ErrorModalOptions.renderServiceMessage(se) :
+          ve ? ErrorModalOptions.renderValidationMessage(ve) :
+            ErrorModalOptions.renderMessage(e)}
 
         {
           se?.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
@@ -98,18 +98,6 @@ export default function ErrorModal(p: ErrorModalProps) {
         <FontAwesomeIcon icon="exclamation-triangle" /> {NormalWindowMessage.ThereAreErrors.niceToString()}
       </span>
     );
-  }
-
-  function renderServiceMessage(se: ServiceError) {
-    return ErrorModalOptions.renderServiceMessage(se);
-  }
-
-  function renderValidationeMessage(ve: ValidationError) {
-    return ErrorModalOptions.renderValidationMessage(ve);
-  }
-
-  function renderMessage(e: any) {
-    return ErrorModalOptions.renderMessage(e);
   }
 }
 
