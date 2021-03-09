@@ -174,6 +174,7 @@ namespace Signum.Engine.Workflow
                             ca.DoneDate = DateTime.Now;
                             ca.DoneType = DoneType.Jump;
                             ca.DoneDecision = CaseActivityMessage.CanceledCase.NiceToString();
+                            ca.Save();
 
                             foreach (var notification in ca.Notifications().ToList())
                             {
