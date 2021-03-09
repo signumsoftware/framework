@@ -816,6 +816,7 @@
   </Type>
   <Type Name="EmailMasterTemplateEntity" Description="Master E-Mail-Vorlage">
     <Member Name="Guid" Description="Guid" />
+    <Member Name="IsDefault" Description="Ist Standard" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -948,7 +949,10 @@
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Recipients" Description="Empfänger" />
-    <Member Name="SendDifferentMessages" Description="Verschiedene Nachrichten senden" />
+  </Type>
+  <Type Name="EmailTemplateFromEmbedded" Description="E-Mail Vorlage Von">
+    <Member Name="WhenMany" Description="Wenn viele" />
+    <Member Name="WhenNone" Description="Wenn keine" />
   </Type>
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Enddatum muss größer als Startdatum sein." />
@@ -977,6 +981,8 @@
   </Type>
   <Type Name="EmailTemplateRecipientEmbedded" Description="E-Mail-Vorlagenempfänger">
     <Member Name="Kind" Description="Art" />
+    <Member Name="WhenMany" Description="Wenn viele" />
+    <Member Name="WhenNone" Description="Wenn keine" />
   </Type>
   <Type Name="EmailTemplateViewMessage">
     <Member Name="Insert" Description="Einfügen" />
@@ -2535,6 +2541,24 @@
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="Json" Description="Json" />
     <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
+    <Member Name="FistResult" Description="Erstes Ergebnis" />
+    <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
+  </Type>
+  <Type Name="WhenManyRecipiensBehaviour" Description="Verhalten Wenn viele Empfänger">
+    <Member Name="KeepOneMessageWithManyRecipients" Description="Eine Nachricht mit vielen Empfängern" />
+    <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
+  </Type>
+  <Type Name="WhenNoneFromBehaviour" Description="Verhalten Wenn keine Von ">
+    <Member Name="DefaultFrom" Description="Standard Von" />
+    <Member Name="NoMessage" Description="Keine Nachricht" />
+    <Member Name="ThrowException" Description="Ausnahme werfen" />
+  </Type>
+  <Type Name="WhenNoneRecipientsBehaviour" Description="Verhalten Wenn kein Empfänger">
+    <Member Name="NoMessage" Description="Keine Nachricht" />
+    <Member Name="NoRecipients" Description="Keine Empfänger" />
+    <Member Name="ThrowException" Description="Ausnahme werfen" />
   </Type>
   <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
     <Member Name="FileName" Description="Dateiname" />

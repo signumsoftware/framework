@@ -159,24 +159,24 @@ namespace Signum.Engine.Mailing
 
                     if(groupsWithEmail.IsEmpty())
                     {
-                        switch (template.From.WhenEmpty)
+                        switch (template.From.WhenNone)
                         {
-                            case WhenEmptyFromBehaviour.ThrowException:
+                            case WhenNoneFromBehaviour.ThrowException:
                                 if (groups.Count() == 0)
                                     throw new InvalidOperationException($"Impossible to send {this.template} because From Token ({template.From.Token}) returned no result");
                                 else
                                     throw new InvalidOperationException($"Impossible to send {this.template} because From Token ({template.From.Token}) returned results without Email addresses");
 
-                            case WhenEmptyFromBehaviour.NoMessage:
+                            case WhenNoneFromBehaviour.NoMessage:
                                 yield break;
-                            case WhenEmptyFromBehaviour.DefaultFrom:
+                            case WhenNoneFromBehaviour.DefaultFrom:
                                 if (smtpConfig != null && smtpConfig.DefaultFrom != null)
                                     yield return smtpConfig.DefaultFrom.Clone();
                                 else
                                     throw new InvalidOperationException("Not Default From found");
                                 break;
                             default:
-                                throw new UnexpectedValueException(template.From.WhenEmpty);
+                                throw new UnexpectedValueException(template.From.WhenNone);
                         }
                     }
                     else
@@ -261,24 +261,24 @@ namespace Signum.Engine.Mailing
 
                 if (groupsWithEmail.IsEmpty())
                 {
-                    switch (tr.WhenEmpty)
+                    switch (tr.WhenNone)
                     {
-                        case WhenEmptyRecipientsBehaviour.ThrowException:
+                        case WhenNoneRecipientsBehaviour.ThrowException:
                             if (groups.Count() == 0)
                                 throw new InvalidOperationException($"Impossible to send {this.template} because {tr.Kind} Token ({tr.Token}) returned no result");
                             else
                                 throw new InvalidOperationException($"Impossible to send {this.template} because {tr.Kind} Token ({tr.Token}) returned results without Email addresses");
 
-                        case WhenEmptyRecipientsBehaviour.NoMessage:
+                        case WhenNoneRecipientsBehaviour.NoMessage:
                             yield break;
-                        case WhenEmptyRecipientsBehaviour.NoRecipients:
+                        case WhenNoneRecipientsBehaviour.NoRecipients:
                             foreach (var item in TokenRecipientsCrossProduct(tokenRecipients, pos + 1))
                             {
                                 yield return item;
                             }
                             break;
                         default:
-                            throw new UnexpectedValueException(tr.WhenEmpty);
+                            throw new UnexpectedValueException(tr.WhenNone);
                     }
 
                 }

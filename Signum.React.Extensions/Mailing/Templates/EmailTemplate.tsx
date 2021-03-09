@@ -29,10 +29,10 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
           <Tabs id={ctx.prefix + "tabs"}>
             <Tab eventKey="recipients" title={ctx.niceName(a => a.recipients)}>
               <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
-                onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenEmpty: "ThrowException", whenMany: "SplitMessages" }))}
+                onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
               <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()}
-                onCreate={() => Promise.resolve(EmailTemplateRecipientEmbedded.New({ whenEmpty: "ThrowException", whenMany: "SplitMessages" }))}
+                onCreate={() => Promise.resolve(EmailTemplateRecipientEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={rctx => <EmailTemplateRecipient ctx={rctx} query={p.ctx.value.query} />} />
             </Tab>
             <Tab eventKey="attachments" title={
@@ -141,7 +141,7 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
 
           {Boolean(p.ctx.value.token) && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenEmpty)} />
+              <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
             </div>
             <div className="col-sm-6">
               <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
@@ -187,7 +187,7 @@ function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbe
 
           {Boolean(p.ctx.value.token) && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenEmpty)} />
+              <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
             </div>
             <div className="col-sm-6">
               <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
