@@ -19,12 +19,6 @@ interface ErrorModalProps extends Modals.IModalProps<undefined> {
 export default function ErrorModal(p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
-  const [showDetails, setShowDetails] = React.useState(false);
-
-  function handleShowStackTrace(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    setShowDetails(!showDetails);
-  }
 
   function handleOnExited() {
     p.onExited!(undefined);
@@ -55,14 +49,6 @@ export default function ErrorModal(p: ErrorModalProps) {
         {se ? ErrorModalOptions.renderServiceMessage(se) :
           ve ? ErrorModalOptions.renderValidationMessage(ve) :
             ErrorModalOptions.renderMessage(e)}
-
-        {
-          se?.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
-          <div>
-            <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
-            {showDetails && <pre>{se.httpError.stackTrace}</pre>}
-          </div>
-        }
       </div>
 
       <div className="modal-footer">
@@ -150,24 +136,42 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
-export function renderServiceMessageDefault(se: ServiceError) {
+export function RenderServiceMessageDefault(p: { error: ServiceError }) {
+
+  const [showDetails, setShowDetails] = React.useState(false);
+
+  function handleShowStackTrace(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    setShowDetails(!showDetails);
+  }
+
   return (
     <div>
-      {textDanger(se.httpError.exceptionMessage)}
+      {textDanger(p.error.httpError.exceptionMessage)}
+      {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
+        <div>
+          <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
+          {showDetails && <pre>{p.error.httpError.stackTrace}</pre>}
+        </div>}
     </div>
   );
 }
 
-export function renderValidationMessageDefault(ve: ValidationError) {
+export function RenderValidationMessageDefault(p: { error: ValidationError }) {
   return (
     <div>
-      {textDanger(Dic.getValues(ve.modelState).join("\n"))}
+      {textDanger(Dic.getValues(p.error.modelState).join("\n"))}
     </div>
   );
 }
 
-export function renderMessageDefault(e: any) {
-  return textDanger(e.message ? e.message : e);
+export function RenderMessageDefault(p: { error: any }) {
+  const e = p.error;
+  return (
+    <div>
+      {textDanger(e.message ? e.message : e)}
+    </div>
+  );
 }
 
 export namespace ErrorModalOptions {
