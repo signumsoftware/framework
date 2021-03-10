@@ -136,7 +136,7 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
-export function renderServiceMessageDefault(se: ServiceError) {
+export function RenderServiceMessageDefault(p: { error: ServiceError }) {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -147,26 +147,31 @@ export function renderServiceMessageDefault(se: ServiceError) {
 
   return (
     <div>
-      {textDanger(se.httpError.exceptionMessage)}
-      {se.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
+      {textDanger(p.error.httpError.exceptionMessage)}
+      {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
           <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
-          {showDetails && <pre>{se.httpError.stackTrace}</pre>}
+          {showDetails && <pre>{p.error.httpError.stackTrace}</pre>}
         </div>}
     </div>
   );
 }
 
-export function renderValidationMessageDefault(ve: ValidationError) {
+export function RenderValidationMessageDefault(p: { error: ValidationError }) {
   return (
     <div>
-      {textDanger(Dic.getValues(ve.modelState).join("\n"))}
+      {textDanger(Dic.getValues(p.error.modelState).join("\n"))}
     </div>
   );
 }
 
-export function renderMessageDefault(e: any) {
-  return textDanger(e.message ? e.message : e);
+export function RenderMessageDefault(p: { error: any }) {
+  const e = p.error;
+  return (
+    <div>
+      {textDanger(e.message ? e.message : e)}
+    </div>
+  );
 }
 
 export namespace ErrorModalOptions {
