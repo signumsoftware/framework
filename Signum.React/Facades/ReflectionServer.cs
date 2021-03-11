@@ -69,7 +69,7 @@ namespace Signum.React.Facades
             EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
         }
 
-        private static void InvalidateCache()
+        public static void InvalidateCache()
         {
             cache.Clear();
             LastModified = DateTimeOffset.UtcNow;
