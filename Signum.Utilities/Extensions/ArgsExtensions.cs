@@ -43,20 +43,28 @@ namespace Signum.Utilities
                     yield return (T)Enum.Parse(typeof(T), s);
                 else if (obj is IComparable && ReflectionTools.IsNumber(obj.GetType()) && ReflectionTools.IsNumber(typeof(T)))
                     yield return ReflectionTools.ChangeType<T>(obj);
+                else if (obj is IComparable && ReflectionTools.IsDate(obj.GetType()) && ReflectionTools.IsDate(typeof(T)))
+                    yield return ReflectionTools.ChangeType<T>(obj);
                 else if (obj is List<object> list)
                 {
                     var type = typeof(T).ElementType();
                     if (type != null)
-                        yield return (T)giConvertListTo.GetInvoker(type)(list);
+                    {
+                        var converted = (T)giConvertListTo.GetInvoker(type)(list);
+                        if (((IList)converted).Count == list.Count)
+                            yield return converted;
+                    }
                 }
             }
         }
+
+   
 
         static readonly GenericInvoker<Func<List<object>, IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
 
         static List<S> ConvertListTo<S>(List<object> list)
         {
-            return list.Cast<S>().ToList();
+            return SmartConvertTo<S>(list).ToList();
         }
     }
 }
