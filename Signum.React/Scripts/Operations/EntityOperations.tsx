@@ -87,7 +87,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
   });
 }
 
-export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean): AlternativeOperationSetting<T> {
+export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean, reloadComponent: boolean = true): AlternativeOperationSetting<T> {
 
   return ({
     name: "andNew",
@@ -101,7 +101,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
         notifySuccess();
 
         (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
-          .then(newPack => newPack && eoc.frame.onReload(newPack, true))
+          .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent))
           .done();
       };
       eoc.defaultClick();
