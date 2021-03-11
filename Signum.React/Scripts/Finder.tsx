@@ -132,7 +132,7 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export const tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
 
   export let defaultPagination: Pagination = {
     mode: "Paginate",

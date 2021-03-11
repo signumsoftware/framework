@@ -288,6 +288,11 @@ namespace Signum.Utilities
             return format;
         }
 
+        public string ToIsoString()
+        {
+            return this._dt.ToString("yyyy-MM-dd");
+        }
+
         public static bool TryParse(string s, out Date result)
         {
             DateTime d;
