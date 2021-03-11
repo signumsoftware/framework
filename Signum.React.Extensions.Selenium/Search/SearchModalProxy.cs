@@ -1,6 +1,7 @@
 using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using System;
 
 namespace Signum.React.Selenium
 {
@@ -84,6 +85,20 @@ namespace Signum.React.Selenium
         public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
         {
             return SearchControl.Create<T>();
+        }
+
+        public void CreateAndSelect<T>(Action<FrameModalProxy<T>> action) where T : ModifiableEntity
+        {
+            var message = this.Element.GetDriver().CapturePopup(() =>
+            {
+                var modal = SearchControl.Create<T>();
+
+                action(modal);
+            });
+
+            message.AsMessageModal().ClickWaitClose(MessageModalButton.Yes);
+
+            this.WaitNotVisible();
         }
 
         public void Search()

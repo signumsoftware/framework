@@ -161,8 +161,10 @@ export function TranslatedInstances(p: { data: TranslatedInstanceViewType, cultu
 
                       function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
                         if (!pair) {
-                          pair = { originalText: ins.master[entry], translatedText: e.currentTarget.value };
+                          if (!trans)
+                            trans = ins.translations[entry] = {};
 
+                          trans[c] = { originalText: ins.master[entry], translatedText: e.currentTarget.value };
                         } else {
                           pair.translatedText = e.currentTarget.value;
                         }
