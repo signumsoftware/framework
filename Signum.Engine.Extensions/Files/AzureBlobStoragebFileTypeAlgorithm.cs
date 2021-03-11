@@ -132,7 +132,7 @@ namespace Signum.Engine.Files
                         { 
                             ContentType = action == Files.BlobAction.Download 
                                 ? "application/octet-stream" 
-                                : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName), "application/octet-stream"),
+                                : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
                             ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
                         });
                 }
