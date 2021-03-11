@@ -158,7 +158,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
         lites: [toLiteFat(entity as Entity)],
         widgetContext: p.wc as WidgetContext<Entity>
       });
-  }, [p]);
+  }, [entity]);
 
   if (links == undefined)
     return <span>…</span>;
