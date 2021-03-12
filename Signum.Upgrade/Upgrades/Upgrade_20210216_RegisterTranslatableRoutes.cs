@@ -21,6 +21,7 @@ namespace Signum.Upgrade.Upgrades
                 file.InsertAfterFirstLine(line => line.Contains("UserChartLogic.RegisterRoleTypeCondition"), "UserChartLogic.RegisterTranslatableRoutes();");
                 file.InsertAfterFirstLine(line => line.Contains("DashboardLogic.RegisterRoleTypeCondition"), "DashboardLogic.RegisterTranslatableRoutes();");
                 file.InsertAfterFirstLine(line => line.Contains("ToolbarLogic.Start(sb);"), "ToolbarLogic.RegisterTranslatableRoutes();");
+                file.InsertAfterFirstLine(line => line.Contains("TranslationLogic.Start("), "TranslatedInstanceLogic.Start(sb, () => CultureInfo.GetCultureInfo(\"en\"));");
             });
 
         }
