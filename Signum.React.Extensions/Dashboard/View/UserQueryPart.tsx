@@ -63,7 +63,8 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
         showFooter={part.showFooter}
-        allowSelection={part.allowSelection} />
+        allowSelection={part.allowSelection}
+        avoidAutoRefresh={part.avoidAutoRefresh} />
     </FullscreenComponent>
   );
 }

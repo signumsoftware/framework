@@ -114,6 +114,7 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   allowSelection: boolean;
   showFooter: boolean;
   createNew: boolean;
+  avoidAutoRefresh: boolean;
   requiresTitle: boolean;
 }
 

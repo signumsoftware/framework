@@ -16,6 +16,7 @@ export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>
           <ValueLine ctx={ctx.subCtx(p => p.allowSelection)} inlineCheckbox="block" />
           <ValueLine ctx={ctx.subCtx(p => p.showFooter)} inlineCheckbox="block" />
           <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.avoidAutoRefresh)} inlineCheckbox="block" />
         </div>
       }
     </div>

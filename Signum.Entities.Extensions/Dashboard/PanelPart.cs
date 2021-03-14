@@ -144,6 +144,8 @@ namespace Signum.Entities.Dashboard
 
         public bool CreateNew { get; set; } = false;
 
+        public bool AvoidAutoRefresh { get; set; } = false;
+
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => UserQuery + "");
 
@@ -161,6 +163,7 @@ namespace Signum.Entities.Dashboard
                 AllowSelection = this.AllowSelection,
                 ShowFooter = this.ShowFooter,
                 CreateNew = this.CreateNew,
+                AvoidAutoRefresh = this.AvoidAutoRefresh,
             };
         }
 
