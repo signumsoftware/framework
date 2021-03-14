@@ -419,21 +419,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               onHeightChanged={this.handleHeightChanged}
               showPinnedFiltersOptions={false}
               showPinnedFiltersOptionsButton={true}
-              /> :
-                sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                  <AutoFocus disabled={!this.props.enableAutoFocus}>
-                    <PinnedFilterBuilder
-                      filterOptions={fo.filterOptions}
-                      onFiltersChanged={this.handlePinnedFilterChanged} />
-                  </AutoFocus>
-            }
+            /> :
+              sfb ? <div className="simple-filter-builder">{sfb}</div> : this.renderPinnedFilters()}
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <AutoFocus disabled={!this.props.enableAutoFocus}>
-          <PinnedFilterBuilder
-            filterOptions={fo.filterOptions}
-            onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />
-        </AutoFocus>}
+        {p.showHeader == "PinnedFilters" && this.renderPinnedFilters(true)}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -465,8 +455,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   // TOOLBAR
 
 
-  handleSearchClick = (ev: React.MouseEvent<any>) => {
-    ev.preventDefault();
+  handleSearchClick = (ev: React.MouseEvent<any> | undefined) => {
+    ev && ev.preventDefault();
 
     this.doSearchPage1();
 
@@ -1379,6 +1369,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
   }
 
+  renderPinnedFilters(extraSmall: boolean = false): React.ReactNode {
+
+    const fo = this.props.findOptions;
+
+    return <AutoFocus disabled={!this.props.enableAutoFocus}>
+      <PinnedFilterBuilder
+        filterOptions={fo.filterOptions}
+        onFiltersChanged={this.props.avoidAutoRefresh ? undefined : this.handlePinnedFilterChanged}
+        onSearchClick={this.props.avoidAutoRefresh ? this.handleSearchClick : undefined}
+        extraSmall={extraSmall}
+      />
+    </AutoFocus>
+  }
+  
   handleOnNavigated = (lite: Lite<Entity>) => {
 
     if (this.props.onNavigated)
