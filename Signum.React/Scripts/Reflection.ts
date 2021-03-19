@@ -910,7 +910,7 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
@@ -918,6 +918,7 @@ const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Nec
 const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
 const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
+const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
@@ -929,7 +930,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     throw Error("invalid function");
 
   const parameter = lambdaMatch[1];
-  let body = lambdaMatch[3];
+  let body = lambdaMatch[4];
   let result: LambdaMember[] = [];
 
   while (body != parameter) {
@@ -949,6 +950,9 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     else if (m = indexRegex.exec(body)) {
       result.push({ name: m[2], type: "Indexer" });
       body = m[1];
+    }
+    else if (m = fixNullPropagator.exec(body)) {
+      body = m[2];
     }
     else {
       throw new Error(`Impossible to extract the properties from: ${body}` +
