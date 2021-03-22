@@ -107,47 +107,49 @@ export default function ChartTableComponent(p: ChartTableProps) {
   var entityFormatter = qs?.entityFormatter || Finder.entityFormatRules.filter(a => a.isApplicable(undefined)).last("EntityFormatRules").formatter;
 
   return (
-    <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
-      <table className="sf-search-results table table-hover table-sm">
-        <thead>
-          <tr>
-            {hasEntity && <th></th>}
-            {columns.map((col, i) =>
-              <th key={i} data-column-name={col.column.token!.fullKey}
-                onClick={e => handleHeaderClick(e, col.column)}>
-                <span className={"sf-header-sort " + orderClassName(col.column)} />
-                <span> {col.column.displayName || col.column.token!.niceName}</span>
-              </th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {
-            resultTable.rows.map((row, i) => {
-              const ctx: Finder.CellFormatterContext = {
-                refresh: undefined,
-                columns: resultTable.columns,
-                row: row,
-                rowIndex: i,
-              }
-              return (
-                <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
-                  {hasEntity &&
-                    <td className={entityFormatter.cellClass}>
-                      {entityFormatter.formatter(row, resultTable.columns, undefined)}
-                    </td>
-                  }
-                  {columns.map((c, j) =>
-                    <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                      {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
-                    </td>)
-                  }
-                </tr>
-              );
-            })
-          }
-        </tbody>
-      </table>
-    </FullscreenComponent>
+    <div className="sf-scroll-table-container" >
+      <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
+        <table className="sf-search-results table table-hover table-sm">
+          <thead>
+            <tr>
+              {hasEntity && <th></th>}
+              {columns.map((col, i) =>
+                <th key={i} data-column-name={col.column.token!.fullKey}
+                  onClick={e => handleHeaderClick(e, col.column)}>
+                  <span className={"sf-header-sort " + orderClassName(col.column)} />
+                  <span> {col.column.displayName || col.column.token!.niceName}</span>
+                </th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {
+              resultTable.rows.map((row, i) => {
+                const ctx: Finder.CellFormatterContext = {
+                  refresh: undefined,
+                  columns: resultTable.columns,
+                  row: row,
+                  rowIndex: i,
+                }
+                return (
+                  <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
+                    {hasEntity &&
+                      <td className={entityFormatter.cellClass}>
+                        {entityFormatter.formatter(row, resultTable.columns, undefined)}
+                      </td>
+                    }
+                    {columns.map((c, j) =>
+                      <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+                      </td>)
+                    }
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table>
+      </FullscreenComponent>
+    </div>
   );
 }
 

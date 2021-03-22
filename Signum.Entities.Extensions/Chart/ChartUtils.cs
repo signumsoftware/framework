@@ -242,6 +242,8 @@ namespace Signum.Entities.Chart
         Reload,
         Maximize,
         Minimize,
+        ShowChartSettings,
+        HideChartSettings,
     }
 
 }

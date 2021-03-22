@@ -32,12 +32,12 @@ export default function UserChartMenu(p : UserChartMenuProps){
 
   React.useEffect(() => {
     if (!isOpen && userCharts == undefined) {
-      reloadList();
+      reloadList().done();
     }
   }, [isOpen, p.chartRequestView && p.chartRequestView.userChart]);
 
-  function reloadList() {
-    UserChartClient.API.forQuery(p.chartRequestView.chartRequest.queryKey)
+  function reloadList(): Promise<Lite<UserChartEntity>[]>  {
+    return UserChartClient.API.forQuery(p.chartRequestView.chartRequest.queryKey)
       .then(list => {
         setUserCharts(list);
         const userChart = p.chartRequestView.userChart;
@@ -53,8 +53,8 @@ export default function UserChartMenu(p : UserChartMenuProps){
               .done();
           }
         }
-      })
-      .done();
+        return list;
+      });
   }
 
   function handleSelect(uc: Lite<UserChartEntity>) {
@@ -63,16 +63,24 @@ export default function UserChartMenu(p : UserChartMenuProps){
     Navigator.API.fetchAndForget(uc).then(userChart => {
       const cr = crv.chartRequest;
       const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
-      UserChartClient.Converter.applyUserChart( newCR, userChart, undefined)
-        .then(newChartRequest => crv.onChange(newChartRequest, toLite(userChart)))
+      UserChartClient.Converter.applyUserChart(newCR, userChart, undefined)
+        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart)); crv.hideFiltersAndSettings(); })
         .done();
     }).done();
   }
 
   function handleEdit() {
-    Navigator.API.fetchAndForget(p.chartRequestView.userChart!)
+    var crv = p.chartRequestView;
+
+    Navigator.API.fetchAndForget(crv.userChart!)
       .then(userChart => Navigator.view(userChart))
       .then(() => reloadList())
+      .then(list => {
+        if (!list.some(a => is(a, crv.userChart)))
+          crv.onChange(p.chartRequestView.chartRequest, undefined);
+        else
+          handleSelect(crv.userChart!);
+      })
       .done();
   }
 
@@ -103,6 +111,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
 
     if (uc?.id) {
       crView.onChange(cr, toLite(uc));
+      crView.hideFiltersAndSettings();
     }
   }
 

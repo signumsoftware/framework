@@ -95,6 +95,8 @@ export module ChartMessage {
   export const Reload = new MessageKey("ChartMessage", "Reload");
   export const Maximize = new MessageKey("ChartMessage", "Maximize");
   export const Minimize = new MessageKey("ChartMessage", "Minimize");
+  export const ShowChartSettings = new MessageKey("ChartMessage", "ShowChartSettings");
+  export const HideChartSettings = new MessageKey("ChartMessage", "HideChartSettings");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");

@@ -47,15 +47,18 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
   if (pair == null)
     return null;
 
+  const isEmpty = pair.chartRequest.columns.every(a => a.element.token == null)
+
   return (
-    <div>
-      {pair == null && <h2>
+    <div style={{ display: "flex" }}>
+      {pair == null ? <h2>
         <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>
-      </h2 >}
-      {pair &&
+      </h2 > :
         <ChartRequestView
           chartRequest={pair.chartRequest}
           userChart={pair.userChart}
+          showFilters={isEmpty}
+          showChartSettings={isEmpty}
           onChange={(cr, uc) => handleOnChange(cr, uc)} />
       }
     </div>
