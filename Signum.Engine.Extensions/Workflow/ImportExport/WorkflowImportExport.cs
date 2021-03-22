@@ -84,10 +84,8 @@ namespace Signum.Engine.Workflow
                     a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))
                 ),
                 !a.DecisionOptions.Any() ? null! : new XElement("DecisionOptions", 
-                    a.DecisionOptions.Select(cdo => new XElement("DecisionOption",
-                    new XAttribute("Name", cdo.Name), 
-                    new XAttribute("Style", cdo.Style.ToString())))
-                ),
+                    a.DecisionOptions.Select(cdo => cdo.ToXml("DecisionOption"))),
+                a.CustomNextButton?.ToXml("CustomNextButton")!,
                 string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
                 a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
                     new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
@@ -307,8 +305,11 @@ namespace Signum.Engine.Workflow
                         });
                         activity.DecisionOptions.Synchronize(xml.Element("DecisionOptions")?.Elements("DecisionOption").ToList(), (cdoe, elem) =>
                         {
-                            cdoe.Name = elem.Attribute("Name")!.Value;
-                            cdoe.Style = Enum.Parse<BootstrapStyle>(elem.Attribute("Style")!.Value);
+                            cdoe.FromXml(elem);
+                        });
+                        activity.CustomNextButton = activity.CustomNextButton.CreateOrAssignEmbedded(xml.Element("CustomNextButton"), (cnb, elem) =>
+                        {
+                            cnb.FromXml(elem);
                         });
                         activity.UserHelp = xml.Element("UserHelp")?.Value;
                         activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>

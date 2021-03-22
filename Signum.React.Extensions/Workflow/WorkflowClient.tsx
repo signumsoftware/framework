@@ -224,7 +224,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         return [{
           order: s?.order ?? 0,
           shortcut: e => eoc.onKeyDown(e),
-          button: <OperationButton eoc={eoc} group={group} />,
+          button: wa.customNextButton == null ? <OperationButton eoc={eoc} group={group} />
+            : <OperationButton eoc={eoc} group={group} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name} </OperationButton>
         }];
       } else if (wa.type == "Decision") {
         return wa.decisionOptions.map(mle => ({
@@ -244,7 +245,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
         if (wa.type == "Task") {
 
-          return [<OperationMenuItem coc={coc} />];
+          return [wa.customNextButton == null ? <OperationMenuItem coc={coc} />
+            : <OperationMenuItem coc={coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</OperationMenuItem>];
 
         } else if (wa.type == "Decision") {
           return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);

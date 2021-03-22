@@ -1,13 +1,15 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import { Lite } from '@framework/Signum.Entities'
+import { Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
+import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
+import { PaginationMode } from '@framework/FindOptions'
 
 export interface ExcelMenuProps {
   searchControl: SearchControlLoaded;
@@ -35,7 +37,35 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
 
   function handlePlainExcel() {
-    ExcelClient.API.generatePlainExcel(p.searchControl.getQueryRequest());
+    var request = p.searchControl.getQueryRequest();
+
+    const rt = p.searchControl.state.resultTable;
+
+    if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate") {
+
+      SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
+        buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
+          <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)
+        }</span>,
+        buttonName: a => a,
+        title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
+        size: "md",
+      })
+        .then(pm => {
+          if (pm == undefined)
+            return;
+
+          if (pm == "All") {
+            request.pagination = { mode: "All" };
+          }
+
+          ExcelClient.API.generatePlainExcel(request);
+        })
+        .done();
+    } else {
+      ExcelClient.API.generatePlainExcel(request);
+    }
   }
 
 
