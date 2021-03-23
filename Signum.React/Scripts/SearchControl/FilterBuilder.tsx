@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { Dic, areEqual, classes } from '../Globals'
+import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage, Lite } from '../Signum.Entities'
 import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
@@ -87,6 +87,9 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       p.onHeightChanged();
   }
 
+
+  var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
+
   return (
     <fieldset className="form-xs">
       {p.title && <legend>{p.title}</legend>}
@@ -107,15 +110,15 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             </tr>
           </thead>
           <tbody>
-            {p.filterOptions.map((f, i) => isFilterGroupOptionParsed(f) ?
-              <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+            {p.filterOptions.map((f) => isFilterGroupOptionParsed(f) ?
+              <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
                 disableValue={false} /> :
-              <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+              <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
@@ -252,6 +255,8 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
   const fg = p.filterGroup;
 
+  var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
+
   if (!p.showPinnedFiltersOptions && !isFilterActive(fg))
     return null;
 
@@ -318,9 +323,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
             </thead>
             {fg.expanded ?
               <tbody>
-                {fg.filters.map((f, i) => isFilterGroupOptionParsed(f) ?
+                {fg.filters.map((f) => isFilterGroupOptionParsed(f) ?
 
-                  <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                     prefixToken={fg.token}
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
@@ -329,7 +334,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   /> :
 
-                  <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                     prefixToken={fg.token}
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
