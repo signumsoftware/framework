@@ -367,8 +367,11 @@ export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss
     const formP = formatParts[i];
     const value = parseInt(valParts[i] || "0");
     switch (formP) {
+      case "h":
       case "hh": result.hour = value; break;
+      case "m":
       case "mm": result.minute = value; break;
+      case "s":
       case "ss": result.second = value; break;
       default: throw new Error("Unexpected " + formP);
     }

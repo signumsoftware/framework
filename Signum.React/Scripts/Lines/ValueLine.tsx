@@ -752,7 +752,7 @@ export interface DurationTextBoxProps {
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   format?: string;
-  htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
@@ -813,7 +813,7 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
 export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
   var valParts = timeStampOrHumanStr.split(":");
-  var formatParts = format.split(":");
+  var formatParts = format.split(":").map(p => p.length == 1 ? p + p : p); //"h -> hh"
   if (valParts.length == 1 && formatParts.length > 1) {
     const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
 
