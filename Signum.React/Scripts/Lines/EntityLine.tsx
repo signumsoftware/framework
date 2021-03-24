@@ -15,6 +15,8 @@ import { useController } from './LineBase'
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
   avoidLink?: boolean;
+  avoidViewButton?: boolean;
+  avoidCreateButton?: boolean;
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
@@ -130,9 +132,9 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   const buttons = (
     <span className="input-group-append">
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-      {!hasValue && c.renderCreateButton(true)}
+      {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
-      {hasValue && c.renderViewButton(true, p.ctx.value!)}
+      {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
     </span>
