@@ -319,7 +319,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.setState({
       contextualMenu: {
-        position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
+        position: ContextMenu.getPositionEvent(event),
         columnIndex,
         rowIndex,
         columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
@@ -420,7 +420,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
 
     return (
-      <div className="sf-search-control sf-control-container" ref="container"
+      <div className="sf-search-control sf-control-container"
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
         {p.showHeader == true &&
@@ -464,7 +464,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
-          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
+          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
             <thead ref={th => this.thead = th}>
               {this.renderHeaders()}
             </thead>
