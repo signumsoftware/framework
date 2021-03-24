@@ -124,7 +124,6 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
     );
   }
 
-  const typeHelpContainerRef = React.useRef<HTMLDivElement>(null);
 
   function renderHelp(h: TypeHelpClient.TypeHelp) {
     return (
@@ -153,7 +152,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
     e.stopPropagation();
     var pr = PropertyRoute.parse((help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
     setSelected(pr);
-    setContextMenuPosition(ContextMenu.getPosition(e, typeHelpContainerRef.current!));
+    setContextMenuPosition(ContextMenu.getPositionEvent(e));
   }
 
   function renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {
@@ -240,7 +239,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
     return <span className={"sf-member-" + kind} title={kind}>{type}</span>;
   }
   return (
-    <div className="sf-type-help" ref={typeHelpContainerRef}>
+    <div className="sf-type-help">
       {renderHeader()}
       {help == undefined ? <h4>Loading {currentType()}…</h4> :
         help == false ? <h4>Not found {currentType()}</h4> :
