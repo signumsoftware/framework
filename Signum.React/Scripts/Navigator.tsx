@@ -20,6 +20,7 @@ import { clearCustomConstructors } from "./Constructor";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
+import { FindOptions } from "./Search";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -531,14 +532,14 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (!result) {
     if (findOptions)
       result = new FindOptionsAutocompleteConfig(findOptions, {
-        getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, ctx, rows.map(a => a.entity!)) as AutocompleteConstructor<Entity>[]
+        getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions }) as AutocompleteConstructor<Entity>[]
       });
     else
       result = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
         types: type.name,
         subString: subStr,
         count: 5
-      }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, ctx, lites) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
+      }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites }) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
   }
 
   if (!result.getItemsDelay && s?.autocompleteDelay) {
@@ -767,9 +768,9 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   modalSize?: BsSize;
 
-  autocomplete?: (fo: FindOptions) => AutocompleteConfig<any> | undefined | null;
+  autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
-  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+  autocompleteConstructor?: (str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null;
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -777,6 +778,12 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
   namedViews?: NamedViewSettings<T>[];
+}
+
+export interface AutocompleteConstructorContext {
+  ctx: TypeContext<any>;
+  foundLites: Lite<Entity>[];
+  findOptions?: FindOptions;
 }
 
 export interface ViewOverride<T extends ModifiableEntity> {
@@ -789,10 +796,10 @@ export interface AutocompleteConstructor<T extends ModifiableEntity> {
   onClick: () => Promise<T | undefined>;
 }
 
-export function getAutocompleteConstructors(tr: TypeReference, str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]): AutocompleteConstructor<ModifiableEntity>[]{
+export function getAutocompleteConstructors(tr: TypeReference, str: string, aac: AutocompleteConstructorContext): AutocompleteConstructor<ModifiableEntity>[]{
   return getTypeInfos(tr.name).map(ti => {
     var es = getSettings(ti);
-    return es?.autocompleteConstructor && es.autocompleteConstructor(str, ctx, foundLites);
+    return es?.autocompleteConstructor && es.autocompleteConstructor(str, aac);
   }).notNull();
 }
 
@@ -814,7 +821,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
-  autocompleteConstructor?: (str: string, ctx: TypeContext<any>, foundLites: Lite<Entity>[]) => AutocompleteConstructor<T> | null;
+  autocompleteConstructor?: (str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null;
 
   findOptions?: FindOptions;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;

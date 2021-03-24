@@ -511,8 +511,8 @@ export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | unde
     return Promise.resolve(undefined);
 
   return getQueryDescription(fo.queryName)
-    .then(qd => parseFilterOptions(fo!.filterOptions ?? [], false, qd))
-    .then(filters => getPropsFromFilters(type, filters));
+    .then(qd => parseFindOptions(fo, qd, true))
+    .then(fop => getPropsFromFilters(type, fop.filterOptions));
 }
 
 export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): FindOptions {
