@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
-import { DateTimePicker, DatePicker } from 'react-widgets'
+import { DateTimePicker, DatePicker, DropdownList } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/lib/Calendar'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
@@ -22,6 +22,7 @@ export interface ValueLineProps extends LineBaseProps {
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
   comboBoxItems?: (OptionItem | MemberInfo | string)[];
+  onRenderComboBoxItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
   initiallyFocused?: boolean;
@@ -324,22 +325,44 @@ function internalComboBox(vl: ValueLineController) {
           val.toString();
   }
 
-  const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
-    const input = e.currentTarget as HTMLInputElement;
-    const option = optionItems.filter(a => toStr(a.value) == input.value).single();
-    vl.setValue(option.value);
-  };
+  if (vl.props.onRenderComboBoxItem) {
+    const handleOptionItem = (e: OptionItem) => {
+      vl.setValue(e.value);
+    };
 
-  return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {vl.withItemGroup(
-        <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
-          {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
-        </select>)
-      }
-    </FormGroup>
-  );
+    var oi = optionItems.single(a => a.value == s.ctx.value);
 
+    return (
+      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {vl.withItemGroup(
+          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={oi}
+            filter="contains"
+            dataKey="value"
+            textField="label"
+            renderValue={a => vl.props.onRenderComboBoxItem!(a.item)}
+            renderListItem={a => vl.props.onRenderComboBoxItem!(a.item)}
+          />)
+        }
+      </FormGroup>
+    );
+  } else {
+
+    const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
+      const input = e.currentTarget as HTMLInputElement;
+      const option = optionItems.filter(a => toStr(a.value) == input.value).single();
+      vl.setValue(option.value);
+    };
+
+    return (
+      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {vl.withItemGroup(
+          <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
+            {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
+          </select>)
+        }
+      </FormGroup>
+    );
+  }
 }
 
 ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
