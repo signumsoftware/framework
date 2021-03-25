@@ -14,8 +14,8 @@ namespace Signum.Entities.UserAssets
     {
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificConverters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
-            { FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter()} },
-            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter() } },
+            { FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter(),new CurrentEntityConverter() } },
+            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
         };
 
         public static string? ToString(object? value, Type type)
@@ -98,12 +98,21 @@ namespace Signum.Entities.UserAssets
 
             if (converters != null)
             {
+                Result<object?>? error=null ;
+
                 foreach (var fvc in converters)
                 {
                     var res = fvc.TryParseValue(stringValue, type);
-                    if (res != null)
+                    //if (res != null )
+                    //    return res;
+
+                    if (res is Result<object?>.Success s)
                         return res;
+
+                    if (res is Result<object?>.Error er)
+                        error= res;
                 }
+                return error!;
             }
 
             if (ReflectionTools.TryParse(stringValue, type, CultureInfo.InvariantCulture, out var result))
