@@ -104,7 +104,6 @@ namespace Signum.Entities.UserAssets
                     if (res != null)
                         return res;
                 }
-                return error!;
             }
 
             if (ReflectionTools.TryParse(stringValue, type, CultureInfo.InvariantCulture, out var result))
