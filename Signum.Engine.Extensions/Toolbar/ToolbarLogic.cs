@@ -272,7 +272,7 @@ namespace Signum.Engine.Toolbar
                 type = element.Type,
                 content = element.Content,
                 url = element.Url,
-                label = transElement.TranslatedElement(a => a.Label!) ?? config?.DefaultLabel(element.Content!),
+                label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(element.Content!),
                 iconName = element.IconName,
                 iconColor = element.IconColor,
                 autoRefreshPeriod = element.AutoRefreshPeriod,
