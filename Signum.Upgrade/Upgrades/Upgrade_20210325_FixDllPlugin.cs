@@ -46,6 +46,14 @@ namespace Signum.Upgrade.Upgrades
                 );
             });
 
+            uctx.ChangeCodeFile(@"Southwind.React\package.json", file =>
+            {
+                file.InsertAfterFirstLine(
+                    a => a.Contains(@"""webpack"""),
+                    @"""webpack-bundle-analyzer"": ""4.4.0"","
+                );
+            });
+
 
         }
     }
