@@ -63,7 +63,7 @@ namespace Signum.Entities.Omnibox
         {
             pattern = pattern.RemoveDiacritics();
 
-            if (values.TryGetValue(pattern, out T val) && filter(val))
+            if (values.TryGetValue(pattern, out T? val) && filter(val))
             {
                 yield return new OmniboxMatch(val!, 0, pattern, new string('#', pattern.Length));
             }

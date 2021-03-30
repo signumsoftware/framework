@@ -90,7 +90,7 @@ namespace Signum.React.Translation
                     Lite = gr.Key,
                     Master = gr.ToDictionary(
                          a => a.Key.RouteAndRowId(),
-                         a => a.Value
+                         a => a.Value!
                          ),
                     Translations = supportByInstance.TryGetC(gr.Key) ?? new Dictionary<string, Dictionary<string, TranslatedPairViewTS>>()
                 }).ToList()
