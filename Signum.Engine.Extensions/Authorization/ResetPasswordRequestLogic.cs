@@ -79,7 +79,6 @@ namespace Signum.Engine.Authorization
         {
             using (AuthLogic.Disable())
             {
-                //Remove old previous requests
                 var rpr = Database.Query<ResetPasswordRequestEntity>()
                      .Where(r => r.Code == code && !r.Lapsed)
                      .SingleEx();

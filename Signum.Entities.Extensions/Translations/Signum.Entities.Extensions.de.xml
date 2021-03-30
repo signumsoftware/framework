@@ -176,6 +176,7 @@
     <Member Name="BpmnElementId" Description="Bpmn Elemente Id" />
     <Member Name="Model" Description="Modell" />
   </Type>
+  <Type Name="ButtonOptionEmbedded" />
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />
@@ -353,6 +354,7 @@
     <Member Name="DeletePalette" Description="Palette löschen" />
     <Member Name="DrawChart" Description="Diagramm chart" />
     <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="HideChartSettings" Description="Diagrammeinstellungen ausblenden" />
     <Member Name="Maximize" Description="Maximieren" />
     <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
@@ -360,6 +362,7 @@
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="Reload" Description="Neu laden" />
     <Member Name="SavePalette" Description="Palette speichern" />
+    <Member Name="ShowChartSettings" Description="Diagrammeinstellungen anzeigen" />
     <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
@@ -476,7 +479,6 @@
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
   </Type>
-  <Type Name="DecisionOptionEmbedded" />
   <Type Name="DefaultColumnEncodings" />
   <Type Name="DefaultState">
     <Member Name="All" Description="Alle" />
