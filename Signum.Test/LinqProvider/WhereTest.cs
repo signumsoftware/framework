@@ -60,7 +60,7 @@ namespace Signum.Test.LinqProvider
         {
             var query = Database.Query<AlbumEntity>().Where(a => ("C" + a.Id) + "B" == "C1B").Select(a => a.Id);
 
-            Assert.Equal(1, new Regex("CONCAT").Matches(query.QueryText()).Count);
+            Assert.Single(new Regex("CONCAT").Matches(query.QueryText()));
 
             query.ToList();
         }
