@@ -20,6 +20,7 @@ using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using System.Data;
+using System.Globalization;
 using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
@@ -49,6 +50,8 @@ namespace Signum.Engine.Word
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
 
         public static Dictionary<string, IWordDataTableProvider> ToDataTableProviders = new Dictionary<string, IWordDataTableProvider>();
+
+        public static Func<Entity?, CultureInfo>? GetCultureInfo;
 
         [AutoExpressionField]
         public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
