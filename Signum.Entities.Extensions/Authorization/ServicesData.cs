@@ -22,7 +22,7 @@ namespace Signum.Entities.Authorization
 
         public A GetAllowed(K key)
         {
-            if (OverrideDictionary != null && OverrideDictionary.TryGetValue(key, out A result))
+            if (OverrideDictionary != null && OverrideDictionary.TryGetValue(key, out A? result))
                 return result;
 
             return DefaultAllowed(key);
