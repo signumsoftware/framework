@@ -74,7 +74,7 @@ namespace Signum.Utilities.DataStructures
 
         public TValue GetOrCreate(TKey key, Func<TValue> valueFactory)
         {
-            if (!TryGetValue(key, out TValue result))
+            if (!TryGetValue(key, out TValue? result))
             {
                 result = valueFactory();
                 Add(key, result);
