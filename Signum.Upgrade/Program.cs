@@ -49,6 +49,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210210_UpgradeNugets(),
                 new Upgrade_20210216_RegisterTranslatableRoutes(),
                 new Upgrade_20210302_TypeScript42(),
+                new Upgrade_20210325_FixDllPlugin(),
             }.Run(uctx);
         }
     }

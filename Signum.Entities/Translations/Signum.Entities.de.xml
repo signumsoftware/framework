@@ -266,7 +266,7 @@
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Alle" />
   </Type>
-  <Type Name="PaginationMode">
+  <Type Name="PaginationMode" Description="Paginierungsmodus">
     <Member Name="All" Description="Alle" />
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Seiten" />
