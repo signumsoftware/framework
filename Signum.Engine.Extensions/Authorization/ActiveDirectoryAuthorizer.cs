@@ -127,7 +127,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public UserEntity? OnAutoCreateUser(IAutoCreateUserContext ctx)
+        public virtual UserEntity? OnAutoCreateUser(IAutoCreateUserContext ctx)
         {
             if (!GetConfig().AutoCreateUsers)
                 return null;
