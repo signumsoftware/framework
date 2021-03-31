@@ -1141,11 +1141,26 @@ namespace Signum.Utilities
         }
 
 
+        public static ImmutableStack<T> PushRange<T>(this ImmutableStack<T> stack, IEnumerable<T> elements)
+        {
+            foreach (var item in elements)
+                stack = stack.Push(item);
+
+            return stack;
+        }
 
         public static void PushRange<T>(this Stack<T> stack, IEnumerable<T> elements)
         {
             foreach (var item in elements)
                 stack.Push(item);
+        }
+
+        public static ImmutableQueue<T> EnqueueRange<T>(this ImmutableQueue<T> queue, IEnumerable<T> elements)
+        {
+            foreach (var item in elements)
+                queue = queue.Enqueue(item);
+
+            return queue;
         }
 
         public static void EnqueueRange<T>(this Queue<T> queue, IEnumerable<T> elements)
