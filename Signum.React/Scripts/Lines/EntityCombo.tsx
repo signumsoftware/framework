@@ -10,7 +10,7 @@ import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { useController } from './LineBase'
 import { useMounted } from '../Hooks'
-import { DropdownList } from 'react-widgets/lib'
+import { DropdownList } from 'react-widgets'
 
 
 export interface EntityComboProps extends EntityBaseProps {

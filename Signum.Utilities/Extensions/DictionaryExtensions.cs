@@ -57,7 +57,7 @@ namespace Signum.Utilities
             where K : notnull
             where V : new()
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
             {
                 result = new V();
                 dictionary.Add(key, result);
@@ -75,7 +75,7 @@ namespace Signum.Utilities
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
             {
                 result = value;
                 dictionary.Add(key, result);
@@ -86,7 +86,7 @@ namespace Signum.Utilities
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<V> generator)
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
             {
                 result = generator();
                 dictionary.Add(key, result);
@@ -97,7 +97,7 @@ namespace Signum.Utilities
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, V> generator)
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
             {
                 result = generator(key);
                 dictionary.Add(key, result);
@@ -108,7 +108,7 @@ namespace Signum.Utilities
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
                 throw exception(key);
             return result;
         }
@@ -116,7 +116,7 @@ namespace Signum.Utilities
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat) 
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
                 throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
             return result;
         }
@@ -124,7 +124,7 @@ namespace Signum.Utilities
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key) 
             where K : notnull
         {
-            if (!dictionary.TryGetValue(key, out V result))
+            if (!dictionary.TryGetValue(key, out V? result))
                 throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
             return result;
         }

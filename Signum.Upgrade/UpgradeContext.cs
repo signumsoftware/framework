@@ -118,7 +118,7 @@ namespace Signum.Upgrade
 
         public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
-            var codeFiles = GetCodeFiles(directory, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
+            var codeFiles = GetCodeFiles(Path.Combine(RootFolder, directory.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
             foreach (var codeFile in codeFiles)
             {
                 codeFile.WarningLevel = showWarnings;
@@ -131,7 +131,7 @@ namespace Signum.Upgrade
         {
             foreach (var dir in directories)
             {
-                var codeFiles = GetCodeFiles(dir, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
+                var codeFiles = GetCodeFiles(Path.Combine(RootFolder, dir.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
                     codeFile.WarningLevel = showWarnings;

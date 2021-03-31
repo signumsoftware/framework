@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { DateTime, Settings } from 'luxon';
 import * as ReactWidgets from 'react-widgets';
-import { UserProvidedMessages } from 'react-widgets/lib/messages';
+import { UserProvidedMessages } from 'react-widgets/cjs/messages';
 import { ReactWidgetsMessage } from './Signum.Entities';
-import { NumberLocalizer } from 'react-widgets/lib/IntlLocalizer';
+import { NumberLocalizer } from 'react-widgets/cjs/IntlLocalizer';
 
 export function getMessages(): UserProvidedMessages{
   return ({
@@ -11,10 +11,7 @@ export function getMessages(): UserProvidedMessages{
     moveBack: ReactWidgetsMessage.MoveBack.niceToString(),
     moveForward: ReactWidgetsMessage.MoveForward.niceToString(),
     dateButton: ReactWidgetsMessage.DateButton.niceToString(),
-    timeButton: ReactWidgetsMessage.TimeButton.niceToString(),
     openCombobox: ReactWidgetsMessage.OpenCombobox.niceToString(),
-    openDropdown: ReactWidgetsMessage.OpenDropdown.niceToString(),
-    placeholder: ReactWidgetsMessage.Placeholder.niceToString(),
     emptyList: ReactWidgetsMessage.EmptyList.niceToString(),
     emptyFilter: ReactWidgetsMessage.EmptyFilter.niceToString(),
     createOption: (_value, searchTerm) =>
