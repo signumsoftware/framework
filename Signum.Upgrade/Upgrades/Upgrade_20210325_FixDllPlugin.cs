@@ -17,9 +17,10 @@ namespace Signum.Upgrade.Upgrades
         {
             uctx.ChangeCodeFile(@"Southwind.React\webpack.config.dll.js", file =>
             {
-                file.InsertAfterFirstLine(
-                    a => a.Contains(@"context: path.resolve(__dirname, ""App""),"),
-                    "entryOnly: false,"
+                file.ReplaceLine(
+                    a => a.Contains(@"context: path.resolve(__dirname, ""App"")"),
+@"context: path.resolve(__dirname, ""App""),
+entryOnly: false,"
                 );
 
                 file.InsertAfterFirstLine(
@@ -41,7 +42,7 @@ namespace Signum.Upgrade.Upgrades
                 );
 
                 file.InsertBeforeFirstLine(
-                    a => a.Contains(@"new new webpack.DllReferencePlugin({"),
+                    a => a.Contains(@"new webpack.DllReferencePlugin({"),
                     "//new BundleAnalyzerPlugin(),"
                 );
             });

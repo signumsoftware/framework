@@ -49,7 +49,6 @@ namespace Signum.Upgrade.Upgrades
                 file.UpdateNpmPackage("msal", "1.4.8");
 
                 file.UpdateNpmPackage("react", "17.0.2");
-                file.UpdateNpmPackage("react-beautiful-dnd", "13.1.0");
                 file.UpdateNpmPackage("react-bootstrap", "1.5.2");
                 file.UpdateNpmPackage("react-dom", "17.0.2");
 
