@@ -4,6 +4,7 @@ import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute, tr
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
+import {API} from "./Navigator";
 
 export const customConstructors: { [typeName: string]: (props?: any, pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
@@ -18,6 +19,7 @@ export function constructPack<T extends ModifiableEntity>(type: Type<T>, props?:
 export function constructPack(type: string, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined>;
 export function constructPack(type: string | Type<any>, props?: any, pr?: PropertyRoute): Promise<EntityPack<ModifiableEntity> | undefined> {
 
+  debugger;
   const typeName = (type as Type<any>).typeName ?? type as string;
 
   const ti = tryGetTypeInfo(typeName);
@@ -75,7 +77,7 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
 
   assertCorrect(result);
 
-  return Navigator.toEntityPack(result);
+  return API.fetchEntityPackEntity(result as Entity);
 }
 
 
