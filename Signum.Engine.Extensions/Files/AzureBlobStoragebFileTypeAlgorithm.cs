@@ -109,9 +109,10 @@ namespace Signum.Engine.Files
                 var client = GetClient(fp);
                 if (CreateBlobContainerIfNotExists)
                 {
-                    using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+                    using (HeavyProfiler.Log("AzureBlobStorage CreateIfNotExists"))
                     {
                         client.CreateIfNotExists();
+                        CreateBlobContainerIfNotExists = false;
                     }
                 }
 
