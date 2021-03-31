@@ -340,7 +340,6 @@ export module JavascriptMessage {
   export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
   export const Date = new MessageKey("JavascriptMessage", "Date");
-  export const Time = new MessageKey("JavascriptMessage", "Time");
 }
 
 export module LiteMessage {
@@ -438,10 +437,7 @@ export module ReactWidgetsMessage {
   export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
   export const MoveForward = new MessageKey("ReactWidgetsMessage", "MoveForward");
   export const DateButton = new MessageKey("ReactWidgetsMessage", "DateButton");
-  export const TimeButton = new MessageKey("ReactWidgetsMessage", "TimeButton");
   export const OpenCombobox = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
-  export const OpenDropdown = new MessageKey("ReactWidgetsMessage", "OpenDropdown");
-  export const Placeholder = new MessageKey("ReactWidgetsMessage", "Placeholder");
   export const FilterPlaceholder = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
   export const EmptyList = new MessageKey("ReactWidgetsMessage", "EmptyList");
   export const EmptyFilter = new MessageKey("ReactWidgetsMessage", "EmptyFilter");

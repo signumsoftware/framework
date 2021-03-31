@@ -314,6 +314,7 @@ namespace Signum.Upgrade
                 throw new InvalidOperationException("");
         }
 
+
         public void UpdateNpmPackage(string packageName, string version)
         {
             AssertExtension(".json");

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker, DropdownList } from 'react-widgets'
-import { CalendarProps } from 'react-widgets/lib/Calendar'
+import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
@@ -9,7 +9,6 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
-import 'react-widgets/dist/css/react-widgets.css';
 import { KeyCodes } from '../Components/Basic';
 import { format } from 'd3';
 import { isPrefix, QueryToken } from '../FindOptions'
@@ -336,7 +335,8 @@ function internalComboBox(vl: ValueLineController) {
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={oi}
-            filter="contains"
+            filter={false}
+            autoComplete="off"
             dataKey="value"
             textField="label"
             renderValue={a => vl.props.onRenderComboBoxItem!(a.item)}
@@ -698,7 +698,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
             inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
-            messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }}
+            messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={s.minDate}
             max={s.maxDate}
             calendarProps={s.calendarProps}
