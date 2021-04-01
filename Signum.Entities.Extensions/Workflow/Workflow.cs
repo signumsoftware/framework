@@ -203,6 +203,8 @@ namespace Signum.Entities.Workflow
         public CaseActivityEntity? PreviousCaseActivity { get; internal set; }
         public WorkflowConnectionEntity? Connection { get; internal set; }
         public CaseEntity? Case { get; set; }
+
+        public Action<WorkflowActivityEntity> OnNextWorkflowActivityCreated; 
     }
 
     public enum WorkflowValidationMessage

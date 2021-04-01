@@ -435,6 +435,8 @@ namespace Signum.Engine.Workflow
             public bool IsFinished { get; set; }
             public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
 
+            public List<WorkflowTransitionContext> TransitionContextToNotify = new List<WorkflowTransitionContext>();
+
             public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? previous)
             {
                 Case = @case;
@@ -443,7 +445,7 @@ namespace Signum.Engine.Workflow
 
             public void ExecuteConnection(WorkflowConnectionEntity connection)
             {
-                var wctx = new WorkflowTransitionContext(Case, PreviousCaseActivity, connection);
+                var wctx = this.NewTransitionContext(connection);
 
                 WorkflowLogic.OnTransition?.Invoke(Case.MainEntity, wctx);
 
@@ -454,6 +456,13 @@ namespace Signum.Engine.Workflow
                 };
                 
                 this.Connections.Add(connection);
+            }
+
+            public WorkflowTransitionContext NewTransitionContext(WorkflowConnectionEntity connection)
+            {
+                var wtc = new WorkflowTransitionContext(Case, PreviousCaseActivity, connection);
+                TransitionContextToNotify.Add(wtc);
+                return wtc;
             }
         }
 
@@ -467,7 +476,7 @@ namespace Signum.Engine.Workflow
             if (wc.Condition != null)
             {
                 var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(ctx.Case.MainEntity, new WorkflowTransitionContext(ctx.Case, ctx.PreviousCaseActivity, wc));
+                var result = alg.EvaluateUntyped(ctx.Case.MainEntity,ctx.NewTransitionContext(wc));
 
 
                 return result;
@@ -857,9 +866,9 @@ namespace Signum.Engine.Workflow
                 {
                     if (firstConnection.Condition != null)
                     {
-                        var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, firstConnection);
+                        var jumpCtx = ctx.NewTransitionContext(firstConnection);
                         var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                        var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
+                        var result = alg.EvaluateUntyped(ca.Case.MainEntity,  jumpCtx);
                         if (!result)
                             throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                     }
