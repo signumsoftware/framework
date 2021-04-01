@@ -109,6 +109,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
         <DropdownList
           disabled={p.readOnly}
           filter="contains"
+          autoComplete="off"
           focusFirstItem={true}
           data={subTokens ?? []}
           placeholder={p.selectedToken == null ? "..." : undefined}
