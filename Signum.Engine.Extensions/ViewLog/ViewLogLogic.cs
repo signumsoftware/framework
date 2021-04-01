@@ -110,17 +110,21 @@ namespace Signum.Engine.ViewLog
             {
                 try
                 {
-                    Task.Run(() =>
-                    {
-                        using (Transaction tr = Transaction.ForceNew())
+                    var str = GetData(request!, sw);
+
+                    using (ExecutionContext.SuppressFlow())
+                        Task.Factory.StartNew(() =>
                         {
-                            viewLog.EndDate = TimeZoneManager.Now;
-                            viewLog.Data = new BigStringEmbedded(GetData(request!, sw));
                             using (ExecutionMode.Global())
-                                viewLog.Save();
-                            tr.Commit();
-                        }
-                    });
+                            using (Transaction tr = Transaction.ForceNew())
+                            {
+                                viewLog.EndDate = TimeZoneManager.Now;
+                                viewLog.Data = new BigStringEmbedded(str);
+                                using (ExecutionMode.Global())
+                                    viewLog.Save();
+                                tr.Commit();
+                            }
+                        });
                 }
                 finally
                 {
