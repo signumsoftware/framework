@@ -842,9 +842,13 @@ namespace Signum.Engine.DynamicQuery
                 (col, ks, rs) => (IEnumerable<object>)Enumerable.GroupBy<string, int, double>((IEnumerable<string>)col, (Func<string, int>)ks, (Func<int, IEnumerable<string>, double>)rs));
         public static DEnumerable<T> GroupBy<T>(this DEnumerable<T> collection, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
         {
-            var keySelector = KeySelector(collection.Context, keyTokens);
+            var rootKeyTokens = GetRootKeyTokens(keyTokens);
 
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
+            var redundantKeyTokens = keyTokens.Except(rootKeyTokens).ToHashSet();
+
+            var keySelector = KeySelector(collection.Context, rootKeyTokens);
+
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, rootKeyTokens, redundantKeyTokens, aggregateTokens, keySelector.Body.Type, isQueryable: false, out BuildExpressionContext newContext);
 
             var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
 
@@ -854,9 +858,13 @@ namespace Signum.Engine.DynamicQuery
         static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null!, (Expression<Func<string, int>>)null!, (Expression<Func<int, IEnumerable<string>, double>>)null!)).GetGenericMethodDefinition();
         public static DQueryable<T> GroupBy<T>(this DQueryable<T> query, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
         {
-            var keySelector = KeySelector(query.Context, keyTokens);
+            var rootKeyTokens = GetRootKeyTokens(keyTokens);
 
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
+            var redundantKeyTokens = keyTokens.Except(rootKeyTokens).ToHashSet();
+
+            var keySelector = KeySelector(query.Context, rootKeyTokens);
+
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, rootKeyTokens, redundantKeyTokens, aggregateTokens, keySelector.Body.Type, isQueryable: true, out BuildExpressionContext newContext);
 
             var resultQuery = (IQueryable<object>)query.Query.Provider.CreateQuery<object?>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
                 new Expression[] { query.Query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));
@@ -864,14 +872,47 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<T>(resultQuery, newContext);
         }
 
-        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
+        private static HashSet<QueryToken> GetRootKeyTokens(HashSet<QueryToken> keyTokens)
+        {
+            return keyTokens.Where(t => !keyTokens.Any(t2 => t.FullKey().StartsWith(t2.FullKey() + "."))).ToHashSet();
+        }
+
+
+        static MethodInfo miFirstE = ReflectionTools.GetMethodInfo(() => Enumerable.First((IEnumerable<string>)null!)).GetGenericMethodDefinition();
+
+        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> rootKeyTokens, HashSet<QueryToken> redundantKeyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, bool isQueryable, out BuildExpressionContext newContext)
         {
             Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
             ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
-            resultExpressions.AddRange(keyTokens.Select((kt, i) => KeyValuePair.Create(kt,
-                TupleReflection.TupleChainProperty(pk, i))));
-
             ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
+            
+            resultExpressions.AddRange(rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, TupleReflection.TupleChainProperty(pk, i))));
+            
+            if (redundantKeyTokens.Any())
+            {
+                if (isQueryable)
+                {
+                    var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, TupleReflection.TupleChainProperty(pk, i))).ToDictionary());
+                    resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext))));
+                }
+                else
+                {
+                    var first = Expression.Call(miFirstE.MakeGenericMethod(typeof(object)), pe);
+
+                    resultExpressions.AddRange(redundantKeyTokens.Select(t =>
+                    {
+                        var exp = t.BuildExpression(context);
+                        var replaced = ExpressionReplacer.Replace(exp,
+                        new Dictionary<ParameterExpression, Expression>
+                        {
+                            { context.Parameter, first }
+                        });
+
+                        return KeyValuePair.Create(t, replaced);
+                    }));
+                }
+            }
+            
             resultExpressions.AddRange(aggregateTokens.Select(at => KeyValuePair.Create((QueryToken)at, BuildAggregateExpressionEnumerable(pe, at, context))));
 
             var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);

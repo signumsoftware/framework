@@ -1155,6 +1155,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       );
     }
 
+    var rootKeys = !this.props.findOptions.groupResults ? [] : getRootKeyColumn(this.props.findOptions.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-th-selection">
@@ -1182,7 +1184,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             onDrop={this.handleHeaderDrop}>
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
-              {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key" className="mr-1" /></span>}
+              {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
+                <FontAwesomeIcon icon="key" className="mr-1"
+                  color={rootKeys.contains(co) ? undefined : "gray"}
+                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>
             {getSummary(co.summaryToken)}
@@ -1252,9 +1257,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+
     var keyFilters = resFo.columnOptions
       .map((col, i) => ({ col, value: row.columns[i] }))
-      .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
+      .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
     var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
@@ -1518,4 +1526,9 @@ function withAggregates(array: { token?: QueryToken, displayName?: string }[], t
 
 function canHaveMin(typeName: string): boolean {
   return typeName == "number" || typeName == "decimal" || typeName == "TimeSpan";
+}
+
+
+function getRootKeyColumn(columnOptions: ColumnOptionParsed[]): ColumnOptionParsed[] {
+  return columnOptions.filter(t => t.token != null && !columnOptions.some(t2 => t2.token != null && t.token!.fullKey.startsWith(t2.token.fullKey + ".")));
 }
