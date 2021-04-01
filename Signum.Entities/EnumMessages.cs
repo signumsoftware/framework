@@ -234,6 +234,13 @@ namespace Signum.Entities
         SummaryHeader,
         [Description("Summary header must be an aggregate (like Sum, Count, etc..)")]
         SummaryHeaderMustBeAnAggregate,
+
+        HiddenColumn,
+        ShowHiddenColumns,
+        HideHiddenColumns, 
+
+        GroupKey,
+        DerivedGroupKey
     }
 
     public enum SelectorMessage

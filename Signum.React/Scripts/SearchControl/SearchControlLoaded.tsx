@@ -100,7 +100,7 @@ export interface SearchControlLoadedState {
   searchCount?: number;
   dragColumnIndex?: number,
   dropBorderIndex?: number,
-
+  showHiddenColumns?: boolean,
   currentMenuItems?: React.ReactElement<any>[];
 
   contextualMenu?: {
@@ -975,11 +975,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </Dropdown.Item>);
       }
 
-      menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
+      menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
         <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
         <FontAwesomeIcon icon="undo-alt" transform="shrink-4 up-8 right-8" color="black" />
       </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
+
+      if (fo.columnOptions.some(a => a.hiddenColumn == true)) {
+        menuItems.push(<Dropdown.Divider />);
+
+
+
+        if (this.state.showHiddenColumns) {
+          menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns : undefined })}>
+            <FontAwesomeIcon icon="eye-slash" color="#21618C" />&nbsp;{SearchMessage.HideHiddenColumns.niceToString()}
+          </Dropdown.Item>);
+        } else {
+          menuItems.push(<Dropdown.Item className="sf-show-hidden-columns" onClick={() => this.setState({ showHiddenColumns: true })}>
+            <FontAwesomeIcon icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
+          </Dropdown.Item>);
+        }
+      }
     }
 
     if (cm.rowIndex != undefined) {
@@ -1164,12 +1180,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
-        {this.props.findOptions.columnOptions.map((co, i) =>
+        {this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns).map((co, i) =>
           <th key={i}
             draggable={true}
             className={classes(
               i == this.state.dragColumnIndex && "sf-draggin",
               co == this.state.editingColumn && "sf-current-column",
+              co.hiddenColumn && "sf-hidden-column",
               !this.canOrder(co) && "noOrder",
               co.token && co.token.type.isCollection && "error",
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
@@ -1353,7 +1370,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   renderRows(): React.ReactNode {
 
-    const columnsCount = this.props.findOptions.columnOptions.length +
+    const columnOptions = this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
+
+    const columnsCount = columnOptions.length +
       (this.props.allowSelection ? 1 : 0) +
       (this.props.view ? 1 : 0);
 
@@ -1373,7 +1392,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const qs = this.props.querySettings;
 
-    const columns = this.props.findOptions.columnOptions.map(co => ({
+    const columns = columnOptions.map(co => ({
       columnOption: co,
       cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)

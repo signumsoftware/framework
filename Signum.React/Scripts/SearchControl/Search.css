@@ -68,8 +68,11 @@ table.sf-search-results > tbody > tr > td {
     opacity: .5;
 }
 
+.sf-hidden-column{
+    color: darkgray
+}
+
 .sf-search-results > thead > tr > th {
-   
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
