@@ -113,6 +113,45 @@ namespace Signum.Engine.Workflow
             return PreviousGraph.RelatedTo(node).SelectMany(a => a.Value);
         }
 
+        public HashSet<WorkflowConnectionEntity> GetAllConnections(IWorkflowNodeEntity from, IWorkflowNodeEntity to, Func<Stack<WorkflowConnectionEntity>, bool> isValidPath)
+        {
+            HashSet<WorkflowConnectionEntity> result = new HashSet<WorkflowConnectionEntity>();
+
+            Stack<WorkflowConnectionEntity> partialPath = new Stack<WorkflowConnectionEntity>();
+            HashSet<IWorkflowNodeEntity> visited = new HashSet<IWorkflowNodeEntity>();
+            void Flood(IWorkflowNodeEntity node)
+            {
+                if (node.Is(to))
+                {
+                    if (isValidPath(partialPath))
+                        result.AddRange(partialPath);
+                    return;
+                }
+
+                if (node is WorkflowActivityEntity && !node.Is(from))
+                    return;
+
+
+                if (node is WorkflowEventEntity e && !node.Is(from) && e.BoundaryOf.Is(from))
+                    return;
+
+                foreach (var con in this.NextConnections(node).ToList())
+                {
+                    if (!visited.Contains(con.To))
+                    {
+                        visited.Add(con.To);
+                        partialPath.Push(con);
+                        Flood(con.To);
+                        partialPath.Pop();
+                        visited.Remove(con.To);
+                    }
+                }
+            };
+
+            Flood(from);
+
+            return result;
+        }
 
 
         public void Validate(List<WorkflowIssue> issuesContainer, Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)

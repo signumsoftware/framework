@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Engine.UserAssets;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Workflow
 {

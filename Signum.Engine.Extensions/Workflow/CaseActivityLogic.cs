@@ -464,6 +464,16 @@ namespace Signum.Engine.Workflow
                 TransitionContextToNotify.Add(wtc);
                 return wtc;
             }
+
+            internal void NotifyTransitionContext(CaseActivityEntity newCaseActivity)
+            {
+                var graph = WorkflowLogic.GetWorkflowNodeGraph(Case.Workflow.ToLite());
+                foreach (var tctx in TransitionContextToNotify.Where(a => a.OnNextCaseActivityCreated != null && a.PreviousCaseActivity != null && a.Connection != null))
+                {
+                    if (graph.GetAllConnections(tctx.PreviousCaseActivity!.WorkflowActivity, newCaseActivity.WorkflowActivity, path => true).Contains(tctx.Connection!))
+                        tctx.OnNextCaseActivityCreated!(newCaseActivity);
+                }
+            }
         }
 
         static bool Applicable(this WorkflowConnectionEntity wc, WorkflowExecuteStepContext ctx)
@@ -921,11 +931,12 @@ namespace Signum.Engine.Workflow
                     {
                         var lastConn = ctx.Connections.OfType<WorkflowConnectionEntity>().Single(a => a.To.Is(twa));
 
-                        Decompose(@case, ca, twa, lastConn);
+                        Decompose(@case, ca, twa, lastConn, ctx);
                     }
                     else
                     {
                         var nca = InsertNewCaseActivity(@case, twa, ca);
+                        ctx.NotifyTransitionContext(nca);
                         InsertCaseActivityNotifications(nca);
                     }
                 }
@@ -1033,9 +1044,10 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
+            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn, WorkflowExecuteStepContext ctx)
             {
                 var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
+                ctx.NotifyTransitionContext(surrogate);
                 var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
                 if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
                     throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");

@@ -206,7 +206,7 @@ namespace Signum.Entities.Workflow
         public WorkflowConnectionEntity? Connection { get; internal set; }
         public CaseEntity? Case { get; set; }
 
-        public Action<WorkflowActivityEntity> OnNextWorkflowActivityCreated; 
+        public Action<CaseActivityEntity>? OnNextCaseActivityCreated; 
     }
 
     public enum WorkflowValidationMessage
