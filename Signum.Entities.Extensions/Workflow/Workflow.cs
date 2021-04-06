@@ -132,6 +132,8 @@ namespace Signum.Entities.Workflow
         [Description("Workflow Issues")]
         WorkflowIssues,
         WorkflowProperties,
+        [Description("{0} not allowed for {1} (no constructor has been defined in 'WithWorkflow')")]
+        _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow,
     }
 
     [Serializable]
