@@ -85,7 +85,7 @@ namespace Signum.Engine.Basics
                 throw new InvalidOperationException("No {0} found in the database".FormatWith(typeof(CultureInfoEntity).Name));
 
 
-            foreach (var c in EntityToCultureInfo.Value)
+            foreach (var c in EntityToCultureInfo.Value.Where(a => a.Value.IsNeutralCulture))
             {
                 using (CultureInfoUtils.ChangeBothCultures(c.Value))
                 {

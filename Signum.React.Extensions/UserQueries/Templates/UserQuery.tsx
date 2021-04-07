@@ -72,14 +72,6 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                       onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
                       subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
 
-                    <div className="row">
-                      <div className="col-sm-6">
-                      </div>
-                      <div className="col-sm-6">
-                      </div>
-                    </div>
-
-
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
                         <input type="checkbox" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
@@ -99,7 +91,12 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                     </div>
                   </div>
               },
-              { property: a => a.displayName, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.displayName)} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }} /> },
+              {
+                property: a => a.displayName,
+                template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                  helpText={<ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; row.forceUpdate(); }} />}
+                  />
+              },
             ])} />
             <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
               {

@@ -290,7 +290,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         minFilter.operation == "GreaterThanOrEqual" ? minFilter.value : undefined;
 
     const maxFilter = machingFilters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
-    const max = maxFilter == null ? d3.min(values as number[]) :
+    const max = maxFilter == null ? d3.max(values as number[]) :
       maxFilter.operation == "LessThan" ? maxFilter.value as number - step :
         maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 
 

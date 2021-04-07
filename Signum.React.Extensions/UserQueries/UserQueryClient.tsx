@@ -152,7 +152,8 @@ export module Converter {
       fo.columnOptions = (uq.columns ?? []).map(f => ({
         token: f.element.token.tokenString,
         displayName: translated(f.element, c => c.displayName),
-        summaryToken: f.element.summaryToken?.tokenString
+        summaryToken: f.element.summaryToken?.tokenString,
+        hiddenColumn: f.element.hiddenColumn,
       }) as ColumnOption);
 
       fo.orderOptions = (uq.orders ?? []).map(f => ({

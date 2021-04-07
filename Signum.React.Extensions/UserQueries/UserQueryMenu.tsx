@@ -160,6 +160,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }) : null,
+        hiddenColumn: c.hiddenColumn
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({

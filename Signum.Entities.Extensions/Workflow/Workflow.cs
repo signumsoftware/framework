@@ -132,6 +132,8 @@ namespace Signum.Entities.Workflow
         [Description("Workflow Issues")]
         WorkflowIssues,
         WorkflowProperties,
+        [Description("{0} not allowed for {1} (no constructor has been defined in 'WithWorkflow')")]
+        _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow,
     }
 
     [Serializable]
@@ -202,6 +204,8 @@ namespace Signum.Entities.Workflow
         public CaseActivityEntity? PreviousCaseActivity { get; internal set; }
         public WorkflowConnectionEntity? Connection { get; internal set; }
         public CaseEntity? Case { get; set; }
+
+        public Action<CaseActivityEntity>? OnNextCaseActivityCreated; 
     }
 
     public enum WorkflowValidationMessage
