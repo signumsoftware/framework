@@ -7,7 +7,6 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
-import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 export interface UserEntity {
     newPassword: string;
@@ -269,15 +268,11 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   code: string;
   user: UserEntity;
   requestDate: string;
-  lapsed: boolean;
+  used: boolean;
 }
 
 export module ResetPasswordRequestOperation {
   export const Execute : Entities.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
-}
-
-export module ResetPasswordRequestTask {
-  export const Timeout : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "ResetPasswordRequestTask.Timeout");
 }
 
 export const RoleEntity = new Type<RoleEntity>("Role");
