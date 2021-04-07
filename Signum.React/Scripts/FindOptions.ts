@@ -140,13 +140,14 @@ export interface ColumnOption {
   token: string | QueryTokenString<any>;
   displayName?: string | (() => string);
   summaryToken?: string | QueryTokenString<any>;
+  hiddenColumn?: boolean;
 }
 
 export interface ColumnOptionParsed {
   token?: QueryToken;
   displayName?: string;
   summaryToken?: QueryToken;
-
+  hiddenColumn?: boolean;
 }
 
 export const DefaultPagination: Pagination = {

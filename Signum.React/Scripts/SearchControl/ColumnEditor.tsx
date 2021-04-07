@@ -38,6 +38,13 @@ export default function ColumnEditor(p: ColumnEditorProps) {
     p.onChange(undefined);
   }
 
+  function handleHiddenColumnClick() {
+    co.hiddenColumn = co.hiddenColumn ? undefined : true;
+    co.displayName = co.token?.niceName;
+    co.summaryToken = undefined;
+    p.onChange(undefined);
+  }
+
   const co = p.columnOption;
 
   const isCollection = co.token && co.token.type.isCollection;
@@ -65,8 +72,12 @@ export default function ColumnEditor(p: ColumnEditorProps) {
         <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>{SearchMessage.DisplayName.niceToString()}</label>
         <div className="flex-grow-1">
           <input className="form-control form-control-xs"
-            value={co.displayName || ""}
+            value={co.displayName || ""} disabled={co.hiddenColumn}
             onChange={handleOnChange} />
+          <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
+            <input type="checkbox" disabled={co.token == null} checked={co.hiddenColumn} onChange={handleHiddenColumnClick} className="mr-1" />
+            {SearchMessage.HiddenColumn.niceToString()}
+          </label>
         </div>
       </div>
       <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}

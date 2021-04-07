@@ -272,7 +272,7 @@ namespace Signum.Engine
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
 
-        internal static string Encode(object? value)
+        internal static string Encode(object? value, bool simple = false)
         {
             if (value == null || value == DBNull.Value)
                 return "NULL";
@@ -288,15 +288,20 @@ namespace Signum.Engine
 
             if (value is DateTime dt)
             {
-                return Schema.Current.Settings.IsPostgres ?
-                    "'{0}'".FormatWith(dt.ToString("yyyy-MM-dd hh:mm:ss.fff", CultureInfo.InvariantCulture)) :
+                var str = dt.ToString("yyyy-MM-dd hh:mm:ss.fff", CultureInfo.InvariantCulture);
+
+                return Schema.Current.Settings.IsPostgres || simple ?
+                    "'{0}'".FormatWith(str) :
                     "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
             }
 
             if (value is TimeSpan ts)
             {
                 var str = ts.ToString("g", CultureInfo.InvariantCulture);
-                return Schema.Current.Settings.IsPostgres ? str : "convert(time, '{0}')".FormatWith(str);
+
+                return Schema.Current.Settings.IsPostgres || simple?
+                   "'{0}'".FormatWith(str) :
+                    "convert(time, '{0}')".FormatWith(str);
             }
 
             if (value is bool b)
@@ -340,9 +345,11 @@ namespace Signum.Engine
             var sqlBuilder = Connector.Current.SqlBuilder;
 
             var parameterVars = pars.ToString(p => $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
-            var parameterValues = pars.ToString(p => Encode(p.Value), ",");
+            var parameterValues = pars.ToString(p => p.ParameterName + " = " + Encode(p.Value, simple: true), ",\r\n");
 
-            return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";
+            return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
+@params = N'{parameterVars}', 
+{parameterValues}";
         }
 
         public override SqlPreCommand Clone()

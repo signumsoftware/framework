@@ -68,8 +68,11 @@ table.sf-search-results > tbody > tr > td {
     opacity: .5;
 }
 
+.sf-hidden-column{
+    color: darkgray
+}
+
 .sf-search-results > thead > tr > th {
-   
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
@@ -320,6 +323,10 @@ ul.sf-context-menu li a:not([disabled]) {
 
 .sf-query-token-part .rw-list-empty, .rw-list-option, .rw-list-optgroup {
     padding: 0 .5em;
+}
+
+.rw-list-option.rw-state-selected span[style]{
+    color: inherit !important;
 }
 
 .sf-prefix-btn {

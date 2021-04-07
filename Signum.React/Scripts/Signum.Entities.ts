@@ -519,6 +519,11 @@ export module SearchMessage {
   export const HidePinnedFiltersOptions = new MessageKey("SearchMessage", "HidePinnedFiltersOptions");
   export const SummaryHeader = new MessageKey("SearchMessage", "SummaryHeader");
   export const SummaryHeaderMustBeAnAggregate = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
+  export const HiddenColumn = new MessageKey("SearchMessage", "HiddenColumn");
+  export const ShowHiddenColumns = new MessageKey("SearchMessage", "ShowHiddenColumns");
+  export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
+  export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
+  export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
 }
 
 export module SelectorMessage {

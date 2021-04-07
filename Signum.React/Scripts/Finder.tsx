@@ -314,7 +314,7 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
 export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
   const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-    c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null;
+    c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
 
   ideal = ideal.filter(a => a.name != "Entity");
 
@@ -344,6 +344,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
         token: c.token!.fullKey,
         displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
         summaryToken: c.summaryToken?.fullKey,
+        hiddenColumn: c.hiddenColumn,
       }) as ColumnOption)
     };
   }
@@ -353,7 +354,8 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     columns: current.map(c => ({
       token: c.token!.fullKey,
       displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-      summaryToken: c.summaryToken?.fullKey
+      summaryToken: c.summaryToken?.fullKey,
+      hiddenColumn: c.hiddenColumn,
     }) as ColumnOption),
   };
 }
@@ -405,7 +407,8 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
-      summaryToken: co.summaryToken && completer.get(co.summaryToken.toString())
+      summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
 
@@ -728,6 +731,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         token: completer.get(co.token.toString()),
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+        hiddenColumn: co.hiddenColumn,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -1441,7 +1445,12 @@ export module Encoder {
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
     if (columnOptions) {
       columnOptions.forEach((co, i) => {
-        query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : "");
+
+        var displayName = co.hiddenColumn ? HIDDEN :
+          co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
+            undefined;
+
+        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
       });
@@ -1474,6 +1483,9 @@ export module Encoder {
 }
 
 
+
+
+const HIDDEN = "__";
 
 export module Decoder {
 
@@ -1566,14 +1578,21 @@ export module Decoder {
     } as OrderOption));
   }
 
+
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
 
-    return valuesInOrder(query, "column").map(p => ({
-      token: p.value.tryBefore("~") ?? p.value,
-      displayName: unscapeTildes(p.value.tryAfter("~")),
-      summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
-    }) as ColumnOption);
+    return valuesInOrder(query, "column").map(p => {
+
+      var displayName = unscapeTildes(p.value.tryAfter("~")); 
+
+      return ({
+        token: p.value.tryBefore("~") ?? p.value,
+        displayName: displayName == HIDDEN ? undefined : displayName,
+        hiddenColumn: displayName == HIDDEN ? true : undefined,
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
+      }) as ColumnOption;
+    });
   }
 }
 
