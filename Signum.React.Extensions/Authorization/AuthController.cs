@@ -215,14 +215,6 @@ namespace Signum.React.Authorization
         }
 
 #pragma warning disable IDE1006 // Naming Styles
-
-        public class SetPasswordRequest
-        {
-            public string password { get; set; }
-            public string confirmPassword { get; set; }
-            public string code { get; set; }
-        }
-
         public class LoginRequest
         {
             public string userName { get; set; }
