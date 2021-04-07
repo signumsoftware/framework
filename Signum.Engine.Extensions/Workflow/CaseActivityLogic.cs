@@ -470,7 +470,11 @@ namespace Signum.Engine.Workflow
                 var graph = WorkflowLogic.GetWorkflowNodeGraph(Case.Workflow.ToLite());
                 foreach (var tctx in TransitionContextToNotify.Where(a => a.OnNextCaseActivityCreated != null && a.PreviousCaseActivity != null && a.Connection != null))
                 {
-                    if (graph.GetAllConnections(tctx.PreviousCaseActivity!.WorkflowActivity, newCaseActivity.WorkflowActivity, path => true).Contains(tctx.Connection!))
+                    var from = tctx.PreviousCaseActivity!.WorkflowActivity;
+                    var to = newCaseActivity.WorkflowActivity;
+
+                    if (graph.GetAllConnections(from, to, path => true).Contains(tctx.Connection!) ||
+                        from is WorkflowActivityEntity fromWA && fromWA.BoundaryTimers.Any(e => graph.GetAllConnections(e, to, path => true).Contains(tctx.Connection!)))
                         tctx.OnNextCaseActivityCreated!(newCaseActivity);
                 }
             }

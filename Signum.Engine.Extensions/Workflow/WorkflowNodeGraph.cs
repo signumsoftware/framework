@@ -135,7 +135,9 @@ namespace Signum.Engine.Workflow
                 if (node is WorkflowEventEntity e && !node.Is(from) && e.BoundaryOf.Is(from))
                     return;
 
-                foreach (var con in this.NextConnections(node).ToList())
+                var nextConnections = this.NextConnections(node).ToList();
+
+                foreach (var con in nextConnections)
                 {
                     if (!visited.Contains(con.To))
                     {
