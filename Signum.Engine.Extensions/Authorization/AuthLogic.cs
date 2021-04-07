@@ -17,8 +17,6 @@ using System.IO;
 using Signum.Engine.Mailing;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Mailing;
-using Signum.Engine;
-using System.Linq.Expressions;
 using Signum.Engine.Cache;
 
 namespace Signum.Engine.Authorization
@@ -27,6 +25,11 @@ namespace Signum.Engine.Authorization
     {
         public static event Action<UserEntity>? UserLogingIn;
         public static ICustomAuthorizer? Authorizer;
+        
+        /// <summary>
+        /// Gets or sets the number of failed login attempts allowed before a user is locked out.
+        /// </summary>
+        public static int? MaxFailedLoginAttempts { get; set; }
 
         public static string? SystemUserName { get; private set; }
         static ResetLazy<UserEntity?> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
@@ -306,8 +309,39 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
-                if (!user.PasswordHash.SequenceEqual(passwordHash))
-                    throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
+                using (UserHolder.UserSession(SystemUser))
+                {
+                    if (!user.PasswordHash.SequenceEqual(passwordHash))
+                    {
+                        user.LoginFailedCounter++;
+                        user.Execute(UserOperation.Save);
+
+                        if (MaxFailedLoginAttempts.HasValue && 
+                            user.LoginFailedCounter == MaxFailedLoginAttempts && 
+                            user.State == UserState.Saved)
+                        {
+                            var config = EmailLogic.Configuration;
+                            var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+                            var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
+
+                            var mail = new UserLockedMail(user, url);
+                            mail.SendMailAsync();
+                            
+                            user.Execute(UserOperation.Disable);
+
+                            throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
+                                .FormatWith(user.UserName));
+                        }
+
+                        throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
+                    }
+
+                    if (user.LoginFailedCounter > 0)
+                    {
+                        user.LoginFailedCounter = 0;
+                        user.Execute(UserOperation.Save);
+                    }
+                }
 
                 return user;
             }
