@@ -207,44 +207,7 @@ namespace Signum.React.Authorization
                     .SingleOrDefault(e => e.Code == code));
             }
         }
-
-        [HttpPost("api/auth/SetPassword"), SignumAllowAnonymous]
-        public ActionResult SetPassword([Required][FromBody] SetPasswordRequest request)
-        {
-            using (UserHolder.UserSession(AuthLogic.SystemUser!))
-            {
-                if (string.IsNullOrEmpty(request.password))
-                    return ModelError("password", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
-
-                if (string.IsNullOrEmpty(request.confirmPassword))
-                    return ModelError("confirmPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
-
-                var error = UserEntity.OnValidatePassword(request.password);
-                if (error != null)
-                    return ModelError("password", error);
-
-                var entity = Database.Query<ResetPasswordRequestEntity>()
-                    .SingleOrDefault(e => e.Code == request.code);
-
-                if (entity == null || !entity.IsValid)
-                    return BadRequest();
-
-                if (entity.User.State == UserState.Disabled)
-                    entity.User.Execute(UserOperation.Enable);
-
-                entity.User.PasswordHash = Security.EncodePassword(request.password);
-                entity.User.Execute(UserOperation.Save);
-
-                entity.Used = true;
-                entity.Save();
-
-                var mail = new PasswordChangedEmail(entity);
-                mail.SendMailAsync();
-
-                return Ok();
-            }
-        }
-
+        
         private BadRequestObjectResult ModelError(string field, string error)
         {
             ModelState.AddModelError(field, error);
