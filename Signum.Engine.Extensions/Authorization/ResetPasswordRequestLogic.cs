@@ -38,19 +38,6 @@ namespace Signum.Engine.Authorization
 
             EmailLogic.AssertStarted(sb);
 
-            SimpleTaskLogic.Register(ResetPasswordRequestTask.Timeout,
-                (ScheduledTaskContext ctx) =>
-                {
-                    Database.Query<ResetPasswordRequestEntity>()
-                        .Where(r => r.RequestDate.AddHours(24) < TimeZoneManager.Now)
-                        .UnsafeUpdate()
-                        .Set(e => e.Lapsed, e => true)
-                        .Execute();
-
-                    return null;
-                }
-            );
-
             EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
             {
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
@@ -79,11 +66,11 @@ namespace Signum.Engine.Authorization
                 {
                     CanBeNew = false,
                     CanBeModified = false,
-                    CanExecute = (e) => e.Lapsed == false ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
+                    CanExecute = (e) => e.IsValid ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
                     Execute = (e, args) =>
                     {
                         string password = args.GetArg<string>();
-                        e.Lapsed = true;
+                        e.Used = true;
                         var user = e.User;
 
                         var error = UserEntity.OnValidatePassword(password);
@@ -103,7 +90,7 @@ namespace Signum.Engine.Authorization
             {
                 //Remove old previous requests
                 var rpr = Database.Query<ResetPasswordRequestEntity>()
-                     .Where(r => r.Code == code && !r.Lapsed)
+                     .Where(r => r.Code == code && r.IsValid)
                      .SingleEx();
 
                 using (UserHolder.UserSession(rpr.User))
@@ -119,9 +106,9 @@ namespace Signum.Engine.Authorization
             UserEntity? user;
             using (AuthLogic.Disable())
             {
-                user = Database.Query<UserEntity>()
-                  .Where(u => u.Email == email && u.State != UserState.Disabled)
-                  .SingleOrDefault();
+                user = Database
+                    .Query<UserEntity>()
+                    .SingleOrDefault(u => u.Email == email && u.State != UserState.Disabled);
 
                 if (user == null)
                     throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());
@@ -152,9 +139,9 @@ namespace Signum.Engine.Authorization
             {
                 //Remove old previous requests
                 Database.Query<ResetPasswordRequestEntity>()
-                    .Where(r => r.User.Is(user) && !r.Lapsed)
+                    .Where(r => r.User.Is(user) && r.IsValid)
                     .UnsafeUpdate()
-                    .Set(e => e.Lapsed, e => true)
+                    .Set(e => e.Used, e => true)
                     .Execute();
 
                 return new ResetPasswordRequestEntity()

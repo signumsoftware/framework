@@ -1,5 +1,6 @@
 using Signum.Entities.Scheduler;
 using System;
+using Signum.Utilities;
 
 namespace Signum.Entities.Authorization
 {
@@ -13,18 +14,14 @@ namespace Signum.Entities.Authorization
 
         public DateTime RequestDate { get; set; }
 
-        public bool Lapsed { get; set; }
+        public bool Used { get; set; }
+        
+        public bool IsValid => As.Expression(() => !Used && TimeZoneManager.Now < RequestDate.AddHours(24));
     }
 
     [AutoInit]
     public static class ResetPasswordRequestOperation
     {
         public static readonly ExecuteSymbol<ResetPasswordRequestEntity> Execute;
-    }
-
-    [AutoInit]
-    public static class ResetPasswordRequestTask
-    {
-        public static SimpleTaskSymbol Timeout;
     }
 }

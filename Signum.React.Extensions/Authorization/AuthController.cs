@@ -248,7 +248,7 @@ namespace Signum.React.Authorization
                 var entity = Database.Query<ResetPasswordRequestEntity>()
                     .SingleOrDefault(e => e.Code == request.code);
 
-                if (entity == null || entity.Lapsed)
+                if (entity == null || !entity.IsValid)
                     return BadRequest();
 
                 if (entity.User.State == UserState.Disabled)
@@ -257,7 +257,7 @@ namespace Signum.React.Authorization
                 entity.User.PasswordHash = Security.EncodePassword(request.password);
                 entity.User.Execute(UserOperation.Save);
 
-                entity.Lapsed = true;
+                entity.Used = true;
                 entity.Save();
 
                 var mail = new PasswordChangedEmail(entity);
