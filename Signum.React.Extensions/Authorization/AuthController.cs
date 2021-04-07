@@ -198,28 +198,6 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
 
-        [HttpGet("api/auth/ResetPasswordMail/{username}"), SignumAllowAnonymous]
-        public ActionResult ResetPasswordMail(string username)
-        {
-            using (UserHolder.UserSession(AuthLogic.SystemUser!))
-            {
-                var user = Database.Query<UserEntity>()
-                    .SingleOrDefault(u => u.UserName.ToLower() == username.ToLower());
-
-                if (user == null)
-                    return Ok();
-
-                var config = EmailLogic.Configuration;
-                var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
-                var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
-
-                var mail = new ResetPasswordRequestEmail(request, url);
-                mail.SendMailAsync();
-
-                return Ok();
-            }
-        }
-
         [HttpGet("api/auth/ResetPasswordRequest/{code}"), SignumAllowAnonymous]
         public ActionResult GetResetPasswordRequest(string code)
         {
