@@ -47,12 +47,10 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-        static Expression<Func<RoleEntity, IQueryable<UserEntity>>> UsersExpression = r => 
+        [AutoExpressionField]
+        public static IQueryable<UserEntity> Users(this RoleEntity r) => 
             As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));
         
-        [ExpressionField(nameof(UsersExpression))]
-        public static IQueryable<UserEntity> Users(this RoleEntity r) => UsersExpression.Evaluate(r);
-
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
         static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
