@@ -104,6 +104,18 @@ namespace Signum.Entities.Authorization
             : base(info, context)
         { }
     }
+    
+    [Serializable]
+    public class UserLockedException : ApplicationException
+    {
+        public UserLockedException() { }
+        public UserLockedException(string message) : base(message) { }
+        protected UserLockedException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
+    }
 
     [Serializable]
     public class IncorrectPasswordException : ApplicationException
