@@ -77,9 +77,17 @@ namespace Signum.Engine.Authorization
                         if (error != null)
                             throw new ApplicationException(error);
 
+                        if (user.State == UserState.Disabled)
+                        {
+                            user.Execute(UserOperation.Enable);
+                        }
+                        
                         user.PasswordHash = Security.EncodePassword(password);
+                        user.LoginFailedCounter = 0;
                         using (AuthLogic.Disable())
+                        {
                             user.Execute(UserOperation.Save);
+                        }
                     }
                 }.Register();
         }
@@ -135,6 +143,7 @@ namespace Signum.Engine.Authorization
 
         public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
         {
+            using (OperationLogic.AllowSave<UserEntity>())
             using (AuthLogic.Disable())
             {
                 //Remove old previous requests
@@ -144,7 +153,7 @@ namespace Signum.Engine.Authorization
                     .Set(e => e.Used, e => true)
                     .Execute();
 
-                return new ResetPasswordRequestEntity()
+                return new ResetPasswordRequestEntity
                 {
                     Code = MyRandom.Current.NextString(32),
                     User = user,
