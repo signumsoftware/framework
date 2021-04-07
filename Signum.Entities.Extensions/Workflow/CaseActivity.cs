@@ -10,7 +10,7 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseActivityEntity : Entity
     {
         public CaseEntity Case { get; set; }

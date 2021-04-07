@@ -16,7 +16,7 @@ namespace Signum.Entities.Dynamic
         
         public TypeEntity EntityType { get; set; }
 
-        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty]
         public DynamicTypeConditionEval Eval { get; set; }
 
         [AutoExpressionField]

@@ -72,7 +72,7 @@ namespace Signum.Entities.Workflow
         Error,
     }
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public class WorkflowModel : ModelEntity
     {
         public string DiagramXml { get; set;  }
@@ -80,7 +80,7 @@ namespace Signum.Entities.Workflow
         public MList<BpmnEntityPairEmbedded> Entities { get; set; } = new MList<BpmnEntityPairEmbedded>();
     }
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
         [ImplementedBy()]
@@ -184,9 +184,8 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
-        [InTypeScript(Undefined = false, Null= false)]
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
-        public Lite<IWorkflowNodeEntity>? OldNode { get; set; }
+        public Lite<IWorkflowNodeEntity> OldNode { get; set; }
 
         public Lite<WorkflowEntity>? SubWorkflow { get; set; }
 
