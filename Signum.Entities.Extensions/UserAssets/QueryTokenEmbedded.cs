@@ -5,7 +5,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.UserAssets
 {
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEmbedded>
     {
         private QueryTokenEmbedded()
@@ -28,7 +28,7 @@ namespace Signum.Entities.UserAssets
             this.TokenString = tokenString;
         }
 
-        [StringLengthValidator(Min = 1, Max = 200), NotNullValidator(DisabledInModelBinder = true), InTypeScript(Undefined = false, Null = false)]
+        [StringLengthValidator(Min = 1, Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string TokenString { get; set; }
 
         [Ignore]

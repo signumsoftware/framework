@@ -44,7 +44,7 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorState State { get; set; }
 
-        [InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
+        [NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
         [Ignore, QueryableProperty] //virtual Mlist

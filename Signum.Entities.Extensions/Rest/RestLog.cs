@@ -7,7 +7,7 @@ using static System.Int32;
 
 namespace Signum.Entities.Rest
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class RestLogEntity : Entity
     {
         [StringLengthValidator(Max = 100)]

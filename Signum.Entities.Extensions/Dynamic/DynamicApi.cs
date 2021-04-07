@@ -16,7 +16,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty]
         public DynamicApiEval Eval { get; set; }
 
         [AutoExpressionField]
