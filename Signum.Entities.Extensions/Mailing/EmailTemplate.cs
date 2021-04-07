@@ -197,8 +197,8 @@ namespace Signum.Entities.Mailing
 
             Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
             {
-                DisplayName = rep.Attribute("DisplayName")!.Value,
-                EmailAddress = rep.Attribute("EmailAddress")!.Value,
+                DisplayName = rep.Attribute("DisplayName")?.Value,
+                EmailAddress = rep.Attribute("EmailAddress")?.Value,
                 Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
                 Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value)),
                 WhenMany = rep.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients,
