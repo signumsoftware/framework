@@ -75,6 +75,8 @@ export module AuthEmailMessage {
   export const YourResetPasswordRequestHasExpired = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestHasExpired");
   export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
   export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
+  export const YourAccountHasBeenLockedDueToSeveralFailedLogins = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
+  export const YourAccountHasBeenLocked = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLocked");
 }
 
 export module AuthMessage {
