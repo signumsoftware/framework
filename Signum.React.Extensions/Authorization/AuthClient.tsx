@@ -127,8 +127,8 @@ export function logout() {
   var user = currentUser();
   if (user == null)
     return;
-
-  Cookies.remove(cookieName)
+  
+  Cookies.remove(cookieName, "/", document.location.hostname);
 
   API.logout().then(() => {
     logoutInternal();
