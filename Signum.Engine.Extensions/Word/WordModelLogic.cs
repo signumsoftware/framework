@@ -269,9 +269,7 @@ namespace Signum.Engine.Word
                 }
             }
 
-            var ci = WordTemplateLogic.GetCultureInfo != null
-                ? WordTemplateLogic.GetCultureInfo(entity)
-                : CultureInfo.CurrentCulture;
+            var ci = WordTemplateLogic.GetCultureInfo?.Invoke(entity) ?? CultureInfo.CurrentCulture;
             
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: false);
             var candidates = templates.Where(isAllowed).Where(t => t.IsApplicable(entity));
