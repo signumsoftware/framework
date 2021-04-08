@@ -319,7 +319,6 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
-
         bool identityBehaviour;
 
         public bool IdentityBehaviour

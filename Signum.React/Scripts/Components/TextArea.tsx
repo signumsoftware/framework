@@ -10,7 +10,10 @@ export default function TextArea(p: TextAreaProps) {
 
   var textAreaRef = React.useRef<HTMLTextAreaElement | null | undefined>();
 
-  function handleResize(ta: HTMLTextAreaElement) {
+    function handleResize(ta: HTMLTextAreaElement) {
+    if (ta.style.height == ta.scrollHeight + 'px') { // do not move to a variable
+        return;
+    }
     ta.style.height = "0";
     ta.style.height = ta.scrollHeight + 'px';
     ta.style.minHeight = p.minHeight!;
