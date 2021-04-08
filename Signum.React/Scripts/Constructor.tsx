@@ -76,7 +76,7 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
 
   assertCorrect(result);
 
-  return API.fetchEntityPackEntity(result as Entity);
+  return Navigator.toEntityPack(result);
 }
 
 function asPromise<T>(valueOrPromise: T | Promise<T>) {
