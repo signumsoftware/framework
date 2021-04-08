@@ -16,7 +16,6 @@ interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 }
 
 function SearchPage(p: SearchPageProps) {
-
   const fo = Finder.parseFindOptionsPath(p.match.params.queryName, QueryString.parse(p.location.search))
 
   useTitle(getQueryNiceName(p.match.params.queryName));
@@ -78,7 +77,7 @@ function SearchPage(p: SearchPageProps) {
         allowSelection={qs && qs.allowSelection}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
-        showFilters={SearchPage.showFilters(fo, qs)}
+        showFilters={qs?.showFilters ?? SearchPage.showFilters(fo, qs)}
         showGroupButton={true}
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
