@@ -2,9 +2,7 @@ using System;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Mailing;
-using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
@@ -56,8 +54,7 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => UserName);
+        public int LoginFailedCounter { get; set; }
 
         public static UserEntity Current
         {
@@ -73,6 +70,9 @@ namespace Signum.Entities.Authorization
             DisplayName = UserName,
             Email = Email,
         });
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserName);
     }
 
     public enum UserState
@@ -99,8 +99,20 @@ namespace Signum.Entities.Authorization
         public IncorrectUsernameException() { }
         public IncorrectUsernameException(string message) : base(message) { }
         protected IncorrectUsernameException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
+    }
+    
+    [Serializable]
+    public class UserLockedException : ApplicationException
+    {
+        public UserLockedException() { }
+        public UserLockedException(string message) : base(message) { }
+        protected UserLockedException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }
@@ -111,8 +123,8 @@ namespace Signum.Entities.Authorization
         public IncorrectPasswordException() { }
         public IncorrectPasswordException(string message) : base(message) { }
         protected IncorrectPasswordException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }

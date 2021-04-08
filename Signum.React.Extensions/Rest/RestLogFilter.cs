@@ -26,6 +26,8 @@ namespace Signum.React.RestLog
 
         public bool AllowReplay { get; set; }
 
+        public bool IgnoreRequestBody { get; set; }
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             try
@@ -50,14 +52,13 @@ namespace Signum.React.RestLog
                     Controller = context.Controller.GetType().FullName!,
                     ControllerName = context.Controller.GetType().Name,
                     Action = ((ControllerActionDescriptor)context.ActionDescriptor).ActionName,
- 					MachineName = System.Environment.MachineName,
+                    MachineName = System.Environment.MachineName,
                     ApplicationName = AppDomain.CurrentDomain.FriendlyName,
                     StartDate = TimeZoneManager.Now,
                     UserHostAddress = connection.RemoteIpAddress!.ToString(),
                     UserHostName = request.Host.Value,
                     Referrer = request.Headers["Referrer"].ToString(),
-                    RequestBody = GetRequestBody(context.HttpContext.Request) //(string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
-                        //actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
+                    RequestBody = IgnoreRequestBody ? null : GetRequestBody(context.HttpContext.Request)
                 };
 
                 context.HttpContext.Items.Add(typeof(RestLogEntity).FullName!, restLog);

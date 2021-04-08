@@ -25,6 +25,8 @@ namespace Signum.Engine.Mailing
     {
         public static bool AvoidSynchronizeTokens = false;
         public static bool AvoidSynchronizeDefaultTemplates = true;
+        
+        public static Func<Entity?, CultureInfo>? GetCultureInfo;
 
         public static EmailTemplateMessageEmbedded? GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
@@ -536,7 +538,6 @@ namespace Signum.Engine.Mailing
                 .Where(a => a.IsApplicable(entity))
                 .Select(a => a.ToLite())
                 .ToList();
-        }
-
+        }   
     }
 }

@@ -14,9 +14,9 @@ using System.Reflection;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
 using System.IO;
+using Signum.Engine.Mailing;
 using Signum.Engine.Scheduler;
-using Signum.Engine;
-using System.Linq.Expressions;
+using Signum.Entities.Mailing;
 using Signum.Engine.Cache;
 
 namespace Signum.Engine.Authorization
@@ -25,6 +25,11 @@ namespace Signum.Engine.Authorization
     {
         public static event Action<UserEntity>? UserLogingIn;
         public static ICustomAuthorizer? Authorizer;
+        
+        /// <summary>
+        /// Gets or sets the number of failed login attempts allowed before a user is locked out.
+        /// </summary>
+        public static int? MaxFailedLoginAttempts { get; set; }
 
         public static string? SystemUserName { get; private set; }
         static ResetLazy<UserEntity?> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
@@ -45,11 +50,10 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-
         [AutoExpressionField]
-        public static IQueryable<UserEntity> Users(this RoleEntity r) =>
-            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));   
-
+        public static IQueryable<UserEntity> Users(this RoleEntity r) => 
+            As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));
+        
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
         static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
@@ -128,6 +132,19 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
 
                 UserGraph.Register();
+                
+                EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
+                {
+                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
+                    {
+                        Text =
+                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YourAccountHasBeenBlockedDueToSeveralFailedLogins.NiceToString()) +
+                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow
+                                .NiceToString()) +
+                            "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
+                        Subject = AuthEmailMessage.AccountLockedSubject.NiceToString()
+                    }).ToMList()
+                });
             }
         }
 
@@ -292,8 +309,39 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
-                if (!user.PasswordHash.SequenceEqual(passwordHash))
-                    throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
+                using (UserHolder.UserSession(SystemUser))
+                {
+                    if (!user.PasswordHash.SequenceEqual(passwordHash))
+                    {
+                        user.LoginFailedCounter++;
+                        user.Execute(UserOperation.Save);
+
+                        if (MaxFailedLoginAttempts.HasValue && 
+                            user.LoginFailedCounter == MaxFailedLoginAttempts && 
+                            user.State == UserState.Saved)
+                        {
+                            var config = EmailLogic.Configuration;
+                            var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+                            var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
+
+                            var mail = new UserLockedMail(user, url);
+                            mail.SendMailAsync();
+                            
+                            user.Execute(UserOperation.Disable);
+
+                            throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
+                                .FormatWith(user.UserName));
+                        }
+
+                        throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
+                    }
+
+                    if (user.LoginFailedCounter > 0)
+                    {
+                        user.LoginFailedCounter = 0;
+                        user.Execute(UserOperation.Save);
+                    }
+                }
 
                 return user;
             }
@@ -673,5 +721,22 @@ namespace Signum.Engine.Authorization
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
+    }
+    
+    public class UserLockedMail : EmailModel<UserEntity>
+    {
+        public string Url;
+        
+        public UserLockedMail(UserEntity entity) : this(entity, "http://testurl.com") { }
+
+        public UserLockedMail(UserEntity entity, string url) : base(entity)
+        {
+            this.Url = url;
+        }
+
+        public override List<EmailOwnerRecipientData> GetRecipients()
+        {
+            return SendTo(Entity.EmailOwnerData);
+        }
     }
 }

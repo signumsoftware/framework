@@ -25,7 +25,6 @@ namespace Signum.Entities.Authorization
         Logout,
         EnterYourUserNameAndPassword,
         Username,
-        RememberMe,
         IHaveForgottenMyPassword,
 
         [Description("Show login form")]
@@ -72,6 +71,26 @@ namespace Signum.Entities.Authorization
         [Description("An error occurred, request not processed.")]
         AnErrorOccurredRequestNotProcessed,
 
+        Remember,
+        RememberMe,
+        [Description("Reset Password")]
+        ResetPassword,
+        ResetPasswordCode,
+        [Description("A confirmation code to reset your password has been sent")]
+        ResetPasswordCodeHasBeenSent,
+        [Description("Your password has been successfully changed")]
+        ResetPasswordSuccess,
+        Save,
+        TheConfirmationCodeThatYouHaveJustSentIsInvalid,
+        [Description("The password must have at least 5 characters")]
+        ThePasswordMustHaveAtLeast5Characters,
+        [Description("There has been an error with your request to reset your password. Please, enter your login.")]
+        ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin,
+        [Description("There's not a registered user with that email address")]
+        ThereSNotARegisteredUserWithThatEmailAddress,
+        [Description("The specified passwords don't match")]
+        TheSpecifiedPasswordsDontMatch,
+        TheUserStateMustBeDisabled,
         TheUserIsNotLongerInTheDatabase,
 
         [Description("Register {0}")]
@@ -108,6 +127,16 @@ namespace Signum.Entities.Authorization
         YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("Reset password request")]
         ResetPasswordRequestSubject,
+        [Description("Password changed")]
+        PasswordChangedSubject,
+        [Description("Your password has recently been changed")]
+        YourPasswordHasRecentlyBeenChanged,
+        [Description("If you have not changed your password, please get in contact with us")]
+        IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs,
+        [Description("Your account has been locked")]
+        AccountLockedSubject,
+        [Description("Your account has been locked due to several failed logins")]
+        YourAccountHasBeenBlockedDueToSeveralFailedLogins,
         [Description("Your reset password request has expired")]
         YourResetPasswordRequestHasExpired,
         [Description("We have send you an email to reset your password")]
