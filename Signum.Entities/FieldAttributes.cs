@@ -319,8 +319,6 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
-        public bool SequentialGuid;
-
         bool identityBehaviour;
 
         public bool IdentityBehaviour
