@@ -198,16 +198,6 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
         }
 
-        [HttpGet("api/auth/ResetPasswordRequest/{code}"), SignumAllowAnonymous]
-        public ActionResult GetResetPasswordRequest(string code)
-        {
-            using (UserHolder.UserSession(AuthLogic.SystemUser!))
-            {
-                return Ok(Database.Query<ResetPasswordRequestEntity>()
-                    .SingleOrDefault(e => e.Code == code));
-            }
-        }
-        
         private BadRequestObjectResult ModelError(string field, string error)
         {
             ModelState.AddModelError(field, error);

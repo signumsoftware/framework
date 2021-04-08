@@ -25,7 +25,7 @@ namespace Signum.Engine.Authorization
     {
         public static event Action<UserEntity>? UserLogingIn;
         public static ICustomAuthorizer? Authorizer;
-        
+
         /// <summary>
         /// Gets or sets the number of failed login attempts allowed before a user is locked out.
         /// </summary>
@@ -51,9 +51,9 @@ namespace Signum.Engine.Authorization
         }
 
         [AutoExpressionField]
-        public static IQueryable<UserEntity> Users(this RoleEntity r) => 
+        public static IQueryable<UserEntity> Users(this RoleEntity r) =>
             As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));
-        
+
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles = null!;
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
         static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
@@ -104,7 +104,7 @@ namespace Signum.Engine.Authorization
                     });
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
-                rolesInverse = sb.GlobalLazy(()=>roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
+                rolesInverse = sb.GlobalLazy(() => roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
                 rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
@@ -117,7 +117,7 @@ namespace Signum.Engine.Authorization
                     {
                         var strat = strategies.GetOrThrow(r);
 
-                        var baseValues = graph.RelatedTo(r).Select(r2=>result[r2].DefaultAllowed);
+                        var baseValues = graph.RelatedTo(r).Select(r2 => result[r2].DefaultAllowed);
 
                         result.Add(r, new RoleData
                         {
@@ -132,17 +132,16 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
 
                 UserGraph.Register();
-                
+
                 EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
                 {
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
                         Text =
-                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YourAccountHasBeenBlockedDueToSeveralFailedLogins.NiceToString()) +
-                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow
-                                .NiceToString()) +
+                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YourAccountHasBeenLockedDueToSeveralFailedLogins.NiceToString()) +
+                            "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
                             "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
-                        Subject = AuthEmailMessage.AccountLockedSubject.NiceToString()
+                        Subject = AuthEmailMessage.YourAccountHasBeenLocked.NiceToString()
                     }).ToMList()
                 });
             }
@@ -309,15 +308,16 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
-                using (UserHolder.UserSession(SystemUser))
+
+                if (!user.PasswordHash.SequenceEqual(passwordHash))
                 {
-                    if (!user.PasswordHash.SequenceEqual(passwordHash))
+                    using (UserHolder.UserSession(SystemUser!))
                     {
                         user.LoginFailedCounter++;
                         user.Execute(UserOperation.Save);
 
-                        if (MaxFailedLoginAttempts.HasValue && 
-                            user.LoginFailedCounter == MaxFailedLoginAttempts && 
+                        if (MaxFailedLoginAttempts.HasValue &&
+                            user.LoginFailedCounter == MaxFailedLoginAttempts &&
                             user.State == UserState.Saved)
                         {
                             var config = EmailLogic.Configuration;
@@ -326,7 +326,7 @@ namespace Signum.Engine.Authorization
 
                             var mail = new UserLockedMail(user, url);
                             mail.SendMailAsync();
-                            
+
                             user.Execute(UserOperation.Disable);
 
                             throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
@@ -335,13 +335,17 @@ namespace Signum.Engine.Authorization
 
                         throw new IncorrectPasswordException(LoginAuthMessage.IncorrectPassword.NiceToString());
                     }
+                }
 
-                    if (user.LoginFailedCounter > 0)
+                if (user.LoginFailedCounter > 0)
+                {
+                    using (UserHolder.UserSession(SystemUser!))
                     {
                         user.LoginFailedCounter = 0;
                         user.Execute(UserOperation.Save);
                     }
                 }
+
 
                 return user;
             }
@@ -412,7 +416,7 @@ namespace Signum.Engine.Authorization
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToString()!),
-                            GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null!,
+                            GetMergeStrategy(r) == MergeStrategy.Intersection ? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null!,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
                      ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())!));
         }
@@ -446,7 +450,7 @@ namespace Signum.Engine.Authorization
 
                     EnumerableExtensions.JoinStrict(
                         roles.Value.RelatedTo(r),
-                        kvp.Value.Attribute("Contains")!.Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries),
+                        kvp.Value.Attribute("Contains")!.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                         sr => sr.ToString()!,
                         s => rolesDic.GetOrThrow(s).ToString()!,
                         (sr, s) => 0,
@@ -488,7 +492,7 @@ namespace Signum.Engine.Authorization
             {
                 Name = x.Attribute("Name")!.Value,
                 MergeStrategy = x.Attribute("MergeStrategy")?.Let(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
-                SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(',' )
+                SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(',')
             }).ToList();
 
             var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy }); /*CSBUG*/
@@ -518,7 +522,8 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Part 1: Syncronize roles without relationships");
 
                 var roleInsertsDeletes = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic,
-                    createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity {
+                    createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity
+                    {
                         Name = name,
                         MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union
                     }, includeCollections: false),
@@ -558,10 +563,10 @@ namespace Signum.Engine.Authorization
                  removeOld: (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
                  mergeBoth: (name, xElement, role) =>
                  {
-                     var should = xElement.Attribute("Contains")!.Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
+                     var should = xElement.Attribute("Contains")!.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                      var current = role.Roles.Select(a => a.ToString()!);
 
-                     if(should.OrderBy().SequenceEqual(current.OrderBy()))
+                     if (should.OrderBy().SequenceEqual(current.OrderBy()))
                          return null;
 
                      role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
@@ -722,11 +727,11 @@ namespace Signum.Engine.Authorization
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
-    
+
     public class UserLockedMail : EmailModel<UserEntity>
     {
         public string Url;
-        
+
         public UserLockedMail(UserEntity entity) : this(entity, "http://testurl.com") { }
 
         public UserLockedMail(UserEntity entity, string url) : base(entity)

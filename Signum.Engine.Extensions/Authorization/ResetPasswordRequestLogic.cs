@@ -52,16 +52,6 @@ namespace Signum.Engine.Authorization
                 }).ToMList()
             });
 
-            EmailModelLogic.RegisterEmailModel<PasswordChangedEmail>(() => new EmailTemplateEntity
-            {
-                Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
-                {
-                    Text = $@"<p>{AuthEmailMessage.YourPasswordHasRecentlyBeenChanged.NiceToString()}</p>
-                                  <p>{AuthEmailMessage.IfYouHaveNotChangedYourPasswordPleaseGetInContactWithUs.NiceToString()}</p>",
-                    Subject = AuthEmailMessage.PasswordChangedSubject.NiceToString()
-                }).ToMList()
-            });
-
             new Graph<ResetPasswordRequestEntity>.Execute(ResetPasswordRequestOperation.Execute)
                 {
                     CanBeNew = false,
@@ -172,16 +162,6 @@ namespace Signum.Engine.Authorization
         {
             this.Url = url;
         }
-
-        public override List<EmailOwnerRecipientData> GetRecipients()
-        {
-            return SendTo(Entity.User.EmailOwnerData);
-        }
-    }
-
-    public class PasswordChangedEmail : EmailModel<ResetPasswordRequestEntity>
-    {
-        public PasswordChangedEmail(ResetPasswordRequestEntity entity) : base(entity) { }
 
         public override List<EmailOwnerRecipientData> GetRecipients()
         {
