@@ -117,7 +117,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
   function renderFilter() {
 
     return (
-      <div className="form-inline container" style={{ marginTop: "10px" }}>
+      <div className="form-inline container" style={{ margin: "1rem 0" }}>
         <div className="form-group form-group-sm">
           <label htmlFor="filter"> {MapMessage.Filter.niceToString()}</label>&nbsp;
                     <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
@@ -146,18 +146,23 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
     return null;
 
   return (
-    <div ref={setContainer}>
+    <div style={{display: "flex", flexDirection: "column", flexGrow: 1}}>
       {renderFilter()}
-      {!(schemaInfo && size && schemaInfo && providers) ?
+      {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
-        <SchemaMapRenderer
-          schemaMapInfo={schemaInfo}
-          tables={tables!}
-          filter={filter}
-          color={color}
-          height={size.height!}
-          width={size.width!}
-          providers={providers} />}
+        <div ref={setContainer} style={{ display: "flex", flexGrow: 1 }}>
+          {size?.height && size?.width &&
+            <SchemaMapRenderer
+              schemaMapInfo={schemaInfo}
+              tables={tables!}
+              filter={filter}
+              color={color}
+              height={size.height}
+              width={size.width}
+              providers={providers} 
+            />
+          }
+        </div>}
     </div>
   );
 }
