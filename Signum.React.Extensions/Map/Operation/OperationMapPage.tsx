@@ -115,7 +115,7 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
     return null;
 
   return (
-    <div style={{display: "flex", flexDirection: "column", flexGrow: 1}}>
+    <div style={{display: "flex", flexDirection: "column"}}>
       {renderFilter()}
       {!(operationMapInfo && nodes) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :

@@ -146,7 +146,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
     return null;
 
   return (
-    <div style={{display: "flex", flexDirection: "column", flexGrow: 1}}>
+    <div style={{display: "flex", flexDirection: "column" }}>
       {renderFilter()}
       {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
