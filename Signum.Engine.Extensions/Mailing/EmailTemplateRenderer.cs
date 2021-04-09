@@ -83,7 +83,11 @@ namespace Signum.Engine.Mailing
                     })).ToMList()
                 };
 
-                EmailTemplateMessageEmbedded? message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                EmailTemplateMessageEmbedded? message = 
+                    template.GetCultureMessage(ci) ??
+                    template.GetCultureMessage(ci.Parent) ?? 
+                    template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
+                    template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo().Parent);
 
                 if (message == null)
                     throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
@@ -126,8 +130,11 @@ namespace Signum.Engine.Mailing
                 if (template.MasterTemplate != null)
                 {
                     var emt = template.MasterTemplate.RetrieveAndRemember();
-                    var emtm = emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
-                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                    var emtm = 
+                        emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
+                        emt.GetCultureMessage(message.CultureInfo.ToCultureInfo().Parent) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo().Parent);
 
                     if (emtm != null)
                         body = EmailMasterTemplateEntity.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
