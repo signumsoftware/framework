@@ -10,6 +10,7 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.Templating;
 using System.Xml.Linq;
 using Signum.Entities.UserQueries;
+using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {
@@ -220,7 +221,7 @@ namespace Signum.Entities.Mailing
 
 
     [Serializable]
-    public abstract class EmailTemplateContactEmbedded : EmbeddedEntity
+    public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
     {
         public string? EmailAddress { get; set; }
 
@@ -255,7 +256,7 @@ namespace Signum.Entities.Mailing
 
 
     [Serializable]
-    public class EmailTemplateRecipientEmbedded : EmailTemplateContactEmbedded
+    public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
 
@@ -283,10 +284,12 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateFromEmbedded : EmailTemplateContactEmbedded
+    public class EmailTemplateFromEmbedded : EmailTemplateAddressEmbedded
     {
         public WhenNoneFromBehaviour WhenNone { get; set; }
         public WhenManyFromBehaviour WhenMany { get; set; }
+
+        public Guid? AzureUserId { get; set; }
     }
 
 

@@ -45,7 +45,7 @@ namespace Signum.Engine.Mailing
         {
             ExecuteQuery();
 
-            foreach (EmailAddressEmbedded from in GetFrom())
+            foreach (EmailFromEmbedded from in GetFrom())
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
@@ -56,7 +56,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private EmailMessageEntity CreateEmailMessageInternal(EmailAddressEmbedded from, List<EmailOwnerRecipientData> recipients)
+        private EmailMessageEntity CreateEmailMessageInternal(EmailFromEmbedded from, List<EmailOwnerRecipientData> recipients)
         {
             EmailMessageEntity email;
             try
@@ -154,7 +154,7 @@ namespace Signum.Engine.Mailing
             return (TextTemplateParser.BlockNode)message.SubjectParsedNode;
         }
 
-        IEnumerable<EmailAddressEmbedded> GetFrom()
+        IEnumerable<EmailFromEmbedded> GetFrom()
         {
             if (template.From != null)
             {
@@ -197,7 +197,7 @@ namespace Signum.Engine.Mailing
                             var old = currentRows;
                             currentRows = gr;
 
-                            yield return new EmailAddressEmbedded(gr.Key);
+                            yield return new EmailFromEmbedded(gr.Key);
 
                             currentRows = old;
                         }
@@ -205,12 +205,13 @@ namespace Signum.Engine.Mailing
                 }
                 else
                 {
-                    yield return new EmailAddressEmbedded(new EmailOwnerData
+                    yield return new EmailFromEmbedded
                     {
-                        CultureInfo = null,
-                        Email = template.From.EmailAddress!,
+                        EmailOwner = null,
+                        EmailAddress = template.From.EmailAddress!,
                         DisplayName = template.From.DisplayName,
-                    });
+                        AzureUserId = template.From.AzureUserId,
+                    };
                 }
             }
             else
