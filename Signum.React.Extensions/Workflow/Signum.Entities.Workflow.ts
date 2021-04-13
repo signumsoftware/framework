@@ -658,6 +658,7 @@ export module WorkflowMessage {
   export const Color = new MessageKey("WorkflowMessage", "Color");
   export const WorkflowIssues = new MessageKey("WorkflowMessage", "WorkflowIssues");
   export const WorkflowProperties = new MessageKey("WorkflowMessage", "WorkflowProperties");
+  export const _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow = new MessageKey("WorkflowMessage", "_0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");

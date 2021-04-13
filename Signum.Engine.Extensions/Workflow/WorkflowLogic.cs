@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Engine.UserAssets;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Workflow
 {
@@ -708,6 +709,13 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (e, args) =>
                     {
+                        if (e.MainEntityStrategies.Contains(WorkflowMainEntityStrategy.CreateNew))
+                        {
+                            var type = e.MainEntityType.ToType();
+                            if (CaseActivityLogic.Options.TryGetC(type)?.Constructor == null)
+                                throw new ApplicationException(WorkflowMessage._0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow.NiceToString(WorkflowMainEntityStrategy.CreateNew.NiceToString(), type.NiceName()));
+                        }
+
                         WorkflowLogic.ApplyDocument(e, args.TryGetArgC<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
                         DynamicCode.OnInvalidated?.Invoke();
                     }

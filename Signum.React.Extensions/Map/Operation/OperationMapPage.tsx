@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
@@ -116,11 +115,23 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
     return null;
 
   return (
-    <div ref={setContainer}>
+    <div style={{display: "flex", flexDirection: "column"}}>
       {renderFilter()}
-      {!(operationMapInfo && size && nodes) ?
+      {!(operationMapInfo && nodes) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
-        <OperationMapRenderer operationMapInfo={operationMapInfo} nodes={nodes} color={color!} height={size.height!} width={size.width!} queryName={p.match.params.type} />}
+        <div ref={setContainer} style={{display: "flex", flexGrow: 1}}>
+          {size?.height && size?.width &&
+            <OperationMapRenderer 
+              operationMapInfo={operationMapInfo} 
+              nodes={nodes} 
+              color={color!} 
+              height={size.height}
+              width={size.width} 
+              queryName={p.match.params.type}
+            />
+          }
+        </div>
+      }
     </div>
   );
 }

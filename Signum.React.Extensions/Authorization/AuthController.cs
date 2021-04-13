@@ -1,18 +1,19 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Signum.Engine;
 using Signum.Engine.Authorization;
+using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.React.Filters;
 using Signum.Services;
 using Signum.Utilities;
-using System;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Signum.React.Filters;
-using System.ComponentModel.DataAnnotations;
 using Signum.Engine.Basics;
-using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -20,7 +21,7 @@ namespace Signum.React.Authorization
     public class AuthController : ControllerBase
     {
         [HttpPost("api/auth/login"), SignumAllowAnonymous]
-        public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
+        public ActionResult<LoginResponse> Login([Required, FromBody] LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
                 return ModelError("userName", LoginAuthMessage.UserNameMustHaveAValue.NiceToString());
@@ -110,7 +111,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-        public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery]bool throwErrors = true)
+        public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery] bool throwErrors = true)
         {
             if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
                 return null;
@@ -136,7 +137,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/ChangePassword")]
-        public ActionResult<LoginResponse> ChangePassword([Required, FromBody]ChangePasswordRequest request)
+        public ActionResult<LoginResponse> ChangePassword([Required, FromBody] ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
                 return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
@@ -165,7 +166,7 @@ namespace Signum.React.Authorization
 
 
         [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
-        public string? ForgotPasswordEmail([Required, FromBody]ForgotPasswordRequest request)
+        public string? ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.eMail))
                 return LoginAuthMessage.EnterYourUserEmail.NiceToString();
@@ -183,7 +184,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]
-        public ActionResult<LoginResponse> ResetPassword([Required, FromBody]ResetPasswordRequest request)
+        public ActionResult<LoginResponse> ResetPassword([Required, FromBody] ResetPasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
@@ -191,7 +192,7 @@ namespace Signum.React.Authorization
             var error = UserEntity.OnValidatePassword(request.newPassword);
             if (error != null)
                 return ModelError("newPassword", error);
-            
+
             var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
             return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
@@ -224,13 +225,11 @@ namespace Signum.React.Authorization
             public string newPassword { get; set; }
         }
 
-
         public class ResetPasswordRequest
         {
             public string code { get; set; }
             public string newPassword { get; set; }
         }
-
 
         public class ForgotPasswordRequest
         {

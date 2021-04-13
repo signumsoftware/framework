@@ -380,17 +380,17 @@ namespace Signum.Engine.Workflow
 
         public class WorkflowOptions
         {
-            public Func<ICaseMainEntity> Constructor;
+            public Func<ICaseMainEntity>? Constructor;
             public Action<ICaseMainEntity> SaveEntity;
 
-            public WorkflowOptions(Func<ICaseMainEntity> constructor, Action<ICaseMainEntity> saveEntity)
+            public WorkflowOptions(Func<ICaseMainEntity>? constructor, Action<ICaseMainEntity> saveEntity)
             {
                 Constructor = constructor;
                 SaveEntity = saveEntity;
             }
         }
         
-        public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T> constructor, Action<T> save)
+        public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save)
             where T: Entity, ICaseMainEntity
         {
             fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args)=>
@@ -435,6 +435,8 @@ namespace Signum.Engine.Workflow
             public bool IsFinished { get; set; }
             public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
 
+            public List<WorkflowTransitionContext> TransitionContextToNotify = new List<WorkflowTransitionContext>();
+
             public WorkflowExecuteStepContext(CaseEntity @case, CaseActivityEntity? previous)
             {
                 Case = @case;
@@ -443,7 +445,7 @@ namespace Signum.Engine.Workflow
 
             public void ExecuteConnection(WorkflowConnectionEntity connection)
             {
-                var wctx = new WorkflowTransitionContext(Case, PreviousCaseActivity, connection);
+                var wctx = this.NewTransitionContext(connection);
 
                 WorkflowLogic.OnTransition?.Invoke(Case.MainEntity, wctx);
 
@@ -454,6 +456,27 @@ namespace Signum.Engine.Workflow
                 };
                 
                 this.Connections.Add(connection);
+            }
+
+            public WorkflowTransitionContext NewTransitionContext(WorkflowConnectionEntity connection)
+            {
+                var wtc = new WorkflowTransitionContext(Case, PreviousCaseActivity, connection);
+                TransitionContextToNotify.Add(wtc);
+                return wtc;
+            }
+
+            internal void NotifyTransitionContext(CaseActivityEntity newCaseActivity)
+            {
+                var graph = WorkflowLogic.GetWorkflowNodeGraph(Case.Workflow.ToLite());
+                foreach (var tctx in TransitionContextToNotify.Where(a => a.OnNextCaseActivityCreated != null && a.PreviousCaseActivity != null && a.Connection != null))
+                {
+                    var from = tctx.PreviousCaseActivity!.WorkflowActivity;
+                    var to = newCaseActivity.WorkflowActivity;
+
+                    if (graph.GetAllConnections(from, to, path => true).Contains(tctx.Connection!) ||
+                        from is WorkflowActivityEntity fromWA && fromWA.BoundaryTimers.Any(e => graph.GetAllConnections(e, to, path => true).Contains(tctx.Connection!)))
+                        tctx.OnNextCaseActivityCreated!(newCaseActivity);
+                }
             }
         }
 
@@ -467,7 +490,7 @@ namespace Signum.Engine.Workflow
             if (wc.Condition != null)
             {
                 var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(ctx.Case.MainEntity, new WorkflowTransitionContext(ctx.Case, ctx.PreviousCaseActivity, wc));
+                var result = alg.EvaluateUntyped(ctx.Case.MainEntity,ctx.NewTransitionContext(wc));
 
 
                 return result;
@@ -542,7 +565,7 @@ namespace Signum.Engine.Workflow
                         if (w.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
-                        var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.Options.GetOrThrow(w.MainEntityType.ToType()).Constructor();
+                        var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.CreateMainEntity(w.MainEntityType.ToType());
 
                         var @case = new CaseEntity
                         {
@@ -857,9 +880,9 @@ namespace Signum.Engine.Workflow
                 {
                     if (firstConnection.Condition != null)
                     {
-                        var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, firstConnection);
+                        var jumpCtx = ctx.NewTransitionContext(firstConnection);
                         var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                        var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
+                        var result = alg.EvaluateUntyped(ca.Case.MainEntity,  jumpCtx);
                         if (!result)
                             throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                     }
@@ -912,11 +935,12 @@ namespace Signum.Engine.Workflow
                     {
                         var lastConn = ctx.Connections.OfType<WorkflowConnectionEntity>().Single(a => a.To.Is(twa));
 
-                        Decompose(@case, ca, twa, lastConn);
+                        Decompose(@case, ca, twa, lastConn, ctx);
                     }
                     else
                     {
                         var nca = InsertNewCaseActivity(@case, twa, ca);
+                        ctx.NotifyTransitionContext(nca);
                         InsertCaseActivityNotifications(nca);
                     }
                 }
@@ -1024,9 +1048,10 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn)
+            private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn, WorkflowExecuteStepContext ctx)
             {
                 var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
+                ctx.NotifyTransitionContext(surrogate);
                 var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
                 if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
                     throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
@@ -1360,6 +1385,15 @@ namespace Signum.Engine.Workflow
                     return true;
                 }
             }
+        }
+
+        private static ICaseMainEntity CreateMainEntity(Type type)
+        {
+            var options = Options.GetOrThrow(type);
+            if (options.Constructor == null)
+                throw new InvalidOperationException($"The WorkflowOptions for {type.Name} doesn't have a Constructor. Consider adding one in sb.Include<{type.Name}>().WithWorkflow()");
+
+            return options.Constructor();
         }
 
         private static void MakeDone(this CaseActivityEntity ca, DoneType doneType, string? decision) 

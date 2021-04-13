@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseEntity : Entity
     {
         

@@ -5,6 +5,8 @@ using System.Net.Mail;
 using Signum.Entities;
 using Microsoft.Exchange.WebServices.Data;
 using System.Reflection;
+using System.ComponentModel;
+using System.Linq;
 
 namespace Signum.Entities.Mailing
 {
@@ -22,36 +24,51 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(Min = 1, Max = 100)]
         public string Name { get; set; }
 
-        public EmailAddressEmbedded? DefaultFrom { get; set; }
+        [NotifyChildProperty]
+        public EmailFromEmbedded? DefaultFrom { get; set; }
 
         [NoRepeatValidator]
         public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-
         public SmtpEmbedded? SMTP { get; set; }
 
         public ExchangeWebServiceEmbedded? Exchange { get; set; }
+
+        public MicrosoftGraphEmbedded? MicrosoftGraph { get; set; }
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Name);
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(SMTP) || pi.Name == nameof(Exchange))
+            if (pi.Name == nameof(SMTP) || pi.Name == nameof(Exchange) || pi.Name == nameof(MicrosoftGraph))
             {
-                if (SMTP == null && Exchange == null)
+                var count = new[] { SMTP != null, Exchange != null, MicrosoftGraph != null }.Count(a => a);
+
+                if (count == 0)
                     return ValidationMessage._0Or1ShouldBeSet.NiceToString(
-                        NicePropertyName(() => SMTP),
-                        NicePropertyName(() => Exchange));
+                        NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
+                        NicePropertyName(() => MicrosoftGraph));
 
 
-                if (SMTP != null && Exchange != null)
+                if (count > 1)
                     return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(
-                        NicePropertyName(() => SMTP),
-                        NicePropertyName(() => Exchange));
+                        NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
+                        NicePropertyName(() => MicrosoftGraph));
             }
 
             return base.PropertyValidation(pi);
+        }
+
+        protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        {
+            if (sender == DefaultFrom && pi.Name == nameof(DefaultFrom.AzureUserId))
+            {
+                if (DefaultFrom.AzureUserId == null && MicrosoftGraph != null)
+                    return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => MicrosoftGraph));
+            }
+
+            return base.ChildPropertyValidation(sender, pi);
         }
     }
 
@@ -144,5 +161,18 @@ namespace Signum.Entities.Mailing
         public string? Password { get; set; }
 
         public bool UseDefaultCredentials { get; set; } = true;
+    }
+
+    [Serializable]
+    public class MicrosoftGraphEmbedded : EmbeddedEntity
+    {
+        [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
+        public string Azure_ApplicationID { get; set; }
+
+        [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
+        public string Azure_DirectoryID { get; set; }
+
+        [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
+        public string Azure_ClientSecret { get; set; }
     }
 }

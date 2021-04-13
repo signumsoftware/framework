@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities.UserAssets;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Collections.Immutable;
 
 namespace Signum.Entities.Omnibox
 {

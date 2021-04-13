@@ -3,6 +3,8 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using Signum.Entities.Scheduler;
+using Signum.Entities;
 
 namespace Signum.Entities.Alerts
 {
@@ -34,6 +36,8 @@ namespace Signum.Entities.Alerts
         public AlertTypeEntity? AlertType { get; set; }
 
         public AlertState State { get; set; }
+
+        public int EmailNotificationsSent { get; set; }
 
         public override string ToString()
         {
@@ -115,6 +119,12 @@ namespace Signum.Entities.Alerts
     {
         public static ExecuteSymbol<AlertTypeEntity> Save;
         public static DeleteSymbol<AlertTypeEntity> Delete;
+    }
+
+    [AutoInit]
+    public static class AlertTask
+    {
+        public static SimpleTaskSymbol AlertNotificationMailTask;
     }
 
     public enum AlertMessage

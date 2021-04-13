@@ -73,7 +73,7 @@ namespace Signum.Entities.Authorization
     }
 
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         
@@ -100,13 +100,12 @@ namespace Signum.Entities.Authorization
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : notnull
         where A : notnull
     {
         A allowedBase;
-        [InTypeScript(Null = false)]
         public A AllowedBase
         {
             get { return allowedBase; }
@@ -114,7 +113,6 @@ namespace Signum.Entities.Authorization
         }
 
         A allowed;
-        [InTypeScript(Null = false)]
         public A Allowed
         {
             get { return allowed; }
@@ -138,7 +136,6 @@ namespace Signum.Entities.Authorization
             get { return !allowed.Equals(allowedBase); }
         }
 
-        [InTypeScript(Null = false)]
         public R Resource { get; set; }
 
         public override string ToString()
@@ -191,7 +188,6 @@ namespace Signum.Entities.Authorization
         }
 
         TypeAllowed? fallback;
-        [InTypeScript(Undefined =false)]
         public TypeAllowed? Fallback
         {
             get { return fallback; }
@@ -287,7 +283,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
     {
         private TypeConditionRuleEmbedded() { }
@@ -298,7 +294,6 @@ namespace Signum.Entities.Authorization
             this.Allowed = allowed;
         }
 
-        [InTypeScript(Null = false)]
         public TypeConditionSymbol TypeCondition { get; set; }
 
         public TypeAllowed Allowed { get; set; }

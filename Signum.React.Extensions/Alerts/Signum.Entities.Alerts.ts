@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 
 export const AlertCurrentState = new EnumType<AlertCurrentState>("AlertCurrentState");
@@ -27,6 +28,7 @@ export interface AlertEntity extends Entities.Entity {
   attendedBy: Entities.Lite<Basics.IUserEntity> | null;
   alertType: AlertTypeEntity | null;
   state: AlertState;
+  emailNotificationsSent: number;
 }
 
 export module AlertMessage {
@@ -65,6 +67,10 @@ export type AlertState =
   "New" |
   "Saved" |
   "Attended";
+
+export module AlertTask {
+  export const AlertNotificationMailTask : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "AlertTask.AlertNotificationMailTask");
+}
 
 export const AlertTypeEntity = new Type<AlertTypeEntity>("AlertType");
 export interface AlertTypeEntity extends Basics.SemiSymbol {

@@ -15,6 +15,12 @@ using System.Linq.Expressions;
 using Signum.Engine.Extensions.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
+using Signum.Engine.Mailing;
+using Signum.Entities.Mailing;
+using Signum.Engine.Templating;
+using Signum.Engine.Scheduler;
+using Signum.Entities.UserAssets;
+using Microsoft.AspNetCore.Html;
 
 namespace Signum.Engine.Alerts
 {
@@ -85,8 +91,105 @@ namespace Signum.Engine.Alerts
                         QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
                     }
                 }
+                
 
                 Started = true;
+            }
+        }
+
+        public static void RegisterAlertNotificationMail()
+        {
+            EmailModelLogic.RegisterEmailModel<AlertNotificationMail>(() => new EmailTemplateEntity
+            {
+                Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
+                {
+                    Text = @"
+<p>Hi @[m:Entity],</p>
+<p>You have some pending alerts:</p>
+<ul>
+ @foreach[m:Alerts] as $a
+    <li>
+        <strong>@[$a.AlertType]:</strong><br/>
+        @[m:TextFormatted]<br/>
+        <small>@[$a.AlertDate] @[$a.CreatedBy]</small>
+    </li>
+ @endforeach
+</ul>
+<p>Please visit <a href=""@[g:UrlLeft]"">@[g:UrlLeft]</a></p>",
+                    Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
+                }).ToMList()
+            });
+
+            SimpleTaskLogic.Register(AlertTask.AlertNotificationMailTask, stc =>
+            {
+                var query = Database.Query<AlertEntity>()
+                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == 0 && a.Recipient != null);
+
+                if (!query.Any())
+                    return null;
+
+                var alerts = query
+                .Select(a => new { Alert = a, Recipient = a.Recipient!.Entity })
+                .ToList();
+
+                EmailPackageEntity emailPackage = new EmailPackageEntity().Save();
+
+                var emails = alerts.GroupBy(a => a.Recipient, a => a.Alert).SelectMany(gr => new AlertNotificationMail((UserEntity)gr.Key, gr.ToList()).CreateEmailMessage()).ToList();
+
+                emails.ForEach(a =>
+                {
+                    a.State = EmailMessageState.ReadyToSend;
+                    a.Package = emailPackage.ToLite();
+                });
+
+                emails.BulkInsertQueryIds(a => a.Target!);
+
+                query.UnsafeUpdate().Set(a => a.EmailNotificationsSent, a => 1).Execute();
+
+                return emailPackage.ToLite();
+            });
+        }
+
+        public class AlertNotificationMail : EmailModel<UserEntity>
+        {
+            public List<AlertEntity> Alerts { get; set; }
+
+            public AlertNotificationMail(UserEntity recipient, List<AlertEntity> alerts) : base(recipient)
+            {
+                this.Alerts = alerts;
+            }
+
+            public HtmlString? TextFormatted(TemplateParameters tp)
+            {
+                if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
+                    return null;
+
+                var alert = (AlertEntity)alertObject;
+                var text = alert.Text;
+
+                if (alert.Target == null)
+                    return new HtmlString(text);
+
+                var url= $"@[g:UrlLeft]/view/{TypeLogic.GetCleanName(alert.Target.EntityType)}/{alert.Target.Id}";
+
+                if (text.Contains("[Target]"))
+                    return new HtmlString(@$"{text.Before("[Target]")}<a href=""{url}"">{alert.Target.ToString()}</a>{text.After("[Target]")}");
+
+                if (text.Contains("[Target:"))
+                    return new HtmlString(@$"{text.Before("[Target:")}<a href=""{url}"">{text.After("[Target:").BeforeLast("]")}</a>{text.AfterLast("[Target]")}");
+
+                return new HtmlString(@$"{text}<br/><a href=""{url}"">{alert.Target.ToString()}</a>");
+            }
+
+            public override List<EmailOwnerRecipientData> GetRecipients()
+            {
+                return new List<EmailOwnerRecipientData>
+                {
+                    new EmailOwnerRecipientData(this.Entity.EmailOwnerData)
+                    {
+                        Kind = EmailRecipientKind.To,
+                    }
+                };
             }
         }
 

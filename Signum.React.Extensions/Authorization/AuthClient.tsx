@@ -3,12 +3,12 @@ import * as Services from '@framework/Services';
 import { ImportRoute } from "@framework/AsyncImport";
 import LoginPage, { LoginWithWindowsButton } from "./Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
-import { UserEntity, PermissionSymbol } from "./Signum.Entities.Authorization";
-import { ajaxPost, ajaxGet, ServiceError } from "@framework/Services";
-import { is } from "@framework/Signum.Entities";
+import { ajaxGet, ajaxPost, ServiceError } from "@framework/Services";
+import { is } from '@framework/Signum.Entities';
 import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
+import { PermissionSymbol, UserEntity} from './Signum.Entities.Authorization';
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
   Options.userTicket = options.userTicket;
@@ -70,12 +70,10 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
 
 var notifyLogout: boolean;
 
-
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
 
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
-
   var myCookie = Options.getCookie();
 
   if (!myCookie) {
@@ -105,7 +103,6 @@ export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefi
 }
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
-
   for (let i = 0; i < authenticators.length; i++) {
     let aUser = await authenticators[i]();
     if (aUser)
@@ -215,7 +212,6 @@ export function registerWindowsAuthenticator() {
   authenticators.push(loginWindowsAuthentication);
 }
 
-
 export function autoLogin(): Promise<UserEntity | undefined> {
   if (AppContext.currentUser)
     return Promise.resolve(AppContext.currentUser as UserEntity);
@@ -255,11 +251,9 @@ export function autoLogin(): Promise<UserEntity | undefined> {
 }
 
 export function logoutOtherTabs(user: UserEntity) {
-
   if (notifyLogout)
     localStorage.setItem('requestLogout' + Services.SessionSharing.getAppName(), user.userName + "&&" + new Date().toString());
 }
-
 
 export namespace Options {
 
@@ -270,7 +264,7 @@ export namespace Options {
     throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
   }
 
-  export let onLogin: (url?: string) => void = (url?: string) => {
+  export let onLogin: (url?: string) => void = () => {
     throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
   }
 
@@ -321,7 +315,6 @@ export module API {
 
   export interface ForgotPasswordEmailRequest {
     email: string;
-
   }
 
   export interface ResetPasswordRequest {
