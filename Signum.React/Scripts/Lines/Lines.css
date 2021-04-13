@@ -40,23 +40,9 @@ input[type=checkbox].form-control {
     text-align: right;
 }
 
-.date-time .input-group.date,
-.date-time .input-group.time {
-    float: left;
-    margin-right: 5px;
+span.sf-today {
+    font-weight: bold;
 }
-
-.input-group.date {
-    max-width: 140px;
-}
-
-.input-group.time {
-    max-width: 100px;
-}
-
-    .input-group.time[data-show-seconds=true] {
-        max-width: 120px;
-    }
 
 .sf-entity-line-entity,
 .sf-entity-line-entity:focus {

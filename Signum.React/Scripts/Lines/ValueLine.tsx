@@ -701,12 +701,20 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={s.minDate}
             max={s.maxDate}
-            calendarProps={s.calendarProps}
+            calendarProps={{ renderDay: defaultRenderDay, ...s.calendarProps }}
           />
         </div>
       )}
     </FormGroup>
   );
+}
+
+function defaultRenderDay({ date, label }: { date: Date; label: string }) {
+  var dateStr = DateTime.fromJSDate(date).toISODate();
+
+  var today = dateStr == DateTime.local().toISODate();
+
+  return <span className={today? "sf-today" : undefined}>{label}</span>;
 }
 
 export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): DateTime {
