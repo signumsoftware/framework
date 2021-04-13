@@ -72,11 +72,6 @@ export default function ChartBuilder(p: ChartBuilderProps) {
     p.onOrderChanged();
   }
 
-
-  
-
-
-
   const chart = p.ctx.value;
 
   const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
@@ -96,6 +91,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
               </div>)}
           </div>
+          <ValueLine ctx={p.ctx.subCtx(a=>a.maxRows)}/>
         </div>
       </div >
       <div className="col-lg-10">

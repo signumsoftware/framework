@@ -47,6 +47,8 @@ namespace Signum.Entities.Chart
         [StringLengthValidator(Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
+        public int? MaxRows { get; set; }
+
         ChartScriptSymbol chartScript;
         public ChartScriptSymbol ChartScript
         {
@@ -59,7 +61,6 @@ namespace Signum.Entities.Chart
                 }
             }
         }
-
 
         public ChartScript GetChartScript()
         {
