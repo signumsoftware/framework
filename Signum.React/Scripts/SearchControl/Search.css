@@ -314,6 +314,7 @@ span.sf-search-entity-error {
 .count-search {
     margin-right: 4px;
     margin-left: 4px;
+    width: initial !important;
 }
 
 ul.sf-context-menu li a:not([disabled]) {

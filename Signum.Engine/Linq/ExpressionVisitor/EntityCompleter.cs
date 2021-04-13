@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using System.Collections.ObjectModel;
+using System.Collections.Immutable;
 
 namespace Signum.Engine.Linq
 {

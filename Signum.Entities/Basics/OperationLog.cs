@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false), InTypeScript(Undefined = false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class OperationLogEntity : Entity
     {
         public OperationLogEntity()

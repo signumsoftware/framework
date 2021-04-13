@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 

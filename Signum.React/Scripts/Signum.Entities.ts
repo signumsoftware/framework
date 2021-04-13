@@ -628,6 +628,7 @@ export module ValidationMessage {
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
   export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
   export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
+  export const _0IsNotCompatibleWith1 = new MessageKey("ValidationMessage", "_0IsNotCompatibleWith1");
 }
 
 export module VoidEnumMessage {

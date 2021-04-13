@@ -1180,6 +1180,9 @@ namespace Signum.Entities
         ThereAre0InState1,
         [Description("There are {0} that reference this {1}")]
         ThereAre0ThatReferenceThis1,
+
+        [Description("{0} is not compatible with {1}")]
+        _0IsNotCompatibleWith1,
     }
 
     public static class ValidationMessageHelper

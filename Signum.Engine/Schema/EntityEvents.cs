@@ -244,8 +244,8 @@ namespace Signum.Engine.Maps
                 var mlistRoute = PropertyRoute.GetMListItemsRoute();
                 if (mlistRoute != null)
                 {
-                    var mlistGetter = mlistRoute.GetLambdaExpression<T, IMListPrivate>(true).Compile();
-                    var partGetter = PropertyRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
+                    var mlistGetter = mlistRoute.Parent!.GetLambdaExpression<T, IMListPrivate>(true).Compile();
+                    var partGetter = PropertyRoute.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
 
                     var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
 

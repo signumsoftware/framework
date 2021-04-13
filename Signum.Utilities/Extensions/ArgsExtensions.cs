@@ -50,21 +50,40 @@ namespace Signum.Utilities
                     var type = typeof(T).ElementType();
                     if (type != null)
                     {
-                        var converted = (T)giConvertListTo.GetInvoker(type)(list);
-                        if (((IList)converted).Count == list.Count)
-                            yield return converted;
+                        if (typeof(T).IsInstanceOfType(typeof(List<>)))
+                        {
+                            var converted = (T)giConvertToList.GetInvoker(type)(list);
+                            if (((IList)converted).Count == list.Count)
+                                yield return converted;
+                        }
+                        else if (typeof(T).IsArray)
+                        {
+                            var converted = (T)(object)giConvertToArray.GetInvoker(type)(list);
+                            if (((IList)converted).Count == list.Count)
+                                yield return converted;
+                        }
+                        else
+                            throw new InvalidOperationException($"Impossible to convert to {typeof(T)}");
                     }
+
                 }
             }
         }
 
    
 
-        static readonly GenericInvoker<Func<List<object>, IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
+        static readonly GenericInvoker<Func<List<object>, IList>> giConvertToList = new GenericInvoker<Func<List<object>, IList>>(list => ConvertToList<int>(list));
 
-        static List<S> ConvertListTo<S>(List<object> list)
+        static List<S> ConvertToList<S>(List<object> list)
         {
             return SmartConvertTo<S>(list).ToList();
+        }
+
+        static readonly GenericInvoker<Func<List<object>, Array>> giConvertToArray = new GenericInvoker<Func<List<object>, Array>>(list => ConvertToArray<int>(list));
+
+        static S[] ConvertToArray<S>(List<object> list)
+        {
+            return SmartConvertTo<S>(list).ToArray();
         }
     }
 }
