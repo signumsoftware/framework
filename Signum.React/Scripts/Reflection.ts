@@ -1630,17 +1630,29 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
-  static parseFull(fullPropertyRoute: string): PropertyRoute {
-    const endPseudoTypeIndex = fullPropertyRoute.indexOf(")");
-    let propertyString = fullPropertyRoute.substr(endPseudoTypeIndex + 1);
-    if (propertyString.startsWith("."))
-      propertyString = propertyString.substr(1);
-    return PropertyRoute.parse(fullPropertyRoute.substring(1, endPseudoTypeIndex), propertyString);
-  }
+
 
   addMembers(propertyString: string): PropertyRoute {
     let result: PropertyRoute = this;
 
+    const parts = PropertyRoute.parseLambdaMembers(propertyString);
+
+    parts.forEach(m => result = result.addMember(m.type, m.name, true));
+
+    return result;
+  }
+
+  tryAddMembers(propertyString: string): PropertyRoute | undefined {
+    let result: PropertyRoute | undefined = this;
+
+    const parts = PropertyRoute.parseLambdaMembers(propertyString);
+
+    parts.forEach(m => result = result?.addMember(m.type, m.name, false));
+
+    return result;
+  }
+
+  static parseLambdaMembers(propertyString: string) {
     function splitMixin(text: string): LambdaMember[] {
 
       if (text.length == 0)
@@ -1676,17 +1688,45 @@ export class PropertyRoute {
 
       return splitDot(text);
     }
+    return splitIndexer(propertyString);
+  }
 
-    const parts = splitIndexer(propertyString);
 
-    parts.forEach(m => result = result.addMember(m.type, m.name, true));
-
-    return result;
+  static parseFull(fullPropertyRoute: string): PropertyRoute {
+    const type = fullPropertyRoute.after("(").before(")");
+    let propertyString = fullPropertyRoute.after(")");
+    if (propertyString.startsWith("."))
+      propertyString = propertyString.substr(1);
+    return PropertyRoute.root(type).addMembers(propertyString);
   }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     return PropertyRoute.root(rootType).addMembers(propertyString);
   }
+
+  static tryParseFull(fullPropertyRoute: string): PropertyRoute | undefined {
+    const type = fullPropertyRoute.after("(").before(")");
+    let propertyString = fullPropertyRoute.after(")");
+    if (propertyString.startsWith("."))
+      propertyString = propertyString.substr(1);
+
+    var ti = tryGetTypeInfo(type);
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.tryParse(type, propertyString);
+  }
+
+  static tryParse(rootType: PseudoType, propertyString: string): PropertyRoute | undefined {
+
+    const ti = tryGetTypeInfo(rootType);
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.root(ti).tryAddMembers(propertyString);
+  }
+
+ 
 
   constructor(
     parent: PropertyRoute | undefined,
