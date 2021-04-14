@@ -3,7 +3,7 @@
   <Type Name="AggregateFunction" />
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
-  <Type Name="Case" />
+  <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType" />
   <Type Name="ColorEmbedded" Description="Couleur" />
   <Type Name="ColumnOptionsMode" />
@@ -11,13 +11,12 @@
     <Member Name="DistinctTo" Description="différent de" />
     <Member Name="EqualTo" Description="Egale à" />
     <Member Name="GreaterThan" Description="Plus grande que" />
-    <Member Name="GreaterThanOrEqual" Description="Plus grand que ou égal" />
     <Member Name="LessThan" Description="Plus petit que" />
-    <Member Name="LessThanOrEqual" Description="Plus petit que ou égal" />
   </Type>
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
   <Type Name="DeleteLogParametersEmbedded" />
+  <Type Name="DeleteLogsTypeOverridesEmbedded" />
   <Type Name="EmbeddedEntity" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Erreur de simultanéité sur la databe, la table = {0}, ID = {1}" />
@@ -37,6 +36,7 @@
   <Type Name="EntityMessage" />
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" />
+  <Type Name="FilterGroupOperation" />
   <Type Name="FilterOperation">
     <Member Name="Contains" Description="Contient" />
     <Member Name="DistinctTo" Description="différenr de" />
@@ -84,13 +84,18 @@
     <Member Name="Save" Description="Enregistrez" />
     <Member Name="ViewForType0IsNotAllowed" Description="Affichage pour le type {0} n'est pas autorisé" />
   </Type>
-  <Type Name="NormalWindowMessage" />
+  <Type Name="NormalWindowMessage">
+    <Member Name="New0_G" Description="Nouveau {0}" />
+  </Type>
   <Type Name="OperationLogEntity" />
   <Type Name="OperationMessage" />
   <Type Name="OperationSymbol" />
   <Type Name="OrderType" />
   <Type Name="PaginationMessage" />
   <Type Name="PaginationMode" />
+  <Type Name="PinnedFilterActive" />
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage">
     <Member Name="And" Description=" et " />
     <Member Name="As0" Description="Comme {0}" />
@@ -109,6 +114,7 @@
     <Member Name="Year" Description="Année" />
   </Type>
   <Type Name="QuickLinkMessage" />
+  <Type Name="RoundingType" />
   <Type Name="SearchMessage">
     <Member Name="AddColumn" Description="Ajouter colonne" />
     <Member Name="AddFilter" Description="Ajouter filtre" />
@@ -125,12 +131,14 @@
     <Member Name="ValueMustBeSpecifiedFor0" Description="Une valeur doit être spécifiée pour {0}" />
   </Type>
   <Type Name="SemiSymbol" />
+  <Type Name="StringCase" />
   <Type Name="Symbol" />
   <Type Name="SynchronizerMessage">
     <Member Name="EndOfSyncScript" Description="--- FIN DU SCRIPT DE SYNCHRONISATION" />
-    <Member Name="NNone" Description="- n: Aucun" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- DÉBUT DE SCRIPT DE SYNCHRONISATION GÉNÉRÉ SUR {0}" />
   </Type>
+  <Type Name="SystemTimeMode" />
+  <Type Name="SystemTimeProperty" />
   <Type Name="TypeEntity" Description="Type">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
@@ -139,13 +147,11 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="Be" Description="être " />
     <Member Name="BeBetween0And1" Description="Doit être entre {0} et {1}" />
     <Member Name="BeNotNull" Description="doit être non nul" />
     <Member Name="FileName" Description="Nom de fichier" />
     <Member Name="Have0Decimals" Description="A {0} décimales" />
     <Member Name="HaveANumberOfElements01" Description="A un nombre d'éléments{0} {1}" />
-    <Member Name="HaveAPrecisionOf" Description="A une précision de " />
     <Member Name="HaveBetween0And1Characters" Description="A entre {0} et {1} caractères" />
     <Member Name="HaveMinimum0Characters" Description="A au minimum {0} caractères" />
     <Member Name="HaveNoRepeatedElements" Description="N'a pas d'éléments répétés" />

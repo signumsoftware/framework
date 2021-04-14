@@ -946,6 +946,9 @@ export module Dic {
       simplesTypes.contains(typeof objB))
       return false;
 
+    if (objA instanceof Date && objB instanceof Date)
+      return objA.valueOf() === objB.valueOf();
+
     if (Array.isArray(objA) !== Array.isArray(objB))
       return false;
 
