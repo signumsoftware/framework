@@ -13,6 +13,7 @@ using Signum.Engine.Json;
 using System.Text.Json;
 using Signum.Entities.UserQueries;
 using Signum.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
@@ -85,16 +86,15 @@ namespace Signum.React.Translation
 
         public static CultureInfo? GetCultureRequest(ActionContext actionContext)
         {
-            foreach (string lang in actionContext.HttpContext.Request.Headers["accept-languages"])
+            var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
+            foreach (var lang in acceptedLanguages.Select(l => l.Value))
             {
-
                 var culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name == lang);
 
                 if (culture != null)
                     return culture;
 
-                string? cleanLang = lang.TryBefore('-');
-
+                string? cleanLang = lang.Value.TryBefore('-');
                 if(cleanLang != null)
                 {
                     culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
@@ -103,10 +103,8 @@ namespace Signum.React.Translation
                         return culture;
                 }
             }
-
             return null;
         }
-
 
         public static string? ReadLanguageCookie(ActionContext ac)
         {

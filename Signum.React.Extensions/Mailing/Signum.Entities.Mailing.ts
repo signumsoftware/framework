@@ -42,9 +42,7 @@ export interface ClientCertificationFileEmbedded extends Entities.EmbeddedEntity
   certFileType: CertFileType;
 }
 
-export const EmailAddressEmbedded = new Type<EmailAddressEmbedded>("EmailAddressEmbedded");
 export interface EmailAddressEmbedded extends Entities.EmbeddedEntity {
-  Type: "EmailAddressEmbedded";
   emailOwner: Entities.Lite<IEmailOwnerEntity> | null;
   emailAddress: string;
   invalidEmail: boolean;
@@ -82,6 +80,12 @@ export module EmailFileType {
   export const Attachment : Files.FileTypeSymbol = registerSymbol("FileType", "EmailFileType.Attachment");
 }
 
+export const EmailFromEmbedded = new Type<EmailFromEmbedded>("EmailFromEmbedded");
+export interface EmailFromEmbedded extends EmailAddressEmbedded {
+  Type: "EmailFromEmbedded";
+  azureUserId: string | null;
+}
+
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
 export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "EmailMasterTemplate";
@@ -108,7 +112,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   Type: "EmailMessage";
   recipients: Entities.MList<EmailRecipientEmbedded>;
   target: Entities.Lite<Entities.Entity> | null;
-  from: EmailAddressEmbedded;
+  from: EmailFromEmbedded;
   template: Entities.Lite<EmailTemplateEntity> | null;
   creationDate: string;
   sent: string | null;
@@ -133,10 +137,6 @@ export module EmailMessageMessage {
   export const Messages = new MessageKey("EmailMessageMessage", "Messages");
   export const RemainingMessages = new MessageKey("EmailMessageMessage", "RemainingMessages");
   export const ExceptionMessages = new MessageKey("EmailMessageMessage", "ExceptionMessages");
-  export const DefaultFromIsMandatory = new MessageKey("EmailMessageMessage", "DefaultFromIsMandatory");
-  export const From = new MessageKey("EmailMessageMessage", "From");
-  export const To = new MessageKey("EmailMessageMessage", "To");
-  export const Attachments = new MessageKey("EmailMessageMessage", "Attachments");
   export const _01requiresExtraParameters = new MessageKey("EmailMessageMessage", "_01requiresExtraParameters");
 }
 
@@ -199,6 +199,7 @@ export interface EmailReceptionMixin extends Entities.MixinEntity {
 
 export const EmailRecipientEmbedded = new Type<EmailRecipientEmbedded>("EmailRecipientEmbedded");
 export interface EmailRecipientEmbedded extends EmailAddressEmbedded {
+  Type: "EmailRecipientEmbedded";
   kind: EmailRecipientKind;
 }
 
@@ -212,17 +213,18 @@ export const EmailSenderConfigurationEntity = new Type<EmailSenderConfigurationE
 export interface EmailSenderConfigurationEntity extends Entities.Entity {
   Type: "EmailSenderConfiguration";
   name: string;
-  defaultFrom: EmailAddressEmbedded | null;
+  defaultFrom: EmailFromEmbedded | null;
   additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
   sMTP: SmtpEmbedded | null;
   exchange: ExchangeWebServiceEmbedded | null;
+  microsoftGraph: MicrosoftGraphEmbedded | null;
 }
 
 export module EmailSenderConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
 }
 
-export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
+export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
   emailAddress: string | null;
   displayName: string | null;
   token: UserAssets.QueryTokenEmbedded | null;
@@ -250,10 +252,11 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
 }
 
 export const EmailTemplateFromEmbedded = new Type<EmailTemplateFromEmbedded>("EmailTemplateFromEmbedded");
-export interface EmailTemplateFromEmbedded extends EmailTemplateContactEmbedded {
+export interface EmailTemplateFromEmbedded extends EmailTemplateAddressEmbedded {
   Type: "EmailTemplateFromEmbedded";
   whenNone: WhenNoneFromBehaviour;
   whenMany: WhenManyFromBehaviour;
+  azureUserId: string | null;
 }
 
 export module EmailTemplateMessage {
@@ -287,7 +290,7 @@ export module EmailTemplateOperation {
 }
 
 export const EmailTemplateRecipientEmbedded = new Type<EmailTemplateRecipientEmbedded>("EmailTemplateRecipientEmbedded");
-export interface EmailTemplateRecipientEmbedded extends EmailTemplateContactEmbedded {
+export interface EmailTemplateRecipientEmbedded extends EmailTemplateAddressEmbedded {
   Type: "EmailTemplateRecipientEmbedded";
   kind: EmailRecipientKind;
   whenNone: WhenNoneRecipientsBehaviour;
@@ -329,6 +332,14 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
   contentId: string;
   type: EmailAttachmentType;
   file: Files.FileEmbedded;
+}
+
+export const MicrosoftGraphEmbedded = new Type<MicrosoftGraphEmbedded>("MicrosoftGraphEmbedded");
+export interface MicrosoftGraphEmbedded extends Entities.EmbeddedEntity {
+  Type: "MicrosoftGraphEmbedded";
+  azure_ApplicationID: string;
+  azure_DirectoryID: string;
+  azure_ClientSecret: string;
 }
 
 export module Pop3ConfigurationAction {

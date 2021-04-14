@@ -25,10 +25,12 @@ namespace Signum.Engine.Mailing
     {
         public static bool AvoidSynchronizeTokens = false;
         public static bool AvoidSynchronizeDefaultTemplates = true;
+        
+        public static Func<Entity?, CultureInfo>? GetCultureInfo;
 
         public static EmailTemplateMessageEmbedded? GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
-            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
+            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo().Equals(ci));
         }
      
         [AutoExpressionField]
@@ -140,8 +142,10 @@ namespace Signum.Engine.Mailing
 
                 Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
-                    if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
-                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
+                    var dc = EmailLogic.Configuration.DefaultCulture;
+
+                    if (!et.Messages.Any(m => dc.Name.StartsWith(m.CultureInfo.Name)))
+                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.EnglishName)).CommaOr(a => a.EnglishName));
 
                     return null;
                 }; 
@@ -536,7 +540,6 @@ namespace Signum.Engine.Mailing
                 .Where(a => a.IsApplicable(entity))
                 .Select(a => a.ToLite())
                 .ToList();
-        }
-
+        }   
     }
 }

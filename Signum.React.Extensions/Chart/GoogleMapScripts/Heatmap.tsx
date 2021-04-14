@@ -25,11 +25,11 @@ function HeatmapChartImp({ data, parameters }: ChartClient.ChartScriptProps) {
     </div>
   );
 
-  
+
   function drawChart() {
-    
+
     var bounds = new google.maps.LatLngBounds();
-    
+
     var coords: any[] = [];
 
     if (data) {

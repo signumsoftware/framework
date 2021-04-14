@@ -114,6 +114,10 @@ namespace Signum.Entities.Authorization
         WeHaveSendYouAnEmailToResetYourPassword,
         [Description("Email not found")]
         EmailNotFound,
+        [Description("Your account has been locked due to several failed logins")]
+        YourAccountHasBeenLockedDueToSeveralFailedLogins,
+        [Description("Your account has been locked")]
+        YourAccountHasBeenLocked,
     }
 
     public enum AuthAdminMessage

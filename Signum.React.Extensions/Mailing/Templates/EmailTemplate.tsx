@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded, EmailTemplateFromEmbedded } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded, EmailTemplateFromEmbedded } from '../Signum.Entities.Mailing'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
@@ -14,7 +14,7 @@ import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
-import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { QueryEntity } from '@framework/Signum.Entities.Basics'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -152,6 +152,7 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
           {!p.ctx.value.token && <div className="row">
             <div className="col-sm-6">
               <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" onChange={forceUpdate} />
+              <ValueLine ctx={sc.subCtx(c => c.azureUserId)} onChange={forceUpdate} />
             </div>
             <div className="col-sm-6">
               <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" onChange={forceUpdate} />

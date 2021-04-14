@@ -45,7 +45,7 @@ namespace Signum.Engine.Mailing
         {
             ExecuteQuery();
 
-            foreach (EmailAddressEmbedded from in GetFrom())
+            foreach (EmailFromEmbedded from in GetFrom())
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
@@ -56,12 +56,13 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private EmailMessageEntity CreateEmailMessageInternal(EmailAddressEmbedded from, List<EmailOwnerRecipientData> recipients)
+        private EmailMessageEntity CreateEmailMessageInternal(EmailFromEmbedded from, List<EmailOwnerRecipientData> recipients)
         {
             EmailMessageEntity email;
             try
             {
-                CultureInfo ci = this.cultureInfo ??
+                var ci = this.cultureInfo ??
+                     EmailTemplateLogic.GetCultureInfo?.Invoke(entity ?? model?.UntypedEntity as Entity) ??
                     recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
                     EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
@@ -82,7 +83,11 @@ namespace Signum.Engine.Mailing
                     })).ToMList()
                 };
 
-                EmailTemplateMessageEmbedded? message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                EmailTemplateMessageEmbedded? message = 
+                    template.GetCultureMessage(ci) ??
+                    template.GetCultureMessage(ci.Parent) ?? 
+                    template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
+                    template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo().Parent);
 
                 if (message == null)
                     throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
@@ -125,8 +130,11 @@ namespace Signum.Engine.Mailing
                 if (template.MasterTemplate != null)
                 {
                     var emt = template.MasterTemplate.RetrieveAndRemember();
-                    var emtm = emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
-                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                    var emtm = 
+                        emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
+                        emt.GetCultureMessage(message.CultureInfo.ToCultureInfo().Parent) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo().Parent);
 
                     if (emtm != null)
                         body = EmailMasterTemplateEntity.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
@@ -146,7 +154,7 @@ namespace Signum.Engine.Mailing
             return (TextTemplateParser.BlockNode)message.SubjectParsedNode;
         }
 
-        IEnumerable<EmailAddressEmbedded> GetFrom()
+        IEnumerable<EmailFromEmbedded> GetFrom()
         {
             if (template.From != null)
             {
@@ -157,7 +165,7 @@ namespace Signum.Engine.Mailing
 
                     var groupsWithEmail = groups.Where(a => a.Key.Email.HasText()).ToList();
 
-                    if(groupsWithEmail.IsEmpty())
+                    if (groupsWithEmail.IsEmpty())
                     {
                         switch (template.From.WhenNone)
                         {
@@ -183,13 +191,13 @@ namespace Signum.Engine.Mailing
                     {
                         if (template.From.WhenMany == WhenManyFromBehaviour.FistResult)
                             groupsWithEmail = groupsWithEmail.Take(1).ToList();
-                    
+
                         foreach (var gr in groupsWithEmail)
                         {
                             var old = currentRows;
                             currentRows = gr;
 
-                            yield return new EmailAddressEmbedded(gr.Key);
+                            yield return new EmailFromEmbedded(gr.Key);
 
                             currentRows = old;
                         }
@@ -197,12 +205,13 @@ namespace Signum.Engine.Mailing
                 }
                 else
                 {
-                    yield return new EmailAddressEmbedded(new EmailOwnerData
+                    yield return new EmailFromEmbedded
                     {
-                        CultureInfo = null,
-                        Email = template.From.EmailAddress!,
+                        EmailOwner = null,
+                        EmailAddress = template.From.EmailAddress!,
                         DisplayName = template.From.DisplayName,
-                    });
+                        AzureUserId = template.From.AzureUserId,
+                    };
                 }
             }
             else
