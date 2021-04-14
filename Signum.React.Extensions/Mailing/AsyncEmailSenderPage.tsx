@@ -59,7 +59,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
       <h2>{EmailMessageEntity.niceName()}</h2>
       <SearchControl findOptions={{
         queryName: EmailMessageEntity,
-        orderOptions: [{ token: EmailMessageEntity.token().entity(e => e.creationDate), orderType: "Descending" }],
+        orderOptions: [{ token: EmailMessageEntity.token(e => e.entity.creationDate), orderType: "Descending" }],
         pagination: { elementsPerPage: 10, mode: "Firsts" }
       }} />
     </div>

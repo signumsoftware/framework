@@ -15,8 +15,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicClientEntity, t => [
-    { token: t.entity(p => p.name), type: "Text" },
-    { token: t.entity(p => p.code), type: "Code" },
+    { token: t.append(p => p.entity.name), type: "Text" },
+    { token: t.append(p => p.entity.code), type: "Code" },
   ]);
 }
 

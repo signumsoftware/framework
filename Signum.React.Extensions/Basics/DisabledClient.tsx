@@ -43,7 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
       }
 
       querySettings.hiddenColumns = [
-        { token: DisabledMixin.token().entity(e => e.isDisabled) }
+        { token: DisabledMixin.token(e => e.entity.isDisabled) }
       ];
 
       querySettings.rowAttributes = (row, columns) => {
@@ -64,7 +64,7 @@ export function start(options: { routes: JSX.Element[] }) {
       if (!entitySettings.findOptions) {
         entitySettings.findOptions = {
           queryName: ti.name,
-          filterOptions: [{ token: DisabledMixin.token().entity(e => e.isDisabled), operation: "EqualTo", value: false, frozen: true }]
+          filterOptions: [{ token: DisabledMixin.token(e => e.entity.isDisabled), operation: "EqualTo", value: false, frozen: true }]
         };
       }
     }

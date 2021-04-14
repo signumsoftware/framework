@@ -49,8 +49,8 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       queryName: AlertEntity,
       filterOptions: [
         { token: AlertEntity.token(a => a.target), value: p.data.caseActivity },
-        { token: AlertEntity.token().entity(e => e.recipient), value: AppContext.currentUser },
-        { token: AlertEntity.token().entity().expression("CurrentState"), value: "Alerted" }
+        { token: AlertEntity.token(e => e.entity.recipient), value: AppContext.currentUser },
+        { token: AlertEntity.token(a => a.entity).expression("CurrentState"), value: "Alerted" }
       ],
       columnOptions: [{ token: AlertEntity.token(e => e.target) }],
       columnOptionsMode: "Remove",

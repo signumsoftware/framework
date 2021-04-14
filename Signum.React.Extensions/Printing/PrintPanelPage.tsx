@@ -58,7 +58,7 @@ export default function PrintPanelPage(p: {}) {
       <h3>{ProcessEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{
         queryName: ProcessEntity,
-        filterOptions: [{ token: ProcessEntity.token().entity(e => e.data).cast(PrintPackageEntity), operation: "DistinctTo", value: undefined }],
+        filterOptions: [{ token: ProcessEntity.token(e => e.entity.data).cast(PrintPackageEntity), operation: "DistinctTo", value: undefined }],
         pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1 },
       }}
       />
