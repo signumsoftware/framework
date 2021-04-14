@@ -21,18 +21,18 @@ export default function Role(p : { ctx: TypeContext<RoleEntity> }){
         vertical={true}
         findOptions={{
           queryName: RoleEntity,
-          filterOptions: [{ token: RoleEntity.token().entity(), operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
+          filterOptions: [{ token: RoleEntity.token(a => a.entity), operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
         }}
         onChange={() => forceUpdate()} />
 
       {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{
         queryName: UserEntity,
-        filterOptions: [{ token: UserEntity.token().entity(u => u.role), value: ctx.value }]
+        filterOptions: [{ token: UserEntity.token(u => u.entity.role), value: ctx.value }]
       }} />
       }
       {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{
         queryName: RoleEntity,
-        filterOptions: [{ token: RoleEntity.token().entity().append(u => u.roles).any(), value: ctx.value }]
+        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.roles).any(), value: ctx.value }]
       }} />
       }
 

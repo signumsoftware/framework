@@ -11,7 +11,7 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
     <div >
       <EntityStrip ctx={ctx.subCtx(p => p.userCharts)} findOptions={{
         queryName: UserChartEntity, filterOptions: [{
-          token: UserChartEntity.token().entity(a => a.chartScript.key),
+          token: UserChartEntity.token(a => a.entity.chartScript.key),
           operation: "IsIn",
           value: [D3ChartScript.Columns.key, D3ChartScript.Line.key]
         }]

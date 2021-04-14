@@ -220,20 +220,20 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
                 <Link onClick={() => setIsOpen(false)} to={Finder.findOptionsPath({
                     queryName: AlertEntity,
                     filterOptions: [
-                      { token: AlertEntity.token().entity(a => a.recipient), value: AuthClient.currentUser() },
+                      { token: AlertEntity.token(a => a.entity.recipient), value: AuthClient.currentUser() },
                     ],
-                    orderOptions: [
-                      { token: AlertEntity.token().entity(a => a.alertDate), orderType: "Descending" },
+                  orderOptions: [
+                    { token: AlertEntity.token(a => a.entity.alertDate), orderType: "Descending" },
                     ],
                     columnOptions: [
-                      { token: AlertEntity.token().entity(a => a.id) },
-                      { token: AlertEntity.token().entity(a => a.alertDate) },
-                      { token: AlertEntity.token().entity(a => a.alertType) },
+                      { token: AlertEntity.token(a => a.entity.id) },
+                      { token: AlertEntity.token(a => a.entity.alertDate) },
+                      { token: AlertEntity.token(a => a.entity.alertType) },
                       { token: AlertEntity.token(a => a.text) },
-                      { token: AlertEntity.token().entity(a => a.target) },
-                      { token: AlertEntity.token().entity().expression("CurrentState") },
-                      { token: AlertEntity.token().entity(a => a.createdBy) },
-                      { token: AlertEntity.token().entity(a => a.recipient) },
+                      { token: AlertEntity.token(a => a.entity.target) },
+                      { token: AlertEntity.token(a => a.entity).expression("CurrentState") },
+                      { token: AlertEntity.token(a => a.entity.createdBy) },
+                      { token: AlertEntity.token(a => a.entity.recipient) },
                     ],
                     columnOptionsMode: "Replace"
                   })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
