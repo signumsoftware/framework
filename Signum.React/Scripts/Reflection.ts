@@ -1314,11 +1314,11 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   /* Constructs a QueryToken able to generate string like "Name" from a strongly typed lambda like a => a.name
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc)*/
-  token(): QueryTokenString<T>;
+  token(): QueryTokenString<T & { entity: T}>;
   /** Shortcut for token().append(lambdaToColumn)
    * @param lambdaToColumn lambda expression pointing to a property in the anonymous class of the query. For simple columns comming from properties from the entity.
    */
-  token<S>(lambdaToColumn: (v: T) => S): QueryTokenString<S>;
+  token<S>(lambdaToColumn: (v: T & { entity: T }) => S): QueryTokenString<S>;
   /** Shortcut for token().expression<S>(columnName)
   * @param columnName property name of some property in the anonymous class of the query. For complex calculated columns that are not a property from the entitiy.
   */
@@ -1329,15 +1329,15 @@ export class Type<T extends ModifiableEntity> implements IType {
     else if (typeof lambdaToColumn == "string")
       return new QueryTokenString(lambdaToColumn);
     else
-      return new QueryTokenString(tokenSequence(lambdaToColumn));
+      return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
 }
 
 /*  Some examples being in ExceptionEntity:
  *  "User" -> ExceptionEntity.token().append(a => a.user) 
  *            ExceptionEntity.token(a => a.user) 
- *  "Entity.User" -> ExceptionEntity.token().entity().append(a=>a.user)
- *                   ExceptionEntity.token().entity(a => a.user)
+ *  "Entity.User" -> ExceptionEntity.token().append(a=>a.entity).append(a=>a.user)
+ *                   ExceptionEntity.token(a => a.entity.user)
  * 
  */
 export class QueryTokenString<T> {
@@ -1367,20 +1367,6 @@ export class QueryTokenString<T> {
     return new QueryTokenString(this.token + ".SystemValidTo");
   }
 
-  /** Allows access to the "Entity" property of the anonymous class from the query.*/
-  entity(): QueryTokenString<T>;
-  /** Shortcut for entity().append(lambdaToProperty).*/
-  entity<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S>;
-  entity(lambdaToProperty?: Function): QueryTokenString<any> {
-    if (this.token != "")
-      throw new Error("entity is only meant to be used with an empty token");
-
-    if (lambdaToProperty == null)
-      return new QueryTokenString("Entity")
-    else
-      return new QueryTokenString("Entity." + tokenSequence(lambdaToProperty));
-  }
-
   cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
     return new QueryTokenString<R>(this.token + ".(" + t.typeName + ")");
   }
@@ -1390,7 +1376,7 @@ export class QueryTokenString<T> {
    * @param lambdaToProperty for a typed lambda like a => a.name will append "Name" to the QueryTokenString
    */
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty));
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty, !this.token));
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
@@ -1454,9 +1440,9 @@ type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveM
 
 type RemoveMListElement<Type> = Type extends MListElement<infer S> ? S : Type;
 
-function tokenSequence(lambdaToProperty: Function) {
+function tokenSequence(lambdaToProperty: Function, isFirst: boolean) {
   return getLambdaMembers(lambdaToProperty)
-    .filter(a => a.name != "entity") //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
+    .filter((a, i) => a.name != "entity" || i == 0 && isFirst) //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
     .map(a => a.name == "toStr" ? "ToString" : a.name.firstUpper())
     .join(".");
 }
