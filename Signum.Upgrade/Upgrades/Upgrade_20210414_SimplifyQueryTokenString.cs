@@ -18,9 +18,9 @@ namespace Signum.Upgrade.Upgrades
         {
             uctx.ForeachCodeFile("*.tsx,*.ts", "Southwind.React", file =>
             {
-                file.Replace(new Regex(@"token\(\).entity\((\w) *=> *\1"), @"token($1 => $1.entity");
-                file.Replace(new Regex(@"t.entity\((\w) *=> *\1"), @"t.append($1 => $1.entity");
-                file.Replace(new Regex(@"token().entity()"), @"token(a => a.entity)");
+                file.Replace(new Regex(@"token\(\).entity\((\w+) *=> *\1"), @"token($1 => $1.entity");
+                file.Replace(new Regex(@"t.entity\((\w+) *=> *\1"), @"t.append($1 => $1.entity");
+                file.Replace(@"token().entity()", @"token(a => a.entity)");
             });
         }
     }
