@@ -10,7 +10,7 @@ namespace Signum.Engine
 {
     public struct InvalidateWith
     {
-        static readonly Type[] Empty = new Type[0];
+        static readonly Type[] Empty = Array.Empty<Type>();
 
         readonly Type[]? types;
         public Type[] Types

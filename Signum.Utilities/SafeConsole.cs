@@ -245,7 +245,7 @@ namespace Signum.Utilities
 
         public static T WaitQuery<T>(string startingText, Func<T> query)
         {
-            T result = default(T)!;
+            T result = default!;
             SafeConsole.WriteColor(ConsoleColor.Yellow, startingText);
             WaitExecute(() => { result = query(); Console.WriteLine(); });
             return result;

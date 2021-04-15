@@ -244,7 +244,7 @@ namespace Signum.Utilities
         public static T? DefaultToNull<T>(this T value)
             where T : struct
         {
-            return EqualityComparer<T>.Default.Equals(default(T), value) ? (T?)null : value;
+            return EqualityComparer<T>.Default.Equals(default, value) ? (T?)null : value;
         }
 
         public static T? DefaultToNull<T>(this T value, T defaultValue)

@@ -38,7 +38,7 @@ namespace Signum.Utilities.DataStructures
                 if (scope.map.TryGetValue(key, out value))
                     return true;
             }
-            value = default(TValue)!;
+            value = default!;
             return false;
         }
 
