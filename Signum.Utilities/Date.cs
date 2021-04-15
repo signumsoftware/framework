@@ -14,7 +14,7 @@ namespace Signum.Utilities
     [Serializable, TypeConverter(typeof(DateTypeConverter))]
     public struct Date : IComparable, IFormattable, ISerializable, IComparable<Date>, IEquatable<Date>
     {
-        private DateTime _dt;
+        private readonly DateTime _dt;
 
         public static readonly Date MaxValue = new Date(DateTime.MaxValue);
         public static readonly Date MinValue = new Date(DateTime.MinValue);
@@ -187,7 +187,7 @@ namespace Signum.Utilities
 
         public override bool Equals(object? value)
         {
-            return value is Date && this._dt.Equals(((Date)value)._dt);
+            return value is Date d && _dt.Equals(d._dt);
         }
 
         public override int GetHashCode()
@@ -295,16 +295,14 @@ namespace Signum.Utilities
 
         public static bool TryParse(string s, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParse(s, out d);
+            bool success = DateTime.TryParse(s, out DateTime d);
             result = new Date(d);
             return success;
         }
 
         public static bool TryParse(string s, IFormatProvider provider, DateTimeStyles style, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParse(s, provider, style, out d);
+            bool success = DateTime.TryParse(s, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
@@ -316,16 +314,14 @@ namespace Signum.Utilities
                 format = "yyyy-MM-dd";
             }
 
-            DateTime d;
-            bool success = DateTime.TryParseExact(s, format, provider, style, out d);
+            bool success = DateTime.TryParseExact(s, format, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
 
         public static bool TryParseExact(string s, string[] formats, IFormatProvider provider, DateTimeStyles style, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParseExact(s, formats, provider, style, out d);
+            bool success = DateTime.TryParseExact(s, formats, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
@@ -349,10 +345,10 @@ namespace Signum.Utilities
                 return null;
 
             if (value is string s)
-                return Date.ParseExact((string)value, "o", CultureInfo.InvariantCulture);
+                return Date.ParseExact(s, "o", CultureInfo.InvariantCulture);
 
             if (value is DateTime dt)
-                return (Date)value;
+                return (Date)dt;
 
             if (value is DateTimeOffset dto)
                 return (Date)dto.DateTime;

@@ -60,7 +60,7 @@ namespace Signum.Test
             var dic = DynamicQueryCore.QueryMetadata(
                     from l in Database.Query<LabelEntity>()
                     join a in Database.Query<AlbumEntity>() on l equals a.Label
-                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name })!;
+                    select new { Label = l.Name, a.Name, Sum = l.Name.Length + a.Name })!;
 
             Assert.IsType<CleanMeta>(dic["Label"]);
             Assert.IsType<CleanMeta>(dic["Name"]);

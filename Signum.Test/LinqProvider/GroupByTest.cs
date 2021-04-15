@@ -48,7 +48,7 @@ namespace Signum.Test.LinqProvider
                         group a.Name.Length by a.Sex into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             Count = g.Count(),
                             Sum = g.Sum(),
                             Min = g.Min(),
@@ -65,7 +65,7 @@ namespace Signum.Test.LinqProvider
                         group a by a.Sex into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             Count = g.Count(), //Fast
                             CountNames = g.Count(a => a.Name != null), //Fast
                             CountNullFast = g.Count(a => (a.Name == null ? "hi" : null) != null), //Fast
@@ -83,7 +83,7 @@ namespace Signum.Test.LinqProvider
                         group a by a.Sex into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             Count1 = g.Select(a => a.Name).Where(a => a != null).Distinct().Count(), //Fast
                             Count2 = g.Where(a => a.Name != null).Select(a => a.Name).Distinct().Count(), //Fast
                             Count3 = g.Select(a => a.Name).Distinct().Where(a => a != null).Count(), //Fast
@@ -106,7 +106,7 @@ namespace Signum.Test.LinqProvider
                         group a by a.Sex into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             Count1 = g.Select(a => a.Name).Distinct().Count(), //Slow
                             Count2 = g.Distinct().Count(), //Slow
                         };
@@ -120,7 +120,7 @@ namespace Signum.Test.LinqProvider
                         group a.Name.Length by new { } into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             Count = g.Count(),
                             Sum = g.Sum(),
                             Min = g.Min(),
@@ -138,7 +138,7 @@ namespace Signum.Test.LinqProvider
                         group a.Name.Length by a.Sex into g
                         select new
                         {
-                            Key = g.Key,
+                            g.Key,
                             StdDev = (double?)g.StdDev(),
                             StdDevInMemory = GetStdDev(g.ToList()),
                             StdDevP = (double?)g.StdDevP(),
@@ -149,12 +149,12 @@ namespace Signum.Test.LinqProvider
             list.ForEach(a => ExtensionsTest.AssertSimilar(a.StdDevP, a.StdDevPInMemory));
         }
 
-        private double? GetStdDev(List<int> list)
+        static double? GetStdDev(List<int> list)
         {
             return list.StdDev();
         }
 
-        private double? GetStdDevP(List<int> list)
+        static double? GetStdDevP(List<int> list)
         {
             return list.StdDevP();
         }
@@ -501,8 +501,8 @@ namespace Signum.Test.LinqProvider
                         group a by new { Author = a.Author.ToLite(), Year = a.Year / 2 } into g
                         select new
                         {
-                            Author = g.Key.Author,
-                            Year = g.Key.Year,
+                            g.Key.Author,
+                            g.Key.Year,
                             Count = g.Count()
                         }).Take(10).ToList();
         }
@@ -515,7 +515,7 @@ namespace Signum.Test.LinqProvider
                         group a by new { Author = a.Author.ToLite(), Year = a.Year / 2 } into g
                         select new
                         {
-                            Author = g.Key.Author,
+                            g.Key.Author,
                             //Year = g.Key.Year,
                             Count = g.Count()
                         }).Take(10).ToList();
@@ -655,6 +655,7 @@ namespace Signum.Test.LinqProvider
                         }).ToList();
         }
 
+#pragma warning disable CA1829 // Use Length/Count property instead of Count() when available
         [Fact]
         public void LetTrick()
         {
@@ -667,6 +668,7 @@ namespace Signum.Test.LinqProvider
                             FemaleFriends = friend.Count(f => f.Entity.Sex == Sex.Female)
                         }).ToList();
         }
+#pragma warning restore CA1829 // Use Length/Count property instead of Count() when available
 
         [Fact]
         public void DistinctGroupByForce()

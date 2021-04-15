@@ -70,14 +70,14 @@ namespace Signum.Engine.CodeGeneration
             {
                 var endMatch = new Regex(@"^}\s*$", RegexOptions.Multiline).Match(content, m.EndIndex());
 
-                var simplifiedContent = SimplifyClass(content.Substring(m.EndIndex(), endMatch.Index - m.EndIndex()), hookImports);
+                var simplifiedContent = SimplifyClass(content[m.EndIndex()..endMatch.Index], hookImports);
 
                 string newComponent = m.Groups["export"].Value + m.Groups["default"].Value + "function " + m.Groups["className"].Value + "(p : " + m.Groups["props"].Value + "){\r\n"
                      + simplifiedContent
                      + endMatch.Value;
 
 
-                content = content.Substring(0, m.Index) + newComponent + content.Substring(endMatch.EndIndex());
+                content = content.Substring(0, m.Index) + newComponent + content[endMatch.EndIndex()..];
             }
 
 
@@ -87,7 +87,7 @@ namespace Signum.Engine.CodeGeneration
 
                 return content.Substring(0, lastImport.EndIndex()) +
                     $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\r\n" +
-                    content.Substring(lastImport.EndIndex());
+                    content[lastImport.EndIndex()..];
             }
             else
             {
@@ -113,23 +113,23 @@ namespace Signum.Engine.CodeGeneration
 
             string? render = null;
 
-            foreach (var p in pairs.AsEnumerable().Reverse())
+            foreach (var (start, end) in pairs.AsEnumerable().Reverse())
             {
-                var methodContent = content.Substring(p.start.EndIndex(), p.end.Index - p.start.EndIndex());
+                var methodContent = content[start.EndIndex()..end.Index];
 
                 var simplifiedContent = SimplifyMethod(methodContent, hooks, hookImports);
 
-                if (p.start.Value.Contains("render()"))
+                if (start.Value.Contains("render()"))
                 {
-                    render = simplifiedContent.Lines().Select(l => l.StartsWith("  ") ? l.Substring(2) : l).ToString("\r\n");
+                    render = simplifiedContent.Lines().Select(l => l.StartsWith("  ") ? l[2..] : l).ToString("\r\n");
 
-                    content = content.Substring(0, p.start.Index) + content.Substring(p.end.EndIndex());
+                    content = content.Substring(0, start.Index) + content[end.EndIndex()..];
                 }
                 else
                 {
-                    string newComponent = ConvertToFunction(p.start.Value) + simplifiedContent + p.end.Value;
+                    string newComponent = ConvertToFunction(start.Value) + simplifiedContent + end.Value;
 
-                    content = content.Substring(0, p.start.Index) + newComponent + content.Substring(p.end.EndIndex());
+                    content = content.Substring(0, start.Index) + newComponent + content[end.EndIndex()..];
                 }
             }
 

@@ -972,7 +972,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(lite));
 
             if (lite.IsNew)
-                throw new ArgumentNullException("lite is New");
+                throw new ArgumentException("lite is New");
 
             giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
@@ -984,7 +984,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ident));
 
             if (ident.IsNew)
-                throw new ArgumentNullException("ident is New");
+                throw new ArgumentException("ident is New");
 
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
@@ -1306,7 +1306,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
                 if (mlistQuery == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(mlistQuery));
 
                 using (Transaction tr = new Transaction())
                 {

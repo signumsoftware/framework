@@ -35,7 +35,7 @@ namespace Signum.Engine.Json
         {
         }
 
-        public PropertyConverter(Type type, IPropertyValidator pv)
+        public PropertyConverter(IPropertyValidator pv)
         {
             this.PropertyValidator = pv;
             GetValue = ReflectionTools.CreateGetter<ModifiableEntity, object?>(pv.PropertyInfo);
@@ -140,7 +140,7 @@ namespace Signum.Engine.Json
             return PropertyConverters.GetOrAdd(type, _t =>
                 Validator.GetPropertyValidators(_t).Values
                 .Where(pv => ShouldSerialize(pv.PropertyInfo))
-                .Select(pv => new PropertyConverter(_t, pv))
+                .Select(pv => new PropertyConverter(pv))
                 .ToDictionary(a => a.PropertyValidator!.PropertyInfo.Name.FirstLower())
             );
         }
@@ -212,7 +212,7 @@ namespace Signum.Engine.Json
             return (JsonConverter)Activator.CreateInstance(typeof(EntityJsonConverter<>).MakeGenericType(typeToConvert), this)!;
         }
 
-        static AsyncLocal<string?> path = new AsyncLocal<string?>();
+        static readonly AsyncLocal<string?> path = new AsyncLocal<string?>();
 
         public static string? CurrentPath => path.Value;
         public static  IDisposable SetPath(string newPart)
@@ -458,9 +458,7 @@ namespace Signum.Engine.Json
                 {
                     try
                     {
-                        var converter = options.GetConverter(pi.PropertyType) as IJsonConverterWithExisting;
-
-                        object? newValue = converter != null ?
+                        object? newValue = options.GetConverter(pi.PropertyType) is IJsonConverterWithExisting converter ?
                             converter.Read(ref reader, pi.PropertyType, options, oldValue) :
                             JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
 
@@ -472,7 +470,7 @@ namespace Signum.Engine.Json
                         {
                             if (pi.CanWrite)
                             {
-                                if (!IsEquals(newValue, oldValue))
+                                if (!EntityJsonConverter<T>.IsEquals(newValue, oldValue))
                                 {
                                     if (!markedAsModified && parentRoute.RootType.IsEntity())
                                     {
@@ -535,7 +533,7 @@ namespace Signum.Engine.Json
             }
         }
 
-        private bool IsEquals(object? newValue, object? oldValue)
+        private static bool IsEquals(object? newValue, object? oldValue)
         {
             if (newValue is byte[] nba && oldValue is byte[] oba)
                 return MemoryExtensions.SequenceEqual<byte>(nba, oba);

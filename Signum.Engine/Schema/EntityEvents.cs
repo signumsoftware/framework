@@ -203,7 +203,7 @@ namespace Signum.Engine.Maps
             if (ValueFunction == null)
                 throw new InvalidOperationException($"ValueFunction should be set in AdditionalBinding {PropertyRoute} because {PropertyRoute.Type} is Cached");
 
-            var setValue = _setter ?? (_setter = CreateSetter());
+            var setValue = _setter ??= CreateSetter();
 
             setValue(entity, retriever);
         }

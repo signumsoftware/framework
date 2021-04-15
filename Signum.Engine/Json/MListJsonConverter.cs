@@ -20,7 +20,7 @@ namespace Signum.Engine.Json
     public abstract class JsonConverterWithExisting<T> : JsonConverter<T>, IJsonConverterWithExisting
     {
         public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            Read(ref reader, typeToConvert, options, default(T));
+            Read(ref reader, typeToConvert, options, default);
 
         public object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue) =>
             Read(ref reader, typeToConvert, options, (T?)existingValue);
@@ -30,7 +30,7 @@ namespace Signum.Engine.Json
 
     public class MListJsonConverterFactory : JsonConverterFactory
     {
-        Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+        readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
 
         public MListJsonConverterFactory(Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
         {
@@ -50,7 +50,7 @@ namespace Signum.Engine.Json
 
     public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
     {
-        Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+        readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
 
         readonly JsonConverter<T> converter;
         public MListJsonConverter(JsonSerializerOptions options, Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
@@ -62,9 +62,9 @@ namespace Signum.Engine.Json
         public override void Write(Utf8JsonWriter writer, MList<T> value, JsonSerializerOptions options)
         {
             writer.WriteStartArray();
-            var tup = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
+            var (pr, mod, rowId) = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
 
-            var elementPr = tup.pr.Add("Item");
+            var elementPr = pr.Add("Item");
 
             foreach (var item in ((IMListPrivate<T>)value).InnerList)
             {
@@ -74,7 +74,7 @@ namespace Signum.Engine.Json
                 JsonSerializer.Serialize(writer, item.RowId?.Object, item.RowId?.Object.GetType() ?? typeof(object), options);
 
                 writer.WritePropertyName("element");
-                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, item.RowId)))
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, mod, item.RowId)))
                 {
                     JsonSerializer.Serialize(writer, item.Element, item.Element?.GetType() ?? typeof(T), options);
                 }

@@ -106,7 +106,7 @@ namespace Signum.Engine.Maps
 
         public EntityField? GetViewPrimaryKey()
         {
-            return Fields.Values.FirstOrDefault(f => f.Field is IColumn && ((IColumn)f.Field).PrimaryKey);
+            return Fields.Values.FirstOrDefault(f => f.Field is IColumn column && column.PrimaryKey);
         }
 
         ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
@@ -283,7 +283,7 @@ namespace Signum.Engine.Maps
             var mixins = this.Mixins?.Values.Select(m => (MixinEntityExpression)m.GetExpression(tableAlias, binder, id, period, entityContext)).ToReadOnly();
 
             Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id,
-                id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
+                id is PrimaryKeyExpression pk ? QueryBinder.NullId(pk.ValueType) : Expression.Constant(null, id.Type.Nullify())) :
                 new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
 
             return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, mixins, this, null, entityContext);
