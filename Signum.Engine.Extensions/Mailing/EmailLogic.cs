@@ -204,20 +204,6 @@ namespace Signum.Engine.Mailing
             };
         }
 
-        public static MList<EmailTemplateMessageEmbedded> CreateMessages(Func<EmailTemplateMessageEmbedded> func)
-        {
-            var list = new MList<EmailTemplateMessageEmbedded>();
-            foreach (var ci in CultureInfoLogic.ApplicationCultures)
-            {
-                using (CultureInfoUtils.ChangeBothCultures(ci))
-                {
-                    list.Add(func());
-                }
-            }
-            return list;
-        }
-
-
         public static void SendAllAsync<T>(List<T> emails)
                    where T : IEmailModel
         {

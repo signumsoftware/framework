@@ -77,13 +77,12 @@ namespace Signum.Engine.Basics
             return CultureInfoToEntity.Value.TryGetC(ci.Name);
         }
 
-        public static IEnumerable<CultureInfo> ApplicationCultures => EntityToCultureInfo.Value.Where(a => !a.Key.Hidden).Select(a => a.Value);
-
+        public static IEnumerable<CultureInfo> ApplicationCultures(bool? isNeutral) => EntityToCultureInfo.Value.Values.Where(a=>isNeutral == null || a.IsNeutralCulture == isNeutral);
+        
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoEntity, T> func)
         {
             if (EntityToCultureInfo.Value.Count == 0)
                 throw new InvalidOperationException("No {0} found in the database".FormatWith(typeof(CultureInfoEntity).Name));
-
 
             foreach (var c in EntityToCultureInfo.Value.Where(a => a.Value.IsNeutralCulture))
             {

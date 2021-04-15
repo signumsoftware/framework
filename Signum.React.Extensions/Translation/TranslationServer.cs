@@ -89,7 +89,7 @@ namespace Signum.React.Translation
             var acceptedLanguages = actionContext.HttpContext.Request.GetTypedHeaders().AcceptLanguage;
             foreach (var lang in acceptedLanguages.Select(l => l.Value))
             {
-                var culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name == lang);
+                var culture = CultureInfoLogic.ApplicationCultures(isNeutral: false).FirstOrDefault(ci => ci.Name == lang);
 
                 if (culture != null)
                     return culture;
@@ -97,7 +97,7 @@ namespace Signum.React.Translation
                 string? cleanLang = lang.Value.TryBefore('-');
                 if(cleanLang != null)
                 {
-                    culture = CultureInfoLogic.ApplicationCultures.FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
+                    culture = CultureInfoLogic.ApplicationCultures(isNeutral: false).FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));
 
                     if (culture != null)
                         return culture;

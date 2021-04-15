@@ -20,7 +20,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
   const assembly = decodeDots(p.match.params.assembly);
   const culture = p.match.params.culture;
 
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
 
   const [filter, setFilter] = React.useState(() => QueryString.parse(p.location.search).filter);
 
