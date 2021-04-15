@@ -31,7 +31,6 @@ interface ChartRequestViewProps {
   userChart?: Lite<UserChartEntity>;
   onChange: (newChartRequest: ChartRequestModel, userChart?: Lite<UserChartEntity>) => void;
   title?: string;
-  showFilters?: boolean;
   showChartSettings?: boolean;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
@@ -47,7 +46,6 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   const forceUpdate = useForceUpdate();
   const lastToken = React.useRef<QueryToken | undefined>(undefined);
 
-  const [showFilters, setShowFilters] = React.useState(p.showFilters ?? false);
   const [showChartSettings, setShowChartSettings] = React.useState(p.showChartSettings ?? false);
 
   const [resultAndLoading, setResult] = React.useState<{
@@ -149,7 +147,6 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   function handleHideFiltersAndSettings() {
     setShowChartSettings(false);
-    setShowFilters(false);
   }
 
   const qd = queryDescription;
@@ -174,7 +171,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
       <div>
-        {showFilters ?
+        {showChartSettings ?
           <FilterBuilder filterOptions={cr.filterOptions} queryDescription={queryDescription!}
             subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
             onFiltersChanged={handleFiltersChanged}
@@ -188,6 +185,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       </div>
       <div className="sf-control-container">
         {showChartSettings && <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+          maxRowsReached={maxRowsReached}
           onInvalidate={handleInvalidate}
           onRedraw={handleOnRedraw}
           onTokenChange={handleTokenChange}
@@ -200,13 +198,6 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         />}
       </div >
       <div className="sf-query-button-bar btn-toolbar mb-2">
-        <button
-          className={classes("sf-query-button sf-filters-header btn", showFilters && "active", "btn-light")}
-          style={!showFilters && cr.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid #6c757d" } : undefined}
-          onClick={() => { setShowFilters(!showFilters); }}
-          title={titleLabels ? showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
-          <FontAwesomeIcon icon="filter" />
-        </button>
         <button
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}

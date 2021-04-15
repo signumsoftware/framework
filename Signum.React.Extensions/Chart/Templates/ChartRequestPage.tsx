@@ -57,7 +57,6 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
         <ChartRequestView
           chartRequest={pair.chartRequest}
           userChart={pair.userChart}
-          showFilters={isEmpty}
           showChartSettings={isEmpty}
           onChange={(cr, uc) => handleOnChange(cr, uc)} />
       }
