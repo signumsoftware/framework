@@ -988,9 +988,9 @@ namespace Signum.Engine.Linq
             :base(DbExpressionType.Interval, type)
 
         {
-            this.Min = min ?? (postgresRange == null ? throw new ArgumentException(nameof(min)) : (Expression?)null);
-            this.Max = max ?? (postgresRange == null ? throw new ArgumentException(nameof(max)) : (Expression?)null);
-            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.Min = min ?? (postgresRange == null ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
+            this.Max = max ?? (postgresRange == null ? throw new ArgumentNullException(nameof(max)) : (Expression?)null);
+            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
             this.AsUtc = asUtc;
         }
 

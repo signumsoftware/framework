@@ -651,7 +651,7 @@ namespace Signum.Engine.Linq
         static Expression EntityIn(Expression newItem, Dictionary<Type, PrimaryKey[]> entityIDs)
         {
             if (newItem is EntityExpression ee)
-                return InPrimaryKey(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new PrimaryKey[0]);
+                return InPrimaryKey(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? Array.Empty<PrimaryKey>());
 
             if (newItem is ImplementedByExpression ib)
                 return ib.Implementations.JoinDictionary(entityIDs,

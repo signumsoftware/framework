@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
 
         DbDataReader dataReader;
 
-        T current = default(T)!;
+        T current = default!;
         Func<IProjectionRow, T> projector;
         Expression<Func<IProjectionRow, T>> projectorExpression;
 

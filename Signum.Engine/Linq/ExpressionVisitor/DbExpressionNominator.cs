@@ -704,8 +704,8 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            value = default(Expression)!;
-            unit = default(SqlEnums);
+            value = default!;
+            unit = default;
             return false;
         }
 

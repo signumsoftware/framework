@@ -1234,7 +1234,7 @@ namespace Signum.Engine.Maps
 
         public override IEnumerable<IColumn> Columns()
         {
-            return new IColumn[0];
+            return Array.Empty<IColumn>();
         }
 
         public override IEnumerable<TableIndex> GenerateIndexes(ITable table)

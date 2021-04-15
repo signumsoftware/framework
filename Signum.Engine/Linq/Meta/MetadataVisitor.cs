@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
 
         static internal Expression MakeVoidMeta(Type type)
         {
-            return new MetaExpression(type, new DirtyMeta(null, new Meta[0]));
+            return new MetaExpression(type, new DirtyMeta(null, Array.Empty<Meta>()));
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -457,7 +457,7 @@ namespace Signum.Engine.Linq
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
-                    return new MetaExpression(memberType, new DirtyMeta(null, new Meta[0]));
+                    return new MetaExpression(memberType, new DirtyMeta(null, Array.Empty<Meta>()));
 
 
                 MetaExpression meta = (MetaExpression)source;

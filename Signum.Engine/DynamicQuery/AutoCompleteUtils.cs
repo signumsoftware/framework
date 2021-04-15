@@ -57,7 +57,7 @@ namespace Signum.Engine.DynamicQuery
             if (match.Success)
                 return PrimaryKey.TryParse(match.Groups[1].ToString(), type, out id);
 
-            id = default(PrimaryKey);
+            id = default;
             return false;
         }
 

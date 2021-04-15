@@ -16,7 +16,7 @@ namespace Signum.Engine
             Save(new[] { entity });
         }
 
-        static readonly Entity[] None = new Entity[0];
+        static readonly Entity[] None = Array.Empty<Entity>();
 
         public static void Save(Entity[] entities)
         {

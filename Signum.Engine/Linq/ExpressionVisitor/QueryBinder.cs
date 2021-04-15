@@ -985,7 +985,7 @@ namespace Signum.Engine.Linq
             if (source.NodeType == ExpressionType.Constant && !typeof(IQueryable).IsAssignableFrom(source.Type)) //!isRoot
             {
                 ConstantExpression ce = (ConstantExpression)source;
-                IEnumerable col = (IEnumerable?)ce.Value ?? new object[0];
+                IEnumerable col = (IEnumerable?)ce.Value ?? Array.Empty<object>();
  
                 if (newItem.Type == typeof(Type))
                     return SmartEqualizer.TypeIn(newItem, col.Cast<Type>().ToList());
@@ -3432,7 +3432,7 @@ namespace Signum.Engine.Linq
         private SelectExpression WrapSelect(SourceExpression source)
         {
             Alias newAlias = aliasGenerator.NextSelectAlias();
-            var select = new SelectExpression(newAlias, false, null, new ColumnDeclaration[0] /*Rebinder*/, source, null, null, null, 0);
+            var select = new SelectExpression(newAlias, false, null, Array.Empty<ColumnDeclaration>() /*Rebinder*/, source, null, null, null, 0);
             return select;
         }
     }
