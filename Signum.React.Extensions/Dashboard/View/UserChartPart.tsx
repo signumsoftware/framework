@@ -56,7 +56,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     );
   }
 
-  const result = resultOrError?.result!;
+  const result = resultOrError?.result;
 
   function handleReload(e?: React.MouseEvent<any>) {
     e?.preventDefault();
@@ -77,8 +77,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       .done();
   }
 
-  const maxRowsReached = chartRequest.maxRows == result.resultTable.rows.length;
-  
   return (
     <div>
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
@@ -87,7 +85,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
           {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
-      {maxRowsReached ? < p className="text-danger">{ChartMessage.QueryResultReachedMaxRows0.niceToString(result.resultTable.rows.length)}</p> : undefined }
+      {result != null && chartRequest.maxRows == result.resultTable.rows.length ?
+        <p className="text-danger">{ChartMessage.QueryResultReachedMaxRows0.niceToString(result.resultTable.rows.length)}</p> : undefined}
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
           <ChartTableComponent
