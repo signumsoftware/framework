@@ -104,6 +104,7 @@ export default function UserChartMenu(p : UserChartMenuProps){
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
       query: query,
       chartScript: cr.chartScript,
+      maxRows: cr.maxRows,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),

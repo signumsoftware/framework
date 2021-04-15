@@ -163,7 +163,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   const result = resultAndLoading?.result && resultAndLoading.result.chartRequest == p.chartRequest ? resultAndLoading.result : undefined;
 
   const titleLabels = StyleContext.default.titleLabels;
-
+  const maxRowsReached = result && result.chartRequest.maxRows == result.chartResult.resultTable.rows.length;
   return (
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
@@ -221,18 +221,25 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
-        <Tabs id="chartResultTabs" key={showFilters + " " + showChartSettings}>
-        <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-          <ChartRenderer chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} />
-        </Tab>
-        {result &&
-          <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(result.chartResult.resultTable.rows.length)})</span> as any}>
-            <ChartTableComponent chartRequest={cr} lastChartRequest={result.lastChartRequest} resultTable={result.chartResult.resultTable}
-              onOrderChanged={() => handleOnDrawClick()} />
+        <Tabs id="chartResultTabs" key={showChartSettings + ""}>
+          <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+            <ChartRenderer chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} />
           </Tab>
-        }
-      </Tabs>
-    </div>
+          {result &&
+            <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (
+            <span
+              className={maxRowsReached ? "text-danger font-weight-bold" : undefined}
+              title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
+                {(result.chartResult.resultTable.rows.length)}
+              </span>
+            )
+            </span> as any}>
+              <ChartTableComponent chartRequest={cr} lastChartRequest={result.lastChartRequest} resultTable={result.chartResult.resultTable}
+                onOrderChanged={() => handleOnDrawClick()} />
+            </Tab>
+          }
+        </Tabs>
+      </div>
     </div>
   );
 }

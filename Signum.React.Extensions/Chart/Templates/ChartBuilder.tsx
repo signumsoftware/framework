@@ -14,6 +14,7 @@ import { UserState } from '../../Authorization/Signum.Entities.Authorization'
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
   queryKey: string;
+  maxRowsReached?: boolean;
   onInvalidate: () => void;
   onTokenChange: () => void;
   onRedraw: () => void;
@@ -91,7 +92,9 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
               </div>)}
           </div>
-          <ValueLine ctx={p.ctx.subCtx(a=>a.maxRows)}/>
+          <div className="card-body">
+            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger font-weight-bold" : undefined }} />
+          </div>
         </div>
       </div >
       <div className="col-lg-10">

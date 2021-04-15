@@ -122,6 +122,7 @@ namespace Signum.Entities.Chart
                 new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", this.ChartScript.Key),
+                MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
                 Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
                 Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
@@ -135,6 +136,7 @@ namespace Signum.Entities.Chart
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
+            MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
             var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);

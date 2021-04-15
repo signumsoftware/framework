@@ -97,6 +97,7 @@ export module ChartMessage {
   export const Minimize = new MessageKey("ChartMessage", "Minimize");
   export const ShowChartSettings = new MessageKey("ChartMessage", "ShowChartSettings");
   export const HideChartSettings = new MessageKey("ChartMessage", "HideChartSettings");
+  export const QueryResultReachedMaxRows0 = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
