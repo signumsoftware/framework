@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityRepeater } from '@framework/Lines'
+import { ValueLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Entities.Scheduler'
 
@@ -10,18 +10,10 @@ export default function HolidayCalendar(p : { ctx: TypeContext<HolidayCalendarEn
     <div>
       <ValueLine ctx={e.subCtx(f => f.name)} />
       <div>
-        <EntityRepeater ctx={e.subCtx(f => f.holidays)} getComponent={(ctx: TypeContext<HolidayEmbedded>) => {
-          const ct4 = ctx.subCtx({ labelColumns: { sm: 4 } });
-          return (
-            <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={ct4.subCtx(f => f.date)} />
-              </div>
-              <div className="col-sm-4">
-                <ValueLine ctx={ctx.subCtx(f => f.name)} />
-              </div>
-            </div>);
-        }} />
+        <EntityTable ctx={e.subCtx(f => f.holidays)} columns={EntityTable.typedColumns<HolidayEmbedded>([
+          { property: a => a.date },
+          { property: a => a.name },
+        ])} />
       </div>
     </div>
   );

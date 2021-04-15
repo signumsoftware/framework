@@ -244,6 +244,8 @@ namespace Signum.Entities.Chart
         Minimize,
         ShowChartSettings,
         HideChartSettings,
+        [Description("Query result reached max rows ({0})")]
+        QueryResultReachedMaxRows0
     }
 
 }

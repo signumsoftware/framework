@@ -7,7 +7,7 @@ import * as Constructor from '@framework/Constructor'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
-import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
+import { ChartMessage, ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
@@ -77,6 +77,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       .done();
   }
 
+  const maxRowsReached = chartRequest.maxRows == result.resultTable.rows.length;
+  
   return (
     <div>
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
@@ -85,6 +87,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
           {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
+      {maxRowsReached ? < p className="text-danger">{ChartMessage.QueryResultReachedMaxRows0.niceToString(result.resultTable.rows.length)}</p> : undefined }
       {showData ?
         (!result ? <span>{JavascriptMessage.loading.niceToString()}</span> :
           <ChartTableComponent

@@ -216,7 +216,7 @@ namespace Signum.Engine.Disconnected
             return export;
         }
 
-        private void CopyExport(Lite<DisconnectedExportEntity> export, SqlServerConnector newDatabase)
+        protected virtual void CopyExport(Lite<DisconnectedExportEntity> export, SqlServerConnector newDatabase)
         {
             var clone = export.RetrieveAndRemember().Clone();
 
@@ -418,7 +418,7 @@ SELECT {3}
             this.CopyTable(table, strategy, newDatabaseName);
         }
 
-        private void DeleteTable(Table table, DatabaseName newDatabaseName)
+        protected virtual void DeleteTable(Table table, DatabaseName newDatabaseName)
         {
             DisconnectedTools.DeleteTable(table.Name.OnDatabase(newDatabaseName));
         }
