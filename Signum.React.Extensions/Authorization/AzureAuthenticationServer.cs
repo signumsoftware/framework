@@ -100,8 +100,7 @@ namespace Signum.React.Authorization
             };
             JwtSecurityTokenHandler tokendHandler = new JwtSecurityTokenHandler();
 
-            SecurityToken secutityToken;
-            var result = tokendHandler.ValidateToken(jwt, validationParameters, out secutityToken);
+            var result = tokendHandler.ValidateToken(jwt, validationParameters, out SecurityToken secutityToken);
 
             jwtSecurityToken = (JwtSecurityToken)secutityToken;
             return result;
