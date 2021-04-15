@@ -399,14 +399,17 @@ namespace Signum.Utilities
             return new Date(date.Year, date.Month, 1);
         }
 
-        public static DateTime WeekStart(this DateTime dateTime)
+        public static DateTime WeekStart(this DateTime dateTime) => dateTime.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+        public static DateTime WeekStart(this DateTime dateTime, DayOfWeek startOfWeek)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind).AddDays(-(int)dateTime.DayOfWeek);
+            return ((Date)dateTime).WeekStart(startOfWeek);
         }
 
-        public static Date WeekStart(this Date date)
+        public static Date WeekStart(this Date date) => date.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+        public static Date WeekStart(this Date date, DayOfWeek startOfWeek)
         {
-            return new Date(date.Year, date.Month, date.Day).AddDays(-(int)date.DayOfWeek);
+            int diff = (7 + (date.DayOfWeek - startOfWeek)) % 7;
+            return date.AddDays(-diff);
         }
 
         public static DateTime HourStart(this DateTime dateTime)
