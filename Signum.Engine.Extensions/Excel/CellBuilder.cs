@@ -106,7 +106,7 @@ namespace Signum.Engine.Excel
         }
 
 
-        private bool IsInlineString(DefaultStyle template)
+        private static bool IsInlineString(DefaultStyle template)
         {
             switch (template)
             {
@@ -170,7 +170,7 @@ namespace Signum.Engine.Excel
 
         }
 
-        private string GetExcelFormat(string? columnFormat)
+        private static string GetExcelFormat(string? columnFormat)
         {
             if (columnFormat == null)
             {
@@ -178,7 +178,7 @@ namespace Signum.Engine.Excel
             }
             var f = columnFormat.ToUpper();
 
-            string DecimalPlaces(int places)
+            static string DecimalPlaces(int places)
             {
                 if (places == 0)
                     return "";
@@ -195,7 +195,7 @@ namespace Signum.Engine.Excel
                 : columnFormat;
         }
 
-        private string ToYesNo(bool value)
+        private static string ToYesNo(bool value)
         {
             return value ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString();
         }
