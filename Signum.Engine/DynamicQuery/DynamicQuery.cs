@@ -766,7 +766,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination, SystemTime? systemTime)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -804,7 +804,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination, SystemTime? systemTime)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));

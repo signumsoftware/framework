@@ -2766,24 +2766,24 @@ namespace Signum.Engine.Linq
  
             foreach (ExpansionRequest req in list)
             {
-                if (req is TableRequest)
+                if (req is TableRequest tr)
                 {
-                    var a = ((TableRequest)req).Table.Alias;
+                    var a = tr.Table.Alias;
  
                     if (result.Add(a))
                         ExpandKnowAlias(result);
                 }
-                else if (req is UniqueRequest)
+                else if (req is UniqueRequest ur)
                 {
-                    foreach (var a in ((UniqueRequest)req).Select.KnownAliases)
+                    foreach (var a in ur.Select.KnownAliases)
                     {
                         if (result.Add(a))
                             ExpandKnowAlias(result);
                     }
                 }
-                else
+                else if(req is UnionAllRequest uar)
                 {
-                    var a = ((UnionAllRequest)req).UnionAlias;
+                    var a = uar.UnionAlias;
  
                     if (result.Add(a))
                         ExpandKnowAlias(result);

@@ -144,7 +144,7 @@ namespace Signum.Test.Environment
                                    .ToDQueryable(description)
                                    .AllQueryOperationsAsync(request, cancellationToken);
 
-                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination, request.SystemTime);
+                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
                 })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)

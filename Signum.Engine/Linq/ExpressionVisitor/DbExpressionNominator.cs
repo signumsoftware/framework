@@ -720,7 +720,7 @@ namespace Signum.Engine.Linq
             {
                 var age = new SqlFunctionExpression(typeof(DateSpan), null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
 
-                SqlFunctionExpression Extract( SqlEnums part, Expression period)
+                static SqlFunctionExpression Extract( SqlEnums part, Expression period)
                 {
                     return new SqlFunctionExpression(typeof(int), null, PostgresFunction.EXTRACT.ToString(), new[] { new SqlLiteralExpression(part), period });
                 }
