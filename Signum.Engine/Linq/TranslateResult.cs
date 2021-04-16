@@ -235,7 +235,7 @@ namespace Signum.Engine.Linq
             return SqlServerRetry.Retry(() =>
             {
                 using (new EntityCache())
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     object? result;
                     using (var retriever = EntityCache.NewRetriever())
@@ -285,7 +285,7 @@ namespace Signum.Engine.Linq
             return SqlServerRetry.RetryAsync(async () =>
             {
                 using (new EntityCache())
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     object? result;
                     using (var retriever = EntityCache.NewRetriever())

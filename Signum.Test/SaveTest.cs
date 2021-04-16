@@ -23,7 +23,7 @@ namespace Signum.Test
         [Fact]
         public void SaveCycle()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 ArtistEntity m = new ArtistEntity() { Name = "Michael" };
@@ -46,7 +46,7 @@ namespace Signum.Test
         [Fact]
         public void SaveSelfCycle()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 ArtistEntity m = new ArtistEntity() { Name = "Michael" };
@@ -66,7 +66,7 @@ namespace Signum.Test
         [Fact]
         public void SaveMany()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 var prev =  Database.Query<ArtistEntity>().Count();
@@ -90,7 +90,7 @@ namespace Signum.Test
         [Fact]
         public void SaveMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -130,7 +130,7 @@ namespace Signum.Test
         [Fact]
         public void SmartSaveMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -201,7 +201,7 @@ namespace Signum.Test
         [Fact]
         public void SmartSaveMListOrder()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -264,7 +264,7 @@ namespace Signum.Test
         [Fact]
         public void SaveManyMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -310,7 +310,7 @@ namespace Signum.Test
         [Fact]
         public void RetrieveSealed()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 var albums = Database.Query<AlbumEntity>().ToList();
@@ -332,7 +332,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertWithMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.Query<AlbumEntity>().Select(a => a.Id).ToList().Max();
                 var count = Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count();
@@ -367,7 +367,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertTable()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.Query<NoteWithDateEntity>().Select(a => a.Id).ToList().Max();
 
@@ -392,7 +392,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
 

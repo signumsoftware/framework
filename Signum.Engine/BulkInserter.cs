@@ -28,7 +28,7 @@ namespace Signum.Engine
             where T : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsert), () => typeof(T).TypeName()))
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var table = Schema.Current.Table(typeof(T));
 
@@ -63,7 +63,7 @@ namespace Signum.Engine
             where K : notnull
         {
             using (HeavyProfiler.Log(nameof(BulkInsertQueryIds), () => typeof(T).TypeName()))
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var t = Schema.Current.Table(typeof(T));
 
@@ -173,7 +173,7 @@ namespace Signum.Engine
                     }
                 }
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
@@ -295,7 +295,7 @@ namespace Signum.Engine
                     dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
                 }
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
@@ -349,7 +349,7 @@ namespace Signum.Engine
                     dt.Rows.Add(t.BulkInsertDataRow(e));
                 }
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 

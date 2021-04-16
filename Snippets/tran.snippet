@@ -23,7 +23,7 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-      <Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
+      <Code Language="csharp"><![CDATA[using (var tr = new Transaction())
 {
   $selected$$end$
     tr.Commit();
