@@ -503,7 +503,7 @@ namespace Signum.Engine.Translation
                  from key in ci.Value
                  select KeyValuePair.Create((culture: ci.Key, instanceKey: key.Key), key.Value)).ToDictionary();
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Dictionary<PropertyRoute, PropertyRouteEntity> routes = should.Keys.Select(a => a.instanceKey.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
 

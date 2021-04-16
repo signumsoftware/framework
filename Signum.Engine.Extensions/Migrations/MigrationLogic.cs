@@ -74,7 +74,7 @@ namespace Signum.Engine.Migrations
 
         public static void EnsureMigrationTable<T>() where T : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 if (Administrator.ExistsTable<T>())
                     return;

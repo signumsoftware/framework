@@ -222,7 +222,7 @@ namespace Signum.React.Authorization
         public async Task<LoginResponse> MakeAssertion([FromBody][Required] MakeAssertionRequest request)
         {
             using (AuthLogic.Disable())
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var assertionOptions = Database.Retrieve<WebAuthnAssertionOptionsEntity>(request.AssertionOptionsId);
                 var options = AssertionOptions.FromJson(assertionOptions.Json);

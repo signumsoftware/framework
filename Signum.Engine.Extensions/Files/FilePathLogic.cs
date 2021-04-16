@@ -53,7 +53,7 @@ namespace Signum.Engine.Files
 
                             if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
                             {
-                                using (Transaction tr = new Transaction())
+                                using (var tr = new Transaction())
                                 {
                                     var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                     fp.Suffix = Path.Combine(preSufix, fp.FileName);
