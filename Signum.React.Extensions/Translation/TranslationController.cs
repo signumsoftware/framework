@@ -247,7 +247,7 @@ namespace Signum.React.Translation
 
             internal void FixMembers(CultureInfo defaultCulture)
             {
-                if (this.hasMembers)
+                if (this.hasMembers && cultures.ContainsKey(defaultCulture.Name))
                 {
                     var members = cultures[defaultCulture.Name].members.Keys;
 

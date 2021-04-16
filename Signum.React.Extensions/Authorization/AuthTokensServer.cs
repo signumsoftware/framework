@@ -77,7 +77,7 @@ namespace Signum.React.Authorization
             if (requiresRefresh)
             {
                 ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUser);
-                return new SignumAuthenticationResult { User = token.User };
+                return new SignumAuthenticationResult { User = newUser};
             }
             else
             {

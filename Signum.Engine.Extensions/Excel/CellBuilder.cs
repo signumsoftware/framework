@@ -87,7 +87,9 @@ namespace Signum.Engine.Excel
             return Cell(value, template, DefaultStyles[template]);
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex)
+#pragma warning restore CA1822 // Mark members as static
         {
             string excelValue = value == null ? "" :
                         (template == DefaultStyle.Date || template == DefaultStyle.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
@@ -108,25 +110,21 @@ namespace Signum.Engine.Excel
 
         private static bool IsInlineString(DefaultStyle template)
         {
-            switch (template)
+            return template switch
             {
-                case DefaultStyle.Title: 
-                case DefaultStyle.Header:
-                case DefaultStyle.Text: 
-                case DefaultStyle.General: 
-                case DefaultStyle.Boolean: 
-                case DefaultStyle.Enum:
-                    return true;
+                DefaultStyle.Title or 
+                DefaultStyle.Header or 
+                DefaultStyle.Text or
+                DefaultStyle.General or 
+                DefaultStyle.Boolean or 
+                DefaultStyle.Enum => true,
 
-                case DefaultStyle.Date: 
-                case DefaultStyle.DateTime: 
-                case DefaultStyle.Number: 
-                case DefaultStyle.Decimal:
-                    return false;
-
-                default:
-                    throw new InvalidOperationException("Unexpected"); 
-            }
+                DefaultStyle.Date or 
+                DefaultStyle.DateTime or 
+                DefaultStyle.Number or 
+                DefaultStyle.Decimal => false,
+                _ => throw new InvalidOperationException("Unexpected"),
+            };
         }
 
         public Dictionary<string, UInt32Value> CustomDecimalStyles = new Dictionary<string, UInt32Value>();
@@ -155,7 +153,7 @@ namespace Signum.Engine.Excel
             return (defaultStyle, DefaultStyles.GetOrThrow(defaultStyle));
         }
 
-        private string GetCustomFormatExpression(string? columnUnit, string? columnFormat)
+        private static string GetCustomFormatExpression(string? columnUnit, string? columnFormat)
         {
             var excelUnitPrefix = 
                 columnUnit == "$" ? "[$$-409]" : 

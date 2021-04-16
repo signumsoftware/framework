@@ -15,7 +15,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
 
 export default function TranslationCodeSync(p: RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }>) {
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const assembly = decodeDots(p.match.params.assembly);
   const culture = p.match.params.culture;
   const namespace = p.match.params.namespace && decodeDots(p.match.params.namespace);
