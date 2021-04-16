@@ -871,7 +871,7 @@ namespace Signum.Engine.Linq
             return false;
         }
 
-        private BinaryExpression MakeBinaryFlexible(ExpressionType nodeType, Expression left, Expression right)
+        private static BinaryExpression MakeBinaryFlexible(ExpressionType nodeType, Expression left, Expression right)
         {
             if (left.Type == right.Type)
             {
@@ -906,7 +906,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public Expression? SimpleNot(Expression e)
+        public static Expression? SimpleNot(Expression e)
         {
             if (e.NodeType == ExpressionType.Not)
                 return ((UnaryExpression)e).Operand;
@@ -939,7 +939,7 @@ namespace Signum.Engine.Linq
             return Add(new SqlFunctionExpression(b.Type, null, SqlFunction.COALESCE.ToString(), expressions));
         }
 
-        private Expression ConvertToSqlAddition(BinaryExpression b)
+        private static Expression ConvertToSqlAddition(BinaryExpression b)
         {
             Expression left = b.Left;
             Expression right = b.Right;
@@ -964,17 +964,17 @@ namespace Signum.Engine.Linq
 
         private static bool AlwaysHasValue(Expression exp)
         {
-            if (exp is SqlConstantExpression)
-                return ((SqlConstantExpression)exp).Value != null;
+            if (exp is SqlConstantExpression scons)
+                return scons.Value != null;
 
-            if (exp is ConstantExpression)
-                return ((ConstantExpression)exp).Value != null;
+            if (exp is ConstantExpression cons)
+                return cons.Value != null;
 
-            if (exp is BinaryExpression)
-                return AlwaysHasValue(((BinaryExpression)exp).Left) && AlwaysHasValue(((BinaryExpression)exp).Right);
+            if (exp is BinaryExpression bin)
+                return AlwaysHasValue(bin.Left) && AlwaysHasValue(bin.Right);
 
-            if (exp is ConditionalExpression)
-                return AlwaysHasValue(((ConditionalExpression)exp).IfTrue) && AlwaysHasValue(((ConditionalExpression)exp).IfFalse);
+            if (exp is ConditionalExpression cond)
+                return AlwaysHasValue(cond.IfTrue) && AlwaysHasValue(cond.IfFalse);
 
             return false;
         }
@@ -1018,7 +1018,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException();
         }
 
-        private Expression ConvertAvoidNominate(BinaryExpression b)
+        private static Expression ConvertAvoidNominate(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal)
             {
@@ -1159,7 +1159,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private Expression Convert(Expression expression, Type type)
+        private static Expression Convert(Expression expression, Type type)
         {
             if (expression.Type == type)
                 return expression;

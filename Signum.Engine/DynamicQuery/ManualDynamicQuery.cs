@@ -61,7 +61,7 @@ namespace Signum.Engine.DynamicQuery
                      .Where(aggregateFilters)
                      .OrderBy(request.Orders);
 
-            var cols = groupCollection.TryPaginate(request.Pagination, request.SystemTime);
+            var cols = groupCollection.TryPaginate(request.Pagination);
 
             return cols.ToResultTable(request);
         }
