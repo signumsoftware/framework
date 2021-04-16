@@ -36,11 +36,6 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-        public static void WindowsFromEntites()
-        {
-
-        }
-
         internal static void GetSolutionInfo(out string solutionFolder, out string solutionName)
         {
             var m = Regex.Match(Environment.CurrentDirectory, @"(?<solutionFolder>.*)\\(?<solutionName>.*).Terminal\\bin\\(Debug|Release)", RegexOptions.ExplicitCapture);

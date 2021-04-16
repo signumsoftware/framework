@@ -42,7 +42,7 @@ namespace Signum.Engine
         {
             return SqlServerRetry.Retry(() =>
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (var con = new SqlConnection(connectionString))
                 {
                     con.Open();
                     var sql =
@@ -52,11 +52,11 @@ namespace Signum.Engine
     SERVERPROPERTY('Edition') as Edition,
     SERVERPROPERTY('EngineEdition') as EngineEdition";
 
-                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    using (var cmd = new SqlCommand(sql, con))
                     {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        var da = new SqlDataAdapter(cmd);
 
-                        DataTable result = new DataTable();
+                        var result = new DataTable();
                         da.Fill(result);
 
                         if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
@@ -111,7 +111,7 @@ namespace Signum.Engine
 
             return SqlServerRetry.Retry(() =>
             {
-                using (SqlConnection con = new SqlConnection(this.ConnectionString))
+                using (var con = new SqlConnection(this.ConnectionString))
                 {
                     con.Open();
 
@@ -122,7 +122,7 @@ namespace Signum.Engine
 
         SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection? overridenConnection, CommandType commandType)
         {
-            SqlCommand cmd = new SqlCommand { CommandType = commandType };
+            var cmd = new SqlCommand { CommandType = commandType };
 
             int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
@@ -219,13 +219,13 @@ namespace Signum.Engine
                         {
                             if (change != null)
                             {
-                                SqlDependency dep = new SqlDependency(cmd);
+                                var dep = new SqlDependency(cmd);
                                 dep.OnChange += change;
                             }
 
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                FieldReader fr = new FieldReader(reader);
+                                var fr = new FieldReader(reader);
                                 int row = -1;
                                 try
                                 {
@@ -321,9 +321,9 @@ namespace Signum.Engine
                 {
                     try
                     {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        var da = new SqlDataAdapter(cmd);
 
-                        DataTable result = new DataTable();
+                        var result = new DataTable();
                         da.Fill(result);
                         return result;
                     }
@@ -378,7 +378,7 @@ namespace Signum.Engine
         {
             EnsureConnectionRetry(con =>
             {
-                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                using (var bulkCopy = new SqlBulkCopy(
                     options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
                     options,
                     options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
@@ -470,7 +470,7 @@ namespace Signum.Engine
 
         public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
 
-        public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
+        public static List<string> ComplexWhereKeywords = new() { "OR" };
 
         public SqlPreCommand ShrinkDatabase(string databaseName)
         {
@@ -563,7 +563,7 @@ namespace Signum.Engine
             NewExpression newExpr = Expression.New(typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
 
-            List<MemberBinding> mb = new List<MemberBinding>()
+            List<MemberBinding> mb = new()
             {
                 Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable")!, Expression.Constant(nullable)),
                 Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType")!, Expression.Constant(dbType.SqlServer)),

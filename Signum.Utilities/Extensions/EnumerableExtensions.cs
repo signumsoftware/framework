@@ -541,7 +541,7 @@ namespace Signum.Utilities
             if (values.Length == 0)
                 return "";
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append(values[0]);
 
             for (int i = 1; i < values.Length - 1; i++)
@@ -587,7 +587,7 @@ namespace Signum.Utilities
 
         public static DataTable ToDataTable<T>(this IEnumerable<T> collection, bool withDescriptions = false)
         {
-            DataTable table = new DataTable();
+            var table = new DataTable();
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Default);
             foreach (var m in members)
@@ -603,7 +603,7 @@ namespace Signum.Utilities
 
         public static DataTable Transpose(this DataTable table, string captionName = "")
         {
-            DataTable result = new DataTable();
+            var result = new DataTable();
             result.Columns.Add(new DataColumn("Column", typeof(string)) { Caption = captionName});
 
             var list = table.Columns.Cast<DataColumn>().Skip(1).Select(a => a.DataType).Distinct().ToList();
@@ -698,8 +698,8 @@ namespace Signum.Utilities
 
         public static string ToFormattedTable<T>(this IEnumerable<T> collection, string? title = null, bool longHeader = false)
         {
-            StringBuilder sb = new StringBuilder();
-            using (StringWriter sw = new StringWriter(sb))
+            var sb = new StringBuilder();
+            using (var sw = new StringWriter(sb))
                 collection.WriteFormattedStringTable(sw, title, longHeader);
             return sb.ToString();
         }

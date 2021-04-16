@@ -28,7 +28,7 @@ namespace Signum.React.Filters
 
         public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
-        public static readonly List<Type> AvoidLogException = new List<Type> { typeof(OperationCanceledException) };
+        public static readonly List<Type> AvoidLogException = new() { typeof(OperationCanceledException) };
 
         public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
@@ -83,7 +83,7 @@ namespace Signum.React.Filters
             }
         }
 
-        private string? Try(int size, Func<string?> getValue)
+        private static string? Try(int size, Func<string?> getValue)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace Signum.React.Filters
             return result;
         }
 
-        private HttpStatusCode GetStatus(Type type)
+        private static HttpStatusCode GetStatus(Type type)
         {
             if (type == typeof(UnauthorizedAccessException))
                 return HttpStatusCode.Forbidden;
@@ -158,7 +158,7 @@ namespace Signum.React.Filters
     public class SignumInitializeFilterAttribute : IAsyncResourceFilter
     {
         public static Action InitializeDatabase = () => throw new InvalidOperationException("SignumInitializeFilterAttribute.InitializeDatabase should be set in Startup");
-        static object lockKey = new object();
+        static object lockKey = new();
         public bool Initialized = false;
 
         public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
