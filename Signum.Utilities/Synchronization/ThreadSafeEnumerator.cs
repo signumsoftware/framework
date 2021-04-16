@@ -46,7 +46,7 @@ namespace Signum.Utilities.Synchronization
                 if (moveNext && (moveNext = enumerator.MoveNext()))
                     current.Value = enumerator.Current;
                 else
-                    current.Value = default(T)!;
+                    current.Value = default!;
 
                 return moveNext; 
             }

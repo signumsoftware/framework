@@ -148,7 +148,7 @@ namespace Signum.Utilities
 
         public Node()
         {
-            Value = default(T)!;
+            Value = default!;
             Children = new ObservableCollection<Node<T>>();
         }
 

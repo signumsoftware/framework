@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-        bool IsConstant(Expression exp)
+        static bool IsConstant(Expression exp)
         {
             return ((DbExpressionType)exp.NodeType) == DbExpressionType.SqlConstant;
         }

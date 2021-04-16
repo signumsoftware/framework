@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
                 return base.VisitLiteReference(lite);
 
             var id = lite.Reference is ImplementedByAllExpression ||
-                lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().Count() > 1 ?
+                lite.Reference is ImplementedByExpression ib && ib.Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().Count() > 1 ?
                 (Expression)binder.GetIdString(lite.Reference) :
                 (Expression)binder.GetId(lite.Reference);
 
@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
             return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
         }
 
-        private bool IsCacheable(Expression newTypeId)
+        private static bool IsCacheable(Expression newTypeId)
         {
 
             if (newTypeId is TypeEntityExpression tfie)
@@ -158,7 +158,7 @@ namespace Signum.Engine.Linq
             return me;
         }
 
-        private bool IsCached(Type type)
+        private static bool IsCached(Type type)
         {
             var cc = Schema.Current.CacheController(type);
             if (cc != null && cc.Enabled)

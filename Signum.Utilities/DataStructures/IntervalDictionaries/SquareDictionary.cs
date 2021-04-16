@@ -62,7 +62,7 @@ namespace Signum.Utilities.DataStructures
             if (!xDimension.TryGetValue(x, out int ix) ||
                 !yDimension.TryGetValue(y, out int iy) || !used[ix,iy])
             {
-                value = default(V)!;
+                value = default!;
                 return false;
             }
 

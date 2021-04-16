@@ -138,7 +138,7 @@ namespace Signum.Utilities.DataStructures
                 return true;
             }
 
-            value = default(V)!;
+            value = default!;
             return false;
         }
 

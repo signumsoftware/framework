@@ -526,9 +526,9 @@ namespace Signum.Engine.DynamicQuery
 
             IOrderedQueryable<object> result = query.OrderBy(orders[0].lambda, orders[0].orderType);
 
-            foreach (var order in orders.Skip(1))
+            foreach (var (lambda, orderType) in orders.Skip(1))
             {
-                result = result.ThenBy(order.lambda, order.orderType);
+                result = result.ThenBy(lambda, orderType);
             }
 
             return result;
@@ -581,9 +581,9 @@ namespace Signum.Engine.DynamicQuery
 
             IOrderedEnumerable<object> result = collection.OrderBy(orders[0].lambda, orders[0].orderType);
 
-            foreach (var order in orders.Skip(1))
+            foreach (var (lambda, orderType) in orders.Skip(1))
             {
-                result = result.ThenBy(order.lambda, order.orderType);
+                result = result.ThenBy(lambda, orderType);
             }
 
             return result;
@@ -610,29 +610,29 @@ namespace Signum.Engine.DynamicQuery
         [return: MaybeNull]
         public static T Unique<T>(this IEnumerable<T> collection, UniqueType uniqueType)
         {
-            switch (uniqueType)
+            return uniqueType switch
             {
-                case UniqueType.First: return collection.First();
-                case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
-                case UniqueType.Single: return collection.SingleEx();
-                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
-                case UniqueType.Only: return collection.Only();
-                default: throw new InvalidOperationException();
-            }
+                UniqueType.First => collection.First(),
+                UniqueType.FirstOrDefault => collection.FirstOrDefault(),
+                UniqueType.Single => collection.SingleEx(),
+                UniqueType.SingleOrDefault => collection.SingleOrDefaultEx(),
+                UniqueType.Only => collection.Only(),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         //[return: MaybeNull]
         public static Task<T> UniqueAsync<T>(this IQueryable<T> collection, UniqueType uniqueType, CancellationToken token)
         {
-            switch (uniqueType)
+            return uniqueType switch
             {
-                case UniqueType.First: return collection.FirstAsync(token);
-                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token)!;
-                case UniqueType.Single: return collection.SingleAsync(token);
-                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token)!;
-                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only()!);
-                default: throw new InvalidOperationException();
-            }
+                UniqueType.First => collection.FirstAsync(token),
+                UniqueType.FirstOrDefault => collection.FirstOrDefaultAsync(token)!,
+                UniqueType.Single => collection.SingleAsync(token),
+                UniqueType.SingleOrDefault => collection.SingleOrDefaultAsync(token)!,
+                UniqueType.Only => collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only()!),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         #endregion
@@ -766,7 +766,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination, SystemTime? systemTime)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
@@ -804,7 +804,7 @@ namespace Signum.Engine.DynamicQuery
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination, SystemTime? systemTime)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));

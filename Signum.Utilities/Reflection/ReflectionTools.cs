@@ -527,7 +527,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T)!;
+                result = default!;
                 return false;
             }
         }
@@ -541,7 +541,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T)!;
+                result = default!;
                 return false;
             }
         }

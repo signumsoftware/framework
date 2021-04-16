@@ -312,22 +312,20 @@ namespace Signum.Engine.Linq
     {
         public static bool OrderMatters(this AggregateSqlFunction aggregateFunction)
         {
-            switch (aggregateFunction)
+            return aggregateFunction switch
             {
-                case AggregateSqlFunction.Average:
-                case AggregateSqlFunction.StdDev:
-                case AggregateSqlFunction.StdDevP:
-                case AggregateSqlFunction.Count:
-                case AggregateSqlFunction.CountDistinct:
-                case AggregateSqlFunction.Min:
-                case AggregateSqlFunction.Max:
-                case AggregateSqlFunction.Sum:
-                    return false;
-                case AggregateSqlFunction.string_agg:
-                    return true;
-                default:
-                    throw new UnexpectedValueException(aggregateFunction);
-            }
+                AggregateSqlFunction.Average or 
+                AggregateSqlFunction.StdDev or 
+                AggregateSqlFunction.StdDevP or 
+                AggregateSqlFunction.Count or 
+                AggregateSqlFunction.CountDistinct or
+                AggregateSqlFunction.Min or 
+                AggregateSqlFunction.Max or 
+                AggregateSqlFunction.Sum => false,
+
+                AggregateSqlFunction.string_agg => true,
+                _ => throw new UnexpectedValueException(aggregateFunction),
+            };
         }
     }
 
@@ -875,7 +873,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentNullException(nameof(condition));
 
             if (condition.Type.UnNullify() != typeof(bool))
-                throw new ArgumentException("condition");
+                throw new ArgumentException("condition should be boolean");
 
             this.Condition = condition;
             this.Value = value ?? throw new ArgumentNullException(nameof(value));
@@ -939,7 +937,7 @@ namespace Signum.Engine.Linq
             Type refType = this.Type.UnNullify();
 
             if (whens.Any(w => w.Value.Type.UnNullify() != refType))
-                throw new ArgumentException("whens");
+                throw new ArgumentException("inconsistent whens");
 
             this.Whens = whens.ToReadOnly();
             this.DefaultValue = defaultValue;
@@ -988,9 +986,9 @@ namespace Signum.Engine.Linq
             :base(DbExpressionType.Interval, type)
 
         {
-            this.Min = min ?? (postgresRange == null ? throw new ArgumentException(nameof(min)) : (Expression?)null);
-            this.Max = max ?? (postgresRange == null ? throw new ArgumentException(nameof(max)) : (Expression?)null);
-            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentException(nameof(min)) : (Expression?)null);
+            this.Min = min ?? (postgresRange == null ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
+            this.Max = max ?? (postgresRange == null ? throw new ArgumentNullException(nameof(max)) : (Expression?)null);
+            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
             this.AsUtc = asUtc;
         }
 
@@ -1012,7 +1010,6 @@ namespace Signum.Engine.Linq
 
     public static class SystemTimeExpressions
     {
-        static MethodInfo miOverlaps = ReflectionTools.GetMethodInfo((Interval<DateTime> pair) => pair.Overlaps(new Interval<DateTime>()));
         internal static Expression? Overlaps(this IntervalExpression? interval1, IntervalExpression? interval2)
         {
             if (interval1 == null)
@@ -1055,10 +1052,10 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Like, typeof(bool))
         {
             if (expression == null || expression.Type != typeof(string))
-                throw new ArgumentException("expression");
+                throw new ArgumentException("expression is wrong");
 
             if (pattern == null || pattern.Type != typeof(string))
-                throw new ArgumentException("pattern");
+                throw new ArgumentException("pattern is wrong");
             this.Expression = expression;
             this.Pattern = pattern;
         }

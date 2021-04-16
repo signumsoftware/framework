@@ -53,8 +53,7 @@ namespace Signum.Engine.Linq
         {
             foreach (ColumnDeclaration decl in select.Columns)
             {
-                ColumnExpression? col = decl.Expression as ColumnExpression;
-                if (col == null || decl.Name != col.Name)
+                if (decl.Expression is not ColumnExpression col || decl.Name != col.Name)
                 {
                     return false;
                 }
@@ -64,17 +63,18 @@ namespace Signum.Engine.Linq
 
         internal static bool IsNameMapProjection(SelectExpression select)
         {
-            if (select.From is TableExpression) return false;
-            SelectExpression? fromSelect = select.From as SelectExpression;
-            if (fromSelect == null || select.Columns.Count != fromSelect.Columns.Count)
+            if (select.From is TableExpression) 
                 return false;
+            
+            if (select.From is not SelectExpression fromSelect || select.Columns.Count != fromSelect.Columns.Count)
+                return false;
+            
             ReadOnlyCollection<ColumnDeclaration> fromColumns = fromSelect.Columns;
             // test that all columns in 'select' are refering to columns in the same position
             // in from.
             for (int i = 0, n = select.Columns.Count; i < n; i++)
             {
-                ColumnExpression? col = select.Columns[i].Expression as ColumnExpression;
-                if (col == null || !(col.Name == fromColumns[i].Name))
+                if (select.Columns[i].Expression is not ColumnExpression col || !(col.Name == fromColumns[i].Name))
                     return false;
             }
             return true;
@@ -302,9 +302,7 @@ namespace Signum.Engine.Linq
 
             static bool HasApplyJoin(SourceExpression source)
             {
-                var join = source as JoinExpression;
-
-                if (join == null)
+                if (source is not JoinExpression join)
                     return false;
 
                 return join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply || HasApplyJoin(join.Left) || HasApplyJoin(join.Right);

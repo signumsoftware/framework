@@ -54,7 +54,7 @@ namespace Signum.Utilities
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            T result = default(T)!;
+            T result = default!;
             bool found = false;
             foreach (T item in collection)
             {
@@ -167,7 +167,7 @@ namespace Signum.Utilities
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            T result = default(T)!;
+            T result = default!;
             bool found = false;
             foreach (T item in collection)
             {
@@ -198,7 +198,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 T current = enumerator.Current;
 
@@ -217,7 +217,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 T current = enumerator.Current;
 
@@ -305,7 +305,7 @@ namespace Signum.Utilities
                 T current = enumerator.Current;
 
                 if (enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 return current;
             }
@@ -324,7 +324,7 @@ namespace Signum.Utilities
                 T current = enumerator.Current;
 
                 if (enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 return current;
             }
@@ -339,12 +339,12 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 T current = enumerator.Current;
 
                 if (enumerator.MoveNext())
-                    return default(T)!;
+                    return default!;
 
                 return current;
             }
@@ -553,7 +553,7 @@ namespace Signum.Utilities
             if (values.Length > 1)
             {
                 sb.Append(lastSeparator);
-                sb.Append(values[values.Length - 1]);
+                sb.Append(values[^1]);
             }
 
             return sb.ToString();
@@ -709,9 +709,9 @@ namespace Signum.Utilities
         public static T WithMin<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
           where V : IComparable<V>
         {
-            T result = default(T)!;
+            T result = default!;
             bool hasMin = false;
-            V min = default(V)!;
+            V min = default!;
             foreach (var item in collection)
             {
                 V val = valueSelector(item);
@@ -729,9 +729,9 @@ namespace Signum.Utilities
         public static T WithMax<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
                where V : IComparable<V>
         {
-            T result = default(T)!;
+            T result = default!;
             bool hasMax = false;
-            V max = default(V)!;
+            V max = default!;
 
             foreach (var item in collection)
             {
@@ -750,7 +750,7 @@ namespace Signum.Utilities
                where V : IComparable<V>
         {
             List<T> result = new List<T>();
-            V min = default(V)!;
+            V min = default!;
 
             foreach (var item in collection)
             {
@@ -771,7 +771,7 @@ namespace Signum.Utilities
                where V : IComparable<V>
         {
             List<T> result = new List<T>();
-            V max = default(V)!;
+            V max = default!;
 
             foreach (var item in collection)
             {
@@ -791,9 +791,9 @@ namespace Signum.Utilities
         public static MinMax<T> WithMinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
             where V : IComparable<V>
         {
-            T withMin = default(T)!, withMax = default(T)!;
+            T withMin = default!, withMax = default!;
             bool hasMin = false, hasMax = false;
-            V min = default(V)!, max = default(V)!;
+            V min = default!, max = default!;
             foreach (var item in collection)
             {
                 V val = valueSelector(item);
@@ -819,7 +819,7 @@ namespace Signum.Utilities
             where T : struct, IComparable<T>, IEquatable<T>
         {
             bool has = false;
-            T min = default(T), max = default(T);
+            T min = default, max = default;
             foreach (var item in collection)
             {
                 if (!has)
@@ -843,7 +843,7 @@ namespace Signum.Utilities
             where V : struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
-            V min = default(V), max = default(V);
+            V min = default, max = default;
             foreach (var item in collection)
             {
                 V val = valueSelector(item);
@@ -1001,8 +1001,8 @@ namespace Signum.Utilities
                 while (okA & (okA = enumA.MoveNext()) | okB & (okB = enumB.MoveNext()))
                 {
                     yield return resultSelector(
-                        okA ? enumA.Current : default(A)!,
-                        okB ? enumB.Current : default(B)!);
+                        okA ? enumA.Current : default!,
+                        okB ? enumB.Current : default!);
                 }
             }
         }
@@ -1016,8 +1016,8 @@ namespace Signum.Utilities
             {
                 while ((okA &= enumA.MoveNext()) || (okB &= enumB.MoveNext()))
                 {
-                    var first = okA ? enumA.Current : default(A)!;
-                    var second = okB ? enumB.Current : default(B)!;
+                    var first = okA ? enumA.Current : default!;
+                    var second = okB ? enumB.Current : default!;
 
                     yield return (first, second);
                 }
@@ -1100,7 +1100,7 @@ namespace Signum.Utilities
 
             static EmptyReadOnlyCollection()
             {
-                EmptyReadOnlyCollection<T>.Instance = new ReadOnlyCollection<T>(new T[0]);
+                EmptyReadOnlyCollection<T>.Instance = new ReadOnlyCollection<T>(Array.Empty<T>());
             }
         }
 

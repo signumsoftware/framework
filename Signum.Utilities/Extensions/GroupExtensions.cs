@@ -214,7 +214,7 @@ namespace Signum.Utilities
                         if(!initialGroup)
                             throw new InvalidOperationException("Parameter initialGroup is false");
 
-                        group = new Grouping<T, T>(default(T)!);
+                        group = new Grouping<T, T>(default!);
                         result.Add(group);
                     }
 

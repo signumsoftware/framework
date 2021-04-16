@@ -248,7 +248,7 @@ namespace Signum.Engine.Maps
             var result = new EntityExpression(cleanType, new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, Name)), period, null, null, null, null, AvoidExpandOnRetrieving);
 
             if(this.IsLite)
-                return binder.MakeLite(result, null);
+                return QueryBinder.MakeLite(result, null);
             else
                 return result;
         }
@@ -314,7 +314,7 @@ namespace Signum.Engine.Maps
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType)! : FieldType, SplitStrategy, implementations);
 
             if (this.IsLite)
-                return binder.MakeLite(result, null);
+                return QueryBinder.MakeLite(result, null);
             else
                 return result;
         }
@@ -331,7 +331,7 @@ namespace Signum.Engine.Maps
                 period);
 
             if (this.IsLite)
-                return binder.MakeLite(result, null);
+                return QueryBinder.MakeLite(result, null);
             else
                 return result;
         }

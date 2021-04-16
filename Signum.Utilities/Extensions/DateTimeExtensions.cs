@@ -194,15 +194,15 @@ namespace Signum.Utilities
         /// <param name="precision">Using Milliseconds does nothing, using Days use DateTime.Date</param>
         public static DateTime TrimTo(this DateTime dateTime, DateTimePrecision precision)
         {
-            switch (precision)
+            return precision switch
             {
-                case DateTimePrecision.Days: return dateTime.Date;
-                case DateTimePrecision.Hours: return TrimToHours(dateTime);
-                case DateTimePrecision.Minutes: return TrimToMinutes(dateTime);
-                case DateTimePrecision.Seconds: return TrimToSeconds(dateTime);
-                case DateTimePrecision.Milliseconds: return dateTime;
-            }
-            throw new ArgumentException("precision");
+                DateTimePrecision.Days => dateTime.Date,
+                DateTimePrecision.Hours => TrimToHours(dateTime),
+                DateTimePrecision.Minutes => TrimToMinutes(dateTime),
+                DateTimePrecision.Seconds => TrimToSeconds(dateTime),
+                DateTimePrecision.Milliseconds => dateTime,
+                _ => throw new UnexpectedValueException(precision),
+            };
         }
 
         public static DateTime TrimToSeconds(this DateTime dateTime)
@@ -325,23 +325,18 @@ namespace Signum.Utilities
         public static string ToAgoString(this DateTime dateTime, DateTime now)
         {
             TimeSpan ts = now.Subtract(dateTime);
-            string? resource = null;
-            if (ts.TotalMilliseconds < 0)
-                resource = DateTimeMessage.In0.NiceToString();
-            else
-                resource = DateTimeMessage._0Ago.NiceToString();
-
+            string msg = ts.TotalMilliseconds < 0 ? DateTimeMessage.In0.NiceToString() : DateTimeMessage._0Ago.NiceToString();
             int months = Math.Abs(ts.Days) / 30;
             if (months > 0)
-                return resource.FormatWith((months == 1 ? DateTimeMessage._0Month.NiceToString() : DateTimeMessage._0Months.NiceToString()).FormatWith(Math.Abs(months))).ToLower();
+                return msg.FormatWith((months == 1 ? DateTimeMessage._0Month.NiceToString() : DateTimeMessage._0Months.NiceToString()).FormatWith(Math.Abs(months))).ToLower();
             if (Math.Abs(ts.Days) > 0)
-                return resource.FormatWith((ts.Days == 1 ? DateTimeMessage._0Day.NiceToString() : DateTimeMessage._0Days.NiceToString()).FormatWith(Math.Abs(ts.Days))).ToLower();
+                return msg.FormatWith((ts.Days == 1 ? DateTimeMessage._0Day.NiceToString() : DateTimeMessage._0Days.NiceToString()).FormatWith(Math.Abs(ts.Days))).ToLower();
             if (Math.Abs(ts.Hours) > 0)
-                return resource.FormatWith((ts.Hours == 1 ? DateTimeMessage._0Hour.NiceToString() : DateTimeMessage._0Hours.NiceToString()).FormatWith(Math.Abs(ts.Hours))).ToLower();
+                return msg.FormatWith((ts.Hours == 1 ? DateTimeMessage._0Hour.NiceToString() : DateTimeMessage._0Hours.NiceToString()).FormatWith(Math.Abs(ts.Hours))).ToLower();
             if (Math.Abs(ts.Minutes) > 0)
-                return resource.FormatWith((ts.Minutes == 1 ? DateTimeMessage._0Minute.NiceToString() : DateTimeMessage._0Minutes.NiceToString()).FormatWith(Math.Abs(ts.Minutes))).ToLower();
+                return msg.FormatWith((ts.Minutes == 1 ? DateTimeMessage._0Minute.NiceToString() : DateTimeMessage._0Minutes.NiceToString()).FormatWith(Math.Abs(ts.Minutes))).ToLower();
 
-            return resource.FormatWith((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).FormatWith(Math.Abs(ts.Seconds))).ToLower();
+            return msg.FormatWith((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).FormatWith(Math.Abs(ts.Seconds))).ToLower();
         }
 
 
@@ -399,14 +394,17 @@ namespace Signum.Utilities
             return new Date(date.Year, date.Month, 1);
         }
 
-        public static DateTime WeekStart(this DateTime dateTime)
+        public static DateTime WeekStart(this DateTime dateTime) => dateTime.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+        public static DateTime WeekStart(this DateTime dateTime, DayOfWeek startOfWeek)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind).AddDays(-(int)dateTime.DayOfWeek);
+            return ((Date)dateTime).WeekStart(startOfWeek);
         }
 
-        public static Date WeekStart(this Date date)
+        public static Date WeekStart(this Date date) => date.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+        public static Date WeekStart(this Date date, DayOfWeek startOfWeek)
         {
-            return new Date(date.Year, date.Month, date.Day).AddDays(-(int)date.DayOfWeek);
+            int diff = (7 + (date.DayOfWeek - startOfWeek)) % 7;
+            return date.AddDays(-diff);
         }
 
         public static DateTime HourStart(this DateTime dateTime)
