@@ -558,10 +558,10 @@ react-transition-group@^4.4.1:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react-widgets@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/react-widgets/-/react-widgets-5.0.0.tgz#6331fa3df5ada641a59fb7b3fbb30440c08292a5"
-  integrity sha512-nq/NVPN/2jwsGcA3x7DqklpDi1AR4pL4NWbAYMC4NADRr+hdLMAga9oA9yN2jsGdwIgkctz5crqAnGGrwugrSg==
+react-widgets@5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/react-widgets/-/react-widgets-5.0.3.tgz#8a23f081fcbabb05c11d7d510753cda2b92d0c2f"
+  integrity sha512-fQ7mzweKv6UfsWx5o7RX3jHJmW/RPSlI8CoSZppmU1skWjqRPHXA3P45FiXYp11l9cjX/loVjwRaCCUgAF8MbA==
   dependencies:
     "@restart/hooks" "^0.3.26"
     "@types/classnames" "^2.2.11"
