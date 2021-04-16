@@ -21,8 +21,8 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
         public string? Azure_DirectoryID { get; set; }
 
-        public bool LoginWithWindowsAuthenticator { get; set; } = true;
-        public bool LoginWithActiveDirectoryRegistry { get; set; } = true;
+        public bool LoginWithWindowsAuthenticator { get; set; }
+        public bool LoginWithActiveDirectoryRegistry { get; set; }
         public bool LoginWithAzureAD { get; set; } = true;
 
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
