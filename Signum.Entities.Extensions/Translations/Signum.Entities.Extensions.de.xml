@@ -2478,7 +2478,7 @@
     <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
-    <Member Name="GroupResults" Description="Resultate der Gruppe" />
+    <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
