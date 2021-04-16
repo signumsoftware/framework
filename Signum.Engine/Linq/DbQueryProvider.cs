@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
             return Translate(expression, tr => tr);
         }
 
-        internal R Translate<R>(Expression expression, Func<ITranslateResult, R> continuation) //For debugging purposes
+        internal protected virtual R Translate<R>(Expression expression, Func<ITranslateResult, R> continuation) //For debugging purposes
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
@@ -109,7 +109,7 @@ namespace Signum.Engine.Linq
             return scalar;
         }
 
-        internal R Delete<R>(IQueryable query, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
+        internal protected virtual R Delete<R>(IQueryable query, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
@@ -130,7 +130,7 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
 
-        internal R Update<R>(IUpdateable updateable, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
+        internal protected virtual R Update<R>(IUpdateable updateable, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
@@ -151,7 +151,7 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
 
-        internal R Insert<R>(IQueryable query, LambdaExpression constructor, ITable table, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
+        internal protected virtual R Insert<R>(IQueryable query, LambdaExpression constructor, ITable table, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 

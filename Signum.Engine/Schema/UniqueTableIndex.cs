@@ -391,9 +391,9 @@ namespace Signum.Engine.Maps
             {
                 sb.Append("IsNull(");
                 Visit(b.Left);
-                sb.Append(",");
+                sb.Append(',');
                 Visit(b.Right);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
@@ -417,7 +417,7 @@ namespace Signum.Engine.Maps
             }
             else
             {
-                sb.Append("(");
+                sb.Append('(');
                 this.Visit(b.Left);
                 switch (b.NodeType)
                 {
@@ -467,7 +467,7 @@ namespace Signum.Engine.Maps
                         throw new NotSupportedException(string.Format("The binary operator {0} is not supported", b.NodeType));
                 }
                 this.Visit(b.Right);
-                sb.Append(")");
+                sb.Append(')');
             }
             return b;
         }

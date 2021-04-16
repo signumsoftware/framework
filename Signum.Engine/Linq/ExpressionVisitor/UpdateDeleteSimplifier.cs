@@ -5,12 +5,10 @@ namespace Signum.Engine.Linq
 {
     class CommandSimplifier : DbExpressionVisitor
     {
-        bool removeSelectRowCount;
         AliasGenerator aliasGenerator;
 
-        public CommandSimplifier(bool removeSelectRowCount, AliasGenerator aliasGenerator)
+        public CommandSimplifier(AliasGenerator aliasGenerator)
         {
-            this.removeSelectRowCount = removeSelectRowCount;
             this.aliasGenerator = aliasGenerator;
         }
 
@@ -19,16 +17,14 @@ namespace Signum.Engine.Linq
             if (removeSelectRowCount)
                 ce = (CommandExpression)new SelectRowRemover().Visit(ce);
 
-            return (CommandExpression)new CommandSimplifier(removeSelectRowCount, aliasGenerator).Visit(ce);
+            return (CommandExpression)new CommandSimplifier(aliasGenerator).Visit(ce);
         }
 
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             var select = (SelectExpression)delete.Source;
 
-            TableExpression? table = select.From as TableExpression;
-
-            if (table == null || delete.Table != table.Table)
+            if (select.From is not TableExpression table || delete.Table != table.Table)
                 return delete;
 
             if (!TrivialWhere(delete, select))
@@ -50,10 +46,9 @@ namespace Signum.Engine.Linq
 
             var b = (BinaryExpression)delete.Where;
 
-            var ce1 = RemoveConvert(b.Left) as ColumnExpression;
-            var ce2 = RemoveConvert(b.Right) as ColumnExpression;
 
-            if (ce1 == null || ce2 == null)
+            if (RemoveConvert(b.Left) is not ColumnExpression ce1 || 
+                RemoveConvert(b.Right) is not ColumnExpression ce2)
                 return false;
 
             ce1 = ResolveColumn(ce1, select);
@@ -64,8 +59,8 @@ namespace Signum.Engine.Linq
 
         private Expression RemoveConvert(Expression expression)
         {
-            if (expression is PrimaryKeyExpression)
-                return RemoveConvert(((PrimaryKeyExpression)expression).Value);
+            if (expression is PrimaryKeyExpression pe)
+                return RemoveConvert(pe.Value);
 
             if (expression.NodeType == ExpressionType.Convert)
                 return RemoveConvert(((UnaryExpression)expression).Operand);
@@ -79,9 +74,7 @@ namespace Signum.Engine.Linq
             {
                 var cd = select.Columns.SingleEx(a => a.Name == ce.Name);
 
-                var result = cd.Expression as ColumnExpression;
-
-                if (result == null)
+                if (cd.Expression is not ColumnExpression result)
                     return ce;
 
                 TableExpression table = (TableExpression)select.From!;

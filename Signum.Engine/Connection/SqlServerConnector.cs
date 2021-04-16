@@ -64,19 +64,18 @@ namespace Signum.Engine
 
                         var version = (string)result.Rows[0]["ProductVersion"];
 
-                        switch (version.Before("."))
+                        return version.Before(".") switch
                         {
-                            case "8": throw new InvalidOperationException("SQL Server 2000 is not supported");
-                            case "9": return SqlServerVersion.SqlServer2005;
-                            case "10": return SqlServerVersion.SqlServer2008;
-                            case "11": return SqlServerVersion.SqlServer2012;
-                            case "12": return SqlServerVersion.SqlServer2014;
-                            case "13": return SqlServerVersion.SqlServer2016;
-                            case "14": return SqlServerVersion.SqlServer2017;
-                            case "15": return SqlServerVersion.SqlServer2019;
-                            default: return (SqlServerVersion?)null;
-                        }
-
+                            "8" => throw new InvalidOperationException("SQL Server 2000 is not supported"),
+                            "9" => SqlServerVersion.SqlServer2005,
+                            "10" => SqlServerVersion.SqlServer2008,
+                            "11" => SqlServerVersion.SqlServer2012,
+                            "12" => SqlServerVersion.SqlServer2014,
+                            "13" => SqlServerVersion.SqlServer2016,
+                            "14" => SqlServerVersion.SqlServer2017,
+                            "15" => SqlServerVersion.SqlServer2019,
+                            _ => (SqlServerVersion?)null,
+                        };
                     }
                 }
             });
@@ -85,7 +84,7 @@ namespace Signum.Engine
 
     public class SqlServerConnector : Connector
     {
-        public static ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        public ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
         public byte DateFirst => DateFirstLazy.Value.Item1;
 
         public SqlServerVersion Version { get; set; }
@@ -325,7 +324,7 @@ namespace Signum.Engine
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
 
                         DataTable result = new DataTable();
-                         da.Fill(result);
+                        da.Fill(result);
                         return result;
                     }
                     catch (Exception ex)
@@ -340,24 +339,24 @@ namespace Signum.Engine
             });
         }
 
-        public Exception HandleException(Exception ex, SqlPreCommandSimple command)
+        public static Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
             var nex = ReplaceException(ex, command);
             nex.Data["Sql"] = command.sp_executesql();
             return nex;
         }
 
-        Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
+        static Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
         {
             if (ex is SqlException se)
             {
-                switch (se.Number)
+                return se.Number switch
                 {
-                    case -2: return new TimeoutException(ex.Message, ex);
-                    case 2601: return new UniqueKeyException(ex);
-                    case 547: return new ForeignKeyException(ex);
-                    default: return ex;
-                }
+                    -2 => new TimeoutException(ex.Message, ex),
+                    2601 => new UniqueKeyException(ex),
+                    547 => new ForeignKeyException(ex),
+                    _ => ex,
+                };
             }
 
             if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))

@@ -58,7 +58,7 @@ namespace Signum.Engine
                      }).ToList();
 
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($@"[TableName(""{tableName.ToString()}"")]");
+                sb.AppendLine($@"[TableName(""{tableName}"")]");
                 sb.AppendLine($"public class {tableName.Name} : IView");
                 sb.AppendLine(@"{");
                 foreach (var c in columns)

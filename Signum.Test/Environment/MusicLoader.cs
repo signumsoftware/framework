@@ -23,6 +23,18 @@ namespace Signum.Test.Environment
             return sibling.GetAncestor(1).GetDescendant(sibling, SqlHierarchyId.Null);
         }
 
+        public static SqlHierarchyId NextLabelNode()
+        {
+            var max = Database.Query<LabelEntity>()
+                .Where(lab => (bool)(lab.Node.GetAncestor(1) == SqlHierarchyId.GetRoot()))
+                .Select(lab => lab.Node)
+                .ToList()
+                .Max(a => (SqlHierarchyId?)a) ??
+                SqlHierarchyId.Null;
+
+            return SqlHierarchyId.GetRoot().GetDescendant(max, SqlHierarchyId.Null);
+        }
+
         public static void Load()
         {
             var ama = new AmericanMusicAwardEntity { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }

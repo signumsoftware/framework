@@ -226,7 +226,7 @@ namespace Signum.Engine.Linq
             return col1 == col2;
         }
 
-        private bool IsCountSumOrAvg(SelectExpression select)
+        private static bool IsCountSumOrAvg(SelectExpression select)
         {
             ColumnDeclaration? col = select.Columns.Only();
             if (col == null)
@@ -234,8 +234,8 @@ namespace Signum.Engine.Linq
 
             Expression exp = col.Expression;
 
-            if (exp is IsNullExpression)
-                exp = ((IsNullExpression)exp).Expression;
+            if (exp is IsNullExpression isNull)
+                exp = isNull.Expression;
 
             if (exp.NodeType == ExpressionType.Coalesce)
             {
@@ -244,7 +244,7 @@ namespace Signum.Engine.Linq
                     exp = ((BinaryExpression)exp).Left;
             }
 
-            if (!(exp is AggregateExpression aggExp))
+            if (exp is not AggregateExpression aggExp)
                 return false;
 
             return aggExp.AggregateFunction == AggregateSqlFunction.Count ||

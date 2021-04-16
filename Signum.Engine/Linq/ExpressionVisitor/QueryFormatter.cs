@@ -28,9 +28,6 @@ namespace Signum.Engine.Linq
         int indent = 2;
         int depth;
 
-        ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
-        static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
-
         class DbParameterPair
         {
             internal DbParameter Parameter;
@@ -75,12 +72,6 @@ namespace Signum.Engine.Linq
             return new DbParameterPair(param, name);
         }
 
-        ObjectNameOptions objectNameOptions;
-        private QueryFormatter()
-        {
-            objectNameOptions = ObjectName.CurrentOptions;
-        }
-
         static internal SqlPreCommandSimple Format(Expression expression)
         {
             QueryFormatter qf = new QueryFormatter();
@@ -112,7 +103,7 @@ namespace Signum.Engine.Linq
             this.Indent(style);
             for (int i = 0, n = this.depth * this.indent; i < n; i++)
             {
-                sb.Append(" ");
+                sb.Append(' ');
             }
         }
 
@@ -161,28 +152,28 @@ namespace Signum.Engine.Linq
             {
                 sb.Append("COALESCE(");
                 Visit(b.Left);
-                sb.Append(",");
+                sb.Append(',');
                 Visit(b.Right);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
-                sb.Append("(");
+                sb.Append('(');
                 Visit(b.Left);
                 sb.Append(b.NodeType == ExpressionType.Equal ? " = " : " <> ");
                 Visit(b.Right);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if (b.NodeType == ExpressionType.ArrayIndex)
             {
                 Visit(b.Left);
-                sb.Append("[");
+                sb.Append('[');
                 Visit(b.Right);
-                sb.Append("]");
+                sb.Append(']');
             }
             else
             {
-                sb.Append("(");
+                sb.Append('(');
                 this.Visit(b.Left);
                 switch (b.NodeType)
                 {
@@ -235,7 +226,7 @@ namespace Signum.Engine.Linq
                         throw new NotSupportedException(string.Format("The binary operator {0} is not supported", b.NodeType));
                 }
                 this.Visit(b.Right);
-                sb.Append(")");
+                sb.Append(')');
             }
             return b;
         }
@@ -253,7 +244,7 @@ namespace Signum.Engine.Linq
                 if (exp.OrderType != OrderType.Ascending)
                     sb.Append(" DESC");
             }
-            sb.Append(")");
+            sb.Append(')');
             return rowNumber;
         }
 
@@ -295,21 +286,21 @@ namespace Signum.Engine.Linq
         {
             sb.Append("EXISTS(");
             this.Visit(exists.Select);
-            sb.Append(")");
+            sb.Append(')');
             return exists;
         }
 
         protected internal override Expression VisitScalar(ScalarExpression exists)
         {
-            sb.Append("(");
+            sb.Append('(');
             this.Visit(exists.Select);
-            sb.Append(")");
+            sb.Append(')');
             return exists;
         }
 
         protected internal override Expression VisitIsNull(IsNullExpression isNull)
         {
-            sb.Append("(");
+            sb.Append('(');
             this.Visit(isNull.Expression);
             sb.Append(") IS NULL");
             return isNull;
@@ -317,7 +308,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
         {
-            sb.Append("(");
+            sb.Append('(');
             this.Visit(isNotNull.Expression);
             sb.Append(") IS NOT NULL");
             return isNotNull;
@@ -333,7 +324,7 @@ namespace Signum.Engine.Linq
                 foreach (var obj in inExpression.Values!)
                 {
                     VisitConstant(Expression.Constant(obj));
-                    sb.Append(",");
+                    sb.Append(',');
                     any = true;
                 }
                 if (any)
@@ -363,7 +354,7 @@ namespace Signum.Engine.Linq
             if (!schema.Settings.IsPostgres && (castExpr.DbType.SqlServer == SqlDbType.NVarChar || castExpr.DbType.SqlServer == SqlDbType.VarChar))
                 sb.Append("(MAX)");
 
-            sb.Append(")");
+            sb.Append(')');
             return castExpr;
         }
 
@@ -393,13 +384,13 @@ namespace Signum.Engine.Linq
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 if (!isPostgres && c.Value.Equals(true))
-                    sb.Append("1");
+                    sb.Append('1');
                 else if (!isPostgres && c.Value.Equals(false))
-                    sb.Append("0");
+                    sb.Append('0');
                 else if (c.Value is string s)
                     sb.Append(s == "" ? "''" : ("'" + s + "'"));
                 else if (c.Value is TimeSpan ts)
-                    sb.Append(@$"CONVERT(time, '{ts.ToString()}')");
+                    sb.Append(@$"CONVERT(time, '{ts}')");
                 else 
                     sb.Append(c.ToString());
             }
@@ -419,7 +410,7 @@ namespace Signum.Engine.Linq
             sb.Append(column.Alias.ToString());
             if (column.Name != null) //Is null for PostgressFunctions.unnest and friends (IQueryable<int> table-valued function)
             {
-                sb.Append(".");
+                sb.Append('.');
                 sb.Append(column.Name.SqlEscape(isPostgres));
             }
             return column;
@@ -431,7 +422,7 @@ namespace Signum.Engine.Linq
             if (!isFirst)
             {
                 AppendNewLine(Indentation.Inner);
-                sb.Append("(");
+                sb.Append('(');
             }
 
             sb.Append("SELECT ");
@@ -526,7 +517,7 @@ namespace Signum.Engine.Linq
 
             if (!isFirst)
             {
-                sb.Append(")");
+                sb.Append(')');
                 AppendNewLine(Indentation.Outer);
             }
 
@@ -554,13 +545,13 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
             sb.Append(GetAggregateFunction(aggregate.AggregateFunction));
-            sb.Append("(");
+            sb.Append('(');
             if (aggregate.AggregateFunction == AggregateSqlFunction.CountDistinct)
                 sb.Append("DISTINCT ");
 
             if (aggregate.Arguments.Count == 1 && aggregate.Arguments[0] == null && aggregate.AggregateFunction == AggregateSqlFunction.Count)
             {
-                sb.Append("*");
+                sb.Append('*');
             }
             else
             {
@@ -572,7 +563,7 @@ namespace Signum.Engine.Linq
                     this.Visit(exp);
                 }
             }
-            sb.Append(")");
+            sb.Append(')');
 
             return aggregate;
         }
@@ -582,19 +573,19 @@ namespace Signum.Engine.Linq
             if (isPostgres && sqlFunction.SqlFunction == PostgresFunction.EXTRACT.ToString())
             {
                 sb.Append(sqlFunction.SqlFunction);
-                sb.Append("(");
+                sb.Append('(');
                 this.Visit(sqlFunction.Arguments[0]);
                 sb.Append(" from ");
                 this.Visit(sqlFunction.Arguments[1]);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if(isPostgres && PostgressOperator.All.Contains(sqlFunction.SqlFunction))
             {
-                sb.Append("(");
+                sb.Append('(');
                 this.Visit(sqlFunction.Arguments[0]);
                 sb.Append(" " + sqlFunction.SqlFunction + " ");
                 this.Visit(sqlFunction.Arguments[1]);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if (sqlFunction.SqlFunction == SqlFunction.COLLATE.ToString())
             {
@@ -608,10 +599,10 @@ namespace Signum.Engine.Linq
                 if (sqlFunction.Object != null)
                 {
                     Visit(sqlFunction.Object);
-                    sb.Append(".");
+                    sb.Append('.');
                 }
                 sb.Append(sqlFunction.SqlFunction);
-                sb.Append("(");
+                sb.Append('(');
                 for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
                 {
                     Expression exp = sqlFunction.Arguments[i];
@@ -619,7 +610,7 @@ namespace Signum.Engine.Linq
                         sb.Append(", ");
                     this.Visit(exp);
                 }
-                sb.Append(")");
+                sb.Append(')');
             }
             return sqlFunction;
         }
@@ -627,7 +618,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
         {
             sb.Append(sqlFunction.SqlFunction.ToString());
-            sb.Append("(");
+            sb.Append('(');
             for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
             {
                 Expression exp = sqlFunction.Arguments[i];
@@ -635,7 +626,7 @@ namespace Signum.Engine.Linq
                     sb.Append(", ");
                 this.Visit(exp);
             }
-            sb.Append(")");
+            sb.Append(')');
 
             return sqlFunction;
         }
@@ -662,7 +653,7 @@ namespace Signum.Engine.Linq
 
             if (table.SystemTime != null && !(table.SystemTime is SystemTime.HistoryTable))
             {
-                sb.Append(" ");
+                sb.Append(' ');
                 WriteSystemTime(table.SystemTime);
             }
             return table;
@@ -692,7 +683,7 @@ namespace Signum.Engine.Linq
 
                 sb.Append(", ");
                 this.VisitSystemTimeConstant(contained.EndtDateTime);
-                sb.Append(")");
+                sb.Append(')');
             }
             else if (st is SystemTime.All)
             {
@@ -713,19 +704,19 @@ namespace Signum.Engine.Linq
 
         protected internal override SourceExpression VisitSource(SourceExpression source)
         {
-            if (source is SourceWithAliasExpression)
+            if (source is SourceWithAliasExpression swae)
             {
                 if (source is TableExpression || source is SqlTableValuedFunctionExpression)
                     Visit(source);
                 else
                 {
-                    sb.Append("(");
+                    sb.Append('(');
                     Visit(source);
-                    sb.Append(")");
+                    sb.Append(')');
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias.ToString());
+                sb.Append(swae.Alias.ToString());
 
                 if (source is TableExpression ta && ta.WithHint != null)
                 {
@@ -771,12 +762,12 @@ namespace Signum.Engine.Linq
             bool needsMoreParenthesis = (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply) && join.Right is JoinExpression;
 
             if (needsMoreParenthesis)
-                sb.Append("(");
+                sb.Append('(');
 
             this.VisitSource(join.Right);
 
             if (needsMoreParenthesis)
-                sb.Append(")");
+                sb.Append(')');
 
             if (join.Condition != null)
             {
@@ -815,15 +806,15 @@ namespace Signum.Engine.Linq
 
         void VisitSetPart(SourceWithAliasExpression source)
         {
-            if (source is SelectExpression)
+            if (source is SelectExpression se)
             {
                 this.Indent(Indentation.Inner);
-                VisitSelect((SelectExpression)source);
+                VisitSelect(se);
                 this.Indent(Indentation.Outer);
             }
-            else if (source is SetOperatorExpression)
+            else if (source is SetOperatorExpression soe)
             {
-                VisitSetOperator((SetOperatorExpression)source);
+                VisitSetOperator(soe);
             }
             else
                 throw new InvalidOperationException("{0} not expected in SetOperatorExpression".FormatWith(source.ToString()));
@@ -867,7 +858,7 @@ namespace Signum.Engine.Linq
                     ColumnAssignment assignment = update.Assigments[i];
                     if (i > 0)
                     {
-                        sb.Append(",");
+                        sb.Append(',');
                         this.AppendNewLine(Indentation.Same);
                     }
                     sb.Append(assignment.Column.SqlEscape(isPostgres));
@@ -893,7 +884,7 @@ namespace Signum.Engine.Linq
             {
                 sb.Append("INSERT INTO ");
                 sb.Append(insertSelect.Name.ToString());
-                sb.Append("(");
+                sb.Append('(');
                 for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
                 {
                     ColumnAssignment assignment = insertSelect.Assigments[i];
@@ -905,7 +896,7 @@ namespace Signum.Engine.Linq
                     }
                     sb.Append(assignment.Column.SqlEscape(isPostgres));
                 }
-                sb.Append(")");
+                sb.Append(')');
                 this.AppendNewLine(Indentation.Same);
                 if(this.isPostgres && Administrator.IsIdentityBehaviourDisabled(insertSelect.Table))
                 {
@@ -954,7 +945,7 @@ namespace Signum.Engine.Linq
                     this.AppendNewLine(Indentation.Same);
                     sb.Append("RETURNING 1");
                     this.AppendNewLine(Indentation.Outer);
-                    sb.Append(")");
+                    sb.Append(')');
                     this.AppendNewLine(Indentation.Same);
                     sb.Append("SELECT CAST(COUNT(*) AS INTEGER) FROM rows");
                 });
@@ -968,7 +959,7 @@ namespace Signum.Engine.Linq
                 CommandExpression command = cea.Commands[i];
                 if (i > 0)
                 {
-                    sb.Append(";");
+                    sb.Append(';');
                     this.AppendNewLine(Indentation.Same);
                 }
                 this.Visit(command);
@@ -1104,7 +1095,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(b);
         }
 
-        private InvalidOperationException InvalidSqlExpression(Expression expression)
+        private static InvalidOperationException InvalidSqlExpression(Expression expression)
         {
             return new InvalidOperationException("Unexepected expression on sql {0}".FormatWith(expression.ToString()));
         }
@@ -1123,9 +1114,11 @@ namespace Signum.Engine.Linq
             QueryFormatter.PostFormatter.Value = postFormatter;
         }
 
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
         public void Dispose()
         {
             QueryFormatter.PostFormatter.Value = prePostFormatter;
         }
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
     }
 }
