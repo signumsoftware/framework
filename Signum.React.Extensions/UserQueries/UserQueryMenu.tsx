@@ -6,6 +6,7 @@ import { parseLite, is, Lite, toLite, newMListElement, toMList, liteKey } from '
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
+import * as SCL from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
@@ -14,9 +15,10 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { useAPI } from '@framework/Hooks'
-import { FilterOptionParsed } from '@framework/Search'
+import { FilterOptionParsed, SearchControl } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString'
+import UserQuery from './Templates/UserQuery'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -81,6 +83,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.systemTime = nfo.systemTime;
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
+        sc.setState({ avoidAutoRefresh: sc.props.defaultAvoidAutoRefresh });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -95,6 +98,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
+          if (userQuery.avoidAutoRefresh)
+            sc.setState({ avoidAutoRefresh: true });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
