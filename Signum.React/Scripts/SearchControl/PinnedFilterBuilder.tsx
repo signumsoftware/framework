@@ -15,7 +15,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
-  onSearchClick?: (ev: React.MouseEvent<any> | undefined) => void;
+  onSearch?: () => void;
+  showSearchButton?: boolean;
   extraSmall?: boolean;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
@@ -39,8 +40,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
             </div>)
         }
       </div>
-      {p.onSearchClick &&
-        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={p.onSearchClick} title="Enter">
+      {p.showSearchButton &&
+        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
           <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
         </button>}
 
@@ -84,6 +85,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 
   function handleValueChange(f: FilterOptionParsed) {
+
     if (isFilterGroupOptionParsed(f) || f.token && f.token.filterType == "String") {
 
       if (timeoutWriteText.current)
@@ -100,10 +102,9 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   }
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (p.onSearchClick && e.keyCode == 13) {
-      debugger;
+    if (p.onSearch && e.keyCode == 13) {
       setTimeout(() => {
-        p.onSearchClick!(undefined);
+        p.onSearch!();
       }, 200);
     }
   }

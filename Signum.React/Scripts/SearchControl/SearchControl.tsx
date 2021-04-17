@@ -45,7 +45,7 @@ export interface SearchControlProps {
   create?: boolean;
   view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
-  avoidAutoRefresh?: boolean;
+  defaultAvoidAutoRefresh?: boolean;
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
   refreshKey?: any;
@@ -199,7 +199,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
         showBarExtensionOption={p.showBarExtensionOption}
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-        avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+        defaultAvoidAutoRefresh={p.defaultAvoidAutoRefresh != null ? p.defaultAvoidAutoRefresh : false}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
         refreshKey={p.refreshKey}
         extraOptions={p.extraOptions}

@@ -92,13 +92,13 @@ function SearchModal(p: SearchModalProps) {
           okPressed.current = true;
           setShow(false);
         } else {
-          if (!scl.props.avoidAutoRefresh)
+          if (!scl.state.avoidAutoRefresh)
             scl.doSearch(true);
         }
       }).done();
 
     } else {
-      if (!scl.props.avoidAutoRefresh)
+      if (!scl.state.avoidAutoRefresh)
         scl.doSearch(true);
     }
   }
