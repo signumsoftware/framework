@@ -269,6 +269,16 @@ namespace Signum.Engine.Alerts
                     .ForEach(a => a.Execute(AlertOperation.Attend));
             }
         }
+
+        public static void DeleteAllAlerts(Lite<Entity> target)
+        {
+            using (AuthLogic.Disable())
+            {
+                Database.Query<AlertEntity>()
+                    .Where(a => a.Target.Is(target))
+                    .UnsafeDelete();
+            }
+        }
     }
 
     public class AlertGraph : Graph<AlertEntity, AlertState>
