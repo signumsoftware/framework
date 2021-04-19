@@ -50,7 +50,7 @@ namespace Signum.Utilities
                     var type = typeof(T).ElementType();
                     if (type != null)
                     {
-                        if (typeof(T).IsInstanceOfType(typeof(List<>)))
+                        if (typeof(T).IsInstantiationOf(typeof(List<>)))
                         {
                             var converted = (T)giConvertToList.GetInvoker(type)(list);
                             if (((IList)converted).Count == list.Count)
