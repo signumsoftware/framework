@@ -133,7 +133,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
             </g> : null
         )}
 
-      {parseFloat(parameters["NumberOpacity"]) > 0 &&
+      {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
         <g className="numbers-label" transform={translate(xRule.start('content'), yRule.start('content'))}>
           {orderedRows
             .filter(r => x(valueColumn.getValue(r))! > 20)

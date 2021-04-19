@@ -84,7 +84,7 @@ namespace Signum.Engine.Chart
 
         public static void SavePalette(ChartPaletteModel model)
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Type type = TypeLogic.GetType(model.TypeName);
 

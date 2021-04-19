@@ -14,7 +14,7 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
   function handleActivityIsClick() {
     Finder.find<WorkflowEntity>({
       queryName: WorkflowEntity,
-      parentToken: WorkflowEntity.token().entity(a => a.mainEntityType!.cleanName),
+      parentToken: WorkflowEntity.token(a => a.entity.mainEntityType!.cleanName),
       parentValue: p.typeName,
     }).then(w => {
       if (!w)

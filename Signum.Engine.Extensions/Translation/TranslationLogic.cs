@@ -77,7 +77,7 @@ namespace Signum.Engine.Translation
 
         public static List<CultureInfo> CurrentCultureInfos(CultureInfo defaultCulture)
         {
-            var cultures = CultureInfoLogic.ApplicationCultures;
+            var cultures = CultureInfoLogic.ApplicationCultures(isNeutral: null);
 
             return cultures.OrderByDescending(a => a.Name == defaultCulture.Name).ThenBy(a => a.Name).ToList();
         }

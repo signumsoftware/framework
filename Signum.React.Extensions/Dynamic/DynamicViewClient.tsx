@@ -45,21 +45,21 @@ export function start(options: { routes: JSX.Element[] }) {
   }} />);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [
-    { token: t.entity(p => p.viewContent), type: "JSon" },
-    { token: t.entity(p => p.locals), type: "Code" },
-    { token: t.entity(p => p.viewName), type: "Text" },
-    { token: t.entity(p => p.entityType!.cleanName), type: "Text" },
+    { token: t.append(p => p.entity.viewContent), type: "JSon" },
+    { token: t.append(p => p.entity.locals), type: "Code" },
+    { token: t.append(p => p.entity.viewName), type: "Text" },
+    { token: t.append(p => p.entity.entityType!.cleanName), type: "Text" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewSelectorEntity, t => [
-    { token: t.entity(p => p.entityType!.cleanName), type: "Text" },
-    { token: t.entity(p => p.script), type: "Code" },
+    { token: t.append(p => p.entity.entityType!.cleanName), type: "Text" },
+    { token: t.append(p => p.entity.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewOverrideEntity, t => [
     { token: t.append(p => p.viewName), type: "Text" },
-    { token: t.entity(p => p.entityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.script), type: "Code" },
+    { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
+    { token: t.append(p => p.entity.script), type: "Code" },
   ]);
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {

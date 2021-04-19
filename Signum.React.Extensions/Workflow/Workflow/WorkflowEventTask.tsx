@@ -54,7 +54,7 @@ export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponen
         <div>
           <EntityCombo ctx={ctx.subCtx(wet => wet.event)} findOptions={{
           queryName: WorkflowEventEntity,
-          parentToken: WorkflowEventEntity.token().entity(a => a.lane!.pool!.workflow),
+          parentToken: WorkflowEventEntity.token(a => a.entity.lane!.pool!.workflow),
             parentValue: ctx.value.workflow,
             filterOptions: [
               { token: WorkflowEventEntity.token(e => e.type), operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart") }

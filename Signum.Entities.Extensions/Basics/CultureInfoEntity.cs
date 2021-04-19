@@ -28,11 +28,6 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string EnglishName { get; private set; }
 
-        /// <summary>
-        /// Used for Culture that can be translated but not selected, like Hidden
-        /// </summary>
-        public bool Hidden { get; set; }
-
         protected override string? PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Name) && Name.HasText())

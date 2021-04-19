@@ -90,7 +90,7 @@ namespace Signum.React.Help
         public void SaveType([Required][FromBody]TypeHelpEntity entity)
         {
             HelpPermissions.ViewHelp.AssertAuthorized();
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 foreach (var query in entity.Queries)
                 {

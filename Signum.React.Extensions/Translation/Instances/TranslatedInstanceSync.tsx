@@ -26,7 +26,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
   const type = p.match.params.type;
   const culture = p.match.params.culture;
 
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
 
   const [result, reloadResult] = useAPIWithReload(() => API.syncTranslatedInstance(type, culture), [type, culture]);

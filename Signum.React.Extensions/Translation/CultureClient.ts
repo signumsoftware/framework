@@ -27,13 +27,13 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
 
 let cachedCultures: Promise<CultureInfoEntity[]>;
 
-export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
+export function getCultures(isNeutral: boolean | null): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
   if (cachedCultures == null)
     cachedCultures = API.fetchCultures();
 
   return cachedCultures.then(list => {
     return list
-      .filter(a => withHidden || !a.hidden)
+      .filter(a => isNeutral == null || isNeutral == !a.name.contains("-"))
       .toObject(a => a.name, a => toLite(a, false, a.nativeName!));
   });
 }

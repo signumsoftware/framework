@@ -151,6 +151,7 @@ namespace Signum.Engine.Chart
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.ToFilterList(),
                 Parameters = userChart.Parameters.ToMList(),
+                MaxRows = userChart.MaxRows,
             };
             
             cr.Columns.ZipForeach(userChart.Columns, (a, b) =>

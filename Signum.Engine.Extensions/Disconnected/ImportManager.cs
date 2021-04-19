@@ -381,7 +381,7 @@ namespace Signum.Engine.Disconnected
             if (count == 0)
                 return 0;
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int result;
                 using (DisableIdentityIfNecessary(table))
@@ -484,7 +484,7 @@ table.PrimaryKey.Name.SqlEscape(isPostgres));
 
         protected virtual int Update(DisconnectedMachineEntity machine, Table table, IDisconnectedStrategy strategy, DatabaseName newDatabaseName)
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 SqlPreCommandSimple command = UpdateTableScript(machine, table, newDatabaseName);
 

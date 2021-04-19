@@ -71,7 +71,7 @@ namespace Signum.Engine.Printing
                     {
                         try
                         {
-                            using (Transaction tr = new Transaction())
+                            using (var tr = new Transaction())
                             {
                                 line.File.DeleteFileOnCommit();
                                 line.State = PrintLineState.PrintedAndDeleted;
@@ -121,7 +121,7 @@ namespace Signum.Engine.Printing
 
         public static ProcessEntity? CreateProcess(FileTypeSymbol? fileType = null)
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var query = Database.Query<PrintLineEntity>()
                         .Where(a => a.State == PrintLineState.ReadyToPrint);

@@ -43,15 +43,21 @@ namespace Signum.Engine.Chart
         {
             using (ExecutionMode.UserInterface())
             {
-                return await dq.ExecuteQueryAsync(new QueryRequest
+                var result = await dq.ExecuteQueryAsync(new QueryRequest
                 {
                     GroupResults = request.HasAggregates(),
                     QueryName = request.QueryName,
-                    Columns =  request.GetQueryColumns(),
+                    Columns = request.GetQueryColumns(),
                     Filters = request.Filters,
                     Orders = request.GetQueryOrders(),
-                    Pagination = new Pagination.All(),
+                    Pagination = request.MaxRows.HasValue ? new Pagination.Firsts(request.MaxRows.Value + 1) : new Pagination.All(),
                 }, token);
+
+
+                if (request.MaxRows.HasValue && result.Rows.Length == request.MaxRows.Value)
+                    throw new InvalidOperationException($"The chart request for ${request.QueryName} exceeded the max rows ({request.MaxRows})");
+
+                return result;
             }
         }
 

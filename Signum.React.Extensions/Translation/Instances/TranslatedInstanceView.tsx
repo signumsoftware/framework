@@ -21,7 +21,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
   const type = p.match.params.type;
   const culture = p.match.params.culture;
 
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
 
   const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(p.location.search).filter);

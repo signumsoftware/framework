@@ -67,10 +67,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
   );
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token().entity(e => e.actorsEval), operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token().entity(e => e.subWorkflow), operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
@@ -81,31 +81,31 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
-    { token: t.entity(p => p.viewName), type: "Text" },
+    { token: t.append(p => p.viewName), type: "Text" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [

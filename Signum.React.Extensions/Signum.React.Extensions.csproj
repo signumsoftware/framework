@@ -35,18 +35,15 @@
 	<ItemGroup>
 		<PackageReference Include="Fido2" Version="1.1.0" />
 		<PackageReference Include="Fido2.Models" Version="1.1.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.8.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.2.2">
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.10.1" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.10.1" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.2.4">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Signum.TSGenerator" Version="5.0.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.1" />
 	</ItemGroup>
 
 	<ItemGroup>

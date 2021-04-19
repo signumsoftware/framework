@@ -448,7 +448,7 @@ namespace Signum.Engine.Processes
             CurrentProcess.MachineName = Environment.MachineName;
             CurrentProcess.ApplicationName = Schema.Current.ApplicationName;
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 if (CurrentProcess.InDB().Any(a => a.State == ProcessState.Executing))
                     throw new InvalidOperationException("The process {0} is allready Executing!".FormatWith(CurrentProcess.Id));
