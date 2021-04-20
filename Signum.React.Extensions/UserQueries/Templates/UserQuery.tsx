@@ -45,8 +45,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
               </p>
             </div>
-          }
-          <ValueLine ctx={ctx.subCtx(e => e.avoidAutoRefresh)} />
+        }
+          <ValueLine ctx={ctx.subCtx(e => e.refreshMode)} valueColumns={2} />
           <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
           <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
           <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />

@@ -46,13 +46,14 @@ export default function UserQueryPage(p: UserQueryPageProps) {
           <FontAwesomeIcon icon="external-link-alt" />
         </a>
       </h2>
-      <SearchControl ref={searchControl}
+      {currentUserQuery && < SearchControl ref={searchControl}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
         extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
-        defaultAvoidAutoRefresh={currentUserQuery?.avoidAutoRefresh}
+        defaultRefreshMode={currentUserQuery?.refreshMode}
         showBarExtension={true}
         findOptions={fo} />
+      }
     </div>
   );
 }

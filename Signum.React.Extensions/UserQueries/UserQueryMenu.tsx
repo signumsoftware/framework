@@ -19,6 +19,7 @@ import { FilterOptionParsed, SearchControl } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString'
 import UserQuery from './Templates/UserQuery'
+import { RefreshMode } from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -83,7 +84,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.systemTime = nfo.systemTime;
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
-        sc.setState({ avoidAutoRefresh: sc.props.defaultAvoidAutoRefresh });
+        sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -98,8 +99,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
-          if (userQuery.avoidAutoRefresh)
-            sc.setState({ avoidAutoRefresh: true });
+          sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);

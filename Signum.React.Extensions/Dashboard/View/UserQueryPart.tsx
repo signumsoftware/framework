@@ -64,7 +64,7 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
         showHeader={"PinnedFilters"}
         showFooter={part.showFooter}
         allowSelection={part.allowSelection}
-        defaultAvoidAutoRefresh={part.userQuery.avoidAutoRefresh} 
+        defaultRefreshMode={part.userQuery.refreshMode} 
       />
     </FullscreenComponent>
   );
