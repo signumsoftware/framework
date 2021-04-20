@@ -132,7 +132,7 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export const tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
 
   export let defaultPagination: Pagination = {
     mode: "Paginate",
@@ -314,7 +314,7 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
 export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
   const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-    c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null;
+    c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
 
   ideal = ideal.filter(a => a.name != "Entity");
 
@@ -344,6 +344,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
         token: c.token!.fullKey,
         displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
         summaryToken: c.summaryToken?.fullKey,
+        hiddenColumn: c.hiddenColumn,
       }) as ColumnOption)
     };
   }
@@ -353,7 +354,8 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     columns: current.map(c => ({
       token: c.token!.fullKey,
       displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-      summaryToken: c.summaryToken?.fullKey
+      summaryToken: c.summaryToken?.fullKey,
+      hiddenColumn: c.hiddenColumn,
     }) as ColumnOption),
   };
 }
@@ -405,7 +407,8 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
     .then(() => columnOptions.map(co => ({
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
-      summaryToken: co.summaryToken && completer.get(co.summaryToken.toString())
+      summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
 
@@ -436,7 +439,7 @@ export function getPropsFromFilters(type: PseudoType, filterOptionsParsed: Filte
 
     if (isFilterGroupOptionParsed(fo) ||
       fo.token == null ||
-      Options.tokenCanSetPropery(fo.token) ||
+      !Options.tokenCanSetPropery(fo.token) ||
       fo.operation != "EqualTo" ||
       !isActive(fo))
       return null;
@@ -511,8 +514,8 @@ export function getPropsFromFindOptions(type: PseudoType, fo: FindOptions | unde
     return Promise.resolve(undefined);
 
   return getQueryDescription(fo.queryName)
-    .then(qd => parseFilterOptions(fo!.filterOptions ?? [], false, qd))
-    .then(filters => getPropsFromFilters(type, filters));
+    .then(qd => parseFindOptions(fo, qd, true))
+    .then(fop => getPropsFromFilters(type, fop.filterOptions));
 }
 
 export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): FindOptions {
@@ -728,6 +731,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         token: completer.get(co.token.toString()),
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+        hiddenColumn: co.hiddenColumn,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions ?? []).map(oo => ({
@@ -1178,7 +1182,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
       if (typeof val == "string") {
 
-        var dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
+        const dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
           return dt.toISO();
@@ -1187,6 +1191,18 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
           return dt.toISODate();
 
         return val;
+      }
+
+      if (val instanceof DateTime) {
+        if (token.type.name == "Date") //DateTime -> Date
+          return val.toISODate();
+        return val.toISO();
+      }
+
+      if (val instanceof Date) {
+        if (token.type.name == "Date") //DateTime -> Date
+          return DateTime.fromJSDate(val).toISODate();
+        return DateTime.fromJSDate(val).toISO();
       }
 
       return val;
@@ -1429,7 +1445,12 @@ export module Encoder {
   export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
     if (columnOptions) {
       columnOptions.forEach((co, i) => {
-        query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName)) : "");
+
+        var displayName = co.hiddenColumn ? HIDDEN :
+          co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
+            undefined;
+
+        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
       });
@@ -1462,6 +1483,9 @@ export module Encoder {
 }
 
 
+
+
+const HIDDEN = "__";
 
 export module Decoder {
 
@@ -1554,14 +1578,21 @@ export module Decoder {
     } as OrderOption));
   }
 
+
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
 
-    return valuesInOrder(query, "column").map(p => ({
-      token: p.value.tryBefore("~") ?? p.value,
-      displayName: unscapeTildes(p.value.tryAfter("~")),
-      summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
-    }) as ColumnOption);
+    return valuesInOrder(query, "column").map(p => {
+
+      var displayName = unscapeTildes(p.value.tryAfter("~")); 
+
+      return ({
+        token: p.value.tryBefore("~") ?? p.value,
+        displayName: displayName == HIDDEN ? undefined : displayName,
+        hiddenColumn: displayName == HIDDEN ? true : undefined,
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
+      }) as ColumnOption;
+    });
   }
 }
 
@@ -1601,7 +1632,7 @@ export interface QuerySettings {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
-  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
+  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
   simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;

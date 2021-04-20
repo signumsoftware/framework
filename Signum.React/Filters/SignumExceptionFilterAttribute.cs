@@ -28,13 +28,15 @@ namespace Signum.React.Filters
 
         public static Func<Exception, bool> IncludeErrorDetails = ex => true;
 
-        public static readonly List<Type> AvoidLogException = new List<Type> { typeof(OperationCanceledException) };
+        public static readonly List<Type> AvoidLogException = new() { typeof(OperationCanceledException) };
+
+        public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
             //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
             //TODO: Make it more eficiently when https://github.com/aspnet/AspNetCore/issues/14396
-            var body = ReadAllBody(precontext.HttpContext); 
+            var body = ReadAllBody(precontext.HttpContext);
 
             var context = await next();
 
@@ -60,38 +62,36 @@ namespace Signum.React.Filters
                         e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                         e.Session = new BigStringEmbedded();
                     });
-                }
 
-                if (ExpectsJsonResult(context))
-                {
-                    var statusCode = GetStatus(context.Exception.GetType());
-
-                    var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
-
-                    using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
+                    if (ExpectsJsonResult(context))
                     {
-                        var error = new HttpError(context.Exception, IncludeErrorDetails(context.Exception));
+                        var statusCode = GetStatus(context.Exception.GetType());
+                        var error = CustomHttpErrorFactory(context.Exception);
 
-                        var response = context.HttpContext.Response;
-                        response.StatusCode = (int)statusCode;
-                        response.ContentType = "application/json";
-                        await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
-                        context.ExceptionHandled = true;
+                        var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
+
+                        using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
+                        {
+                            var response = context.HttpContext.Response;
+                            response.StatusCode = (int)statusCode;
+                            response.ContentType = "application/json";
+                            await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
+                            context.ExceptionHandled = true;
+                        }
                     }
                 }
-
             }
         }
 
-        private string? Try(int size, Func<string?> getValue)
+        private static string? Try(int size, Func<string?> getValue)
         {
             try
             {
                 return getValue()?.TryStart(size);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return (e.GetType().Name + ":"  + e.Message).TryStart(size);
+                return (e.GetType().Name + ":" + e.Message).TryStart(size);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Signum.React.Filters
             return result;
         }
 
-        private HttpStatusCode GetStatus(Type type)
+        private static HttpStatusCode GetStatus(Type type)
         {
             if (type == typeof(UnauthorizedAccessException))
                 return HttpStatusCode.Forbidden;
@@ -158,7 +158,7 @@ namespace Signum.React.Filters
     public class SignumInitializeFilterAttribute : IAsyncResourceFilter
     {
         public static Action InitializeDatabase = () => throw new InvalidOperationException("SignumInitializeFilterAttribute.InitializeDatabase should be set in Startup");
-        static object lockKey = new object();
+        static object lockKey = new();
         public bool Initialized = false;
 
         public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
@@ -174,7 +174,7 @@ namespace Signum.React.Filters
                     }
                 }
             }
-            
+
             return next();
         }
     }

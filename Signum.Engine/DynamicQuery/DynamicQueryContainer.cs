@@ -225,14 +225,14 @@ namespace Signum.Engine.DynamicQuery
         {
             return Task.WhenAll<object?>(requests.Select<BaseQueryRequest, Task<object?>>(r =>
             {
-                if (r is QueryValueRequest)
-                    return ExecuteQueryValueAsync((QueryValueRequest)r, token);
+                if (r is QueryValueRequest qvr)
+                    return ExecuteQueryValueAsync(qvr, token);
 
-                if (r is QueryRequest)
-                    return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith<object?>(a => a.Result);
+                if (r is QueryRequest qr)
+                    return ExecuteQueryAsync(qr, token).ContinueWith<object?>(a => a.Result);
 
-                if (r is UniqueEntityRequest)
-                    return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object?)a.Result);
+                if (r is UniqueEntityRequest uer)
+                    return ExecuteUniqueEntityAsync(uer, token).ContinueWith(a => (object?)a.Result);
 
                 throw new InvalidOperationException("Unexpected QueryRequest type");
             }));

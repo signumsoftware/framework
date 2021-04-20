@@ -64,88 +64,47 @@ namespace Signum.Engine.Linq
             if (((DbExpression)a).DbNodeType != ((DbExpression)b).DbNodeType)
                 return false;
 
-            switch (((DbExpression)a).DbNodeType)
+            return ((DbExpression)a).DbNodeType switch
             {
-                case DbExpressionType.Table:
-                    return CompareTable((TableExpression)a, (TableExpression)b);
-                case DbExpressionType.Column:
-                    return CompareColumn((ColumnExpression)a, (ColumnExpression)b);
-                case DbExpressionType.Select:
-                    return CompareSelect((SelectExpression)a, (SelectExpression)b);
-                case DbExpressionType.Join:
-                    return CompareJoin((JoinExpression)a, (JoinExpression)b);
-                case DbExpressionType.SetOperator:
-                    return CompareSetOperator((SetOperatorExpression)a, (SetOperatorExpression)b);
-                case DbExpressionType.Projection:
-                    return CompareProjection((ProjectionExpression)a, (ProjectionExpression)b);
-                case DbExpressionType.ChildProjection:
-                    return CompareChildProjection((ChildProjectionExpression)a, (ChildProjectionExpression)b);
-                case DbExpressionType.Aggregate:
-                    return CompareAggregate((AggregateExpression)a, (AggregateExpression)b);
-                case DbExpressionType.AggregateRequest:
-                    return CompareAggregateSubquery((AggregateRequestsExpression)a, (AggregateRequestsExpression)b);
-                case DbExpressionType.SqlCast:
-                    return CompareSqlCast((SqlCastExpression)a, (SqlCastExpression)b);
-                case DbExpressionType.SqlFunction:
-                    return CompareSqlFunction((SqlFunctionExpression)a, (SqlFunctionExpression)b);
-                case DbExpressionType.SqlTableValuedFunction:
-                    return CompareTableValuedSqlFunction((SqlTableValuedFunctionExpression)a, (SqlTableValuedFunctionExpression)b);
-                case DbExpressionType.SqlConstant:
-                    return CompareSqlConstant((SqlConstantExpression)a, (SqlConstantExpression)b);
-                case DbExpressionType.SqlLiteral:
-                    return CompareSqlLiteral((SqlLiteralExpression)a, (SqlLiteralExpression)b);
-                case DbExpressionType.Case:
-                    return CompareCase((CaseExpression)a, (CaseExpression)b);
-                case DbExpressionType.RowNumber:
-                    return CompareRowNumber((RowNumberExpression)a, (RowNumberExpression)b);
-                case DbExpressionType.Like:
-                    return CompareLike((LikeExpression)a, (LikeExpression)b);
-                case DbExpressionType.Scalar:
-                case DbExpressionType.Exists:
-                case DbExpressionType.In:
-                    return CompareSubquery((SubqueryExpression)a, (SubqueryExpression)b);
-                case DbExpressionType.IsNull:
-                    return CompareIsNull((IsNullExpression)a, (IsNullExpression)b);
-                case DbExpressionType.IsNotNull:
-                    return CompareIsNotNull((IsNotNullExpression)a, (IsNotNullExpression)b);
-                case DbExpressionType.Delete:
-                    return CompareDelete((DeleteExpression)a, (DeleteExpression)b);
-                case DbExpressionType.Update:
-                    return CompareUpdate((UpdateExpression)a, (UpdateExpression)b);
-                case DbExpressionType.InsertSelect:
-                    return CompareInsertSelect((InsertSelectExpression)a, (InsertSelectExpression)b);
-                case DbExpressionType.CommandAggregate:
-                    return CompareCommandAggregate((CommandAggregateExpression)a, (CommandAggregateExpression)b);
-                case DbExpressionType.Entity:
-                    return CompareEntityInit((EntityExpression)a, (EntityExpression)b);
-                case DbExpressionType.EmbeddedInit:
-                    return CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b);
-                case DbExpressionType.MixinInit:
-                    return CompareMixinFieldInit((MixinEntityExpression)a, (MixinEntityExpression)b);
-                case DbExpressionType.ImplementedBy:
-                    return CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b);
-                case DbExpressionType.ImplementedByAll:
-                    return CompareImplementedByAll((ImplementedByAllExpression)a, (ImplementedByAllExpression)b);
-                case DbExpressionType.LiteReference:
-                    return CompareLiteReference((LiteReferenceExpression)a, (LiteReferenceExpression)b);
-                case DbExpressionType.LiteValue:
-                    return CompareLiteValue((LiteValueExpression)a, (LiteValueExpression)b);
-                case DbExpressionType.TypeEntity:
-                    return CompareTypeFieldInit((TypeEntityExpression)a, (TypeEntityExpression)b);
-                case DbExpressionType.TypeImplementedBy:
-                    return CompareTypeImplementedBy((TypeImplementedByExpression)a, (TypeImplementedByExpression)b);
-                case DbExpressionType.TypeImplementedByAll:
-                    return CompareTypeImplementedByAll((TypeImplementedByAllExpression)a, (TypeImplementedByAllExpression)b);
-                case DbExpressionType.MList:
-                    return CompareMList((MListExpression)a, (MListExpression)b);
-                case DbExpressionType.MListElement:
-                    return CompareMListElement((MListElementExpression)a, (MListElementExpression)b);
-                case DbExpressionType.PrimaryKey:
-                    return ComparePrimaryKey((PrimaryKeyExpression)a, (PrimaryKeyExpression)b);
-                default:
-                    throw new InvalidOperationException("Unexpected " + ((DbExpression)a).DbNodeType);
-
-            }
+                DbExpressionType.Table => CompareTable((TableExpression)a, (TableExpression)b),
+                DbExpressionType.Column => CompareColumn((ColumnExpression)a, (ColumnExpression)b),
+                DbExpressionType.Select => CompareSelect((SelectExpression)a, (SelectExpression)b),
+                DbExpressionType.Join => CompareJoin((JoinExpression)a, (JoinExpression)b),
+                DbExpressionType.SetOperator => CompareSetOperator((SetOperatorExpression)a, (SetOperatorExpression)b),
+                DbExpressionType.Projection => CompareProjection((ProjectionExpression)a, (ProjectionExpression)b),
+                DbExpressionType.ChildProjection => CompareChildProjection((ChildProjectionExpression)a, (ChildProjectionExpression)b),
+                DbExpressionType.Aggregate => CompareAggregate((AggregateExpression)a, (AggregateExpression)b),
+                DbExpressionType.AggregateRequest => CompareAggregateSubquery((AggregateRequestsExpression)a, (AggregateRequestsExpression)b),
+                DbExpressionType.SqlCast => CompareSqlCast((SqlCastExpression)a, (SqlCastExpression)b),
+                DbExpressionType.SqlFunction => CompareSqlFunction((SqlFunctionExpression)a, (SqlFunctionExpression)b),
+                DbExpressionType.SqlTableValuedFunction => CompareTableValuedSqlFunction((SqlTableValuedFunctionExpression)a, (SqlTableValuedFunctionExpression)b),
+                DbExpressionType.SqlConstant => CompareSqlConstant((SqlConstantExpression)a, (SqlConstantExpression)b),
+                DbExpressionType.SqlLiteral => CompareSqlLiteral((SqlLiteralExpression)a, (SqlLiteralExpression)b),
+                DbExpressionType.Case => CompareCase((CaseExpression)a, (CaseExpression)b),
+                DbExpressionType.RowNumber => CompareRowNumber((RowNumberExpression)a, (RowNumberExpression)b),
+                DbExpressionType.Like => CompareLike((LikeExpression)a, (LikeExpression)b),
+                DbExpressionType.Scalar or DbExpressionType.Exists or DbExpressionType.In => CompareSubquery((SubqueryExpression)a, (SubqueryExpression)b),
+                DbExpressionType.IsNull => CompareIsNull((IsNullExpression)a, (IsNullExpression)b),
+                DbExpressionType.IsNotNull => CompareIsNotNull((IsNotNullExpression)a, (IsNotNullExpression)b),
+                DbExpressionType.Delete => CompareDelete((DeleteExpression)a, (DeleteExpression)b),
+                DbExpressionType.Update => CompareUpdate((UpdateExpression)a, (UpdateExpression)b),
+                DbExpressionType.InsertSelect => CompareInsertSelect((InsertSelectExpression)a, (InsertSelectExpression)b),
+                DbExpressionType.CommandAggregate => CompareCommandAggregate((CommandAggregateExpression)a, (CommandAggregateExpression)b),
+                DbExpressionType.Entity => CompareEntityInit((EntityExpression)a, (EntityExpression)b),
+                DbExpressionType.EmbeddedInit => CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b),
+                DbExpressionType.MixinInit => CompareMixinFieldInit((MixinEntityExpression)a, (MixinEntityExpression)b),
+                DbExpressionType.ImplementedBy => CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b),
+                DbExpressionType.ImplementedByAll => CompareImplementedByAll((ImplementedByAllExpression)a, (ImplementedByAllExpression)b),
+                DbExpressionType.LiteReference => CompareLiteReference((LiteReferenceExpression)a, (LiteReferenceExpression)b),
+                DbExpressionType.LiteValue => CompareLiteValue((LiteValueExpression)a, (LiteValueExpression)b),
+                DbExpressionType.TypeEntity => CompareTypeFieldInit((TypeEntityExpression)a, (TypeEntityExpression)b),
+                DbExpressionType.TypeImplementedBy => CompareTypeImplementedBy((TypeImplementedByExpression)a, (TypeImplementedByExpression)b),
+                DbExpressionType.TypeImplementedByAll => CompareTypeImplementedByAll((TypeImplementedByAllExpression)a, (TypeImplementedByAllExpression)b),
+                DbExpressionType.MList => CompareMList((MListExpression)a, (MListExpression)b),
+                DbExpressionType.MListElement => CompareMListElement((MListElementExpression)a, (MListElementExpression)b),
+                DbExpressionType.PrimaryKey => ComparePrimaryKey((PrimaryKeyExpression)a, (PrimaryKeyExpression)b),
+                _ => throw new InvalidOperationException("Unexpected " + ((DbExpression)a).DbNodeType),
+            };
         }
 
 
@@ -373,16 +332,14 @@ namespace Signum.Engine.Linq
         {
             if (a.NodeType != b.NodeType)
                 return false;
-            switch (a.DbNodeType)
+            
+            return a.DbNodeType switch
             {
-                case DbExpressionType.Scalar:
-                    return CompareScalar((ScalarExpression)a, (ScalarExpression)b);
-                case DbExpressionType.Exists:
-                    return CompareExists((ExistsExpression)a, (ExistsExpression)b);
-                case DbExpressionType.In:
-                    return CompareIn((InExpression)a, (InExpression)b);
-            }
-            return false;
+                DbExpressionType.Scalar => CompareScalar((ScalarExpression)a, (ScalarExpression)b),
+                DbExpressionType.Exists => CompareExists((ExistsExpression)a, (ExistsExpression)b),
+                DbExpressionType.In => CompareIn((InExpression)a, (InExpression)b),
+                _ => false,
+            };
         }
 
         protected virtual bool CompareScalar(ScalarExpression a, ScalarExpression b)
@@ -576,13 +533,13 @@ namespace Signum.Engine.Linq
                 return obj.Type.GetHashCode() ^ obj.NodeType.GetHashCode() ^ SpacialHash(obj);
             }
 
-            private int SpacialHash(Expression obj)
+            private static int SpacialHash(Expression obj)
             {
-                if (obj is MethodCallExpression)
-                    return ((MethodCallExpression)obj).Method.Name.GetHashCode();
+                if (obj is MethodCallExpression mce)
+                    return mce.Method.Name.GetHashCode();
 
-                if (obj is MemberExpression)
-                    return ((MemberExpression)obj).Member.Name.GetHashCode();
+                if (obj is MemberExpression me)
+                    return me.Member.Name.GetHashCode();
 
                 return 0;
             }

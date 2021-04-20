@@ -111,11 +111,11 @@ namespace Signum.Engine.Basics
                     should.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
                     current.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
 
-                Func<string, string> simplify = tn =>
+                string simplify(string tn)
                 {
                     ObjectName name = ObjectName.Parse(tn, isPostgres);
                     return repeated.Contains(name.Name) ? name.ToString() : name.Name;
-                };
+                }
 
                 should = should.SelectDictionary(simplify, v => v);
                 current = current.SelectDictionary(simplify, v => v);

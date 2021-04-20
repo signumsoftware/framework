@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
+using System.Collections.Immutable;
 
 namespace Signum.Engine.Linq
 {

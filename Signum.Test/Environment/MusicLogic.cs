@@ -126,7 +126,7 @@ namespace Signum.Test.Environment
                                          Type = "Artist",
                                          a.Name,
                                          Lonely = a.Lonely(),
-                                         LastAward = a.LastAward
+                                         a.LastAward
                                      })
                                    .ToDQueryable(description)
                                    .AllQueryOperationsAsync(request, cancellationToken);
@@ -139,12 +139,12 @@ namespace Signum.Test.Environment
                                          Type = "Band",
                                          a.Name,
                                          Lonely = a.Lonely(),
-                                         LastAward = a.LastAward
+                                         a.LastAward
                                      })
                                    .ToDQueryable(description)
                                    .AllQueryOperationsAsync(request, cancellationToken);
 
-                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination, request.SystemTime);
+                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
                 })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)

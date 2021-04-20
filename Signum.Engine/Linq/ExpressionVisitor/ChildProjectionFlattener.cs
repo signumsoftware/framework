@@ -145,7 +145,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public Expression MakeEquatable(Expression expression)
+        public static Expression MakeEquatable(Expression expression)
         {
             if (expression.Type.IsArray)
                 return Expression.New(typeof(ArrayBox<>).MakeGenericType(expression.Type.ElementType()!).GetConstructors().SingleEx(), expression);
@@ -153,7 +153,7 @@ namespace Signum.Engine.Linq
             return expression.Nullify();
         }
 
-        private SelectExpression WithoutOrder(SelectExpression sel)
+        private static SelectExpression WithoutOrder(SelectExpression sel)
         {
             if (sel.Top != null || (sel.OrderBy.Count == 0))
                 return sel;
@@ -161,7 +161,7 @@ namespace Signum.Engine.Linq
             return new SelectExpression(sel.Alias, sel.IsDistinct, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy, sel.SelectOptions);
         }
 
-        private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression>? innerOrders)
+        private static SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression>? innerOrders)
         {
             if (sel.Top != null || (sel.OrderBy.Count == 0))
             {
@@ -179,7 +179,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        private bool IsKey(SelectExpression source, HashSet<ColumnExpression> columns)
+        private static bool IsKey(SelectExpression source, HashSet<ColumnExpression> columns)
         {
             var keys = KeyFinder.Keys(source);
 
@@ -190,14 +190,14 @@ namespace Signum.Engine.Linq
         {
             public static IEnumerable<ColumnExpression?> Keys(SourceExpression source)
             {
-                if (source is SelectExpression)
-                    return KeysSelect((SelectExpression)source);
-                if (source is TableExpression)
-                    return KeysTable((TableExpression)source);
-                if(source is JoinExpression)
-                    return KeysJoin((JoinExpression)source);
-                if (source is SetOperatorExpression)
-                    return KeysSet((SetOperatorExpression)source);
+                if (source is SelectExpression se)
+                    return KeysSelect(se);
+                if (source is TableExpression te)
+                    return KeysTable(te);
+                if(source is JoinExpression je)
+                    return KeysJoin(je);
+                if (source is SetOperatorExpression soe)
+                    return KeysSet(soe);
 
                 throw new InvalidOperationException("Unexpected source");
             }

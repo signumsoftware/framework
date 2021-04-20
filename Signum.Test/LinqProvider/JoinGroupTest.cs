@@ -130,7 +130,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void LeftOuterMyView()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Administrator.CreateTemporaryTable<MyTempView>();
 

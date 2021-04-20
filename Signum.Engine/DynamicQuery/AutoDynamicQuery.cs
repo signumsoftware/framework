@@ -121,8 +121,8 @@ namespace Signum.Engine.DynamicQuery
                 if (request.ValueToken == null)
                     return query.Query.Count();
 
-                if (request.ValueToken is AggregateToken)
-                    return query.SimpleAggregate((AggregateToken)request.ValueToken);
+                if (request.ValueToken is AggregateToken at)
+                    return query.SimpleAggregate(at);
 
                 return query.SelectOne(request.ValueToken).Unique(UniqueType.SingleOrDefault);
             }
@@ -139,8 +139,8 @@ namespace Signum.Engine.DynamicQuery
                 if (request.ValueToken == null)
                     return await query.Query.CountAsync(token);
 
-                if (request.ValueToken is AggregateToken)
-                    return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
+                if (request.ValueToken is AggregateToken at)
+                    return await query.SimpleAggregateAsync(at, token);
 
                 if (request.MultipleValues)
                     return await query.SelectOne(request.ValueToken).ToListAsync(token);

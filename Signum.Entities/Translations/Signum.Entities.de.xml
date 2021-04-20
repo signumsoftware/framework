@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -266,7 +266,7 @@
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Alle" />
   </Type>
-  <Type Name="PaginationMode">
+  <Type Name="PaginationMode" Description="Paginierungsmodus">
     <Member Name="All" Description="Alle" />
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Seiten" />
@@ -434,6 +434,8 @@
     <Member Name="Search" Description="Suche" />
     <Member Name="ShowPinnedFiltersOptions" Description="Vorgewahlter Filteroptionen anzeigen" />
     <Member Name="SplitText" Description="Text aufteilen" />
+    <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
+    <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
     <Member Name="Value" Description="Wert" />

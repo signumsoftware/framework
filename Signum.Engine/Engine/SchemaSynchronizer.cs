@@ -642,6 +642,9 @@ WHERE {where}"))!;
                 if (column.DbType.IsString() && !defaultValue.Contains("'"))
                     defaultValue = "'" + defaultValue + "'";
 
+                if (column.DbType.IsGuid() && !defaultValue.Contains("'"))
+                    defaultValue = "'" + defaultValue + "'";
+
                 if ((column.DbType.IsDate() || column.DbType.IsTime()) && !defaultValue.Contains("'") && defaultValue != typeDefault)
                     defaultValue = "'" + defaultValue + "'";
 

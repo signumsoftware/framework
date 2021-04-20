@@ -52,7 +52,7 @@ namespace Signum.React.Json
                     writer.WriteStartArray();
                     foreach (var column in rt.Columns)
                     {
-                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null)))
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null, null)))
                         {
                             JsonSerializer.Serialize(writer, row[column], options);
                         }

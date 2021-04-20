@@ -27,7 +27,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateValue()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate().Set(a => a.Year, a => a.Year * 2).Execute();
                 //tr.Commit();
@@ -38,7 +38,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateValueSqlFunction()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate().Set(a => a.Name, a => a.Name.ToUpper()).Execute();
                 //tr.Commit();
@@ -49,7 +49,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateValueNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate().Set(a => a.Text, a => null!).Execute();
                 //tr.Commit();
@@ -60,7 +60,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateValueConstant()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().Where(a => a.Year < 1990)
                     .UnsafeUpdate().Set(a => a.Year, a => 1990).Execute();
@@ -72,7 +72,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEnumConstant()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<ArtistEntity>().UnsafeUpdate()
                 .Set(a => a.Sex, a => Sex.Male)
@@ -84,7 +84,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEnum()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<ArtistEntity>().UnsafeUpdate()
                 .Set(a => a.Sex, a => a.Sex == Sex.Female ? Sex.Male : Sex.Female)
@@ -98,7 +98,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEfie()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 SongEmbedded song = new SongEmbedded
                 {
@@ -122,7 +122,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEfieNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
                     .Set(a => a.BonusTrack, a => null)
@@ -137,7 +137,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEfieConditional()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 SongEmbedded song = new SongEmbedded
                 {
@@ -160,7 +160,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateFie()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 LabelEntity label = Database.Query<LabelEntity>().FirstEx();
 
@@ -176,7 +176,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateFieConditional()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 LabelEntity label = Database.Query<LabelEntity>().FirstEx();
 
@@ -190,7 +190,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateFieSetReadonly()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 LabelEntity label = Database.Query<LabelEntity>().FirstEx();
 
@@ -204,7 +204,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateMixin()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
                     .Set(a => a.Mixin<CorruptMixin>().Corrupt, a => true)
@@ -216,7 +216,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateFieToLite()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 LabelEntity label = Database.Query<LabelEntity>().FirstEx();
 
@@ -232,7 +232,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public void UpdateFieNew()
         {
             var e  = Assert.Throws<InvalidOperationException>(()=> {
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     LabelEntity label = new LabelEntity();
 
@@ -249,7 +249,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateFieNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
                     .Set(a => a.Label, a => null!)
@@ -262,7 +262,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbFie()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -278,7 +278,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbFieConditional()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -292,7 +292,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
                     .Set(a => a.Author, a => null!)
@@ -305,7 +305,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaFie()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -319,7 +319,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaLiteFie()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -333,7 +333,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
                     .Set(a => a.Target, a => null!)
@@ -346,7 +346,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaLiteNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
                     .Set(a => a.OtherTarget, a => null)
@@ -359,7 +359,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaConditional()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -374,7 +374,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaLiteConditional()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -388,7 +388,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaCoalesce()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -403,7 +403,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateIbaLiteCoalesce()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
@@ -417,7 +417,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEmbeddedField()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
                     .Set(a => a.BonusTrack!.Name, a => a.BonusTrack!.Name + " - ")
@@ -430,7 +430,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateEmbeddedNull()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeUpdate()
                     .Set(a => a.BonusTrack, a => null)
@@ -443,7 +443,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeUpdatePart()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>()
                     .Select(a => new { a.Label, Album = a })
@@ -460,7 +460,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateMListLite()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity artist = Database.Query<ArtistEntity>().FirstEx();
 
@@ -478,7 +478,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateMListEntity()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 ArtistEntity artist = Database.Query<ArtistEntity>().FirstEx();
 
@@ -493,7 +493,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateMListEmbedded()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.MListQuery((AlbumEntity a) => a.Songs).UnsafeUpdateMList()
                      .Set(mle => mle.Element.Seconds, mle => 3)
@@ -507,7 +507,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateMListEmbeddedPart()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = (from a in Database.Query<AlbumEntity>()
                              from mle in a.MListElements(_ => _.Songs)
@@ -527,7 +527,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UpdateExplicitInterfaceImplementedField()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                  Database.Query<AlbumEntity>()
                      .UnsafeUpdate()
@@ -539,7 +539,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeUpdatePartExpand()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Database.Query<LabelEntity>()
                     .UnsafeUpdatePart(lb => lb.Owner!.Entity.Country)
@@ -552,7 +552,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeUpdateNullableEmbeddedValue()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Database.Query<AlbumEntity>()
                     .UnsafeUpdate()
@@ -573,7 +573,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeUpdateMyView()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Administrator.CreateTemporaryTable<MyTempView>();
 

@@ -58,7 +58,7 @@ namespace Signum.Engine
                      }).ToList();
 
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($@"[TableName(""{tableName.ToString()}"")]");
+                sb.AppendLine($@"[TableName(""{tableName}"")]");
                 sb.AppendLine($"public class {tableName.Name} : IView");
                 sb.AppendLine(@"{");
                 foreach (var c in columns)
@@ -280,7 +280,7 @@ namespace Signum.Engine
         public static void SaveDisableIdentity<T>(T entities)
             where T : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (Administrator.SaveDisableIdentity<T>())
             {
                 Database.Save(entities);
@@ -291,7 +291,7 @@ namespace Signum.Engine
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
             where T : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (Administrator.SaveDisableIdentity<T>())
             {
                 Database.SaveList(entities);
@@ -487,7 +487,7 @@ namespace Signum.Engine
         {
             var table = Schema.Current.Table(type);
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 table.TablesMList().ToList().ForEach(mlist =>
                 {
@@ -581,7 +581,7 @@ namespace Signum.Engine
         public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool>? shouldMove = null)
         where T : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double)!.ExecuteLeaves();
                 tr.Commit();

@@ -12,7 +12,7 @@ export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
 export type MessageModalIcon = "info" | "question" | "warning" | "error" | "success";
 
-export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "yes_no_cancel";
+export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "yes_cancel" | "yes_no_cancel";
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
@@ -97,6 +97,22 @@ export default function MessageModal(p: MessageModalProps) {
               onClick={() => handleButtonClicked("no")}
               name="no">
               {BooleanEnum.niceToString("False")}
+            </button>
+          </div>);
+      case "yes_no":
+        return (
+          <div className="btn-toolbar">
+            <button
+              className="btn btn-primary sf-close-button sf-yes-button"
+              onClick={() => handleButtonClicked("yes")}
+              name="yes">
+              {BooleanEnum.niceToString("True")}
+            </button>
+            <button
+              className="btn btn-secondary sf-close-button sf-cancel-button"
+              onClick={() => handleButtonClicked("cancel")}
+              name="cancel">
+              {JavascriptMessage.cancel.niceToString()}
             </button>
           </div>);
       case "yes_no_cancel":

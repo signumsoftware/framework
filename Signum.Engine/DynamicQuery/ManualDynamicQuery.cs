@@ -61,7 +61,7 @@ namespace Signum.Engine.DynamicQuery
                      .Where(aggregateFilters)
                      .OrderBy(request.Orders);
 
-            var cols = groupCollection.TryPaginate(request.Pagination, request.SystemTime);
+            var cols = groupCollection.TryPaginate(request.Pagination);
 
             return cols.ToResultTable(request);
         }
@@ -78,7 +78,7 @@ namespace Signum.Engine.DynamicQuery
                 Pagination = new Pagination.All(),
             };
 
-            if (request.ValueToken == null || request.ValueToken is AggregateToken && ((AggregateToken)request.ValueToken).AggregateFunction == AggregateFunction.Count)
+            if (request.ValueToken == null || request.ValueToken is AggregateToken at && at.AggregateFunction == AggregateFunction.Count)
             {
                 req.Pagination = new Pagination.Paginate(1, 1);
                 req.Columns.Add(new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName));
@@ -86,12 +86,12 @@ namespace Signum.Engine.DynamicQuery
                 return result.TotalElements!.Value;
             }
 
-            else if (request.ValueToken is AggregateToken)
+            else if (request.ValueToken is AggregateToken agt)
             {
                 var parent = request.ValueToken.Parent!;
                 req.Columns.Add(new Column(parent, parent.NiceName()));
                 var result = await Execute(req, GetQueryDescription(), cancellationToken);
-                return result.SimpleAggregate((AggregateToken)request.ValueToken);
+                return result.SimpleAggregate(agt);
             }
             else if(request.MultipleValues)
             {

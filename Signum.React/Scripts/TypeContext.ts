@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
-import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } from './Signum.Entities'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo } from './Reflection'
+import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 import { classes } from './Globals';
@@ -337,6 +337,19 @@ export class TypeContext<T> extends StyleContext {
     var path = suffix == null ? this.prefix : (this.prefix + "." + suffix);
 
     return path.replace(/.\[\]/, "_");
+  }
+
+  tryFindRootEntity(): TypeContext<ModelEntity | Entity> | undefined {
+    let current: TypeContext<any> = this;
+    while (current) {
+      const entity = current.value as ModifiableEntity;
+      if (entity && entity.Type && tryGetTypeInfo(entity.Type))
+        return current as TypeContext<ModifiableEntity>;
+
+      current = current.parent as TypeContext<any>;
+    }
+
+    return undefined;
   }
 
   tryFindParentCtx<S extends ModifiableEntity>(type: Type<S>): TypeContext<S> | undefined;

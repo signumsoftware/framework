@@ -105,8 +105,8 @@ SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, title?: Rea
       });
 };
 
-SelectorModal.chooseLite = <T extends Entity>(type: Type<T>): Promise<Lite<T> | undefined> => {
-  return Finder.API.fetchAllLites({ types: type.typeName })
+SelectorModal.chooseLite = <T extends Entity>(type: Type<T>, values?: Lite<T>[]): Promise<Lite<T> | undefined> => {
+  return (values ? Promise.resolve(values):  Finder.API.fetchAllLites({ types: type.typeName }))
     .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
       {
         buttonDisplay: a => getToString(a),

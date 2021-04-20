@@ -29,7 +29,7 @@ namespace Signum.Engine.Linq
                 return base.Visit(exp);
         }
 
-        private Expression VisitType(Expression exp)
+        protected virtual Expression VisitType(Expression exp)
         {
             if (exp.NodeType == ExpressionType.Constant)
                 return exp;
@@ -54,7 +54,7 @@ namespace Signum.Engine.Linq
 
                 if (typeof(IEntity).IsAssignableFrom(node.Left.Type) || typeof(IEntity).IsAssignableFrom(node.Right.Type))
                 {
-                    return this.CombineEntities(node.Left, node.Right, node.Type, 
+                    return CombineEntities(node.Left, node.Right, node.Type, 
                         (l, r) => Expression.Coalesce(l, r), 
                         (l, r) => Expression.Condition(Expression.NotEqual(node.Left, Expression.Constant(null, node.Left.Type)), l, r));
                 }
@@ -71,15 +71,14 @@ namespace Signum.Engine.Linq
 
             if (typeof(IEntity).IsAssignableFrom(node.IfTrue.Type) || typeof(IEntity).IsAssignableFrom(node.IfFalse.Type))
             {
-                return this.CombineEntities(node.IfTrue, node.IfFalse, node.Type, 
+                return CombineEntities(node.IfTrue, node.IfFalse, node.Type, 
                     (t, f) => Expression.Condition(node.Test, t, f));
             }
 
             return base.VisitConditional(node);
         }
 
-
-        Expression CombineEntities(Expression a, Expression b, Type type, Func<Expression, Expression, Expression> combiner, Func<Expression, Expression, Expression>? combinerIB = null)
+        static Expression CombineEntities(Expression a, Expression b, Type type, Func<Expression, Expression, Expression> combiner, Func<Expression, Expression, Expression>? combinerIB = null)
         {
             if (a is ImplementedByAllExpression || b is ImplementedByAllExpression)
                 return CombineIBA(ToIBA(a, type), ToIBA(b, type), type, combiner);
@@ -101,13 +100,13 @@ namespace Signum.Engine.Linq
             throw new UnexpectedValueException(a);
         }
 
-        private ImplementedByAllExpression CombineIBA(ImplementedByAllExpression a, ImplementedByAllExpression b, Type type, Func<Expression, Expression, Expression> combiner)
+        private static ImplementedByAllExpression CombineIBA(ImplementedByAllExpression a, ImplementedByAllExpression b, Type type, Func<Expression, Expression, Expression> combiner)
         {
             return new ImplementedByAllExpression(type, combiner(a.Id, b.Id),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(combiner(a.TypeId.TypeColumn, b.TypeId.TypeColumn))), null);
         }
 
-        private ImplementedByExpression CombineIB(ImplementedByExpression a, ImplementedByExpression b, Type type, Func<Expression, Expression, Expression> combiner)
+        private static ImplementedByExpression CombineIB(ImplementedByExpression a, ImplementedByExpression b, Type type, Func<Expression, Expression, Expression> combiner)
         {
             return new ImplementedByExpression(type, a.Strategy,
                 a.Implementations.OuterJoinDictionaryCC(b.Implementations,
@@ -115,12 +114,12 @@ namespace Signum.Engine.Linq
                 ));
         }
 
-        private EntityExpression CombineEntity(EntityExpression a, EntityExpression b, Type type, Func<Expression, Expression, Expression> combiner)
+        private static EntityExpression CombineEntity(EntityExpression a, EntityExpression b, Type type, Func<Expression, Expression, Expression> combiner)
         {
             return new EntityExpression(type, new PrimaryKeyExpression(combiner(a.ExternalId.Value, b.ExternalId.Value)), null, null, null, null, null, a.AvoidExpandOnRetrieving || b.AvoidExpandOnRetrieving);
         }
 
-        ImplementedByAllExpression ToIBA(Expression node, Type type)
+        static ImplementedByAllExpression ToIBA(Expression node, Type type)
         {
             if (node.IsNull())
                 return new ImplementedByAllExpression(type, 
@@ -145,7 +144,7 @@ namespace Signum.Engine.Linq
             throw new UnexpectedValueException(node);
         }
 
-        ImplementedByExpression ToIB(Expression node, Type type)
+        static ImplementedByExpression ToIB(Expression node, Type type)
         {
             if (node.IsNull())
                 return new ImplementedByExpression(type, CombineStrategy.Case, new Dictionary<Type, EntityExpression>());
@@ -159,7 +158,7 @@ namespace Signum.Engine.Linq
             throw new UnexpectedValueException(node);
         }
 
-        EntityExpression ToEntity(Expression node, Type type)
+        static EntityExpression ToEntity(Expression node, Type type)
         {
             if (node.IsNull())
                 return NullEntity(type);

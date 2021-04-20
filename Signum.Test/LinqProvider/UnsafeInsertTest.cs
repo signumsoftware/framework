@@ -23,7 +23,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertSimple()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                 {
@@ -42,7 +42,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertSimpleParameter()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.Query<AlbumEntity>().Select(a => new AlbumEntity
                 {
@@ -61,7 +61,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertSimpleId()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 using (Administrator.SaveDisableIdentity<AlbumEntity>())
                 {
@@ -84,7 +84,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertMListSimple()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.MListQuery((AlbumEntity a) => a.Songs)
                     .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEmbedded>
@@ -101,7 +101,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertMListParameter()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.MListQuery((AlbumEntity a) => a.Songs)
                     .Select(mle => new MListElement<AlbumEntity, SongEmbedded>
@@ -119,7 +119,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertMListId()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 using (Administrator.DisableIdentity((AlbumEntity a)=>a.Songs))
                 {
@@ -140,7 +140,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertSimpleSingle()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                 {
@@ -158,7 +158,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void InsertDistinct()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int value = Database.Query<LabelEntity>().Select(a => a.Country).Distinct().UnsafeInsert(c => new CountryEntity
                 {
@@ -179,7 +179,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeInsertMyView()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Administrator.CreateTemporaryTable<MyTempView>();
 

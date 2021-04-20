@@ -62,12 +62,11 @@ namespace Signum.Engine.Linq
         {
             if (this.candidates.Contains(expression!))
             {
-                if (expression is ColumnExpression)
+                if (expression is ColumnExpression column)
                 {
                     if (!projectTrivialColumns)
                         return expression;
 
-                    ColumnExpression column = (ColumnExpression)expression;
                     if (this.map.TryGetValue(column, out var mapped))
                     {
                         return mapped;

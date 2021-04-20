@@ -16,12 +16,12 @@ namespace Signum.Engine
             Save(new[] { entity });
         }
 
-        static readonly Entity[] None = new Entity[0];
+        static readonly Entity[] None = Array.Empty<Entity>();
 
         public static void Save(Entity[] entities)
         {
             if (entities == null || entities.Any(e => e == null))
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entities));
 
             using (var log = HeavyProfiler.LogNoStackTrace("PreSaving"))
             {
@@ -91,15 +91,15 @@ namespace Signum.Engine
             else
                 identifiables.RemoveEdges(backEdges.Edges);
 
-            Dictionary<TypeNew, int> stats = identifiables.GroupCount(ident => new TypeNew(ident.GetType(), ident.IsNew));
+            Dictionary<(Type type, bool isNew), int> stats = identifiables.GroupCount(ident => (ident.GetType(), ident.IsNew));
 
             DirectedGraph<Entity> clone = identifiables.Clone();
             DirectedGraph<Entity> inv = identifiables.Inverse();
 
             while (clone.Count > 0)
             {
-                IGrouping<TypeNew, Entity> group = clone.Sinks()
-                    .GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew))
+                IGrouping<(Type type, bool isNew), Entity> group = clone.Sinks()
+                    .GroupBy(ident => (ident.GetType(), ident.IsNew))
                     .WithMin(g => stats[g.Key] - g.Count());
 
                 foreach (var node in group)
@@ -112,47 +112,19 @@ namespace Signum.Engine
 
             if (backEdges != null)
             {
-                foreach (var gr in backEdges.Edges.Select(e => e.From).Distinct().GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew)))
+                foreach (var gr in backEdges.Edges.Select(e => e.From).Distinct().GroupBy(ident => (ident.GetType(), ident.IsNew)))
                     SaveGroup(schema, gr, null);
             }
         }
 
-        private static void SaveGroup(Schema schema, IGrouping<TypeNew, Entity> group, DirectedGraph<Entity>? backEdges)
+        private static void SaveGroup(Schema schema, IGrouping<(Type type, bool isNew), Entity> group, DirectedGraph<Entity>? backEdges)
         {
-            Table table = schema.Table(group.Key.Type);
+            Table table = schema.Table(group.Key.type);
 
-            if (group.Key.IsNew)
+            if (group.Key.isNew)
                 table.InsertMany(group.ToList(), backEdges);
             else
                 table.UpdateMany(group.ToList(), backEdges);
-        }
-
-        struct TypeNew : IEquatable<TypeNew>
-        {
-            public readonly Type Type;
-            public readonly bool IsNew;
-
-            public TypeNew(Type type, bool isNew)
-            {
-                this.Type = type;
-                this.IsNew = isNew;
-            }
-
-            public bool Equals(TypeNew other)
-            {
-                return Type == other.Type &&
-                    IsNew == other.IsNew;
-            }
-
-            public override int GetHashCode()
-            {
-                return Type.GetHashCode() ^ (IsNew ? 1 : 0);
-            }
-
-            public override string ToString()
-            {
-                return $"{Type} IsNew={IsNew}";
-            }
         }
 
         internal static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)

@@ -14,7 +14,7 @@ namespace Signum.Utilities
     [Serializable, TypeConverter(typeof(DateTypeConverter))]
     public struct Date : IComparable, IFormattable, ISerializable, IComparable<Date>, IEquatable<Date>
     {
-        private DateTime _dt;
+        private readonly DateTime _dt;
 
         public static readonly Date MaxValue = new Date(DateTime.MaxValue);
         public static readonly Date MinValue = new Date(DateTime.MinValue);
@@ -187,7 +187,7 @@ namespace Signum.Utilities
 
         public override bool Equals(object? value)
         {
-            return value is Date && this._dt.Equals(((Date)value)._dt);
+            return value is Date d && _dt.Equals(d._dt);
         }
 
         public override int GetHashCode()
@@ -288,18 +288,21 @@ namespace Signum.Utilities
             return format;
         }
 
+        public string ToIsoString()
+        {
+            return this._dt.ToString("yyyy-MM-dd");
+        }
+
         public static bool TryParse(string s, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParse(s, out d);
+            bool success = DateTime.TryParse(s, out DateTime d);
             result = new Date(d);
             return success;
         }
 
         public static bool TryParse(string s, IFormatProvider provider, DateTimeStyles style, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParse(s, provider, style, out d);
+            bool success = DateTime.TryParse(s, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
@@ -311,16 +314,14 @@ namespace Signum.Utilities
                 format = "yyyy-MM-dd";
             }
 
-            DateTime d;
-            bool success = DateTime.TryParseExact(s, format, provider, style, out d);
+            bool success = DateTime.TryParseExact(s, format, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
 
         public static bool TryParseExact(string s, string[] formats, IFormatProvider provider, DateTimeStyles style, out Date result)
         {
-            DateTime d;
-            bool success = DateTime.TryParseExact(s, formats, provider, style, out d);
+            bool success = DateTime.TryParseExact(s, formats, provider, style, out DateTime d);
             result = new Date(d);
             return success;
         }
@@ -330,23 +331,47 @@ namespace Signum.Utilities
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            return sourceType == typeof(string);
+            return sourceType == typeof(string) || sourceType == typeof(DateTime) || sourceType == typeof(DateTimeOffset);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(string);
+            return destinationType == typeof(string) || destinationType == typeof(DateTime) || destinationType == typeof(DateTimeOffset);
         }
 
         public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            return string.IsNullOrEmpty((string)value) ? (Date?)null : (Date?)Date.ParseExact((string)value, "o", CultureInfo.InvariantCulture);
+            if (value is null)
+                return null;
+
+            if (value is string s)
+                return Date.ParseExact(s, "o", CultureInfo.InvariantCulture);
+
+            if (value is DateTime dt)
+                return (Date)dt;
+
+            if (value is DateTimeOffset dto)
+                return (Date)dto.DateTime;
+
+            throw new UnexpectedValueException(value);
         }
 
         public override object? ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            var date = (Date?)value;
-            return date == null ? null : date.Value.ToString("o");
+            if (value == null)
+                return null;
+
+            var date = (Date)value;
+            if (destinationType == typeof(string))
+                return date.ToString("o");
+
+            if (destinationType == typeof(DateTime))
+                return (DateTime)date;
+
+            if (destinationType == typeof(DateTimeOffset))
+                return (DateTimeOffset)(DateTime)date;
+
+            throw new UnexpectedValueException(destinationType);
         }
     }
 }

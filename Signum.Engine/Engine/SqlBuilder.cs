@@ -6,6 +6,8 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 
+#pragma warning disable CA1822 // Mark members as static
+
 namespace Signum.Engine
 {
     public class SqlBuilder

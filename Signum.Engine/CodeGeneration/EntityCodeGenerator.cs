@@ -566,7 +566,7 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
 
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         }
 
@@ -785,7 +785,7 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string CleanDefault(string def)
         {
             if (def.StartsWith("(") && def.EndsWith(")"))
-                return def.Substring(1, def.Length - 2);
+                return def[1..^1];
 
             return def;
         }
@@ -812,41 +812,41 @@ namespace Signum.Engine.CodeGeneration
 
         protected internal virtual Type GetValueType(DiffColumn col)
         {
-            switch (col.DbType.SqlServer)
+            return col.DbType.SqlServer switch
             {
-                case SqlDbType.BigInt: return typeof(long);
-                case SqlDbType.Binary: return typeof(byte[]);
-                case SqlDbType.Bit: return typeof(bool);
-                case SqlDbType.Char: return typeof(char);
-                case SqlDbType.Date: return typeof(DateTime);
-                case SqlDbType.DateTime: return typeof(DateTime);
-                case SqlDbType.DateTime2: return typeof(DateTime);
-                case SqlDbType.DateTimeOffset: return typeof(DateTimeOffset);
-                case SqlDbType.Decimal: return typeof(Decimal);
-                case SqlDbType.Float: return typeof(double);
-                case SqlDbType.Image: return typeof(byte[]);
-                case SqlDbType.Int: return typeof(int);
-                case SqlDbType.Money: return typeof(decimal);
-                case SqlDbType.NChar: return typeof(string);
-                case SqlDbType.NText: return typeof(string);
-                case SqlDbType.NVarChar: return typeof(string);
-                case SqlDbType.Real: return typeof(float);
-                case SqlDbType.SmallDateTime: return typeof(DateTime);
-                case SqlDbType.SmallInt: return typeof(short);
-                case SqlDbType.SmallMoney: return typeof(decimal);
-                case SqlDbType.Text: return typeof(string);
-                case SqlDbType.Time: return typeof(TimeSpan);
-                case SqlDbType.Timestamp: return typeof(TimeSpan);
-                case SqlDbType.TinyInt: return typeof(byte);
-                case SqlDbType.UniqueIdentifier: return typeof(Guid);
-                case SqlDbType.VarBinary: return typeof(byte[]);
-                case SqlDbType.VarChar: return typeof(string);
-                case SqlDbType.Xml: return typeof(string);
-                case SqlDbType.Udt: return Schema.Current.Settings.UdtSqlName
-                    .SingleOrDefaultEx(kvp => StringComparer.InvariantCultureIgnoreCase.Equals(kvp.Value, col.UserTypeName))
-                    .Key;
-                default: throw new NotImplementedException("Unknown translation for " + col.DbType.SqlServer);
-            }
+                SqlDbType.BigInt => typeof(long),
+                SqlDbType.Binary => typeof(byte[]),
+                SqlDbType.Bit => typeof(bool),
+                SqlDbType.Char => typeof(char),
+                SqlDbType.Date => typeof(DateTime),
+                SqlDbType.DateTime => typeof(DateTime),
+                SqlDbType.DateTime2 => typeof(DateTime),
+                SqlDbType.DateTimeOffset => typeof(DateTimeOffset),
+                SqlDbType.Decimal => typeof(Decimal),
+                SqlDbType.Float => typeof(double),
+                SqlDbType.Image => typeof(byte[]),
+                SqlDbType.Int => typeof(int),
+                SqlDbType.Money => typeof(decimal),
+                SqlDbType.NChar => typeof(string),
+                SqlDbType.NText => typeof(string),
+                SqlDbType.NVarChar => typeof(string),
+                SqlDbType.Real => typeof(float),
+                SqlDbType.SmallDateTime => typeof(DateTime),
+                SqlDbType.SmallInt => typeof(short),
+                SqlDbType.SmallMoney => typeof(decimal),
+                SqlDbType.Text => typeof(string),
+                SqlDbType.Time => typeof(TimeSpan),
+                SqlDbType.Timestamp => typeof(TimeSpan),
+                SqlDbType.TinyInt => typeof(byte),
+                SqlDbType.UniqueIdentifier => typeof(Guid),
+                SqlDbType.VarBinary => typeof(byte[]),
+                SqlDbType.VarChar => typeof(string),
+                SqlDbType.Xml => typeof(string),
+                SqlDbType.Udt => Schema.Current.Settings.UdtSqlName
+.SingleOrDefaultEx(kvp => StringComparer.InvariantCultureIgnoreCase.Equals(kvp.Value, col.UserTypeName))
+.Key,
+                _ => throw new NotImplementedException("Unknown translation for " + col.DbType.SqlServer),
+            };
         }
 
         protected virtual string WriteEmbeddedField(DiffTable table, string fieldName)
@@ -922,11 +922,12 @@ namespace Signum.Engine.CodeGeneration
             if (mListInfo.IsVirtual)
                 return "PreserveOrder";
 
-            var parts = new List<string>();
+            var parts = new List<string>
+            {
+                "\"" + mListInfo.PreserveOrderColumn.Name + "\""
+            };
 
-            parts.Add("\"" + mListInfo.PreserveOrderColumn.Name  +"\"");
-
-             Type type = GetValueType(mListInfo.PreserveOrderColumn);
+            Type type = GetValueType(mListInfo.PreserveOrderColumn);
 
             parts.AddRange(GetSqlDbTypeParts(mListInfo.PreserveOrderColumn, type));
 

@@ -383,15 +383,22 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public static Dictionary<Type, Func<Expression, Expression>> OrderAdapters = new Dictionary<Type, Func<Expression, Expression>>();
+        public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters = 
+            new List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>>();
 
         public static LambdaExpression CreateOrderLambda(QueryToken token, BuildExpressionContext ctx)
         {
-            var body = token.BuildExpression(ctx);
-            var adapter = QueryUtils.OrderAdapters.TryGetC(token.Type);
-            if (adapter != null)
-                body = adapter(body);
+            foreach (var ad in OrderAdapters)
+            {
+                var func = ad(token);
+                if (func != null)
+                {
+                    var b = func(ctx);
+                    return Expression.Lambda(b, ctx.Parameter);
+                }
+            }
 
+            var body = token.BuildExpression(ctx);
             return Expression.Lambda(body, ctx.Parameter);
         }
 
@@ -400,7 +407,7 @@ namespace Signum.Entities.DynamicQuery
             if (token == null)
                 return "No column selected";
 
-            if (token.Type.IsEmbeddedEntity() && !OrderAdapters.ContainsKey(token.Type))
+            if (token.Type.IsEmbeddedEntity() && !OrderAdapters.Any(a => a(token) != null))
                 return "{0} can not be ordered".FormatWith(token.Type.NicePluralName());
 
             if (QueryToken.IsCollection(token.Type))

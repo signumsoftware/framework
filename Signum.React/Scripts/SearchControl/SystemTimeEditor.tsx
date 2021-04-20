@@ -147,7 +147,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
-          valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString(), timeButton: JavascriptMessage.Time.niceToString() }} />
+          valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString() }} />
       </div>
     );
   }

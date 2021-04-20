@@ -47,6 +47,12 @@ namespace Signum.Upgrade
                 new Upgrade_20210119_DeepL(),
                 new Upgrade_20210205_ErrorHandling(),
                 new Upgrade_20210210_UpgradeNugets(),
+                new Upgrade_20210216_RegisterTranslatableRoutes(),
+                new Upgrade_20210302_TypeScript42(),
+                new Upgrade_20210325_FixDllPlugin(),
+                new Upgrade_20210331_ReactWidgets5(),
+                new Upgrade_20210414_SimplifyQueryTokenString(),
+                new Upgrade_20210415_ReactWidgets503(),
             }.Run(uctx);
         }
     }

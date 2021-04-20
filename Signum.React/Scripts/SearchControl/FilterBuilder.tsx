@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { Dic, areEqual, classes } from '../Globals'
+import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
 import { SearchMessage, Lite } from '../Signum.Entities'
-import { isNumber } from '../Lines/ValueLine'
+import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
@@ -87,6 +87,9 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       p.onHeightChanged();
   }
 
+
+  var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
+
   return (
     <fieldset className="form-xs">
       {p.title && <legend>{p.title}</legend>}
@@ -107,15 +110,15 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             </tr>
           </thead>
           <tbody>
-            {p.filterOptions.map((f, i) => isFilterGroupOptionParsed(f) ?
-              <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+            {p.filterOptions.map((f) => isFilterGroupOptionParsed(f) ?
+              <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
                 disableValue={false} /> :
-              <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+              <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
@@ -135,10 +138,10 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
                   </a>
 
-                {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
+                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
                     className="sf-line-button ml-3"
-                  onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                  <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
+                    onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
                   </a>
                   }
                 </td>
@@ -252,6 +255,8 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
   const fg = p.filterGroup;
 
+  var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
+
   if (!p.showPinnedFiltersOptions && !isFilterActive(fg))
     return null;
 
@@ -318,9 +323,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
             </thead>
             {fg.expanded ?
               <tbody>
-                {fg.filters.map((f, i) => isFilterGroupOptionParsed(f) ?
+                {fg.filters.map((f) => isFilterGroupOptionParsed(f) ?
 
-                  <FilterGroupComponent key={i} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                     prefixToken={fg.token}
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
@@ -329,7 +334,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   /> :
 
-                  <FilterConditionComponent key={i} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                     prefixToken={fg.token}
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
@@ -394,8 +399,13 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 }
 
 function isFilterActive(fo: FilterOptionParsed) {
-  return fo.pinned == null ||
-    fo.pinned.active == null /*Always*/ ||
+  if (fo.pinned == null)
+    return true;
+
+  if (fo.pinned.splitText && (fo.value == null || fo.value == ""))
+    return false;
+
+  return fo.pinned.active == null /*Always*/ ||
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_StartChecked" ||
     fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
@@ -441,7 +451,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
-        f.value = f.value && trimDateToFormat(f.value, newToken);
+        if (f.value) {
+          const type = newToken.type.name as "Date" | "DateTime";
+          const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
+          f.value = type == "Date" ? date.toISODate() : date.toISO();
+        }
       }
     }
     f.token = newToken ?? undefined;
@@ -453,19 +467,6 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     forceUpdate();
   }
-
-  function trimDateToFormat(date: string, newToken: QueryToken) {
-
-    var luxonFormat = toLuxonFormat(newToken.format, newToken.type.name as "Date" | "DateTime");
-
-    if (!luxonFormat)
-      return date;
-
-    const formatted = DateTime.fromISO(date).toFormat(luxonFormat);
-    const dateTime = DateTime.fromFormat(formatted, luxonFormat);
-    return newToken.type.name == "Date" ? dateTime.toISODate() : dateTime.toISO();
-  }
-
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
     const operation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;

@@ -20,7 +20,7 @@ namespace Signum.Engine.Json
     public abstract class JsonConverterWithExisting<T> : JsonConverter<T>, IJsonConverterWithExisting
     {
         public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            Read(ref reader, typeToConvert, options, default(T));
+            Read(ref reader, typeToConvert, options, default);
 
         public object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue) =>
             Read(ref reader, typeToConvert, options, (T?)existingValue);
@@ -30,7 +30,7 @@ namespace Signum.Engine.Json
 
     public class MListJsonConverterFactory : JsonConverterFactory
     {
-        Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+        readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
 
         public MListJsonConverterFactory(Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
         {
@@ -50,7 +50,7 @@ namespace Signum.Engine.Json
 
     public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
     {
-        Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
+        readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
 
         readonly JsonConverter<T> converter;
         public MListJsonConverter(JsonSerializerOptions options, Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
@@ -62,24 +62,24 @@ namespace Signum.Engine.Json
         public override void Write(Utf8JsonWriter writer, MList<T> value, JsonSerializerOptions options)
         {
             writer.WriteStartArray();
-            var tup = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
+            var (pr, mod, rowId) = EntityJsonContext.CurrentPropertyRouteAndEntity!.Value;
 
-            var elementPr = tup.pr.Add("Item");
+            var elementPr = pr.Add("Item");
 
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod)))
+            foreach (var item in ((IMListPrivate<T>)value).InnerList)
             {
-                foreach (var item in ((IMListPrivate<T>)value).InnerList)
+                writer.WriteStartObject();
+
+                writer.WritePropertyName("rowId");
+                JsonSerializer.Serialize(writer, item.RowId?.Object, item.RowId?.Object.GetType() ?? typeof(object), options);
+
+                writer.WritePropertyName("element");
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, mod, item.RowId)))
                 {
-                    writer.WriteStartObject();
-
-                    writer.WritePropertyName("rowId");
-                    JsonSerializer.Serialize(writer, item.RowId?.Object, item.RowId?.Object.GetType() ?? typeof(object), options);
-
-                    writer.WritePropertyName("element");
                     JsonSerializer.Serialize(writer, item.Element, item.Element?.GetType() ?? typeof(T), options);
-
-                    writer.WriteEndObject();
                 }
+
+                writer.WriteEndObject();
             }
 
             writer.WriteEndArray();
@@ -105,33 +105,33 @@ namespace Signum.Engine.Json
 
             reader.Read();
 
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod)))
+            while (reader.TokenType == JsonTokenType.StartObject)
             {
-                while (reader.TokenType == JsonTokenType.StartObject)
+                reader.Read();
+                reader.Assert(JsonTokenType.PropertyName);
+                if (reader.GetString() != "rowId")
+                    throw new JsonException($"member 'rowId' expected in {reader.CurrentState}");
+
+                reader.Read();
+                var rowIdValue = reader.GetLiteralValue();
+
+                reader.Read();
+                reader.Assert(JsonTokenType.PropertyName);
+                if (reader.GetString() != "element")
+                    throw new JsonException($"member 'element' expected in {reader.CurrentState}");
+
+                reader.Read();
+
+                using (EntityJsonConverterFactory.SetPath($"[{newList.Count}].element"))
                 {
-                    reader.Read();
-                    reader.Assert(JsonTokenType.PropertyName);
-                    if (reader.GetString() != "rowId")
-                        throw new JsonException($"member 'rowId' expected in {reader.CurrentState}");
-
-                    reader.Read();
-                    var rowIdValue = reader.GetLiteralValue();
-
-                    reader.Read();
-                    reader.Assert(JsonTokenType.PropertyName);
-                    if (reader.GetString() != "element")
-                        throw new JsonException($"member 'element' expected in {reader.CurrentState}");
-
-                    reader.Read();
-
-                    using (EntityJsonConverterFactory.SetPath($"[{newList.Count}].element"))
+                    if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
                     {
-                        if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
+                        var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
+
+                        var oldValue = dic.TryGetS(rowId);
+
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, rowId)))
                         {
-                            var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType)!);
-
-                            var oldValue = dic.TryGetS(rowId);
-
                             if (oldValue == null)
                             {
                                 T newValue = (T)converter.Read(ref reader, typeof(T), options)!;
@@ -150,17 +150,20 @@ namespace Signum.Engine.Json
                                     newList.Add(new MList<T>.RowIdElement(newValue));
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, null)))
                         {
                             var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
                             newList.Add(new MList<T>.RowIdElement(newValue));
                         }
                     }
-
-                    reader.Read();
-                    reader.Assert(JsonTokenType.EndObject);
-                    reader.Read();
                 }
+
+                reader.Read();
+                reader.Assert(JsonTokenType.EndObject);
+                reader.Read();
             }
 
             reader.Assert(JsonTokenType.EndArray);

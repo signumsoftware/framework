@@ -12,7 +12,7 @@ namespace Signum.Engine
             where L : class, IEntity
         {
             if (source == null)
-                throw new ArgumentNullException("query");
+                throw new ArgumentNullException(nameof(source));
 
             return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(liteSelector), Expression.Constant(expandLite) }));
         }
@@ -21,7 +21,7 @@ namespace Signum.Engine
             where L : class, IEntity
         {
             if (source == null)
-                throw new ArgumentNullException("query");
+                throw new ArgumentNullException(nameof(source));
 
             return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()!).MakeGenericMethod(new Type[] { typeof(T), typeof(L) }), new Expression[] { source.Expression, Expression.Quote(entitySelector), Expression.Constant(expandEntity) }));
         }

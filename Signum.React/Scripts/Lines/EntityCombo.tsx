@@ -10,6 +10,7 @@ import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { useController } from './LineBase'
 import { useMounted } from '../Hooks'
+import { DropdownList } from 'react-widgets'
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -18,7 +19,8 @@ export interface EntityComboProps extends EntityBaseProps {
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
   refreshKey?: string;
   initiallyFocused?: boolean;
-  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  comboHtmlAttributes?: React.AllHTMLAttributes<any>;
+  onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactChild;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
 }
@@ -109,8 +111,9 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             refreshKey={p.refreshKey}
             delayLoadData={p.delayLoadData}
             toStringFromData={p.toStringFromData}
-            selectHtmlAttributes={p.selectHtmlAttributes}
+            selectHtmlAttributes={p.comboHtmlAttributes}
             liteToString={p.liteToString}
+            onRenderItem={p.onRenderItem}
           />
           {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
         </div>
@@ -129,6 +132,7 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
   refreshKey?: string;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -179,7 +183,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       if (requestStarted.current)
         console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${p.type!.name}`);
       setData(p.data);
-    } else if (loadData){
+    } else if (loadData) {
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
@@ -203,12 +207,25 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   if (ctx.readOnly)
     return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
 
-  return (
-    <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
-      disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
-      {renderOptions()}
-    </select>
-  );
+  if (p.onRenderItem) {
+    return (
+      <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionLites()} onChange={lite => p.onChange(lite ?? null)} value={lite}
+        filter="contains"
+        dataKey="value"
+        textField="label"
+        renderValue={a => p.onRenderItem!(a.item)}
+        renderListItem={a => p.onRenderItem!(a.item)}
+      />
+    );
+  } else {
+    return (
+      <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
+        disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
+        {getOptionLites().map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : " - "}</option>)}
+      </select>
+    );
+
+  }
 
 
   function handleOnChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -237,7 +254,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return v as Lite<Entity>;
   }
 
-  function renderOptions() {
+  function getOptionLites() {
 
     const lite = getLite();
 
@@ -253,9 +270,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       }
     }
 
-    return (
-      elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : " - "}</option>)
-    );
+    return elements;
   }
 });
 

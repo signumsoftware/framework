@@ -340,7 +340,6 @@ export module JavascriptMessage {
   export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
   export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
   export const Date = new MessageKey("JavascriptMessage", "Date");
-  export const Time = new MessageKey("JavascriptMessage", "Time");
 }
 
 export module LiteMessage {
@@ -438,10 +437,7 @@ export module ReactWidgetsMessage {
   export const MoveBack = new MessageKey("ReactWidgetsMessage", "MoveBack");
   export const MoveForward = new MessageKey("ReactWidgetsMessage", "MoveForward");
   export const DateButton = new MessageKey("ReactWidgetsMessage", "DateButton");
-  export const TimeButton = new MessageKey("ReactWidgetsMessage", "TimeButton");
   export const OpenCombobox = new MessageKey("ReactWidgetsMessage", "OpenCombobox");
-  export const OpenDropdown = new MessageKey("ReactWidgetsMessage", "OpenDropdown");
-  export const Placeholder = new MessageKey("ReactWidgetsMessage", "Placeholder");
   export const FilterPlaceholder = new MessageKey("ReactWidgetsMessage", "FilterPlaceholder");
   export const EmptyList = new MessageKey("ReactWidgetsMessage", "EmptyList");
   export const EmptyFilter = new MessageKey("ReactWidgetsMessage", "EmptyFilter");
@@ -523,6 +519,11 @@ export module SearchMessage {
   export const HidePinnedFiltersOptions = new MessageKey("SearchMessage", "HidePinnedFiltersOptions");
   export const SummaryHeader = new MessageKey("SearchMessage", "SummaryHeader");
   export const SummaryHeaderMustBeAnAggregate = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
+  export const HiddenColumn = new MessageKey("SearchMessage", "HiddenColumn");
+  export const ShowHiddenColumns = new MessageKey("SearchMessage", "ShowHiddenColumns");
+  export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
+  export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
+  export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
 }
 
 export module SelectorMessage {
@@ -627,6 +628,7 @@ export module ValidationMessage {
   export const IsATimeOfTheDay = new MessageKey("ValidationMessage", "IsATimeOfTheDay");
   export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
   export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
+  export const _0IsNotCompatibleWith1 = new MessageKey("ValidationMessage", "_0IsNotCompatibleWith1");
 }
 
 export module VoidEnumMessage {

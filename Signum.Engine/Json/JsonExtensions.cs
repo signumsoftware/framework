@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,18 +35,28 @@ namespace Signum.Engine.Json
             };
         }
 
-        static readonly ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?> currentPropertyRoute = Statics.ThreadVariable<(PropertyRoute pr, ModifiableEntity? mod)?>("jsonPropertyRoute");
+        static readonly ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>?> currentPropertyRoute = Statics.ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey ? rowId) >?>("jsonPropertyRoute");
 
-        public static (PropertyRoute pr, ModifiableEntity? mod)? CurrentPropertyRouteAndEntity
+        public static (PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)? CurrentPropertyRouteAndEntity
         {
-            get { return currentPropertyRoute.Value; }
+            get { return currentPropertyRoute.Value?.Peek(); }
         }
 
-        public static IDisposable SetCurrentPropertyRouteAndEntity((PropertyRoute, ModifiableEntity?)? route)
+        public static IRootEntity? FindCurrentRootEntity()
+        {
+            return currentPropertyRoute.Value?.FirstOrDefault(a => a.mod is IRootEntity).mod as IRootEntity;
+        }
+
+        public static PrimaryKey? FindCurrentRowId()
+        {
+            return currentPropertyRoute.Value?.Where(a => a.rowId != null).FirstOrDefault().rowId;
+        }
+
+        public static IDisposable SetCurrentPropertyRouteAndEntity((PropertyRoute, ModifiableEntity?, PrimaryKey? rowId) pair)
         {
             var old = currentPropertyRoute.Value;
 
-            currentPropertyRoute.Value = route;
+            currentPropertyRoute.Value = (old ?? ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>.Empty).Push(pair);
 
             return new Disposable(() => { currentPropertyRoute.Value = old; });
         }

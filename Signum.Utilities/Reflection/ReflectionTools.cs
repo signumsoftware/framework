@@ -61,6 +61,7 @@ namespace Signum.Utilities.Reflection
                   null;
         }
 
+ 
         public static bool? GetNullable(this NullableAttribute attr, int position = 0)
         {
             if (position > 0 && attr.NullableFlags.Length == 1)
@@ -389,6 +390,14 @@ namespace Signum.Utilities.Reflection
             return false;
         }
 
+        internal static bool IsDate(Type type)
+        {
+            return type == typeof(Date)
+                || type == typeof(DateTime)
+                || type == typeof(DateTimeOffset);
+        }
+
+
         public static bool IsPercentage(string formatString, CultureInfo culture)
         {
             return formatString.HasText() && formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase);
@@ -518,7 +527,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T)!;
+                result = default!;
                 return false;
             }
         }
@@ -532,7 +541,7 @@ namespace Signum.Utilities.Reflection
             }
             else
             {
-                result = default(T)!;
+                result = default!;
                 return false;
             }
         }
@@ -759,11 +768,20 @@ namespace Signum.Utilities.Reflection
                     return (T)Enum.ToObject(utype, value);
                 }
 
-                if (utype == typeof(Guid) && value is string)
-                    return (T)(object)Guid.Parse((string)value);
+                if (utype == typeof(Guid) && value is string s)
+                    return (T)(object)Guid.Parse(s);
 
-                if (utype == typeof(Date) && value is string)
-                    return (T)(object)Date.Parse((string)value);
+                if (utype == typeof(Date))
+                {
+                    if (value is string s2)
+                        return (T)(object)Date.Parse(s2);
+
+                    if (value is DateTime dt)
+                        return (T)(object)(Date)dt;
+
+                    if (value is DateTimeOffset dto)
+                        return (T)(object)(Date)dto.DateTime;
+                }
 
                 return (T)Convert.ChangeType(value, utype)!;
             }
@@ -791,8 +809,17 @@ namespace Signum.Utilities.Reflection
                 if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
 
-                if (utype == typeof(Date) && value is string)
-                    return Date.Parse((string)value);
+                if (utype == typeof(Date))
+                {
+                    if (value is string s2)
+                        return Date.Parse(s2);
+
+                    if (value is DateTime dt)
+                        return (Date)dt;
+
+                    if (value is DateTimeOffset dto)
+                        return (Date)dto.DateTime;
+                }
 
                 var conv = TypeDescriptor.GetConverter(type);
                 if (conv != null && conv.CanConvertFrom(value.GetType()))

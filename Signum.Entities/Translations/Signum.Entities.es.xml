@@ -154,6 +154,7 @@
     <Member Name="chooseAType" Description="Elija un tipo" />
     <Member Name="chooseAValue" Description="Elija un valor" />
     <Member Name="create" Description="Crear" />
+    <Member Name="Date" Description="Fecha" />
     <Member Name="deactivateTimeMachine" Description="Desactivar Máquina del tiempo" />
     <Member Name="editColumn" Description="Editar columna" />
     <Member Name="error" Description="Error" />
@@ -190,6 +191,7 @@
     <Member Name="showPeriod" Description="Mostrar período" />
     <Member Name="showPreviousOperation" Description="Mostrar operación anterior" />
     <Member Name="showRecords" Description="Mostrar registros" />
+    <Member Name="Time" Description="Hora" />
     <Member Name="ungroupResults" Description="Desagrupar resultados" />
     <Member Name="view" Description="Ver" />
   </Type>
@@ -277,10 +279,12 @@
   </Type>
   <Type Name="PropertyOperation" Description="Operación de propiedad">
     <Member Name="AddElement" Description="Añadir elemento" />
+    <Member Name="AddNewElement" Description="Añadir nuevo elemento" />
     <Member Name="ChangeElements" Description="Cambiar elementos" />
     <Member Name="CreateNewEntity" Description="Crear nueva entidad" />
     <Member Name="ModifyEntity" Description="Modificar entidad" />
-    <Member Name="RemoveElements" Description="Eliminar elementos" />
+    <Member Name="RemoveElement" Description="Eliminar elemento" />
+    <Member Name="RemoveElementsWhere" Description="Eliminar elementos donde" />
     <Member Name="Set" Description="Establecer" />
   </Type>
   <Type Name="PropertyRouteEntity" Description="Ruta de la propiedad">
@@ -345,6 +349,27 @@
     <Member Name="No0Found" Description="Ningún {0} encontrado" />
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
+  <Type Name="ReactWidgetsMessage">
+    <Member Name="CreateOption" Description="Crear opción" />
+    <Member Name="CreateOption0" Description="Crear opción {0}" />
+    <Member Name="DateButton" Description="Seleccionar fecha" />
+    <Member Name="DecrementValue" Description="Valor decremento" />
+    <Member Name="EmptyFilter" Description="El filtro no devolvió resultados" />
+    <Member Name="EmptyList" Description="No hay elementos en esta lista" />
+    <Member Name="FilterPlaceholder" Description="" />
+    <Member Name="IncrementValue" Description="Valor de incremento" />
+    <Member Name="MoveBack" Description="Navegar hacia atrás" />
+    <Member Name="MoveForward" Description="Navegar hacia adelante" />
+    <Member Name="MoveToday" Description="Hoy" />
+    <Member Name="NoneSelected" Description="sin elementos seleccionados" />
+    <Member Name="OpenCombobox" Description="abrir combo" />
+    <Member Name="OpenDropdown" Description="abrir desplegable" />
+    <Member Name="Placeholder" Description="" />
+    <Member Name="RemoveLabel" Description="Eliminar elemento seleccionado" />
+    <Member Name="SelectedItems0" Description="Elementos seleccionados: {0}" />
+    <Member Name="TagsLabel" Description="Elementos seleccionados" />
+    <Member Name="TimeButton" Description="Seleccionar hora" />
+  </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Cielo" />
     <Member Name="Floor" Description="Piso" />
@@ -372,12 +397,14 @@
     <Member Name="DeleteAllFilter" Description="Eliminar todos los filtros" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
     <Member Name="DisplayName" Description="Nombre para mostrar" />
+    <Member Name="DoYouWantToSelectTheNew01_G" Description="¿Desea devolver el nuevo {0} ({1})?" />
     <Member Name="Explore" Description="Explorar" />
     <Member Name="Field" Description="Campo" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
     <Member Name="First0Results_N" Description="primer[os] {0} resultado[s]." />
+    <Member Name="HidePinnedFiltersOptions" Description="Ocultar opciones de filtro ancladas" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
@@ -402,8 +429,10 @@
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en QueryLogic.Queries" />
     <Member Name="Refresh" Description="Actualizar" />
     <Member Name="Rename" Description="Renombrar" />
+    <Member Name="ReturnNewEntity" Description="¿Devolver nueva entidad?" />
     <Member Name="Row" Description="Fila" />
     <Member Name="Search" Description="Buscar" />
+    <Member Name="ShowPinnedFiltersOptions" Description="Mostrar opciones de filtro ancladas" />
     <Member Name="SplitText" Description="Dividir texto" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Para evitar problemas de rendimiento, la búsqueda automática está deshabilitada, compruebe primero los filtros y, a continuación, haga clic en el botón [Buscar]." />

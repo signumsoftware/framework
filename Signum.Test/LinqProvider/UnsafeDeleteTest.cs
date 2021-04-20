@@ -21,7 +21,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteAll()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeDelete();
 
@@ -33,7 +33,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void Delete()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().Where(a => a.Year < 1990).UnsafeDelete();
 
@@ -44,7 +44,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteChunks()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().UnsafeDeleteChunks(2);
 
@@ -55,7 +55,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteJoin()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.Query<AlbumEntity>().Where(a => ((ArtistEntity)a.Author).Dead).UnsafeDelete();
                 //tr.Commit();
@@ -66,7 +66,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteMListLite()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.MListQuery((ArtistEntity a) => a.Friends).UnsafeDeleteMList();
                 //tr.Commit();
@@ -76,7 +76,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteMListEntity()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.MListQuery((BandEntity a) => a.Members).UnsafeDeleteMList();
 
@@ -87,7 +87,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteMListEmbedded()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int count = Database.MListQuery((AlbumEntity a) => a.Songs).UnsafeDeleteMList();
 
@@ -99,7 +99,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void DeleteManual()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var list = Database.Query<AlbumEntity>().Where(a => ((ArtistEntity)a.Author).Dead).Select(a => a.ToLite()).ToList();
 
@@ -118,7 +118,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [Fact]
         public void UnsafeDeleteMyView()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Administrator.CreateTemporaryTable<MyTempView>();
 

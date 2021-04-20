@@ -13,7 +13,7 @@ export interface ContextMenuPosition {
 
 export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
-  onHide: () => void;
+  onHide: (e: MouseEvent | TouchEvent) => void;
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps> {
@@ -27,15 +27,30 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
   static childContextTypes = { "toggle": PropTypes.func };
 
-  static getPosition(e: React.MouseEvent<any>, container: HTMLElement): ContextMenuPosition {
+  static getPositionEvent(e: React.MouseEvent<any>): ContextMenuPosition {
 
-    const op = DomUtils.offsetParent(container);
+    const op = DomUtils.offsetParent(e.currentTarget);
 
     const rec = op?.getBoundingClientRect();
 
     var result = ({
       left: e.pageX - (rec ? rec.left : 0),
       top: e.pageY - (rec ? rec.top : 0),
+      width: (op ? op.offsetWidth : window.innerWidth)
+    }) as ContextMenuPosition;
+
+    return result;
+  }
+
+  static getPositionElement(button: HTMLElement): ContextMenuPosition {
+    const op = DomUtils.offsetParent(button);
+
+    const recOp = op!.getBoundingClientRect();
+    const recButton = button.getBoundingClientRect();
+
+    var result = ({
+      left: recButton.left - recOp.left,
+      top: recButton.top + recButton.height - recOp.top,
       width: (op ? op.offsetWidth : window.innerWidth)
     }) as ContextMenuPosition;
 
@@ -57,7 +72,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     const childrens = React.Children.map(this.props.children,
       (rc) => {
         let c = rc as React.ReactElement<DropdownItemProps>;
-        return c && React.cloneElement(c, { onClick: combineFunction(c.props.onClick, onHide) } as Partial<DropdownItemProps>);
+        return c && React.cloneElement(c, { onClick: e => { c.props.onClick && c.props.onClick(e); onHide(e.nativeEvent); } } as Partial<DropdownItemProps>);
       });
 
     const ul = (
@@ -67,7 +82,6 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     );
 
     return ul;
-    //return <RootCloseWrapper onRootClose={onHide}>{ul}</RootCloseWrapper>;
   }
 
 
@@ -93,6 +107,6 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
       return;
     }
 
-    this.props.onHide();
+    this.props.onHide(e);
   }
 }

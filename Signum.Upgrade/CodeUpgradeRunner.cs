@@ -25,14 +25,14 @@ namespace Signum.Upgrade
             var upgradeFile = Path.Combine(uctx.RootFolder, "SignumUpgrade.txt");
             while (true)
             {
-                SetExecuted(uctx, upgradeFile);
+                SetExecuted(upgradeFile);
 
                 if (!Prompt(uctx, upgradeFile))
                     return;
             }
         }
 
-        void SetExecuted(UpgradeContext uctx, string upgradeFile)
+        void SetExecuted(string upgradeFile)
         {
             Console.WriteLine();
             if (!File.Exists(upgradeFile))
@@ -41,7 +41,7 @@ namespace Signum.Upgrade
                 Console.WriteLine();
                 var result = Upgrades.Select(a=>a.Key).And("<< Mark ALL upgrades as executed >>").ChooseConsole(a => a.ToString(), "What do you think is the next upgrade that you should run? (the previous ones will be marked as executed)");
 
-                File.WriteAllLines(upgradeFile, result == null ? new string[0] : Upgrades.TakeWhile(a => a.Key != result).Select(a => a.Key).ToArray());
+                File.WriteAllLines(upgradeFile, result == null ? Array.Empty<string>() : Upgrades.TakeWhile(a => a.Key != result).Select(a => a.Key).ToArray());
                 Console.WriteLine();
                 SafeConsole.WriteLineColor(ConsoleColor.Green, $"File {upgradeFile} created!");
                 SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"(this file contains the Upgrades that have been run, and should be commited to git)");
@@ -82,7 +82,7 @@ namespace Signum.Upgrade
 
         }
 
-        public bool IsDirtyExceptSubmodules(string folder)
+        static bool IsDirtyExceptSubmodules(string folder)
         {
             using (Repository rep = new Repository(folder))
             {
@@ -92,7 +92,7 @@ namespace Signum.Upgrade
             }
         }
 
-        private bool ExecuteUpgrade(CodeUpgradeBase upgrade, UpgradeContext uctx, string signumUpgradeFile)
+        static bool ExecuteUpgrade(CodeUpgradeBase upgrade, UpgradeContext uctx, string signumUpgradeFile)
         {
             while (IsDirtyExceptSubmodules(uctx.RootFolder))
             {

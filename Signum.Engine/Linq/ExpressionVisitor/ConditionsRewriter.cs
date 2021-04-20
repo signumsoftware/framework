@@ -116,25 +116,23 @@ namespace Signum.Engine.Linq
             }
 
             var exp = (DbExpression)expression;
-            switch (exp.DbNodeType)
+            return exp.DbNodeType switch
             {
-                case DbExpressionType.Exists:
-                case DbExpressionType.Like:
-                case DbExpressionType.In:
-                case DbExpressionType.IsNull:
-                case DbExpressionType.IsNotNull:
-                    return true;
+                DbExpressionType.Exists or 
+                DbExpressionType.Like or 
+                DbExpressionType.In or 
+                DbExpressionType.IsNull or 
+                DbExpressionType.IsNotNull => true,
 
-                case DbExpressionType.SqlFunction:
-                case DbExpressionType.Column:
-                case DbExpressionType.Projection:
-                case DbExpressionType.Case:
-                case DbExpressionType.SqlConstant:
-                case DbExpressionType.SqlCast:
-                    return false;
-            }
-
-            throw new InvalidOperationException("Expected expression: {0}".FormatWith(expression.ToString()));
+                DbExpressionType.SqlFunction or 
+                DbExpressionType.Column or 
+                DbExpressionType.Projection or 
+                DbExpressionType.Case or 
+                DbExpressionType.SqlConstant or 
+                DbExpressionType.SqlCast => false,
+                
+                _ => throw new InvalidOperationException("Expected expression: {0}".FormatWith(expression.ToString())),
+            };
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
@@ -167,12 +165,12 @@ namespace Signum.Engine.Linq
         }
 
 
-        private bool IsTrue(Expression operand)
+        private static bool IsTrue(Expression operand)
         {
             return operand == TrueCondition || (operand is SqlConstantExpression c && object.Equals(c.Value, 1));
         }
 
-        private bool IsFalse(Expression operand)
+        private static bool IsFalse(Expression operand)
         {
             return operand == FalseCondition || (operand is SqlConstantExpression c && object.Equals(c.Value, 0));
         }

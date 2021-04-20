@@ -28,7 +28,7 @@ namespace Signum.Engine
             var list = entities.ToList();
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".FormatWith(typeof(T).TypeName())))
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Saver.Save(list.Cast<Entity>().ToArray());
 
@@ -40,7 +40,7 @@ namespace Signum.Engine
         {
             using (new EntityCache())
             using (HeavyProfiler.Log("DBSave", () => "SaveParams"))
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 Saver.Save(entities.Cast<Entity>().ToArray());
 
@@ -58,7 +58,7 @@ namespace Signum.Engine
             {
                 using (new EntityCache())
                 using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".FormatWith(typeof(T).TypeName())))
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     Saver.Save((Entity)(IEntity)entity);
 
@@ -919,7 +919,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             if (lites.IsEmpty())
                 return new List<T>();
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
                     RetrieveList(gr.Key, gr.Select(a => a.Id).Distinct().ToList(), message).ToDictionaryEx(a => a.Id));
@@ -939,7 +939,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             if (lites.IsEmpty())
                 return new List<T>();
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var tasks = lites.GroupBy(a => a.EntityType).Select(gr =>
                     RetrieveListAsync(gr.Key, gr.Select(a => a.Id).ToList(), token)).ToList();
@@ -972,7 +972,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(lite));
 
             if (lite.IsNew)
-                throw new ArgumentNullException("lite is New");
+                throw new ArgumentException("lite is New");
 
             giDeleteId.GetInvoker(lite.EntityType)(lite.Id);
         }
@@ -984,7 +984,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ident));
 
             if (ident.IsNew)
-                throw new ArgumentNullException("ident is New");
+                throw new ArgumentException("ident is New");
 
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
@@ -1039,7 +1039,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();
 
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 foreach (var gr in groups)
                 {
@@ -1067,7 +1067,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     var groups = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters);
                     int result = 0;
@@ -1285,7 +1285,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (query == null)
                     throw new ArgumentNullException(nameof(query));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeDelete<T>(query))
@@ -1306,9 +1306,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
                 if (mlistQuery == null)
-                    throw new ArgumentNullException("query");
+                    throw new ArgumentNullException(nameof(mlistQuery));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent)))
@@ -1332,7 +1332,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (query == null)
                     throw new ArgumentNullException(nameof(query));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar()!);
 
@@ -1430,7 +1430,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (update == null)
                     throw new ArgumentNullException(nameof(update));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     int rows;
                     using (Schema.Current.OnPreUnsafeUpdate(update))
@@ -1466,7 +1466,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         public static int UnsafeInsertDisableIdentity<E>(this IQueryable<E> query, string? message = null)
             where E : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int result;
                 using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
@@ -1478,7 +1478,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         public static int UnsafeInsertDisableIdentity<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string? message = null)
               where E : Entity
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 int result;
                 using (Administrator.DisableIdentity(Schema.Current.Table(typeof(E))))
@@ -1508,7 +1508,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (constructor == null)
                     throw new ArgumentNullException(nameof(constructor));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.Table(typeof(E));
@@ -1541,7 +1541,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (constructor == null)
                     throw new ArgumentNullException(nameof(constructor));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     constructor = (Expression<Func<T, MListElement<E, V>>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c => c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
@@ -1567,7 +1567,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (constructor == null)
                     throw new ArgumentNullException(nameof(constructor));
 
-                using (Transaction tr = new Transaction())
+                using (var tr = new Transaction())
                 {
                     constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.View(typeof(E));

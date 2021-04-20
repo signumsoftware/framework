@@ -158,9 +158,7 @@ namespace Signum.Engine.Linq
         
         private static Expression? ConstanToNewExpression(Expression exp)
         {
-            var ce = exp as ConstantExpression;
-
-            if (ce == null)
+            if (exp is not ConstantExpression ce)
                 return null;
 
             var type = ce.Value!.GetType();
@@ -198,8 +196,8 @@ namespace Signum.Engine.Linq
                 if (left == null && right == null)
                     return null;
 
-                left = left ?? ChangeConstant(expr1, right!.Type);
-                right = right ?? ChangeConstant(expr2, left!.Type);
+                left ??= ChangeConstant(expr1, right!.Type);
+                right ??= ChangeConstant(expr2, left!.Type);
 
                 if (left == null || right == null)
                     return null;
@@ -286,16 +284,16 @@ namespace Signum.Engine.Linq
 
             public static MethodInfo? GetMethod(ExpressionType type)
             {
-                switch (type)
+                return type switch
                 {
-                    case ExpressionType.GreaterThan: return ReflectionTools.GetMethodInfo(() => GreaterThan(Guid.Empty, Guid.Empty));
-                    case ExpressionType.GreaterThanOrEqual: return ReflectionTools.GetMethodInfo(() => GreaterThanOrEqual(Guid.Empty, Guid.Empty));
-                    case ExpressionType.LessThan: return ReflectionTools.GetMethodInfo(() => LessThan(Guid.Empty, Guid.Empty));
-                    case ExpressionType.LessThanOrEqual: return ReflectionTools.GetMethodInfo(() => LessThanOrEqual(Guid.Empty, Guid.Empty));
-                    case ExpressionType.Equal: return null;
-                    case ExpressionType.NotEqual: return null;
-                    default: throw new InvalidOperationException("GuidComparer.GetMethod unexpected ExpressionType " + type);
-                }
+                    ExpressionType.GreaterThan => ReflectionTools.GetMethodInfo(() => GreaterThan(Guid.Empty, Guid.Empty)),
+                    ExpressionType.GreaterThanOrEqual => ReflectionTools.GetMethodInfo(() => GreaterThanOrEqual(Guid.Empty, Guid.Empty)),
+                    ExpressionType.LessThan => ReflectionTools.GetMethodInfo(() => LessThan(Guid.Empty, Guid.Empty)),
+                    ExpressionType.LessThanOrEqual => ReflectionTools.GetMethodInfo(() => LessThanOrEqual(Guid.Empty, Guid.Empty)),
+                    ExpressionType.Equal => null,
+                    ExpressionType.NotEqual => null,
+                    _ => throw new InvalidOperationException("GuidComparer.GetMethod unexpected ExpressionType " + type),
+                };
             }
         }
 
@@ -651,7 +649,7 @@ namespace Signum.Engine.Linq
         static Expression EntityIn(Expression newItem, Dictionary<Type, PrimaryKey[]> entityIDs)
         {
             if (newItem is EntityExpression ee)
-                return InPrimaryKey(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new PrimaryKey[0]);
+                return InPrimaryKey(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? Array.Empty<PrimaryKey>());
 
             if (newItem is ImplementedByExpression ib)
                 return ib.Implementations.JoinDictionary(entityIDs,
@@ -707,7 +705,7 @@ namespace Signum.Engine.Linq
             if (liteExp is UnaryExpression ue && (ue.NodeType == ExpressionType.Convert || ue.NodeType == ExpressionType.ConvertChecked))
                 liteExp = ue.Operand;
 
-            if (!(liteExp is LiteReferenceExpression liteReference))
+            if (liteExp is not LiteReferenceExpression liteReference)
                 throw new InvalidCastException("Impossible to convert expression to Lite: {0}".FormatWith(liteExp.ToString()));
 
             return liteReference.Reference;
@@ -718,10 +716,10 @@ namespace Signum.Engine.Linq
             e1 = ConstantToEntity(e1) ?? e1;
             e2 = ConstantToEntity(e2) ?? e2;
 
-            if (e1 is EmbeddedEntityExpression && e2.IsNull())
-                return EmbeddedNullEquals((EmbeddedEntityExpression)e1);
-            if (e2 is EmbeddedEntityExpression && e1.IsNull())
-                return EmbeddedNullEquals((EmbeddedEntityExpression)e2);
+            if (e1 is EmbeddedEntityExpression eee1 && e2.IsNull())
+                return EmbeddedNullEquals(eee1);
+            if (e2 is EmbeddedEntityExpression eee2 && e1.IsNull())
+                return EmbeddedNullEquals(eee2);
 
             if (e1 is EntityExpression ee1)
             {
@@ -824,8 +822,7 @@ namespace Signum.Engine.Linq
 
         public static Expression? ConstantToEntity(Expression expression)
         {
-            ConstantExpression? c = expression as ConstantExpression;
-            if (c == null)
+            if (expression is not ConstantExpression c)
                 return null;
 
             if (c.Value == null)
@@ -848,8 +845,7 @@ namespace Signum.Engine.Linq
 
         public static Expression? ConstantToLite(Expression expression)
         {
-            ConstantExpression? c = expression as ConstantExpression;
-            if (c == null)
+            if (expression is not ConstantExpression c)
                 return null;
 
             if (c.Value == null)

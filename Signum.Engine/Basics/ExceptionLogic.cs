@@ -156,11 +156,11 @@ namespace Signum.Engine.Basics
                                 select (table: t, command: new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
                                    .FormatWith(ex.Name, referenced.Name, t.Name, c.Name)))).ToList();
 
-                foreach (var p in commands)
+                foreach (var (table, command) in commands)
                 {
                     token.ThrowIfCancellationRequested();
 
-                    WriteRows(sb, "Updating Exceptions.Referenced from " + p.table.Name.Name, () => p.command.ExecuteNonQuery());
+                    WriteRows(sb, "Updating Exceptions.Referenced from " + table.Name.Name, () => command.ExecuteNonQuery());
                 }
 
                 token.ThrowIfCancellationRequested();

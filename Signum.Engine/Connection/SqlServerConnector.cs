@@ -42,7 +42,7 @@ namespace Signum.Engine
         {
             return SqlServerRetry.Retry(() =>
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (var con = new SqlConnection(connectionString))
                 {
                     con.Open();
                     var sql =
@@ -52,11 +52,11 @@ namespace Signum.Engine
     SERVERPROPERTY('Edition') as Edition,
     SERVERPROPERTY('EngineEdition') as EngineEdition";
 
-                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    using (var cmd = new SqlCommand(sql, con))
                     {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        var da = new SqlDataAdapter(cmd);
 
-                        DataTable result = new DataTable();
+                        var result = new DataTable();
                         da.Fill(result);
 
                         if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
@@ -64,19 +64,18 @@ namespace Signum.Engine
 
                         var version = (string)result.Rows[0]["ProductVersion"];
 
-                        switch (version.Before("."))
+                        return version.Before(".") switch
                         {
-                            case "8": throw new InvalidOperationException("SQL Server 2000 is not supported");
-                            case "9": return SqlServerVersion.SqlServer2005;
-                            case "10": return SqlServerVersion.SqlServer2008;
-                            case "11": return SqlServerVersion.SqlServer2012;
-                            case "12": return SqlServerVersion.SqlServer2014;
-                            case "13": return SqlServerVersion.SqlServer2016;
-                            case "14": return SqlServerVersion.SqlServer2017;
-                            case "15": return SqlServerVersion.SqlServer2019;
-                            default: return (SqlServerVersion?)null;
-                        }
-
+                            "8" => throw new InvalidOperationException("SQL Server 2000 is not supported"),
+                            "9" => SqlServerVersion.SqlServer2005,
+                            "10" => SqlServerVersion.SqlServer2008,
+                            "11" => SqlServerVersion.SqlServer2012,
+                            "12" => SqlServerVersion.SqlServer2014,
+                            "13" => SqlServerVersion.SqlServer2016,
+                            "14" => SqlServerVersion.SqlServer2017,
+                            "15" => SqlServerVersion.SqlServer2019,
+                            _ => (SqlServerVersion?)null,
+                        };
                     }
                 }
             });
@@ -85,7 +84,7 @@ namespace Signum.Engine
 
     public class SqlServerConnector : Connector
     {
-        public static ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
+        public ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
         public byte DateFirst => DateFirstLazy.Value.Item1;
 
         public SqlServerVersion Version { get; set; }
@@ -112,7 +111,7 @@ namespace Signum.Engine
 
             return SqlServerRetry.Retry(() =>
             {
-                using (SqlConnection con = new SqlConnection(this.ConnectionString))
+                using (var con = new SqlConnection(this.ConnectionString))
                 {
                     con.Open();
 
@@ -123,7 +122,7 @@ namespace Signum.Engine
 
         SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection? overridenConnection, CommandType commandType)
         {
-            SqlCommand cmd = new SqlCommand { CommandType = commandType };
+            var cmd = new SqlCommand { CommandType = commandType };
 
             int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
@@ -220,13 +219,13 @@ namespace Signum.Engine
                         {
                             if (change != null)
                             {
-                                SqlDependency dep = new SqlDependency(cmd);
+                                var dep = new SqlDependency(cmd);
                                 dep.OnChange += change;
                             }
 
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                FieldReader fr = new FieldReader(reader);
+                                var fr = new FieldReader(reader);
                                 int row = -1;
                                 try
                                 {
@@ -322,10 +321,10 @@ namespace Signum.Engine
                 {
                     try
                     {
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        var da = new SqlDataAdapter(cmd);
 
-                        DataTable result = new DataTable();
-                         da.Fill(result);
+                        var result = new DataTable();
+                        da.Fill(result);
                         return result;
                     }
                     catch (Exception ex)
@@ -340,24 +339,24 @@ namespace Signum.Engine
             });
         }
 
-        public Exception HandleException(Exception ex, SqlPreCommandSimple command)
+        public static Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
             var nex = ReplaceException(ex, command);
             nex.Data["Sql"] = command.sp_executesql();
             return nex;
         }
 
-        Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
+        static Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
         {
             if (ex is SqlException se)
             {
-                switch (se.Number)
+                return se.Number switch
                 {
-                    case -2: return new TimeoutException(ex.Message, ex);
-                    case 2601: return new UniqueKeyException(ex);
-                    case 547: return new ForeignKeyException(ex);
-                    default: return ex;
-                }
+                    -2 => new TimeoutException(ex.Message, ex),
+                    2601 => new UniqueKeyException(ex),
+                    547 => new ForeignKeyException(ex),
+                    _ => ex,
+                };
             }
 
             if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
@@ -379,7 +378,7 @@ namespace Signum.Engine
         {
             EnsureConnectionRetry(con =>
             {
-                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                using (var bulkCopy = new SqlBulkCopy(
                     options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
                     options,
                     options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
@@ -471,7 +470,7 @@ namespace Signum.Engine
 
         public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
 
-        public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
+        public static List<string> ComplexWhereKeywords = new() { "OR" };
 
         public SqlPreCommand ShrinkDatabase(string databaseName)
         {
@@ -564,7 +563,7 @@ namespace Signum.Engine
             NewExpression newExpr = Expression.New(typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
 
-            List<MemberBinding> mb = new List<MemberBinding>()
+            List<MemberBinding> mb = new()
             {
                 Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable")!, Expression.Constant(nullable)),
                 Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType")!, Expression.Constant(dbType.SqlServer)),

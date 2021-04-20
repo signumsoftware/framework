@@ -89,15 +89,7 @@ namespace Signum.Upgrade
 
         static readonly Encoding UTF8NoBOM = new UTF8Encoding(false);
 
-        public void Replace(string searchFor, string replaceBy)
-        {
-            var newContent = this.Content.Replace(searchFor, replaceBy);
 
-            if (newContent == this.Content)
-                Warning($"Unable to replace '{searchFor}' by '{replaceBy}'");
-
-            this.Content = newContent;
-        }
 
         WarningLevel? isFirstWarning = null;
         public void Warning(FormattableString message)
@@ -124,6 +116,26 @@ namespace Signum.Upgrade
             }
 
             Console.WriteLine();
+        }
+
+        public void Replace(string searchFor, string replaceBy)
+        {
+            var newContent = this.Content.Replace(searchFor, replaceBy);
+
+            if (newContent == this.Content)
+                Warning($"Unable to replace '{searchFor}' by '{replaceBy}'");
+
+            this.Content = newContent;
+        }
+
+        public void Replace(Regex regex, string replaceBy)
+        {
+            var newContent = regex.Replace(this.Content, replaceBy);
+
+            if (newContent == this.Content)
+                Warning($"Unable to match {regex} to replace it by {replaceBy}");
+
+            this.Content = newContent;
         }
 
         public void Replace(Regex regex, Expression<MatchEvaluator> evaluator)
@@ -313,6 +325,7 @@ namespace Signum.Upgrade
             if (!extension.Any(e => e.Equals(ext, StringComparison.InvariantCulture)))
                 throw new InvalidOperationException("");
         }
+
 
         public void UpdateNpmPackage(string packageName, string version)
         {

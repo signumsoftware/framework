@@ -161,7 +161,7 @@ namespace Signum.Entities
             {
                 case EntityKind.SystemString: return false;
                 case EntityKind.System: return false;
-                case EntityKind.Relational: return false;
+                case EntityKind.Relational: return true;
                 case EntityKind.String: return true;
                 case EntityKind.Shared: return true;
                 case EntityKind.Main: return true;
@@ -197,7 +197,7 @@ namespace Signum.Entities
 
         /// <summary>
         /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
-        /// Not RequiresSaveOperation, not vieable, not creable (override on SearchControl)
+        /// RequiresSaveOperation, not vieable, not creable (override on SearchControl)
         /// ie: DiscountProductEntity
         /// </summary>
         Relational,

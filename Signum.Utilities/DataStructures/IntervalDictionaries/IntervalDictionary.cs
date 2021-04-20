@@ -154,7 +154,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(K key, out V value)
         {
-            value = default(V)!;
+            value = default!;
 
             int index = PossibleIndex(key);
             if (index == -1)

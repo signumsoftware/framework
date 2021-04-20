@@ -345,11 +345,6 @@ namespace Signum.Engine.CodeGeneration
             return "";
         }
 
-        private static string[] GetTypingsImports()
-        {
-            return new[] { "Files", "Mailing", "SMS", "Processes", "Basics", "Scheduler" };
-        }
-
         protected virtual string WriteClientStartMethod(Module mod)
         {
             StringBuilder sb = new StringBuilder();

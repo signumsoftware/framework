@@ -30,7 +30,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeNull()
         {
             var list = Database.Query<LabelEntity>()
-                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner!.Entity.GetType() }).ToList();
+                .Select(a => new { Label = a.ToLite(), a.Owner, OwnerType = a.Owner!.Entity.GetType() }).ToList();
         }
 
         [Fact]

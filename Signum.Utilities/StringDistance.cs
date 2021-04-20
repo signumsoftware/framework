@@ -86,12 +86,12 @@ namespace Signum.Utilities
 
             public static Choice<T> Add(T value)
             {
-                return new Choice<T>(ChoiceType.Add, default(T)!, value);
+                return new Choice<T>(ChoiceType.Add, default!, value);
             }
 
             public static Choice<T> Remove(T value)
             {
-                return new Choice<T>(ChoiceType.Remove, value, default(T)!);
+                return new Choice<T>(ChoiceType.Remove, value, default!);
             }
 
             public static Choice<T> Equal(T value)

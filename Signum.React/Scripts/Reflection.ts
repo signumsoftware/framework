@@ -367,8 +367,11 @@ export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss
     const formP = formatParts[i];
     const value = parseInt(valParts[i] || "0");
     switch (formP) {
+      case "h":
       case "hh": result.hour = value; break;
+      case "m":
       case "mm": result.minute = value; break;
+      case "s":
       case "ss": result.second = value; break;
       default: throw new Error("Unexpected " + formP);
     }
@@ -910,7 +913,7 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
@@ -918,6 +921,7 @@ const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Nec
 const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
 const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
+const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
@@ -929,7 +933,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     throw Error("invalid function");
 
   const parameter = lambdaMatch[1];
-  let body = lambdaMatch[3];
+  let body = lambdaMatch[4];
   let result: LambdaMember[] = [];
 
   while (body != parameter) {
@@ -949,6 +953,9 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     else if (m = indexRegex.exec(body)) {
       result.push({ name: m[2], type: "Indexer" });
       body = m[1];
+    }
+    else if (m = fixNullPropagator.exec(body)) {
+      body = m[2];
     }
     else {
       throw new Error(`Impossible to extract the properties from: ${body}` +
@@ -1307,11 +1314,11 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   /* Constructs a QueryToken able to generate string like "Name" from a strongly typed lambda like a => a.name
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc)*/
-  token(): QueryTokenString<T>;
+  token(): QueryTokenString<T & { entity: T}>;
   /** Shortcut for token().append(lambdaToColumn)
    * @param lambdaToColumn lambda expression pointing to a property in the anonymous class of the query. For simple columns comming from properties from the entity.
    */
-  token<S>(lambdaToColumn: (v: T) => S): QueryTokenString<S>;
+  token<S>(lambdaToColumn: (v: T & { entity: T }) => S): QueryTokenString<S>;
   /** Shortcut for token().expression<S>(columnName)
   * @param columnName property name of some property in the anonymous class of the query. For complex calculated columns that are not a property from the entitiy.
   */
@@ -1322,15 +1329,15 @@ export class Type<T extends ModifiableEntity> implements IType {
     else if (typeof lambdaToColumn == "string")
       return new QueryTokenString(lambdaToColumn);
     else
-      return new QueryTokenString(tokenSequence(lambdaToColumn));
+      return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
 }
 
 /*  Some examples being in ExceptionEntity:
  *  "User" -> ExceptionEntity.token().append(a => a.user) 
  *            ExceptionEntity.token(a => a.user) 
- *  "Entity.User" -> ExceptionEntity.token().entity().append(a=>a.user)
- *                   ExceptionEntity.token().entity(a => a.user)
+ *  "Entity.User" -> ExceptionEntity.token().append(a=>a.entity).append(a=>a.user)
+ *                   ExceptionEntity.token(a => a.entity.user)
  * 
  */
 export class QueryTokenString<T> {
@@ -1360,20 +1367,6 @@ export class QueryTokenString<T> {
     return new QueryTokenString(this.token + ".SystemValidTo");
   }
 
-  /** Allows access to the "Entity" property of the anonymous class from the query.*/
-  entity(): QueryTokenString<T>;
-  /** Shortcut for entity().append(lambdaToProperty).*/
-  entity<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S>;
-  entity(lambdaToProperty?: Function): QueryTokenString<any> {
-    if (this.token != "")
-      throw new Error("entity is only meant to be used with an empty token");
-
-    if (lambdaToProperty == null)
-      return new QueryTokenString("Entity")
-    else
-      return new QueryTokenString("Entity." + tokenSequence(lambdaToProperty));
-  }
-
   cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
     return new QueryTokenString<R>(this.token + ".(" + t.typeName + ")");
   }
@@ -1383,7 +1376,7 @@ export class QueryTokenString<T> {
    * @param lambdaToProperty for a typed lambda like a => a.name will append "Name" to the QueryTokenString
    */
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty));
+    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty, !this.token));
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
@@ -1447,9 +1440,9 @@ type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveM
 
 type RemoveMListElement<Type> = Type extends MListElement<infer S> ? S : Type;
 
-function tokenSequence(lambdaToProperty: Function) {
+function tokenSequence(lambdaToProperty: Function, isFirst: boolean) {
   return getLambdaMembers(lambdaToProperty)
-    .filter(a => a.name != "entity") //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
+    .filter((a, i) => a.name != "entity" || i == 0 && isFirst) //For convinience navigating Lite<T>, 'entity' is removed. If you have a property named Entity, you will need to use expression<S>()
     .map(a => a.name == "toStr" ? "ToString" : a.name.firstUpper())
     .join(".");
 }
@@ -1623,17 +1616,29 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
-  static parseFull(fullPropertyRoute: string): PropertyRoute {
-    const endPseudoTypeIndex = fullPropertyRoute.indexOf(")");
-    let propertyString = fullPropertyRoute.substr(endPseudoTypeIndex + 1);
-    if (propertyString.startsWith("."))
-      propertyString = propertyString.substr(1);
-    return PropertyRoute.parse(fullPropertyRoute.substring(1, endPseudoTypeIndex), propertyString);
-  }
+
 
   addMembers(propertyString: string): PropertyRoute {
     let result: PropertyRoute = this;
 
+    const parts = PropertyRoute.parseLambdaMembers(propertyString);
+
+    parts.forEach(m => result = result.addMember(m.type, m.name, true));
+
+    return result;
+  }
+
+  tryAddMembers(propertyString: string): PropertyRoute | undefined {
+    let result: PropertyRoute | undefined = this;
+
+    const parts = PropertyRoute.parseLambdaMembers(propertyString);
+
+    parts.forEach(m => result = result?.addMember(m.type, m.name, false));
+
+    return result;
+  }
+
+  static parseLambdaMembers(propertyString: string) {
     function splitMixin(text: string): LambdaMember[] {
 
       if (text.length == 0)
@@ -1669,17 +1674,45 @@ export class PropertyRoute {
 
       return splitDot(text);
     }
+    return splitIndexer(propertyString);
+  }
 
-    const parts = splitIndexer(propertyString);
 
-    parts.forEach(m => result = result.addMember(m.type, m.name, true));
-
-    return result;
+  static parseFull(fullPropertyRoute: string): PropertyRoute {
+    const type = fullPropertyRoute.after("(").before(")");
+    let propertyString = fullPropertyRoute.after(")");
+    if (propertyString.startsWith("."))
+      propertyString = propertyString.substr(1);
+    return PropertyRoute.root(type).addMembers(propertyString);
   }
 
   static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
     return PropertyRoute.root(rootType).addMembers(propertyString);
   }
+
+  static tryParseFull(fullPropertyRoute: string): PropertyRoute | undefined {
+    const type = fullPropertyRoute.after("(").before(")");
+    let propertyString = fullPropertyRoute.after(")");
+    if (propertyString.startsWith("."))
+      propertyString = propertyString.substr(1);
+
+    var ti = tryGetTypeInfo(type);
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.tryParse(type, propertyString);
+  }
+
+  static tryParse(rootType: PseudoType, propertyString: string): PropertyRoute | undefined {
+
+    const ti = tryGetTypeInfo(rootType);
+    if (ti == null)
+      return undefined;
+
+    return PropertyRoute.root(ti).tryAddMembers(propertyString);
+  }
+
+ 
 
   constructor(
     parent: PropertyRoute | undefined,

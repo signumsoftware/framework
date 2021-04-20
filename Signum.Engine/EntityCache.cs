@@ -19,7 +19,7 @@ namespace Signum.Engine
             public void Add(Entity e)
             {
                 if (e == null)
-                    throw new ArgumentNullException("ie");
+                    throw new ArgumentNullException(nameof(e));
 
                 var tuple = (e.GetType(), e.Id);
 

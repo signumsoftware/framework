@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
@@ -11,8 +11,8 @@ namespace Signum.Engine.Linq
                 case ExpressionType.Convert: return ((UnaryExpression)e).Operand.IsNull();
                 case ExpressionType.Constant: return ((ConstantExpression)e).Value == null;
                 default:
-                    if (e is SqlConstantExpression)
-                        return ((SqlConstantExpression)e).Value == null;
+                    if (e is SqlConstantExpression sce)
+                        return sce.Value == null;
                     break;
             }
 

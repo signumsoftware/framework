@@ -3,6 +3,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 

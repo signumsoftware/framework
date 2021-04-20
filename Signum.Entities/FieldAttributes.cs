@@ -111,7 +111,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public static Implementations By(params Type[] types)
         {
             if (types == null || types.Length == 0)
-                return new Implementations { arrayOrType = types ?? new Type[0] };
+                return new Implementations { arrayOrType = types ?? Array.Empty<Type>() };
 
             if (types.Length == 1)
                 return By(types[0]);
@@ -319,7 +319,6 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
         public bool Identity { get; set; }
 
-
         bool identityBehaviour;
 
         public bool IdentityBehaviour
@@ -340,7 +339,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             this.Type = type;
             this.Name = name;
-            this.Identity = type == typeof(Guid) ? false : true;
+            this.Identity = type != typeof(Guid);
             this.IdentityBehaviour = true;
         }
     }

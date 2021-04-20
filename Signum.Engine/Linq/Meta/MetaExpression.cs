@@ -85,7 +85,7 @@ namespace Signum.Engine.Linq
             var pr = token.GetPropertyRoute();
 
             if (pr == null)
-                return new MetaExpression(sourceType, new DirtyMeta(token.GetImplementations(), new Meta[0]));
+                return new MetaExpression(sourceType, new DirtyMeta(token.GetImplementations(), Array.Empty<Meta>()));
 
             if (!sourceType.IsLite()  && pr.Type.IsLite())
                 return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr.Add("Entity") }));

@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Signum.Entities.Reflection;
 
 namespace Signum.React.ApiControllers
 {
@@ -446,7 +447,7 @@ namespace Signum.React.ApiControllers
             this.typeColor = token.TypeColor;
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;
-            this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(token.Type);
+            this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(token) != null);
             this.preferEquals = token.Type == typeof(string) &&
                 token.GetPropertyRoute() is PropertyRoute pr &&
                 typeof(Entity).IsAssignableFrom(pr.RootType) &&
@@ -475,7 +476,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
-            this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(qt.Type);
+            this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
 
             this.preferEquals = qt.Type == typeof(string) &&
                 qt.GetPropertyRoute() is PropertyRoute pr &&

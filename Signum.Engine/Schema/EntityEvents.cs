@@ -203,7 +203,7 @@ namespace Signum.Engine.Maps
             if (ValueFunction == null)
                 throw new InvalidOperationException($"ValueFunction should be set in AdditionalBinding {PropertyRoute} because {PropertyRoute.Type} is Cached");
 
-            var setValue = _setter ?? (_setter = CreateSetter());
+            var setValue = _setter ??= CreateSetter();
 
             setValue(entity, retriever);
         }
@@ -244,8 +244,8 @@ namespace Signum.Engine.Maps
                 var mlistRoute = PropertyRoute.GetMListItemsRoute();
                 if (mlistRoute != null)
                 {
-                    var mlistGetter = mlistRoute.GetLambdaExpression<T, IMListPrivate>(true).Compile();
-                    var partGetter = PropertyRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
+                    var mlistGetter = mlistRoute.Parent!.GetLambdaExpression<T, IMListPrivate>(true).Compile();
+                    var partGetter = PropertyRoute.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(true, mlistRoute).Compile();
 
                     var setter = ReflectionTools.CreateSetter<ModifiableEntity, V>(PropertyRoute.FieldInfo!);
 

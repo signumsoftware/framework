@@ -44,7 +44,7 @@ namespace Signum.Utilities
         public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly, Type? declaringType = null)
         {
             if (valueFactory == null)
-                throw new ArgumentNullException("valueFactory");
+                throw new ArgumentNullException(nameof(valueFactory));
 
             this.mode = mode;
             this.valueFactory = valueFactory;
@@ -59,11 +59,11 @@ namespace Signum.Utilities
         public int Invalidations;
         public TimeSpan SumLoadtime;  
 
-        object syncLock = new object();
+        object syncLock = new();
 
         Box? box;
 
-        Type declaringType; 
+        readonly Type declaringType; 
         public Type DeclaringType
         {
             get { return declaringType; }

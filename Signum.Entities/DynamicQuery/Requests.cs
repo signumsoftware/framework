@@ -56,7 +56,7 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+    [DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(true)]
     public enum PaginationMode
     {
         All,

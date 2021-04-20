@@ -348,7 +348,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        private Func<T, bool>? CombineFunc<T>(Func<T, bool>? one, Func<T, bool>? two) where T : Entity
+        private static Func<T, bool>? CombineFunc<T>(Func<T, bool>? one, Func<T, bool>? two) where T : Entity
         {
             if (one == null)
                 return two;

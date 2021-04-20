@@ -70,7 +70,7 @@ namespace Signum.Engine.Operations
 
                     try
                     {
-                        using (Transaction tr = new Transaction())
+                        using (var tr = new Transaction())
                         {
                             T? result = null;
                             using (OperationLogic.AllowSave<T>())
@@ -235,7 +235,7 @@ namespace Signum.Engine.Operations
 
                     try
                     {
-                        using (Transaction tr = new Transaction())
+                        using (var tr = new Transaction())
                         {
                             T? result = null;
                             using (OperationLogic.AllowSave(origin.GetType()))
@@ -374,7 +374,7 @@ namespace Signum.Engine.Operations
 
                     try
                     {
-                        using (Transaction tr = new Transaction())
+                        using (var tr = new Transaction())
                         {
                             T? result = null;
 
@@ -524,7 +524,7 @@ namespace Signum.Engine.Operations
 
                     try
                     {
-                        using (Transaction tr = new Transaction())
+                        using (var tr = new Transaction())
                         {
                             using (OperationLogic.AllowSave(entity.GetType()))
                                 OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
@@ -666,7 +666,7 @@ namespace Signum.Engine.Operations
                         {
                             try
                             {
-                                using (Transaction tr = new Transaction())
+                                using (var tr = new Transaction())
                                 {
                                     OnDelete((T)entity, args);
 

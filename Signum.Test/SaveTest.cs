@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Test.Environment;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test
 {
@@ -22,7 +23,7 @@ namespace Signum.Test
         [Fact]
         public void SaveCycle()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 ArtistEntity m = new ArtistEntity() { Name = "Michael" };
@@ -45,7 +46,7 @@ namespace Signum.Test
         [Fact]
         public void SaveSelfCycle()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 ArtistEntity m = new ArtistEntity() { Name = "Michael" };
@@ -65,7 +66,7 @@ namespace Signum.Test
         [Fact]
         public void SaveMany()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<ArtistEntity>())
             {
                 var prev =  Database.Query<ArtistEntity>().Count();
@@ -89,7 +90,7 @@ namespace Signum.Test
         [Fact]
         public void SaveMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -106,7 +107,7 @@ namespace Signum.Test
                     Year = 2001,
                     Songs = types.Select(t => new SongEmbedded() { Name = t.Name }).ToMList(),
                     State = AlbumState.Saved,
-                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany"} },
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany"}, Node = MusicLoader.NextLabelNode() },
                 }.Save();
 
                 Assert.All(GraphExplorer.FromRoot(album), a => Assert.False(a.IsGraphModified));
@@ -129,7 +130,7 @@ namespace Signum.Test
         [Fact]
         public void SmartSaveMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -146,7 +147,7 @@ namespace Signum.Test
                     Year = 2000,
                     Songs = { new SongEmbedded { Name = "Song 1" } },
                     State = AlbumState.Saved,
-                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } },
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() },
                 };
 
                 var innerList = ((IMListPrivate<SongEmbedded>)album.Songs).InnerList;
@@ -200,7 +201,7 @@ namespace Signum.Test
         [Fact]
         public void SmartSaveMListOrder()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -215,7 +216,7 @@ namespace Signum.Test
                     Year = 2000,
                     Songs = { new SongEmbedded { Name = "Song 0" }, new SongEmbedded { Name = "Song 1" }, new SongEmbedded { Name = "Song 2" }, },
                     State = AlbumState.Saved,
-                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } },
+                    Label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() },
                 };
 
                 album.Save();
@@ -255,7 +256,7 @@ namespace Signum.Test
             }
         }
 
-        void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
+        static void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
         {
             Assert.True(one.SequenceEqual(two));
         }
@@ -263,7 +264,7 @@ namespace Signum.Test
         [Fact]
         public void SaveManyMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (OperationLogic.AllowSave<LabelEntity>())
             using (OperationLogic.AllowSave<CountryEntity>())
             using (OperationLogic.AllowSave<AlbumEntity>())
@@ -275,7 +276,7 @@ namespace Signum.Test
                     Database.Query<BandEntity>().Take(6).ToList().Concat<IAuthorEntity>(
                     Database.Query<ArtistEntity>().Take(8).ToList()).ToList();
 
-                var label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" } };
+                var label = new LabelEntity { Name = "Four Music", Country = new CountryEntity { Name = "Germany" }, Node = MusicLoader.NextLabelNode() };
 
                 List<AlbumEntity> albums = 0.To(16).Select(i => new AlbumEntity()
                 {
@@ -309,7 +310,7 @@ namespace Signum.Test
         [Fact]
         public void RetrieveSealed()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 var albums = Database.Query<AlbumEntity>().ToList();
@@ -331,7 +332,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertWithMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.Query<AlbumEntity>().Select(a => a.Id).ToList().Max();
                 var count = Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count();
@@ -366,7 +367,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertTable()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.Query<NoteWithDateEntity>().Select(a => a.Id).ToList().Max();
 
@@ -391,7 +392,7 @@ namespace Signum.Test
         [Fact]
         public void BulkInsertMList()
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var max = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
 
