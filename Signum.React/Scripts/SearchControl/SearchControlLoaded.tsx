@@ -23,7 +23,7 @@ import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation } from '../Signum.Entities.DynamicQuery';
+import { FilterOperation, RefreshMode } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -69,7 +69,7 @@ export interface SearchControlLoadedProps {
   create: boolean;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
-  defaultAvoidAutoRefresh: boolean;
+  defaultRefreshMode: RefreshMode;
   avoidChangeUrl: boolean;
   refreshKey: any;
   extraOptions: any;
@@ -110,7 +110,7 @@ export interface SearchControlLoadedState {
   };
 
   showFilters: boolean;
-  avoidAutoRefresh: boolean;
+  refreshMode: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
 }
@@ -122,7 +122,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.state = {
       isSelectOpen: false,
       showFilters: props.showFilters,
-      avoidAutoRefresh: props.defaultAvoidAutoRefresh
+      refreshMode: props.defaultRefreshMode
     };
   }
 
@@ -146,10 +146,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       });
     }
 
-    if (this.props.defaultAvoidAutoRefresh)
-      this.setState({ avoidAutoRefresh: true });
-
-    if (this.props.searchOnLoad && !this.props.defaultAvoidAutoRefresh)
+//commnted because refreshMode state has already copied from defaultRefreshMode prop in constructor
+/*    if (this.props.defaultRefreshMode == 'Manual')
+      this.setState({ refreshMode: 'Manual' });
+*/
+    if (this.props.searchOnLoad && this.props.defaultRefreshMode == 'Auto')
       this.doSearch().done();
 
     this.containerDiv!.addEventListener("scroll", (e) => {
@@ -196,7 +197,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   // MAIN
   doSearchPage1(force: boolean = false) {
 
-    if (this.state.avoidAutoRefresh && !force)
+    if (this.state.refreshMode == 'Manual' && !force)
       return;
 
     const fo = this.props.findOptions;
@@ -224,7 +225,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   doSearch(dataChanged?: boolean, force: boolean = false): Promise<void> {
 
-    if (this.isUnmounted || (this.state.avoidAutoRefresh && !force))
+    if (this.isUnmounted || (this.state.refreshMode == 'Manual' && !force))
       return Promise.resolve();
 
     return this.getFindOptionsWithSFB().then(fop => {
@@ -539,7 +540,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const isAll = p.findOptions.pagination.mode == "All";
 
-    const isSearch = isAll || this.state.showFilters || this.state.avoidAutoRefresh ||
+    const isSearch = isAll || this.state.showFilters || this.state.refreshMode == 'Manual' ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
       this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
       this.props.findOptions.systemTime != null;
@@ -639,7 +640,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity);
     } else {
-      if (!this.state.avoidAutoRefresh)
+//      if (this.state.refreshMode == 'Auto')
         this.doSearch(true);
     }
   }
@@ -779,7 +780,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   markRows = (dic: MarkedRowsDictionary) => {
-    var promise = this.state.avoidAutoRefresh ? Promise.resolve(undefined) :
+    var promise = this.state.refreshMode == 'Manual' ? Promise.resolve(undefined) :
       this.doSearch(true);
 
     promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
@@ -1301,7 +1302,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       (this.props.allowSelection ? 1 : 0) +
       (this.props.view ? 1 : 0);
 
-
     if (!this.state.resultTable) {
       if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
         return <tr><td colSpan={columnsCount} className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</td></tr>;
@@ -1390,7 +1390,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         filterOptions={fo.filterOptions}
         onFiltersChanged={this.handlePinnedFilterChanged}
         onSearch={() => this.doSearchPage1(true)}
-        showSearchButton={this.state.avoidAutoRefresh && this.props.showHeader != true}
+        showSearchButton={this.state.refreshMode == 'Manual' && this.props.showHeader != true}
         extraSmall={extraSmall}
       />
     </AutoFocus>
@@ -1401,7 +1401,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onNavigated)
       this.props.onNavigated(lite);
 
-    if (this.state.avoidAutoRefresh)
+    if (this.state.refreshMode == 'Manual')
       return;
 
     this.doSearch(true);

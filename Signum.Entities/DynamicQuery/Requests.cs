@@ -67,6 +67,13 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+    public enum RefreshMode
+    {
+        Auto,
+        Manual
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum SystemTimeMode
     {
         AsOf,
