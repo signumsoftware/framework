@@ -2449,6 +2449,9 @@
     <Member Name="State" Description="Status" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>
+  <Type Name="UserOIDMessage">
+    <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit Active Directory verbunden und kann kein lokales Kennwort festgelegt haben" />
+  </Type>
   <Type Name="UserOIDMixin">
     <Member Name="OID" Description="OID" />
   </Type>
