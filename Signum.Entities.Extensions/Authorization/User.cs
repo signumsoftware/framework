@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
+using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -30,7 +31,7 @@ namespace Signum.Entities.Authorization
         public string UserName { get; set; }
 
         [DbType(Size = 128)]
-        public byte[] PasswordHash { get; set; }
+        public byte[]? PasswordHash { get; set; }
 
         public Lite<RoleEntity> Role { get; set; }
 
@@ -133,6 +134,8 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserOIDMixin : MixinEntity
     {
+        public static bool AllowUsersWithPassswordAndOID = false;
+
         UserOIDMixin(ModifiableEntity mainEntity, MixinEntity? next)
             : base(mainEntity, next)
         {
@@ -140,5 +143,19 @@ namespace Signum.Entities.Authorization
 
         [UniqueIndex(AllowMultipleNulls = true)]
         public Guid? OID { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(OID) && OID != null && ((UserEntity)this.MainEntity).PasswordHash != null && !AllowUsersWithPassswordAndOID)
+                return UserOIDMessage.TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet.NiceToString(this.MainEntity);
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    public enum UserOIDMessage
+    {
+        [Description("The user {0} is connected to Active Directory and can not have a local password set")]
+        TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet
     }
 }

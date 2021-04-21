@@ -150,7 +150,7 @@ namespace Signum.Engine.Authorization
             var result = new UserEntity
             {
                 UserName = ctx.UserName,
-                PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                PasswordHash = null,
                 Email = ctx.EmailAddress,
                 Role = GetRole(ctx, throwIfNull: true)!,
                 State = UserState.Saved,

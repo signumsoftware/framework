@@ -46,10 +46,13 @@ namespace Signum.React.Authorization
 
                         if (user != null && user.Mixin<UserOIDMixin>().OID == null)
                         {
-                            user.Mixin<UserOIDMixin>().OID = ctx.OID;
                             using (AuthLogic.Disable())
                             using (OperationLogic.AllowSave<UserEntity>())
                             {
+                                user.Mixin<UserOIDMixin>().OID = ctx.OID;
+                                user.UserName = ctx.UserName;
+                                if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
+                                    user.PasswordHash = null;
                                 user.Save();
                             }
                         }

@@ -44,10 +44,14 @@ namespace Signum.Engine.Authorization
 
         static void UserTicketLogic_Saving(UserEntity user)
         {
-            if (!user.IsNew && user.IsGraphModified && !user.InDB(u => u.PasswordHash).SequenceEqual(user.PasswordHash))
+            if (!user.IsNew && user.IsGraphModified)
             {
-                using (AuthLogic.Disable())
-                    user.UserTickets().UnsafeDelete();
+
+                if (!user.InDB(u => u.PasswordHash).EmptyIfNull().SequenceEqual(user.PasswordHash.EmptyIfNull()))
+                {
+                    using (AuthLogic.Disable())
+                        user.UserTickets().UnsafeDelete();
+                }
             }
         }
 

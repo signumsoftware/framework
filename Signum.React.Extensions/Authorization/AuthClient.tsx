@@ -194,11 +194,11 @@ export function getAuthToken(): string | undefined {
   return sessionStorage.getItem("authToken") ?? undefined;
 }
 
-export function getAuthenticationType(): string | undefined {
+export function getAuthenticationType(): AuthenticationType | undefined {
   return sessionStorage.getItem("authenticationType") ?? undefined;
 }
 
-export function setAuthToken(authToken: string | undefined, authenticationType: string | undefined): void {
+export function setAuthToken(authToken: string | undefined, authenticationType: AuthenticationType | undefined): void {
   sessionStorage.setItem("authToken", authToken ?? "");
   sessionStorage.setItem("authenticationType", authenticationType ?? "");
 }
@@ -274,6 +274,8 @@ export namespace Options {
   export let resetPassword: boolean;
 }
 
+export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows" | "webauthn";
+
 export module API {
   export interface LoginRequest {
     userName: string;
@@ -282,7 +284,7 @@ export module API {
   }
 
   export interface LoginResponse {
-    authenticationType: string;
+    authenticationType: AuthenticationType;
     message?: string;
     token: string;
     userEntity: UserEntity;

@@ -381,13 +381,17 @@ export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
   userName: string;
-  passwordHash: string;
+  passwordHash: string | null;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
   disabledOn: string | null;
   state: UserState;
   loginFailedCounter: number;
+}
+
+export module UserOIDMessage {
+  export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
 }
 
 export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");

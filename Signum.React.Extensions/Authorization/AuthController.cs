@@ -139,9 +139,6 @@ namespace Signum.React.Authorization
         [HttpPost("api/auth/ChangePassword")]
         public ActionResult<LoginResponse> ChangePassword([Required, FromBody] ChangePasswordRequest request)
         {
-            if (string.IsNullOrEmpty(request.oldPassword))
-                return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
-
             if (string.IsNullOrEmpty(request.newPassword))
                 return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
@@ -150,9 +147,16 @@ namespace Signum.React.Authorization
                 return ModelError("newPassword", error);
 
             var user = UserEntity.Current;
-
-            if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
-                return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
+            if(string.IsNullOrEmpty(request.oldPassword))
+            {
+                if(user.PasswordHash != null)
+                    return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
+            }
+            else
+            {
+                if (user.PasswordHash == null || !user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
+                    return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
+            }
 
             user.PasswordHash = Security.EncodePassword(request.newPassword);
             using (AuthLogic.Disable())

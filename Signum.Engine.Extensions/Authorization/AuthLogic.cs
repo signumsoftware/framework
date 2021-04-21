@@ -309,7 +309,7 @@ namespace Signum.Engine.Authorization
                     throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
 
-                if (!user.PasswordHash.SequenceEqual(passwordHash))
+                if (user.PasswordHash == null || !user.PasswordHash.SequenceEqual(passwordHash))
                 {
                     using (UserHolder.UserSession(SystemUser!))
                     {
@@ -359,19 +359,11 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     return null;
 
-                if (!user.PasswordHash.SequenceEqual(passwordHash))
+                if (user.PasswordHash == null || !user.PasswordHash.SequenceEqual(passwordHash))
                     return null;
 
                 return user;
             }
-        }
-
-        public static void ChangePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash)
-        {
-            var userEntity = user.RetrieveAndForget();
-            userEntity.PasswordHash = newPasswordHash;
-            using (AuthLogic.Disable())
-                userEntity.Execute(UserOperation.Save);
         }
 
         public static void StartAllModules(SchemaBuilder sb)
