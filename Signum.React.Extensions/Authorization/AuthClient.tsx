@@ -115,7 +115,7 @@ export async function authenticate(): Promise<AuthenticatedUser | undefined> {
 export interface AuthenticatedUser {
   userEntity: UserEntity;
   token: string;
-  authenticationType: string;
+  authenticationType: AuthenticationType;
 }
 
 export function currentUser(): UserEntity {
@@ -195,7 +195,7 @@ export function getAuthToken(): string | undefined {
 }
 
 export function getAuthenticationType(): AuthenticationType | undefined {
-  return sessionStorage.getItem("authenticationType") ?? undefined;
+  return sessionStorage.getItem("authenticationType") as AuthenticationType | null ?? undefined;
 }
 
 export function setAuthToken(authToken: string | undefined, authenticationType: AuthenticationType | undefined): void {
