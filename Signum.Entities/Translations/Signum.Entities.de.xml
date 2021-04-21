@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -191,7 +191,6 @@
     <Member Name="showPeriod" Description="Zeit zeigen" />
     <Member Name="showPreviousOperation" Description="Vorherige Operation zeigen" />
     <Member Name="showRecords" Description="Datensätze anzeigen" />
-    <Member Name="Time" Description="Zeit" />
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
@@ -363,12 +362,9 @@
     <Member Name="MoveToday" Description="Heute" />
     <Member Name="NoneSelected" Description="keine ausgewählten Elemente" />
     <Member Name="OpenCombobox" Description="Combobox öffnen" />
-    <Member Name="OpenDropdown" Description="Dropdown öffnen" />
-    <Member Name="Placeholder" Description="" />
     <Member Name="RemoveLabel" Description="Ausgewähltes Element entfernen" />
     <Member Name="SelectedItems0" Description="Ausgewählte Elemente: {0}" />
     <Member Name="TagsLabel" Description="Ausgewählte Elemente" />
-    <Member Name="TimeButton" Description="Zeit wählen" />
   </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Decke" />
@@ -396,6 +392,7 @@
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
+    <Member Name="DerivedGroupKey" Description="Abgeleiteter Gruppenschlüssel" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) zurückgeben?" />
     <Member Name="Explore" Description="Erforsche" />
@@ -404,6 +401,9 @@
     <Member Name="Find" Description="Finden" />
     <Member Name="FinderOf0" Description="Finder von {0}" />
     <Member Name="First0Results_N" Description="erste {0} Ergebnis[se]." />
+    <Member Name="GroupKey" Description="Gruppenschlüssel" />
+    <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
+    <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
     <Member Name="HidePinnedFiltersOptions" Description="Vorgewahlter Filteroptionen ausblenden" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Name" Description="Name" />
@@ -432,6 +432,7 @@
     <Member Name="ReturnNewEntity" Description="Neue Entität zurückgeben?" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
+    <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="ShowPinnedFiltersOptions" Description="Vorgewahlter Filteroptionen anzeigen" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
@@ -513,6 +514,7 @@
     <Member Name="_0IsNotA1_G" Description="{0} ist kei[m:n|f:ne|n:n] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} ist nicht zulässig" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
+    <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />
