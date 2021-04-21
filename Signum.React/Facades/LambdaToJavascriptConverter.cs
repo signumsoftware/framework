@@ -160,8 +160,11 @@ namespace Signum.React.Facades
             if (expr.Type.UnNullify() == typeof(TimeSpan))
                 return "durationToString(" + r + formatFull + ")";
 
-            if (ReflectionTools.IsNumber(expr.Type.UnNullify()))
-                return "numberToString(" + r + formatFull + ")";
+            if (ReflectionTools.IsIntegerNumber(expr.Type.UnNullify()))
+                return "numberToString(" + r + (formatFull ?? ", 'D'") + ")";
+
+            if (ReflectionTools.IsDecimalNumber(expr.Type.UnNullify()))
+                return "numberToString(" + r + (formatFull ?? ", 'N'") + ")";
 
             return "valToString(" + r + ")";
         }

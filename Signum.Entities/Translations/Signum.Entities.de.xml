@@ -394,7 +394,7 @@
     <Member Name="DeleteFilter" Description="Filter löschen" />
     <Member Name="DerivedGroupKey" Description="Abgeleiteter Gruppenschlüssel" />
     <Member Name="DisplayName" Description="Anzeigename" />
-    <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) zurückgeben?" />
+    <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
     <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />
