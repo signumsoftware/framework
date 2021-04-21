@@ -62,10 +62,13 @@ namespace Signum.Engine.Translation
 
         public List<string?>? TranslateBatch(List<string> list, string from, string to)
         {
-            var result = Task.Run(async () =>
+            if(this.AzureKey() == null)
+                return null;
+
+            var result = list.GroupsOf(10).SelectMany(listPart => Task.Run(async () =>
             {
-                return await this.TranslateBatchAsync(list, from, to);
-            }).Result;
+                return await this.TranslateBatchAsync(listPart, from, to);
+            }).Result!).ToList();
             
             return result;
         }
