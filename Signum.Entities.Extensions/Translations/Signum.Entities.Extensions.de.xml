@@ -32,6 +32,7 @@
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="CurrentState" Description="Aktueller Status" />
+    <Member Name="EmailNotificationsSent" Description="E-Mail-Benachrichtigungen gesendet" />
     <Member Name="Future" Description="Zukünftige" />
     <Member Name="NotAttended" Description="Nicht erledigte" />
     <Member Name="Recipient" Description="Empfänger" />
@@ -73,6 +74,9 @@
     <Member Name="Attended" Description="Erledigte" />
     <Member Name="New" Description="Neu" />
     <Member Name="Saved" Description="Gespeichert" />
+  </Type>
+  <Type Name="AlertTask">
+    <Member Name="AlertNotificationMailTask" Description="Benachrichtigungs-E-Mail-Task" />
   </Type>
   <Type Name="AlertTypeEntity" Description="Benachrichtigungstyp" />
   <Type Name="AlertTypeOperation">
@@ -130,6 +134,8 @@
     <Member Name="ResetPasswordRequestSubject" Description="Neues Passwort anfordern" />
     <Member Name="WeHaveSendYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail geschickt, um Ihr Passwort zurückzusetzen" />
     <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Sie können Ihr Passwort zurücksetzen, indem Sie dem unten stehenden Link folgen" />
+    <Member Name="YourAccountHasBeenLocked" Description="Ihr Konto wurde gesperrt" />
+    <Member Name="YourAccountHasBeenLockedDueToSeveralFailedLogins" Description="Ihr Konto wurde aufgrund mehrerer fehlgeschlagener Anmeldungen gesperrt" />
     <Member Name="YouRecentlyRequestedANewPassword" Description="Sie haben vor kurzem ein neues Passwort angefordert" />
     <Member Name="YourResetPasswordRequestHasExpired" Description="Ihre Anforderung für das Zurücksetzen des Passworts ist abgelaufen." />
     <Member Name="YourUsernameIs" Description="Ihr Benutzername ist:" />
@@ -137,46 +143,6 @@
   <Type Name="AuthMessage">
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Nicht autorisiert, um die Entität {1} mit der Id {2} zu {0} " />
     <Member Name="NotAuthorizedToRetrieve0" Description="Nicht autorisiert zum Abrufen von '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Nicht autorisiertt '{0}' zu speichern" />
-    <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
-    <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
-    <Member Name="Password" Description="Passwort" />
-    <Member Name="PasswordChanged" Description="Passwort geändert" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="Das eingegebene Passwort stimmt nicht mit dem Aktuellen überein" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
-    <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
-    <Member Name="PasswordsAreDifferent" Description="Die Passwörter sind unterschiedlich" />
-    <Member Name="PasswordsDoNotMatch" Description="Die Passwörter stimmen nicht überein" />
-    <Member Name="Please0IntoYourAccount" Description="Bitte, {0} in Ihr Konto" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Bitte geben Sie Ihr neues Passwort ein" />
-    <Member Name="Remember" Description="Denken Sie daran" />
-    <Member Name="RememberMe" Description="Auf diesem Computer merken" />
-    <Member Name="RequestAccepted" Description="Anfrage angenommen" />
-    <Member Name="ResetPassword" Description="Passwort zurücksetzen" />
-    <Member Name="ResetPasswordCode" Description="Code für die Wiederherstellung des Passworts" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an Ihr E-Mail-Konto gesendet" />
-    <Member Name="ResetPasswordSuccess" Description="Ihr Passwort wurde erfolgreich geändert" />
-    <Member Name="Save" Description="Speichern" />
-    <Member Name="SendEmail" Description="E-Mail senden" />
-    <Member Name="SwitchUser" Description="Benutzer wechseln" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Der Bestätigungs-Code, den Sie gerade gesendet haben, ist ungültig" />
-    <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="Das Passwort muss mindestens 5 Zeichen lang sein." />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Es ist ein Fehler beim Senden Ihrer Anfrage zum Zurücksetzen des Passworts aufgetreten. Bitte geben Sie Ihre Login-Daten ein." />
-    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Es gibt kein registrierter Benutzer mit dieser E-Mail-Adresse" />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Die angegebenen Passwörter stimmen nicht überein" />
-    <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
-    <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert sein" />
-    <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
-    <Member Name="Username" Description="Benutzername" />
-    <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
-    <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
-    <Member Name="View" Description="Ansehen" />
-    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
-    <Member Name="Welcome0" Description="Willkommen {0}" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Sie haben die Erstellung eines Kontos beantragt. Um dieses zu bestätigen, klicken Sie bitte unten auf den folgenden Link:" />
-    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Wir senden Ihnen eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts." />
-    <Member Name="YouMustRepeatTheNewPassword" Description="Sie müssen das neue Passwort wiederholen" />
-    <Member Name="YourPasswordIsNearExpiration" Description="Ihr Passwort läuft bald ab" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth-Miniaturansicht">
     <Member Name="All" Description="Alle" />
@@ -400,6 +366,7 @@
     <Member Name="MyCharts" Description="Meine Charts" />
     <Member Name="NewPalette" Description="Neue Palette" />
     <Member Name="Preview" Description="Vorschau" />
+    <Member Name="QueryResultReachedMaxRows0" Description="Abfrageergebnis hat max. Zeilen erreicht ({0})" />
     <Member Name="Reload" Description="Neu laden" />
     <Member Name="SavePalette" Description="Palette speichern" />
     <Member Name="ShowChartSettings" Description="Diagrammeinstellungen anzeigen" />
@@ -423,6 +390,7 @@
     <Member Name="ChartScript" Description="Diagrammskript" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Filters" Description="Filter" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Multiplications" Description="Multiplikationen" />
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="QueryName" Description="Abfrage-Name" />
@@ -447,7 +415,6 @@
   </Type>
   <Type Name="CultureInfoEntity" Description="Kulturinfo" PluralDescription="Kulturinfos" Gender="f">
     <Member Name="EnglishName" Description="Englischer Name" />
-    <Member Name="Hidden" Description="Versteckt" />
     <Member Name="Name" Description="Name" />
     <Member Name="NativeName" Description="Nativer Name" />
   </Type>
@@ -656,6 +623,12 @@
     <Member Name="ScriptSuccess" Description="Skript-Erfolgreich" />
     <Member Name="Timeout" Description="Timeout" />
   </Type>
+  <Type Name="Download">
+    <Member Name="All" Description="Alle" />
+    <Member Name="None" Description="Keine" />
+    <Member Name="Replace" Description="Ersetzen" />
+    <Member Name="Subset" Description="Teilmenge" />
+  </Type>
   <Type Name="DynamicApiEntity" />
   <Type Name="DynamicApiEval" />
   <Type Name="DynamicApiOperation" />
@@ -856,6 +829,9 @@
   <Type Name="EmailFileType">
     <Member Name="Attachment" Description="Anhang" />
   </Type>
+  <Type Name="EmailFromEmbedded" Description="E-Mail von">
+    <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
+  </Type>
   <Type Name="EmailMasterTemplateEntity" Description="Master E-Mail-Vorlage">
     <Member Name="Guid" Description="Guid" />
     <Member Name="IsDefault" Description="Ist Standard" />
@@ -893,15 +869,11 @@
   </Type>
   <Type Name="EmailMessageMessage">
     <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
-    <Member Name="Attachments" Description="Anhänge" />
-    <Member Name="DefaultFromIsMandatory" Description="Standardmäßig von ist obligatorisch" />
     <Member Name="ExceptionMessages" Description="Ausnahmenachrichten" />
-    <Member Name="From" Description="Von" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="RemainingMessages" Description="Verbleibenden Nachrichten" />
     <Member Name="TheEmailMessageCannotBeSentFromState0" Description="Die E-Mail kann nicht aus dem Status {0} gesendet werden" />
-    <Member Name="To" Description="An" />
   </Type>
   <Type Name="EmailMessageOperation">
     <Member Name="CreateEmailFromTemplate" Description="E-Mail aus Vorlage erstellen" />
@@ -932,6 +904,7 @@
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
   <Type Name="EmailOwnerData" Description="E-Mailbesitzerdaten">
+    <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="Email" Description="E-Mail" />
@@ -963,14 +936,15 @@
     <Member Name="AdditionalRecipients" Description="Zusätzliche Empfänger" />
     <Member Name="DefaultFrom" Description="Standard von" />
     <Member Name="Exchange" Description="Exchange" />
+    <Member Name="MicrosoftGraph" Description="Microsoft Graph" />
     <Member Name="Name" Description="Name" />
     <Member Name="SMTP" Description="SMTP" />
   </Type>
   <Type Name="EmailSenderConfigurationOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="EmailTemplateContactEmbedded" Description="Kontakt E-Mail-Vorlage">
-    <Member Name="DisplayName" Description="Namen" />
+  <Type Name="EmailTemplateAddressEmbedded" Description="E-Mail-Vorlagenadresse">
+    <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -993,6 +967,7 @@
     <Member Name="Recipients" Description="Empfänger" />
   </Type>
   <Type Name="EmailTemplateFromEmbedded" Description="E-Mail Vorlage Von">
+    <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
     <Member Name="WhenMany" Description="Wenn viele" />
     <Member Name="WhenNone" Description="Wenn keine" />
   </Type>
@@ -1477,6 +1452,11 @@
     <Member Name="NotAllowed" Description="Nicht erlaubt" />
     <Member Name="TextPruning" Description="Text beschneiden" />
   </Type>
+  <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
+  </Type>
   <Type Name="ModelConverterSymbol" Description="Modell-Konverter" Gender="m" />
   <Type Name="MoveTreeModel" Description="Bewege Baum">
     <Member Name="InsertPlace" Description="Platz einfügen" />
@@ -1807,6 +1787,7 @@
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="SummaryToken" Description="Zusammenfassung Token" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -1862,8 +1843,9 @@
   </Type>
   <Type Name="ResetPasswordRequestEntity" Description="Resetkennwort Anforderung">
     <Member Name="Code" Description="Code" />
-    <Member Name="Lapsed" Description="Verfallen" />
+    <Member Name="IsValid" Description="Ist gültig" />
     <Member Name="RequestDate" Description="Datum der Anfrage" />
+    <Member Name="Used" Description="Gebraucht" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ResetPasswordRequestOperation">
@@ -2402,6 +2384,11 @@
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Type" Description="Typ" />
   </Type>
+  <Type Name="Upload">
+    <Member Name="New" Description="Neu" />
+    <Member Name="None" Description="Keine" />
+    <Member Name="Subset" Description="Teilmenge" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
@@ -2434,6 +2421,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="Query" Description="Abfrage" />
@@ -2455,6 +2443,7 @@
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
+    <Member Name="LoginFailedCounter" Description="fehlgeschlagener Login-Zähler" />
     <Member Name="PasswordHash" Description="Passwort-Hash" />
     <Member Name="Role" Description="Rolle" />
     <Member Name="State" Description="Status" />
