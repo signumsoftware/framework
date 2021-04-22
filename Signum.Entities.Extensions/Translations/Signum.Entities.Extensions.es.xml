@@ -123,94 +123,8 @@
     <Member Name="YourUsernameIs" Description="Tu nombre de usuario es:" />
   </Type>
   <Type Name="AuthMessage">
-    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
-    <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
-    <Member Name="AnErrorOccurredRequestNotProcessed" Description="Se ha producido un error, solicitud no procesada." />
-    <Member Name="AuthAdmin_AddCondition" Description="Añadir condición" />
-    <Member Name="AuthAdmin_ChooseACondition" Description="Elija una condición" />
-    <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condición" />
-    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Caché de autorización se actualizó correctamente" />
-    <Member Name="ChangePassword" Description="Cambiar contraseña" />
-    <Member Name="ChangePasswordAspx_ActualPassword" Description="Contraseña actual" />
-    <Member Name="ChangePasswordAspx_ChangePassword" Description="Cambiar contraseña" />
-    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Confirmar nueva contraseña" />
-    <Member Name="ChangePasswordAspx_EnterActualPasswordAndNewOne" Description="Escriba su contraseña actual y la nueva" />
-    <Member Name="ChangePasswordAspx_NewPassword" Description="Nueva contraseña" />
-    <Member Name="ConfirmNewPassword" Description="Confirmar contraseña" />
-    <Member Name="Email" Description="Correo electrónico" />
-    <Member Name="EmailMustHaveAValue" Description="El correo electrónico debe tener un valor" />
-    <Member Name="EmailSent" Description="Email enviado" />
-    <Member Name="EnterTheNewPassword" Description="Escriba la nueva contraseña" />
-    <Member Name="EnterYourUserEmail" Description="Introduzca su correo electrónico de usuario" />
-    <Member Name="EnterYourUserNameAndPassword" Description="Escriba su usuario y contraseña" />
-    <Member Name="EntityGroupsAscx_EntityGroup" Description="Grupo de entidades" />
-    <Member Name="EntityGroupsAscx_Overriden" Description="Sobreescrito" />
-    <Member Name="ExpectedUserLogged" Description="Se esperaba que un usuario hubiera iniciado sesión" />
-    <Member Name="ExpiredPassword" Description="Contraseña caducada" />
-    <Member Name="ExpiredPasswordMessage" Description="Su contraseña ha caducado. Debe cambiarla" />
-    <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="¿Olvidó su contraseña? Introduzca su email de inicio de sesión." />
-    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Danos el correo electrónico de tu usuario y te enviaremos un correo electrónico para que puedas restablecer tu contraseña." />
-    <Member Name="IForgotMyPassword" Description="Olvidé mi contraseña" />
-    <Member Name="IHaveForgottenMyPassword" Description="He olvidado mi contraseña" />
-    <Member Name="IncorrectPassword" Description="Contraseña incorrecta" />
-    <Member Name="InvalidPassword" Description="Contraseña no válida" />
-    <Member Name="InvalidUsername" Description="Nombre de usuario no válido" />
-    <Member Name="InvalidUsernameOrPassword" Description="El nombre de usuario o la contraseña son incorrectos" />
-    <Member Name="Login" Description="Iniciar Sesión" />
-    <Member Name="Login_New" Description="Nuevo:" />
-    <Member Name="Login_Password" Description="Contraseña:" />
-    <Member Name="Login_Repeat" Description="Repetir:" />
-    <Member Name="Login_UserName" Description="Nombre de usuario:" />
-    <Member Name="Login_UserName_Watermark" Description="usuario" />
-    <Member Name="LoginWithAnotherUser" Description="Iniciar sesión con otro usuario" />
-    <Member Name="LoginWithWindowsUser" Description="Iniciar sesión con el usuario de Windows" />
-    <Member Name="Logout" Description="Desconectar" />
-    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Parece que el usuario de Windows no puede utilizar esta aplicación, el navegador  no proporciona información de identidad o el servidor no está configurado correctamente." />
-    <Member Name="NewPassword" Description="Nueva contraseña" />
-    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="No autorizado para {0} la entidad {1} con Id {2}" />
-    <Member Name="NotAuthorizedToChangeProperty0on1" Description="No autorizado para cambiar propiedad '{0}' en {1}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="No autorizado para recuperar '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
-    <Member Name="NotUserLogged" Description="Ningún usuario logado" />
-    <Member Name="NoWindowsUserFound" Description="No se ha encontrado ningún usuario de Windows" />
-    <Member Name="Password" Description="Contraseña" />
-    <Member Name="PasswordChanged" Description="Contraseña cambiada" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado con éxito" />
-    <Member Name="PasswordMustHaveAValue" Description="Se debe especificar la contraseña" />
-    <Member Name="PasswordsAreDifferent" Description="Las contraseñas son diferentes" />
-    <Member Name="PasswordsDoNotMatch" Description="Las contraseñas no coinciden" />
-    <Member Name="Please0IntoYourAccount" Description="Por favor, vaya al {0} para acceder a la aplicación" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Por favor, introduzca su nueva contraseña" />
-    <Member Name="Remember" Description="Recordar" />
-    <Member Name="RememberMe" Description="Recordarme" />
-    <Member Name="RequestAccepted" Description="Solicitud aceptada" />
-    <Member Name="ResetPassword" Description="Restablecer contraseña" />
-    <Member Name="ResetPasswordCode" Description="Código para restablecer la contraseña" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Un código de confirmación para restablecer su contraseña se ha enviado a su cuenta de correo electrónico {0}" />
-    <Member Name="ResetPasswordSuccess" Description="Su contraseña ha sido modificada con éxito" />
-    <Member Name="Save" Description="Guardar" />
-    <Member Name="SendEmail" Description="Enviar correo electrónico" />
-    <Member Name="SwitchUser" Description="Cambiar usuario" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="El código de confirmación proporcionado es inválido" />
-    <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="La contraseña debe tener al menos 5 caracteres" />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email." />
-    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="No hay ningún usuario registrado con esa dirección de correo electrónico" />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Las contraseñas especificadas no coinciden" />
-    <Member Name="TheUserIsNotLongerInTheDatabase" Description="El usuario ya no existe en la base de datos" />
-    <Member Name="TheUserStateMustBeDisabled" Description="El estado del usuario debe ser deshabilitado" />
-    <Member Name="User0IsDisabled" Description="El usuario {0} está desactivado" />
-    <Member Name="Username" Description="Nombre de usuario" />
-    <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
-    <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
-    <Member Name="View" Description="Ver" />
-    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Le hemos enviado un correo electrónico con un enlace que le permitirá restablecer su contraseña." />
-    <Member Name="Welcome0" Description="¡ Bienvenido {0}" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
-    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Le enviaremos un correo electrónico con un enlace para restablecer su contraseña." />
-    <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
-    <Member Name="YourPasswordIsNearExpiration" Description="Su contraseña es cerca de caducar" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth miniatura">
     <Member Name="All" Description="Todos" />
@@ -1432,6 +1346,94 @@
     <Member Name="Exception" Description="Excepción" />
     <Member Name="MethodName" Description="Nombre del método" />
     <Member Name="Start" Description="Inicio" />
+  </Type>
+  <Type Name="LoginAuthMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
+    <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
+    <Member Name="AnErrorOccurredRequestNotProcessed" Description="Se ha producido un error, solicitud no procesada." />
+    <Member Name="AuthAdmin_AddCondition" Description="Añadir condición" />
+    <Member Name="AuthAdmin_ChooseACondition" Description="Elija una condición" />
+    <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condición" />
+    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Caché de autorización se actualizó correctamente" />
+    <Member Name="ChangePassword" Description="Cambiar contraseña" />
+    <Member Name="ChangePasswordAspx_ActualPassword" Description="Contraseña actual" />
+    <Member Name="ChangePasswordAspx_ChangePassword" Description="Cambiar contraseña" />
+    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Confirmar nueva contraseña" />
+    <Member Name="ChangePasswordAspx_EnterActualPasswordAndNewOne" Description="Escriba su contraseña actual y la nueva" />
+    <Member Name="ChangePasswordAspx_NewPassword" Description="Nueva contraseña" />
+    <Member Name="ConfirmNewPassword" Description="Confirmar contraseña" />
+    <Member Name="Email" Description="Correo electrónico" />
+    <Member Name="EmailMustHaveAValue" Description="El correo electrónico debe tener un valor" />
+    <Member Name="EmailSent" Description="Email enviado" />
+    <Member Name="EnterTheNewPassword" Description="Escriba la nueva contraseña" />
+    <Member Name="EnterYourUserEmail" Description="Introduzca su correo electrónico de usuario" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Escriba su usuario y contraseña" />
+    <Member Name="EntityGroupsAscx_EntityGroup" Description="Grupo de entidades" />
+    <Member Name="EntityGroupsAscx_Overriden" Description="Sobreescrito" />
+    <Member Name="ExpectedUserLogged" Description="Se esperaba que un usuario hubiera iniciado sesión" />
+    <Member Name="ExpiredPassword" Description="Contraseña caducada" />
+    <Member Name="ExpiredPasswordMessage" Description="Su contraseña ha caducado. Debe cambiarla" />
+    <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="¿Olvidó su contraseña? Introduzca su email de inicio de sesión." />
+    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Danos el correo electrónico de tu usuario y te enviaremos un correo electrónico para que puedas restablecer tu contraseña." />
+    <Member Name="IForgotMyPassword" Description="Olvidé mi contraseña" />
+    <Member Name="IHaveForgottenMyPassword" Description="He olvidado mi contraseña" />
+    <Member Name="IncorrectPassword" Description="Contraseña incorrecta" />
+    <Member Name="InvalidPassword" Description="Contraseña no válida" />
+    <Member Name="InvalidUsername" Description="Nombre de usuario no válido" />
+    <Member Name="InvalidUsernameOrPassword" Description="El nombre de usuario o la contraseña son incorrectos" />
+    <Member Name="Login" Description="Iniciar Sesión" />
+    <Member Name="Login_New" Description="Nuevo:" />
+    <Member Name="Login_Password" Description="Contraseña:" />
+    <Member Name="Login_Repeat" Description="Repetir:" />
+    <Member Name="Login_UserName" Description="Nombre de usuario:" />
+    <Member Name="Login_UserName_Watermark" Description="usuario" />
+    <Member Name="LoginWithAnotherUser" Description="Iniciar sesión con otro usuario" />
+    <Member Name="LoginWithWindowsUser" Description="Iniciar sesión con el usuario de Windows" />
+    <Member Name="Logout" Description="Desconectar" />
+    <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Parece que el usuario de Windows no puede utilizar esta aplicación, el navegador  no proporciona información de identidad o el servidor no está configurado correctamente." />
+    <Member Name="NewPassword" Description="Nueva contraseña" />
+    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
+    <Member Name="NotAuthorizedToChangeProperty0on1" Description="No autorizado para cambiar propiedad '{0}' en {1}" />
+    <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
+    <Member Name="NotUserLogged" Description="Ningún usuario logado" />
+    <Member Name="NoWindowsUserFound" Description="No se ha encontrado ningún usuario de Windows" />
+    <Member Name="Password" Description="Contraseña" />
+    <Member Name="PasswordChanged" Description="Contraseña cambiada" />
+    <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado con éxito" />
+    <Member Name="PasswordMustHaveAValue" Description="Se debe especificar la contraseña" />
+    <Member Name="PasswordsAreDifferent" Description="Las contraseñas son diferentes" />
+    <Member Name="PasswordsDoNotMatch" Description="Las contraseñas no coinciden" />
+    <Member Name="Please0IntoYourAccount" Description="Por favor, vaya al {0} para acceder a la aplicación" />
+    <Member Name="PleaseEnterYourChosenNewPassword" Description="Por favor, introduzca su nueva contraseña" />
+    <Member Name="Remember" Description="Recordar" />
+    <Member Name="RememberMe" Description="Recordarme" />
+    <Member Name="RequestAccepted" Description="Solicitud aceptada" />
+    <Member Name="ResetPassword" Description="Restablecer contraseña" />
+    <Member Name="ResetPasswordCode" Description="Código para restablecer la contraseña" />
+    <Member Name="ResetPasswordCodeHasBeenSent" Description="Un código de confirmación para restablecer su contraseña se ha enviado a su cuenta de correo electrónico {0}" />
+    <Member Name="ResetPasswordSuccess" Description="Su contraseña ha sido modificada con éxito" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="SendEmail" Description="Enviar correo electrónico" />
+    <Member Name="SwitchUser" Description="Cambiar usuario" />
+    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="El código de confirmación proporcionado es inválido" />
+    <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="La contraseña debe tener al menos 5 caracteres" />
+    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email." />
+    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="No hay ningún usuario registrado con esa dirección de correo electrónico" />
+    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Las contraseñas especificadas no coinciden" />
+    <Member Name="TheUserIsNotLongerInTheDatabase" Description="El usuario ya no existe en la base de datos" />
+    <Member Name="TheUserStateMustBeDisabled" Description="El estado del usuario debe ser deshabilitado" />
+    <Member Name="User0IsDisabled" Description="El usuario {0} está desactivado" />
+    <Member Name="Username" Description="Nombre de usuario" />
+    <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
+    <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
+    <Member Name="View" Description="Ver" />
+    <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Le hemos enviado un correo electrónico con un enlace que le permitirá restablecer su contraseña." />
+    <Member Name="Welcome0" Description="¡ Bienvenido {0}" />
+    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
+    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Le enviaremos un correo electrónico con un enlace para restablecer su contraseña." />
+    <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
+    <Member Name="YourPasswordIsNearExpiration" Description="Su contraseña es cerca de caducar" />
   </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Color" />

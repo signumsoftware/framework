@@ -74,81 +74,8 @@
     <Member Name="YourUsernameIs" Description="O nome de utilizador é:" />
   </Type>
   <Type Name="AuthMessage">
-    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos foram encontrados no gráfico das funções devido às relações:" />
-    <Member Name="_0RulesFor1" Description="Regras de {0} para {1}" />
-    <Member Name="AuthAdmin_AddCondition" Description="Adicionar condição" />
-    <Member Name="AuthAdmin_ChooseACondition" Description="Escolha uma condição" />
-    <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condição" />
-    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Cache de autorização foi actualizada correctamente" />
-    <Member Name="ChangePassword" Description="Alterar a palavra-passe" />
-    <Member Name="ChangePasswordAspx_ActualPassword" Description="Remover a palavra-passe" />
-    <Member Name="ChangePasswordAspx_ChangePassword" Description="Alterar a palavra-passe" />
-    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Confirmar nova palavra-passe" />
-    <Member Name="ChangePasswordAspx_NewPassword" Description="Nova palavra chave&#xD;&#xA;Nova palavra-passe" />
-    <Member Name="ChangePasswordAspx_WriteActualPasswordAndNewOne" Description="Escreva a sua palavra-passe actual e a nova" />
-    <Member Name="ConfirmNewPassword" Description="Confirmar a nova palavra-passe" />
-    <Member Name="Email" Description="E-mail&#xD;&#xA;E-mail" />
-    <Member Name="EmailMustHaveAValue" Description="O E-mail deve ter um valor" />
-    <Member Name="EmailSent" Description="E-mail enviado" />
-    <Member Name="EnterTheNewPassword" Description="Escreva a nova palavra-passe" />
-    <Member Name="EntityGroupsAscx_EntityGroup" Description="Grupo de entidades" />
-    <Member Name="EntityGroupsAscx_Overriden" Description="Sobrescrito" />
-    <Member Name="ExpectedUserLogged" Description="Esperava-se que um utilizador se conectasse" />
-    <Member Name="ExpiredPassword" Description="Palavra-passe expirada" />
-    <Member Name="ExpiredPasswordMessage" Description="Palavra-passe expirada. Por favor, alterar" />
-    <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="Não se lembra da sua palavra-passe? Introduza o seu email." />
-    <Member Name="IHaveForgottenMyPassword" Description="Esqueci-me da minha palavra-passe" />
-    <Member Name="IncorrectPassword" Description="Palavra-passe incorrecta" />
-    <Member Name="IntroduceYourUserNameAndPassword" Description="Escrever nome de utilizador e palavra-passe" />
-    <Member Name="InvalidPassword" Description="Palavra-passe inválida" />
-    <Member Name="InvalidUsername" Description="Nome de utilizador inválido" />
-    <Member Name="InvalidUsernameOrPassword" Description="Nome de utilizador ou Palavra-passe incorreta" />
-    <Member Name="Login" Description="Iniciar sessão" />
-    <Member Name="Login_New" Description="Novo:" />
-    <Member Name="Login_Password" Description="Palavra-passe: " />
-    <Member Name="Login_Repeat" Description="Repetir:" />
-    <Member Name="Login_UserName" Description="Nome de utilizador:" />
-    <Member Name="Login_UserName_Watermark" Description="Utilizador" />
-    <Member Name="Logout" Description="Desconectar" />
-    <Member Name="NewPassword" Description="Nova palavra-passe" />
-    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="Não se pode guardar este {0} em modo desconectado" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Não autorizado para {0} a entidade {1} com Id {2}" />
-    <Member Name="NotAuthorizedToChangeProperty0on1" Description="Não autorizado para alterar a propriedade '{0}' em {1}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="Não autorizado para recuperar '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Não autorizado para guardar '{0}'" />
-    <Member Name="NotUserLogged" Description="Nenhum utilizador com sessão iniciada" />
-    <Member Name="Password" Description="Palavra-passe" />
-    <Member Name="PasswordChanged" Description="Palavra-passe alterada" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="Palavra-passe indicada não corresponde à actual" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Palara-passe alterada com êxito" />
-    <Member Name="PasswordMustHaveAValue" Description="A palavra-passe tem de ter um valor" />
-    <Member Name="PasswordsAreDifferent" Description="As palavras-passes são diferentes" />
-    <Member Name="PasswordsDoNotMatch" Description="As palavras-passes não correspondem" />
-    <Member Name="Please0IntoYourAccount" Description="Por favor, dirija-se a {0} para aceder ao aplicativo" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Escrever a nova palavra-passe" />
-    <Member Name="Remember" Description="Recordar" />
-    <Member Name="RememberMe" Description="Recordar-me" />
-    <Member Name="ResetPassword" Description="Restaurar palavra-passe" />
-    <Member Name="ResetPasswordCode" Description="Restaurar palavra-passe" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Um código de confirmação para restaurar a sua palavra-passe foi enviado para o e-mail {0}" />
-    <Member Name="ResetPasswordSuccess" Description="Palavra-passe alterada com êxito" />
-    <Member Name="Save" Description="Guardar" />
-    <Member Name="SendEmail" Description="Enviar e-mail" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="O código de confirmação fornecido é inválido" />
-    <Member Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="A palavra-passe deve ter entre 7 e 15 caracteres sem espaços." />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Ocorreu um erro com o pedido para alterar a palavra-passe. Por favor, introduza o seu e-mail." />
-    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Não existe nenhum utilizador registado com esse e-mail" />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="As palavras-passe especificadas não correspondem" />
-    <Member Name="TheUserStateMustBeDisabled" Description="O Estado do utilizador tem de estar desactivado" />
-    <Member Name="User0IsDisabled" Description="O utilizador {0} está desactivado" />
-    <Member Name="Username" Description="Nome de utilizador" />
-    <Member Name="Username0IsNotValid" Description="O nome de utilizador {0} não é válido" />
-    <Member Name="UserNameMustHaveAValue" Description="O nome de utilizador deve ter um valor" />
-    <Member Name="View" Description="Ver" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Recebemos um pedido para criar uma conta. Poderá criá-la continuando no link em baixo:" />
-    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Ser-lhe-á enviado um correio electrónico com um link para restabelecer a sua palavra-passe." />
-    <Member Name="YouMustRepeatTheNewPassword" Description="Volte a escrever a sua palavra-passe" />
-    <Member Name="YourPasswordIsNearExpiration" Description="A sua palavra-passe está prestes a caducar" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Função" />
@@ -761,6 +688,81 @@
   </Type>
   <Type Name="LastAuthRulesImportEntity" Description="Importar últimas regras auth">
     <Member Name="Date" Description="Data" />
+  </Type>
+  <Type Name="LoginAuthMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos foram encontrados no gráfico das funções devido às relações:" />
+    <Member Name="_0RulesFor1" Description="Regras de {0} para {1}" />
+    <Member Name="AuthAdmin_AddCondition" Description="Adicionar condição" />
+    <Member Name="AuthAdmin_ChooseACondition" Description="Escolha uma condição" />
+    <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condição" />
+    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Cache de autorização foi actualizada correctamente" />
+    <Member Name="ChangePassword" Description="Alterar a palavra-passe" />
+    <Member Name="ChangePasswordAspx_ActualPassword" Description="Remover a palavra-passe" />
+    <Member Name="ChangePasswordAspx_ChangePassword" Description="Alterar a palavra-passe" />
+    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Confirmar nova palavra-passe" />
+    <Member Name="ChangePasswordAspx_NewPassword" Description="Nova palavra chave&#xD;&#xA;Nova palavra-passe" />
+    <Member Name="ChangePasswordAspx_WriteActualPasswordAndNewOne" Description="Escreva a sua palavra-passe actual e a nova" />
+    <Member Name="ConfirmNewPassword" Description="Confirmar a nova palavra-passe" />
+    <Member Name="Email" Description="E-mail&#xD;&#xA;E-mail" />
+    <Member Name="EmailMustHaveAValue" Description="O E-mail deve ter um valor" />
+    <Member Name="EmailSent" Description="E-mail enviado" />
+    <Member Name="EnterTheNewPassword" Description="Escreva a nova palavra-passe" />
+    <Member Name="EntityGroupsAscx_EntityGroup" Description="Grupo de entidades" />
+    <Member Name="EntityGroupsAscx_Overriden" Description="Sobrescrito" />
+    <Member Name="ExpectedUserLogged" Description="Esperava-se que um utilizador se conectasse" />
+    <Member Name="ExpiredPassword" Description="Palavra-passe expirada" />
+    <Member Name="ExpiredPasswordMessage" Description="Palavra-passe expirada. Por favor, alterar" />
+    <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="Não se lembra da sua palavra-passe? Introduza o seu email." />
+    <Member Name="IHaveForgottenMyPassword" Description="Esqueci-me da minha palavra-passe" />
+    <Member Name="IncorrectPassword" Description="Palavra-passe incorrecta" />
+    <Member Name="IntroduceYourUserNameAndPassword" Description="Escrever nome de utilizador e palavra-passe" />
+    <Member Name="InvalidPassword" Description="Palavra-passe inválida" />
+    <Member Name="InvalidUsername" Description="Nome de utilizador inválido" />
+    <Member Name="InvalidUsernameOrPassword" Description="Nome de utilizador ou Palavra-passe incorreta" />
+    <Member Name="Login" Description="Iniciar sessão" />
+    <Member Name="Login_New" Description="Novo:" />
+    <Member Name="Login_Password" Description="Palavra-passe: " />
+    <Member Name="Login_Repeat" Description="Repetir:" />
+    <Member Name="Login_UserName" Description="Nome de utilizador:" />
+    <Member Name="Login_UserName_Watermark" Description="Utilizador" />
+    <Member Name="Logout" Description="Desconectar" />
+    <Member Name="NewPassword" Description="Nova palavra-passe" />
+    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="Não se pode guardar este {0} em modo desconectado" />
+    <Member Name="NotAuthorizedToChangeProperty0on1" Description="Não autorizado para alterar a propriedade '{0}' em {1}" />
+    <Member Name="NotAuthorizedToSave0" Description="Não autorizado para guardar '{0}'" />
+    <Member Name="NotUserLogged" Description="Nenhum utilizador com sessão iniciada" />
+    <Member Name="Password" Description="Palavra-passe" />
+    <Member Name="PasswordChanged" Description="Palavra-passe alterada" />
+    <Member Name="PasswordDoesNotMatchCurrent" Description="Palavra-passe indicada não corresponde à actual" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Palara-passe alterada com êxito" />
+    <Member Name="PasswordMustHaveAValue" Description="A palavra-passe tem de ter um valor" />
+    <Member Name="PasswordsAreDifferent" Description="As palavras-passes são diferentes" />
+    <Member Name="PasswordsDoNotMatch" Description="As palavras-passes não correspondem" />
+    <Member Name="Please0IntoYourAccount" Description="Por favor, dirija-se a {0} para aceder ao aplicativo" />
+    <Member Name="PleaseEnterYourChosenNewPassword" Description="Escrever a nova palavra-passe" />
+    <Member Name="Remember" Description="Recordar" />
+    <Member Name="RememberMe" Description="Recordar-me" />
+    <Member Name="ResetPassword" Description="Restaurar palavra-passe" />
+    <Member Name="ResetPasswordCode" Description="Restaurar palavra-passe" />
+    <Member Name="ResetPasswordCodeHasBeenSent" Description="Um código de confirmação para restaurar a sua palavra-passe foi enviado para o e-mail {0}" />
+    <Member Name="ResetPasswordSuccess" Description="Palavra-passe alterada com êxito" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="SendEmail" Description="Enviar e-mail" />
+    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="O código de confirmação fornecido é inválido" />
+    <Member Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="A palavra-passe deve ter entre 7 e 15 caracteres sem espaços." />
+    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Ocorreu um erro com o pedido para alterar a palavra-passe. Por favor, introduza o seu e-mail." />
+    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Não existe nenhum utilizador registado com esse e-mail" />
+    <Member Name="TheSpecifiedPasswordsDontMatch" Description="As palavras-passe especificadas não correspondem" />
+    <Member Name="TheUserStateMustBeDisabled" Description="O Estado do utilizador tem de estar desactivado" />
+    <Member Name="User0IsDisabled" Description="O utilizador {0} está desactivado" />
+    <Member Name="Username" Description="Nome de utilizador" />
+    <Member Name="Username0IsNotValid" Description="O nome de utilizador {0} não é válido" />
+    <Member Name="UserNameMustHaveAValue" Description="O nome de utilizador deve ter um valor" />
+    <Member Name="View" Description="Ver" />
+    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Recebemos um pedido para criar uma conta. Poderá criá-la continuando no link em baixo:" />
+    <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Ser-lhe-á enviado um correio electrónico com um link para restabelecer a sua palavra-passe." />
+    <Member Name="YouMustRepeatTheNewPassword" Description="Volte a escrever a sua palavra-passe" />
+    <Member Name="YourPasswordIsNearExpiration" Description="A sua palavra-passe está prestes a caducar" />
   </Type>
   <Type Name="LinkElementEmbedded" Description="Elemento link">
     <Member Name="Label" Description="Etiqueta" />
