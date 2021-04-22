@@ -355,6 +355,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleFiltersChanged = () => {
+
+    if (this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All")
+      this.forceUpdate();
+
     if (this.props.onFiltersChanged)
       this.props.onFiltersChanged(this.props.findOptions.filterOptions);
   }
@@ -538,12 +542,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
-    const isAll = p.findOptions.pagination.mode == "All";
+    const isManualOrAll = this.state.refreshMode == "Manual" || p.findOptions.pagination.mode == "All";
 
-    const isSearch = isAll || this.state.showFilters || this.state.refreshMode == 'Manual' ||
+    const isSearch = isManualOrAll || this.state.showFilters ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
       this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
       this.props.findOptions.systemTime != null;
+
+    var hasFindOptionsChanges = isManualOrAll;
+    if (isManualOrAll) {
+
+      const lastFindOptions = s.resultFindOptions && Finder.toFindOptions(s.resultFindOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
+      const lastFindOptionsPath = lastFindOptions && Finder.findOptionsPath(lastFindOptions);
+
+      const newFindOptions = p.findOptions && Finder.toFindOptions(p.findOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
+      const newFindOptionsPath = newFindOptions && Finder.findOptionsPath(newFindOptions);
+
+      hasFindOptionsChanges = lastFindOptionsPath != newFindOptionsPath;
+    }
 
     var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
@@ -586,7 +602,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
+        button: < button className={classes("sf-query-button sf-search btn ml-2", hasFindOptionsChanges ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
           <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
