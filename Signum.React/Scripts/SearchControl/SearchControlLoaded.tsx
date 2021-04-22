@@ -146,11 +146,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       });
     }
 
-//commnted because refreshMode state has already copied from defaultRefreshMode prop in constructor
-/*    if (this.props.defaultRefreshMode == 'Manual')
-      this.setState({ refreshMode: 'Manual' });
-*/
-    if (this.props.searchOnLoad && this.props.defaultRefreshMode == 'Auto')
+    if (this.props.searchOnLoad)
       this.doSearch().done();
 
     this.containerDiv!.addEventListener("scroll", (e) => {
@@ -195,9 +191,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   // MAIN
+
+  isManualRefreshOrAllPagination() {
+    return this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All";
+  }
+
   doSearchPage1(force: boolean = false) {
 
-    if (this.state.refreshMode == 'Manual' && !force)
+    if (this.isManualRefreshOrAllPagination() && !force)
       return;
 
     const fo = this.props.findOptions;
@@ -225,7 +226,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   doSearch(dataChanged?: boolean, force: boolean = false): Promise<void> {
 
-    if (this.isUnmounted || (this.state.refreshMode == 'Manual' && !force))
+    if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !force))
       return Promise.resolve();
 
     return this.getFindOptionsWithSFB().then(fop => {
@@ -288,13 +289,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.props.findOptions.pagination = p;
     this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
-    if (this.props.findOptions.pagination.mode != "All") {
+    if (this.containerDiv)
+      this.containerDiv.scrollTop = 0;
 
-      if (this.containerDiv)
-        this.containerDiv.scrollTop = 0;
-
-      this.doSearch().done();
-    }
+    this.doSearch().done();
   }
 
 
@@ -356,7 +354,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   handleFiltersChanged = () => {
 
-    if (this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All")
+    if (this.isManualRefreshOrAllPagination())
       this.forceUpdate();
 
     if (this.props.onFiltersChanged)
@@ -367,8 +365,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   handlePinnedFilterChanged = () => {
 
     this.handleFiltersChanged();
-    if (this.props.findOptions.pagination.mode != "All")
-      this.doSearchPage1();
+
+    this.doSearchPage1();
   }
 
   handleHeightChanged = () => {
@@ -542,7 +540,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
-    const isManualOrAll = this.state.refreshMode == "Manual" || p.findOptions.pagination.mode == "All";
+    const isManualOrAll = this.isManualRefreshOrAllPagination();
 
     const isSearch = isManualOrAll || this.state.showFilters ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
@@ -796,7 +794,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   markRows = (dic: MarkedRowsDictionary) => {
-    var promise = this.state.refreshMode == 'Manual' ? Promise.resolve(undefined) :
+    var promise = this.state.refreshMode == "Manual" ? Promise.resolve(undefined) :
       this.doSearch(true);
 
     promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
@@ -1049,8 +1047,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.forceUpdate();
 
-    if (fo.pagination.mode != "All" || this.props.showHeader != true)
-      this.doSearchPage1();
+    this.doSearchPage1();
   }
 
   //HEADER DRAG AND DROP
@@ -1406,7 +1403,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         filterOptions={fo.filterOptions}
         onFiltersChanged={this.handlePinnedFilterChanged}
         onSearch={() => this.doSearchPage1(true)}
-        showSearchButton={this.state.refreshMode == 'Manual' && this.props.showHeader != true}
+        showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
         extraSmall={extraSmall}
       />
     </AutoFocus>
@@ -1417,7 +1414,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onNavigated)
       this.props.onNavigated(lite);
 
-    if (this.state.refreshMode == 'Manual')
+    if (this.state.refreshMode == "Manual")
       return;
 
     this.doSearch(true);

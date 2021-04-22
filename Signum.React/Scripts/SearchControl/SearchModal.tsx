@@ -91,16 +91,12 @@ function SearchModal(p: SearchModalProps) {
           selectedRows.current = [{ entity: toLite(e), columns: [] }];
           okPressed.current = true;
           setShow(false);
-        } else {
-          if (scl.state.refreshMode == 'Auto')
+        } else 
             scl.doSearch(true);
-        }
       }).done();
 
-    } else {
-      if (scl.state.refreshMode == 'Auto')
+    } else 
         scl.doSearch(true);
-    }
   }
 
   function onResize() {
