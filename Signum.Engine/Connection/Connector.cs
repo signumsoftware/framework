@@ -142,6 +142,8 @@ namespace Signum.Engine
             return catalogPostfix;
         }
 
+        public abstract bool HasTables();
+
         public abstract bool AllowsSetSnapshotIsolation { get; }
 
         public abstract bool AllowsIndexWithWhere(string where);

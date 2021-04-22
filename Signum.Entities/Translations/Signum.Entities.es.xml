@@ -191,7 +191,6 @@
     <Member Name="showPeriod" Description="Mostrar período" />
     <Member Name="showPreviousOperation" Description="Mostrar operación anterior" />
     <Member Name="showRecords" Description="Mostrar registros" />
-    <Member Name="Time" Description="Hora" />
     <Member Name="ungroupResults" Description="Desagrupar resultados" />
     <Member Name="view" Description="Ver" />
   </Type>
@@ -266,7 +265,7 @@
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Todas" />
   </Type>
-  <Type Name="PaginationMode">
+  <Type Name="PaginationMode" Description="Modo paginación">
     <Member Name="All" Description="Todos" />
     <Member Name="Firsts" Description="Primeros" />
     <Member Name="Paginate" Description="Paginar" />
@@ -363,12 +362,9 @@
     <Member Name="MoveToday" Description="Hoy" />
     <Member Name="NoneSelected" Description="sin elementos seleccionados" />
     <Member Name="OpenCombobox" Description="abrir combo" />
-    <Member Name="OpenDropdown" Description="abrir desplegable" />
-    <Member Name="Placeholder" Description="" />
     <Member Name="RemoveLabel" Description="Eliminar elemento seleccionado" />
     <Member Name="SelectedItems0" Description="Elementos seleccionados: {0}" />
     <Member Name="TagsLabel" Description="Elementos seleccionados" />
-    <Member Name="TimeButton" Description="Seleccionar hora" />
   </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Cielo" />
@@ -396,6 +392,7 @@
     <Member Name="CreateNew0_G" Description="Crear nuev[m:o|f:a] {0}" />
     <Member Name="DeleteAllFilter" Description="Eliminar todos los filtros" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
+    <Member Name="DerivedGroupKey" Description="Derivado de la clave de grupo " />
     <Member Name="DisplayName" Description="Nombre para mostrar" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="¿Desea devolver el nuevo {0} ({1})?" />
     <Member Name="Explore" Description="Explorar" />
@@ -404,6 +401,9 @@
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
     <Member Name="First0Results_N" Description="primer[os] {0} resultado[s]." />
+    <Member Name="GroupKey" Description="Clave de grupo" />
+    <Member Name="HiddenColumn" Description="Columna oculta" />
+    <Member Name="HideHiddenColumns" Description="Ocultar columnas ocultas" />
     <Member Name="HidePinnedFiltersOptions" Description="Ocultar opciones de filtro ancladas" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Name" Description="Nombre" />
@@ -432,8 +432,11 @@
     <Member Name="ReturnNewEntity" Description="¿Devolver nueva entidad?" />
     <Member Name="Row" Description="Fila" />
     <Member Name="Search" Description="Buscar" />
+    <Member Name="ShowHiddenColumns" Description="Mostrar columnas ocultas" />
     <Member Name="ShowPinnedFiltersOptions" Description="Mostrar opciones de filtro ancladas" />
     <Member Name="SplitText" Description="Dividir texto" />
+    <Member Name="SummaryHeader" Description="Resumen en cabecera" />
+    <Member Name="SummaryHeaderMustBeAnAggregate" Description="Resumen en cabeceradebe ser un agregado (Suma, Recuento, etc.)" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Para evitar problemas de rendimiento, la búsqueda automática está deshabilitada, compruebe primero los filtros y, a continuación, haga clic en el botón [Buscar]." />
     <Member Name="Value" Description="Valor" />
@@ -511,6 +514,7 @@
     <Member Name="_0IsNotA1_G" Description="{0} no es [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
+    <Member Name="_0IsNotCompatibleWith1" Description="{0} no es compatible con {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="_0IsSet" Description="{0} está establecido" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} o {1} deben establecerse" />

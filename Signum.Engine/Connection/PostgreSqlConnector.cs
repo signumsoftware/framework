@@ -1,7 +1,9 @@
 using Npgsql;
 using NpgsqlTypes;
 using Signum.Engine.Connection;
+using Signum.Engine.Engine;
 using Signum.Engine.Maps;
+using Signum.Engine.PostgresCatalog;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -94,7 +96,7 @@ namespace Signum.Engine
 
         public override void CleanDatabase(DatabaseName? database)
         {
-           PostgreSqlConnectorScripts.RemoveAllScript(database).ExecuteNonQuery();
+            PostgreSqlConnectorScripts.RemoveAllScript(database).ExecuteNonQuery();
         }
 
         public override DbParameter CloneParameter(DbParameter p)
@@ -361,6 +363,14 @@ namespace Signum.Engine
 
 
         public override string ToString() => $"PostgreSqlConnector({PostgresVersion}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
+
+        public override bool HasTables()
+        {
+            return (from ns in Database.View<PgNamespace>()
+                    where !ns.IsInternal()
+                    from t in ns.Tables()
+                    select t).Any();
+        }
     }
 
     public static class PostgreSqlConnectorScripts 

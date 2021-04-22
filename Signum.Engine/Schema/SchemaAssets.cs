@@ -84,7 +84,7 @@ namespace Signum.Engine.Maps
                     return (from p in Database.View<PgClass>()
                             where p.relkind == RelKind.View
                             let ns = p.Namespace()
-                            where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                            where !ns.IsInternal()
                             let definition = PostgresFunctions.pg_get_viewdef(p.oid)
                             select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), p.relname, isPostgres), definition)).ToList();
                 }
@@ -152,7 +152,7 @@ namespace Signum.Engine.Maps
 
                     return (from v in Database.View<PgProc>()
                             let ns = v.Namespace()
-                            where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                            where !ns.IsInternal()
                             let definition = PostgresFunctions.pg_get_viewdef(v.oid)
                             select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), v.proname, isPostgres), definition)).ToList();
                 }
