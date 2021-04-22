@@ -11,7 +11,7 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { LabelWithHelp } from '../../MachineLearning/Templates/NeuralNetworkSettings';
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function EmailMessage(p : { ctx: TypeContext<EmailMessageEntity> }){
+export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }) {
   const forceUpdate = useForceUpdate();
 
   function renderEmailReceptionMixin() {
@@ -73,7 +73,7 @@ export default function EmailMessage(p : { ctx: TypeContext<EmailMessageEntity> 
               <EntityLine ctx={ctx.subCtx(f => f.exception)} />
             </div>
           </div>
-          <hr/>
+          <hr />
           <div className="row">
             <div className="col-sm-4">
               <ValueLine ctx={ctx4.subCtx(f => f.receptionNotified)} />
@@ -109,7 +109,7 @@ export interface EmailMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailMessageComponent(p : EmailMessageComponentProps){
+export function EmailMessageComponent(p: EmailMessageComponentProps) {
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(true);
 
@@ -133,7 +133,7 @@ export function EmailMessageComponent(p : EmailMessageComponentProps){
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </a>
-        {showPreview && <IFrameRenderer style={{ width: "100%", height: "150px" }} html={ec.value.body.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", height: "450px" }} html={ec.value.body.text} />}
       </div>
     </div>
   );

@@ -67,10 +67,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
   );
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token().entity(e => e.actorsEval), operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token().entity(e => e.subWorkflow), operation: "DistinctTo", value: null }] });
+  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
@@ -81,31 +81,31 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
-    { token: t.entity(p => p.viewName), type: "Text" },
+    { token: t.append(p => p.viewName), type: "Text" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-    { token: t.entity(p => p.eval.script), type: "Code" },
+    { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
   QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -224,7 +224,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         return [{
           order: s?.order ?? 0,
           shortcut: e => eoc.onKeyDown(e),
-          button: <OperationButton eoc={eoc} group={group} />,
+          button: wa.customNextButton == null ? <OperationButton eoc={eoc} group={group} />
+            : <OperationButton eoc={eoc} group={group} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name} </OperationButton>
         }];
       } else if (wa.type == "Decision") {
         return wa.decisionOptions.map(mle => ({
@@ -244,7 +245,8 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
         if (wa.type == "Task") {
 
-          return [<OperationMenuItem coc={coc} />];
+          return [wa.customNextButton == null ? <OperationMenuItem coc={coc} />
+            : <OperationMenuItem coc={coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</OperationMenuItem>];
 
         } else if (wa.type == "Decision") {
           return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
@@ -315,12 +317,12 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => import('./Workflow/WorkflowEventModel')));
   Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => import('./Workflow/WorkflowEventTask')));
 
-  Constructor.registerConstructor(WorkflowEntity, () => WorkflowEntity.New({ mainEntityStrategies: [newMListElement(WorkflowMainEntityStrategy.value("CreateNew"))] }));
-  Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
-  Constructor.registerConstructor(WorkflowTimerConditionEntity, () => WorkflowTimerConditionEntity.New({ eval: WorkflowTimerConditionEval.New() }));
-  Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
-  Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
-  Constructor.registerConstructor(WorkflowTimerEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ts => ts && WorkflowTimerEmbedded.New({ duration: ts })));
+  Constructor.registerConstructor(WorkflowEntity, props => WorkflowEntity.New({ mainEntityStrategies: [newMListElement(WorkflowMainEntityStrategy.value("CreateNew"))], ...props }));
+  Constructor.registerConstructor(WorkflowConditionEntity, props => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New(), ...props }));
+  Constructor.registerConstructor(WorkflowTimerConditionEntity, props => WorkflowTimerConditionEntity.New({ eval: WorkflowTimerConditionEval.New(), ...props }));
+  Constructor.registerConstructor(WorkflowActionEntity, props => WorkflowActionEntity.New({ eval: WorkflowActionEval.New(), ...props }));
+  Constructor.registerConstructor(WorkflowScriptEntity, props => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New(), ...props }));
+  Constructor.registerConstructor(WorkflowTimerEmbedded, props => Constructor.construct(TimeSpanEmbedded).then(ts => ts && WorkflowTimerEmbedded.New({ duration: ts, ...props })));
 
   registerCustomContexts();
 

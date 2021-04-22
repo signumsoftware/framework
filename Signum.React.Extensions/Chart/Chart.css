@@ -1,8 +1,6 @@
 ﻿
-@media (min-width: 1200px)
-{
-    body:not(.rtl) .sf-chart-type
-    {
+@media (min-width: 1200px) {
+    body:not(.rtl) .sf-chart-type {
         margin-right: -25px;
     }
 
@@ -11,17 +9,15 @@
     }
 }
 
-.sf-chart-type
-{
+.sf-chart-type {
     margin-bottom: 4px;
 }
 
-.sf-chart-type > .card-body
-{
-    padding: 10px;
-}
+    .sf-chart-type > .card-body {
+        padding: 10px;
+    }
 
-.number-label{
+.number-label {
     cursor: pointer;
     user-select: none;
 }
@@ -30,35 +26,29 @@
     margin-bottom: 6px;
 }
 
-.sf-chart-tokens > .card-body
-{
-    padding: 0px
-}
+    .sf-chart-tokens > .card-body {
+        padding: 0px
+    }
 
-.sf-chart-tokens table.table
-{
-    width:auto;
-}
+    .sf-chart-tokens table.table {
+        width: auto;
+    }
 
-.sf-chart-tokens table.table > thead > tr > th
-{
-    border-top: 0px;
-}
+        .sf-chart-tokens table.table > thead > tr > th {
+            border-top: 0px;
+        }
 
-.sf-chart-tokens table.table > tbody > tr > th
-{
-    text-align:right
-}
+        .sf-chart-tokens table.table > tbody > tr > th {
+            text-align: right
+        }
 
-.sf-chart-tokens table.table td,
-.sf-chart-tokens table.table th
-{
-    vertical-align: middle;
-}
+        .sf-chart-tokens table.table td,
+        .sf-chart-tokens table.table th {
+            vertical-align: middle;
+        }
 
-.sf-chart-token-narrow
-{
-   min-width: 125px;
+.sf-chart-token-narrow {
+    min-width: 125px;
 }
 
 .sf-chart-token-wide {
@@ -66,42 +56,38 @@
 }
 
 .sf-chart-token th,
-.sf-chart-token td
-{
+.sf-chart-token td {
     padding: 4px !important;
 }
 
-.sf-chart-img
-{
+.sf-chart-img {
     height: 40px;
     width: 40px;
     float: left;
     cursor: pointer;
 }
-.sf-chart-img-equiv
-{
+
+.sf-chart-img-equiv {
     background-color: #dfefff;
 }
-.sf-chart-img-curr
-{
+
+.sf-chart-img-curr {
     background-color: #81bffc;
 }
 
-.sf-chart-img-curr.edited
-{
-    background-color: #FF7F00;
-}
+    .sf-chart-img-curr.edited {
+        background-color: #FF7F00;
+    }
 
 
 
-.sf-chart-token-config td
-{
+.sf-chart-token-config td {
     border-top: 1px dashed #ddd !important;
 }
-.sf-chart-token-config-trigger
-{
+
+.sf-chart-token-config-trigger {
     cursor: pointer;
-    margin-top:4px
+    margin-top: 4px
 }
 
 body:not(.rtl) .sf-chart-token-config-trigger {
@@ -124,32 +110,26 @@ body.rtl .sf-chart-token .sf-query-token {
     float: right;
 }
 
-.sf-chart-container
-{
+.sf-chart-container {
     width: 100%;
     min-height: 400px;
     height: auto;
-    position:relative;
+    position: relative;
     overflow: auto;
 }
-.sf-chart-container svg
-{
-    shape-rendering: crispEdges;
-}
 
-.sf-chart-color-table
-{
+    .sf-chart-container svg {
+        shape-rendering: crispEdges;
+    }
+
+.sf-chart-color-table {
     width: 0%;
 }
 
-.sf-chart-color-box
-{
-    width:16px;
-    height:16px;
+.sf-chart-color-box {
+    width: 16px;
+    height: 16px;
     border: 2px solid #AAA;
-}
-.sf-chart-control .sf-query-fullscreen {
-    float: none;
 }
 
 
@@ -162,7 +142,7 @@ body.rtl .sf-chart-token .sf-query-token {
 }
 
 .exceptionLine {
-    background-color:pink;
+    background-color: pink;
 }
 
 .sf-chart-animable .sf-transition {
@@ -180,11 +160,23 @@ text.sf-initial-message {
 
 .sf-chart-mini-icon {
     cursor: pointer;
-    color:gray;
+    color: gray;
 }
 
-.sf-chart-mini-icon:hover{
-    color:dimgray;
+    .sf-chart-mini-icon:hover {
+        color: dimgray;
+    }
+
+
+.sf-chart-tab-container,
+.sf-chart-tab-container .tab-content,
+.sf-chart-tab-container .tab-content .tab-pane.active {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-
+    .sf-chart-tab-container .tab-content .tab-pane.active .sf-fullscreen-component {
+        flex-grow: 1;
+        display: flex;
+    }

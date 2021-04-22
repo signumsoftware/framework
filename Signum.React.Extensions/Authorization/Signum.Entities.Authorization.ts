@@ -75,6 +75,8 @@ export module AuthEmailMessage {
   export const YourResetPasswordRequestHasExpired = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestHasExpired");
   export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
   export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
+  export const YourAccountHasBeenLockedDueToSeveralFailedLogins = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
+  export const YourAccountHasBeenLocked = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLocked");
 }
 
 export module AuthMessage {
@@ -251,7 +253,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   code: string;
   user: UserEntity;
   requestDate: string;
-  lapsed: boolean;
+  used: boolean;
 }
 
 export module ResetPasswordRequestOperation {
@@ -379,12 +381,17 @@ export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
   userName: string;
-  passwordHash: string;
+  passwordHash: string | null;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
   disabledOn: string | null;
   state: UserState;
+  loginFailedCounter: number;
+}
+
+export module UserOIDMessage {
+  export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
 }
 
 export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");

@@ -44,8 +44,8 @@ export function MixinCombo(p : MixinComboProps){
     return Finder.fetchEntitiesLiteWithFilters(
       DynamicTypeEntity,
       [
-        { token: DynamicTypeEntity.token().entity(e => e.baseType), operation: "EqualTo", value: "MixinEntity" },
-        { token: DynamicTypeEntity.token().entity(e => e.typeName), operation: "StartsWith", value: query },
+        { token: DynamicTypeEntity.token(e => e.entity.baseType), operation: "EqualTo", value: "MixinEntity" },
+        { token: DynamicTypeEntity.token(e => e.entity.typeName), operation: "StartsWith", value: query },
       ], [], 5)
       .then(lites => lites?.map(a => a.toStr));
   }

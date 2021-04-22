@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master), InTypeScript(Undefined = false), AllowUnathenticated]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master), AllowUnathenticated]
     public class CultureInfoEntity : Entity
     {
         public CultureInfoEntity() { }
@@ -27,11 +27,6 @@ namespace Signum.Entities.Basics
 
         [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
         public string EnglishName { get; private set; }
-
-        /// <summary>
-        /// Used for Culture that can be translated but not selected, like Hidden
-        /// </summary>
-        public bool Hidden { get; set; }
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {

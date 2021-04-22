@@ -23,7 +23,6 @@ export interface CultureInfoEntity extends Entities.Entity {
   name: string;
   nativeName: string;
   englishName: string;
-  hidden: boolean;
 }
 
 export module CultureInfoOperation {

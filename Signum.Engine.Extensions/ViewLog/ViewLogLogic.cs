@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using System.IO;
 using Signum.Entities.Authorization;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.ViewLog
 {
@@ -109,16 +110,21 @@ namespace Signum.Engine.ViewLog
             {
                 try
                 {
-                    using (Transaction tr = Transaction.ForceNew())
-                    {
+                    var str = GetData(request!, sw);
 
-                        viewLog.EndDate = TimeZoneManager.Now;
-                        viewLog.Data = new BigStringEmbedded(GetData(request!, sw));
-                        using (ExecutionMode.Global())
-                            viewLog.Save();
-                        tr.Commit();
-                    }
-
+                    using (ExecutionContext.SuppressFlow())
+                        Task.Factory.StartNew(() =>
+                        {
+                            using (ExecutionMode.Global())
+                            using (Transaction tr = Transaction.ForceNew())
+                            {
+                                viewLog.EndDate = TimeZoneManager.Now;
+                                viewLog.Data = new BigStringEmbedded(str);
+                                using (ExecutionMode.Global())
+                                    viewLog.Save();
+                                tr.Commit();
+                            }
+                        });
                 }
                 finally
                 {

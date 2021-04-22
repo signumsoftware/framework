@@ -49,8 +49,8 @@ export default function ChartRenderer(p: ChartRendererProps) {
           <ReactChart
             chartRequest={p.chartRequest}
             data={p.data}
-          loading={p.loading}
-          onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined)}
+            loading={p.loading}
+            onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined)}
             parameters={parameters}
             onReload={p.onReload}
             onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />

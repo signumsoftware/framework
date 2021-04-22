@@ -22,7 +22,7 @@ namespace Signum.Entities.Dynamic
 
         public static Func<DynamicValidationEntity, Type> GetMainType; 
 
-        [NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
+        [NotifyChildProperty]
         public DynamicValidationEval Eval { get; set; }
 
         [AutoExpressionField]

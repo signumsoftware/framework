@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Link, RouteComponentProps } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
@@ -7,21 +8,21 @@ import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
-import { RouteComponentProps } from "react-router";
 import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
 import { decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
 import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
+import { QueryString } from '@framework/QueryString'
 
 export default function TranslationCodeView(p: RouteComponentProps<{ culture: string; assembly: string }>) {
 
   const assembly = decodeDots(p.match.params.assembly);
   const culture = p.match.params.culture;
 
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
 
-  const [filter, setFilter] = React.useState("");
+  const [filter, setFilter] = React.useState(() => QueryString.parse(p.location.search).filter);
 
   const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
 
@@ -55,7 +56,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
 
   return (
     <div>
-      <h2>{message}</h2>
+      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
       <br />

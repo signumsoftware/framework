@@ -112,7 +112,7 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
 
         public static SeedInfo GetSeedInfo(ITable table)
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 string? message = null;
 

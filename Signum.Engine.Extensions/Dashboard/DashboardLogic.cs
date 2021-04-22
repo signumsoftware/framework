@@ -3,6 +3,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
 using Signum.Entities;
@@ -178,6 +179,12 @@ namespace Signum.Engine.Dashboard
             return result;
         }
 
+        public static void RegisterTranslatableRoutes()
+        {
+            TranslatedInstanceLogic.AddRoute((DashboardEntity d) => d.DisplayName);
+            TranslatedInstanceLogic.AddRoute((DashboardEntity d) => d.Parts[0].Title);
+        }
+
         public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
@@ -202,22 +209,30 @@ namespace Signum.Engine.Dashboard
         public static List<Lite<DashboardEntity>> GetDashboards()
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
-            return Dashboards.Value.Where(d => d.Value.EntityType == null && isAllowed(d.Value))
-                .Select(d => d.Key).ToList();
+            return Dashboards.Value.Values
+                .Where(d => d.EntityType == null && isAllowed(d))
+                .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+                .ToList();
         }
 
         public static List<Lite<DashboardEntity>> GetDashboardsEntity(Type entityType)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
-            return DashboardsByType.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => isAllowed(Dashboards.Value.GetOrThrow(e))).ToList();
+            return DashboardsByType.Value.TryGetC(entityType)
+                .EmptyIfNull()
+                .Select(lite => Dashboards.Value.GetOrThrow(lite))
+                .Where(d => isAllowed(d))
+                .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+                .ToList();
         }
 
         public static List<Lite<DashboardEntity>> Autocomplete(string subString, int limit)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
-            return Dashboards.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
-                .Select(a => a.Key).Autocomplete(subString, limit).ToList();
+            return Dashboards.Value.Values
+                .Where(d => d.EntityType == null && isAllowed(d))
+                .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+                .Autocomplete(subString, limit).ToList();
         }
 
         public static DashboardEntity RetrieveDashboard(this Lite<DashboardEntity> dashboard)

@@ -43,19 +43,32 @@ namespace Signum.React.Translation
 
             var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
-            Func<LocalizedInstanceKey, bool> filtered = li => all ||
-              li.RowId.ToString() == filter ||
-              li.Instance.Id.ToString() == filter ||
-              li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-              master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-              cultures.Any(ci => (support.TryGetC(ci)?.TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+            Func<LocalizedInstanceKey, bool> filtered = li =>
+            {
+                if (all)
+                    return true;
+
+                if (li.RowId.ToString() == filter || li.Instance.Id.ToString() == filter || li.Instance.Key() == filter)
+                    return true;
+
+                if (li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+
+                if (master.GetOrThrow(li)?.Contains(filter, StringComparison.InvariantCultureIgnoreCase) == true)
+                    return true;
+
+                if (cultures.Any(ci => (support.TryGetC(ci)?.TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase)))
+                    return true;
+
+                return false;
+            };
 
             var sd = new StringDistance();
 
             var supportByInstance = (from kvpCult in support
                                      from kvpLocIns in kvpCult.Value
                                      where filtered(kvpLocIns.Key)
-                                     let newText = master.GetOrThrow(kvpLocIns.Key)
+                                     let newText = master.TryGet(kvpLocIns.Key, null)
                                      group (lockIns: kvpLocIns.Key, translatedInstance: kvpLocIns.Value, culture: kvpCult.Key, newText: newText) by kvpLocIns.Key.Instance into gInstance
                                      select KeyValuePair.Create(gInstance.Key,
                                      gInstance.AgGroupToDictionary(a => a.lockIns.RouteAndRowId(),
@@ -77,7 +90,7 @@ namespace Signum.React.Translation
                     Lite = gr.Key,
                     Master = gr.ToDictionary(
                          a => a.Key.RouteAndRowId(),
-                         a => a.Value
+                         a => a.Value!
                          ),
                     Translations = supportByInstance.TryGetC(gr.Key) ?? new Dictionary<string, Dictionary<string, TranslatedPairViewTS>>()
                 }).ToList()

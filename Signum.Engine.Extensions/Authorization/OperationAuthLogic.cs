@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using System.Reflection;
 using System.Xml.Linq;
+using System.Collections.Immutable;
 
 namespace Signum.Engine.Authorization
 {

@@ -109,9 +109,10 @@ namespace Signum.Engine.Files
                 var client = GetClient(fp);
                 if (CreateBlobContainerIfNotExists)
                 {
-                    using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+                    using (HeavyProfiler.Log("AzureBlobStorage CreateIfNotExists"))
                     {
                         client.CreateIfNotExists();
+                        CreateBlobContainerIfNotExists = false;
                     }
                 }
 
@@ -132,7 +133,7 @@ namespace Signum.Engine.Files
                         { 
                             ContentType = action == Files.BlobAction.Download 
                                 ? "application/octet-stream" 
-                                : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName), "application/octet-stream"),
+                                : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
                             ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
                         });
                 }

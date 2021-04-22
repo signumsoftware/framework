@@ -6,6 +6,7 @@ import * as CultureClient from '../CultureClient'
 import { API, TranslatedInstanceViewType, TranslatedTypeSummary, TranslationRecord } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
+import { Link} from "react-router-dom";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -13,20 +14,19 @@ import { DiffDocumentSimple } from '../../DiffLog/Templates/DiffDocument'
 import TextArea from '../../../../Framework/Signum.React/Scripts/Components/TextArea'
 import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components'
 import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
-
-
+import { QueryString } from '@framework/QueryString'
 
 export default function TranslationInstanceView(p: RouteComponentProps<{ type: string; culture?: string; }>) {
 
   const type = p.match.params.type;
   const culture = p.match.params.culture;
 
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
 
-  const [filter, setFilter] = React.useState("");
+  const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(p.location.search).filter);
 
-  const [result, reloadResult] = useAPIWithReload(() => filter == "" ? Promise.resolve(undefined) : API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
+  const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
 
   function renderTable() {
     if (result == undefined || cultures == undefined)
@@ -78,8 +78,8 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
   return (
     <div>
       <div className="mb-2">
-        <h2>{message}</h2>
-        <TranslateSearchBox setFilter={setFilter} filter={filter} />
+        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
       </div>
       {renderTable()}
@@ -161,8 +161,10 @@ export function TranslatedInstances(p: { data: TranslatedInstanceViewType, cultu
 
                       function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
                         if (!pair) {
-                          pair = { originalText: ins.master[entry], translatedText: e.currentTarget.value };
+                          if (!trans)
+                            trans = ins.translations[entry] = {};
 
+                          trans[c] = { originalText: ins.master[entry], translatedText: e.currentTarget.value };
                         } else {
                           pair.translatedText = e.currentTarget.value;
                         }

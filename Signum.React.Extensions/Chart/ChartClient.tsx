@@ -347,6 +347,7 @@ export function cleanedChartRequest(request: ChartRequestModel): ChartRequestMod
 export interface ChartOptions {
   queryName: any,
   chartScript?: string,
+  maxRows?: number | null,
   groupResults?: boolean,
   filterOptions?: FilterOption[];
   orderOptions?: OrderOption[];
@@ -398,6 +399,7 @@ export module Encoder {
     return {
       queryName: cr.queryKey,
       chartScript: cr.chartScript?.key.after(".") ?? undefined,
+      maxRows: cr.maxRows,
       filterOptions: toFilterOptions(cr.filterOptions),
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
@@ -428,9 +430,11 @@ export module Encoder {
   }
   
   export function chartPath(co: ChartOptions, userChart?: Lite<UserChartEntity>): string {
-
     const query = {
       script: co.chartScript,
+      maxRows:
+        co.maxRows === null ? "null" : 
+        co.maxRows === undefined || co.maxRows == Decoder.DefaultMaxRows ? undefined : co.maxRows,
       groupResults: co.groupResults,
       userChart: userChart && liteKey(userChart)
     };
@@ -464,6 +468,8 @@ export module Encoder {
 
 export module Decoder {
 
+  export let DefaultMaxRows = 1000;
+
   export function parseChartRequest(queryName: string, query: any): Promise<ChartRequestModel> {
 
     return getChartScripts().then(scripts => {
@@ -488,10 +494,10 @@ export module Decoder {
             scripts
               .filter(cs => cs.symbol.key.after(".") == query.script)
               .single(`ChartScript '${query.queryKey}'`);
-              
 
           const chartRequest = ChartRequestModel.New({
             chartScript: cr.symbol,
+            maxRows: query.maxRows == "null" ? null : query.maxRows || Decoder.DefaultMaxRows,
             queryKey: getQueryKey(queryName),
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
@@ -512,9 +518,9 @@ export module Decoder {
   const valuesInOrder = Finder.Decoder.valuesInOrder;
 
   export function decodeColumns(query: any): MList<ChartColumnEmbedded> {
-    return valuesInOrder(query, "column").map(val => {
+    return valuesInOrder(query, "column").map(p => {
 
-      var parts = val.split("~");
+      var parts = p.value.split("~");
 
       let order: string | undefined;
       let token: string;
@@ -542,11 +548,11 @@ export module Decoder {
   }
 
   export function decodeParameters(query: any): MList<ChartParameterEmbedded> {
-    return valuesInOrder(query, "param").map(val => ({
+    return valuesInOrder(query, "param").map(p => ({
       rowId: null,
       element: ChartParameterEmbedded.New({
-        name: unscapeTildes(val.before("~")),
-        value: unscapeTildes(val.after("~")),
+        name: unscapeTildes(p.value.before("~")),
+        value: unscapeTildes(p.value.after("~")),
       })
     }));
   }
@@ -563,7 +569,7 @@ export module API {
       filters: toFilterRequests(request.filterOptions),
       columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
       orders: request.columns.filter(mle => mle.element.orderByType != null && mle.element.token != null).orderBy(mle => mle.element.orderByIndex).map(mle => ({ token: mle.element.token!.token!.fullKey, orderType: mle.element.orderByType! }) as OrderRequest),
-      pagination: { mode: "All" }
+      pagination: request.maxRows == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: request.maxRows }
     };
   }
 

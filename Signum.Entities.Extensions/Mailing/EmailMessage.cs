@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
 using System.Reflection;
+using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {
@@ -28,7 +29,7 @@ namespace Signum.Entities.Mailing
         [ImplementedByAll]
         public Lite<Entity>? Target { get; set; }
 
-        public EmailAddressEmbedded From { get; set; }
+        public EmailFromEmbedded From { get; set; }
 
         public Lite<EmailTemplateEntity>? Template { get; set; }
 
@@ -222,7 +223,7 @@ namespace Signum.Entities.Mailing
 
         public EmailRecipientKind Kind { get; set; }
 
-        public new EmailRecipientEmbedded Clone()
+        public EmailRecipientEmbedded Clone()
         {
             return new EmailRecipientEmbedded
             {
@@ -234,18 +235,8 @@ namespace Signum.Entities.Mailing
         }
 
         public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailRecipientEmbedded? other)
-        {
-            if (other == null)
-                return false;
-
-            return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode() ^ Kind.GetHashCode();
-        }
+        public bool Equals(EmailRecipientEmbedded? other) => other != null && base.Equals(other) && Kind == other.Kind;
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Kind.GetHashCode());
 
         public string BaseToString()
         {
@@ -266,7 +257,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailAddressEmbedded : EmbeddedEntity, IEquatable<EmailAddressEmbedded>
+    public abstract class EmailAddressEmbedded : EmbeddedEntity, IEquatable<EmailAddressEmbedded>
     {
         public EmailAddressEmbedded() { }
 
@@ -306,30 +297,36 @@ namespace Signum.Entities.Mailing
             return "{0} <{1}>".FormatWith(DisplayName, EmailAddress);
         }
 
-        public EmailAddressEmbedded Clone()
+        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
+        public bool Equals(EmailAddressEmbedded? other) => other != null && other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
+        public override int GetHashCode() => HashCode.Combine((EmailAddress ?? "").GetHashCode(), (DisplayName ?? "").GetHashCode());
+    }
+
+    [Serializable]
+    public class EmailFromEmbedded : EmailAddressEmbedded, IEquatable<EmailFromEmbedded>
+    {
+        public EmailFromEmbedded() { }
+        public EmailFromEmbedded(EmailOwnerData data) : base(data)
         {
-            return new EmailAddressEmbedded
+            AzureUserId = data.AzureUserId;
+        }
+
+        public Guid? AzureUserId { get; set; }
+
+        public EmailFromEmbedded Clone()
+        {
+            return new EmailFromEmbedded
             {
                 DisplayName = DisplayName,
                 EmailAddress = EmailAddress,
-                EmailOwner = EmailOwner
+                EmailOwner = EmailOwner,
+                AzureUserId = AzureUserId,
             };
         }
 
-        public override bool Equals(object? obj) => obj is EmailAddressEmbedded eae && Equals(eae);
-        public bool Equals(EmailAddressEmbedded? other)
-        {
-            if (other == null)
-                return false;
-
-            return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
-        }
-
-
-        public override int GetHashCode()
-        {
-            return (EmailAddress ?? "").GetHashCode() ^ (DisplayName ?? "").GetHashCode();
-        }
+        public override bool Equals(object? obj) => obj is EmailFromEmbedded eae && Equals(eae);
+        public bool Equals(EmailFromEmbedded? other) => other != null && base.Equals(other) && other.AzureUserId == AzureUserId;
+        public override int GetHashCode() => base.GetHashCode();
     }
 
     public enum EmailMessageState
@@ -357,6 +354,7 @@ namespace Signum.Entities.Mailing
         public string? Email { get; set; }
         public string? DisplayName { get; set; }
         public CultureInfoEntity? CultureInfo { get; set; }
+        public Guid? AzureUserId { get; set; }
 
         public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
         public bool Equals(EmailOwnerData? other)
@@ -405,10 +403,6 @@ namespace Signum.Entities.Mailing
         Messages,
         RemainingMessages,
         ExceptionMessages,
-        DefaultFromIsMandatory,
-        From,
-        To,
-        Attachments,
         [Description("{0} {1} requires extra parameters")]
         _01requiresExtraParameters
     }

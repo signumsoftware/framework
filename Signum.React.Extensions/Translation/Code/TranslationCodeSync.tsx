@@ -15,7 +15,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
 
 export default function TranslationCodeSync(p: RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }>) {
-  const cultures = useAPI(() => CultureClient.getCultures(true), []);
+  const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const assembly = decodeDots(p.match.params.assembly);
   const culture = p.match.params.culture;
   const namespace = p.match.params.namespace && decodeDots(p.match.params.namespace);
@@ -37,7 +37,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
 
   return (
     <div>
-      <h2>{message}</h2>
+      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
       <br />
       {result && result.totalTypes > 0 && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
       {result && result.totalTypes == 0 && <Link to={`~/translation/status`}>

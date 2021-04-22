@@ -17,7 +17,7 @@ namespace Signum.Engine.Mailing
     {
         public static EmailMasterTemplateMessageEmbedded? GetCultureMessage(this EmailMasterTemplateEntity template, CultureInfo ci)
         {
-            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
+            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo().Equals(ci));
         }
 
         public static Func<EmailMasterTemplateEntity>? CreateDefaultMasterTemplate;
@@ -37,8 +37,10 @@ namespace Signum.Engine.Mailing
                 EmailMasterTemplateGraph.Register();
                 Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
-                    if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
-                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
+                    var dc = EmailLogic.Configuration.DefaultCulture;
+
+                    if (!et.Messages.Any(m => dc.Name.StartsWith(m.CultureInfo.Name)))
+                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.EnglishName)).CommaOr(a => a.EnglishName));
 
                     return null;
                 };
@@ -68,7 +70,9 @@ namespace Signum.Engine.Mailing
 
         public static Lite<EmailMasterTemplateEntity>? GetDefaultMasterTemplate()
         {
-            var result = Database.Query<EmailMasterTemplateEntity>().Select(emt => emt.ToLite()).FirstOrDefault();
+
+
+            var result = Database.Query<EmailMasterTemplateEntity>().Where(a => a.IsDefault).Select(emt => emt.ToLite()).FirstOrDefault();
 
             if (result != null)
                 return result;
@@ -77,6 +81,8 @@ namespace Signum.Engine.Mailing
                 return null;
 
             var newTemplate = CreateDefaultMasterTemplate();
+
+            newTemplate.IsDefault = true;
 
             using (OperationLogic.AllowSave<EmailMasterTemplateEntity>())
                 return newTemplate.Save().ToLite();

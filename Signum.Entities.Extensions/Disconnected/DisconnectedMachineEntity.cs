@@ -90,6 +90,7 @@ namespace Signum.Entities.Disconnected
 
 
     [InTypeScript(true)]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum Download
     {
         None,
@@ -99,6 +100,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [InTypeScript(true)]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum Upload
     {
         None,

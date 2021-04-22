@@ -48,8 +48,10 @@ export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
   return (
     <div>
       <h2>{TranslationMessage.InstanceTranslations.niceToString()}</h2>
-      {result == undefined ? <strong>{JavascriptMessage.loading.niceToString()}</strong> : <TranslationTable result={result} />}
-      {result && renderFileInput()}
+      {result == undefined ? <p><strong>{JavascriptMessage.loading.niceToString()}</strong></p> :
+        result.length == 0 ? <p>No routes marked for translation. Consider using <code>TranslatedInstanceLogic.AddRoute()</code></p> :
+          <TranslationTable result={result} />}
+      {result && result.length > 0 && renderFileInput()}
     </div>
   );
 }

@@ -174,7 +174,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       .done();
   }
 
-  treeContainer!: HTMLElement;
 
   render() {
     return (
@@ -186,7 +185,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           <br />
         </>}
         
-        <div className="tree-container" ref={(t) => this.treeContainer = t!} >
+        <div className="tree-container">
           <ul>
             {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
               this.state.treeNodes.map((node, i) =>
@@ -205,7 +204,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({
       selectedNode: n,
       contextualMenu: {
-        position: ContextMenu.getPosition(e, this.treeContainer)
+        position: ContextMenu.getPositionEvent(e)
       }
     }, () => this.loadMenuItems());
   }

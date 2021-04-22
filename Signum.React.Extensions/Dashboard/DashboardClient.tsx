@@ -20,6 +20,7 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
+import { translated } from '../Translation/TranslatedInstanceTools';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -36,6 +37,7 @@ interface IconColor {
 export interface PartRenderer<T extends IPartEntity> {
   component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
   defaultIcon: (element: T) => IconColor;
+  defaultTitle?: (elenent: T) => string;
   withPanel?: (element: T) => boolean;
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
   handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
@@ -77,6 +79,7 @@ export function start(options: { routes: JSX.Element[] }) {
   registerRenderer(UserChartPartEntity, {
     component: () => import('./View/UserChartPart').then(a => a.default),
     defaultIcon: () => ({ icon: "chart-bar", iconColor: "violet" }),
+    defaultTitle: e => translated(e.userChart, uc => uc.displayName),
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -130,6 +133,7 @@ export function start(options: { routes: JSX.Element[] }) {
   registerRenderer(UserQueryPartEntity, {
     component: () => import('./View/UserQueryPart').then((a: any) => a.default),
     defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
+    defaultTitle: e => translated(e.userQuery, uc => uc.displayName),
     withPanel: p => p.renderMode != "BigValue",
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
       (p, e, ev) => {

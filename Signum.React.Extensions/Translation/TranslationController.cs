@@ -247,7 +247,7 @@ namespace Signum.React.Translation
 
             internal void FixMembers(CultureInfo defaultCulture)
             {
-                if (this.hasMembers)
+                if (this.hasMembers && cultures.ContainsKey(defaultCulture.Name))
                 {
                     var members = cultures[defaultCulture.Name].members.Keys;
 
@@ -283,33 +283,36 @@ namespace Signum.React.Translation
 
 
         [HttpPost("api/translation/save")]
-        public void SaveTypes(string assembly, string culture, [Required, FromBody] AssemblyResultTS result)
+        public void SaveTypes(string assembly, string? culture, [Required, FromBody] AssemblyResultTS result)
         {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
 
-            LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture), forceCreate: true)!;
-
-            var types = result.types.Values.ToDictionary(a => a.type!, a => a.cultures.GetOrThrow(culture)!); /*CSBUG*/
-
-            foreach (var lt in locAssembly.Types.Values)
+            foreach (var cult in result.cultures.Keys.Where(ci => culture == null  || culture == ci))
             {
-                var ts = types.TryGetC(lt.Type.Name);
+                LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(cult), forceCreate: true)!;
 
-                if (ts != null)
+                var types = result.types.Values.ToDictionary(a => a.type!, a => a.cultures.TryGetC(cult));
+
+                foreach (var lt in locAssembly.Types.Values)
                 {
-                    if (ts.typeDescription != null)
+                    var ts = types.TryGet(lt.Type.Name, null);
+
+                    if (ts != null)
                     {
-                        var td = ts.typeDescription;
-                        lt.Gender = td.gender?[0];
-                        lt.Description = td.description;
-                        lt.PluralDescription = td.pluralDescription;
+                        if (ts.typeDescription != null)
+                        {
+                            var td = ts.typeDescription;
+                            lt.Gender = td.gender?[0];
+                            lt.Description = td.description;
+                            lt.PluralDescription = td.pluralDescription;
+                        }
+
+                        lt.Members!.SetRange(ts.members.Select(a => KeyValuePair.Create(a.Key!, a.Value.description!)));
                     }
-
-                    lt.Members!.SetRange(ts.members.Select(a => KeyValuePair.Create(a.Key!, a.Value.description!)));
                 }
-            }
 
-            locAssembly.ExportXml();
+                locAssembly.ExportXml();
+            }
         }
 
         [HttpPost("api/translation/pluralize")]

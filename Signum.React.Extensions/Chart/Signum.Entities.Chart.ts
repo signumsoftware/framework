@@ -73,7 +73,7 @@ export module ChartMessage {
   export const CreatePalette = new MessageKey("ChartMessage", "CreatePalette");
   export const MyCharts = new MessageKey("ChartMessage", "MyCharts");
   export const CreateNew = new MessageKey("ChartMessage", "CreateNew");
-  export const EditUserChart = new MessageKey("ChartMessage", "EditUserChart");
+  export const Edit = new MessageKey("ChartMessage", "Edit");
   export const ViewPalette = new MessageKey("ChartMessage", "ViewPalette");
   export const ChartFor = new MessageKey("ChartMessage", "ChartFor");
   export const ChartOf0 = new MessageKey("ChartMessage", "ChartOf0");
@@ -95,6 +95,9 @@ export module ChartMessage {
   export const Reload = new MessageKey("ChartMessage", "Reload");
   export const Maximize = new MessageKey("ChartMessage", "Maximize");
   export const Minimize = new MessageKey("ChartMessage", "Minimize");
+  export const ShowChartSettings = new MessageKey("ChartMessage", "ShowChartSettings");
+  export const HideChartSettings = new MessageKey("ChartMessage", "HideChartSettings");
+  export const QueryResultReachedMaxRows0 = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
 }
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
@@ -127,6 +130,7 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   chartScript: ChartScriptSymbol;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
+  maxRows: number | null;
 }
 
 export const ChartScriptSymbol = new Type<ChartScriptSymbol>("ChartScript");
@@ -171,6 +175,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   hideQuickLink: boolean;
   owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
+  maxRows: number | null;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;
   columns: Entities.MList<ChartColumnEmbedded>;

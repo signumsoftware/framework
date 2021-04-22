@@ -44,10 +44,14 @@ namespace Signum.Engine.Authorization
 
         static void UserTicketLogic_Saving(UserEntity user)
         {
-            if (!user.IsNew && user.IsGraphModified && !user.InDB(u => u.PasswordHash).SequenceEqual(user.PasswordHash))
+            if (!user.IsNew && user.IsGraphModified)
             {
-                using (AuthLogic.Disable())
-                    user.UserTickets().UnsafeDelete();
+
+                if (!user.InDB(u => u.PasswordHash).EmptyIfNull().SequenceEqual(user.PasswordHash.EmptyIfNull()))
+                {
+                    using (AuthLogic.Disable())
+                        user.UserTickets().UnsafeDelete();
+                }
             }
         }
 
@@ -58,7 +62,7 @@ namespace Signum.Engine.Authorization
         public static string NewTicket(string device)
         {
             using (AuthLogic.Disable())
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 CleanExpiredTickets(UserEntity.Current);
 
@@ -80,7 +84,7 @@ namespace Signum.Engine.Authorization
         public static UserEntity UpdateTicket(string device, ref string ticket)
         {
             using (AuthLogic.Disable())
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var pair = UserTicketEntity.ParseTicket(ticket);
 

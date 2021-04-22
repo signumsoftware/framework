@@ -2,6 +2,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -20,8 +21,8 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
         public string? Azure_DirectoryID { get; set; }
 
-        public bool LoginWithWindowsAuthenticator { get; set; } = true;
-        public bool LoginWithActiveDirectoryRegistry { get; set; } = true;
+        public bool LoginWithWindowsAuthenticator { get; set; }
+        public bool LoginWithActiveDirectoryRegistry { get; set; }
         public bool LoginWithAzureAD { get; set; } = true;
 
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
@@ -32,6 +33,29 @@ namespace Signum.Entities.Authorization
         public MList<RoleMappingEmbedded> RoleMapping { get; set; } = new MList<RoleMappingEmbedded>();
 
         public Lite<RoleEntity>? DefaultRole { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if(LoginWithWindowsAuthenticator || LoginWithActiveDirectoryRegistry)
+            {
+                if (pi.Name == nameof(DomainName) && !DomainName.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (pi.Name == nameof(DomainServer) && !DomainServer.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            if (LoginWithAzureAD)
+            {
+                if (pi.Name == nameof(Azure_ApplicationID) && !Azure_ApplicationID.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (pi.Name == nameof(Azure_DirectoryID) && !Azure_DirectoryID.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     [Serializable]

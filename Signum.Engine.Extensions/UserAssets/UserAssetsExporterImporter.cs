@@ -401,7 +401,7 @@ namespace Signum.Engine.UserAssets
 
         public static void Import(byte[] document, UserAssetPreviewModel preview)
         {
-            using (Transaction tr = new Transaction())
+            using (var tr = new Transaction())
             {
                 var doc = new MemoryStream(document).Using(XDocument.Load);
                 if (PreImport != null)

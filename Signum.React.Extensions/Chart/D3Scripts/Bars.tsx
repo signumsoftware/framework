@@ -13,12 +13,16 @@ import InitialMessage from './Components/InitialMessage';
 
 export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
+  const isMargin = parameters["Labels"] == "Margin" || parameters["Labels"] == "MarginAll";
+  const isInside = parameters["Labels"] == "Inside" || parameters["Labels"] == "InsideAll";
+  const isAll = parameters["Labels"] == "MarginAll" || parameters["Labels"] == "InsideAll";
+
   var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
-    labels: parameters["Labels"] == "Margin" ? parseInt(parameters["LabelsMargin"]) : 0,
-    _3: parameters["Labels"] == "Margin" ? 5 : 0,
+    labels: isMargin ? parseInt(parameters["LabelsMargin"]) : 0,
+    _3: isMargin ? 5 : 0,
     ticks: 4,
     content: '*',
     _4: 5,
@@ -62,6 +66,9 @@ export default function renderBars({ data, width, height, parameters, loading, o
   var size = xRule.size('content');
   var labelMargin = 10;
 
+  var rowsByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
+ 
+
   return (
     <svg direction="ltr" width={width} height={height}>
 
@@ -85,45 +92,48 @@ export default function renderBars({ data, width, height, parameters, loading, o
       </g>
 
       {y.bandwidth() > 15 &&
-        (parameters["Labels"] == "Margin" ?
+        (isMargin ?
         <g className="y-label" transform={translate(xRule.end('labels'), yRule.start('content') + y.bandwidth() / 2)}>
-            {orderedRows.map(r => <TextEllipsis key={keyColumn.getValueKey(r)}
-              transform={translate(0, y(keyColumn.getValueKey(r))!)}
+          {(isAll ? keyValues: orderedRows.map(r => keyColumn.getValue(r))).map(k => <TextEllipsis key={keyColumn.getKey(k)}
+              transform={translate(0, y(keyColumn.getKey(k))!)}
               maxWidth={xRule.size('labels')}
               padding={labelMargin}
-              className="y-label sf-transition"
-              fill={(keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
+            className="y-label sf-transition"
+            fill={(keyColumn.getColor(k) ?? color(keyColumn.getKey(k)))}
               dominantBaseline="middle"
               textAnchor="end"
               fontWeight="bold"
-              onClick={e => onDrillDown(r, e)}
-              cursor="pointer">
-              {keyColumn.getValueNiceName(r)}
+            onClick={e => onDrillDown({c0: k}, e)}
+            cursor="pointer">
+            {keyColumn.getNiceName(k)}
             </TextEllipsis>)}
-          </g> :
-          parameters["Labels"] == "Inside" ?
-            <g className="y-label" transform={translate(xRule.start('content') + labelMargin, yRule.start('content') + y.bandwidth() / 2)}>
-              {orderedRows.map(r => {
-                var posx = x(valueColumn.getValue(r))!;
-                return (
-                  <TextEllipsis key={keyColumn.getValueKey(r)}
-                    transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getValueKey(r))!)}
-                    maxWidth={posx >= size / 2 ? posx : size - posx}
-                    padding={labelMargin}
-                    className="y-label sf-transition"
-                    fill={x(valueColumn.getValue(r))! >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) ?? color(keyColumn.getValueKey(r)))}
-                    dominantBaseline="middle"
-                    fontWeight="bold"
-                    onClick={e => onDrillDown(r, e)}
-                    cursor="pointer">
-                    {keyColumn.getValueNiceName(r)}
-                  </TextEllipsis>
-                );
-              })}
+        </g> :
+        isInside ?
+          <g className="y-label" transform={translate(xRule.start('content') + labelMargin, yRule.start('content') + y.bandwidth() / 2)}>
+            {(isAll ? keyValues : orderedRows.map(r => keyColumn.getValue(r))).map(k => {
+
+              var row = rowsByKey[keyColumn.getKey(k)];
+
+              var posx = x(row ? valueColumn.getValue(row) : 0)!;
+              return (
+                <TextEllipsis key={keyColumn.getKey(k)}
+                  transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getKey(k))!)}
+                  maxWidth={posx >= size / 2 ? posx : size - posx}
+                  padding={labelMargin}
+                  className="y-label sf-transition"
+                  fill={posx >= size / 2 ? '#fff' : (keyColumn.getColor(k) ?? color(keyColumn.getKey(k)))}
+                  dominantBaseline="middle"
+                  fontWeight="bold"
+                  onClick={e => onDrillDown({ c0: k }, e)}
+                  cursor="pointer">
+                  {keyColumn.getNiceName(k)}
+                </TextEllipsis>
+              );
+            })}
             </g> : null
         )}
 
-      {parseFloat(parameters["NumberOpacity"]) > 0 &&
+      {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
         <g className="numbers-label" transform={translate(xRule.start('content'), yRule.start('content'))}>
           {orderedRows
             .filter(r => x(valueColumn.getValue(r))! > 20)

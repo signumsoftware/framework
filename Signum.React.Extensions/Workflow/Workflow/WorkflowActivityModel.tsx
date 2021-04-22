@@ -1,8 +1,8 @@
 import * as React from 'react'
 import {
-  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, DecisionOptionEmbedded, WorkflowActivityMessage, 
+  WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, ButtonOptionEmbedded, WorkflowActivityMessage,
 } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable } from '@framework/Lines'
+import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
@@ -122,12 +122,17 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
     if (wa.type == "Decision")
     {
       if (ctx.value.decisionOptions.length == 0) {
-        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Approve.niceToString(), style: "Success" })));
-        ctx.value.decisionOptions.push(newMListElement(DecisionOptionEmbedded.New({ name: WorkflowActivityMessage.Decline.niceToString(), style: "Danger" })));
+        ctx.value.decisionOptions.push(newMListElement(ButtonOptionEmbedded.New({ name: WorkflowActivityMessage.Approve.niceToString(), style: "Success" })));
+        ctx.value.decisionOptions.push(newMListElement(ButtonOptionEmbedded.New({ name: WorkflowActivityMessage.Decline.niceToString(), style: "Danger" })));
       }
     }
     else
       wa.decisionOptions = [];
+
+
+    if (wa.type != "Task") 
+      wa.customNextButton = null;
+
 
     wa.modified = true;
 
@@ -233,7 +238,9 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
         {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
 
-          {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
+        {ctx.value.type == "Task" ? <EntityDetail ctx={ctx.subCtx(a => a.customNextButton)} labelColumns={1} valueColumns={4} /> : null}
+
+          {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={false} /> :
             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
 
           <fieldset>
@@ -266,7 +273,7 @@ function ScriptComponent(p : { ctx: TypeContext<WorkflowScriptPartEmbedded>, mai
       <legend>{ctx.niceName()}</legend>
       <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
         queryName: WorkflowScriptEntity,
-        parentToken: WorkflowScriptEntity.token().entity(e => e.mainEntityType),
+        parentToken: WorkflowScriptEntity.token(e => e.entity.mainEntityType),
         parentValue: p.mainEntityType
       }} />
       <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />

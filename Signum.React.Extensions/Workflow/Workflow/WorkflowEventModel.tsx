@@ -1,15 +1,16 @@
 import * as React from 'react'
-import { ValueLine, TypeContext, EntityDetail, RenderEntity } from '@framework/Lines'
-import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded } from '../Signum.Entities.Workflow'
+import { ValueLine, TypeContext, EntityDetail, RenderEntity, EntityLine } from '@framework/Lines'
+import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded, WorkflowTimerConditionEntity } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 import { useForceUpdate } from '@framework/Hooks'
+import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 interface WorkflowEventModelComponentProps {
   ctx: TypeContext<WorkflowEventModel>;
 }
 
-export default function WorkflowEventModelComponent(p : WorkflowEventModelComponentProps){
+export default function WorkflowEventModelComponent(p: WorkflowEventModelComponentProps) {
   const forceUpdate = useForceUpdate();
   function isSchedulesStart() {
     return (p.ctx.value.type == "ScheduledStart");
@@ -54,43 +55,57 @@ export default function WorkflowEventModelComponent(p : WorkflowEventModelCompon
       WorkflowEventType.values().filter(a => !isTimer(a)).map(a => WorkflowEventType.value(a));
   }
 
-  function renderTaskModel(ctx: TypeContext<WorkflowEventModel>) {
-    if (!ctx.value.mainEntityType)
-      return <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.task), ctx.niceName(e => e.mainEntityType))}</div>;
-
-    return (
-      <div>
-        <ValueLine ctx={ctx.subCtx(we => we.task!.suspended)} />
-        <EntityDetail ctx={ctx.subCtx(we => we.task!.rule)} />
-
-        <ValueLine ctx={ctx.subCtx(we => we.task!.triggeredOn)} onChange={handleTriggeredOnChange} />
-
-        {isConditional() &&
-          <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(we => we.task!.condition)} />}
-        <WorkflowEventTaskActionComponent ctx={ctx.subCtx(we => we.task!.action!)} mainEntityType={ctx.value.mainEntityType} />
-      </div>
-    );
-  }
-
-  function handleTriggeredOnChange() {
-    const ctx = p.ctx;
-    const task = ctx.value.task!;
-
-    if (isConditional() && !task.condition) {
-      task.condition = WorkflowEventTaskConditionEval.New();
-      task.modified = true;
-    }
-
-    forceUpdate();
-  }
   var ctx = p.ctx;
 
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(we => we.name)} />
       <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} comboBoxItems={getTypeComboItems()} onChange={loadTask} />
-      {isSchedulesStart() && renderTaskModel(ctx)}
-      {ctx.value.timer && <RenderEntity ctx={ctx.subCtx(a => a.timer)} />}
+      {ctx.value.task && <WorkflowEventTask ctx={ctx.subCtx(a => a.task!)} mainEntityType={ctx.value.mainEntityType} isConditional={isConditional()} />}
+      {ctx.value.timer && <WorkflowTimer ctx={ctx.subCtx(a => a.timer!)} mainEntityType={ctx.value.mainEntityType}/>}
+    </div>
+  );
+}
+
+
+
+function WorkflowEventTask(p: { ctx: TypeContext<WorkflowEventTaskModel>, mainEntityType: TypeEntity, isConditional: boolean }) {
+
+  const forceUpdate = useForceUpdate();
+
+  const ctx = p.ctx;
+
+  return (
+    <div>
+      <ValueLine ctx={ctx.subCtx(te => te.suspended)} />
+      <EntityDetail ctx={ctx.subCtx(te => te.rule)} />
+      <ValueLine ctx={ctx.subCtx(te => te.triggeredOn)} onChange={handleTriggeredOnChange} />
+      {p.isConditional && <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(t => t.condition)} />}
+      <WorkflowEventTaskActionComponent ctx={ctx.subCtx(t => t.action!)} mainEntityType={p.mainEntityType} />
+    </div>
+  );
+
+  function handleTriggeredOnChange() {
+    const task = p.ctx.value;
+
+    if (p.isConditional && !task.condition) {
+      task.condition = WorkflowEventTaskConditionEval.New();
+      task.modified = true;
+    }
+
+    forceUpdate();
+  }
+}
+
+function WorkflowTimer(p: { ctx: TypeContext<WorkflowTimerEmbedded>, mainEntityType: TypeEntity }) {
+
+  const ctx = p.ctx;
+
+  return (
+    <div>
+      <EntityDetail ctx={ctx.subCtx(te => te.duration)} />
+      <EntityLine ctx={ctx.subCtx(te => te.condition)}
+        findOptions={{ queryName: WorkflowTimerConditionEntity, parentToken: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), parentValue: p.mainEntityType }} />
     </div>
   );
 }

@@ -40,19 +40,16 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
 
-  React.useEffect(() => {
-    if (currentUserQuery && currentUserQuery.toStr == null) {
-      Navigator.API.fillToStrings(currentUserQuery)
-        .then(() => setCurrentUserQuery(currentUserQuery))
-        .done();
-    }
-  }, [currentUserQuery]);
-
   const oldExtraParams = React.useRef(p.searchControl.extraParams);
   React.useEffect(() => {
     oldExtraParams.current = p.searchControl.extraParams;
     p.searchControl.extraParams = () => ({ ...oldExtraParams.current(), userQuery: currentUserQuery && liteKey(currentUserQuery) });
     return () => { p.searchControl.extraParams = oldExtraParams.current };
+  }, []);
+
+  React.useEffect(() => {
+    if (currentUserQuery)
+      reloadList();
   }, []);
 
   function handleSelectedToggle(isOpen: boolean) {
@@ -64,7 +61,21 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function reloadList(): Promise<Lite<UserQueryEntity>[]> {
     return UserQueryClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
-      .then(list => { setUserQueries(list); return list; });
+      .then(list => {
+        setUserQueries(list);
+        if (currentUserQuery && currentUserQuery.toStr == null) {
+          const similar = list.firstOrNull(l => is(l, currentUserQuery));
+          if (similar != null) {
+            currentUserQuery.toStr = similar.toStr;
+            setCurrentUserQuery(currentUserQuery);
+          } else {
+            Navigator.API.fillToStrings(currentUserQuery)
+              .then(() => setCurrentUserQuery(currentUserQuery))
+              .done();
+          }
+        }
+        return list;
+      });
   }
 
   function handleBackToDefault() {
@@ -134,9 +145,13 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       filters: (fo.filterOptions ?? []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
-    const parsedTokens = sc.props.findOptions.columnOptions.map(a => a.token).notNull()
-      .concat(sc.props.findOptions.orderOptions.map(a => a.token).notNull())
-      .toObjectDistinct(a => a.fullKey);
+    const parsedTokens =
+      [
+        ...sc.props.findOptions.columnOptions.map(a => a.token),
+        ...sc.props.findOptions.columnOptions.map(a => a.summaryToken),
+        ...sc.props.findOptions.orderOptions.map(a => a.token),
+      ].notNull()
+        .toObjectDistinct(a => a.fullKey);
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
@@ -151,6 +166,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
+        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }) : null,
+        hiddenColumn: c.hiddenColumn
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({
@@ -177,6 +194,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   const labelText = p.searchControl.props.largeToolbarButtons == true ?
     (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
 
+  var canSave = Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) != null;
+
   const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
   return (
     <Dropdown
@@ -195,8 +214,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         }
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
-        {currentUserQuery && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
-        {Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );

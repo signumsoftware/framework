@@ -50,9 +50,6 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
     });
   }
 
-
-
-
   function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
     setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2.current) }).done();
   }

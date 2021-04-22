@@ -94,8 +94,8 @@ export function WorkflowScriptRunnerTab(p: {}) {
         findOptions={{
           queryName: CaseActivityEntity,
           filterOptions: [
-            { token: CaseActivityEntity.token().entity(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-            { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "EqualTo", value: null }
+            { token: CaseActivityEntity.token(a => a.entity.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+            { token: CaseActivityEntity.token(e => e.entity.doneDate), operation: "EqualTo", value: null }
           ],
           columnOptionsMode: "Replace",
           columnOptions: [
@@ -104,11 +104,11 @@ export function WorkflowScriptRunnerTab(p: {}) {
             { token: CaseActivityEntity.token(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
             { token: CaseActivityEntity.token(e => e.workflowActivity) },
             { token: CaseActivityEntity.token(e => e.case) },
-            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution) },
-            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.retryCount) },
+            { token: CaseActivityEntity.token(e => e.entity.scriptExecution!.nextExecution) },
+            { token: CaseActivityEntity.token(e => e.entity.scriptExecution!.retryCount) },
           ],
           orderOptions: [
-            { token: CaseActivityEntity.token().entity(e => e.scriptExecution!.nextExecution), orderType: "Ascending" }
+            { token: CaseActivityEntity.token(e => e.entity.scriptExecution!.nextExecution), orderType: "Ascending" }
           ],
           pagination: { elementsPerPage: 10, mode: "Firsts" }
         }} />
@@ -135,8 +135,8 @@ export function WorkflowScriptRunnerTab(p: {}) {
             findOptions={{
               queryName: CaseActivityEntity,
               filterOptions: [
-                { token: CaseActivityEntity.token().entity(e => e.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                { token: CaseActivityEntity.token().entity(e => e.doneDate), operation: "DistinctTo", value: null }
+                { token: CaseActivityEntity.token(e => e.entity.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                { token: CaseActivityEntity.token(e => e.entity.doneDate), operation: "DistinctTo", value: null }
               ],
               columnOptionsMode: "Replace",
               columnOptions: [
@@ -145,13 +145,13 @@ export function WorkflowScriptRunnerTab(p: {}) {
                 { token: CaseActivityEntity.token(a => a.workflowActivity).cast(WorkflowActivityEntity).append(a => a.lane!.pool!.workflow) },
                 { token: CaseActivityEntity.token(a => a.workflowActivity) },
                 { token: CaseActivityEntity.token(a=>a.case) },
-                { token: CaseActivityEntity.token().entity(e => e.doneDate) },
-                { token: CaseActivityEntity.token().entity(e => e.doneType) },
-                { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.nextExecution) },
-                { token: CaseActivityEntity.token().entity(a => a.scriptExecution!.retryCount) },
+                { token: CaseActivityEntity.token(e => e.entity.doneDate) },
+                { token: CaseActivityEntity.token(e => e.entity.doneType) },
+                { token: CaseActivityEntity.token(a => a.entity.scriptExecution!.nextExecution) },
+                { token: CaseActivityEntity.token(a => a.entity.scriptExecution!.retryCount) },
               ],
               orderOptions: [
-                { token: CaseActivityEntity.token().entity(e => e.doneDate), orderType: "Descending" }
+                { token: CaseActivityEntity.token(e => e.entity.doneDate), orderType: "Descending" }
               ],
               pagination: { elementsPerPage: 10, mode: "Firsts" }
             }} />

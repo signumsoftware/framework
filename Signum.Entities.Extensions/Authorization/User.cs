@@ -2,9 +2,8 @@ using System;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Mailing;
-using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using Signum.Entities;
+using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -32,7 +31,7 @@ namespace Signum.Entities.Authorization
         public string UserName { get; set; }
 
         [DbType(Size = 128)]
-        public byte[] PasswordHash { get; set; }
+        public byte[]? PasswordHash { get; set; }
 
         public Lite<RoleEntity> Role { get; set; }
 
@@ -56,8 +55,7 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => UserName);
+        public int LoginFailedCounter { get; set; }
 
         public static UserEntity Current
         {
@@ -73,6 +71,9 @@ namespace Signum.Entities.Authorization
             DisplayName = UserName,
             Email = Email,
         });
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => UserName);
     }
 
     public enum UserState
@@ -99,8 +100,20 @@ namespace Signum.Entities.Authorization
         public IncorrectUsernameException() { }
         public IncorrectUsernameException(string message) : base(message) { }
         protected IncorrectUsernameException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
+    }
+    
+    [Serializable]
+    public class UserLockedException : ApplicationException
+    {
+        public UserLockedException() { }
+        public UserLockedException(string message) : base(message) { }
+        protected UserLockedException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }
@@ -111,8 +124,8 @@ namespace Signum.Entities.Authorization
         public IncorrectPasswordException() { }
         public IncorrectPasswordException(string message) : base(message) { }
         protected IncorrectPasswordException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }
@@ -121,6 +134,8 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserOIDMixin : MixinEntity
     {
+        public static bool AllowUsersWithPassswordAndOID = false;
+
         UserOIDMixin(ModifiableEntity mainEntity, MixinEntity? next)
             : base(mainEntity, next)
         {
@@ -128,5 +143,19 @@ namespace Signum.Entities.Authorization
 
         [UniqueIndex(AllowMultipleNulls = true)]
         public Guid? OID { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(OID) && OID != null && ((UserEntity)this.MainEntity).PasswordHash != null && !AllowUsersWithPassswordAndOID)
+                return UserOIDMessage.TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet.NiceToString(this.MainEntity);
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    public enum UserOIDMessage
+    {
+        [Description("The user {0} is connected to Active Directory and can not have a local password set")]
+        TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet
     }
 }

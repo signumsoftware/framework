@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using System.Reflection;
 using Signum.Entities.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
@@ -32,7 +33,10 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
+        [PreserveOrder]
+        public MList<ButtonOptionEmbedded> DecisionOptions { get; set; } = new MList<ButtonOptionEmbedded>();
+
+        public ButtonOptionEmbedded? CustomNextButton { get; set; }
 
         [Ignore, QueryableProperty]
         [NoRepeatValidator]
@@ -104,6 +108,11 @@ namespace Signum.Entities.Workflow
                 return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
             }
 
+            if (pi.Name == nameof(CustomNextButton) && CustomNextButton != null && Type != WorkflowActivityType.Task)
+            {
+                return ValidationMessage._0IsSet.NiceToString(pi.NiceName());
+            }
+
             return base.PropertyValidation(pi);
         }
 
@@ -129,6 +138,7 @@ namespace Signum.Entities.Workflow
             }).ToMList());
 
             model.DecisionOptions.AssignMList(this.DecisionOptions);
+            model.CustomNextButton = this.CustomNextButton;
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -147,7 +157,8 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
-            this.DecisionOptions.AssignMList(wModel.Type == WorkflowActivityType.Decision ? wModel.DecisionOptions : new MList<DecisionOptionEmbedded>());
+            this.DecisionOptions.AssignMList(wModel.Type == WorkflowActivityType.Decision ? wModel.DecisionOptions : new MList<ButtonOptionEmbedded>());
+            this.CustomNextButton =  wModel.CustomNextButton;
             // We can not set boundary timers in model
             //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
@@ -183,12 +194,26 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class DecisionOptionEmbedded : EmbeddedEntity
+    public class ButtonOptionEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public BootstrapStyle Style { get; set; }
+
+        public void FromXml(XElement elem)
+        {
+            Name = elem.Attribute("Name")!.Value;
+            Style = elem.Attribute("Style")!.Value.ToEnum<BootstrapStyle>();
+        }
+
+        public XElement ToXml(string elementName)
+        {
+            return new XElement(elementName,
+                    new XAttribute("Name", Name),
+                    new XAttribute("Style", Style.ToString())
+                );
+        }
     }
 
     public class WorkflowActivityInfo
@@ -316,11 +341,10 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
-        public Lite<WorkflowActivityEntity>?  WorkflowActivity { get; set; }
+        public Lite<WorkflowActivityEntity>? WorkflowActivity { get; set; }
 
         public WorkflowEntity? Workflow { get; set; }
 
-        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -330,7 +354,9 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
+        public MList<ButtonOptionEmbedded> DecisionOptions { get; set; } = new MList<ButtonOptionEmbedded>();
+
+        public ButtonOptionEmbedded? CustomNextButton {get; set; }
 
         [PreserveOrder]
         [NoRepeatValidator]
@@ -373,6 +399,11 @@ namespace Signum.Entities.Workflow
             if (pi.Name == nameof(DecisionOptions))
             {
                 return (pi, DecisionOptions).IsSetOnlyWhen(Type == WorkflowActivityType.Decision);
+            }
+
+            if (pi.Name == nameof(CustomNextButton) && CustomNextButton != null && Type != WorkflowActivityType.Task)
+            {
+                return ValidationMessage._0IsSet.NiceToString(pi.NiceName());
             }
 
             return base.PropertyValidation(pi);

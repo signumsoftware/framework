@@ -131,7 +131,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventModel : ModelEntity
     {
-        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]

@@ -35,7 +35,7 @@ namespace Signum.Entities.Authorization
     public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
 
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public class OperationTypeEmbedded : EmbeddedEntity
     {
         public OperationSymbol Operation { get; set; }

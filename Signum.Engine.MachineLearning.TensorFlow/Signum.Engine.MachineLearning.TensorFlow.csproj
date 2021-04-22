@@ -14,6 +14,7 @@
 	<ItemGroup>
 		<PackageReference Include="Signum.Analyzer" Version="2.7.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="5.0.0" />
+        <PackageReference Include="TensorFlow.Keras" Version="0.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -22,9 +23,5 @@
 		<ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
 		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-    <PackageReference Include="TensorFlow.Keras" Version="0.2.1" />
 	</ItemGroup>
 </Project>

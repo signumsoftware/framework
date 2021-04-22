@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 
@@ -18,7 +19,7 @@ namespace Signum.Entities.Chart
         void FixParameters(ChartColumnEmbedded chartColumnEntity);
     }
 
-    [Serializable, InTypeScript(Undefined = false)]
+    [Serializable]
     public class ChartRequestModel : ModelEntity, IChartBase
     {
         private ChartRequestModel()
@@ -63,6 +64,8 @@ namespace Signum.Entities.Chart
 
         [NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
+
+        public int? MaxRows { get; set; }
 
         public List<Column> GetQueryColumns()
         {

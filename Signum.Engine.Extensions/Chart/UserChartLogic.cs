@@ -3,6 +3,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
 using Signum.Entities;
@@ -102,7 +103,10 @@ namespace Signum.Engine.Chart
             var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
             return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
-                .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
+                .Select(lite => UserCharts.Value.GetOrThrow(lite))
+                .Where(uc => isAllowed(uc))
+                .Select(uc => uc.ToLite(TranslatedInstanceLogic.TranslatedField(uc, d => d.DisplayName)))
+                .ToList();
         }
 
         public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType)
@@ -110,15 +114,20 @@ namespace Signum.Engine.Chart
             var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
             return UserChartsByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
-                .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
+                .Select(lite => UserCharts.Value.GetOrThrow(lite))
+                .Where(uc => isAllowed(uc))
+                .Select(uc => uc.ToLite(TranslatedInstanceLogic.TranslatedField(uc, d => d.DisplayName)))
+                .ToList();
         }
 
         public static List<Lite<UserChartEntity>> Autocomplete(string subString, int limit)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
-            return UserCharts.Value.Where(a => a.Value.EntityType == null && isAllowed(a.Value))
-                .Select(a => a.Key).Autocomplete(subString, limit).ToList();
+            return UserCharts.Value.Values.Where(uc => uc.EntityType == null && isAllowed(uc))
+                .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+                .Autocomplete(subString, limit)
+                .ToList();
         }
 
         public static UserChartEntity RetrieveUserChart(this Lite<UserChartEntity> userChart)
@@ -142,6 +151,7 @@ namespace Signum.Engine.Chart
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.ToFilterList(),
                 Parameters = userChart.Parameters.ToMList(),
+                MaxRows = userChart.MaxRows,
             };
             
             cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
@@ -169,6 +179,13 @@ namespace Signum.Engine.Chart
 
             TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, 
                 uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+        }
+
+        public static void RegisterTranslatableRoutes()
+        {
+            TranslatedInstanceLogic.AddRoute((UserChartEntity uc) => uc.DisplayName);
+            TranslatedInstanceLogic.AddRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
+            TranslatedInstanceLogic.AddRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
         }
 
         static SqlPreCommand? Schema_Synchronizing(Replacements replacements)

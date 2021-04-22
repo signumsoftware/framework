@@ -47,7 +47,6 @@ export function DynamicViewTree(p: DynamicViewTreeProps) {
     position: ContextMenuPosition;
   } | undefined>(undefined);
 
-  const treeContainer = React.useRef<HTMLDivElement>(null);
 
   function handleNodeTextContextMenu(n: DesignerNode<BaseNode>, e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -55,7 +54,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps) {
 
     p.rootNode.context.setSelectedNode(n);
     setContextualMenu({
-      position: ContextMenu.getPosition(e, treeContainer.current!)
+      position: ContextMenu.getPositionEvent(e)
     });
   }
 
@@ -157,7 +156,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps) {
   }
   return (
     <div>
-      <div className="dynamic-view-tree" ref={treeContainer } >
+      <div className="dynamic-view-tree">
         <ul>
           <DynamicViewNode
             node={p.rootNode}

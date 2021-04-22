@@ -211,13 +211,18 @@ namespace Signum.React.Authorization
                 {
                     SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
 
-                    var password = reader.GetString()!;
+                    var password = reader.GetString();
 
-                    var error = UserEntity.OnValidatePassword(password);
-                    if (error != null)
-                        throw new ApplicationException(error);
+                    if (password == null)
+                        ((UserEntity)ctx.Entity).PasswordHash = null;
+                    else
+                    {
+                        var error = UserEntity.OnValidatePassword(password);
+                        if (error != null)
+                            throw new ApplicationException(error);
 
-                    ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
+                        ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
+                    }
                 }
             });
 

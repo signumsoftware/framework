@@ -210,7 +210,7 @@ namespace Signum.Entities.Chart
         [Description("My Charts")]
         MyCharts,
         CreateNew,
-        EditUserChart,
+        Edit,
         ViewPalette,
         [Description("Chart for")]
         ChartFor,
@@ -242,6 +242,10 @@ namespace Signum.Entities.Chart
         Reload,
         Maximize,
         Minimize,
+        ShowChartSettings,
+        HideChartSettings,
+        [Description("Query result reached max rows ({0})")]
+        QueryResultReachedMaxRows0
     }
 
 }

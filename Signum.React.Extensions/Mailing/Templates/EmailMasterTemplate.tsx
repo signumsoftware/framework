@@ -13,6 +13,7 @@ export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTe
   return (
     <div>
       <ValueLine ctx={e.subCtx(f => f.name)} />
+      <ValueLine ctx={e.subCtx(f => f.isDefault)} />
       <EntityTabRepeater ctx={e.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>
         <EmailTemplateMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />} />
     </div>

@@ -24,7 +24,7 @@ namespace Signum.Engine.Chart.Scripts
                 },
                 new ChartScriptParameterGroup("Margins")
                 {
-                    new ChartScriptParameter("Labels", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Inside|Margin|None") },
+                    new ChartScriptParameter("Labels", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Inside|InsideAll|Margin|MarginAll|None") },
                     new ChartScriptParameter("LabelsMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 100m } },
                 },
                 new ChartScriptParameterGroup("Numbers")

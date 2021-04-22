@@ -105,7 +105,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
-        [InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -126,7 +125,7 @@ namespace Signum.Entities.Workflow
 
         public int? Order { get; set; }
 
-        public MList<DecisionOptionEmbedded> DecisionOptions { get; set; } = new MList<DecisionOptionEmbedded>();
+        public MList<ButtonOptionEmbedded> DecisionOptions { get; set; } = new MList<ButtonOptionEmbedded>();
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {

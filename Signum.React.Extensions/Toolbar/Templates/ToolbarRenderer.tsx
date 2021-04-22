@@ -111,7 +111,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
       case "Header":
       case "Item":
         if (res.elements && res.elements.length) {
-          var title = res.label ?? res.content!.toStr;
+          var title = res.label || res.content!.toStr;
           var icon = getIcon(res);
 
           return (
@@ -151,7 +151,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
               <Nav.Link
                 onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
                 onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
-                {config.getIcon(res)}{config.getLabel(res)}
+                {config.getIcon(res)}{res.label}
               </Nav.Link>
             </Nav.Item>
           );
@@ -212,7 +212,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           return [
             <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
               className={classes(menuItemN, "sf-cursor-pointer")}>
-              {getIcon(res)}{res.label ?? res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-right"} className="arrow-align" />
+              {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-right"} className="arrow-align" />
             </HeaderOrItem>
           ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, isNavbar, topRes)) : [])
         }
@@ -243,7 +243,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
               onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
               onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
               className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
-              {config.getIcon(res)}{config.getLabel(res)}
+              {config.getIcon(res)}{res.label}
             </HeaderOrItem>
           ];
         }
