@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Engine.Connection;
+using Signum.Engine.SchemaInfoTables;
 
 namespace Signum.Engine
 {
@@ -520,6 +521,11 @@ namespace Signum.Engine
         public override int MaxNameLength => 128;
 
         public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
+
+        public override bool HasTables()
+        {
+            return Database.View<SysTables>().Any();
+        }
     }
 
     public class SqlParameterBuilder : ParameterBuilder
