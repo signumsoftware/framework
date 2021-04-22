@@ -366,9 +366,9 @@ namespace Signum.Engine
 
         public override bool HasTables()
         {
-            return (from s in Database.View<PgNamespace>()
-                    where !PostgresCatalogSchema.systemSchemas.Contains(s.nspname)
-                    from t in s.Tables()
+            return (from ns in Database.View<PgNamespace>()
+                    where !ns.IsInternal()
+                    from t in ns.Tables()
                     select t).Any();
         }
     }

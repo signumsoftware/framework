@@ -2,6 +2,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -14,6 +15,9 @@ namespace Signum.Engine.PostgresCatalog
         public int oid;
 
         public string nspname;
+
+        [AutoExpressionField]
+        public bool IsInternal() => As.Expression(() => nspname == "information_schema" || nspname.StartsWith("pg_"));
 
         [AutoExpressionField]
         public IQueryable<PgClass> Tables() =>

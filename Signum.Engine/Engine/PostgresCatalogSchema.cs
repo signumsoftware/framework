@@ -12,7 +12,6 @@ namespace Signum.Engine.Engine
 {
     public static class PostgresCatalogSchema
     {
-        public static string[] systemSchemas = new[] { "pg_catalog", "pg_toast", "information_schema" };
 
         public static Dictionary<string, DiffTable> GetDatabaseDescription(List<DatabaseName?> databases)
         {
@@ -33,12 +32,12 @@ namespace Signum.Engine.Engine
                     var con = Connector.Current;
 
                     var tables =
-                        (from s in Database.View<PgNamespace>()
-                         where !systemSchemas.Contains(s.nspname)
-                         from t in s.Tables()
+                        (from ns in Database.View<PgNamespace>()
+                         where !ns.IsInternal()
+                         from t in ns.Tables()
                          select new DiffTable
                          {
-                             Name = new ObjectName(new SchemaName(db, s.nspname, isPostgres), t.relname, isPostgres),
+                             Name = new ObjectName(new SchemaName(db, ns.nspname, isPostgres), t.relname, isPostgres),
 
                              TemporalType = t.Triggers().Any(t => t.Proc()!.proname == "versioning") ? Signum.Engine.SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
 
@@ -229,9 +228,9 @@ namespace Signum.Engine.Engine
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
-                    var schemaNames = Database.View<PgNamespace>().Select(s => s.nspname).ToList();
+                    var schemaNames = Database.View<PgNamespace>().Where(a=>!a.IsInternal()).Select(s => s.nspname).ToList();
 
-                    result.AddRange(schemaNames.Except(systemSchemas).Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
                 }
             }
             return result;
