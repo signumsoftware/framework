@@ -130,7 +130,7 @@ namespace Signum.React.Maps
                     if (isPostgres)
                     {
                         var dic = (from ns in Database.View<PgNamespace>()
-                                   where !PostgresCatalogSchema.systemSchemas.Contains(ns.nspname)
+                                   where !ns.IsInternal()
                                    from t in ns.Tables()
                                    select KeyValuePair.Create(new ObjectName(new SchemaName(dbName, ns.nspname, isPostgres), t.relname, isPostgres),
                                    new RuntimeStats
