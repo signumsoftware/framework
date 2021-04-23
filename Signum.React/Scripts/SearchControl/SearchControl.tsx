@@ -80,8 +80,8 @@ function is_touch_device(): boolean {
 export interface SearchControlHandler {
   findOptions: FindOptions;
   state?: SearchControlState;
-  doSearch(): void;
-  doSearchPage1(): void;
+  doSearch(opts: { dataChanged?: boolean, force?: boolean }): void;
+  doSearchPage1(force?: boolean): void;
   searchControlLoaded: SearchControlLoaded | null;
 }
 
@@ -103,8 +103,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
       return searchControlLoaded.current;
     },
     state: state,
-    doSearch: () => searchControlLoaded.current && searchControlLoaded.current.doSearch(),
-    doSearchPage1: () => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(),
+    doSearch: opts => searchControlLoaded.current && searchControlLoaded.current.doSearch(opts),
+    doSearchPage1: force => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(force),
   };
   React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
 

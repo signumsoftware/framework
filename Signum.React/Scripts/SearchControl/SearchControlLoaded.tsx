@@ -102,6 +102,7 @@ export interface SearchControlLoadedState {
   dropBorderIndex?: number,
   showHiddenColumns?: boolean,
   currentMenuItems?: React.ReactElement<any>[];
+  dataChanged?: boolean;
 
   contextualMenu?: {
     position: ContextMenuPosition;
@@ -148,7 +149,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     if (this.props.searchOnLoad)
-      this.doSearch().done();
+      this.doSearch({ force: true }).done();
 
     this.containerDiv!.addEventListener("scroll", (e) => {
 
@@ -214,7 +215,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.containerDiv)
       this.containerDiv.scrollTop = 0;
 
-    this.doSearch(undefined, force).done();
+    this.doSearch({ force }).done();
   };
 
   resetResults(continuation: () => void) {
@@ -225,16 +226,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       selectedRows: [],
       currentMenuItems: undefined,
       markedRows: undefined,
+      dataChanged: undefined,
     }, continuation);
   }
 
   abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
   abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
 
-  doSearch(dataChanged?: boolean, force: boolean = false): Promise<void> {
-
-    if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !force))
+  dataChanged(): Promise<void> {
+    if (this.isManualRefreshOrAllPagination()) {
+      this.setState({ dataChanged: true });
       return Promise.resolve();
+    }
+    else {
+      return this.doSearch({dataChanged: true});
+    }
+  }
+
+  doSearch(opts : { dataChanged?: boolean, force?: boolean}): Promise<void> {
+
+    if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !opts.force))
+      return Promise.resolve();
+
+    var dataChanged = opts.dataChanged ?? this.state.dataChanged;
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
@@ -254,6 +268,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
+          dataChanged: undefined,
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
           selectedRows: [],
@@ -301,13 +316,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   handlePagination = (p: Pagination) => {
     this.props.findOptions.pagination = p;
-    this.setState({ resultTable: undefined, resultFindOptions: undefined });
+    this.setState({ resultTable: undefined, resultFindOptions: undefined, dataChanged: false });
 
-      if (this.containerDiv)
-        this.containerDiv.scrollTop = 0;
+    if (this.containerDiv)
+      this.containerDiv.scrollTop = 0;
 
-      this.doSearch().done();
-    }
+    this.doSearch({}).done();
+  }
 
 
   handleOnContextMenu = (event: React.MouseEvent<any>) => {
@@ -554,24 +569,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
-    const isManualOrAll = this.isManualRefreshOrAllPagination();
 
-    const isSearch = isManualOrAll || this.state.showFilters ||
-      this.state.resultTable == null && !this.props.searchOnLoad ||
-      this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
-      this.props.findOptions.systemTime != null;
 
-    var hasFindOptionsChanges = isManualOrAll;
-    if (isManualOrAll) {
-
-      const lastFindOptions = s.resultFindOptions && Finder.toFindOptions(s.resultFindOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
-      const lastFindOptionsPath = lastFindOptions && Finder.findOptionsPath(lastFindOptions);
-
-      const newFindOptions = p.findOptions && Finder.toFindOptions(p.findOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
-      const newFindOptionsPath = newFindOptions && Finder.findOptionsPath(newFindOptions);
-
-      hasFindOptionsChanges = lastFindOptionsPath != newFindOptionsPath;
+    function toFindOptionsPath(fop: FindOptionsParsed) {
+      var fo = Finder.toFindOptions(fop, p.queryDescription, p.defaultIncudeDefaultFilters);
+      return Finder.findOptionsPath(fo);
     }
+
+    const isManualOrAll = this.isManualRefreshOrAllPagination();
+    var changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions);
+
+
 
     var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
@@ -614,8 +622,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ml-2", hasFindOptionsChanges ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+        button: < button className={classes("sf-query-button sf-search btn ml-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
+          <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
 
@@ -668,8 +676,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity);
     } else {
-//      if (this.state.refreshMode == 'Auto')
-        this.doSearch(true);
+      this.dataChanged();
     }
   }
  
@@ -809,10 +816,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   markRows = (dic: MarkedRowsDictionary) => {
-    var promise = this.state.refreshMode == "Manual" ? Promise.resolve(undefined) :
-      this.doSearch(true);
-
-    promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
+    this.dataChanged()
+      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }))
+      .done();
 
   }
 
@@ -1173,14 +1179,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 
-    return (
+      return (
         <div className={formatter.cellClass}>{formatter.formatter(val, {
-            columns: rt.columns,
-            row: rt.rows[0],
-            rowIndex: 0,
-            refresh: () => scl.doSearch(true).done(),
-            systemTime: scl.props.findOptions.systemTime
-          })}</div>
+          columns: rt.columns,
+          row: rt.rows[0],
+          rowIndex: 0,
+          refresh: () => scl.dataChanged().done(),
+          systemTime: scl.props.findOptions.systemTime
+        })}</div>
       );
     }
 
@@ -1317,7 +1323,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       systemTime: resFo.systemTime && { ...resFo.systemTime },
       includeDefaultFilters: false,
     }).then(() => {
-      this.doSearch(true);
+      this.dataChanged();
     });
   }
 
@@ -1421,7 +1427,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
       const ctx: Finder.CellFormatterContext = {
-        refresh: () => this.doSearch(true).done(),
+        refresh: () => this.dataChanged().done(),
         systemTime: this.props.findOptions.systemTime,
         columns: resultTable.columns,
         row: row,
@@ -1488,10 +1494,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onNavigated)
       this.props.onNavigated(lite);
 
-    if (this.state.refreshMode == "Manual")
-      return;
-
-    this.doSearch(true);
+    this.dataChanged();
   }
 
   getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
