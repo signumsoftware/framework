@@ -6,7 +6,7 @@ import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeMode } from '../Signum.Entities.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets';
-import { QueryTokenString } from '../Reflection';
+import { QueryTokenString, toLuxonFormat } from '../Reflection';
 import QueryTokenBuilder from './QueryTokenBuilder';
 import { OperationLogEntity } from '../Signum.Entities.Basics';
 
@@ -131,7 +131,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
     var utcDate = systemTime[field]
 
     var m = utcDate == null ? null : DateTime.fromISO(utcDate);
-    var luxonFormat = "yyyy-MM-dd'T'HH:mm:ss";
+    var luxonFormat = toLuxonFormat("o", "DateTime");
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}

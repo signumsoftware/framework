@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string? Format
         {
-            get { return "s"; }
+            get { return "o"; }
         }
 
         public override string? Unit

@@ -1749,7 +1749,8 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },
@@ -1765,7 +1766,8 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },
