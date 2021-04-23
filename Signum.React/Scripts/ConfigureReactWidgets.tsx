@@ -68,6 +68,8 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
 
     parse: function parse(value: string, format?: string) {
 
+      value = value?.trim();
+
       if (value == undefined || value == "")
         return null;
 
