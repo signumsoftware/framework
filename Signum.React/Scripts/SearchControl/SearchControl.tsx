@@ -11,6 +11,7 @@ import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
+import { RefreshMode } from '../Signum.Entities.DynamicQuery';
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -45,7 +46,7 @@ export interface SearchControlProps {
   create?: boolean;
   view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
-  avoidAutoRefresh?: boolean;
+  defaultRefreshMode?: RefreshMode;
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
   refreshKey?: any;
@@ -199,7 +200,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
         showBarExtensionOption={p.showBarExtensionOption}
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-        avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+        defaultRefreshMode={p.defaultRefreshMode ?? 'Auto'}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
         refreshKey={p.refreshKey}
         extraOptions={p.extraOptions}

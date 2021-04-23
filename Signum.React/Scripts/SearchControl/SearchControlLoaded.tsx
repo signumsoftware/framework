@@ -23,7 +23,7 @@ import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation } from '../Signum.Entities.DynamicQuery';
+import { FilterOperation, RefreshMode } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -69,7 +69,7 @@ export interface SearchControlLoadedProps {
   create: boolean;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
-  avoidAutoRefresh: boolean;
+  defaultRefreshMode: RefreshMode;
   avoidChangeUrl: boolean;
   refreshKey: any;
   extraOptions: any;
@@ -111,6 +111,7 @@ export interface SearchControlLoadedState {
   };
 
   showFilters: boolean;
+  refreshMode: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
 }
@@ -121,7 +122,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     super(props);
     this.state = {
       isSelectOpen: false,
-      showFilters: props.showFilters
+      showFilters: props.showFilters,
+      refreshMode: props.defaultRefreshMode
     };
   }
 
@@ -197,7 +199,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   // MAIN
-  doSearchPage1() {
+
+  isManualRefreshOrAllPagination() {
+    return this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All";
+  }
+
+  doSearchPage1(force: boolean = false) {
+
     const fo = this.props.findOptions;
 
     if (fo.pagination.mode == "Paginate")
@@ -206,7 +214,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.containerDiv)
       this.containerDiv.scrollTop = 0;
 
-    this.doSearch().done();
+    this.doSearch(undefined, force).done();
   };
 
   resetResults(continuation: () => void) {
@@ -223,9 +231,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
   abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
 
-  doSearch(dataChanged?: boolean): Promise<void> {
+  doSearch(dataChanged?: boolean, force: boolean = false): Promise<void> {
 
-    if (this.isUnmounted)
+    if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !force))
       return Promise.resolve();
 
     return this.getFindOptionsWithSFB().then(fop => {
@@ -295,14 +303,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.props.findOptions.pagination = p;
     this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
-    if (this.props.findOptions.pagination.mode != "All") {
-
       if (this.containerDiv)
         this.containerDiv.scrollTop = 0;
 
       this.doSearch().done();
     }
-  }
 
 
   handleOnContextMenu = (event: React.MouseEvent<any>) => {
@@ -362,14 +367,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleFiltersChanged = () => {
+
+    if (this.isManualRefreshOrAllPagination())
+      this.forceUpdate();
+
     if (this.props.onFiltersChanged)
       this.props.onFiltersChanged(this.props.findOptions.filterOptions);
   }
 
 
   handlePinnedFilterChanged = () => {
+
     this.handleFiltersChanged();
-    if (this.props.findOptions.pagination.mode != "All")
+
       this.doSearchPage1();
   }
 
@@ -383,7 +393,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       setTimeout(() => {
         var input = (document.activeElement as HTMLInputElement);
         input.blur();
-        this.doSearchPage1();
+        this.doSearchPage1(true);
       }, 200);
     }
   }
@@ -437,20 +447,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               showPinnedFiltersOptions={false}
               showPinnedFiltersOptionsButton={true}
               /> :
-                sfb ? <div className="simple-filter-builder">{sfb}</div> :
-                  <AutoFocus disabled={!this.props.enableAutoFocus}>
-                    <PinnedFilterBuilder
-                      filterOptions={fo.filterOptions}
-                      onFiltersChanged={this.handlePinnedFilterChanged} />
-                  </AutoFocus>
-            }
+              sfb && <div className="simple-filter-builder">{sfb}</div>}
           </div>
         }
-        {p.showHeader == "PinnedFilters" && <AutoFocus disabled={!this.props.enableAutoFocus}>
-          <PinnedFilterBuilder
-            filterOptions={fo.filterOptions}
-            onFiltersChanged={this.handlePinnedFilterChanged} extraSmall={true} />
-        </AutoFocus>}
+        {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
+        {p.showHeader == "PinnedFilters" && this.renderPinnedFilters(true)}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -464,7 +465,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
-          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
             <thead ref={th => this.thead = th}>
               {this.renderHeaders()}
             </thead>
@@ -483,9 +484,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   handleSearchClick = (ev: React.MouseEvent<any>) => {
+
     ev.preventDefault();
 
-    this.doSearchPage1();
+    this.doSearchPage1(true);
 
   };
 
@@ -552,12 +554,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const p = this.props;
     const s = this.state;
 
-    const isAll = p.findOptions.pagination.mode == "All";
+    const isManualOrAll = this.isManualRefreshOrAllPagination();
 
-    const isSearch = isAll || this.state.showFilters ||
+    const isSearch = isManualOrAll || this.state.showFilters ||
       this.state.resultTable == null && !this.props.searchOnLoad ||
       this.state.resultTable != null && this.props.findOptions.columnOptions.some(c => c.token != null && !this.state.resultTable!.columns.contains(c.token.fullKey)) ||
       this.props.findOptions.systemTime != null;
+
+    var hasFindOptionsChanges = isManualOrAll;
+    if (isManualOrAll) {
+
+      const lastFindOptions = s.resultFindOptions && Finder.toFindOptions(s.resultFindOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
+      const lastFindOptionsPath = lastFindOptions && Finder.findOptionsPath(lastFindOptions);
+
+      const newFindOptions = p.findOptions && Finder.toFindOptions(p.findOptions, p.queryDescription, p.defaultIncudeDefaultFilters);
+      const newFindOptionsPath = newFindOptions && Finder.findOptionsPath(newFindOptions);
+
+      hasFindOptionsChanges = lastFindOptionsPath != newFindOptionsPath;
+    }
 
     var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
     var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
@@ -600,7 +614,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ml-2", isAll ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
+        button: < button className={classes("sf-query-button sf-search btn ml-2", hasFindOptionsChanges ? "btn-danger" : isSearch ? "btn-primary" : "btn-light")} onClick={this.handleSearchClick} >
           <FontAwesomeIcon icon={"search"} />&nbsp;{isSearch ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
@@ -654,7 +668,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity);
     } else {
-      if (!this.props.avoidAutoRefresh)
+//      if (this.state.refreshMode == 'Auto')
         this.doSearch(true);
     }
   }
@@ -795,7 +809,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   markRows = (dic: MarkedRowsDictionary) => {
-    var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
+    var promise = this.state.refreshMode == "Manual" ? Promise.resolve(undefined) :
       this.doSearch(true);
 
     promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
@@ -995,7 +1009,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             <FontAwesomeIcon icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
           </Dropdown.Item>);
         }
-      }
+    }
     }
 
     if (cm.rowIndex != undefined) {
@@ -1064,7 +1078,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.forceUpdate();
 
-    if (fo.pagination.mode != "All" || this.props.showHeader != true)
       this.doSearchPage1();
   }
 
@@ -1160,7 +1173,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 
-      return (
+    return (
         <div className={formatter.cellClass}>{formatter.formatter(val, {
             columns: rt.columns,
             row: rt.rows[0],
@@ -1376,7 +1389,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       (this.props.allowSelection ? 1 : 0) +
       (this.props.view ? 1 : 0);
 
-
     if (!this.state.resultTable) {
       if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
         return <tr><td colSpan={columnsCount} className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</td></tr>;
@@ -1456,12 +1468,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
   }
 
+  renderPinnedFilters(extraSmall: boolean = false): React.ReactNode {
+
+    const fo = this.props.findOptions;
+
+    return <AutoFocus disabled={!this.props.enableAutoFocus}>
+      <PinnedFilterBuilder
+        filterOptions={fo.filterOptions}
+        onFiltersChanged={this.handlePinnedFilterChanged}
+        onSearch={() => this.doSearchPage1(true)}
+        showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
+        extraSmall={extraSmall}
+      />
+    </AutoFocus>
+  }
+  
   handleOnNavigated = (lite: Lite<Entity>) => {
 
     if (this.props.onNavigated)
       this.props.onNavigated(lite);
 
-    if (this.props.avoidAutoRefresh)
+    if (this.state.refreshMode == "Manual")
       return;
 
     this.doSearch(true);

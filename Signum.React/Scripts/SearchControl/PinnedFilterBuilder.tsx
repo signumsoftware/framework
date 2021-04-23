@@ -10,10 +10,13 @@ import "./FilterBuilder.css"
 import { createFilterValueControl, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+  onSearch?: () => void;
+  showSearchButton?: boolean;
   extraSmall?: boolean;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
@@ -26,15 +29,22 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     return null;
 
   return (
-    <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
-      {
-        allPinned
-          .groupBy(a => (a.pinned!.column ?? 0).toString())
-          .orderBy(gr => parseInt(gr.key))
-          .map(gr => <div className="col-sm-3" key={gr.key}>
-            {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
-          </div>)
-      }
+    <div onKeyUp={handleFiltersKeyUp }>
+      <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
+        {
+          allPinned
+            .groupBy(a => (a.pinned!.column ?? 0).toString())
+            .orderBy(gr => parseInt(gr.key))
+            .map(gr => <div className="col-sm-3" key={gr.key}>
+              {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+            </div>)
+        }
+      </div>
+      {p.showSearchButton &&
+        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
+          <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
+        </button>}
+
     </div>
   );
 
@@ -75,6 +85,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 
   function handleValueChange(f: FilterOptionParsed) {
+
     if (isFilterGroupOptionParsed(f) || f.token && f.token.filterType == "String") {
 
       if (timeoutWriteText.current)
@@ -89,6 +100,15 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
     }
   }
+
+  function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (p.onSearch && e.keyCode == 13) {
+      setTimeout(() => {
+        p.onSearch!();
+      }, 200);
+    }
+  }
+
 }
 
 function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[] {
