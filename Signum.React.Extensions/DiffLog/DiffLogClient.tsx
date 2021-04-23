@@ -20,7 +20,7 @@ import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineModal } from './Templates/TimeMachinePage';
-import { asUTC } from '../../../Framework/Signum.React/Scripts/SearchControl/SystemTimeEditor';
+import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
@@ -57,7 +57,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         return undefined;
 
       var lite = sc.state.selectedRows[0].entity!;
-      var versions = sc.state.selectedRows.map(r => asUTC(r.columns[index] as string));
+      var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
@@ -104,12 +104,12 @@ export namespace API {
     return ajaxGet({ url: "~/api/diffLog/" + id });
   }
 
-  export function retrieveVersion(lite: Lite<Entity>, asOf: string, ): Promise<Entity> {
-    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}` });
+  export function retrieveVersion(lite: Lite<Entity>, asOf: string,): Promise<Entity> {
+    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?` + QueryString.stringify({asOf}) });
   }
 
   export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
-    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
+    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?` + QueryString.stringify({ from, to }) });
   }
 }
 
