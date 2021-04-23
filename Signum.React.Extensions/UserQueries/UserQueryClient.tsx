@@ -80,6 +80,11 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
 }
 
+export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
+  return AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`)
+}
+
+
 function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
   if (!(cic.container instanceof SearchControlLoaded))
     return undefined;
