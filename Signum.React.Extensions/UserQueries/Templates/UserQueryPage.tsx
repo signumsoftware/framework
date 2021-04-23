@@ -50,7 +50,8 @@ export default function UserQueryPage(p: UserQueryPageProps) {
         hideFullScreenButton={true}
         largeToolbarButtons={true}
         extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
-        defaultRefreshMode={currentUserQuery?.refreshMode}
+        defaultRefreshMode={currentUserQuery.refreshMode}
+        searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         showBarExtension={true}
         findOptions={fo} />
       }
