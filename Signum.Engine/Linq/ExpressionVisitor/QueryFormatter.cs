@@ -663,39 +663,47 @@ namespace Signum.Engine.Linq
         {
             sb.Append("FOR SYSTEM_TIME ");
 
-            if (st is SystemTime.AsOf asOf)
+            switch (st)
             {
-                sb.Append("AS OF ");
-                this.VisitSystemTimeConstant(asOf.DateTime);
-            }
-            else if (st is SystemTime.Between between)
-            {
-                sb.Append("BETWEEN ");
-                this.VisitSystemTimeConstant(between.StartDateTime);
+                case SystemTime.AsOf asOf:
+                    {
+                        sb.Append("AS OF ");
+                        this.VisitSystemTimeConstant(asOf.DateTime);
 
-                sb.Append(" AND ");
-                this.VisitSystemTimeConstant(between.EndtDateTime);
-            }
-            else if (st is SystemTime.ContainedIn contained)
-            {
-                sb.Append("CONTAINED IN (");
-                this.VisitSystemTimeConstant(contained.StartDateTime);
+                        break;
+                    }
+                case SystemTime.Between between:
+                    {
+                        sb.Append("BETWEEN ");
+                        this.VisitSystemTimeConstant(between.StartDateTime);
 
-                sb.Append(", ");
-                this.VisitSystemTimeConstant(contained.EndtDateTime);
-                sb.Append(')');
-            }
-            else if (st is SystemTime.All)
-            {
-                sb.Append("ALL");
-            }
-            else
-                throw new InvalidOperationException("Unexpected");
+                        sb.Append(" AND ");
+                        this.VisitSystemTimeConstant(between.EndtDateTime);
 
+                        break;
+                    }
+                case SystemTime.ContainedIn contained:
+                    {
+                        sb.Append("CONTAINED IN (");
+                        this.VisitSystemTimeConstant(contained.StartDateTime);
+
+                        sb.Append(", ");
+                        this.VisitSystemTimeConstant(contained.EndtDateTime);
+                        sb.Append(')');
+                        break;
+                    }
+                case SystemTime.All:
+                    {
+                        sb.Append("ALL");
+                        break;
+                    }
+                default:
+                    throw new UnexpectedValueException(st);
+            }
         }
 
-        Dictionary<DateTime, ConstantExpression> systemTimeConstants = new Dictionary<DateTime, ConstantExpression>();
-        void VisitSystemTimeConstant(DateTime datetime)
+        Dictionary<DateTimeOffset, ConstantExpression> systemTimeConstants = new Dictionary<DateTimeOffset, ConstantExpression>();
+        void VisitSystemTimeConstant(DateTimeOffset datetime)
         {
             var c = systemTimeConstants.GetOrCreate(datetime, dt => Expression.Constant(dt));
 

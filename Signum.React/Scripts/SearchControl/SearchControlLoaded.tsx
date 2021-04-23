@@ -24,7 +24,7 @@ import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
-import SystemTimeEditor, { asUTC } from './SystemTimeEditor';
+import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
@@ -503,7 +503,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
 
     if (fo.systemTime == null)
-      fo.systemTime = { mode: "AsOf", startDate: asUTC(DateTime.local().toISO()) };
+      fo.systemTime = { mode: "AsOf", startDate: DateTime.local().toISO() };
     else
       fo.systemTime = undefined;
 

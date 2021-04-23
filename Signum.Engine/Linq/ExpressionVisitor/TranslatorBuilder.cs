@@ -562,8 +562,10 @@ namespace Signum.Engine.Linq
             }
 
             static MethodInfo miToInterval = ReflectionTools.GetMethodInfo(() => ToInterval<int>(new NpgsqlTypes.NpgsqlRange<int>())).GetGenericMethodDefinition();
-            static Interval<T> ToInterval<T>(NpgsqlTypes.NpgsqlRange<T> range) where T : struct, IComparable<T>, IEquatable<T>
-                => new Interval<T>(range.LowerBound, range.UpperBound);
+            static NullableInterval<T> ToInterval<T>(NpgsqlTypes.NpgsqlRange<T> range) where T : struct, IComparable<T>, IEquatable<T>
+                => new NullableInterval<T>(
+                    range.LowerBoundInfinite ? null : range.LowerBound,
+                    range.UpperBoundInfinite ? null : range.UpperBound);
 
             protected internal override Expression VisitInterval(IntervalExpression interval)
             {
@@ -574,7 +576,7 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return Expression.New(typeof(Interval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min!), Visit(interval.Max!));
+                    return Expression.New(typeof(NullableInterval<>).MakeGenericType(intervalType).GetConstructor(new[] { intervalType, intervalType })!, Visit(interval.Min!), Visit(interval.Max!));
                 }
             }
 

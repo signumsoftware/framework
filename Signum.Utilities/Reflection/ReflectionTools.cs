@@ -783,6 +783,18 @@ namespace Signum.Utilities.Reflection
                         return (T)(object)(Date)dto.DateTime;
                 }
 
+                if (utype == typeof(DateTime))
+                {
+                    if (value is DateTimeOffset dto)
+                        return (T)(object)dto.DateTime;
+                }
+
+                if (utype == typeof(DateTimeOffset))
+                {
+                    if (value is DateTime dt)
+                        return (T)(object)(DateTimeOffset)dt;
+                }
+
                 return (T)Convert.ChangeType(value, utype)!;
             }
         }

@@ -45,17 +45,12 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal static ConstructorInfo intervalConstructor = typeof(Interval<DateTime>).GetConstructor(new[] { typeof(DateTime), typeof(DateTime) })!;
-
         internal IntervalExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
-            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? new IntervalExpression(typeof(Interval<DateTime>),
-                this.SystemVersioned.StartColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.EndColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c)),
-                asUtc: true
-            ) : null;
+            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? this.SystemVersioned.IntervalExpression(tableAlias) : null;
         }
+
+    
 
         internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
         {
@@ -183,12 +178,7 @@ namespace Signum.Engine.Maps
 
         internal IntervalExpression? GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
-            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? new IntervalExpression(typeof(Interval<DateTime>),
-                this.SystemVersioned.StartColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.EndColumnName?.Let(c => new ColumnExpression(typeof(DateTime), tableAlias, c)),
-                this.SystemVersioned.PostgreeSysPeriodColumnName?.Let(c => new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, c)),
-                asUtc: true
-            ) : null;
+            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ?  this.SystemVersioned.IntervalExpression(tableAlias) : null;
         }
 
         ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
