@@ -6,6 +6,7 @@ import { parseLite, is, Lite, toLite, newMListElement, toMList, liteKey } from '
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
+import * as SCL from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
@@ -14,9 +15,11 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { getQueryKey, Type } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { useAPI } from '@framework/Hooks'
-import { FilterOptionParsed } from '@framework/Search'
+import { FilterOptionParsed, SearchControl } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString'
+import UserQuery from './Templates/UserQuery'
+import { RefreshMode } from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -92,6 +95,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.systemTime = nfo.systemTime;
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
+        sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -106,6 +110,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
+          sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
@@ -150,6 +155,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
+    const currentUserQueryEntity = await currentUserQuery ? Navigator.API.fetchAndRemember(currentUserQuery!) : null;
+
     const uq = await Navigator.view(UserQueryEntity.New({
       query: qe,
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
@@ -171,7 +178,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         })
       }))),
       paginationMode: fo.pagination && fo.pagination.mode,
-      elementsPerPage: fo.pagination && fo.pagination.elementsPerPage
+      elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
+      refreshMode: currentUserQueryEntity ? (await currentUserQueryEntity).refreshMode : 'Auto'
     }));
 
     if (uq?.id) {

@@ -44,6 +44,8 @@ namespace Signum.Entities.UserQueries
 
         public bool AppendFilters { get; set; }
 
+        public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
+
         [PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 

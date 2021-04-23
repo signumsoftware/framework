@@ -51,7 +51,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               </div>
             </div>
         }
-        <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+          <ValueLine ctx={ctx.subCtx(e => e.refreshMode)} valueColumns={2} />
+          <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
             helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
           <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
           <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
