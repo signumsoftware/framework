@@ -155,8 +155,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
-    const currentUserQueryEntity = await currentUserQuery ? Navigator.API.fetchAndRemember(currentUserQuery!) : null;
-
     const uq = await Navigator.view(UserQueryEntity.New({
       query: qe,
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
@@ -179,7 +177,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       }))),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
-      refreshMode: currentUserQueryEntity ? (await currentUserQueryEntity).refreshMode : 'Auto'
+      refreshMode: p.searchControl.state.refreshMode,
     }));
 
     if (uq?.id) {
