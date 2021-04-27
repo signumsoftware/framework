@@ -66,16 +66,13 @@ namespace Signum.Test.LinqProvider
                 period = Database.Query<FolderEntity>().Where(a => a.Name == "X2").Select(a => a.SystemPeriod()).Single();
             }
 
-            period = new NullableInterval<DateTimeOffset>(
-                new DateTime(period.Min.Value.Ticks, DateTimeKind.Utc),
-                new DateTime(period.Max.Value.Ticks, DateTimeKind.Utc)); //Hack 
 
-            using (SystemTime.Override(new SystemTime.AsOf(period.Min.Value)))
+            using (SystemTime.Override(new SystemTime.AsOf(period.Min!.Value)))
             {
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
 
-            using (SystemTime.Override(new SystemTime.Between(period.Max.Value, period.Max.Value.AddSeconds(1))))
+            using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1))))
             {
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
