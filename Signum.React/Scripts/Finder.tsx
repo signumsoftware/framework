@@ -1673,10 +1673,12 @@ export interface CellFormatterContext {
 
 export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined): CellFormatter {
 
+  debugger;
   const result = qs?.formatters && qs.formatters[qt.fullKey];
 
   if (result)
     return result;
+
 
   const prRoute = registeredPropertyFormatters[qt.propertyRoute!];
   if (prRoute)
@@ -1689,7 +1691,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, 
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute | undefined, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ |undefined, formater: CellFormatter) {
   if (pr == null)
     return;
   registeredPropertyFormatters[pr.toString()] = formater;
