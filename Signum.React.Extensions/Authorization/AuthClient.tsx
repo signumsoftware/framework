@@ -127,7 +127,7 @@ export function logout() {
   if (user == null)
     return;
 
-  Options.removeCookie()
+  Options.removeCookie();
 
   API.logout().then(() => {
     logoutInternal();
@@ -258,7 +258,7 @@ export function logoutOtherTabs(user: UserEntity) {
 export namespace Options {
 
   export function getCookie(): string | null { return Cookies.get("sfUser"); }
-  export function removeCookie() { return Cookies.remove("sfUser"); }
+  export function removeCookie() { return Cookies.remove("sfUser", "/", document.location.hostname); }
 
   export let onLogout: () => void = () => {
     throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");

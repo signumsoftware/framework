@@ -14,8 +14,8 @@ namespace Signum.Entities.UserAssets
     {
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificConverters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
-            { FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter()} },
-            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter() } },
+            { FilterType.DateTime, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new SmartDateTimeFilterValueConverter() } },
+            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
         };
 
         public static string? ToString(object? value, Type type)

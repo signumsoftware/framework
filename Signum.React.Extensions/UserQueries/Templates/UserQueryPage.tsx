@@ -11,6 +11,7 @@ import { UserQueryEntity } from '../Signum.Entities.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
 import { RouteComponentProps } from "react-router";
 import { useAPI } from '@framework/Hooks'
+import { useState } from 'react'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
@@ -18,15 +19,19 @@ interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; 
 
 export default function UserQueryPage(p: UserQueryPageProps) {
 
+  const [currentUserQuery, setCurrentUserQuery] = useState<UserQueryEntity | null>(null);
+
   const { userQueryId, entity } = p.match.params;
 
   const fo = useAPI(() => {
-    const lite = entity == undefined ? undefined : parseLite(entity);
-    return Navigator.API.fillToStrings(lite)
-      .then(() => Navigator.API.fetchEntity(UserQueryEntity, userQueryId))
-      .then(uc => UserQueryClient.Converter.toFindOptions(uc, lite))
+    return Navigator.API.fetchEntity(UserQueryEntity, userQueryId)
+      .then(uq => {
+        setCurrentUserQuery(uq);
+        const lite = entity == undefined ? undefined : parseLite(entity);
+        return Navigator.API.fillToStrings(lite)
+          .then(() => UserQueryClient.Converter.toFindOptions(uq, lite))
+      })
   }, [userQueryId, entity]);
-
 
   const searchControl = React.useRef<SearchControlHandler>(null);
 
@@ -41,12 +46,15 @@ export default function UserQueryPage(p: UserQueryPageProps) {
           <FontAwesomeIcon icon="external-link-alt" />
         </a>
       </h2>
-      <SearchControl ref={searchControl}
+      {currentUserQuery && < SearchControl ref={searchControl}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
-        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId)}}
+        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
+        defaultRefreshMode={currentUserQuery.refreshMode}
+        searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         showBarExtension={true}
         findOptions={fo} />
+      }
     </div>
   );
 }

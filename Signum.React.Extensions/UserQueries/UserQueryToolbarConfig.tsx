@@ -1,6 +1,7 @@
 import { Location } from 'history'
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { FindOptions, ValueSearchControl } from '@framework/Search'
 import { Lite, liteKey } from '@framework/Signum.Entities'
@@ -27,25 +28,13 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor ?? "dodgerblue");
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>) {
-    if (!res.openInPopup)
-      super.handleNavigateClick(e, res);
-    else {
-      Navigator.API.fetchAndForget(res.content!)
-        .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content }}}))
-        .done();
-    }
-  }
 
   navigateTo(res: ToolbarResponse<UserQueryEntity>): Promise<string> {
-    return Navigator.API.fetchAndForget(res.content!)
-      .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-      .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
+    return Promise.resolve(UserQueryClient.userQueryUrl(res.content!));
   }
 
   isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): boolean {
-    return query["userQuery"] == liteKey(res.content!);
+    return location.pathname == AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(res.content!));
   }
 }
 

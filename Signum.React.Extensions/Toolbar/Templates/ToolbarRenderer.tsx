@@ -53,7 +53,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
 
-  useHistoryListen((location: History.Location, action: History.Action) => {
+  function changeActive(location: History.Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
       if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
@@ -63,7 +63,13 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
       var newActive = inferActive(responseRef.current, location, query);
       setActive(newActive);
     }
+  }
+
+  useHistoryListen((location: History.Location, action: History.Action) => {
+    changeActive(location);
   }, response != null);
+
+  React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
   if (!response)
     return null;

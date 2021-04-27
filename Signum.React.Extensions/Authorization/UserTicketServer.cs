@@ -53,7 +53,7 @@ namespace Signum.React.Authorization
 
         public static void RemoveCookie(ActionContext ac)
         {
-            ac.HttpContext.Response.Cookies.Append(CookieName, "", new CookieOptions()
+            ac.HttpContext.Response.Cookies.Append(CookieName, "", new CookieOptions
             {
                 Domain = ac.HttpContext.Request.Host.Host,
                 Path = new UrlHelper(ac).Content("~/"),

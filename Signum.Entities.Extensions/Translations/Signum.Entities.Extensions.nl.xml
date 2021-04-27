@@ -17,11 +17,7 @@
   <Type Name="AsyncEmailSenderPermission" />
   <Type Name="AuthAdminMessage" />
   <Type Name="AuthEmailMessage" />
-  <Type Name="AuthMessage">
-    <Member Name="ChangePassword" Description="&#xA;Verander wachtwoord" />
-    <Member Name="ChangePasswordAspx_ChangePassword" Description="&#xA;Verander wachtwoord" />
-    <Member Name="Logout" Description="Afmelden" />
-  </Type>
+  <Type Name="AuthMessage" />
   <Type Name="AuthThumbnail" />
   <Type Name="AuthTokenConfigurationEmbedded" />
   <Type Name="AutoconfigureNeuralNetworkEntity" />
@@ -217,6 +213,11 @@
   <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" />
   <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoginAuthMessage">
+    <Member Name="ChangePassword" Description="&#xA;Verander wachtwoord" />
+    <Member Name="ChangePasswordAspx_ChangePassword" Description="&#xA;Verander wachtwoord" />
+    <Member Name="Logout" Description="Afmelden" />
+  </Type>
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />

@@ -10,20 +10,16 @@ import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
-import { newLite, QueryTokenString } from '@framework/Reflection'
+import { newLite, QueryTokenString, toLuxonFormat } from '@framework/Reflection'
 import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
 import { Tabs, Tab, Modal } from 'react-bootstrap'
-import { is } from '@framework/Signum.Entities'
 import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { asUTC } from '@framework/SearchControl/SystemTimeEditor'
-import { QueryString } from '../../../../Framework/Signum.React/Scripts/QueryString'
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components'
 import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals'
 
 export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
@@ -42,7 +38,6 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
   const forceUpdate = useForceUpdate();
   const queryDescription = useAPI(() => Finder.getQueryDescription(params.type), [params.type]);
 
-  var ctx = new StyleContext(undefined, undefined);
   if (lite == null)
     return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
@@ -56,8 +51,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
         <br />
         <small className="sf-type-nice-name">
           <EntityLink lite={lite}>{NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
-          &nbsp;
-                        <span style={{ color: "#aaa" }}>{lite.toStr}</span>
+          &nbsp;<span style={{ color: "#aaa" }}>{lite.toStr}</span>
         </small>
       </h4>
 
@@ -82,7 +76,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
       <br />
       <h5>Selected Versions</h5>
       {scl?.state.selectedRows &&
-        <TimeMachineTabs lite={lite} versionDatesUTC={scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => asUTC(d))} />
+        <TimeMachineTabs lite={lite} versionDatesUTC={scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => d)} />
       }
     </div>
   );
@@ -134,10 +128,12 @@ export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
 export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
 
+  var luxonFormat = toLuxonFormat("o", "DateTime");
+
   return (
     <Tabs id="timeMachineTabs">
       {p.versionDatesUTC.orderBy(a => a).flatMap((d, i, dates) => [
-        <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
+        <Tab title={DateTime.fromISO(d).toFormatFixed(luxonFormat)} key={d} eventKey={d}>
           <RenderEntityVersion lite={p.lite} asOf={d} />
         </Tab>,
         (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
