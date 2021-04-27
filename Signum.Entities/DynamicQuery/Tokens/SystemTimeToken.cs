@@ -25,7 +25,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return typeof(DateTime); }
+            get { return typeof(DateTimeOffset?); }
         }
 
         public override string ToString()
@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string? Format
         {
-            get { return "s"; }
+            get { return "o"; }
         }
 
         public override string? Unit

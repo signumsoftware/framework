@@ -6,7 +6,7 @@ import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeMode } from '../Signum.Entities.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets';
-import { QueryTokenString } from '../Reflection';
+import { QueryTokenString, toLuxonFormat } from '../Reflection';
 import QueryTokenBuilder from './QueryTokenBuilder';
 import { OperationLogEntity } from '../Signum.Entities.Basics';
 
@@ -16,44 +16,31 @@ interface SystemTimeEditorProps extends React.Props<SystemTime> {
   onChanged: () => void;
 }
 
-export default class SystemTimeEditor extends React.Component<SystemTimeEditorProps>{
-  render() {
-    var mode = this.props.findOptions.systemTime!.mode;
+export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
-    return (
-      <div className={classes("sf-system-time-editor", "alert alert-primary")}>
-        <span style={{ paddingTop: "3px" }}>{JavascriptMessage.showRecords.niceToString()}</span>
-        {this.renderMode()}
-        {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && this.renderDateTime("startDate")}
-        {(mode == "Between" || mode == "ContainedIn") && this.renderDateTime("endDate")}
-        {this.renderShowPeriod()}
-        {this.renderShowOperations()}
-      </div>
-    );
-  }
 
-  handlePeriodClicked = () => {
-    var fop = this.props.findOptions;
-    if (this.isPeriodChecked()) {
+  function handlePeriodClicked() {
+    var fop = p.findOptions;
+    if (isPeriodChecked()) {
       fop.columnOptions.extract(a => a.token != null && (
         a.token.fullKey.startsWith(QueryTokenString.entity().systemValidFrom().toString()) ||
         a.token.fullKey.startsWith(QueryTokenString.entity().systemValidTo().toString())));
-      this.props.onChanged();
+      p.onChanged();
     }
     else {
 
       Finder.parseColumnOptions([
         { token: QueryTokenString.entity().systemValidFrom() },
         { token: QueryTokenString.entity().systemValidTo() }
-      ], fop.groupResults, this.props.queryDescription).then(cops => {
+      ], fop.groupResults, p.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
-        this.props.onChanged();
+        p.onChanged();
       }).done();
     }
   }
 
-  isPeriodChecked() {
-    var cos = this.props.findOptions.columnOptions;
+  function isPeriodChecked() {
+    var cos = p.findOptions.columnOptions;
 
     return cos.some(a => a.token != null && (
       a.token.fullKey.startsWith(QueryTokenString.entity().systemValidFrom().toString()) ||
@@ -61,25 +48,25 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
     );
   }
 
-  renderShowPeriod() {
+  function renderShowPeriod() {
     return (
       <div className="form-check form-check-inline ml-3">
         <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={this.isPeriodChecked()} onChange={this.handlePeriodClicked} />
+          <input className="form-check-input" type="checkbox" checked={isPeriodChecked()} onChange={handlePeriodClicked} />
           {JavascriptMessage.showPeriod.niceToString()}
         </label>
       </div>
     );
   }
 
-  handlePreviousOperationClicked = () => {
+  function handlePreviousOperationClicked() {
 
     var prevLogToken = QueryTokenString.entity().expression<OperationLogEntity>("PreviousOperationLog");
 
-    var fop = this.props.findOptions;
-    if (this.isPreviousOperationChecked()) {
+    var fop = p.findOptions;
+    if (isPreviousOperationChecked()) {
       fop.columnOptions.extract(a => a.token != null && a.token.fullKey.startsWith(prevLogToken.toString()));
-      this.props.onChanged();
+      p.onChanged();
     }
     else {
 
@@ -87,63 +74,64 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
         { token: prevLogToken.append(a => a.start) },
         { token: prevLogToken.append(a => a.user) },
         { token: prevLogToken.append(a => a.operation) },
-      ], fop.groupResults, this.props.queryDescription).then(cops => {
+      ], fop.groupResults, p.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
-        this.props.onChanged();
+        p.onChanged();
       }).done();
     }
   }
 
-  isPreviousOperationChecked() {
-    var cos = this.props.findOptions.columnOptions;
+  function isPreviousOperationChecked() {
+    var cos = p.findOptions.columnOptions;
 
     return cos.some(a => a.token != null && a.token.fullKey.startsWith("Entity.PreviousOperationLog"));
   }
 
-  renderShowOperations() {
+  function renderShowOperations() {
     return (
       <div className="form-check form-check-inline ml-3">
         <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={this.isPreviousOperationChecked()} onChange={this.handlePreviousOperationClicked} />
+          <input className="form-check-input" type="checkbox" checked={isPreviousOperationChecked()} onChange={handlePreviousOperationClicked} />
           {JavascriptMessage.showPreviousOperation.niceToString()}
         </label>
       </div>
     );
   }
 
-  handleChangeMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    let st = this.props.findOptions.systemTime!;
+  function handleChangeMode (e: React.ChangeEvent<HTMLSelectElement>){
+    let st = p.findOptions.systemTime!;
     st.mode = e.currentTarget.value as SystemTimeMode;
 
-    st.startDate = st.mode == "All" ? undefined : (st.startDate || asUTC(DateTime.local().toISO()));
-    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || asUTC(DateTime.local().toISO()));
+    st.startDate = st.mode == "All" ? undefined : (st.startDate || DateTime.local().toISO());
+    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || DateTime.local().toISO());
 
-    this.forceUpdate();
+    p.onChanged();
   }
 
-  renderMode() {
-    var st = this.props.findOptions.systemTime!;
+  function renderMode() {
+    var st = p.findOptions.systemTime!;
 
     return (
-      <select value={st.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={this.handleChangeMode}>
+      <select value={st.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeMode}>
         {SystemTimeMode.values().map((st, i) => <option key={i} value={st}>{SystemTimeMode.niceToString(st)}</option>)}
       </select>
     );
   }
 
-  renderDateTime(field: "startDate" | "endDate") {
+  function renderDateTime(field: "startDate" | "endDate") {
 
-    var systemTime = this.props.findOptions.systemTime!;
+    var systemTime = p.findOptions.systemTime!;
 
     const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
       const m = date && DateTime.fromJSDate(date);
-      systemTime[field] = m ? asUTC(m.toISO()) : undefined;
+      systemTime[field] = m ? m.toISO() : undefined;
+      p.onChanged();
     };
 
     var utcDate = systemTime[field]
 
-    var m = utcDate == null ? null : DateTime.fromISO(asLocal(utcDate));
-    var luxonFormat = "yyyy-MM-dd'T'HH:mm:ss";
+    var m = utcDate == null ? null : DateTime.fromISO(utcDate);
+    var luxonFormat = toLuxonFormat("o", "DateTime");
     return (
       <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
@@ -151,21 +139,20 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
       </div>
     );
   }
-}
 
-export function asUTC(date: string): string {
 
-  if (date.contains("+"))
-    return date.tryBefore("+") + "Z"; //Hack
+  var mode = p.findOptions.systemTime!.mode;
 
-  return date;
-}
-
-export function asLocal(date: string): string {
-  if (date.contains("Z"))
-    return date.before("Z");
-
-  return date;
+  return (
+    <div className={classes("sf-system-time-editor", "alert alert-primary")}>
+      <span style={{ paddingTop: "3px" }}>{JavascriptMessage.showRecords.niceToString()}</span>
+      {renderMode()}
+      {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && renderDateTime("startDate")}
+      {(mode == "Between" || mode == "ContainedIn") && renderDateTime("endDate")}
+      {renderShowPeriod()}
+      {renderShowOperations()}
+    </div>
+  );
 }
 
 

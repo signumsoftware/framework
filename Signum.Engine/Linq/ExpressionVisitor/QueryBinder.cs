@@ -1863,8 +1863,8 @@ namespace Signum.Engine.Linq
 
                                         return m.Member.Name switch
                                         {
-                                            "Min" => interval.Min ?? Expression.Field(interval.PostgresRange!, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.LowerBound)),
-                                            "Max" => interval.Max ?? Expression.Field(interval.PostgresRange!, nameof(NpgsqlTypes.NpgsqlRange<DateTime>.UpperBound)),
+                                            "Min" => interval.Min ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.lower.ToString(), new [] { interval.PostgresRange! }),
+                                            "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }),
                                             _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                         };
                                     }

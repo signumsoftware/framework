@@ -348,8 +348,8 @@ namespace Signum.React.ApiControllers
     public class SystemTimeTS
     {
         public SystemTimeMode mode;
-        public DateTime? startDate;
-        public DateTime? endDate;
+        public DateTimeOffset? startDate;
+        public DateTimeOffset? endDate;
 
         public SystemTimeTS() { }
 

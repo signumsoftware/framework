@@ -60,27 +60,24 @@ namespace Signum.Test.LinqProvider
             if (!Connector.Current.SupportsTemporalTables)
                 return;
 
-            Interval<DateTime> period;
+            NullableInterval<DateTimeOffset> period;
             using (SystemTime.Override(new SystemTime.All()))
             {
                 period = Database.Query<FolderEntity>().Where(a => a.Name == "X2").Select(a => a.SystemPeriod()).Single();
             }
 
-            period = new Interval<DateTime>(
-                new DateTime(period.Min.Ticks, DateTimeKind.Utc),
-                new DateTime(period.Max.Ticks, DateTimeKind.Utc)); //Hack 
 
-            using (SystemTime.Override(new SystemTime.AsOf(period.Min)))
+            using (SystemTime.Override(new SystemTime.AsOf(period.Min!.Value)))
             {
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
 
-            using (SystemTime.Override(new SystemTime.Between(period.Max, period.Max.AddSeconds(1))))
+            using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1))))
             {
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
 
-            using (SystemTime.Override(new SystemTime.ContainedIn(period.Max, period.Max.AddSeconds(1))))
+            using (SystemTime.Override(new SystemTime.ContainedIn(period.Max.Value, period.Max.Value.AddSeconds(1))))
             {
                 var list = Database.Query<FolderEntity>().Where(f2 => f2.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }

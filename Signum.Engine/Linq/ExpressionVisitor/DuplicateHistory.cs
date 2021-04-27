@@ -45,14 +45,18 @@ namespace Signum.Engine.Linq
                     var tableExp = new TableExpression(aliasGenerator.NextTableAlias(tableNameForAlias), table.Table, systemTime, null);
 
                     ColumnExpression GetTablePeriod() => new ColumnExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), tableExp.Alias, table.Table.SystemVersioned!.PostgreeSysPeriodColumnName);
-                    SqlFunctionExpression tstzrange(DateTime start, DateTime end) => new SqlFunctionExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), null, PostgresFunction.tstzrange.ToString(),
-                        new[] { Expression.Constant(new DateTimeOffset(start)), Expression.Constant(new DateTimeOffset(end)) });
+                    
+                    SqlFunctionExpression tstzrange(DateTimeOffset start, DateTimeOffset end) => new SqlFunctionExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), null, PostgresFunction.tstzrange.ToString(),
+                        new[] { Expression.Constant(start), Expression.Constant(end) });
 
-                    var where = table.SystemTime is SystemTime.All ? null :
-                        table.SystemTime is SystemTime.AsOf asOf ? new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(new DateTimeOffset(asOf.DateTime)) }) :
-                        table.SystemTime is SystemTime.Between b ? new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime, b.EndtDateTime), GetTablePeriod() }) :
-                        table.SystemTime is SystemTime.ContainedIn ci ? new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime, ci.EndtDateTime), GetTablePeriod() }) :
-                        throw new UnexpectedValueException(table.SystemTime);
+                    var where = table.SystemTime switch
+                    {
+                        SystemTime.All => null,
+                        SystemTime.AsOf asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(asOf.DateTime) }),
+                        SystemTime.Between b => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime, b.EndtDateTime), GetTablePeriod() }),
+                        SystemTime.ContainedIn ci => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime, ci.EndtDateTime), GetTablePeriod() }),
+                        _ => throw new UnexpectedValueException(table.SystemTime),
+                    };
 
                     var newSelect = new SelectExpression(aliasGenerator.NextTableAlias(tableNameForAlias), false, null,
                         columns: requests?.Select(kvp => new ColumnDeclaration(kvp.Key.Name!, new ColumnExpression(kvp.Key.Type, tableExp.Alias, kvp.Key.Name))),

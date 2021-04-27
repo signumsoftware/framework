@@ -13,20 +13,12 @@ namespace Signum.Entities
 
         public static SystemTime? Current => currentVariable.Value;
 
-        public static IDisposable Override(DateTime asOf) => Override(new SystemTime.AsOf(asOf));
+        public static IDisposable Override(DateTimeOffset asOf) => Override(new SystemTime.AsOf(asOf));
         public static IDisposable Override(SystemTime? systemTime)
         {
             var old = currentVariable.Value;
             currentVariable.Value = systemTime;
             return new Disposable(() => currentVariable.Value = old);
-        }
-
-        static DateTime ValidateUTC(DateTime dt)
-        {
-            if (dt.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException("Date should be in UTC");
-
-            return dt;
         }
 
         public class HistoryTable : SystemTime
@@ -36,11 +28,11 @@ namespace Signum.Entities
 
         public class AsOf : SystemTime
         {
-            public DateTime DateTime { get; private set; }
+            public DateTimeOffset DateTime { get; private set; }
 
-            public AsOf(DateTime dateTime)
+            public AsOf(DateTimeOffset dateTime)
             {
-                this.DateTime = ValidateUTC(dateTime);
+                this.DateTime = dateTime;
             }
 
             public override string ToString() => $"AS OF {DateTime:u}";
@@ -54,13 +46,13 @@ namespace Signum.Entities
 
         public class Between : Interval
         {
-            public DateTime StartDateTime { get; private set; }
-            public DateTime EndtDateTime { get; private set; }
+            public DateTimeOffset StartDateTime { get; private set; }
+            public DateTimeOffset EndtDateTime { get; private set; }
 
-            public Between(DateTime startDateTime, DateTime endDateTime)
+            public Between(DateTimeOffset startDateTime, DateTimeOffset endDateTime)
             {
-                this.StartDateTime = ValidateUTC(startDateTime);
-                this.EndtDateTime = ValidateUTC(endDateTime);
+                this.StartDateTime = startDateTime;
+                this.EndtDateTime = endDateTime;
             }
 
             public override string ToString() => $"BETWEEN {StartDateTime:u} AND {EndtDateTime:u}";
@@ -68,13 +60,13 @@ namespace Signum.Entities
 
         public class ContainedIn : Interval
         {
-            public DateTime StartDateTime { get; private set; }
-            public DateTime EndtDateTime { get; private set; }
+            public DateTimeOffset StartDateTime { get; private set; }
+            public DateTimeOffset EndtDateTime { get; private set; }
 
-            public ContainedIn(DateTime startDateTime, DateTime endDateTime)
+            public ContainedIn(DateTimeOffset startDateTime, DateTimeOffset endDateTime)
             {
-                this.StartDateTime = ValidateUTC(startDateTime);
-                this.EndtDateTime = ValidateUTC(endDateTime);
+                this.StartDateTime = startDateTime;
+                this.EndtDateTime = endDateTime;
             }
 
             public override string ToString() => $"CONTAINED IN ({StartDateTime:u}, {EndtDateTime:u})";
@@ -92,12 +84,12 @@ namespace Signum.Entities
 
     public static class SystemTimeExtensions
     {
-        public static Interval<DateTime> SystemPeriod(this Entity entity)
+        public static NullableInterval<DateTimeOffset> SystemPeriod(this Entity entity)
         {
             throw new InvalidOperationException("Only for queries");
         }
 
-        public static Interval<DateTime> SystemPeriod<E, T>(this MListElement<E, T> mlistElement)
+        public static NullableInterval<DateTimeOffset> SystemPeriod<E, T>(this MListElement<E, T> mlistElement)
             where E : Entity
         {
             throw new InvalidOperationException("Only for queries");

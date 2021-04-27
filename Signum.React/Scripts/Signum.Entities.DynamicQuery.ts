@@ -119,6 +119,11 @@ export module QueryTokenMessage {
   export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
 }
 
+export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");
+export type RefreshMode =
+  "Auto" |
+  "Manual";
+
 export const RoundingType = new EnumType<RoundingType>("RoundingType");
 export type RoundingType =
   "Floor" |
