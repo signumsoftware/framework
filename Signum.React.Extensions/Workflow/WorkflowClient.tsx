@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DateTime, Duration } from 'luxon';
+import { DateTime, Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -682,8 +682,23 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   return viewPromise.promise;
 }
 
-export function durationFormat(d: Duration) {
-  return `${d.days}d ${d.hours}h ${d.minutes}m ${d.seconds}s`;
+export function formatDuration(d: Duration) {
+
+  var a = {
+    years: "yr",
+    quarters: "qua",
+    months: "mon",
+    weeks: "weeks",
+    days: "d",
+    hours: "h",
+    minutes: "m",
+    seconds: "s",
+    milliseconds: "ms",
+  };
+
+  var result = Object.entries(a).map(([key, label]) => d.get(key as DurationUnit) == 0 ? null : d.get(key as DurationUnit) + label).filter(a => a != null).join(" ");
+
+  return result; 
 }
 
 export namespace API {
