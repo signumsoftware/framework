@@ -18,52 +18,8 @@
   <Type Name="AuthAdminMessage" />
   <Type Name="AuthEmailMessage" />
   <Type Name="AuthMessage">
-    <Member Name="ChangePassword" Description="Modifier le mot de passe" />
-    <Member Name="ConfirmNewPassword" Description="Confirmer mot de passe" />
-    <Member Name="EmailMustHaveAValue" Description="L'email doit avoir une valeur" />
-    <Member Name="EmailSent" Description="Email envoyé" />
-    <Member Name="EnterTheNewPassword" Description="Entrez le nouveau mot de passe" />
-    <Member Name="EnterYourUserEmail" Description="Saississez votre adresse e-mail" />
-    <Member Name="EnterYourUserNameAndPassword" Description="Saississez votre login et votre mot de passe" />
-    <Member Name="ExpiredPassword" Description="Mot de passe a expiré" />
-    <Member Name="ExpiredPasswordMessage" Description="Votre mot de passe a expiré. Vous devez le modifier" />
-    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Indiquez ci-dessous votre adresse e-mail afin de recevoir un lien vous permettant de réinitialiser votre mot de passe." />
-    <Member Name="IForgotMyPassword" Description="J’ai oublié mon mot de passe" />
-    <Member Name="IHaveForgottenMyPassword" Description="J'ai oublié mon mot de passe" />
-    <Member Name="IncorrectPassword" Description="Mot de passe incorrecte" />
-    <Member Name="InvalidUsernameOrPassword" Description="Le nom d'utilisateur ou mot de passe est incorrect" />
-    <Member Name="Login" Description="Connexion" />
-    <Member Name="Login_UserName" Description="Login :" />
-    <Member Name="Logout" Description="Déconnexion" />
-    <Member Name="NewPassword" Description="Nouveau mot de passe" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Pas autorisée à {0} du {1} avec l'Id {2}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="Pas autorisé à récupérer '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Pas autorisé à enregistrer '{0}'" />
-    <Member Name="NotUserLogged" Description="Pas d'utilisateur connecté" />
-    <Member Name="Password" Description="Mot de passe" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="Le mot de passe donné ne correspond pas à l'actuel" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Le mot de passe a été modifié avec succès" />
-    <Member Name="PasswordMustHaveAValue" Description="Le mot de passe doit être spécifié" />
-    <Member Name="PasswordsAreDifferent" Description="Les mots de passe sont différents" />
-    <Member Name="Please0IntoYourAccount" Description="Veuillez aller {0} pour accéder à l'application" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Veuillez entrer votre nouveau mot de passe" />
-    <Member Name="Remember" Description="Rappeler" />
-    <Member Name="RememberMe" Description="Se souvenir de moi" />
-    <Member Name="ResetPassword" Description="Réinitialiser le mot de passe" />
-    <Member Name="ResetPasswordCode" Description="Réinitialiser le mot de passe" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="Un code de confirmation pour réinitialiser votre mot de passe a été envoyé à votre compte email {0}" />
-    <Member Name="ResetPasswordSuccess" Description="Votre mot de passe a été modifié avec succès" />
-    <Member Name="SendEmail" Description="Envoyer" />
-    <Member Name="SwitchUser" Description="Changer d’utilisateur" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Le code de confirmation fourni n'est pas valide" />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Une erreur s'est produite avec votre demande de changement de mot de passe. Veuillez introduire votre email." />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Les mots de passe spécifiés ne correspondent pas" />
-    <Member Name="TheUserStateMustBeDisabled" Description="L'état de l'utilisateur doit être désactivé" />
-    <Member Name="Username" Description="Login" />
-    <Member Name="Username0IsNotValid" Description="Nom d'utilisateur {0} n'est pas valide" />
-    <Member Name="UserNameMustHaveAValue" Description="Vous devez entrer le nom d'utilisateur" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Vous avez demandé la création d'un compte. Pour confirmer veuillez cliquer sur le lien suivant:" />
-    <Member Name="YouMustRepeatTheNewPassword" Description="Vous devez répéter le nouveau mot de passe" />
   </Type>
   <Type Name="AuthThumbnail" />
   <Type Name="AuthTokenConfigurationEmbedded" />
@@ -340,6 +296,54 @@
     <Member Name="Links" Description="Liens" />
   </Type>
   <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoginAuthMessage">
+    <Member Name="ChangePassword" Description="Modifier le mot de passe" />
+    <Member Name="ConfirmNewPassword" Description="Confirmer mot de passe" />
+    <Member Name="EmailMustHaveAValue" Description="L'email doit avoir une valeur" />
+    <Member Name="EmailSent" Description="Email envoyé" />
+    <Member Name="EnterTheNewPassword" Description="Entrez le nouveau mot de passe" />
+    <Member Name="EnterYourUserEmail" Description="Saississez votre adresse e-mail" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Saississez votre login et votre mot de passe" />
+    <Member Name="ExpiredPassword" Description="Mot de passe a expiré" />
+    <Member Name="ExpiredPasswordMessage" Description="Votre mot de passe a expiré. Vous devez le modifier" />
+    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Indiquez ci-dessous votre adresse e-mail afin de recevoir un lien vous permettant de réinitialiser votre mot de passe." />
+    <Member Name="IForgotMyPassword" Description="J’ai oublié mon mot de passe" />
+    <Member Name="IHaveForgottenMyPassword" Description="J'ai oublié mon mot de passe" />
+    <Member Name="IncorrectPassword" Description="Mot de passe incorrecte" />
+    <Member Name="InvalidUsernameOrPassword" Description="Le nom d'utilisateur ou mot de passe est incorrect" />
+    <Member Name="Login" Description="Connexion" />
+    <Member Name="Login_UserName" Description="Login :" />
+    <Member Name="Logout" Description="Déconnexion" />
+    <Member Name="NewPassword" Description="Nouveau mot de passe" />
+    <Member Name="NotAuthorizedTo0The1WithId2" Description="Pas autorisée à {0} du {1} avec l'Id {2}" />
+    <Member Name="NotAuthorizedToRetrieve0" Description="Pas autorisé à récupérer '{0}'" />
+    <Member Name="NotAuthorizedToSave0" Description="Pas autorisé à enregistrer '{0}'" />
+    <Member Name="NotUserLogged" Description="Pas d'utilisateur connecté" />
+    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="PasswordDoesNotMatchCurrent" Description="Le mot de passe donné ne correspond pas à l'actuel" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Le mot de passe a été modifié avec succès" />
+    <Member Name="PasswordMustHaveAValue" Description="Le mot de passe doit être spécifié" />
+    <Member Name="PasswordsAreDifferent" Description="Les mots de passe sont différents" />
+    <Member Name="Please0IntoYourAccount" Description="Veuillez aller {0} pour accéder à l'application" />
+    <Member Name="PleaseEnterYourChosenNewPassword" Description="Veuillez entrer votre nouveau mot de passe" />
+    <Member Name="Remember" Description="Rappeler" />
+    <Member Name="RememberMe" Description="Se souvenir de moi" />
+    <Member Name="ResetPassword" Description="Réinitialiser le mot de passe" />
+    <Member Name="ResetPasswordCode" Description="Réinitialiser le mot de passe" />
+    <Member Name="ResetPasswordCodeHasBeenSent" Description="Un code de confirmation pour réinitialiser votre mot de passe a été envoyé à votre compte email {0}" />
+    <Member Name="ResetPasswordSuccess" Description="Votre mot de passe a été modifié avec succès" />
+    <Member Name="SendEmail" Description="Envoyer" />
+    <Member Name="SwitchUser" Description="Changer d’utilisateur" />
+    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Le code de confirmation fourni n'est pas valide" />
+    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Une erreur s'est produite avec votre demande de changement de mot de passe. Veuillez introduire votre email." />
+    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Les mots de passe spécifiés ne correspondent pas" />
+    <Member Name="TheUserStateMustBeDisabled" Description="L'état de l'utilisateur doit être désactivé" />
+    <Member Name="Username" Description="Login" />
+    <Member Name="Username0IsNotValid" Description="Nom d'utilisateur {0} n'est pas valide" />
+    <Member Name="UserNameMustHaveAValue" Description="Vous devez entrer le nom d'utilisateur" />
+    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Vous avez demandé la création d'un compte. Pour confirmer veuillez cliquer sur le lien suivant:" />
+    <Member Name="YouMustRepeatTheNewPassword" Description="Vous devez répéter le nouveau mot de passe" />
+  </Type>
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
