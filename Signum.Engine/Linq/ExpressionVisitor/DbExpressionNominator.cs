@@ -495,7 +495,7 @@ namespace Signum.Engine.Linq
 
             return Add(new SqlFunctionExpression(type, newObj, sqlFunction, newExpressions));
         }
-        //(end - start).TotalDays => DateDiff(days, null, end)
+
         private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression expression)
         {
             if (innerProjection)
