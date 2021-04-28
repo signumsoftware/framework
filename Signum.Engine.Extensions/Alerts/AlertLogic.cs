@@ -116,7 +116,7 @@ namespace Signum.Engine.Alerts
  @endforeach
 </ul>
 <p>Please visit <a href=""@[g:UrlLeft]"">@[g:UrlLeft]</a></p>",
-                    Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
+                    Subject = AlertMessage.NewUnreadNotifications.NiceToString(),
                 }).ToMList()
             });
 
