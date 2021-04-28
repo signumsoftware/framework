@@ -3,7 +3,7 @@ import { Duration } from 'luxon'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Entities.Workflow'
 import { Color, Gradient } from '../../Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowActivityStats, WorkflowActivityMonitor, durationFormat } from '../WorkflowClient'
+import { WorkflowActivityStats, WorkflowActivityMonitor, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
@@ -64,18 +64,18 @@ function getTitle(stats: WorkflowActivityStats, config: WorkflowActivityMonitorC
 
   if (config.columns.length) {
     result += "\n" + config.columns.map((col, i) =>
-      `${col.displayName || col.token!.niceName}: ${formatDuration(stats.customValues[i], col.token!)}`).join("\n");
+      `${col.displayName || col.token!.niceName}: ${formatMinutes(stats.customValues[i], col.token!)}`).join("\n");
   }
   return result;
 }
 
 
-function formatDuration(minutes: number | undefined, token: QueryToken) {
+function formatMinutes(minutes: number | undefined, token: QueryToken) {
 
   if (minutes == undefined)
     return "";
 
-  return durationFormat(Duration.fromObject({ minutes }));
+  return formatDuration(Duration.fromObject({ minutes }));
 }
 
 export const __init__ = ['workflowActivityMonitorRenderer'];

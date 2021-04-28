@@ -6,7 +6,7 @@ import { durationToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
 import { JavascriptMessage } from '@framework/Signum.Entities'
-import { CaseActivityStats, durationFormat } from "../WorkflowClient";
+import { CaseActivityStats, formatDuration } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
@@ -125,9 +125,9 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.startDate)}</FormGroup>
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.doneDate)}</FormGroup>
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{stats.doneType && DoneType.niceToString(stats.doneType)}</FormGroup>
-      <FormGroup ctx={ctx} labelText={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatDuration(stats.estimatedDuration)}</FormGroup>
-      <FormGroup ctx={ctx} labelText={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatDuration(stats.averageDuration)}</FormGroup>
-      <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatDuration(stats.duration)}</FormGroup>
+      <FormGroup ctx={ctx} labelText={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatMinutes(stats.estimatedDuration)}</FormGroup>
+      <FormGroup ctx={ctx} labelText={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatMinutes(stats.averageDuration)}</FormGroup>
+      <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatMinutes(stats.duration)}</FormGroup>
       <FormGroup ctx={ctx} labelText={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>
       {
         stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? renderTaskExtra() :
@@ -147,7 +147,7 @@ function formatDate(date: string | undefined) {
   return <span>{DateTime.fromISO(date).toFormat("FFF")} <mark>({DateTime.fromISO(date).toRelative()})</mark></span>
 }
 
-function formatDuration(duration: number | undefined) {
+function formatMinutes(duration: number | undefined) {
   if (duration == undefined)
     return undefined;
 
@@ -155,5 +155,5 @@ function formatDuration(duration: number | undefined) {
 
   var formatNumber = toNumberFormat("0.00");
 
-  return <span>{formatNumber.format(duration)} {unit} <mark>({durationFormat(Duration.fromObject({ minute: duration }))})</mark></span>
+  return <span>{formatNumber.format(duration)} {unit} <mark>({formatDuration(Duration.fromObject({ minute: duration }))})</mark></span>
 }

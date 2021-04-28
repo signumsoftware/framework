@@ -4,7 +4,7 @@ import { DateTime, Duration } from 'luxon'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
-import { CaseFlow, CaseActivityStats, durationFormat } from '../WorkflowClient'
+import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
 
@@ -177,22 +177,22 @@ ${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${DateTime.fromISO(sta
     result += `
 ${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${DateTime.fromISO(stats.doneDate).toFormat("FFF")} (${DateTime.fromISO(stats.doneDate).toRelative()})
 ${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.doneBy && stats.doneBy.toStr} (${DoneType.niceToString(stats.doneType!)})
-${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.duration)}`;
+${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatMinutes(stats.duration)}`;
 
   result += `
-${CaseFlowColor.niceToString("AverageDuration")}: ${formatDuration(stats.averageDuration)}
-${CaseFlowColor.niceToString("EstimatedDuration")}: ${formatDuration(stats.estimatedDuration)}`;
+${CaseFlowColor.niceToString("AverageDuration")}: ${formatMinutes(stats.averageDuration)}
+${CaseFlowColor.niceToString("EstimatedDuration")}: ${formatMinutes(stats.estimatedDuration)}`;
 
   return result;
 }
 
 
-function formatDuration(minutes: number | undefined) {
+function formatMinutes(minutes: number | undefined) {
 
   if (minutes == undefined)
     return "";
 
-  return durationFormat(Duration.fromObject({ minutes }));
+  return formatDuration(Duration.fromObject({ minutes }).shiftTo("days", "hours", "minutes"));
 }
 
 export const __init__ = ['caseFlowRenderer'];
