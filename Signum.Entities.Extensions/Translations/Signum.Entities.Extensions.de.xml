@@ -2478,6 +2478,7 @@
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
+    <Member Name="RefreshMode" Description="Aktualisierungsmodus" />
   </Type>
   <Type Name="UserQueryMessage">
     <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
