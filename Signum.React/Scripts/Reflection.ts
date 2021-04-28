@@ -2064,7 +2064,7 @@ export class GraphExplorer {
 
     const mle = obj as MListElement<any>;
     if (mle.hasOwnProperty && mle.hasOwnProperty("rowId")) {
-      if (this.isModified(mle.element, dot(modelStatePrefix, "element"))) {
+      if (this.isModified(mle.element, modelStatePrefix + ".element")) {
         if (window.exploreGraphDebugMode)
           debugger;
         return true;
@@ -2082,7 +2082,7 @@ export class GraphExplorer {
 
     const lite = obj as Lite<Entity>
     if (lite.EntityType) {
-      if (lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity"))) {
+      if (lite.entity != undefined && this.isModified(lite.entity, modelStatePrefix + ".entity")) {
         if (window.exploreGraphDebugMode)
           debugger;
         return true;
@@ -2096,7 +2096,7 @@ export class GraphExplorer {
       let result = false;
       for (const p in obj) {
         if (obj.hasOwnProperty == null || obj.hasOwnProperty(p)) {
-          const propertyPrefix = dot(modelStatePrefix, p);
+          const propertyPrefix = modelStatePrefix + "." + p;
           if (this.isModified(obj[p], propertyPrefix)) {
             if (window.exploreGraphDebugMode)
               debugger;
@@ -2111,10 +2111,10 @@ export class GraphExplorer {
     if (this.mode == "collect") {
       if (mod.error != undefined) {
         for (const p in mod.error) {
-          const propertyPrefix = dot(modelStatePrefix, p);
+          const propertyPrefix = modelStatePrefix + "." + p;
 
           if (mod.error[p])
-            this.modelState[dot(modelStatePrefix, p)] = [mod.error[p]];
+            this.modelState[modelStatePrefix + "." + p] = [mod.error[p]];
         }
       }
     }
@@ -2122,7 +2122,7 @@ export class GraphExplorer {
 
       mod.error = undefined;
 
-      const prefix = dot(modelStatePrefix, "");
+      const prefix = modelStatePrefix  + ".";
       for (const key in this.modelState) {
         const propName = key.tryAfter(prefix)
         if (propName && !propName.contains(".")) {
@@ -2148,14 +2148,14 @@ export class GraphExplorer {
       if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
 
         if (p == "mixins") {
-          const propertyPrefix = dot(modelStatePrefix, p);
+          const propertyPrefix = modelStatePrefix + "." + p;
           if (this.isModifiedMixinDictionary(obj[p], propertyPrefix)) {
             if (window.exploreGraphDebugMode)
               debugger;
             mod.modified = true;
           }
         } else {
-          const propertyPrefix = dot(modelStatePrefix, p);
+          const propertyPrefix = modelStatePrefix + "." + p;
           if (this.isModified(obj[p], propertyPrefix)) {
             if (window.exploreGraphDebugMode)
               debugger;
@@ -2194,12 +2194,5 @@ export class GraphExplorer {
   }
 
   static TypesLazilyCreated: string[] = [];
-}
-
-function dot(prev: string, property: string) {
-  if (prev == undefined || prev == "")
-    return property;
-
-  return prev + "." + property
 }
 

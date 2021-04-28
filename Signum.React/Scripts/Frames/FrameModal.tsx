@@ -153,7 +153,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
           okClicked.current = true;
           setShow(false);
         }, ifError(ValidationError, e => {
-          GraphExplorer.setModelState(pack!.entity, e.modelState, "entity");
+          GraphExplorer.setModelState(pack!.entity, e.modelState, "");
           forceUpdate();
         })).done();
     }
