@@ -25,6 +25,7 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
             <legend>Azure AD</legend>
             <ValueLine ctx={ctxb.subCtx(n => n.azure_ApplicationID)} />
             <ValueLine ctx={ctxb.subCtx(n => n.azure_DirectoryID)} />
+            <ValueLine ctx={ctxb.subCtx(n => n.azure_ClientSecret)} helpText="Required for Microsoft Graph, not for Azure Log-in" />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithAzureAD)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }}/>
           </fieldset>
         </div>

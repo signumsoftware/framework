@@ -13,6 +13,7 @@ using Signum.Engine.Files;
 using Microsoft.Identity.Client;
 using Microsoft.Graph.Auth;
 using Microsoft.Graph;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Mailing
 {
@@ -99,6 +100,10 @@ namespace Signum.Engine.Mailing
 
         public static ClientCredentialProvider GetAuthProvider(this MicrosoftGraphEmbedded microsoftGraph, string[]? scopes = null)
         {
+            if (microsoftGraph.UseActiveDirectoryConfiguration)
+                return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetAuthProvider() :
+                    throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
+
             IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
             .Create(microsoftGraph.Azure_ApplicationID)
             .WithTenantId(microsoftGraph.Azure_DirectoryID)
@@ -111,5 +116,22 @@ namespace Signum.Engine.Mailing
             ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
             return authProvider;
         }
+
+        public static ClientCredentialProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
+        {
+            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
+            .Create(activeDirectoryConfig.Azure_ApplicationID)
+            .WithTenantId(activeDirectoryConfig.Azure_DirectoryID)
+            .WithClientSecret(activeDirectoryConfig.Azure_ClientSecret)
+            .Build();
+
+            var authResultDirect = confidentialClientApplication.AcquireTokenForClient(scopes ?? new string[] { "https://graph.microsoft.com/.default" }).ExecuteAsync().Result;
+
+            //Microsoft.Graph.Auth is required for the following to work
+            ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
+            return authProvider;
+        }
+
+
     }
 }

@@ -21,6 +21,9 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
         public string? Azure_DirectoryID { get; set; }
 
+        [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
+        public string? Azure_ClientSecret { get; set; }
+
         public bool LoginWithWindowsAuthenticator { get; set; }
         public bool LoginWithActiveDirectoryRegistry { get; set; }
         public bool LoginWithAzureAD { get; set; } = true;
@@ -71,5 +74,22 @@ namespace Signum.Entities.Authorization
     {
         [Description("Active Directory user '{0}' is not associated with a user in this application.")]
         ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication,
+    }
+
+    [AllowUnathenticated]
+    public enum UserADMessage
+    {
+        [Description("Find '{0}' in Active Directory")]
+        Find0InActiveDirectory,
+        [Description("Find in Active Directory")]
+        FindInActiveDirectory,
+        [Description("No user containing '{0}' found in Active Directory")]
+        NoUserContaining0FoundInActiveDirectory,
+        [Description("Select Active Directory User")]
+        SelectActiveDirectoryUser,
+        [Description("Please select the user from Active Directory that you want to import")]
+        PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport,
+        [Description("Name or e-Mail")]
+        NameOrEmail,
     }
 }

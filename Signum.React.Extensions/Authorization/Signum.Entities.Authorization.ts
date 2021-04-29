@@ -23,6 +23,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   domainServer: string | null;
   azure_ApplicationID: string | null;
   azure_DirectoryID: string | null;
+  azure_ClientSecret: string | null;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
   loginWithAzureAD: boolean;
@@ -375,6 +376,15 @@ export interface TypeConditionRuleEmbedded extends Entities.EmbeddedEntity {
 export const TypeRulePack = new Type<TypeRulePack>("TypeRulePack");
 export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
   Type: "TypeRulePack";
+}
+
+export module UserADMessage {
+  export const Find0InActiveDirectory = new MessageKey("UserADMessage", "Find0InActiveDirectory");
+  export const FindInActiveDirectory = new MessageKey("UserADMessage", "FindInActiveDirectory");
+  export const NoUserContaining0FoundInActiveDirectory = new MessageKey("UserADMessage", "NoUserContaining0FoundInActiveDirectory");
+  export const SelectActiveDirectoryUser = new MessageKey("UserADMessage", "SelectActiveDirectoryUser");
+  export const PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport = new MessageKey("UserADMessage", "PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport");
+  export const NameOrEmail = new MessageKey("UserADMessage", "NameOrEmail");
 }
 
 export const UserEntity = new Type<UserEntity>("User");

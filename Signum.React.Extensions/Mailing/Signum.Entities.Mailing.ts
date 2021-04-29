@@ -337,9 +337,10 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
 export const MicrosoftGraphEmbedded = new Type<MicrosoftGraphEmbedded>("MicrosoftGraphEmbedded");
 export interface MicrosoftGraphEmbedded extends Entities.EmbeddedEntity {
   Type: "MicrosoftGraphEmbedded";
-  azure_ApplicationID: string;
-  azure_DirectoryID: string;
-  azure_ClientSecret: string;
+  useActiveDirectoryConfiguration: boolean;
+  azure_ApplicationID: string | null;
+  azure_DirectoryID: string | null;
+  azure_ClientSecret: string | null;
 }
 
 export module Pop3ConfigurationAction {
