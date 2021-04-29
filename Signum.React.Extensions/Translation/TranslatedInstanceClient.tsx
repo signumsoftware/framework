@@ -40,7 +40,8 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
 
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field" &&
-      state.ctx.propertyRoute.member!.translatable) {
+      state.ctx.propertyRoute.member!.translatable && 
+      AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
       if (!vProps.extraButtons)
         vProps.extraButtons = vlc => <TranslateButton controller={lineBase} />;
 
