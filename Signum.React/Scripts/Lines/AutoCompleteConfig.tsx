@@ -58,6 +58,9 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string): React.ReactNode{
 
     if (isAutocompleteConstructor<T>(item)) {
+      if (item.customElement)
+        return item.customElement;
+
       var ti = getTypeInfo(item.type);
       return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;
     }
