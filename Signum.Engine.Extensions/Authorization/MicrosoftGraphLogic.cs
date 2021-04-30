@@ -68,6 +68,7 @@ namespace Signum.Engine.Authorization
                     {
                         user.Mixin<UserOIDMixin>().OID = Guid.Parse(msGraphUser.Id);
                         user.UserName = msGraphUser.UserPrincipalName;
+                        user.Email = msGraphUser.UserPrincipalName;
                         if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
                             user.PasswordHash = null;
                         user.Save();

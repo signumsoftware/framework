@@ -51,6 +51,7 @@ namespace Signum.React.Authorization
                             {
                                 user.Mixin<UserOIDMixin>().OID = ctx.OID;
                                 user.UserName = ctx.UserName;
+                                user.Email = ctx.EmailAddress;
                                 if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
                                     user.PasswordHash = null;
                                 user.Save();
