@@ -21,7 +21,7 @@ export function start(options: { routes: JSX.Element[]  }) {
 
   Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => ({
     type: UserEntity,
-    customElement: <em><FontAwesomeIcon icon="user-plus" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
+    customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
     onClick: () => importADUser(str),
   });
 
@@ -40,7 +40,8 @@ export function start(options: { routes: JSX.Element[]  }) {
             var promise = !search ? ValueLineModal.show({
               type: { name: "string" },
               valueLineType: "TextBox",
-              title: UserADMessage.FindInActiveDirectory.niceToString(),
+              modalSize: "md",
+              title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
               labelText: UserADMessage.NameOrEmail.niceToString(),
             }) as Promise<string> : Promise.resolve(search);
 
@@ -68,14 +69,15 @@ export function importADUser(text: string): Promise<Lite<UserEntity> | undefined
       if (adUsers.length == 0)
         return MessageModal.showError(UserADMessage.NoUserContaining0FoundInActiveDirectory.niceToString(text));
 
-      SelectorModal.chooseElement(adUsers, {
+      return SelectorModal.chooseElement(adUsers, {
         forceShow: true,
+        size: "md",
         title: UserADMessage.SelectActiveDirectoryUser.niceToString(),
         message: UserADMessage.PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport.niceToString(),
-        buttonDisplay: u => <div style={{ display: "flex", flexDirection: "row" }}>
-          {u.displayName}
-          <span className="text-muted">{u.jobTitle}</span>
-          <code>{u.jobTitle}</code>
+        buttonDisplay: u => <div style={{ display: "flex", flexDirection: "column" }}>
+          <strong>{u.displayName}</strong>
+          <pre className="mb-0">{u.upn}</pre>
+          {u.jobTitle && <span className="text-muted">{u.jobTitle}</span>}
         </div>
       })
         .then(adu => adu ? API.createADUser(adu) : undefined);
@@ -99,7 +101,7 @@ export module API {
 export interface ActiveDirectoryUser {
   displayName: string;
   jobTitle: string;
-  uPN: string;
+  upn: string;
   objectID: string;
 }
 
