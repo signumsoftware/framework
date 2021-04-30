@@ -1,6 +1,7 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
 using Signum.Engine.Mailing;
+using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
@@ -26,7 +27,12 @@ namespace Signum.Engine.Authorization
 
             subStr = subStr.Replace("'", "''");
 
-            var result = await graphClient.Users.Request().Filter($"startswith(displayName, '{subStr}')" /* OR startswith(displayName, '{subStr}') OR startswith(displayName, '{subStr}') OR mail eq '{subStr}'"*/).Top(top).GetAsync(token);
+            var query = subStr.Contains("@") ? $"mail eq '{subStr}'" :
+                subStr.Contains(",") ? $"startswith(givenName, '{subStr.After(",").Trim()}') AND startswith(surname, '{subStr.Before(",").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
+                subStr.Contains(" ") ? $"startswith(givenName, '{subStr.Before(" ").Trim()}') AND startswith(surname, '{subStr.After(" ").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
+                 $"startswith(givenName, '{subStr}') OR startswith(surname, '{subStr}') OR startswith(displayname, '{subStr.Trim()}') OR startswith(mail, '{subStr.Trim()}')";
+
+            var result = await graphClient.Users.Request().Filter(query).Top(top).GetAsync(token);
 
             return result.Select(a => new ActiveDirectoryUser
             {
@@ -38,14 +44,41 @@ namespace Signum.Engine.Authorization
         }
 
 
-        public static UserEntity CreateUserFromAD(ActiveDirectoryUser user)
+        public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
         {
             ClientCredentialProvider authProvider = GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-            var u = graphClient.Users[user.ObjectID.ToString()].Request().GetAsync().Result;
+            var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
 
+            using (ExecutionMode.Global())
+            {
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserOIDMixin>().OID == Guid.Parse(msGraphUser.Id));
+                if(user != null)
+                    return user;
 
-            var result = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).OnAutoCreateUser(new MicrosoftGraphCreateUserContext(u));
+                var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+                user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == msGraphUser.UserPrincipalName) ??
+                       (msGraphUser.UserPrincipalName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == msGraphUser.UserPrincipalName || a.UserName == msGraphUser.UserPrincipalName.Before("@")) : null);
+
+                if (user != null && user.Mixin<UserOIDMixin>().OID == null)
+                {
+                    using (AuthLogic.Disable())
+                    using (OperationLogic.AllowSave<UserEntity>())
+                    {
+                        user.Mixin<UserOIDMixin>().OID = Guid.Parse(msGraphUser.Id);
+                        user.UserName = msGraphUser.UserPrincipalName;
+                        if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
+                            user.PasswordHash = null;
+                        user.Save();
+                    }
+
+                    return user;
+                }
+
+            }
+
+            var result = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).OnAutoCreateUser(new MicrosoftGraphCreateUserContext(msGraphUser));
 
             return result ?? throw new InvalidOperationException(ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded e) => e.AutoCreateUsers).NiceName() + " is not activated");
         }

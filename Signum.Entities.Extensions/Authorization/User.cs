@@ -92,6 +92,7 @@ namespace Signum.Entities.Authorization
         public static ExecuteSymbol<UserEntity> Enable;
         public static ExecuteSymbol<UserEntity> Disable;
         public static ExecuteSymbol<UserEntity> SetPassword;
+        public static DeleteSymbol<UserEntity> Delete;
     }
 
     [Serializable]
