@@ -56,6 +56,15 @@ namespace Signum.Engine.Authorization
                     u.PasswordHash = passwordHash;
                 }
             }.Register();
+
+            new Delete(UserOperation.Delete)
+            {
+                FromStates = { UserState.Disabled, UserState.Saved },
+                Delete = (u, _) =>
+                {
+                    u.Delete();
+                },
+            }.Register();
         }
     }
 }
