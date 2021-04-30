@@ -27,9 +27,11 @@ export default function HtmlCodemirror(p: {
   const { ctx, onChange, innerRef } = p;
 
   function handleOnChange(newValue: string) {
-    ctx.value = newValue;
-    if (onChange != undefined)
-      onChange(ctx.value);
+    if (!ctx.readOnly) {
+      ctx.value = newValue;
+      if (onChange != undefined)
+        onChange(ctx.value);
+    }
   };
 
 
@@ -44,7 +46,8 @@ export default function HtmlCodemirror(p: {
         if (cm.getOption("fullScreen"))
           cm.setOption("fullScreen", false);
       }
-    }
+    },
+    readOnly: ctx.readOnly
   } as CodeMirror.EditorConfiguration;
 
   (options as any).highlightSelectionMatches = true;

@@ -51,6 +51,6 @@ export default function SqlCodeMirror(p: SqlCodeMirrorProps) {
   return (
     <CodeMirrorComponent value={p.script} ref={p.innerRef}
       options={options}
-      onChange={p.onChange} />
+      onChange={p.isReadOnly ? undefined : p.onChange} />
   );
 }
