@@ -416,6 +416,7 @@ export module UserOperation {
   export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Enable");
   export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Disable");
   export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
+  export const Delete : Entities.DeleteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Delete");
 }
 
 export const UserState = new EnumType<UserState>("UserState");
