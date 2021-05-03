@@ -1178,6 +1178,11 @@ export function newLite(type: PseudoType, id: number | string, toStr?: string): 
   };
 }
 
+export type Anonymous<T extends ModifiableEntity> = T & {
+  /** Represents the 'Entity' column in the query selector */
+  entity: T
+}
+
 export class Type<T extends ModifiableEntity> implements IType {
 
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
@@ -1314,11 +1319,11 @@ export class Type<T extends ModifiableEntity> implements IType {
 
   /* Constructs a QueryToken able to generate string like "Name" from a strongly typed lambda like a => a.name
    * Note: The QueryToken language is quite different to javascript lambdas (Any, Lites, Nullable, etc)*/
-  token(): QueryTokenString<T & { entity: T}>;
+  token(): QueryTokenString<Anonymous<T>>;
   /** Shortcut for token().append(lambdaToColumn)
    * @param lambdaToColumn lambda expression pointing to a property in the anonymous class of the query. For simple columns comming from properties from the entity.
    */
-  token<S>(lambdaToColumn: (v: T & { entity: T }) => S): QueryTokenString<S>;
+  token<S>(lambdaToColumn: (v: Anonymous<T>) => S): QueryTokenString<S>;
   /** Shortcut for token().expression<S>(columnName)
   * @param columnName property name of some property in the anonymous class of the query. For complex calculated columns that are not a property from the entitiy.
   */
