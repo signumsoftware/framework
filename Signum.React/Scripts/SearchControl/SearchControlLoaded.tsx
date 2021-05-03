@@ -69,7 +69,7 @@ export interface SearchControlLoadedProps {
   create: boolean;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
-  defaultRefreshMode: RefreshMode;
+  defaultRefreshMode?: RefreshMode;
   avoidChangeUrl: boolean;
   refreshKey: any;
   extraOptions: any;
@@ -112,7 +112,7 @@ export interface SearchControlLoadedState {
   };
 
   showFilters: boolean;
-  refreshMode: RefreshMode;
+  refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
 }
@@ -202,7 +202,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   // MAIN
 
   isManualRefreshOrAllPagination() {
-    return this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All";
+    return this.state.refreshMode == "Manual" || this.state.refreshMode == undefined && this.props.findOptions.pagination.mode == "All";
   }
 
   doSearchPage1(force: boolean = false) {
