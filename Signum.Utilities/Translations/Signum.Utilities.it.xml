@@ -25,9 +25,13 @@
     <Member Name="_0Months" Description=",{0} Mesi" />
     <Member Name="_0Second" Description="{0} secondo,{0} Secondo" />
     <Member Name="_0Seconds" Description="{0} secondi,{0} Secondi" />
+    <Member Name="_0Week" Description="{0} settimana" />
+    <Member Name="_0Weeks" Description="{0} settimane" />
     <Member Name="_0Year" Description="{0} anno,{0} Anno" />
     <Member Name="_0Years" Description="{0} anni,{0} Anni" />
     <Member Name="In0" Description="in {0}" />
+    <Member Name="Last0" Description="Ultimo {0}" />
+    <Member Name="This0" Description="Questo {0}" />
     <Member Name="Today" Description="Oggi" />
     <Member Name="Tomorrow" Description="Domani" />
     <Member Name="Yesterday" Description="Ieri" />

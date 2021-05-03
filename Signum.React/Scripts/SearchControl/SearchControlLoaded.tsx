@@ -69,7 +69,7 @@ export interface SearchControlLoadedProps {
   create: boolean;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
-  defaultRefreshMode: RefreshMode;
+  defaultRefreshMode?: RefreshMode;
   avoidChangeUrl: boolean;
   refreshKey: any;
   extraOptions: any;
@@ -78,7 +78,7 @@ export interface SearchControlLoadedProps {
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: () => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<any> | ModifiableEntity | undefined) => void;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -112,7 +112,7 @@ export interface SearchControlLoadedState {
   };
 
   showFilters: boolean;
-  refreshMode: RefreshMode;
+  refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
 }
@@ -202,7 +202,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   // MAIN
 
   isManualRefreshOrAllPagination() {
-    return this.state.refreshMode == "Manual" || this.props.findOptions.pagination.mode == "All";
+    return this.state.refreshMode == "Manual" || this.state.refreshMode == undefined && this.props.findOptions.pagination.mode == "All";
   }
 
   doSearchPage1(force: boolean = false) {
@@ -672,7 +672,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .then(ti => ti ? ti.name : undefined);
   }
 
-  handleCreated = (entity: EntityPack<any> | ModifiableEntity | undefined) => {
+  handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => {
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity);
     } else {
