@@ -109,14 +109,14 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
       {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} className="shape-serie"
         transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
-        <path className="shape sf-transition" stroke={colorByKey[s.key] ?? color(s.key)} fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
+        <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
           <title>
             {columnsByKey[s.key].niceName!}
           </title>
         </path>
       </g>)}
 
-      {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} className="hover-trigger-serie"
+      {stackedSeries.orderBy(s => s.key).map((s) => <g key={s.key} className="hover-trigger-serie"
         transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
 
         {s.orderBy(v => keyColumn.getKey(v.data))
@@ -138,8 +138,9 @@ export default function renderStackedLines({ data, width, height, parameters, lo
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           s.orderBy(v => keyColumn.getKey(v.data))
             .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined && (y(v[1])! - y(v[0])!)! > 10)
-            .map(v => <text key={keyColumn.getKey(v.data)}
+            .map(v => <TextRectangle key={keyColumn.getKey(v.data)}
               className="number-label sf-transition"
+              fillRectangle={colorByKey[s.key] ?? color(s.key)}
               transform={translate(x(keyColumn.getKey(v.data))!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
               fill={parameters["NumberColor"]}
               dominantBaseline="middle"
@@ -151,7 +152,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
               <title>
                 {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}
               </title>
-            </text>)
+            </TextRectangle>)
         }
       </g>
       )}
@@ -162,4 +163,53 @@ export default function renderStackedLines({ data, width, height, parameters, lo
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>
   );
+}
+
+
+export interface TextRectangleProps extends React.SVGProps<SVGTextElement> {
+  fillRectangle?: string
+}
+
+
+export function TextRectangle({ fillRectangle, children, ...atts }: TextRectangleProps) {
+
+  const txt = React.useRef<SVGTextElement>(null);
+  const rect = React.useRef<SVGRectElement>(null);
+
+  React.useEffect(() => {
+    if (rect.current) {
+
+      var bbox = txt.current!.getBoundingClientRect();
+
+      rect.current.setAttribute("width", bbox.width + 4 + "px");
+      rect.current.setAttribute("x", -(bbox.width + 4) / 2 + "px");
+      rect.current.setAttribute("height", bbox.height + "px");
+      rect.current.setAttribute("y", -(bbox.height / 2) - 2 + "px");
+    }
+      
+
+  }, [fillRectangle, getString(children)]);
+
+
+  if (fillRectangle == undefined)
+    return (
+      <text ref={txt} {...atts} >
+        {children ?? ""}
+      </text>
+    );
+
+  
+  return (
+    <>
+      <rect ref={rect} fill={fillRectangle} transform={atts.transform} height={20} />
+      <text ref={txt} {...atts} >
+        {children ?? ""}
+      </text>
+    </>
+  );
+}
+
+        
+function getString(children: React.ReactNode) {
+  return React.Children.toArray(children)[0] as string;
 }
