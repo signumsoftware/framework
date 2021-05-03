@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission } from './Signum.Entities.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal';
 import { FindOptionsParsed } from '@framework/FindOptions';
@@ -10,6 +10,7 @@ import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/Message
 import { Lite } from '@framework/Signum.Entities';
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
+import { isPermissionAuthorized } from './AuthClient';
 
 export let types: boolean;
 export let properties: boolean;
@@ -19,14 +20,14 @@ export let permissions: boolean;
 
 export function start(options: { routes: JSX.Element[]  }) {
 
-  Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => ({
+  Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
     type: UserEntity,
     customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
     onClick: () => importADUser(str),
-  });
+  }) : null;
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    if (ctx.findOptions.queryKey != UserEntity.typeName)
+    if (ctx.findOptions.queryKey != UserEntity.typeName || !isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD))
       return undefined;
 
     var search = getSearch(ctx.findOptions);
@@ -37,15 +38,19 @@ export function start(options: { routes: JSX.Element[]  }) {
         button: <button className="btn btn-info ml-2"
           onClick={e => {
             e.preventDefault();
-            var promise = !search ? ValueLineModal.show({
+            var promise = ValueLineModal.show({
               type: { name: "string" },
               valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
               labelText: UserADMessage.NameOrEmail.niceToString(),
-            }) as Promise<string> : Promise.resolve(search);
+              initialValue: search
+            }) as Promise<string>;
 
-            return promise.then(str => !str ? null : importADUser(str).then(u => u && ctx.searchControl.handleCreated(u))).done();
+            return promise.then(str => !str ? null : importADUser(str))
+              .then(u => u && Navigator.view(u))
+              .then(u => u && ctx.searchControl.handleCreated(u))
+              .done();
 
           }}>
           <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}

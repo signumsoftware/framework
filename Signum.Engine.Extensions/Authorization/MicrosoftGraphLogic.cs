@@ -61,7 +61,7 @@ namespace Signum.Engine.Authorization
                 user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == msGraphUser.UserPrincipalName) ??
                        (msGraphUser.UserPrincipalName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == msGraphUser.UserPrincipalName || a.UserName == msGraphUser.UserPrincipalName.Before("@")) : null);
 
-                if (user != null && user.Mixin<UserOIDMixin>().OID == null)
+                if (user != null)
                 {
                     using (AuthLogic.Disable())
                     using (OperationLogic.AllowSave<UserEntity>())

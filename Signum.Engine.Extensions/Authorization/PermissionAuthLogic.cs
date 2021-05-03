@@ -83,10 +83,7 @@ namespace Signum.Engine.Authorization
                     return null;
                 };
 
-                RegisterPermissions(BasicPermission.AdminRules,
-                    BasicPermission.AutomaticUpgradeOfProperties,
-                    BasicPermission.AutomaticUpgradeOfOperations,
-                    BasicPermission.AutomaticUpgradeOfQueries);
+                RegisterTypes(typeof(BasicPermission));
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(),
                     exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);

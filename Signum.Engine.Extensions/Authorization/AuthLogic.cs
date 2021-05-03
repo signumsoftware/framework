@@ -366,13 +366,18 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartAllModules(SchemaBuilder sb)
+        public static void StartAllModules(SchemaBuilder sb, bool activeDirectoryIntegration = false)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb);
             QueryAuthLogic.Start(sb);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
+
+            if (activeDirectoryIntegration)
+            {
+                PermissionAuthLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+            }
         }
 
         public static HashSet<Lite<RoleEntity>> CurrentRoles()

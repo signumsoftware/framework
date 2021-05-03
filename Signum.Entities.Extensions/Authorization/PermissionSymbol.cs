@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Authorization
 {
@@ -20,5 +20,11 @@ namespace Signum.Entities.Authorization
         public static PermissionSymbol AutomaticUpgradeOfProperties;
         public static PermissionSymbol AutomaticUpgradeOfQueries;
         public static PermissionSymbol AutomaticUpgradeOfOperations;
+    }
+
+    [AutoInit]
+    public static class ActiveDirectoryPermission
+    {
+        public static PermissionSymbol InviteUsersFromAD;
     }
 }

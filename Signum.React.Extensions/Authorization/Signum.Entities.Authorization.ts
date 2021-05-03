@@ -33,6 +33,10 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   defaultRole: Entities.Lite<RoleEntity> | null;
 }
 
+export module ActiveDirectoryPermission {
+  export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+}
+
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
   allowedBase: A;
   allowed: A;
