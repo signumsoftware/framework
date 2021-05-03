@@ -209,12 +209,16 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //Date.MonthStart == 1.4.2000
         //             Min-> 1.4.2000
 
-        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
+        var filterUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) :
+          f.token?.type.name == "Date" ? "day" : null;
 
-        const newValue = f.operation == "GreaterThan" ? floor(value, newUnit).plus({ [newUnit]: 1 }) : floor(value, newUnit);
+        if (filterUnit != unit)
+          return null;
+
+        const newValue = f.operation == "GreaterThan" ? floor(value, unit).plus({ [unit]: 1 }) : floor(value, unit);
 
         return newValue.toISO();
-      })) ?? tryFloor(d3.min(values as string[]), unit);
+      }).notNull()) ?? tryFloor(d3.min(values as string[]), unit);
 
     const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(a => {
@@ -228,12 +232,16 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //Date.MonthStart == 1.4.2000
         //             Max   1.5.2000
 
-        const newUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) : unit;
+        var filterUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) :
+          f.token?.type.name == "Date" ? "day" : null;
 
-        const newValue = a.operation == "LessThan" ? ceil(value, newUnit) : floor(value, newUnit).plus({ [newUnit]: 1 }); 
+        if (filterUnit != unit)
+          return null;
+
+        const newValue = a.operation == "LessThan" ? ceil(value, unit) : floor(value, unit).plus({ [unit]: 1 });
 
         return newValue.toISO();
-      })) ?? tryCeil(d3.max(values as string[]), unit);
+      }).notNull()) ?? tryCeil(d3.max(values as string[]), unit);
 
 
     if (min == undefined  || max == undefined)
