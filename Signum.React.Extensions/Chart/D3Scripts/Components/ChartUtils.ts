@@ -221,9 +221,9 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       }).notNull()) ?? tryFloor(d3.min(values as string[]), unit);
 
     const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
-      .map(a => {
-        const pair = normalizeToken(a.token!);
-        let value = DateTime.fromISO(a.value);
+      .map(f => {
+        const pair = normalizeToken(f.token!);
+        let value = DateTime.fromISO(f.value);
 
         //Date.MonthStart <  1.4.2000
         //             Max   1.4.2000
@@ -238,7 +238,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         if (filterUnit != unit)
           return null;
 
-        const newValue = a.operation == "LessThan" ? ceil(value, unit) : floor(value, unit).plus({ [unit]: 1 });
+        const newValue = f.operation == "LessThan" ? ceil(value, unit) : floor(value, unit).plus({ [unit]: 1 });
 
         return newValue.toISO();
       }).notNull()) ?? tryCeil(d3.max(values as string[]), unit);
