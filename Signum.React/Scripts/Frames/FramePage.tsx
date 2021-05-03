@@ -219,10 +219,12 @@ export default function FramePage(p: FramePageProps) {
 
   return (
     <div className="normal-control">
-      <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true}/>
+      <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
       {renderTitle()}
-      {renderWidgets(wc)}
-      {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
+      <div className="sf-button-widget-container">
+        {renderWidgets(wc)}
+        {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
+      </div>
       <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
       <WidgetEmbedded widgetContext={wc} >
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>

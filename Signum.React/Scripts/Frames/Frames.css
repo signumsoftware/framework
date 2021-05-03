@@ -44,8 +44,12 @@
     }
 }
 
-.sf-button-bar
-{
+.sf-button-widget-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.sf-button-bar {
     margin-bottom: 16px;
 }
 

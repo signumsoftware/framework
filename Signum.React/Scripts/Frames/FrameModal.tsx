@@ -91,7 +91,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     return viewPromise;
   }
-  
+
   function setPack(pack: EntityPack<ModifiableEntity>, getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>, callback?: () => void) {
     setPackComponent({
       pack,
@@ -213,20 +213,20 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
 
-    return (
+  return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
-        <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined}>
+      <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
-        </ModalHeaderButtons>
-        {packComponent && renderBody(packComponent)}
-        {p.buttons == "ok_cancel" && <ModalFooterButtons
-          onOk={handleOkClicked}
-          onCancel={handleCancelClicked}
-          okDisabled={!packComponent}>
-        </ModalFooterButtons>
-        }
-      </Modal>
-    );
+      </ModalHeaderButtons>
+      {packComponent && renderBody(packComponent)}
+      {p.buttons == "ok_cancel" && <ModalFooterButtons
+        onOk={handleOkClicked}
+        onCancel={handleCancelClicked}
+        okDisabled={!packComponent}>
+      </ModalFooterButtons>
+      }
+    </Modal>
+  );
 
   function renderBody(pc: PackAndComponent) {
 
@@ -276,15 +276,17 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
     return (
       <div className="modal-body">
-        {renderWidgets(wc)}
         <WidgetEmbedded widgetContext={wc} >
-        {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
-        <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
-        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-          <ErrorBoundary>
-            {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-          </ErrorBoundary>
-        </div>
+          <div className="sf-button-widget-container">
+            {renderWidgets(wc)}
+            {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
+          </div>
+          <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
+          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+            <ErrorBoundary>
+              {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+            </ErrorBoundary>
+          </div>
         </WidgetEmbedded>
       </div>
     );
@@ -330,18 +332,18 @@ export namespace FrameModalManager {
 export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
 
   if (!pack)
-      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
   const entity = pack.entity;
 
-    return (
-      <span>
+  return (
+    <span>
       <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
-        {renderExpandLink(pack.entity)}
-        <br />
-        <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-      </span>
-    );
+      {renderExpandLink(pack.entity)}
+      <br />
+      <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+    </span>
+  );
 
   function renderExpandLink(entity: ModifiableEntity) {
 
@@ -367,6 +369,6 @@ export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: En
     var entity = pack!.entity;
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
-    }
   }
+}
 
