@@ -51,6 +51,6 @@ export default function XmlCodeMirror(p: XmlCodeMirrorProps) {
   return (
     <CodeMirrorComponent value={p.script} ref={p.innerRef}
       options={options}
-      onChange={p.onChange} />
+      onChange={p.isReadOnly ? undefined: p.onChange} />
   );
 }

@@ -15,6 +15,9 @@ namespace Signum.Engine.Authorization
     {
         public string UserName { get; }
         public string? EmailAddress { get; }
+        public string FirstName { get; }
+        public string LastName { get; }
+        public Guid? OID { get;  }
     }
 
     public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
@@ -23,6 +26,12 @@ namespace Signum.Engine.Authorization
         public string UserName { get; private set; }
         public string DomainName { get; private set; }
         public string? EmailAddress => this.GetUserPrincipal().EmailAddress;
+
+        public string FirstName => this.GetUserPrincipal().GivenName;
+
+        public string LastName => this.GetUserPrincipal().Surname;
+
+        public Guid? OID => null;
 
         UserPrincipal? userPrincipal;
 
@@ -45,10 +54,30 @@ namespace Signum.Engine.Authorization
 
         string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
-        public Guid OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+        public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
         public string UserName => GetClaim("preferred_username");
         public string? EmailAddress => GetClaim("preferred_username");
+
+        public string FirstName
+        {
+            get
+            {
+                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+
+                return name == null ? "Unknown" : name.Contains(",") ? name.After(",").Trim() : name.TryBefore(" ")?.Trim() ?? name.DefaultToNull() ?? "Unknown";
+            }
+        }
+
+        public string LastName
+        {
+            get
+            {
+                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+
+                return name == null ? "Unknown" : name.Contains(",") ? name.Before(",").Trim() : name.TryAfter(" ")?.Trim() ??  "Unknown";
+            }
+        }
 
         public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal)
         {
@@ -156,12 +185,9 @@ namespace Signum.Engine.Authorization
                 State = UserState.Saved,
             };
 
-            if (ctx is AzureClaimsAutoCreateUserContext ac)
-            {
-                var mixin = result.TryMixin<UserOIDMixin>();
-                if (mixin != null)
-                    mixin.OID = ac.OID;
-            }
+            var mixin = result.TryMixin<UserOIDMixin>();
+            if (mixin != null)
+                mixin.OID = ctx.OID;
 
             return result;
         }

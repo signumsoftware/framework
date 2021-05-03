@@ -166,13 +166,32 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class MicrosoftGraphEmbedded : EmbeddedEntity
     {
+        public bool UseActiveDirectoryConfiguration { get; set; }
+
         [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
-        public string Azure_ApplicationID { get; set; }
+        public string? Azure_ApplicationID { get; set; }
 
         [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
-        public string Azure_DirectoryID { get; set; }
+        public string? Azure_DirectoryID { get; set; }
 
         [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
-        public string Azure_ClientSecret { get; set; }
+        public string? Azure_ClientSecret { get; set; }
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if (!UseActiveDirectoryConfiguration)
+            {
+                if (pi.Name == nameof(Azure_ApplicationID) && !Azure_ApplicationID.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (pi.Name == nameof(Azure_DirectoryID) && !Azure_DirectoryID.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (pi.Name == nameof(Azure_ClientSecret) && !Azure_ClientSecret.HasText())
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 }

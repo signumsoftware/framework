@@ -51,6 +51,7 @@ export module AlertMessage {
   export const ViewMore = new MessageKey("AlertMessage", "ViewMore");
   export const CloseAll = new MessageKey("AlertMessage", "CloseAll");
   export const AllMyAlerts = new MessageKey("AlertMessage", "AllMyAlerts");
+  export const NewUnreadNotifications = new MessageKey("AlertMessage", "NewUnreadNotifications");
 }
 
 export module AlertOperation {

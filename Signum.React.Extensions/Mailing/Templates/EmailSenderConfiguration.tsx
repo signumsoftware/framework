@@ -48,13 +48,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
           <ValueLine ctx={ews.subCtx(s => s.password)} />
         </div>
       } />
-      <EntityDetail ctx={sc.subCtx(s => s.microsoftGraph)} labelColumns={3} getComponent={(mgc: TypeContext<MicrosoftGraphEmbedded>) =>
-        <div>
-          <ValueLine ctx={mgc.subCtx(s => s.azure_DirectoryID)} />
-          <ValueLine ctx={mgc.subCtx(s => s.azure_ApplicationID)} />
-          <ValueLine ctx={mgc.subCtx(s => s.azure_ClientSecret)} />
-        </div>
-      } />
+      <EntityDetail ctx={sc.subCtx(s => s.microsoftGraph)} labelColumns={3}/>
     </div >
   );
 }

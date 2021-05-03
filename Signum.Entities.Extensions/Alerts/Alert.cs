@@ -157,5 +157,6 @@ namespace Signum.Entities.Alerts
         ViewMore,
         CloseAll,
         AllMyAlerts,
+        NewUnreadNotifications,
     }
 }
