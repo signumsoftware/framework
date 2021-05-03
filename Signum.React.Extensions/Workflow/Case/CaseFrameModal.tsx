@@ -248,8 +248,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     return (
       <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
-        {renderWidgets(wc)}
-        {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
+        <div className="sf-button-widget-container">
+          {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
+          {renderWidgets(wc)}
+        </div>
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
         <ErrorBoundary>
           {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}

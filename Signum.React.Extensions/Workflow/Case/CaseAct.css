@@ -18,8 +18,12 @@ div.workflow-buttons {
     margin-top: 0px;
 }
 
-.case-alert{
-    margin-bottom:5px;
+.case-main-entity .sf-button-widget-container {
+    flex-direction: row;
+}
+
+.case-alert {
+    margin-bottom: 5px;
     padding: 5px;
     white-space: pre;
 }
