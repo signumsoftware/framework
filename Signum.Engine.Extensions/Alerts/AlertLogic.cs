@@ -21,6 +21,8 @@ using Signum.Engine.Templating;
 using Signum.Engine.Scheduler;
 using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
+using Signum.Engine;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Alerts
 {
@@ -68,6 +70,8 @@ namespace Signum.Engine.Alerts
 
                 AlertGraph.Register();
 
+                
+
                 sb.Include<AlertTypeEntity>()
                     .WithSave(AlertTypeOperation.Save)
                     .WithDelete(AlertTypeOperation.Delete)
@@ -97,7 +101,7 @@ namespace Signum.Engine.Alerts
             }
         }
 
-        public static void RegisterAlertNotificationMail()
+        public static void RegisterAlertNotificationMail(SchemaBuilder sb)
         {
             EmailModelLogic.RegisterEmailModel<AlertNotificationMail>(() => new EmailTemplateEntity
             {
@@ -120,10 +124,25 @@ namespace Signum.Engine.Alerts
                 }).ToMList()
             });
 
-            SimpleTaskLogic.Register(AlertTask.AlertNotificationMailTask, stc =>
+            sb.Include<SendNotificationEmailTaskEntity>()
+                  .WithSave(SendNotificationEmailTaskOperation.Save)
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.SendNotificationsOlderThan,
+                      e.SendBehavior,
+                  });
+
+            SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
             {
+                var limit = DateTime.Now.AddMinutes(-task.SendNotificationsOlderThan);
+
                 var query = Database.Query<AlertEntity>()
-                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == 0 && a.Recipient != null);
+                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == 0 && a.Recipient != null && a.CreationDate < limit)
+                .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
+                            task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
+                            task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));
 
                 if (!query.Any())
                     return null;
@@ -170,7 +189,7 @@ namespace Signum.Engine.Alerts
                 if (alert.Target == null)
                     return new HtmlString(text);
 
-                var url= $"@[g:UrlLeft]/view/{TypeLogic.GetCleanName(alert.Target.EntityType)}/{alert.Target.Id}";
+                var url=  $"{EmailLogic.Configuration.UrlLeft}/view/{TypeLogic.GetCleanName(alert.Target.EntityType)}/{alert.Target.Id}";
 
                 if (text.Contains("[Target]"))
                     return new HtmlString(@$"{text.Before("[Target]")}<a href=""{url}"">{alert.Target.ToString()}</a>{text.After("[Target]")}");
