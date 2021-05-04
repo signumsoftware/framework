@@ -45,8 +45,6 @@
 }
 
 .sf-button-widget-container{
-    display: flex;
-    flex-direction: column;
 }
 
 .sf-button-bar {

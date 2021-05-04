@@ -1,14 +1,13 @@
 ﻿ul.sf-widgets {
     list-style-type: none;
     margin-top: -34px;
-    margin-left: auto;
     display: flex;
     flex-direction: row-reverse;
+    float:right;
 }
 
 body.rtl ul.sf-widgets {
-    margin-right: auto;
-    margin-left: 0;
+   float:left;
 }
 
 .modal-body > div > ul.sf-widgets {
