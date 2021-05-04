@@ -1313,7 +1313,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   if (resultTable == null)
     return undefined;
 
-  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
+  return resultTable.rows[0]?.columns[0] ?? null;
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
