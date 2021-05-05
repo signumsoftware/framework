@@ -47,7 +47,7 @@ namespace Signum.React.Translation
               li.RowId.ToString() == filter ||
               li.Instance.Id.ToString() == filter ||
               li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-              master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
+              master.GetOrThrow(li)?.Contains(filter, StringComparison.InvariantCultureIgnoreCase) == true ||
               cultures.Any(ci => (support.TryGetC(ci)?.TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
 
             var sd = new StringDistance();
