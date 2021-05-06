@@ -473,6 +473,9 @@ namespace Signum.Engine.Workflow
                     var from = tctx.PreviousCaseActivity!.WorkflowActivity;
                     var to = newCaseActivity.WorkflowActivity;
 
+                    if (!from.Lane.Pool.Workflow.Is(Case.Workflow)) //Is SubWorkflow
+                        from = graph.Events.Values.SingleEx(a => a.Type == WorkflowEventType.Start);
+
                     if (graph.GetAllConnections(from, to, path => true).Contains(tctx.Connection!) ||
                         from is WorkflowActivityEntity fromWA && fromWA.BoundaryTimers.Any(e => graph.GetAllConnections(e, to, path => true).Contains(tctx.Connection!)))
                         tctx.OnNextCaseActivityCreated!(newCaseActivity);
@@ -575,7 +578,7 @@ namespace Signum.Engine.Workflow
                             MainEntity = mainEntity,
                         };
 
-                        var start = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start);
+                        var start = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite()).Events.Values.Single(a => a.Type == WorkflowEventType.Start);
                         var connection = start.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
                         var next = (WorkflowActivityEntity)connection.To;
                         var ca = new CaseActivityEntity
@@ -585,7 +588,7 @@ namespace Signum.Engine.Workflow
                             Case = @case,
                         };
 
-                        new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
+                        //new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
 
                         return ca;
                     }
@@ -631,12 +634,16 @@ namespace Signum.Engine.Workflow
                         c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                         c.Save();
 
-                        var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
+                        var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.Start);
 
-                        new WorkflowExecuteStepContext(ca.Case, ca).ExecuteConnection(prevConn);
+                        var wec = new WorkflowExecuteStepContext(ca.Case, ca.Previous?.RetrieveAndForget());
+
+                        wec.ExecuteConnection(prevConn);
 
                         ca.StartDate = now;
                         ca.Save();
+
+                        wec.NotifyTransitionContext(ca);
 
                         InsertCaseActivityNotifications(ca);
                     }
