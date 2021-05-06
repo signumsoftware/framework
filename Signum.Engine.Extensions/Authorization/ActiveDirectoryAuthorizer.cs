@@ -122,7 +122,7 @@ namespace Signum.Engine.Authorization
                 {
                     try
                     {
-                        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName, localName, password))
+                        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName, localName + "@" + domainName, password))
                         {
                             if (pc.ValidateCredentials(localName + "@" + domainName, password, ContextOptions.Negotiate))
                             {

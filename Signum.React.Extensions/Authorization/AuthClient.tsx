@@ -166,7 +166,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
   if (options.headers == undefined)
     options.headers = {};
 
-  options.headers["Authorization"] = "Bearer " + token;
+  options.headers["Signum_Authorization"] = "Bearer " + token;
 
   return makeCall()
     .then(r => {

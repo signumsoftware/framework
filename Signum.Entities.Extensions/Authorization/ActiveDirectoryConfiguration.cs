@@ -15,6 +15,11 @@ namespace Signum.Entities.Authorization
         [StringLengthValidator(Max = 250)]
         public string? DomainServer { get; set; }
 
+        public string? DirectoryRegistry_Username { get; set; }
+
+        [Format(FormatAttribute.Password)]
+        public string? DirectoryRegistry_Password { get; set; }
+
         [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
         public string? Azure_ApplicationID { get; set; }
 
