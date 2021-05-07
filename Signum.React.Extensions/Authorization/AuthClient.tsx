@@ -68,6 +68,10 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   return true;
 }
 
+export namespace Options {
+  export let AuthHeader = "Authorization";
+}
+
 var notifyLogout: boolean;
 
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
@@ -166,7 +170,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
   if (options.headers == undefined)
     options.headers = {};
 
-  options.headers["Signum_Authorization"] = "Bearer " + token;
+  options.headers[Options.AuthHeader] = "Bearer " + token;
 
   return makeCall()
     .then(r => {
@@ -209,6 +213,7 @@ export function registerUserTicketAuthenticator() {
 
 /* Install and enable Windows authentication in IIS https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-2.2&tabs=visual-studio */
 export function registerWindowsAuthenticator() {
+  Options.AuthHeader = "Signum_Authorization"; //Authorization is used by IIS with Negotiate prefix
   authenticators.push(loginWindowsAuthentication);
 }
 

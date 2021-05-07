@@ -16,6 +16,8 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
             <legend>Active Directory (Windows)</legend>
             <ValueLine ctx={ctxb.subCtx(n => n.domainName)} />
             <ValueLine ctx={ctxb.subCtx(n => n.domainServer)} />
+            <ValueLine ctx={ctx.subCtx(ad => ad.directoryRegistry_Username)} helpText="Required if the IIS user is not in AD" />
+            <ValueLine ctx={ctx.subCtx(ad => ad.directoryRegistry_Password)} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithWindowsAuthenticator)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithActiveDirectoryRegistry)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
           </fieldset>

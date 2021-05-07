@@ -59,9 +59,16 @@ namespace Signum.React.Authorization
             return null;
         }
 
+        public static string AuthHeader = "Authorization";
+
+        public static void PrepareForWindowsAuthentication()
+        {
+            AuthHeader = "Signum_Authorization";
+        }
+
         static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
-            var authHeader = ctx.HttpContext.Request.Headers["Signum_Authorization"].FirstOrDefault();
+            var authHeader = ctx.HttpContext.Request.Headers[AuthHeader].FirstOrDefault();
             if (authHeader == null)
             {
                 return null;
