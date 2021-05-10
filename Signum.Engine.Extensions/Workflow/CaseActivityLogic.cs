@@ -568,6 +568,12 @@ namespace Signum.Engine.Workflow
                         if (w.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
+                        var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite());
+
+                        if (!wfGraph.IsStartCurrentUser())
+                            throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
+
+
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.CreateMainEntity(w.MainEntityType.ToType());
 
                         var @case = new CaseEntity
@@ -578,7 +584,7 @@ namespace Signum.Engine.Workflow
                             MainEntity = mainEntity,
                         };
 
-                        var start = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite()).Events.Values.Single(a => a.Type == WorkflowEventType.Start);
+                        var start = wfGraph.Events.Values.Single(a => a.Type == WorkflowEventType.Start);
                         var connection = start.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
                         var next = (WorkflowActivityEntity)connection.To;
                         var ca = new CaseActivityEntity

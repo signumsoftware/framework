@@ -32,18 +32,18 @@ namespace Signum.Engine.Workflow
             if (Workflow.MainEntityStrategies.Count == 0)
                 return false;
 
-            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start).Select(s => NextConnections(s).SingleEx().To);
+            var startEvents = Events.Values.Where(a => a.Type == WorkflowEventType.Start);
 
-            return act.Any(a =>
+            return startEvents.Any(e =>
             {
-                if (a.Lane.ActorsEval != null)
+                if (e.Lane.ActorsEval != null)
                 {
-                    var actors = a.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
+                    var actors = e.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
 
                     return actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
                 }
 
-                return a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
+                return e.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
             });
         }
 
