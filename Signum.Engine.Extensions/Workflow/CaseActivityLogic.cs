@@ -568,17 +568,17 @@ namespace Signum.Engine.Workflow
                         if (w.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
+                        var parentCase = args.TryGetArgC<CaseEntity>();
+
                         var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite());
-
-                        if (!wfGraph.IsStartCurrentUser())
+                        if (parentCase == null && !wfGraph.IsStartCurrentUser())
                             throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
-
 
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.CreateMainEntity(w.MainEntityType.ToType());
 
                         var @case = new CaseEntity
                         {
-                            ParentCase = args.TryGetArgC<CaseEntity>(),
+                            ParentCase = parentCase,
                             Workflow = w,
                             Description = w.Name,
                             MainEntity = mainEntity,
@@ -622,7 +622,7 @@ namespace Signum.Engine.Workflow
 
                         return @case;
                     }
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.Register)
                 {
@@ -633,12 +633,18 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (ca, _) =>
                     {
+                        var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(ca.WorkflowActivity.Lane.Pool.Workflow.ToLite());
+                        if (ca.Case.ParentCase == null && !wfGraph.IsStartCurrentUser())
+                            throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
+
                         SaveEntity(ca.Case.MainEntity);
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
                         c.StartDate = now;
                         c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                         c.Save();
+
+
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.Start);
 
@@ -746,7 +752,7 @@ namespace Signum.Engine.Workflow
                                 throw new InvalidOperationException("Unexpected Timer Type " + timer.Type);
                         }
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.MarkAsUnread)
                 {
@@ -839,7 +845,7 @@ namespace Signum.Engine.Workflow
 
                         ExecuteStep(ca, DoneType.ScriptSuccess, null, null);
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.ScriptScheduleRetry)
                 {
@@ -854,7 +860,7 @@ namespace Signum.Engine.Workflow
                         se.ProcessIdentifier = null;
                         ca.Save();
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.ScriptFailureJump)
                 {
@@ -865,7 +871,7 @@ namespace Signum.Engine.Workflow
                     {
                         ExecuteStep(ca, DoneType.ScriptFailure, null, ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.ScriptException).SingleEx());
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
             }
 
             private static void CheckRequiresOpen(CaseActivityEntity ca)
