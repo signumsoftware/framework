@@ -54,18 +54,24 @@ namespace Signum.Engine.Authorization
 
         string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
+        string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
+
         public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
         public string UserName => GetClaim("preferred_username");
         public string? EmailAddress => GetClaim("preferred_username");
 
+        public string? FullName => TryGetClain("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+
         public string FirstName
         {
             get
             {
-                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+                var name = FullName;
 
-                return name == null ? "Unknown" : name.Contains(",") ? name.After(",").Trim() : name.TryBefore(" ")?.Trim() ?? name.DefaultToNull() ?? "Unknown";
+                return name == null ? "Unknown" : 
+                    name.Contains(",") ? name.After(",").Trim() :
+                    name.TryBefore(" ")?.Trim() ?? name.DefaultToNull() ?? "Unknown";
             }
         }
 
@@ -73,9 +79,11 @@ namespace Signum.Engine.Authorization
         {
             get
             {
-                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+                var name = FullName;
 
-                return name == null ? "Unknown" : name.Contains(",") ? name.Before(",").Trim() : name.TryAfter(" ")?.Trim() ??  "Unknown";
+                return name == null ? "Unknown" : 
+                    name.Contains(",") ? name.Before(",").Trim() : 
+                    name.TryAfter(" ")?.Trim() ??  "Unknown";
             }
         }
 
