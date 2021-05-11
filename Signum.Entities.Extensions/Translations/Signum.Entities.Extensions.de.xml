@@ -7,14 +7,20 @@
     <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer durch einfachen Benutzernamen zulassen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="DefaultRole" Description="Standardrolle" />
+    <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
+    <Member Name="DirectoryRegistry_Username" Description="DirectoryRegistry Benutzername" />
     <Member Name="DomainName" Description="Domain-Name" />
     <Member Name="DomainServer" Description="Domain-Server" />
     <Member Name="LoginWithActiveDirectoryRegistry" Description="Login mit Active Directory Registry" />
     <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
     <Member Name="LoginWithWindowsAuthenticator" Description="Login mit Windows-Authentifikator" />
     <Member Name="RoleMapping" Description="Rollenzuordnung" />
+  </Type>
+  <Type Name="ActiveDirectoryPermission">
+    <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
   </Type>
   <Type Name="ActivityWithRemarks" Description="Aktivität mit Bemerkungen" />
   <Type Name="AlertCurrentState" Description="aktueller Status der Benachrichtigung">
@@ -58,6 +64,7 @@
     <Member Name="FutureAlerts" Description="Zukünftige" />
     <Member Name="MyActiveAlerts" Description="Meine aktiven Benachrichtigungen" />
     <Member Name="NewAlert" Description="Neue Benachrichtigungen" />
+    <Member Name="NewUnreadNotifications" Description="Neue ungelesene Benachrichtigungen" />
     <Member Name="ViewMore" Description="Mehr sehen" />
     <Member Name="WarnedAlerts" Description="Gewarnte" />
     <Member Name="YouDoNotHaveAnyActiveAlert" Description="Sie haben keine aktive Benachrichtigung" />
@@ -1456,6 +1463,7 @@
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
+    <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
   </Type>
   <Type Name="ModelConverterSymbol" Description="Modell-Konverter" Gender="m" />
   <Type Name="MoveTreeModel" Description="Bewege Baum">
@@ -2022,6 +2030,11 @@
     <Member Name="ProcessIdentifier" Description="Prozess Indentifikator" />
     <Member Name="RetryCount" Description="Wiederholungszähler" />
   </Type>
+  <Type Name="SendAlertTypeBehavior" Description="Verhalten des Alarm Typs Senden">
+    <Member Name="All" Description="Alle" />
+    <Member Name="Exclude" Description="Ausschließen" />
+    <Member Name="Include" Description="Einschließen " />
+  </Type>
   <Type Name="SendEmailTaskEntity" Description="Sende eine Email Aufgabe" PluralDescription="Sende E-Mail Aufgaben">
     <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
     <Member Name="ModelConverter" Description="Modell-Konverter" />
@@ -2030,6 +2043,14 @@
     <Member Name="UniqueTarget" Description="Einzigartiges Ziel" />
   </Type>
   <Type Name="SendEmailTaskOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskEntity" Description="Benachrichtigung per E-Mail senden Aufgabe " Gender="f">
+    <Member Name="AlertTypes" Description="Alert-Typen" />
+    <Member Name="SendBehavior" Description="Senden-Verhalten" />
+    <Member Name="SendNotificationsOlderThan" Description="Benachrichtigungen senden älter als" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
@@ -2389,6 +2410,14 @@
     <Member Name="None" Description="Keine" />
     <Member Name="Subset" Description="Teilmenge" />
   </Type>
+  <Type Name="UserADMessage">
+    <Member Name="Find0InActiveDirectory" Description="Suche nach '{0}' in Active Directory" />
+    <Member Name="FindInActiveDirectory" Description="Suchen in Active Directory" />
+    <Member Name="NameOrEmail" Description="Name oder E-Mail" />
+    <Member Name="NoUserContaining0FoundInActiveDirectory" Description="Kein Benutzer mit '{0}' in Active Directory gefunden" />
+    <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Wählen Sie den Benutzer aus Active Directory aus, den Sie importieren möchten." />
+    <Member Name="SelectActiveDirectoryUser" Description="Active Directory-Benutzer auswählen" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
@@ -2457,6 +2486,7 @@
   </Type>
   <Type Name="UserOperation">
     <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Disable" Description="Deaktivieren" />
     <Member Name="Enable" Description="Aktivieren" />
     <Member Name="Save" Description="Speichern" />
