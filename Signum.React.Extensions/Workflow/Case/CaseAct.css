@@ -19,6 +19,7 @@ div.workflow-buttons {
 }
 
 .case-main-entity .sf-button-widget-container {
+    overflow: auto;
 }
 
 .case-alert {

@@ -473,6 +473,9 @@ namespace Signum.Engine.Workflow
                     var from = tctx.PreviousCaseActivity!.WorkflowActivity;
                     var to = newCaseActivity.WorkflowActivity;
 
+                    if (!from.Lane.Pool.Workflow.Is(Case.Workflow)) //Is SubWorkflow
+                        from = graph.Events.Values.SingleEx(a => a.Type == WorkflowEventType.Start);
+
                     if (graph.GetAllConnections(from, to, path => true).Contains(tctx.Connection!) ||
                         from is WorkflowActivityEntity fromWA && fromWA.BoundaryTimers.Any(e => graph.GetAllConnections(e, to, path => true).Contains(tctx.Connection!)))
                         tctx.OnNextCaseActivityCreated!(newCaseActivity);
@@ -565,17 +568,23 @@ namespace Signum.Engine.Workflow
                         if (w.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
+                        var parentCase = args.TryGetArgC<CaseEntity>();
+
+                        var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite());
+                        if (parentCase == null && !wfGraph.IsStartCurrentUser())
+                            throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
+
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.CreateMainEntity(w.MainEntityType.ToType());
 
                         var @case = new CaseEntity
                         {
-                            ParentCase = args.TryGetArgC<CaseEntity>(),
+                            ParentCase = parentCase,
                             Workflow = w,
                             Description = w.Name,
                             MainEntity = mainEntity,
                         };
 
-                        var start = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start);
+                        var start = wfGraph.Events.Values.Single(a => a.Type == WorkflowEventType.Start);
                         var connection = start.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
                         var next = (WorkflowActivityEntity)connection.To;
                         var ca = new CaseActivityEntity
@@ -585,7 +594,7 @@ namespace Signum.Engine.Workflow
                             Case = @case,
                         };
 
-                        new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
+                        //new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
 
                         return ca;
                     }
@@ -613,7 +622,7 @@ namespace Signum.Engine.Workflow
 
                         return @case;
                     }
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.Register)
                 {
@@ -624,6 +633,10 @@ namespace Signum.Engine.Workflow
                     CanBeModified = true,
                     Execute = (ca, _) =>
                     {
+                        var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(ca.WorkflowActivity.Lane.Pool.Workflow.ToLite());
+                        if (ca.Case.ParentCase == null && !wfGraph.IsStartCurrentUser())
+                            throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
+
                         SaveEntity(ca.Case.MainEntity);
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
@@ -631,12 +644,18 @@ namespace Signum.Engine.Workflow
                         c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
                         c.Save();
 
-                        var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
 
-                        new WorkflowExecuteStepContext(ca.Case, ca).ExecuteConnection(prevConn);
+
+                        var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.Start);
+
+                        var wec = new WorkflowExecuteStepContext(ca.Case, ca.Previous?.RetrieveAndForget());
+
+                        wec.ExecuteConnection(prevConn);
 
                         ca.StartDate = now;
                         ca.Save();
+
+                        wec.NotifyTransitionContext(ca);
 
                         InsertCaseActivityNotifications(ca);
                     }
@@ -733,7 +752,7 @@ namespace Signum.Engine.Workflow
                                 throw new InvalidOperationException("Unexpected Timer Type " + timer.Type);
                         }
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.MarkAsUnread)
                 {
@@ -826,7 +845,7 @@ namespace Signum.Engine.Workflow
 
                         ExecuteStep(ca, DoneType.ScriptSuccess, null, null);
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.ScriptScheduleRetry)
                 {
@@ -841,7 +860,7 @@ namespace Signum.Engine.Workflow
                         se.ProcessIdentifier = null;
                         ca.Save();
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
                 new Execute(CaseActivityOperation.ScriptFailureJump)
                 {
@@ -852,7 +871,7 @@ namespace Signum.Engine.Workflow
                     {
                         ExecuteStep(ca, DoneType.ScriptFailure, null, ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.ScriptException).SingleEx());
                     },
-                }.Register();
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
             }
 
             private static void CheckRequiresOpen(CaseActivityEntity ca)

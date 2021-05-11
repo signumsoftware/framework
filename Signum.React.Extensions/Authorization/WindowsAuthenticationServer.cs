@@ -41,9 +41,19 @@ namespace Signum.React.Authorization
                 return null;
             try
             {
-                using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName))
+                using (PrincipalContext pc =  config.DirectoryRegistry_Username.HasText() ?
+                    new PrincipalContext(ContextType.Domain, domainName, config.DirectoryRegistry_Username + "@" + config.DomainServer, config.DirectoryRegistry_Password): 
+                    new PrincipalContext(ContextType.Domain, domainName))
                 {
-                    var user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                    
+
+                    UserEntity? user = AuthLogic.RetrieveUser(localName);
+
+                    if (user != null)
+                        return user;
+
+                    user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+
                     return user;
                 }
             }

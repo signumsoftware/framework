@@ -93,4 +93,22 @@ export type DelayOption =
   "_1Day" |
   "Custom";
 
+export const SendAlertTypeBehavior = new EnumType<SendAlertTypeBehavior>("SendAlertTypeBehavior");
+export type SendAlertTypeBehavior =
+  "All" |
+  "Include" |
+  "Exclude";
+
+export const SendNotificationEmailTaskEntity = new Type<SendNotificationEmailTaskEntity>("SendNotificationEmailTask");
+export interface SendNotificationEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
+  Type: "SendNotificationEmailTask";
+  sendNotificationsOlderThan: number;
+  sendBehavior: SendAlertTypeBehavior;
+  alertTypes: Entities.MList<AlertTypeEntity>;
+}
+
+export module SendNotificationEmailTaskOperation {
+  export const Save : Entities.ExecuteSymbol<SendNotificationEmailTaskEntity> = registerSymbol("Operation", "SendNotificationEmailTaskOperation.Save");
+}
+
 

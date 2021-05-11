@@ -21,6 +21,8 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
   domainServer: string | null;
+  directoryRegistry_Username: string | null;
+  directoryRegistry_Password: string | null;
   azure_ApplicationID: string | null;
   azure_DirectoryID: string | null;
   azure_ClientSecret: string | null;
