@@ -23,7 +23,7 @@ var msalConfig: msal.Configuration = {
     clientId: window.__azureApplicationId!, //This is your client ID
     authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
     redirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
-    //postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
+    postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
   },
   cache: {
     cacheLocation: "localStorage",
@@ -31,21 +31,26 @@ var msalConfig: msal.Configuration = {
   }
 };
 
-var myMSALObj = new msal.PublicClientApplication(msalConfig);
+var msalClient = new msal.PublicClientApplication(msalConfig);
+
+export namespace Config {
+  export let scopes = ["user.read"];
+}
+
 
 export function signIn(ctx: LoginContext) {
   ctx.setLoading("azureAD");
 
   var userRequest: msal.PopupRequest = {
-    scopes: ["user.read"],
-    extraScopesToConsent: ["Calendars.Read"]
+    scopes: Config.scopes,
   };
 
-  myMSALObj.loginPopup(userRequest)
+  msalClient.loginPopup(userRequest)
     .then(a => {
+      localStorage.setItem('msalAccount', a.account!.username);
       return AuthClient.API.loginWithAzureAD(a.idToken, true);
     }).then(r => {
-           AuthClient.setAuthToken(r!.token, r!.authenticationType);
+      AuthClient.setAuthToken(r!.token, r!.authenticationType);
       AuthClient.setCurrentUser(r!.userEntity);
       AuthClient.Options.onLogin()
     })
@@ -65,11 +70,17 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
   if (location.search.contains("avoidAD"))
     return Promise.resolve(undefined);
 
+  var ai = getAccountInfo();
+
+  if (!ai)
+    return Promise.resolve(undefined);
+
   var userRequest: msal.SilentRequest = {
-    scopes: [window.__azureApplicationId!] // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
+    scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
+    account: ai,
   };
 
-  return myMSALObj.acquireTokenSilent(userRequest).then(res => {
+  return msalClient.acquireTokenSilent(userRequest).then(res => {
     const rawIdToken = res.idToken;
 
     return AuthClient.API.loginWithAzureAD(rawIdToken, false);
@@ -82,17 +93,36 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
   });
 }
 
+export function getAccountInfo() {
+  let account = localStorage.getItem('msalAccount');
+  if (!account)
+    return null;
+
+  return msalClient.getAccountByUsername(account) ?? undefined;
+}
+
 export function getAccessToken() {
+
+  var ai = getAccountInfo();
+
+  if (!ai)
+    throw new Error('User account missing from session. Please sign out and sign in again.');
+
   var userRequest: msal.SilentRequest = {
-    scopes: [window.__azureApplicationId!] // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
+    scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
+    account: ai,
   };
 
-  return myMSALObj.acquireTokenSilent(userRequest).then(res => res.idToken);
+  return msalClient.acquireTokenSilent(userRequest).then(res => res.accessToken);
 }
 
 export function signOut() {
-  if (myMSALObj.getActiveAccount())
-    myMSALObj.logout();
+  var account = getAccountInfo();
+  if (account) {
+    msalClient.logout({
+      account: account
+    }).done();
+  }
 }
 
 export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
