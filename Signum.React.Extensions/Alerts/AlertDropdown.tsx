@@ -19,62 +19,6 @@ import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityLink } from '@framework/Search'
 
-
-
-
-
-export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) => void, className?: string; }) {
-
-
- 
-
-  var icon = p.alert.alertType && p.alert.alertType.key && AlertToast.icons[p.alert.alertType.key]
-
-
-  return (
-    <Toast onClose={() => p.onClose([p.alert])} className={p.className}>
-      <Toast.Header>
-        {icon && <span className="mr-2">{icon}</span>}
-        <strong className="mr-auto">{p.alert.title ?? p.alert.alertType?.name ?? AlertEntity.niceName()}</strong>
-        <small>{DateTime.fromISO(p.alert.alertDate!).toRelative()}</small>
-      </Toast.Header>
-      <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        {AlertsClient.formatText(p.alert.text, p.alert.target)}
-        {p.alert.createdBy && <small className="sf-alert-signature">{p.alert.createdBy?.toStr}</small>}
-      </Toast.Body>
-    </Toast>
-  );
-}
-
-AlertToast.icons = {} as { [alertTypeKey: string]: React.ReactNode };
-
-export function AlertGroupToast(p: { alerts: Array<AlertEntity>, onClose: (e: AlertEntity[]) => void}) {
-
-  const [showAlerts, setShowAlert] = React.useState<number>(1);
-
-  const alert = p.alerts[0];
-
-  var icon = alert.alertType && alert.alertType.key && AlertToast.icons[alert.alertType.key]
-
-  return (
-    <div className="mb-2">
-      {p.alerts.filter((a, i) => i < showAlerts).map((a, i) => <AlertToast key={a.id} alert={a} onClose={p.onClose} className="mb-0 mt-0" />)}
-      {
-        p.alerts.length > showAlerts &&
-        <Toast className="mt-0" onClose={() => p.onClose(p.alerts)}>
-          <Toast.Header>
-            {icon && <span className="mr-2">{icon}</span>}
-            <strong >{AlertMessage._0SimilarAlerts.niceToString(p.alerts.length - showAlerts)}</strong>
-            <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
-            <small>{AlertMessage.CloseAll.niceToString()}</small>
-          </Toast.Header>
-        </Toast>
-      }
-    </div>
-  );
-}
-
-
 export default function AlertDropdown(props: { checkForChangesEvery?: number, keepRingingFor?: number }) {
 
   if (!Navigator.isViewable(AlertEntity))
@@ -202,8 +146,8 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
               { alertsGroups.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast> }
               {
                 alertsGroups.filter((gr, i) => i < showAlerts)
-                  .flatMap(gr => gr.key == "none" || gr.elements.length <= 2 ? gr.elements.map(a => <AlertToast alert={a} key={a.id} onClose={handleOnCloseAlerts}  />) :
-                    [<AlertGroupToast key={gr.key} alerts={gr.elements} onClose={handleOnCloseAlerts}/>])
+                .flatMap(gr => gr.key == "none" || gr.elements.length <= 2 ? gr.elements.map(a => <AlertToast alert={a} key={a.id} onClose={handleOnCloseAlerts} refresh={reloadCount}/>) :
+                  [<AlertGroupToast key={gr.key} alerts={gr.elements} onClose={handleOnCloseAlerts} refresh={reloadCount} />])
               }
               {
                 alertsGroups.length > showAlerts &&
@@ -243,5 +187,53 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
         }
       </div>}
     </>
+  );
+}
+
+export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) => void, refresh: () => void, className?: string; }) {
+
+  var icon = p.alert.alertType && p.alert.alertType.key && AlertToast.icons[p.alert.alertType.key]
+
+
+  return (
+    <Toast onClose={() => p.onClose([p.alert])} className={p.className}>
+      <Toast.Header>
+        {icon && <span className="mr-2">{icon}</span>}
+        <strong className="mr-auto">{p.alert.title ?? p.alert.alertType?.name ?? AlertEntity.niceName()}</strong>
+        <small>{DateTime.fromISO(p.alert.alertDate!).toRelative()}</small>
+      </Toast.Header>
+      <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
+        {AlertsClient.formatText(p.alert.text, p.alert.target, p.refresh)}
+        {p.alert.createdBy && <small className="sf-alert-signature">{p.alert.createdBy?.toStr}</small>}
+      </Toast.Body>
+    </Toast>
+  );
+}
+
+AlertToast.icons = {} as { [alertTypeKey: string]: React.ReactNode };
+
+export function AlertGroupToast(p: { alerts: Array<AlertEntity>, onClose: (e: AlertEntity[]) => void, refresh: () => void }) {
+
+  const [showAlerts, setShowAlert] = React.useState<number>(1);
+
+  const alert = p.alerts[0];
+
+  var icon = alert.alertType && alert.alertType.key && AlertToast.icons[alert.alertType.key]
+
+  return (
+    <div className="mb-2">
+      {p.alerts.filter((a, i) => i < showAlerts).map((a, i) => <AlertToast key={a.id} alert={a} onClose={p.onClose} refresh={p.refresh} className="mb-0 mt-0" />)}
+      {
+        p.alerts.length > showAlerts &&
+        <Toast className="mt-0" onClose={() => p.onClose(p.alerts)}>
+          <Toast.Header>
+            {icon && <span className="mr-2">{icon}</span>}
+            <strong >{AlertMessage._0SimilarAlerts.niceToString(p.alerts.length - showAlerts)}</strong>
+            <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
+            <small>{AlertMessage.CloseAll.niceToString()}</small>
+          </Toast.Header>
+        </Toast>
+      }
+    </div>
   );
 }
