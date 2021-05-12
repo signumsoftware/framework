@@ -31,6 +31,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   loginWithAzureAD: boolean;
   allowMatchUsersBySimpleUserName: boolean;
   autoCreateUsers: boolean;
+  autoUpdateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;
 }
@@ -393,6 +394,13 @@ export module UserADMessage {
   export const NameOrEmail = new MessageKey("UserADMessage", "NameOrEmail");
 }
 
+export const UserADMixin = new Type<UserADMixin>("UserADMixin");
+export interface UserADMixin extends Entities.MixinEntity {
+  Type: "UserADMixin";
+  oID: string | null;
+  sID: string | null;
+}
+
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
@@ -408,12 +416,6 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
 
 export module UserOIDMessage {
   export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
-}
-
-export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");
-export interface UserOIDMixin extends Entities.MixinEntity {
-  Type: "UserOIDMixin";
-  oID: string | null;
 }
 
 export module UserOperation {
