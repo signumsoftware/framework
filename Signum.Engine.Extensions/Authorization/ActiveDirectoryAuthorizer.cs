@@ -193,9 +193,7 @@ namespace Signum.Engine.Authorization
                 State = UserState.Saved,
             };
 
-            var mixin = result.TryMixin<UserOIDMixin>();
-            if (mixin != null)
-                mixin.OID = ctx.OID;
+            UpdateUser(result, ctx);
 
             return result;
         }
@@ -231,6 +229,19 @@ namespace Signum.Engine.Authorization
                     return null;
 
             }
+        }
+
+        public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)
+        {
+            if(user.TryMixin<UserOIDMixin>() != null && ctx.OID != null)
+            {
+                user.Mixin<UserOIDMixin>().OID = ctx.OID;
+                if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
+                    user.PasswordHash = null;
+            }
+
+            user.UserName = ctx.UserName;
+            user.Email = ctx.EmailAddress;
         }
     }
 }

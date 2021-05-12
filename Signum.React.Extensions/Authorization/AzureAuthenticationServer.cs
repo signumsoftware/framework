@@ -43,20 +43,6 @@ namespace Signum.React.Authorization
                     {
                         user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
                         (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
-
-                        if (user != null)
-                        {
-                            using (AuthLogic.Disable())
-                            using (OperationLogic.AllowSave<UserEntity>())
-                            {
-                                user.Mixin<UserOIDMixin>().OID = ctx.OID;
-                                user.UserName = ctx.UserName;
-                                user.Email = ctx.EmailAddress;
-                                if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
-                                    user.PasswordHash = null;
-                                user.Save();
-                            }
-                        }
                     }
 
                     if (user == null)
@@ -65,6 +51,22 @@ namespace Signum.React.Authorization
 
                         if (user == null)
                             return false;
+                    }
+                    else
+                    {
+                        ada.UpdateUser(user, ctx);
+
+                        if (user.IsGraphModified)
+                        {
+                            using (AuthLogic.Disable())
+                            using (OperationLogic.AllowSave<UserEntity>())
+                            {
+                                user.UserName = ctx.UserName;
+                                user.Email = ctx.EmailAddress;
+
+                                user.Save();
+                            }
+                        }
                     }
 
                     AuthServer.OnUserPreLogin(ac, user);
