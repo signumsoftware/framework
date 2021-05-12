@@ -1320,8 +1320,6 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
 
-
-
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
