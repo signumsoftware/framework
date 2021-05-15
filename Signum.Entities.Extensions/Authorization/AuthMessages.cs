@@ -18,6 +18,7 @@ namespace Signum.Entities.Authorization
         IncorrectPassword,
 
         Login,
+        MyProfile,
         Password,
         ChangePassword,
         SwitchUser,

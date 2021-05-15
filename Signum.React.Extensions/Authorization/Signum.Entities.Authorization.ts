@@ -124,6 +124,7 @@ export module LoginAuthMessage {
   export const User0IsDisabled = new MessageKey("LoginAuthMessage", "User0IsDisabled");
   export const IncorrectPassword = new MessageKey("LoginAuthMessage", "IncorrectPassword");
   export const Login = new MessageKey("LoginAuthMessage", "Login");
+  export const MyProfile = new MessageKey("LoginAuthMessage", "MyProfile");
   export const Password = new MessageKey("LoginAuthMessage", "Password");
   export const ChangePassword = new MessageKey("LoginAuthMessage", "ChangePassword");
   export const SwitchUser = new MessageKey("LoginAuthMessage", "SwitchUser");
