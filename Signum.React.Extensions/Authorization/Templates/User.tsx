@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserEntity, UserState, LoginAuthMessage, UserOIDMixin } from '../Signum.Entities.Authorization'
+import { UserEntity, UserState, LoginAuthMessage, UserADMixin } from '../Signum.Entities.Authorization'
 import { Binding } from '@framework/Reflection'
 import { ValueLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
@@ -11,7 +11,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   const ctx = p.ctx.subCtx({ labelColumns: { sm: 3 } });
   const entity = p.ctx.value;
 
-  var oid = tryGetMixin(entity, UserOIDMixin);
+  var oid = tryGetMixin(entity, UserADMixin);
 
   return (
     <div>
@@ -26,6 +26,6 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   );
 }
 
-User.changePasswordVisible = (user: UserEntity) => tryGetMixin(user, UserOIDMixin)?.oID == null;
-User.userNameReadonly = (user: UserEntity) => tryGetMixin(user, UserOIDMixin)?.oID != null;
-User.emailReadonly = (user: UserEntity) => tryGetMixin(user, UserOIDMixin)?.oID != null;
+User.changePasswordVisible = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null;
+User.userNameReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
+User.emailReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
