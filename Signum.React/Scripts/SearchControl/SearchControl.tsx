@@ -11,6 +11,7 @@ import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
+import { RefreshMode } from '../Signum.Entities.DynamicQuery';
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -45,7 +46,7 @@ export interface SearchControlProps {
   create?: boolean;
   view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
-  avoidAutoRefresh?: boolean;
+  defaultRefreshMode?: RefreshMode;
   avoidChangeUrl?: boolean;
   throwIfNotFindable?: boolean;
   refreshKey?: any;
@@ -61,7 +62,7 @@ export interface SearchControlProps {
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: () => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<any> | ModifiableEntity | undefined) => void;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => void;
   styleContext?: StyleContext;
 }
 
@@ -79,8 +80,8 @@ function is_touch_device(): boolean {
 export interface SearchControlHandler {
   findOptions: FindOptions;
   state?: SearchControlState;
-  doSearch(): void;
-  doSearchPage1(): void;
+  doSearch(opts: { dataChanged?: boolean, force?: boolean }): void;
+  doSearchPage1(force?: boolean): void;
   searchControlLoaded: SearchControlLoaded | null;
 }
 
@@ -102,8 +103,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
       return searchControlLoaded.current;
     },
     state: state,
-    doSearch: () => searchControlLoaded.current && searchControlLoaded.current.doSearch(),
-    doSearchPage1: () => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(),
+    doSearch: opts => searchControlLoaded.current && searchControlLoaded.current.doSearch(opts),
+    doSearchPage1: force => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(force),
   };
   React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
 
@@ -199,7 +200,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
         showBarExtensionOption={p.showBarExtensionOption}
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-        avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+        defaultRefreshMode={p.defaultRefreshMode}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
         refreshKey={p.refreshKey}
         extraOptions={p.extraOptions}

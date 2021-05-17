@@ -531,14 +531,16 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (!result) {
     if (findOptions)
       result = new FindOptionsAutocompleteConfig(findOptions, {
-        getAutocompleteConstructor: !create ? undefined : (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions }) as AutocompleteConstructor<Entity>[]
+        getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
       });
     else
       result = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
         types: type.name,
         subString: subStr,
         count: 5
-      }, signal).then(lites => [...lites, ...(!create ? [] : getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites }) as AutocompleteConstructor<Entity>[])]), { showType: showType ?? type.name.contains(",") });
+      }, signal)
+        .then(lites => [...lites, ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])]),
+        { showType: showType ?? type.name.contains(",") });
   }
 
   if (!result.getItemsDelay && s?.autocompleteDelay) {
@@ -783,6 +785,7 @@ export interface AutocompleteConstructorContext {
   ctx: TypeContext<any>;
   foundLites: Lite<Entity>[];
   findOptions?: FindOptions;
+  create: boolean;
 }
 
 export interface ViewOverride<T extends ModifiableEntity> {
@@ -792,7 +795,8 @@ export interface ViewOverride<T extends ModifiableEntity> {
 
 export interface AutocompleteConstructor<T extends ModifiableEntity> {
   type: PseudoType;
-  onClick: () => Promise<T | undefined>;
+  onClick: () => Promise<T | Lite<T & Entity> | undefined>;
+  customElement?: React.ReactNode;
 }
 
 export function getAutocompleteConstructors(tr: TypeReference, str: string, aac: AutocompleteConstructorContext): AutocompleteConstructor<ModifiableEntity>[]{

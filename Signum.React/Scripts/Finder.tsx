@@ -1313,14 +1313,12 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   if (resultTable == null)
     return undefined;
 
-  return resultTable.rows[0] && resultTable.rows[0].columns[0] || null;
+  return resultTable.rows[0]?.columns[0] ?? null;
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
-
-
 
 export module API {
 
@@ -1689,7 +1687,7 @@ export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, 
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute | undefined, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ |undefined, formater: CellFormatter) {
   if (pr == null)
     return;
   registeredPropertyFormatters[pr.toString()] = formater;
@@ -1749,7 +1747,8 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },
@@ -1765,7 +1764,8 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
             undefined;
 
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat("yyyy-MM-dd'T'HH:mm:ss")}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       });
     }
   },

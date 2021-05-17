@@ -1,3 +1,4 @@
+using NpgsqlTypes;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -663,6 +664,8 @@ namespace Signum.Engine.Linq
         date_trunc,
         age,
         tstzrange,
+        upper,
+        lower,
     }
 
     public static class PostgressOperator
@@ -980,16 +983,40 @@ namespace Signum.Engine.Linq
         public readonly Expression? Min;
         public readonly Expression? Max;
         public readonly Expression? PostgresRange;
-        public readonly bool AsUtc;
 
-        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange, bool asUtc)
+        public readonly Type ElementType;
+
+        public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange)
             :base(DbExpressionType.Interval, type)
-
         {
-            this.Min = min ?? (postgresRange == null ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
-            this.Max = max ?? (postgresRange == null ? throw new ArgumentNullException(nameof(max)) : (Expression?)null);
-            this.PostgresRange = postgresRange ?? ((min == null || max == null) ? throw new ArgumentNullException(nameof(min)) : (Expression?)null);
-            this.AsUtc = asUtc;
+            var isNullable =
+                 type.IsInstantiationOf(typeof(NullableInterval<>)) ? true :
+                 type.IsInstantiationOf(typeof(Interval<>)) ? false :
+                 throw new UnexpectedValueException(type);
+
+            this.ElementType = isNullable ?  type.GetGenericArguments()[0].Nullify() : type.GetGenericArguments()[0];
+            
+            if (postgresRange == null)
+            {
+                this.Min = min == null ? throw new ArgumentNullException(nameof(min)) :
+                    min.Type != ElementType ? throw new ArgumentException($"{nameof(min)} should be a {ElementType.TypeName()}"): 
+                    min;
+
+
+                this.Max = max == null ? throw new ArgumentNullException(nameof(max)) :
+                    max.Type != ElementType ? throw new ArgumentException($"{nameof(max)} should be a {ElementType.TypeName()}") :
+                    max;
+            }
+            else
+            {
+                var rangeType = typeof(NpgsqlRange<>).MakeGenericType(type.GetGenericArguments()[0]);
+
+                if (min != null || max != null)
+                    throw new InvalidOperationException($"{nameof(min)} and {nameof(max)} should be null if {nameof(postgresRange)} is used");
+
+                this.PostgresRange = postgresRange.Type != rangeType ? throw new ArgumentException($"{nameof(postgresRange)} should be a {rangeType.TypeName()}") :
+                    postgresRange;
+            }
         }
 
         public override string ToString()

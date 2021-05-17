@@ -5,7 +5,7 @@ import { FindOptions, FindMode, ResultRow, ModalFindOptions } from '../FindOptio
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
-import { Entity, EntityPack, getToString, isEntityPack, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
+import { Entity, EntityPack, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { namespace } from 'd3';
@@ -74,12 +74,12 @@ function SearchModal(p: SearchModalProps) {
     handleOkClicked();
   }
 
-  function handleCreateFinished(entity: EntityPack<any> | ModifiableEntity | undefined) {
+  function handleCreateFinished(entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) {
 
     const scl = searchControl.current!.searchControlLoaded!;
     if (p.findMode == "Find" && entity != null && !p.avoidReturnCreate && !p.findOptions.groupResults && !p.onOKClicked) {
-      const e = isEntityPack(entity) ? entity.entity as Entity : entity as Entity;
-      const ti = getTypeInfo(e.Type);
+      const e = isEntityPack(entity) ? entity.entity : entity;
+      const ti = getTypeInfo(isLite(e) ? e.EntityType : e.Type);
       MessageModal.show({
         buttons: "yes_no",
         style: "success",
@@ -88,19 +88,15 @@ function SearchModal(p: SearchModalProps) {
         message: SearchMessage.DoYouWantToSelectTheNew01_G.niceToString().forGenderAndNumber(ti.gender).formatHtml(ti.niceName, <strong>{getToString(e)}</strong>)
       }).then(b => {
         if (b == "yes") {
-          selectedRows.current = [{ entity: toLite(e), columns: [] }];
+          selectedRows.current = [{ entity: isLite(e) ? e : toLite(e as Entity), columns: [] }];
           okPressed.current = true;
           setShow(false);
-        } else {
-          if (!scl.props.avoidAutoRefresh)
-            scl.doSearch(true);
-        }
+        } else
+          scl.dataChanged();
       }).done();
 
-    } else {
-      if (!scl.props.avoidAutoRefresh)
-        scl.doSearch(true);
-    }
+    } else 
+      scl.dataChanged();
   }
 
   function onResize() {

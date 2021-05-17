@@ -35,6 +35,14 @@ export default function ValueLineModal(p: ValueLineModalProps) {
     p.onExited!(selectedValue.current);
   }
 
+  function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.keyCode == 13) {
+      setTimeout(() => {
+        handleOkClick();
+      }, 100);
+    }
+  }
+
   const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
   var vlp: ValueLineProps = {
@@ -59,7 +67,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div className="modal-body">
+      <div className="modal-body" onKeyUp={handleFiltersKeyUp}>
         <p>
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>

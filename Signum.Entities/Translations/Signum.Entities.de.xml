@@ -366,6 +366,10 @@
     <Member Name="SelectedItems0" Description="Ausgewählte Elemente: {0}" />
     <Member Name="TagsLabel" Description="Ausgewählte Elemente" />
   </Type>
+  <Type Name="RefreshMode">
+    <Member Name="Auto" Description="Auto" />
+    <Member Name="Manual" Description="Manuell" />
+  </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Decke" />
     <Member Name="Floor" Description="Boden" />

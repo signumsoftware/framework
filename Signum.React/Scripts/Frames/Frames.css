@@ -44,8 +44,10 @@
     }
 }
 
-.sf-button-bar
-{
+.sf-button-widget-container{
+}
+
+.sf-button-bar {
     margin-bottom: 16px;
 }
 

@@ -1,23 +1,22 @@
 ﻿ul.sf-widgets {
-    float: right;
     list-style-type: none;
     margin-top: -34px;
     display: flex;
     flex-direction: row-reverse;
+    float:right;
 }
 
 body.rtl ul.sf-widgets {
-    float: left;
+   float:left;
 }
 
-.modal-body > ul.sf-widgets {
-    margin-top: -60px;
+.modal-body > div > ul.sf-widgets {
+    margin-top: -45px;
 }
 
 ul.sf-widgets > li {
     display: block;
     position: relative;
-    float: left;
     margin-left: 4px;
 }
 
