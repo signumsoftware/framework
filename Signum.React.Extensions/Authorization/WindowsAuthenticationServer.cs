@@ -10,6 +10,7 @@ using System.Linq;
 using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Basics;
+using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -17,53 +18,12 @@ namespace Signum.React.Authorization
 
     public class WindowsAuthenticationServer
     {
-        public static Func<WindowsPrincipal, UserEntity?>? AutoCreateUser = DefaultAutoCreateUser;
-
-        public static UserEntity? DefaultAutoCreateUser(WindowsPrincipal wp)
+        private static PrincipalContext GetPrincipalContext(string domainName, ActiveDirectoryConfigurationEmbedded config)
         {
-            
-            if (!(AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada))
-                return null;
+            if (config.DirectoryRegistry_Username.HasText())
+                return new PrincipalContext(ContextType.Domain, domainName, config.DirectoryRegistry_Username + "@" + config.DomainServer, config.DirectoryRegistry_Password);
 
-            var config = ada.GetConfig();
-            var userName = wp.Identity.Name!;
-            var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\');
-            var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
-
-            if(ada.GetConfig().AllowMatchUsersBySimpleUserName)
-            {
-                UserEntity? user = AuthLogic.RetrieveUser(localName);
-                if (user != null)
-                    return user;
-            }
-
-            if (!config.AutoCreateUsers)
-                return null;
-            try
-            {
-                using (PrincipalContext pc =  config.DirectoryRegistry_Username.HasText() ?
-                    new PrincipalContext(ContextType.Domain, domainName, config.DirectoryRegistry_Username + "@" + config.DomainServer, config.DirectoryRegistry_Password): 
-                    new PrincipalContext(ContextType.Domain, domainName))
-                {
-                    
-
-                    UserEntity? user = AuthLogic.RetrieveUser(localName);
-
-                    if (user != null)
-                        return user;
-
-                    user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
-
-                    return user;
-                }
-            }
-            catch (Exception e)
-            {
-                e.Data["Identity.Name"] = wp.Identity.Name;
-                e.Data["domainName"] = domainName;
-                e.Data["localName"] = localName;
-                throw;
-            }
+            return new PrincipalContext(ContextType.Domain, domainName); //Uses current user
         }
 
         public static string? LoginWindowsAuthentication(ActionContext ac)
@@ -75,27 +35,77 @@ namespace Signum.React.Authorization
                     if (!(ac.HttpContext.User is WindowsPrincipal wp))
                         return $"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})";
 
-                    if (AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada && !ada.GetConfig().LoginWithWindowsAuthenticator)
+                    if (AuthLogic.Authorizer is not ActiveDirectoryAuthorizer ada)
+                        return "No AuthLogic.Authorizer set";
+
+                    var config = ada.GetConfig();
+
+                    if (!config.LoginWithWindowsAuthenticator)
                         return $"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false";
 
-                    UserEntity? user = AuthLogic.RetrieveUser(wp.Identity.Name!);
+                    var userName = wp.Identity.Name!;
+                    var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\')!;
+                    var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
+
+
+                    var sid = ((WindowsIdentity)wp.Identity).User!.Value;
+
+                    UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == sid);
 
                     if (user == null)
                     {
-                        if (AutoCreateUser == null)
-                            return "AutoCreateUser is null";
-
-                        user = AutoCreateUser(wp);
-
-                        if (user == null)
-                            return "AutoCreateUser returned null";
+                        user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == userName) ??
+                        (config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == userName || a.UserName == localName) : null);
                     }
+
+                    try
+                    {
+                        if (user == null)
+                        {
+                            if (!config.AutoCreateUsers)
+                                return null;
+
+                            using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                            {
+                                user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == sid);
+
+                                if (user == null)
+                                {
+                                    user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (!config.AutoUpdateUsers)
+                                return null;
+
+                            using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                            {
+                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.Data["Identity.Name"] = wp.Identity.Name;
+                        e.Data["domainName"] = domainName;
+                        e.Data["localName"] = localName;
+                        throw;
+                    }
+
+                    if (user == null)
+                    {
+                        if (user == null)
+                            return "AutoCreateUsers is false";
+                    }
+
 
                     AuthServer.OnUserPreLogin(ac, user);
                     AuthServer.AddUserSession(ac, user);
                     return null;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     e.LogException();
                     return e.Message;

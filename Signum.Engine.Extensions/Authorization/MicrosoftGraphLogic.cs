@@ -21,7 +21,6 @@ namespace Signum.Engine.Authorization
 
         public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
         {
-            
             ClientCredentialProvider authProvider = GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
@@ -46,42 +45,40 @@ namespace Signum.Engine.Authorization
 
         public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
         {
+            var adAuthorizer = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
+            var config = adAuthorizer.GetConfig();
+            
+            var acuCtx = GetMicrosoftGraphContext(adUser);
+
+            using (ExecutionMode.Global())
+            {
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().OID == acuCtx.OID);
+                if (user == null)
+                {
+                    user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == acuCtx.UserName) ??
+                           (acuCtx.UserName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == acuCtx.UserName || a.UserName == acuCtx.UserName.Before("@")) : null);
+                }
+
+                if (user != null)
+                {
+                    adAuthorizer.UpdateUser(user, acuCtx);
+
+                    return user;
+                }
+            }
+
+            var result = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).OnAutoCreateUser(acuCtx);
+
+            return result ?? throw new InvalidOperationException(ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded e) => e.AutoCreateUsers).NiceName() + " is not activated");
+        }
+
+        private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser)
+        {
             ClientCredentialProvider authProvider = GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
             var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
 
-            using (ExecutionMode.Global())
-            {
-                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserOIDMixin>().OID == Guid.Parse(msGraphUser.Id));
-                if(user != null)
-                    return user;
-
-                var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
-
-                user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == msGraphUser.UserPrincipalName) ??
-                       (msGraphUser.UserPrincipalName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == msGraphUser.UserPrincipalName || a.UserName == msGraphUser.UserPrincipalName.Before("@")) : null);
-
-                if (user != null)
-                {
-                    using (AuthLogic.Disable())
-                    using (OperationLogic.AllowSave<UserEntity>())
-                    {
-                        user.Mixin<UserOIDMixin>().OID = Guid.Parse(msGraphUser.Id);
-                        user.UserName = msGraphUser.UserPrincipalName;
-                        user.Email = msGraphUser.UserPrincipalName;
-                        if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
-                            user.PasswordHash = null;
-                        user.Save();
-                    }
-
-                    return user;
-                }
-
-            }
-
-            var result = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).OnAutoCreateUser(new MicrosoftGraphCreateUserContext(msGraphUser));
-
-            return result ?? throw new InvalidOperationException(ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded e) => e.AutoCreateUsers).NiceName() + " is not activated");
+            return new MicrosoftGraphCreateUserContext(msGraphUser);
         }
     }
 
@@ -101,6 +98,8 @@ namespace Signum.Engine.Authorization
         public string LastName => User.Surname;
 
         public Guid? OID => Guid.Parse(User.Id);
+
+        public string? SID => null;
     }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
