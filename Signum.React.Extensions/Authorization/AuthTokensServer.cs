@@ -79,7 +79,8 @@ namespace Signum.React.Authorization
             var c = Configuration();
 
             bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
-                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
+                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+                ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
             if (requiresRefresh)
             {

@@ -311,10 +311,6 @@ export module API {
     return ajaxPost({ url: "~/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
   }
 
-  export function refreshToken(oldToken: string): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
-  }
-
   export interface ChangePasswordRequest {
     oldPassword: string;
     newPassword: string;
@@ -341,8 +337,8 @@ export module API {
     return ajaxPost({ url: "~/api/auth/changePassword" }, request);
   }
 
-  export function fetchCurrentUser(): Promise<UserEntity> {
-    return ajaxGet({ url: "~/api/auth/currentUser", cache: "no-cache" });
+  export function fetchCurrentUser(refreshToken: boolean = false): Promise<UserEntity> {
+    return ajaxGet({ url: "~/api/auth/currentUser" + (refreshToken ? "?refreshToken=true" : ""), cache: "no-cache" });
   }
 
   export function logout(): Promise<void> {

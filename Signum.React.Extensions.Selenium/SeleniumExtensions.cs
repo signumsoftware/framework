@@ -53,6 +53,12 @@ namespace Signum.React.Selenium
             }
             catch (WebDriverTimeoutException ex)
             {
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                    return default!;
+                }
+
                 throw new WebDriverTimeoutException(ex.Message + ": waiting for {0} in page {1}({2})".FormatWith(
                     actionDescription == null ? "visual condition" : actionDescription(),
                     selenium.Title,
@@ -395,8 +401,13 @@ namespace Signum.React.Selenium
         public static void SafeSendKeys(this IWebElement element, string? text)
         {
             new Actions(element.GetDriver()).MoveToElement(element).Perform();
-            while(element.GetAttribute("value").Length > 0)
-                element.SendKeys(Keys.Backspace);
+            var length = 0;
+            while((length = element.GetAttribute("value").Length) > 0)
+            {
+                for (int i = 0; i < length; i++)
+                    element.SendKeys(Keys.Backspace);
+            }
+               
 
             if (text.HasText())
                 element.SendKeys(text);
