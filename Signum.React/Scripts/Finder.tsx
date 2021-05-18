@@ -21,7 +21,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, Anonymous
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -57,7 +57,7 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
     pinned: { splitText: true },
@@ -132,7 +132,9 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity" || qt.filterType == "Enum" && !isState(qt.type);
+
+  export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
   export let defaultPagination: Pagination = {
     mode: "Paginate",
