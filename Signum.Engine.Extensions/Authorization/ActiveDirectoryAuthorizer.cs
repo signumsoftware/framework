@@ -1,6 +1,7 @@
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Utilities;
 using System;
@@ -272,7 +273,7 @@ namespace Signum.Engine.Authorization
 
             UpdateUserInternal(user, ctx);
 
-            if (user.IsGraphModified)
+            if (GraphExplorer.IsGraphModified(user))
             {
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
