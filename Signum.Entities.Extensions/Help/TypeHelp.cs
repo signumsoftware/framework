@@ -25,7 +25,7 @@ namespace Signum.Entities.Help
         public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Type.ToString());
+        public override string ToString() => As.Expression(() => $"{Type}");
 
         public bool IsEmpty
         {
