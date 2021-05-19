@@ -421,7 +421,7 @@ namespace Signum.Engine.Word
             {
                 string fullFileName = Path.Combine(DumpFileFolder, part.Uri.ToString().Replace("/", "_") + "." + fileName);
 
-                File.WriteAllText(fullFileName, part.RootElement.NiceToString());
+                File.WriteAllText(fullFileName, part.RootElement!.NiceToString());
             }
         }
 
