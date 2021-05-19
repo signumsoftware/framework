@@ -9,47 +9,40 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.Authorization
 {
+#pragma warning disable CA1416 // Validate platform compatibility
     public static class ActiveDirectoryLogic
     {
-        public static PrincipalContext GetPrincipalContext()
+        static PrincipalContext GetPrincipalContext()
         {
             var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
             if (config.DirectoryRegistry_Username.HasText() && config.DirectoryRegistry_Password.HasText())
-            {
                 return new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!);
-            }
             else
-            {
-                throw new InvalidOperationException();
-            }
+                return new PrincipalContext(ContextType.Domain, config.DomainName);
         }
 
-        public static  async Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName)
+        public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName)
         {
-            var pc = GetPrincipalContext();
-            PrincipalSearchResult<Principal> result;
-
-            var principal = new UserPrincipal(pc)
+            using (var pc = GetPrincipalContext())
             {
-                SamAccountName = searchUserName + "*"
-            };
+                var principal = new UserPrincipal(pc)
+                {
+                    SamAccountName = searchUserName + "*"
+                };
 
-            var searcher = new PrincipalSearcher(principal);
+                var searcher = new PrincipalSearcher(principal);
 
+                var result = searcher.FindAll().Select(a => new ActiveDirectoryUser
+                {
+                    UPN = a.UserPrincipalName,
+                    DisplayName = a.DisplayName,
+                    JobTitle = a.Description,
+                    ObjectID = (Guid)a.Guid!,
+                }).ToList();
 
-            result  = searcher.FindAll(); 
-           
-
-            return await Task.Run(() =>  result.Select(a => new ActiveDirectoryUser
-            {
-                UPN = a.UserPrincipalName,
-                DisplayName = a.DisplayName,
-                JobTitle = a.Description,
-                ObjectID = (Guid)a.Guid!,
-            }).ToList());
-
-
+                return Task.FromResult(result);
+            }
         }
     }
 }

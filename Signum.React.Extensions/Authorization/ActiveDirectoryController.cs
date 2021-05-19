@@ -28,8 +28,14 @@ namespace Signum.React.Authorization
         [HttpGet("api/findADUsers")]
         public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
         {
-            //return ActiveDirectoryLogic.SearchUser(subString);
-            return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
+            var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+            if (config.Azure_ApplicationID.HasText())
+                return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
+
+            if (config.DomainName.HasText())
+                return ActiveDirectoryLogic.SearchUser(subString);
+
+            throw new InvalidOperationException($"Neither {nameof(ActiveDirectoryConfigurationEmbedded.Azure_ApplicationID)} or {nameof(ActiveDirectoryConfigurationEmbedded.DomainName)} are set in {nameof(ActiveDirectoryConfigurationEmbedded)}")
         }
 
 
