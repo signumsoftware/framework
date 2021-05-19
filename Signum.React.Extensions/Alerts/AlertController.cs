@@ -24,13 +24,13 @@ namespace Signum.React.Authorization
     {
 
         [HttpGet("api/alerts/myAlerts")]
-        public List<AlertEntity> MyAlerts(string apiKey)
+        public List<AlertEntity> MyAlerts()
         {
             return Database.Query<AlertEntity>().Where(a => a.Recipient.Is(UserEntity.Current) && a.Alerted).ToList();
         }
 
         [HttpGet("api/alerts/myAlertsCount")]
-        public MyAlertCountResult MyAlertsCount(string apiKey)
+        public MyAlertCountResult MyAlertsCount()
         {
             var result =  Database.Query<AlertEntity>()
                 .Where(a => a.Recipient.Is(UserEntity.Current) && a.Alerted)

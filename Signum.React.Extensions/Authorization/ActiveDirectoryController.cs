@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 
+
+
 namespace Signum.React.Authorization
 {
     [ValidateModelFilter]
@@ -26,6 +28,7 @@ namespace Signum.React.Authorization
         [HttpGet("api/findADUsers")]
         public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
         {
+            //return ActiveDirectoryLogic.SearchUser(subString);
             return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
         }
 
