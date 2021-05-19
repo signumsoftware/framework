@@ -35,7 +35,7 @@ namespace Signum.React.Authorization
             if (config.DomainName.HasText())
                 return ActiveDirectoryLogic.SearchUser(subString);
 
-            throw new InvalidOperationException($"Neither {nameof(ActiveDirectoryConfigurationEmbedded.Azure_ApplicationID)} or {nameof(ActiveDirectoryConfigurationEmbedded.DomainName)} are set in {nameof(ActiveDirectoryConfigurationEmbedded)}")
+            throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
         }
 
 
