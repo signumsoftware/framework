@@ -66,8 +66,7 @@ namespace Signum.Entities.UserQueries
         public Guid Guid { get; set; } = Guid.NewGuid();
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => 
-        DisplayName);
+        public override string ToString() => As.Expression(() => DisplayName);
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
@@ -114,6 +113,7 @@ namespace Signum.Entities.UserQueries
                 !HideQuickLink ? null! : new XAttribute("HideQuickLink", HideQuickLink),
                 IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
                 !AppendFilters ? null! : new XAttribute("AppendFilters", AppendFilters),
+                RefreshMode == RefreshMode.Auto ? null! : new XAttribute("RefreshMode", RefreshMode.ToString()),
                 !GroupResults ? null! : new XAttribute("GroupResults", GroupResults),
                 ElementsPerPage == null ? null! : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null! : new XAttribute("PaginationMode", PaginationMode),
@@ -132,6 +132,7 @@ namespace Signum.Entities.UserQueries
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
             AppendFilters = element.Attribute("AppendFilters")?.Let(a => bool.Parse(a.Value)) ?? false;
+            RefreshMode = element.Attribute("RefreshMode")?.Let(a => a.Value.ToEnum<RefreshMode>()) ?? RefreshMode.Auto;
             GroupResults = element.Attribute("GroupResults")?.Let(a => bool.Parse(a.Value)) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
