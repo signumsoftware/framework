@@ -108,12 +108,7 @@ namespace SearchPage {
   export let marginDown = 130;
   export let minHeight = 600;
   export let showFilters = (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => {
-    var allFilters = [
-      ...fo.filterOptions ?? [],
-      ... (fo.includeDefaultFilters ?? true) ? Finder.getDefaultFilter(qd, qs)?? [] : []
-    ];
-
-    return allFilters.length > 0 && !anyPinned(allFilters);
+    return false;
   }
 }
 
