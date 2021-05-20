@@ -1183,6 +1183,8 @@ namespace Signum.Entities
 
         [Description("{0} is not compatible with {1}")]
         _0IsNotCompatibleWith1,
+        [Description("{0} is repeated")]
+        _0IsRepated,
     }
 
     public static class ValidationMessageHelper
