@@ -203,7 +203,7 @@ namespace Signum.Engine.Authorization
                 PasswordHash = null,
                 Email = ctx.EmailAddress,
                 Role = GetRole(ctx, throwIfNull: true)!,
-                State = UserState.Saved,
+                State = UserState.Active,
             };
 
             UpdateUserInternal(result, ctx);

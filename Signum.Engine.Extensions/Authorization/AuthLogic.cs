@@ -210,7 +210,7 @@ namespace Signum.Engine.Authorization
         {
             var result = RetrieveUserByUsername(username);
 
-            if (result != null && result.State == UserState.Disabled)
+            if (result != null && result.State == UserState.Deactivated)
                 throw new ApplicationException(LoginAuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
 
             return result;
@@ -318,7 +318,7 @@ namespace Signum.Engine.Authorization
 
                         if (MaxFailedLoginAttempts.HasValue &&
                             user.LoginFailedCounter == MaxFailedLoginAttempts &&
-                            user.State == UserState.Saved)
+                            user.State == UserState.Active)
                         {
                             var config = EmailLogic.Configuration;
                             var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
@@ -327,7 +327,7 @@ namespace Signum.Engine.Authorization
                             var mail = new UserLockedMail(user, url);
                             mail.SendMailAsync();
 
-                            user.Execute(UserOperation.Disable);
+                            user.Execute(UserOperation.Deactivate);
 
                             throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
                                 .FormatWith(user.UserName));
