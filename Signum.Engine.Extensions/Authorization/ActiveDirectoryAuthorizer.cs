@@ -68,7 +68,7 @@ namespace Signum.Engine.Authorization
         public string UserName => GetClaim("preferred_username");
         public string? EmailAddress => GetClaim("preferred_username");
 
-        public string? FullName => TryGetClain("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
+        public string? FullName => TryGetClain("name");
 
         public string FirstName
         {
