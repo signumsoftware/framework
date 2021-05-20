@@ -28,7 +28,7 @@ namespace Signum.Engine.Word
     {
         internal static void ValidateTables(OpenXmlPart part, WordTemplateEntity template, List<TemplateError> errors)
         {
-            var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
+            var graphicFrames = part.RootElement!.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
             foreach (var item in graphicFrames)
             {
                 var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
@@ -56,7 +56,7 @@ namespace Signum.Engine.Word
 
         internal static void ProcessTables(OpenXmlPart part, WordTemplateParameters parameters)
         {
-            var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
+            var graphicFrames = part.RootElement!.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
             foreach (var item in graphicFrames)
             {
                 var nonVisualProps = item.Descendants().SingleEx(a => a.LocalName == "cNvPr");
@@ -68,8 +68,8 @@ namespace Signum.Engine.Word
                     var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
                     if (chartRef != null)
                     {
-                        OpenXmlPart chartPart = part.GetPartById(chartRef.Id.Value);
-                        var chart = chartPart.RootElement.Descendants<Charts.Chart>().SingleEx();
+                        OpenXmlPart chartPart = part.GetPartById(chartRef.Id!.Value!);
+                        var chart = chartPart.RootElement!.Descendants<Charts.Chart>().SingleEx();
                         ReplaceChart(chart, dataTable);
                     }
                     else
@@ -108,7 +108,7 @@ namespace Signum.Engine.Word
                 {
                     var last = nodes[nodes.Count - 1];
                     var clone = (N)last.CloneNode(true);
-                    last.Parent.InsertAfter(clone, last);
+                    last.Parent!.InsertAfter(clone, last);
                     apply(clone, data[i], i, true);
                 }
             }
@@ -147,7 +147,7 @@ namespace Signum.Engine.Word
                     SynchronizeNodes(
                         tr.Descendants<Drawing.TableCell>().ToList(),
                         dataTable.Columns.Cast<Data.DataColumn>().Select(dc => dr[dc]).ToList(),
-                        (gc, val, i, isCloned2) => { gc.Descendants<Drawing.Text>().SingleEx().Text = ToStringLocal(val); });
+                        (gc, val, i, isCloned2) => { gc.Descendants<Drawing.Text>().SingleEx().Text = ToStringLocal(val)!; });
                 });
         }
 
@@ -171,11 +171,11 @@ namespace Signum.Engine.Word
         {
             serie.Descendants<Charts.Formula>().ToList().ForEach(f => f.Remove());
 
-            serie.GetFirstChild<Charts.Index>().Val = new UInt32Value((uint)index);
-            serie.GetFirstChild<Charts.Order>().Val = new UInt32Value((uint)index);
+            serie.GetFirstChild<Charts.Index>()!.Val = new UInt32Value((uint)index);
+            serie.GetFirstChild<Charts.Order>()!.Val = new UInt32Value((uint)index);
 
             var setTxt = serie.Descendants<Charts.SeriesText>().SingleEx();
-            setTxt.StringReference.Descendants<Charts.NumericValue>().SingleEx().Text = dataRow[0]?.ToString();
+            setTxt.StringReference!.Descendants<Charts.NumericValue>().SingleEx().Text = dataRow[0]?.ToString()!;
 
             {
                 var cat = serie.Descendants<Charts.CategoryAxisData>().SingleEx();
@@ -197,7 +197,7 @@ namespace Signum.Engine.Word
                   (sp, val, i, isCloned) =>
                   {
                       sp.Index = new UInt32Value((uint)i);
-                      sp.Descendants<Charts.NumericValue>().Single().Text = ToStringLocal(val);
+                      sp.Descendants<Charts.NumericValue>().Single().Text = ToStringLocal(val)!;
                   });
             }
         }
