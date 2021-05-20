@@ -42,7 +42,15 @@ namespace Signum.React.Authorization
         [HttpPost("api/createADUser")]
         public Lite<UserEntity> CreateADUser([FromBody][Required] ActiveDirectoryUser user)
         {
-            return MicrosoftGraphLogic.CreateUserFromAD(user).ToLite();
+            var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+            if (config.Azure_ApplicationID.HasText())
+                return MicrosoftGraphLogic.CreateUserFromAD(user).ToLite();
+
+            if (config.DomainName.HasText())
+                return ActiveDirectoryLogic.CreateUserFromAD(user).ToLite();
+
+            throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
         }
     }
 }

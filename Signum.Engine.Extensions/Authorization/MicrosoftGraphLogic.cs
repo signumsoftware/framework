@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            var result = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).OnAutoCreateUser(acuCtx);
+            var result = adAuthorizer.OnAutoCreateUser(acuCtx);
 
             return result ?? throw new InvalidOperationException(ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded e) => e.AutoCreateUsers).NiceName() + " is not activated");
         }
