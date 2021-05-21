@@ -57,6 +57,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
   if (fo == undefined || currentUserQuery == null)
     return null;
 
+  var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
       <h2>
@@ -70,15 +71,21 @@ export default function UserQueryPage(p: UserQueryPageProps) {
       </h2>
 
       {currentUserQuery && <SearchControl ref={searchControl}
+        defaultIncludeDefaultFilters={true}
+        findOptions={fo}
+        tag="UserQueryPage"
+        throwIfNotFindable={true}
+        showBarExtension={true}
+        allowSelection={qs && qs.allowSelection}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
-        defaultIncludeDefaultFilters={true}
+        showFilters={false /*consider adding uq.showFilters*/}
+        view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
-        showBarExtension={true}
-        findOptions={fo}
+        extraButtons={qs?.extraButtons}
       />
       }
     </div>

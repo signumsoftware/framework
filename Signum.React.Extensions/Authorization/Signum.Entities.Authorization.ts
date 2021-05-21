@@ -31,6 +31,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   loginWithAzureAD: boolean;
   allowMatchUsersBySimpleUserName: boolean;
   autoCreateUsers: boolean;
+  autoUpdateUsers: boolean;
   roleMapping: Entities.MList<RoleMappingEmbedded>;
   defaultRole: Entities.Lite<RoleEntity> | null;
 }
@@ -124,6 +125,7 @@ export module LoginAuthMessage {
   export const User0IsDisabled = new MessageKey("LoginAuthMessage", "User0IsDisabled");
   export const IncorrectPassword = new MessageKey("LoginAuthMessage", "IncorrectPassword");
   export const Login = new MessageKey("LoginAuthMessage", "Login");
+  export const MyProfile = new MessageKey("LoginAuthMessage", "MyProfile");
   export const Password = new MessageKey("LoginAuthMessage", "Password");
   export const ChangePassword = new MessageKey("LoginAuthMessage", "ChangePassword");
   export const SwitchUser = new MessageKey("LoginAuthMessage", "SwitchUser");
@@ -393,6 +395,13 @@ export module UserADMessage {
   export const NameOrEmail = new MessageKey("UserADMessage", "NameOrEmail");
 }
 
+export const UserADMixin = new Type<UserADMixin>("UserADMixin");
+export interface UserADMixin extends Entities.MixinEntity {
+  Type: "UserADMixin";
+  oID: string | null;
+  sID: string | null;
+}
+
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
@@ -410,17 +419,11 @@ export module UserOIDMessage {
   export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
 }
 
-export const UserOIDMixin = new Type<UserOIDMixin>("UserOIDMixin");
-export interface UserOIDMixin extends Entities.MixinEntity {
-  Type: "UserOIDMixin";
-  oID: string | null;
-}
-
 export module UserOperation {
   export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
   export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
-  export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Enable");
-  export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Disable");
+  export const Reactivate : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Reactivate");
+  export const Deactivate : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Deactivate");
   export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
   export const Delete : Entities.DeleteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Delete");
 }
@@ -428,8 +431,8 @@ export module UserOperation {
 export const UserState = new EnumType<UserState>("UserState");
 export type UserState =
   "New" |
-  "Saved" |
-  "Disabled";
+  "Active" |
+  "Deactivated";
 
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {

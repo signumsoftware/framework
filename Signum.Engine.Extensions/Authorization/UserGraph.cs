@@ -19,32 +19,32 @@ namespace Signum.Engine.Authorization
 
             new Execute(UserOperation.Save)
             {
-                FromStates = { UserState.Saved, UserState.New },
-                ToStates = { UserState.Saved },
+                FromStates = { UserState.Active, UserState.New },
+                ToStates = { UserState.Active },
                 CanBeNew = true,
                 CanBeModified = true,
-                Execute = (u, _) => { u.State = UserState.Saved; }
+                Execute = (u, _) => { u.State = UserState.Active; }
             }.Register();
 
-            new Execute(UserOperation.Disable)
+            new Execute(UserOperation.Deactivate)
             {
-                FromStates = { UserState.Saved },
-                ToStates = { UserState.Disabled },
+                FromStates = { UserState.Active },
+                ToStates = { UserState.Deactivated },
                 Execute = (u, _) =>
                 {
                     u.DisabledOn = TimeZoneManager.Now;
-                    u.State = UserState.Disabled;
+                    u.State = UserState.Deactivated;
                 },
             }.Register();
 
-            new Execute(UserOperation.Enable)
+            new Execute(UserOperation.Reactivate)
             {
-                FromStates = { UserState.Disabled },
-                ToStates = { UserState.Saved },
+                FromStates = { UserState.Deactivated },
+                ToStates = { UserState.Active },
                 Execute = (u, _) =>
                 {
                     u.DisabledOn = null;
-                    u.State = UserState.Saved;
+                    u.State = UserState.Active;
                 },
             }.Register();
 
@@ -59,7 +59,7 @@ namespace Signum.Engine.Authorization
 
             new Delete(UserOperation.Delete)
             {
-                FromStates = { UserState.Disabled, UserState.Saved },
+                FromStates = { UserState.Deactivated, UserState.Active },
                 Delete = (u, _) =>
                 {
                     u.Delete();

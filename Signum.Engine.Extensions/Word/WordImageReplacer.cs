@@ -52,7 +52,7 @@ namespace Signum.Engine.Word
             {
                 bitmaps = bitmaps.Select(bitmap =>
                 {
-                    var part = doc.MainDocumentPart.GetPartById(blips.First().Embed);
+                    var part = doc.MainDocumentPart!.GetPartById(blips.First().Embed!);
 
                     using (var stream = part.GetStream())
                     {
@@ -62,7 +62,7 @@ namespace Signum.Engine.Word
                 }).ToArray();
             }
 
-            doc.MainDocumentPart.DeletePart(blips.First().Embed);
+            doc.MainDocumentPart!.DeletePart(blips.First().Embed!);
 
             var i = 0;
             var bitmapStack = new Stack<Bitmap>(bitmaps.Reverse());
@@ -76,7 +76,7 @@ namespace Signum.Engine.Word
         
         public static Size GetBlipBitmapSize(this WordprocessingDocument doc, Blip blip)
         {
-            var part = doc.MainDocumentPart.GetPartById(blip.Embed);
+            var part = doc.MainDocumentPart!.GetPartById(blip.Embed!);
 
             using (var str = part.GetStream())
                 return Bitmap.FromStream(str).Size;
@@ -84,8 +84,8 @@ namespace Signum.Engine.Word
 
         public static void ReplaceBlipContent(this WordprocessingDocument doc, Blip blip, Bitmap bitmap, string newImagePartId, ImagePartType imagePartType = ImagePartType.Png)
         {
-            if (doc.MainDocumentPart.Parts.Any(p => p.RelationshipId == blip.Embed))
-                doc.MainDocumentPart.DeletePart(blip.Embed);
+            if (doc.MainDocumentPart!.Parts.Any(p => p.RelationshipId == blip.Embed))
+                doc.MainDocumentPart.DeletePart(blip.Embed!);
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
         }
@@ -93,7 +93,7 @@ namespace Signum.Engine.Word
         public static void RemoveImage(this WordprocessingDocument doc, string title, bool removeFullDrawing)
         {
             Blip blip = FindBlip(doc, title);
-            doc.MainDocumentPart.DeletePart(blip.Embed);
+            doc.MainDocumentPart!.DeletePart(blip.Embed!);
 
             if (removeFullDrawing)
                 ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
@@ -103,7 +103,7 @@ namespace Signum.Engine.Word
 
         static ImagePart CreateImagePart(this WordprocessingDocument doc, Bitmap bitmap, string id, ImagePartType imagePartType = ImagePartType.Png)
         {
-            ImagePart img = doc.MainDocumentPart.AddImagePart(imagePartType, id);
+            ImagePart img = doc.MainDocumentPart!.AddImagePart(imagePartType, id);
 
             using (var ms = new MemoryStream())
             {
@@ -133,7 +133,7 @@ namespace Signum.Engine.Word
 
         public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
         {
-            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Single(r =>
+            var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Single(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
                 var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
@@ -146,7 +146,7 @@ namespace Signum.Engine.Word
 
         public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate)
         {
-            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().Where(r =>
+            var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Where(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
                 var match = prop != null && predicate(prop);

@@ -69,10 +69,6 @@ export type AlertState =
   "Saved" |
   "Attended";
 
-export module AlertTask {
-  export const AlertNotificationMailTask : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "AlertTask.AlertNotificationMailTask");
-}
-
 export const AlertTypeEntity = new Type<AlertTypeEntity>("AlertType");
 export interface AlertTypeEntity extends Basics.SemiSymbol {
   Type: "AlertType";

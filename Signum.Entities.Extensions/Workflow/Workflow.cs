@@ -134,6 +134,8 @@ namespace Signum.Entities.Workflow
         WorkflowProperties,
         [Description("{0} not allowed for {1} (no constructor has been defined in 'WithWorkflow')")]
         _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow,
+        [Description("You are not member of any lane containing an Start event in workflow '{0}'")]
+        YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0,
     }
 
     [Serializable]

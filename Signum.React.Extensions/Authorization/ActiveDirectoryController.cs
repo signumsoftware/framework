@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
 
+
+
 namespace Signum.React.Authorization
 {
     [ValidateModelFilter]
@@ -26,14 +28,29 @@ namespace Signum.React.Authorization
         [HttpGet("api/findADUsers")]
         public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
         {
-            return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
+            var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+            if (config.Azure_ApplicationID.HasText())
+                return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
+
+            if (config.DomainName.HasText())
+                return ActiveDirectoryLogic.SearchUser(subString);
+
+            throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
         }
 
 
         [HttpPost("api/createADUser")]
         public Lite<UserEntity> CreateADUser([FromBody][Required] ActiveDirectoryUser user)
         {
-            return MicrosoftGraphLogic.CreateUserFromAD(user).ToLite();
+            var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+            if (config.Azure_ApplicationID.HasText())
+                return MicrosoftGraphLogic.CreateUserFromAD(user).ToLite();
+
+            if (config.DomainName.HasText())
+                return ActiveDirectoryLogic.CreateUserFromAD(user).ToLite();
+
+            throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
         }
     }
 }

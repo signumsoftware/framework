@@ -1,6 +1,7 @@
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Utilities;
 using System;
@@ -18,6 +19,7 @@ namespace Signum.Engine.Authorization
         public string FirstName { get; }
         public string LastName { get; }
         public Guid? OID { get;  }
+        public string? SID { get; }
     }
 
     public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
@@ -33,13 +35,16 @@ namespace Signum.Engine.Authorization
 
         public Guid? OID => null;
 
+        public string? SID => this.GetUserPrincipal().Sid.Value;
+
         UserPrincipal? userPrincipal;
 
-        public DirectoryServiceAutoCreateUserContext(PrincipalContext principalContext, string localName, string domainName)
+        public DirectoryServiceAutoCreateUserContext(PrincipalContext principalContext, string localName, string domainName, UserPrincipal? userPrincipal = null)
         {
             PrincipalContext = principalContext;
             UserName = localName;
             DomainName = domainName;
+            this.userPrincipal = userPrincipal;
         }
 
         public UserPrincipal GetUserPrincipal() //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
@@ -54,18 +59,26 @@ namespace Signum.Engine.Authorization
 
         string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
+        string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
+
         public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+
+        public string? SID => null;
 
         public string UserName => GetClaim("preferred_username");
         public string? EmailAddress => GetClaim("preferred_username");
+
+        public string? FullName => TryGetClain("name");
 
         public string FirstName
         {
             get
             {
-                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+                var name = FullName;
 
-                return name == null ? "Unknown" : name.Contains(",") ? name.After(",").Trim() : name.TryBefore(" ")?.Trim() ?? name.DefaultToNull() ?? "Unknown";
+                return name == null ? "Unknown" : 
+                    name.Contains(",") ? name.After(",").Trim() :
+                    name.TryBefore(" ")?.Trim() ?? name.DefaultToNull() ?? "Unknown";
             }
         }
 
@@ -73,11 +86,15 @@ namespace Signum.Engine.Authorization
         {
             get
             {
-                var name = ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == "name")?.Value;
+                var name = FullName;
 
-                return name == null ? "Unknown" : name.Contains(",") ? name.Before(",").Trim() : name.TryAfter(" ")?.Trim() ??  "Unknown";
+                return name == null ? "Unknown" : 
+                    name.Contains(",") ? name.Before(",").Trim() : 
+                    name.TryAfter(" ")?.Trim() ??  "Unknown";
             }
         }
+
+      
 
         public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal)
         {
@@ -128,20 +145,25 @@ namespace Signum.Engine.Authorization
                             {
                                 UserEntity? user = AuthLogic.RetrieveUser(userName);
 
-                                if (user == null)
-                                {
-                                    user = OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
-                                }
-
+                                var dsacuCtx = new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!);
 
                                 if (user != null)
                                 {
+                                    UpdateUser(user, dsacuCtx);
+
                                     AuthLogic.OnUserLogingIn(user);
+
                                     return user;
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
+                                    user = OnAutoCreateUser(dsacuCtx);
+
+                                    if (user == null)
+                                        throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
+
+                                    AuthLogic.OnUserLogingIn(user);
+                                    return user;
                                 }
                             }
                         }
@@ -182,12 +204,10 @@ namespace Signum.Engine.Authorization
                 PasswordHash = null,
                 Email = ctx.EmailAddress,
                 Role = GetRole(ctx, throwIfNull: true)!,
-                State = UserState.Saved,
+                State = UserState.Active,
             };
 
-            var mixin = result.TryMixin<UserOIDMixin>();
-            if (mixin != null)
-                mixin.OID = ctx.OID;
+            UpdateUserInternal(result, ctx);
 
             return result;
         }
@@ -222,6 +242,44 @@ namespace Signum.Engine.Authorization
                 else
                     return null;
 
+            }
+        }
+
+
+        public virtual void UpdateUserInternal(UserEntity user, IAutoCreateUserContext ctx)
+        {
+            if (ctx.OID != null)
+            {
+                user.Mixin<UserADMixin>().OID = ctx.OID;
+                if (!UserADMixin.AllowPasswordForActiveDirectoryUsers)
+                    user.PasswordHash = null;
+            }
+
+            if (ctx.SID != null)
+            {
+                user.Mixin<UserADMixin>().SID = ctx.SID;
+                if (!UserADMixin.AllowPasswordForActiveDirectoryUsers)
+                    user.PasswordHash = null;
+            }
+
+            user.UserName = ctx.UserName;
+            user.Email = ctx.EmailAddress;
+        }
+
+        public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)
+        {
+            if (this.GetConfig().AutoUpdateUsers == false)
+                return;
+
+            UpdateUserInternal(user, ctx);
+
+            if (GraphExplorer.IsGraphModified(user))
+            {
+                using (AuthLogic.Disable())
+                using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    user.Save();
+                }
             }
         }
     }

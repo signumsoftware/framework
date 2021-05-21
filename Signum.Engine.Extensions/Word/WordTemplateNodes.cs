@@ -39,9 +39,9 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var textNode = new W.Text(text) {Space = spaceMode};
+            var textNode = new W.Text(text!) {Space = spaceMode};
 
-            var result = new W.Run(runProps, textNode);
+            var result = new W.Run(runProps!, textNode);
 
             if (initialBr)
                 result.InsertBefore(new W.Break(), textNode);
@@ -74,7 +74,7 @@ namespace Signum.Engine.Word
         
         public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
         {
-            return ((W.Run)run).RunProperties;
+            return ((W.Run)run).RunProperties!;
         }
 
         public bool IsParagraph(OpenXmlElement? element)
@@ -102,9 +102,9 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var textElement = new D.Text(text);
+            var textElement = new D.Text(text!);
 
-            var result = new D.Run(runProps, textElement);
+            var result = new D.Run(runProps!, textElement);
             
             if (initialBr)
                 result.InsertBefore(new D.Break(), textElement);
@@ -134,7 +134,7 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
         {
-            return ((D.Run)run).RunProperties;
+            return ((D.Run)run).RunProperties!;
         }
 
         public bool IsParagraph(OpenXmlElement? element)
@@ -162,8 +162,8 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var textElement = new S.Text(text);
-            var result = new S.Run(runProps, textElement);
+            var textElement = new S.Text(text!);
+            var result = new S.Run(runProps!, textElement);
             
             if (initialBr)
                 result.InsertBefore(new S.Break(), textElement);
@@ -195,7 +195,7 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
         {
-            return ((S.Run)run).RunProperties;
+            return ((S.Run)run).RunProperties!;
         }
 
         public bool IsParagraph(OpenXmlElement? element)
@@ -444,7 +444,7 @@ namespace Signum.Engine.Word
         protected internal override void RenderNode(WordTemplateParameters p)
         {
             if (this.NodeProvider.IsParagraph(this.Parent) && 
-                !this.Parent.ChildElements.Any(a => BlockContainerNode.IsImportant(a, NodeProvider) && a != this))
+                !this.Parent!.ChildElements.Any(a => BlockContainerNode.IsImportant(a, NodeProvider) && a != this))
                 this.Parent.Remove();
             else
                 this.Remove();
@@ -492,7 +492,7 @@ namespace Signum.Engine.Word
                 item.RenderNode(p);
             }
 
-            var parent = this.Parent;
+            var parent = this.Parent!;
             int index = parent.ChildElements.IndexOf(this);
             parent.RemoveChild(this);
   
@@ -673,12 +673,12 @@ namespace Signum.Engine.Word
 
             base.WriteTo(xmlWriter);
 
-            this.RemoveChild(this.ForeachBlock);
+            this.RemoveChild(this.ForeachBlock!);
         }
 
         protected internal override void RenderNode(WordTemplateParameters p)
         {
-            var parent = this.Parent;
+            var parent = this.Parent!;
 
             this.ValueProvider.Foreach(p, () =>
             {
@@ -696,7 +696,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
-            var parent = this.Parent;
+            var parent = this.Parent!;
             int index = parent.ChildElements.IndexOf(this);
             this.Remove();
             parent.InsertAt(this.ForeachToken.ReplaceMatchNode("@foreach" + this.ValueProvider.ToString(variables, null)), index++);
@@ -741,7 +741,7 @@ namespace Signum.Engine.Word
             if (this.AscendantNode!.Parent != other.AscendantNode!.Parent)
                 throw new InvalidOperationException("Parents do not match");
 
-            return this.AscendantNode.Parent;
+            return this.AscendantNode.Parent!;
         }
 
         public MatchNodePair CloneNode()
@@ -827,7 +827,7 @@ namespace Signum.Engine.Word
             if (this.NotAnyBlock != null)
                 this.RemoveChild(this.NotAnyBlock);
 
-            this.RemoveChild(this.AnyBlock);
+            this.RemoveChild(this.AnyBlock!);
         }
 
         protected internal override void ReplaceBlock()
@@ -889,7 +889,7 @@ namespace Signum.Engine.Word
                     this.NotAnyBlock.RenderNode(p);
                 }
                 else
-                    this.Parent.RemoveChild(this);
+                    this.Parent!.RemoveChild(this);
             }
         }
 
@@ -917,7 +917,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
-            var parent = this.Parent;
+            var parent = this.Parent!;
             int index = parent.ChildElements.IndexOf(this);
             this.Remove();
 
@@ -1028,7 +1028,7 @@ namespace Signum.Engine.Word
             if (this.ElseBlock != null)
                 this.RemoveChild(this.ElseBlock);
 
-            this.RemoveChild(this.IfBlock);
+            this.RemoveChild(this.IfBlock!);
         }
 
         public override void FillTokens(List<QueryToken> tokens)
@@ -1053,7 +1053,7 @@ namespace Signum.Engine.Word
                 this.ElseBlock.RenderNode(p);
             }
             else
-                this.Parent.RemoveChild(this);
+                this.Parent!.RemoveChild(this);
         }
 
         public override void Synchronize(SynchronizationContext sc)
@@ -1080,7 +1080,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
-            var parent = this.Parent;
+            var parent = this.Parent!;
             int index = parent.ChildElements.IndexOf(this);
             this.Remove();
 
@@ -1114,17 +1114,17 @@ namespace Signum.Engine.Word
     {
         public static void ReplaceBy(this OpenXmlElement element, OpenXmlElement replacement)
         {
-            element.Parent.ReplaceChild(replacement, element);
+            element.Parent!.ReplaceChild(replacement, element);
         }
 
         public static void ReplaceBy(this OpenXmlElement element, IEnumerable<OpenXmlElement> replacements)
         {
             foreach (var r in replacements)
             {
-                element.Parent.InsertBefore(r, element);
+                element.Parent!.InsertBefore(r, element);
             }
 
-            element.Parent.RemoveChild(element);
+            element.Parent!.RemoveChild(element);
         }
 
         public static void MoveChilds(this OpenXmlElement target, IEnumerable<OpenXmlElement> childs)

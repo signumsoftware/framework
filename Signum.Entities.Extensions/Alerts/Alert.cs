@@ -121,12 +121,6 @@ namespace Signum.Entities.Alerts
         public static DeleteSymbol<AlertTypeEntity> Delete;
     }
 
-    [AutoInit]
-    public static class AlertTask
-    {
-        public static SimpleTaskSymbol AlertNotificationMailTask;
-    }
-
     public enum AlertMessage
     {
         Alert,

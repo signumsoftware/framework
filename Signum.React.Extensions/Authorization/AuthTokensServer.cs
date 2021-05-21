@@ -79,7 +79,8 @@ namespace Signum.React.Authorization
             var c = Configuration();
 
             bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
-                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
+                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
+                ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
             if (requiresRefresh)
             {
@@ -101,7 +102,7 @@ namespace Signum.React.Authorization
             if (user == null)
                 throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-            if (user.State == UserState.Disabled)
+            if (user.State == UserState.Deactivated)
                 throw new AuthenticationException(LoginAuthMessage.User0IsDisabled.NiceToString(user));
 
             if (user.UserName != oldToken.User.UserName)

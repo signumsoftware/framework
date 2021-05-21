@@ -67,9 +67,9 @@ namespace Signum.Engine.Authorization
                         if (error != null)
                             throw new ApplicationException(error);
 
-                        if (user.State == UserState.Disabled)
+                        if (user.State == UserState.Deactivated)
                         {
-                            user.Execute(UserOperation.Enable);
+                            user.Execute(UserOperation.Reactivate);
                         }
                         
                         user.PasswordHash = Security.EncodePassword(password);
@@ -105,7 +105,7 @@ namespace Signum.Engine.Authorization
             {
                 user = Database
                     .Query<UserEntity>()
-                    .SingleOrDefault(u => u.Email == email && u.State != UserState.Disabled);
+                    .SingleOrDefault(u => u.Email == email && u.State != UserState.Deactivated);
 
                 if (user == null)
                     throw new ApplicationException(AuthEmailMessage.EmailNotFound.NiceToString());

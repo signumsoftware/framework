@@ -52,7 +52,7 @@ namespace Signum.Engine.Excel
             result.Worksheet = sheet;
             sheet.Save();
 
-            workbookPart.Workbook.Sheets.Append(
+            workbookPart.Workbook.Sheets!.Append(
                 new Sheet
                 {
                     Name = name,
@@ -65,7 +65,7 @@ namespace Signum.Engine.Excel
 
         public static void XLDeleteSheet(this SpreadsheetDocument document, string sheetId)
         {
-            WorkbookPart wbPart = document.WorkbookPart;
+            WorkbookPart wbPart = document.WorkbookPart!;
 
             Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
               Where(s => s.Id == sheetId).FirstOrDefault();
@@ -74,7 +74,7 @@ namespace Signum.Engine.Excel
                 return;
 
             // Remove the sheet reference from the workbook.
-            WorksheetPart worksheetPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
+            WorksheetPart worksheetPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id!));
             theSheet.Remove();
 
             // Delete the worksheet part.
@@ -120,7 +120,7 @@ namespace Signum.Engine.Excel
             {
                 case CellValues.SharedString:
                     // For shared strings, look up the value in the shared strings table.
-                    var stringTable = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+                    var stringTable = document.WorkbookPart!.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
                     // If the shared string table is missing, something's wrong.
                     // Just return the index that you found in the cell.
                     // Otherwise, look up the correct text in the table.
@@ -145,7 +145,7 @@ namespace Signum.Engine.Excel
             if(type == typeof(string))
             {
                 cell.RemoveAllChildren();
-                cell.Append(new InlineString(new Text((string?)value)));
+                cell.Append(new InlineString(new Text((string?)value!)));
                 cell.DataType = CellValues.InlineString;
             }
             else
@@ -183,7 +183,7 @@ namespace Signum.Engine.Excel
 
         public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
         {
-            WorkbookPart wbPart = document.WorkbookPart;
+            WorkbookPart wbPart = document.WorkbookPart!;
 
             Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
               Where(s => s.Id == sheetId).FirstOrDefault();
@@ -193,13 +193,13 @@ namespace Signum.Engine.Excel
 
             // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
             // a reference to the cell whose address matches the address you've supplied:
-            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
+            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id!));
             return wsPart;
         }
 
         public static WorksheetPart GetWorksheetPartByName(this SpreadsheetDocument document, string sheetName)
         {
-            WorkbookPart wbPart = document.WorkbookPart;
+            WorkbookPart wbPart = document.WorkbookPart!;
 
             Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
               Where(s => s.Name == sheetName).FirstOrDefault();
@@ -209,7 +209,7 @@ namespace Signum.Engine.Excel
 
             // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
             // a reference to the cell whose address matches the address you've supplied:
-            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
+            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id!));
             return wsPart;
         }
     }

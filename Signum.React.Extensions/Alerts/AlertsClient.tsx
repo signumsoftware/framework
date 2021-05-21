@@ -93,7 +93,7 @@ function chooseDate(): Promise<DateTime | undefined> {
 }
 
 
-export function formatText(text: string, target: Lite<Entity> | null) {
+export function formatText(text: string, target: Lite<Entity> | null, onNavigated?: () => void) {
   if (!target)
     return text;
 
@@ -101,7 +101,7 @@ export function formatText(text: string, target: Lite<Entity> | null) {
     return (
       <>
         {text.before("[Target]")}
-        <EntityLink lite={target} />
+        <EntityLink lite={target} onNavigated={onNavigated} />
         {text.after("[Target]")}
       </>
     );
@@ -110,7 +110,7 @@ export function formatText(text: string, target: Lite<Entity> | null) {
     return (
       <>
         {text.before("[Target:")}
-        <EntityLink lite={target}>{text.after("[Target:").beforeLast("]")}</EntityLink>
+        <EntityLink lite={target} onNavigated={onNavigated}>{text.after("[Target:").beforeLast("]")}</EntityLink>
         {text.afterLast("]")}
       </>
     );
@@ -119,7 +119,7 @@ export function formatText(text: string, target: Lite<Entity> | null) {
     <>
       {text}
       <br />
-      <EntityLink lite={target} />
+      <EntityLink lite={target} onNavigated={onNavigated}/>
     </>
   );
 }

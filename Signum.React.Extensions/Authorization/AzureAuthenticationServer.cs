@@ -36,27 +36,12 @@ namespace Signum.React.Authorization
                     var principal = ValidateToken(jwt, out var jwtSecurityToken);
                     var ctx = new AzureClaimsAutoCreateUserContext(principal);
 
-                    UserEntity? user =
-                        Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserOIDMixin>().OID == ctx.OID);
+                    UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
                     if(user == null)
                     {
                         user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
                         (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
-
-                        if (user != null)
-                        {
-                            using (AuthLogic.Disable())
-                            using (OperationLogic.AllowSave<UserEntity>())
-                            {
-                                user.Mixin<UserOIDMixin>().OID = ctx.OID;
-                                user.UserName = ctx.UserName;
-                                user.Email = ctx.EmailAddress;
-                                if (!UserOIDMixin.AllowUsersWithPassswordAndOID)
-                                    user.PasswordHash = null;
-                                user.Save();
-                            }
-                        }
                     }
 
                     if (user == null)
@@ -65,6 +50,10 @@ namespace Signum.React.Authorization
 
                         if (user == null)
                             return false;
+                    }
+                    else
+                    {
+                        ada.UpdateUser(user, ctx);
                     }
 
                     AuthServer.OnUserPreLogin(ac, user);

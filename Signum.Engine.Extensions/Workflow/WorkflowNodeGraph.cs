@@ -32,7 +32,7 @@ namespace Signum.Engine.Workflow
             if (Workflow.MainEntityStrategies.Count == 0)
                 return false;
 
-            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start).Select(s => NextConnections(s).SingleEx().To);
+            var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start);
 
             return act.Any(a =>
             {

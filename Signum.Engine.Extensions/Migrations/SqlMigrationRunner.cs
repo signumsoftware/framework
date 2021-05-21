@@ -1,3 +1,4 @@
+using Signum.Engine.Cache;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
@@ -182,6 +183,8 @@ namespace Signum.Engine.Migrations
                         Execute(mi);
                     }
 
+                    ResetCache();
+
                     Console.WriteLine("Elapsed time: {0}".FormatWith(TimeZoneManager.Now.Subtract(start).ToString(@"hh\:mm\:ss")));
 
                     return true;
@@ -195,6 +198,13 @@ namespace Signum.Engine.Migrations
                 }
             }
 
+        }
+
+        private static void ResetCache()
+        {
+            CacheLogic.ForceReset();
+            GlobalLazy.ResetAll();
+            Schema.Current.InvalidateMetadata();
         }
 
         private static void Execute(MigrationInfo mi)
