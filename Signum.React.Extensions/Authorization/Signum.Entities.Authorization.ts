@@ -422,8 +422,8 @@ export module UserOIDMessage {
 export module UserOperation {
   export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
   export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
-  export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Enable");
-  export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Disable");
+  export const Reactivate : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Reactivate");
+  export const Deactivate : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Deactivate");
   export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
   export const Delete : Entities.DeleteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Delete");
 }
@@ -431,8 +431,8 @@ export module UserOperation {
 export const UserState = new EnumType<UserState>("UserState");
 export type UserState =
   "New" |
-  "Saved" |
-  "Disabled";
+  "Active" |
+  "Deactivated";
 
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {

@@ -48,7 +48,7 @@ namespace Signum.Entities.Authorization
         {
             if (pi.Name == nameof(State))
             {
-                if (DisabledOn != null && State != UserState.Disabled)
+                if (DisabledOn != null && State != UserState.Deactivated)
                     return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
@@ -80,8 +80,8 @@ namespace Signum.Entities.Authorization
     {
         [Ignore]
         New = -1,
-        Saved,
-        Disabled,
+        Active,
+        Deactivated,
     }
 
     [AutoInit]
@@ -89,8 +89,8 @@ namespace Signum.Entities.Authorization
     {
         public static ConstructSymbol<UserEntity>.Simple Create;
         public static ExecuteSymbol<UserEntity> Save;
-        public static ExecuteSymbol<UserEntity> Enable;
-        public static ExecuteSymbol<UserEntity> Disable;
+        public static ExecuteSymbol<UserEntity> Reactivate;
+        public static ExecuteSymbol<UserEntity> Deactivate;
         public static ExecuteSymbol<UserEntity> SetPassword;
         public static DeleteSymbol<UserEntity> Delete;
     }
