@@ -51,6 +51,9 @@ namespace Signum.Engine.Word
 
         public string GetText(OpenXmlElement run)
         {
+            if (run is W.Text t)
+                return t.Text;
+
             return run.ChildElements.OfType<W.Text>().SingleOrDefault()?.Text ?? "";
         }
 

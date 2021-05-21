@@ -4,16 +4,16 @@ import { TypeContext } from '@framework/TypeContext'
 import { ScheduledTaskEntity } from '../Signum.Entities.Scheduler'
 
 export default function ScheduledTask(p : { ctx: TypeContext<ScheduledTaskEntity> }){
-  const e = p.ctx;
+  const ctx = p.ctx;
 
   return (
     <div>
-      <ValueLine ctx={e.subCtx(f => f.suspended)} />
-      <EntityLine ctx={e.subCtx(f => f.task)} create={false} />
-      <EntityDetail ctx={e.subCtx(f => f.rule)} />
-      <ValueLine ctx={e.subCtx(f => f.machineName)} />
-      <ValueLine ctx={e.subCtx(f => f.applicationName)} />
-      <EntityLine ctx={e.subCtx(f => f.user)} />
+      <EntityLine ctx={ctx.subCtx(f => f.task)} create={false} />
+      <EntityDetail ctx={ctx.subCtx(f => f.rule)} />
+      <EntityLine ctx={ctx.subCtx(f => f.user)} />
+      {!ctx.value.isNew && <ValueLine ctx={ctx.subCtx(f => f.machineName)} />}
+      {!ctx.value.isNew && <ValueLine ctx={ctx.subCtx(f => f.applicationName)} />}
+      <ValueLine ctx={ctx.subCtx(f => f.suspended)} />
     </div>
   );
 }
