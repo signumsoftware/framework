@@ -401,7 +401,7 @@ namespace Signum.Entities.UserQueries
             return "{0} {1} {2}".FormatWith(token, Operation, ValueString);
         }
 
-        internal QueryFilterEmbedded Clone() => new QueryFilterEmbedded
+        public QueryFilterEmbedded Clone() => new QueryFilterEmbedded
         {
             Indentation = Indentation,
             GroupOperation = GroupOperation,
