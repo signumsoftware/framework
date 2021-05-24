@@ -15,7 +15,6 @@ import { NumericTextBox } from '../Lines/ValueLine';
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown } from 'react-bootstrap'
-import { parseFilterOptions } from '../Finder'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
