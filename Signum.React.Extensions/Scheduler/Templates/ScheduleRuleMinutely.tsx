@@ -8,7 +8,7 @@ export default function ScheduleRuleMinutely(p : { ctx: TypeContext<ScheduleRule
 
   return (
     <div>
-      <ValueLine ctx={ctx4.subCtx(f => f.startingOn)} />
+      <ValueLine ctx={ctx4.subCtx(f => f.startingOn)} helpText="The hour determines when each execution will occour"/>
       <ValueLine ctx={ctx4.subCtx(f => f.eachMinutes)} />
     </div>
   );

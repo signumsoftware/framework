@@ -27,7 +27,7 @@ namespace Signum.Engine.Authorization
         public readonly PrincipalContext PrincipalContext;
         public string UserName { get; private set; }
         public string DomainName { get; private set; }
-        public string? EmailAddress => this.GetUserPrincipal().EmailAddress;
+        public string? EmailAddress => this.GetUserPrincipal().EmailAddress != null ? this.GetUserPrincipal().EmailAddress : null;
 
         public string FirstName => this.GetUserPrincipal().GivenName;
 
