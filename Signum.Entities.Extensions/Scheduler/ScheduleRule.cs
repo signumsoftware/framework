@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Globalization;
 using Signum.Utilities;
@@ -118,13 +118,13 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return "{0} {1} {2} {3}".FormatWith(
-                (Monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_M.NiceToString() : "") +
-                (Tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_T.NiceToString() : "") +
-                (Wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_W.NiceToString() : "") +
+                (Monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Mo.NiceToString() : "") +
+                (Tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Tu.NiceToString() : "") +
+                (Wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_We.NiceToString() : "") +
                 (Thursday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Th.NiceToString() : "") +
-                (Friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_F.NiceToString() : "") +
+                (Friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Fr.NiceToString() : "") +
                 (Saturday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Sa.NiceToString() : "") +
-                (Sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
+                (Sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Su.NiceToString() : ""),
                 (Calendar != null ? (Holiday ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 StartingOn.ToUserInterface().ToShortTimeString());
@@ -239,64 +239,33 @@ namespace Signum.Entities.Scheduler
 
     public enum SchedulerMessage
     {
-        [Description("Each {0} hours")]
-        Each0Hours,
         [Description("Each {0} minutes")]
         Each0Minutes,
-        [Description("Dialy")]
-        ScheduleRuleDailyEntity,
-        [Description("Every day at ")]
-        ScheduleRuleDailyDN_Everydayat,
-        [Description("Starting On")]
-        ScheduleRuleDayDN_StartingOn,
-        [Description("Each X Hours")]
-        ScheduleRuleHourlyEntity,
-        [Description("Each X Minutes")]
-        ScheduleRuleMinutelyEntity,
-        [Description("Days of week")]
-        ScheduleRuleWeekDaysEntity,
+
         [Description("and holidays")]
         ScheduleRuleWeekDaysDN_AndHoliday,
         [Description("at")]
         ScheduleRuleWeekDaysDN_At,
         [Description("but holidays")]
         ScheduleRuleWeekDaysDN_ButHoliday,
-        [Description("Calendar")]
-        ScheduleRuleWeekDaysDN_Calendar,
-        [Description("F")]
-        ScheduleRuleWeekDaysDN_F,
-        [Description("Friday")]
-        ScheduleRuleWeekDaysDN_Friday,
-        [Description("Holiday")]
-        ScheduleRuleWeekDaysDN_Holiday,
-        [Description("M")]
-        ScheduleRuleWeekDaysDN_M,
-        [Description("Monday")]
-        ScheduleRuleWeekDaysDN_Monday,
-        [Description("S")]
-        ScheduleRuleWeekDaysDN_S,
-        [Description("Sa")]
-        ScheduleRuleWeekDaysDN_Sa,
-        [Description("Saturday")]
-        ScheduleRuleWeekDaysDN_Saturday,
-        [Description("Sunday")]
-        ScheduleRuleWeekDaysDN_Sunday,
-        [Description("T")]
-        ScheduleRuleWeekDaysDN_T,
+
+
+        [Description("Mo")]
+        ScheduleRuleWeekDaysDN_Mo,
+        [Description("Tu")]
+        ScheduleRuleWeekDaysDN_Tu,
+        [Description("We")]
+        ScheduleRuleWeekDaysDN_We,
         [Description("Th")]
         ScheduleRuleWeekDaysDN_Th,
-        [Description("Thursday")]
-        ScheduleRuleWeekDaysDN_Thursday,
-        [Description("Tuesday")]
-        ScheduleRuleWeekDaysDN_Tuesday,
-        [Description("W")]
-        ScheduleRuleWeekDaysDN_W,
-        [Description("Wednesday")]
-        ScheduleRuleWeekDaysDN_Wednesday,
-        [Description("Weekly")]
-        ScheduleRuleWeeklyEntity,
-        [Description("Day of the week")]
-        ScheduleRuleWeeklyDN_DayOfTheWeek,
+        [Description("Fr")]
+        ScheduleRuleWeekDaysDN_Fr,
+        [Description("Sa")]
+        ScheduleRuleWeekDaysDN_Sa,
+        [Description("Su")]
+        ScheduleRuleWeekDaysDN_Su,
+
+
         [Description("Day {0} at {1} in {2}")]
         Day0At1In2,
         TaskIsNotRunning

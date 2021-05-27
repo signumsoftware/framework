@@ -177,7 +177,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       }))),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
-      refreshMode: p.searchControl.state.refreshMode,
+      refreshMode: p.searchControl.state.refreshMode ?? "Auto",
     }));
 
     if (uq?.id) {
