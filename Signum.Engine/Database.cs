@@ -1389,6 +1389,12 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return new Updateable<E>(query, null);
         }
 
+        public static int UnsafeUpdate<E, V>(this IQueryable<E> query, Expression<Func<E, V>> propertyExpression, Expression<Func<E, V>> valueExpression, string? message = null)
+            where E : Entity
+        {
+            return new Updateable<E>(query, null).Set(propertyExpression, valueExpression).Execute(message);
+        }
+
         public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
              where E : Entity
         {
