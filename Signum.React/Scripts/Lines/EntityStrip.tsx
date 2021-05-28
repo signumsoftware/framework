@@ -252,10 +252,12 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   var hasIcon = p.onRemove || p.drag;
 
+  var containerHtmlAttributes = (p.onItemContainerHtmlAttributes && p.onItemContainerHtmlAttributes(p.ctx.value));
+
   return (
-    <li className="sf-strip-element"
+    <li className={classes("sf-strip-element", containerHtmlAttributes?.className)}
       {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
-      {...(p.onItemContainerHtmlAttributes && p.onItemContainerHtmlAttributes(p.ctx.value))}>
+      {...containerHtmlAttributes}>
       <div className={classes(drag && "sf-strip-dropable", drag?.dropClass)}
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
@@ -265,11 +267,11 @@ export function EntityStripElement(p: EntityStripElementProps) {
         {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
         {
           p.onView ?
-            <a href={url} className="sf-entitStrip-link" onClick={p.onView} {...htmlAttributes}>
+            <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>
               {toStr}
             </a>
             :
-            <span className="sf-entitStrip-link" {...htmlAttributes}>
+            <span className={classes("sf-strip-link", htmlAttributes?.className)} {...htmlAttributes}>
               {toStr}
             </span>
         }
