@@ -199,7 +199,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     const s = p.setter;
     s.property = newProperty == null ? undefined! :
       p.root.propertyRouteType == "Root" ? newProperty.propertyPath() :
-        newProperty.propertyPath().after(p.root.propertyPath()).trimStart('.');
+        removeInitialPoin(newProperty.propertyPath().after(p.root.propertyPath()));
 
     s.operation = newProperty == null || p.isPredicate ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
 
@@ -212,6 +212,13 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
       p.onSetterChanged();
       forceUpdate();
     }).done();
+  }
+
+  function removeInitialPoin(str: string) {
+    if (str.startsWith("."))
+      return str.after(".");
+
+    return str;
   }
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
