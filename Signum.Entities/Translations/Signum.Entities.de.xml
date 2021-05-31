@@ -520,6 +520,7 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsRepated" Description="{0} wird wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
