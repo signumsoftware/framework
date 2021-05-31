@@ -1398,7 +1398,9 @@ export module API {
 
 
 
-
+function shouldIgnoreValues(pinned?: PinnedFilter | null) {
+  return pinned != null && (pinned.active == "Always" || pinned.active == "WhenHasValue");
+}
 
 export module Encoder {
 
@@ -1426,7 +1428,7 @@ export module Encoder {
       if (isFilterGroupOption(fo)) {
         query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || Boolean(fo.pinned)));
+        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
         query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
@@ -1546,7 +1548,7 @@ export module Decoder {
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
-            filters: toFilterList(gr.elements, identation + 1, ignoreValues || Boolean(pinned)),
+            filters: toFilterList(gr.elements, identation + 1, ignoreValues || shouldIgnoreValues(pinned)),
           }) as FilterGroupOption;
         }
       });
