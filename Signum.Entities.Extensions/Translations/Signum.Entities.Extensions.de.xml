@@ -6,6 +6,7 @@
   <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Active Directory-Konfiguration">
     <Member Name="AllowMatchUsersBySimpleUserName" Description="Benutzer durch einfachen Benutzernamen zulassen" />
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
+    <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
@@ -1405,6 +1406,7 @@
     <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sieht so aus, als ob Ihr Windows-Benutzer diese Anwendung nicht verwenden darf, der Browser keine Identitätsinformationen bereitstellt oder der Server nicht richtig konfiguriert ist." />
+    <Member Name="MyProfile" Description="Mein Profil" />
     <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
     <Member Name="NoWindowsUserFound" Description="Kein Windows-Benutzer gefunden" />
@@ -2415,7 +2417,10 @@
     <Member Name="PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport" Description="Wählen Sie den Benutzer aus Active Directory aus, den Sie importieren möchten." />
     <Member Name="SelectActiveDirectoryUser" Description="Active Directory-Benutzer auswählen" />
   </Type>
-  <Type Name="UserADMixin" />
+  <Type Name="UserADMixin">
+    <Member Name="OID" Description="OID" />
+    <Member Name="SID" Description="SID" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
@@ -2481,7 +2486,9 @@
   </Type>
   <Type Name="UserOperation">
     <Member Name="Create" Description="Erstellen" />
+    <Member Name="Deactivate" Description="Deaktivieren" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="Reactivate" Description="Reaktivieren" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="SetPassword" Description="Passwort festlegen" />
   </Type>
@@ -2537,6 +2544,8 @@
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
   </Type>
   <Type Name="UserState" Description="Benutzerstatus">
+    <Member Name="Active" Description="Aktiv" />
+    <Member Name="Deactivated" Description="Deaktiviert" />
     <Member Name="New" Description="Neu" />
   </Type>
   <Type Name="UserTicketEntity" Description="Benutzerticket" PluralDescription="Benutzertickets" Gender="n">
