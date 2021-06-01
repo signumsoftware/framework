@@ -203,7 +203,7 @@ export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) 
         <small>{DateTime.fromISO(p.alert.alertDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        {AlertsClient.formatText(p.alert.text, p.alert.target, p.refresh)}
+        {AlertsClient.formatText(p.alert.text, p.alert, p.refresh)}
         {p.alert.createdBy && <small className="sf-alert-signature">{p.alert.createdBy?.toStr}</small>}
       </Toast.Body>
     </Toast>

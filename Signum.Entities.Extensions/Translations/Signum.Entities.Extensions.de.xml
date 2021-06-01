@@ -274,7 +274,7 @@
     <Member Name="To" Description="An" />
   </Type>
   <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
-    <Member Name="Actor" Description="Schauspieler" />
+    <Member Name="Actor" Description="Akteur" />
     <Member Name="CaseActivity" Description="Fall-Aktivität" />
     <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="State" Description="Zustand" />
@@ -2782,13 +2782,13 @@
   <Type Name="WorkflowIssueType" />
   <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" Description="Workflowstrasse">
-    <Member Name="Actors" Description="Schauspieler" />
+    <Member Name="Actors" Description="Akteur" />
     <Member Name="Name" Description="Name" />
     <Member Name="Pool" Description="Pool" />
     <Member Name="Xml" Description="XML" />
   </Type>
   <Type Name="WorkflowLaneModel" Description="Workflowstrasse">
-    <Member Name="Actors" Description="Schauspieler" />
+    <Member Name="Actors" Description="Akteur" />
     <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
     <Member Name="Name" Description="Name" />
   </Type>
