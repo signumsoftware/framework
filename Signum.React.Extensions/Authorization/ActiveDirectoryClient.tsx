@@ -2,12 +2,12 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery } from './Signum.Entities.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal';
 import { FindOptionsParsed } from '@framework/FindOptions';
 import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal';
-import { Lite } from '@framework/Signum.Entities';
+import { Lite, SearchMessage } from '@framework/Signum.Entities';
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
 import { isPermissionAuthorized } from './AuthClient';
@@ -57,6 +57,22 @@ export function start(options: { routes: JSX.Element[]  }) {
         </button>
       }
     );
+  });
+
+  Finder.addSettings({
+    queryName: UserADQuery.ActiveDirectoryUsers,
+    defaultFilters: [
+      {
+        groupOperation: "Or",
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        filters: [
+          { token: "DisplayName", operation: "StartsWith" },
+          { token: "GivenName", operation: "StartsWith" },
+          { token: "Surname", operation: "StartsWith" },
+          { token: "Mail", operation: "StartsWith" },
+        ]
+      }],
+    pagination: { mode: "Firsts", elementsPerPage: 20 },
   });
 
 }

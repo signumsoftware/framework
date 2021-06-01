@@ -402,6 +402,10 @@ export interface UserADMixin extends Entities.MixinEntity {
   sID: string | null;
 }
 
+export module UserADQuery {
+  export const ActiveDirectoryUsers = new QueryKey("UserADQuery", "ActiveDirectoryUsers");
+}
+
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
