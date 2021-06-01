@@ -65,7 +65,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     const style: React.CSSProperties = { zIndex: 9999, display: "block", position: "absolute" };
 
     style.top = position.top + "px";
-    if (document.body.className.contains("rtl-mode") !== alignRight)
+    if (document.body.className.contains("rtl-mode") !== Boolean(alignRight))
       style.right = (position.width - position.left) + "px";
     else
       style.left = position.left + "px";
