@@ -383,6 +383,17 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerable<T>(query.Query.ToList(), query.Context);
         }
 
+        public static DEnumerableCount <T> ToDEnumerableCount<T>(this IEnumerable<T> query, QueryDescription description, int? totalElements)
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(object));
+
+            var dic = description.Columns.ToDictionary(
+                cd => (QueryToken)new ColumnToken(cd, description.QueryName),
+                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
+
+            return new DEnumerableCount<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic), totalElements);
+        }
+
         public static async Task<DEnumerable<T>> ToDEnumerableAsync<T>(this DQueryable<T> query, CancellationToken token)
         {
             var list = await query.Query.ToListAsync(token);
