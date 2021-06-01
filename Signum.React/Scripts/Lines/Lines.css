@@ -36,6 +36,11 @@ input[type=checkbox].form-control {
         white-space: pre-wrap;
     }
 
+.form-control.sf-multi-line {
+    height: auto;
+    white-space: pre;
+}
+
 .numeric {
     text-align: right;
 }
@@ -82,7 +87,7 @@ li.sf-strip-element {
 }*/
 .sf-line-button {
     cursor: pointer;
-    color: lightgray;
+    color: #b1bac4;
 }
 
     .sf-line-button.btn {
@@ -204,6 +209,11 @@ label.sf-checkbox-element {
 
 label.sf-radio-element {
     display: block;
+}
+
+.sf-strip-link {
+    margin-left: 4px;
+    margin-right: 4px;
 }
 
 /*Tabs*/
