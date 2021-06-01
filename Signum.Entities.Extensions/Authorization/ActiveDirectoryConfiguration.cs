@@ -98,4 +98,9 @@ namespace Signum.Entities.Authorization
         [Description("Name or e-Mail")]
         NameOrEmail,
     }
+
+    public enum UserADQuery
+    {
+        ActiveDirectoryUsers
+    }
 }
