@@ -314,10 +314,10 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   //simple euristic
   var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
+  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: style,
-    minimumFractionDigits: afterDot.trimStart("#").length,
+    minimumFractionDigits: afterDot.replace("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
@@ -1000,7 +1000,7 @@ function sameEntity(a: any, b: any) {
 
 export function getFieldMembers(field: string): LambdaMember[] {
   if (field.contains(".")) {
-    var mixinType = field.before(".").trimStart("[").trimEnd("]");
+    var mixinType = field.before(".").after("[").before("]");
     var fieldName = field.after(".");
 
     return [

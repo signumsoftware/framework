@@ -128,9 +128,6 @@ declare global {
     firstUpper(this: string): string;
     firstLower(this: string, ): string;
 
-    trimEnd(this: string, char?: string): string;
-    trimStart(this: string, char?: string): string;
-
     repeat(this: string, n: number): string;
   }
 
@@ -762,7 +759,6 @@ export function softCast<T>(val: T): T {
   return val;
 }
 
-
 String.prototype.replaceAll = function (this: string, from: string, to: string) {
   return this.split(from).join(to)
 };
@@ -885,37 +881,6 @@ String.prototype.firstUpper = function () {
 
 String.prototype.firstLower = function () {
   return this[0].toLowerCase() + this.substring(1);
-};
-
-String.prototype.trimStart = function (this: string, char: string) {
-  let result = this;
-
-  if (!char)
-    char = " ";
-
-  if (char == "")
-    throw new Error("Empty char");
-
-
-  while (result.startsWith(char))
-    result = result.substr(char.length);
-
-  return result;
-};
-
-String.prototype.trimEnd = function (this: string, char: string) {
-  let result = this;
-
-  if (!char)
-    char = " ";
-
-  if (char == "")
-    throw new Error("Empty char");
-
-  while (result.endsWith(char))
-    result = result.substr(0, result.length - char.length);
-
-  return result;
 };
 
 String.prototype.repeat = function (this: string, n: number) {
