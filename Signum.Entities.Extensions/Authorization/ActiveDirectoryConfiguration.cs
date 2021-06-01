@@ -31,7 +31,7 @@ namespace Signum.Entities.Authorization
 
         public bool LoginWithWindowsAuthenticator { get; set; }
         public bool LoginWithActiveDirectoryRegistry { get; set; }
-        public bool LoginWithAzureAD { get; set; } = true;
+        public bool LoginWithAzureAD { get; set; }
 
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
 
