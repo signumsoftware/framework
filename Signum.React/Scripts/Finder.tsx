@@ -108,7 +108,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
 
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
-    .then(rr => rr?.entity);
+    .then(a => a?.row.entity);
 
   if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
@@ -144,7 +144,7 @@ export namespace Options {
 
 }
 
-export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
+export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -169,7 +169,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
-    .then(rows => rows?.map(a => a.entity!));
+    .then(a => a?.rows.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
@@ -183,7 +183,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   return getPromiseSearchModal();
 }
 
-export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
+export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
