@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,6 +51,7 @@ namespace Signum.Engine.Authorization
             }).ToList();
         }
 
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -65,33 +67,69 @@ namespace Signum.Engine.Authorization
                         .OrderBy(request.Orders, queryDescription)
                         .Paginate(request.Pagination);
 
+                     query.QueryOptions.Add(new QueryOption("$count", "true"));
+                     query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
+
                      var result = await query.GetAsync(cancellationToken);
 
-                     return result.Select(u => new
+                     var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
+
+                     var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+                     return result.Skip(skip).Select(u => new
                      {
                          Entity = (Lite<Entities.Entity>?)null,
                          u.Id,
                          u.DisplayName,
+                         u.UserPrincipalName,
                          u.Mail,
                          u.GivenName,
                          u.Surname,
                          u.JobTitle,
-                         LocationCode = u.OnPremisesExtensionAttributes?.ExtensionAttribute8,
+                         OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
+                         {
+                             ExtensionAttribute1 = ea.ExtensionAttribute1,
+                             ExtensionAttribute2 = ea.ExtensionAttribute2,
+                             ExtensionAttribute3 = ea.ExtensionAttribute3,
+                             ExtensionAttribute4 = ea.ExtensionAttribute4,
+                             ExtensionAttribute5 = ea.ExtensionAttribute5,
+                             ExtensionAttribute6 = ea.ExtensionAttribute6,
+                             ExtensionAttribute7 = ea.ExtensionAttribute7,
+                             ExtensionAttribute8 = ea.ExtensionAttribute8,
+                             ExtensionAttribute9 = ea.ExtensionAttribute9,
+                             ExtensionAttribute10 = ea.ExtensionAttribute10,
+                             ExtensionAttribute11 = ea.ExtensionAttribute11,
+                             ExtensionAttribute12 = ea.ExtensionAttribute12,
+                             ExtensionAttribute13 = ea.ExtensionAttribute13,
+                             ExtensionAttribute14 = ea.ExtensionAttribute14,
+                             ExtensionAttribute15 = ea.ExtensionAttribute15,
+                         }),
+                         u.OnPremisesImmutableId,
                          u.CompanyName,
-                     }).ToDEnumerableCount(queryDescription, null);
-                 }).Column(a => a.Entity, c => c.Implementations = Implementations.By()), Implementations.By());
+                         u.CreationType,
+                         u.AccountEnabled,
+                     }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
+                 })
+                .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+                .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
+                .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
+                .ColumnDisplayName(a => a.Mail, () => ActiveDirectoryMessage.Mail.NiceToString())
+                .ColumnDisplayName(a => a.GivenName, () => ActiveDirectoryMessage.GivenName.NiceToString())
+                .ColumnDisplayName(a => a.Surname, () => ActiveDirectoryMessage.Surname.NiceToString())
+                .ColumnDisplayName(a => a.JobTitle, () => ActiveDirectoryMessage.JobTitle.NiceToString())
+                .ColumnDisplayName(a => a.OnPremisesExtensionAttributes, () => ActiveDirectoryMessage.OnPremisesExtensionAttributes.NiceToString())
+                .ColumnDisplayName(a => a.OnPremisesImmutableId, () => ActiveDirectoryMessage.OnPremisesImmutableId.NiceToString())
+                .ColumnDisplayName(a => a.CompanyName, () => ActiveDirectoryMessage.CompanyName.NiceToString())
+                .ColumnDisplayName(a => a.AccountEnabled, () => ActiveDirectoryMessage.AccountEnabled.NiceToString())
+                ,
+                Implementations.By());
             }
         }
 
 
-        static Dictionary<string, string> replace = new Dictionary<string, string>
-        {
-            { "LocationCode", "onPremisesExtensionAttributes/extensionAttribute8"}
-        };
-
         static string ToGraphField(QueryToken token, bool simplify = false)
         {
-            var field = replace.TryGetC(token.Key) ?? token.Key.FirstLower();
+            var field = token.FullKey().Split(".").ToString(a => a.FirstLower(), "/");
 
             if (simplify)
                 return field.TryBefore("/") ?? field;
@@ -107,6 +145,7 @@ namespace Signum.Engine.Authorization
                 value is DateTime dt ? $"'{dt.ToIsoString()}'" :
                 value is DateTimeOffset dto ? $"'{dto.DateTime.ToIsoString()}'" :
                 value is Guid guid ? $"'{guid.ToString()}'" :
+                value is bool b ? b.ToString().ToLower() :
                 value?.ToString() ?? "";
         }
 
@@ -164,8 +203,8 @@ namespace Signum.Engine.Authorization
         static IGraphServiceUsersCollectionRequest OrderBy(this IGraphServiceUsersCollectionRequest users, List<Order> orders, QueryDescription queryDescription)
         {
             var orderStr = orders.Select(c => ToGraphField(c.Token) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToString(",");
-            //if (orderStr.HasText())
-            //    return users.OrderBy(orderStr);
+            if (orderStr.HasText())
+                return users.OrderBy(orderStr);
 
             return users;
         }
@@ -176,7 +215,8 @@ namespace Signum.Engine.Authorization
             {
                 Pagination.All => users,
                 Pagination.Firsts f => users.Top(f.TopElements),
-                Pagination.Paginate p => users.Skip(p.StartElementIndex()).Top(p.ElementsPerPage),
+                //Pagination.Paginate p => users.Skip((p.CurrentPage - 1) * p.ElementsPerPage).Top(p.ElementsPerPage),
+                Pagination.Paginate p => users.Top(p.ElementsPerPage * p.CurrentPage),
                 _ => throw new UnexpectedValueException(pagination)
             };
         }

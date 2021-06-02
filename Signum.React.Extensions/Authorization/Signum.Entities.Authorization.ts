@@ -36,6 +36,20 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   defaultRole: Entities.Lite<RoleEntity> | null;
 }
 
+export module ActiveDirectoryMessage {
+  export const Id = new MessageKey("ActiveDirectoryMessage", "Id");
+  export const DisplayName = new MessageKey("ActiveDirectoryMessage", "DisplayName");
+  export const Mail = new MessageKey("ActiveDirectoryMessage", "Mail");
+  export const GivenName = new MessageKey("ActiveDirectoryMessage", "GivenName");
+  export const Surname = new MessageKey("ActiveDirectoryMessage", "Surname");
+  export const JobTitle = new MessageKey("ActiveDirectoryMessage", "JobTitle");
+  export const OnPremisesImmutableId = new MessageKey("ActiveDirectoryMessage", "OnPremisesImmutableId");
+  export const CompanyName = new MessageKey("ActiveDirectoryMessage", "CompanyName");
+  export const AccountEnabled = new MessageKey("ActiveDirectoryMessage", "AccountEnabled");
+  export const OnPremisesExtensionAttributes = new MessageKey("ActiveDirectoryMessage", "OnPremisesExtensionAttributes");
+  export const OnlyActiveUsers = new MessageKey("ActiveDirectoryMessage", "OnlyActiveUsers");
+}
+
 export module ActiveDirectoryPermission {
   export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
 }
@@ -170,6 +184,26 @@ export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
 export type MergeStrategy =
   "Union" |
   "Intersection";
+
+export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
+export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
+  Type: "OnPremisesExtensionAttributesModel";
+  extensionAttribute1: string;
+  extensionAttribute2: string;
+  extensionAttribute3: string;
+  extensionAttribute4: string;
+  extensionAttribute5: string;
+  extensionAttribute6: string;
+  extensionAttribute7: string;
+  extensionAttribute8: string;
+  extensionAttribute9: string;
+  extensionAttribute10: string;
+  extensionAttribute11: string;
+  extensionAttribute12: string;
+  extensionAttribute13: string;
+  extensionAttribute14: string;
+  extensionAttribute15: string;
+}
 
 export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");
 export type OperationAllowed =

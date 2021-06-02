@@ -2,21 +2,16 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage } from './Signum.Entities.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal';
-import { FindOptionsParsed } from '@framework/FindOptions';
+import { FindOptions, FindOptionsParsed, ResultRow } from '@framework/FindOptions';
 import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal';
 import { Lite, SearchMessage } from '@framework/Signum.Entities';
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
 import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
 import { isPermissionAuthorized } from './AuthClient';
-
-export let types: boolean;
-export let properties: boolean;
-export let operations: boolean;
-export let queries: boolean;
-export let permissions: boolean;
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 
 export function start(options: { routes: JSX.Element[]  }) {
 
@@ -70,11 +65,49 @@ export function start(options: { routes: JSX.Element[]  }) {
           { token: "GivenName", operation: "StartsWith" },
           { token: "Surname", operation: "StartsWith" },
           { token: "Mail", operation: "StartsWith" },
-        ]
-      }],
-    pagination: { mode: "Firsts", elementsPerPage: 20 },
+        ],
+      },
+      {
+        pinned: { label: ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
+        token: "AccountEnabled", operation: "EqualTo", value: true
+      },
+      { token: "CreationType", operation: "DistinctTo", value: "Invitation" }
+    ],
+    hiddenColumns: [
+      { token: "Id" },
+      { token: "OnPremisesImmutableId" },
+    ],
+    defaultOrders: [
+      { token: "DisplayName", orderType: "Ascending" }
+    ],
   });
 
+}
+
+function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
+  return Finder.findRow({
+    queryName: UserADQuery.ActiveDirectoryUsers,
+    columnOptions: [
+      { token: "DisplayName" },
+      { token: "UserPrincipalName" },
+      { token: "GivenName" },
+      { token: "Surname" },
+      { token: "JobTitle" },
+    ],
+    columnOptionsMode: "Replace",
+  }, { searchControlProps: { allowChangeOrder: false } })
+    .then(a => a && API.createADUser(toActiveDirectoryUser(a.row, a.searchControl)));
+}
+
+export function toActiveDirectoryUser(row: ResultRow, scl: SearchControlLoaded): ActiveDirectoryUser {
+
+  const columns = scl.state.resultTable!.columns;
+  return ({
+    displayName: row.columns[columns.indexOf("DisplayName")],
+    jobTitle: row.columns[columns.indexOf("JobTitle")],
+    objectID: row.columns[columns.indexOf("Id")],
+    upn: row.columns[columns.indexOf("UserPrincipalName")],
+  });
 }
 
 
