@@ -383,7 +383,7 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerable<T>(query.Query.ToList(), query.Context);
         }
 
-        public static DEnumerableCount <T> ToDEnumerableCount<T>(this IEnumerable<T> query, QueryDescription description, int? totalElements)
+        public static DEnumerable<T> ToDEnumerable<T>(this IEnumerable<T> query, QueryDescription description)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
@@ -391,7 +391,12 @@ namespace Signum.Engine.DynamicQuery
                 cd => (QueryToken)new ColumnToken(cd, description.QueryName),
                 cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
 
-            return new DEnumerableCount<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic), totalElements);
+            return new DEnumerable<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic));
+        }
+
+        public static DEnumerableCount<T> WithCount<T>(this DEnumerable<T> result, int? totalElements)
+        {
+            return new DEnumerableCount<T>(result.Collection, result.Context, totalElements);
         }
 
         public static async Task<DEnumerable<T>> ToDEnumerableAsync<T>(this DQueryable<T> query, CancellationToken token)
