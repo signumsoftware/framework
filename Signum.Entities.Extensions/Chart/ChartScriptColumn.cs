@@ -39,13 +39,15 @@ namespace Signum.Entities.Chart
         Enum = 64, // Boolean,
         [Code("rg")]
         RealGroupable = 128,
+        [Code("t")]
+        Time = 256,
 
         [Code("G")]
         Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | Date | String | Lite | Enum,
         [Code("M")]
         Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
         [Code("P")]
-        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime
+        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime | Time,
     }
 
 

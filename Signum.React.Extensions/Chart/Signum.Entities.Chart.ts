@@ -54,9 +54,10 @@ export type ChartColumnType =
   "Lite" |
   "Enum" |
   "RealGroupable" |
+  "Time" |
   "Magnitude" |
-  "Positionable" |
-  "Groupable";
+  "Groupable" |
+  "Positionable";
 
 export module ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");

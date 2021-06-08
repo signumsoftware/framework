@@ -14,7 +14,9 @@ namespace Signum.Engine.Chart.Scripts
             {
                 new ChartScriptColumn("Point Color", ChartColumnType.Groupable),
                 new ChartScriptColumn("Horizontal Axis", ChartColumnType.Positionable) ,
-                new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable) 
+                new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable), 
+                new ChartScriptColumn("Horizontal Axis (2)", ChartColumnType.Positionable) { IsOptional = true } ,
+                new ChartScriptColumn("Vertical Axis (2)", ChartColumnType.Positionable) { IsOptional = true } ,
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {

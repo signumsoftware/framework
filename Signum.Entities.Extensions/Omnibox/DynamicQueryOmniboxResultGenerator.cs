@@ -203,6 +203,7 @@ namespace Signum.Entities.Omnibox
                 case FilterType.Decimal: return new[] { new ValueTuple { Value = Activator.CreateInstance(queryToken.Type.UnNullify()), Match = null } };
                 case FilterType.String: return new[] { new ValueTuple { Value = "", Match = null } };
                 case FilterType.DateTime: return new[] { new ValueTuple { Value = DateTime.Today, Match = null } };
+                case FilterType.Time: return new[] { new ValueTuple { Value = TimeSpan.Zero, Match = null } };
                 case FilterType.Lite:
                 case FilterType.Embedded: break;
                 case FilterType.Boolean: return new[] { new ValueTuple { Value = true, Match = null }, new ValueTuple { Value = false, Match = null } };
@@ -236,6 +237,7 @@ namespace Signum.Entities.Omnibox
                         return new[] { new ValueTuple { Value = OmniboxUtils.CleanCommas(omniboxToken.Value), Match = null } };
                     break;
                 case FilterType.DateTime:
+                case FilterType.Time:
                     if (omniboxToken.Type == OmniboxTokenType.String)
                     {
                         var str = OmniboxUtils.CleanCommas(omniboxToken.Value);
@@ -370,6 +372,7 @@ namespace Signum.Entities.Omnibox
 
                 case FilterType.String: return "\"" + p.ToString() + "\"";
                 case FilterType.DateTime: return "'" + p.ToString() + "'";
+                case FilterType.Time: return "'" + p.ToString() + "'";
                 case FilterType.Lite: return ((Lite<Entity>)p).Key();
                 case FilterType.Embedded: throw new InvalidOperationException("Impossible to translate not null Embedded entity to string");
                 case FilterType.Boolean: return p.ToString()!;

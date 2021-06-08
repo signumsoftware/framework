@@ -353,7 +353,8 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   }
 }
 
-const serverFormat = "yyyy/MM/dd HH:mm:ss";
+const serverDateTimeFormat = "yyyy/MM/dd HH:mm:ss";
+const serverTimeFormat = "HH:mm:ss.u";
 
 function parseValue(str: string | null | undefined, filterType: FilterType | undefined): string | number | boolean | null | undefined {
   return str == null ? null :
@@ -361,12 +362,19 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
       filterType == "Decimal" ? parseFloat(str) :
         filterType == "Boolean" ? (str == "True" ? true : str == "False" ? false : undefined) :
           filterType == "DateTime" ? parseDate(str) :
-            filterType == "Enum" || filterType == "Guid" || filterType == "String" ? str :
-              undefined;
+            filterType == "Time" ? parseTime(str) :
+              filterType == "Enum" || filterType == "Guid" || filterType == "String" ? str :
+                undefined;
 }
 
 function parseDate(str: string) {
-  const parsed = DateTime.fromFormat(str, serverFormat).toISO();
+  const parsed = DateTime.fromFormat(str, serverDateTimeFormat).toISO();
+
+  return parsed ?? undefined;
+}
+
+function parseTime(str: string) {
+  const parsed = DateTime.fromFormat(str, serverTimeFormat).toFormat(serverTimeFormat);
 
   return parsed ?? undefined;
 }
@@ -376,8 +384,8 @@ function toStringValue(value: string | number | boolean | null | undefined, filt
     filterType == "Integer" ? value.toString() :
       filterType == "Decimal" ? value.toString() :
         filterType == "Boolean" ? (value ? "True" : "False") :
-          filterType == "DateTime" ? DateTime.fromISO(value as string).toFormat(serverFormat) :
-            filterType == "Enum" || filterType == "Guid" || filterType == "String" ? value as string :
-              null;
-
+          filterType == "DateTime" ? DateTime.fromISO(value as string).toFormat(serverDateTimeFormat) :
+            filterType == "Time" ? DateTime.fromFormat(value as string, serverTimeFormat).toFormat(serverTimeFormat) :
+              filterType == "Enum" || filterType == "Guid" || filterType == "String" ? value as string :
+                null;
 }

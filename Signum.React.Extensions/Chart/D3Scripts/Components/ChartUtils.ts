@@ -1,11 +1,11 @@
-import { DateTime, DurationUnit } from "luxon"
+import { DateTime, DurationUnit, Duration } from "luxon"
 import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
-import { getTypeInfo, tryGetTypeInfo } from "@framework/Reflection";
+import { getTypeInfo, parseDuration, tryGetTypeInfo } from "@framework/Reflection";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 
@@ -60,7 +60,19 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
         .domain([d3.min(dates)!, d3.max(dates)!])
         .range([minRange, maxRange]);
 
-      const f = function (d: string) { return scale(new Date(d)); } as any as d3.ScaleContinuousNumeric<number, number>;
+      const f = function (d: string | Date) { return scale(typeof d == "string" ?  new Date(d) : d); } as any as d3.ScaleContinuousNumeric<number, number>;
+      f.ticks = scale.ticks as any;
+      f.tickFormat = scale.tickFormat as any;
+      return f;
+    }
+    else if (column.type == "Time") {
+      var dates = values.map(d => DateTime.fromFormat(d as any as string, "HH:mm:ss.u").toJSDate());
+
+      const scale = d3.scaleTime()
+        .domain([d3.min(dates)!, d3.max(dates)!])
+        .range([minRange, maxRange]);
+
+      const f = function (d: string | Date) { return scale(typeof d == "string" ? DateTime.fromFormat(d, "HH:mm:ss.u").toJSDate() : d); } as any as d3.ScaleContinuousNumeric<number, number>;
       f.ticks = scale.ticks as any;
       f.tickFormat = scale.tickFormat as any;
       return f;

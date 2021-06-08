@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, durationToString } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
@@ -243,7 +243,8 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "Real",
       "RealGroupable",
       "Date",
-      "DateTime"].contains(type);
+      "DateTime",
+      "Time"].contains(type);
   }
 
 
@@ -261,6 +262,7 @@ export function getChartColumnType(token: QueryToken): ChartColumnType | undefin
     case "Integer": return "Integer";
     case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
     case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+    case "Time": return "Time";
   }
 
   return undefined;
@@ -583,6 +585,7 @@ export module API {
       case "Integer": return "Integer";
       case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
       case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+      case "Time": return "Time";
       default: return null;
     }
   }
@@ -647,6 +650,13 @@ export module API {
         var date = v as string | null;
         var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "Date" | "DateTime");
         return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
+      };
+
+    if (token.filterType == "Time")
+      return v => {
+        var date = v as string | null;
+        var format = toDurationFormat(chartColumn.format || token.format);
+        return date == null ? String(null) : durationToString(date, format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
