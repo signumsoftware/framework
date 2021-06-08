@@ -90,7 +90,7 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
     case "m": return "dd LLLL";
     case "u": return "yyyy-MM-dd'T'HH:mm:ss";
     case "s": return "yyyy-MM-dd'T'HH:mm:ss";
-    case "o": return "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    case "o": return "yyyy-MM-dd'T'HH:mm:ss.u";
     case "t": return "t";
     case "T": return "tt";
     case "y": return "LLLL yyyy";
