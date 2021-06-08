@@ -680,7 +680,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
 
     vl.setValue(m == null || !m.isValid ? null :
       type == "Date" ? m.toISODate() :
-        !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss" /*No Z*/) :
+        !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss",{locale:'en-GB'} /*No Z*/) :
           m.toISO());
   };
 
@@ -724,8 +724,8 @@ export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", form
   if (!luxonFormat)
     return date; 
 
-  const formatted = date.toFormat(luxonFormat);
-  return DateTime.fromFormat(formatted, luxonFormat);
+  const formatted = date.toFormat(luxonFormat,{locale:'en-GB'});
+  return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'});
 }
 
 ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
