@@ -45,12 +45,12 @@ namespace Signum.Engine.Excel
                 document.PackageProperties.Creator = "";
                 document.PackageProperties.LastModifiedBy = "";
 
-                WorkbookPart workbookPart = document.WorkbookPart;
+                WorkbookPart workbookPart = document.WorkbookPart!;
 
                 if (workbookPart.CalculationChainPart != null)
                 {
-                    workbookPart.Workbook.CalculationProperties.ForceFullCalculation = true;
-                    workbookPart.Workbook.CalculationProperties.FullCalculationOnLoad = true;
+                    workbookPart.Workbook.CalculationProperties!.ForceFullCalculation = true;
+                    workbookPart.Workbook.CalculationProperties!.FullCalculationOnLoad = true;
                 }
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartByName(ExcelMessage.Data.NiceToString());
@@ -61,7 +61,7 @@ namespace Signum.Engine.Excel
 
                 List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, results);
 
-                UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1")!.StyleIndex;
+                UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1").StyleIndex!;
 
                 //Clear sheetData from the template sample data
                 sheetData.InnerXml = "";
@@ -78,13 +78,13 @@ namespace Signum.Engine.Excel
 
                 var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
                     .Where(ptpart => ptpart.PivotCacheDefinition.Descendants<WorksheetSource>()
-                                                                .Any(wss => wss.Sheet.Value == ExcelMessage.Data.NiceToString()));
+                                                                .Any(wss => wss.Sheet!.Value == ExcelMessage.Data.NiceToString()));
 
                 foreach (PivotTableCacheDefinitionPart ptpart in pivotTableParts)
                 {
                     PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
                     WorksheetSource wss = pcd.Descendants<WorksheetSource>().FirstEx();
-                    wss.Reference.Value = "A1:" + GetExcelColumn(columnEquivalences.Count(ce => !ce.IsNew) - 1) + (results.Rows.Count() + 1).ToString();
+                    wss.Reference!.Value = "A1:" + GetExcelColumn(columnEquivalences.Count(ce => !ce.IsNew) - 1) + (results.Rows.Count() + 1).ToString();
                     
                     pcd.RefreshOnLoad = true;
                     pcd.SaveData = false;
@@ -114,7 +114,7 @@ namespace Signum.Engine.Excel
                 
                 if (cell != null)
                 {
-                    var styleIndex = rowDataCellTemplates[headerCells.IndexOf(cell)].StyleIndex;
+                    var styleIndex = rowDataCellTemplates[headerCells.IndexOf(cell)].StyleIndex!;
                     return new ColumnData(resultCol!, styleIndex, isNew: false);
                 }
                 else
@@ -129,7 +129,7 @@ namespace Signum.Engine.Excel
 
         private static bool IsValidRowDataTemplate(Row row, List<Cell> headerCells)
         { 
-            if (row.RowIndex <= 1) //At least greater than 1 (row 1 must be the header one)
+            if (row.RowIndex! <= 1) //At least greater than 1 (row 1 must be the header one)
                 return false;
 
             var cells = row.Descendants<Cell>().ToList();
@@ -137,8 +137,8 @@ namespace Signum.Engine.Excel
             if (cells.Count < headerCells.Count) //Must have at least as many cells as the header row to have a template cell for all data columns
                 return false;
 
-            string headerLastCellReference = headerCells[headerCells.Count - 1].CellReference;
-            string dataCellReference = cells[headerCells.Count - 1].CellReference;
+            string headerLastCellReference = headerCells[headerCells.Count - 1].CellReference!;
+            string dataCellReference = cells[headerCells.Count - 1].CellReference!;
             
             //they must be in the same column
             //If cellReferences of HeaderCell and DataCell differ only in the number they are on the same column

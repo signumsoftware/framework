@@ -36,8 +36,7 @@ namespace Signum.React.Authorization
                     var principal = ValidateToken(jwt, out var jwtSecurityToken);
                     var ctx = new AzureClaimsAutoCreateUserContext(principal);
 
-                    UserEntity? user =
-                        Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserOIDMixin>().OID == ctx.OID);
+                    UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
                     if(user == null)
                     {
@@ -55,18 +54,6 @@ namespace Signum.React.Authorization
                     else
                     {
                         ada.UpdateUser(user, ctx);
-
-                        if (user.IsGraphModified)
-                        {
-                            using (AuthLogic.Disable())
-                            using (OperationLogic.AllowSave<UserEntity>())
-                            {
-                                user.UserName = ctx.UserName;
-                                user.Email = ctx.EmailAddress;
-
-                                user.Save();
-                            }
-                        }
                     }
 
                     AuthServer.OnUserPreLogin(ac, user);

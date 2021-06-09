@@ -102,7 +102,7 @@ namespace Signum.React.Authorization
             if (user == null)
                 throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
-            if (user.State == UserState.Disabled)
+            if (user.State == UserState.Deactivated)
                 throw new AuthenticationException(LoginAuthMessage.User0IsDisabled.NiceToString(user));
 
             if (user.UserName != oldToken.User.UserName)

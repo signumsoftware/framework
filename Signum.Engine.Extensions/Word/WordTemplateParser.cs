@@ -39,7 +39,7 @@ namespace Signum.Engine.Word
         {
             foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {
-                foreach (var item in part.RootElement.Descendants())
+                foreach (var item in part.RootElement!.Descendants())
                 {
                     if (item is W.Paragraph wp)
                         ReplaceRuns(wp, new WordprocessingNodeProvider());
@@ -144,7 +144,7 @@ namespace Signum.Engine.Word
             if (!TemplateUtils.KeywordsRegex.IsMatch(text))
                 return;
 
-            par.RemoveChild(only);
+            par.RemoveChild(only!);
             par.AppendChild(nodeProvider.WrapInRun(only!));
         }
 
@@ -207,7 +207,7 @@ namespace Signum.Engine.Word
                             {
                                 var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
 
-                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
+                                matchNode.Parent!.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
                                 {
                                     RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
@@ -218,7 +218,7 @@ namespace Signum.Engine.Word
                         case "declare":
                             {
                                 var vp = ValueProviderBase.TryParse(expr, variable, this);
-                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
+                                matchNode.Parent!.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
                                 {
                                     RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);

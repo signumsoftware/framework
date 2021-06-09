@@ -9,6 +9,7 @@ export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMo
 
   return (
     <div>
+      <ValueLine ctx={ctx2.subCtx(f => f.startingOn)} helpText="The hour determines when each execution will occour" />
       <div className="row">
         <div className="col-sm-3">
           <ValueLine ctx={ctx4.subCtx(f => f.january)} />
@@ -31,7 +32,6 @@ export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMo
           <ValueLine ctx={ctx4.subCtx(f => f.december)} />
         </div>
       </div>
-      <ValueLine ctx={ctx2.subCtx(f => f.startingOn)} />
     </div>
   );
 }

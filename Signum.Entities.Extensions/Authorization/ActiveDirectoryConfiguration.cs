@@ -36,6 +36,7 @@ namespace Signum.Entities.Authorization
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
 
         public bool AutoCreateUsers { get; set; }
+        public bool AutoUpdateUsers { get; set; }
 
         [PreserveOrder, NoRepeatValidator]
         public MList<RoleMappingEmbedded> RoleMapping { get; set; } = new MList<RoleMappingEmbedded>();

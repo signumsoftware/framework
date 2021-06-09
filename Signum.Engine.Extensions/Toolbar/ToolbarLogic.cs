@@ -227,7 +227,7 @@ namespace Signum.Engine.Toolbar
 
         private static List<ToolbarResponse> ToResponseList(List<TranslatableElement<ToolbarElementEmbedded>> elements)
         {
-            var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
+            var result = elements.SelectMany(a => ToResponse(a) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
 
             retry:
             var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (
@@ -255,16 +255,20 @@ namespace Signum.Engine.Toolbar
             return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
         }
 
-        private static ToolbarResponse? ToResponse(TranslatableElement<ToolbarElementEmbedded> transElement)
+        private static IEnumerable<ToolbarResponse>? ToResponse(TranslatableElement<ToolbarElementEmbedded> transElement)
         {
             var element = transElement.Value;
 
-            var config = element.Content == null ? null : ContentCondigDictionary.GetOrThrow(element.Content.EntityType);
-
-            if(config != null)
+            IContentConfig? config = null;
+            if (element.Content != null)
             {
-                if (!config.IsAuhorized(element.Content!))
+                config = ContentCondigDictionary.GetOrThrow(element.Content.EntityType);
+                if (!config.IsAuhorized(element.Content))
                     return null;
+
+                var customResponse = config.CustomResponses(element.Content);
+                if (customResponse != null)
+                    return customResponse;
             }
 
             var result = new ToolbarResponse
@@ -287,7 +291,7 @@ namespace Signum.Engine.Toolbar
                     return null;
             }
 
-            return result;
+            return new[] { result };
         }
 
         public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel) 
@@ -296,18 +300,26 @@ namespace Signum.Engine.Toolbar
             ContentCondigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel));
         }
 
+        public static ContentConfig<T> GetContentConfig<T>() where T: Entity
+        {
+            return (ContentConfig<T>)ContentCondigDictionary.GetOrThrow(typeof(T));
+        }
+
         static Dictionary<Type, IContentConfig> ContentCondigDictionary = new Dictionary<Type, IContentConfig>();
 
         public interface IContentConfig
         {
             bool IsAuhorized(Lite<Entity> lite);
             string DefaultLabel(Lite<Entity> lite);
+
+            List<ToolbarResponse>? CustomResponses(Lite<Entity> lite);
         }
 
         public class ContentConfig<T> : IContentConfig where T : Entity
         {
             public Func<Lite<T>, bool> IsAuthorized;
             public Func<Lite<T>, string> DefaultLabel;
+            public Func<Lite<T>, List<ToolbarResponse>?>? CustomResponses;
 
             public ContentConfig(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel)
             {
@@ -317,6 +329,7 @@ namespace Signum.Engine.Toolbar
 
             bool IContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
             string IContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
+            List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite) => CustomResponses?.Invoke((Lite<T>)lite);
         }
 
         static bool IsQueryAllowed(Lite<QueryEntity> query)

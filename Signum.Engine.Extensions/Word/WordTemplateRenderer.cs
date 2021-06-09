@@ -85,7 +85,7 @@ namespace Signum.Engine.Word
             
             foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {
-                var root = part.RootElement;
+                var root = part.RootElement!;
                 var baseNodes = root.Descendants<BaseNode>().ToList(); //eager
                 foreach (var node in baseNodes)
                 {

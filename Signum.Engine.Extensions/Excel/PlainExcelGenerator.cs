@@ -38,27 +38,27 @@ namespace Signum.Engine.Excel
                 document.PackageProperties.Creator = "";
                 document.PackageProperties.LastModifiedBy = "";
 
-                WorkbookPart workbookPart = document.WorkbookPart;
+                WorkbookPart workbookPart = document.WorkbookPart!;
                                             
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
                 Worksheet worksheet = worksheetPart.Worksheet;
 
                 CellBuilder = new CellBuilder()
                 {
-                    CellFormatCount = document.WorkbookPart.WorkbookStylesPart.Stylesheet.CellFormats.Count,
+                    CellFormatCount = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet.CellFormats!.Count!,
                     DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                     {
-                        { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex },
-                        { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex },
-                        { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex },
-                        { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex },
-                        { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex },
-                        { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex },
-                        { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex },
-                        { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex },
-                        { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex },
-                        { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex },
-                        { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex },
+                        { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex! },
+                        { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex! },
+                        { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex! },
+                        { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex! },
+                        { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex! },
+                        { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex! },
+                        { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex! },
+                        { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex! },
+                        { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex! },
+                        { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex! },
+                        { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex! },
                     }
                 };
             }
@@ -91,7 +91,7 @@ namespace Signum.Engine.Excel
                 document.PackageProperties.Creator = "";
                 document.PackageProperties.LastModifiedBy = "";
 
-                WorkbookPart workbookPart = document.WorkbookPart;
+                WorkbookPart workbookPart = document.WorkbookPart!;
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
                 
@@ -108,12 +108,12 @@ namespace Signum.Engine.Excel
 
                 Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
                     results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
-                var ss = document.WorkbookPart.WorkbookStylesPart.Stylesheet;
+                var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
                 {
-                    var maxIndex = ss.NumberingFormats.ChildElements.Cast<NumberingFormat>()
-                        .Max(f => (uint) f.NumberFormatId)+1;
+                    var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
+                        .Max(f => (uint)f.NumberFormatId!) + 1;
 
-                    var decimalCellFormat = ss.CellFormats.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
+                    var decimalCellFormat = ss.CellFormats!.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
                     foreach (var kvp in CellBuilder.CustomDecimalStyles)
                     {
                         var numberingFormat = new NumberingFormat
@@ -124,7 +124,7 @@ namespace Signum.Engine.Excel
                         ss.NumberingFormats.AppendChild(numberingFormat);
                         var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
                         cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
-                        ss.CellFormats.AppendChild(cellFormat);
+                        ss.CellFormats!.AppendChild(cellFormat);
                         ss.CellFormats.Count = (uint)ss.CellFormats.ChildElements.Count;
                         if (ss.CellFormats.Count != kvp.Value + 1)
                         {
@@ -182,7 +182,7 @@ namespace Signum.Engine.Excel
                 document.PackageProperties.Creator = "";
                 document.PackageProperties.LastModifiedBy = "";
 
-                WorkbookPart workbookPart = document.WorkbookPart;
+                WorkbookPart workbookPart = document.WorkbookPart!;
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
 
@@ -231,7 +231,7 @@ namespace Signum.Engine.Excel
         {
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
             {
-                WorkbookPart workbookPart = document.WorkbookPart;
+                WorkbookPart workbookPart = document.WorkbookPart!;
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
 
