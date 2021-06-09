@@ -21,7 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, toDurationFormat, durationToString
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
+  Anonymous, toDurationFormat, durationToString
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -57,7 +58,7 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
     pinned: { splitText: true },
@@ -108,7 +109,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
 
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
-    .then(rr => rr?.entity);
+    .then(a => a?.row.entity);
 
   if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
@@ -132,7 +133,9 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity" || qt.filterType == "Enum" && !isState(qt.type);
+
+  export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
   export let defaultPagination: Pagination = {
     mode: "Paginate",
@@ -142,7 +145,7 @@ export namespace Options {
 
 }
 
-export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
+export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -167,7 +170,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
-    .then(rows => rows?.map(a => a.entity!));
+    .then(a => a?.rows.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
@@ -181,7 +184,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   return getPromiseSearchModal();
 }
 
-export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
+export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -1396,7 +1399,9 @@ export module API {
 
 
 
-
+function shouldIgnoreValues(pinned?: PinnedFilter | null) {
+  return pinned != null && (pinned.active == "Always" || pinned.active == "WhenHasValue");
+}
 
 export module Encoder {
 
@@ -1424,7 +1429,7 @@ export module Encoder {
       if (isFilterGroupOption(fo)) {
         query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || Boolean(fo.pinned)));
+        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
         query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
@@ -1544,7 +1549,7 @@ export module Decoder {
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
-            filters: toFilterList(gr.elements, identation + 1, ignoreValues || Boolean(pinned)),
+            filters: toFilterList(gr.elements, identation + 1, ignoreValues || shouldIgnoreValues(pinned)),
           }) as FilterGroupOption;
         }
       });

@@ -345,9 +345,9 @@ namespace Signum.Entities
                     if (item is bool)
                         value = value.ToLower();
 
-                    if (item is DateTime)
+                    if (item is DateTime dt)
                     {
-                        value = "DateTime.Parse(\"{0}\")".FormatWith(value);
+                        value = "DateTime.Parse(\"{0}\")".FormatWith(dt.ToString("O"));
                     }
                 }
 

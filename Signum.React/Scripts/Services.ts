@@ -242,10 +242,10 @@ export function getFileName(response: Response) {
   const fileNamePartAscii = parts.filter(a => a.trim().startsWith("filename=")).singleOrNull();
 
   if (fileNamePartUTF8)
-    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
+    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''"));
 
   if (fileNamePartAscii)
-    return fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
+    return fileNamePartAscii.trim().after("filename=").replace("\"", "");
   else
     return "file.dat";
 }

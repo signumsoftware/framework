@@ -629,6 +629,7 @@ export module ValidationMessage {
   export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
   export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
   export const _0IsNotCompatibleWith1 = new MessageKey("ValidationMessage", "_0IsNotCompatibleWith1");
+  export const _0IsRepated = new MessageKey("ValidationMessage", "_0IsRepated");
 }
 
 export module VoidEnumMessage {

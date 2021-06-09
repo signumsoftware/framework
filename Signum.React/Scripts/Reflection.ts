@@ -248,7 +248,11 @@ export namespace NumberFormatSettings {
 
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
 export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale ?? NumberFormatSettings.defaultNumberFormatLocale, toNumberFormatOptions(format));
+    let loc = locale ?? NumberFormatSettings.defaultNumberFormatLocale;
+    if (loc.startsWith("es-")) {
+        loc = "de-DE"; //fix problem for Intl formatting "es" numbers for 4 digits over decimal point 
+    }
+  return new Intl.NumberFormat(loc, toNumberFormatOptions(format));
 }
 
 export function toNumberFormatOptions(format: string | undefined): Intl.NumberFormatOptions | undefined {
@@ -310,10 +314,10 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   //simple euristic
   var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
+  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: style,
-    minimumFractionDigits: afterDot.trimStart("#").length,
+    minimumFractionDigits: afterDot.replace("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
@@ -996,7 +1000,7 @@ function sameEntity(a: any, b: any) {
 
 export function getFieldMembers(field: string): LambdaMember[] {
   if (field.contains(".")) {
-    var mixinType = field.before(".").trimStart("[").trimEnd("]");
+    var mixinType = field.before(".").after("[").before("]");
     var fieldName = field.after(".");
 
     return [
