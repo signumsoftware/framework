@@ -256,7 +256,7 @@ TypeHelpComponent.getExpression = function getExpression(initial: string, pr: Pr
 
   return pr.split(".").reduce((prev, curr) => {
     if (curr.startsWith("[") && curr.endsWith("]")) {
-      const mixin = curr.trimStart("[").trimEnd("]");
+      const mixin = curr.after("[").beforeLast("]");
       return mode == "CSharp" ?
         `${prev}.Mixin<${mixin}>()` :
         options?.stronglyTypedMixinTS ?

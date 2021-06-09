@@ -31,7 +31,7 @@ namespace Signum.Entities.Authorization
 
         public bool LoginWithWindowsAuthenticator { get; set; }
         public bool LoginWithActiveDirectoryRegistry { get; set; }
-        public bool LoginWithAzureAD { get; set; } = true;
+        public bool LoginWithAzureAD { get; set; }
 
         public bool AllowMatchUsersBySimpleUserName { get; set; } = true;
 
@@ -97,5 +97,45 @@ namespace Signum.Entities.Authorization
         PleaseSelectTheUserFromActiveDirectoryThatYouWantToImport,
         [Description("Name or e-Mail")]
         NameOrEmail,
+    }
+
+    public enum UserADQuery
+    {
+        ActiveDirectoryUsers
+    }
+
+    public enum ActiveDirectoryMessage
+    {
+        Id,
+        DisplayName,
+        Mail,
+        GivenName,
+        Surname,
+        JobTitle,
+        OnPremisesImmutableId,
+        CompanyName,
+        AccountEnabled,
+        OnPremisesExtensionAttributes,
+        OnlyActiveUsers,
+    }
+
+    [Serializable]
+    public class OnPremisesExtensionAttributesModel : ModelEntity
+    {
+        public string ExtensionAttribute1 { get; set; }
+        public string ExtensionAttribute2 { get; set; }
+        public string ExtensionAttribute3 { get; set; }
+        public string ExtensionAttribute4 { get; set; }
+        public string ExtensionAttribute5 { get; set; }
+        public string ExtensionAttribute6 { get; set; }
+        public string ExtensionAttribute7 { get; set; }
+        public string ExtensionAttribute8 { get; set; }
+        public string ExtensionAttribute9 { get; set; }
+        public string ExtensionAttribute10 { get; set; }
+        public string ExtensionAttribute11 { get; set; }
+        public string ExtensionAttribute12 { get; set; }
+        public string ExtensionAttribute13 { get; set; }
+        public string ExtensionAttribute14 { get; set; }
+        public string ExtensionAttribute15 { get; set; }
     }
 }

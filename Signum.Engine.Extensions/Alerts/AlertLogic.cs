@@ -23,6 +23,7 @@ using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
 using Signum.Engine;
 using Signum.Entities.Scheduler;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Alerts
 {
@@ -178,6 +179,8 @@ namespace Signum.Engine.Alerts
                 this.Alerts = alerts;
             }
 
+            static Regex LinkPlaceholder = new Regex(@"\[(?<prop>(\w|\d|\.)+)(\:(?<text>.+))?\](\((?<url>.+)\))?");
+
             public HtmlString? TextFormatted(TemplateParameters tp)
             {
                 if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
@@ -186,18 +189,65 @@ namespace Signum.Engine.Alerts
                 var alert = (AlertEntity)alertObject;
                 var text = alert.Text;
 
-                if (alert.Target == null)
-                    return new HtmlString(text);
+                var newText = LinkPlaceholder.Replace(text, m =>
+                {
+                    var propEx = m.Groups["prop"].Value;
 
-                var url=  $"{EmailLogic.Configuration.UrlLeft}/view/{TypeLogic.GetCleanName(alert.Target.EntityType)}/{alert.Target.Id}";
+                    var prop = GetPropertyValue(alert, propEx);
 
-                if (text.Contains("[Target]"))
-                    return new HtmlString(@$"{text.Before("[Target]")}<a href=""{url}"">{alert.Target.ToString()}</a>{text.After("[Target]")}");
+                    var lite = prop is Entity e ? e.ToLite() :
+                                prop is Lite<Entity> l ? l : null;
 
-                if (text.Contains("[Target:"))
-                    return new HtmlString(@$"{text.Before("[Target:")}<a href=""{url}"">{text.After("[Target:").BeforeLast("]")}</a>{text.AfterLast("[Target]")}");
+                    var url = ReplacePlaceHolders(m.Groups["url"].Value, alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
 
-                return new HtmlString(@$"{text}<br/><a href=""{url}"">{alert.Target.ToString()}</a>");
+                    var text = ReplacePlaceHolders(m.Groups["text"].Value, alert) ?? (lite != null ? lite.ToString() : null);
+
+                    return @$"<a href=""{url}"">{text}</a>";
+
+                });
+
+                if (text != newText)
+                    return new HtmlString(newText);
+
+                if (alert.Target != null)
+                    return new HtmlString(@$"{text}<br/><a href=""{EntityUrl(alert.Target)}"">{alert.Target.ToString()}</a>");
+
+                return new HtmlString(text);
+            }
+
+       
+
+            private static string EntityUrl(Lite<Entity> lite)
+            {
+                return $"{EmailLogic.Configuration.UrlLeft}/view/{TypeLogic.GetCleanName(lite.EntityType)}/{lite.Id}";
+            }
+
+            static Regex TextPlaceHolder = new Regex(@"({(?<prop>(\w|\d|\.)+)})");
+
+            private string? ReplacePlaceHolders(string? value, AlertEntity alert)
+            {
+                if (value == null)
+                    return null;
+
+                return TextPlaceHolder.Replace(value, g =>
+                {
+                    return GetPropertyValue(alert, g.Groups["prop"].Value)?.ToString()!;
+                });
+            }
+
+            private static object? GetPropertyValue(AlertEntity alert, string expresion)
+            {
+                var parts = expresion.SplitNoEmpty('.');
+
+                var result = SimpleMemberEvaluator.EvaluateExpression(alert, parts);
+
+                if (result is Result<object?>.Error e)
+                    throw new InvalidOperationException(e.ErrorText);
+
+                if (result is Result<object?>.Success s)
+                    return s.Value;
+
+                throw new UnexpectedValueException(result);
             }
 
             public override List<EmailOwnerRecipientData> GetRecipients()

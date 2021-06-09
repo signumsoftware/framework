@@ -56,7 +56,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         columnOptionsMode: "Replace",
         columnOptions: fullKeys.map(fk => ({ token: fk }) as ColumnOption)
       }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
-        .then(row => PredictorClient.predict(p, row && fullKeys.map((fk, i) => ({ tokenString: fk, value: row!.columns[i] })).toObject(a => a.tokenString, a => a.value)))
+        .then(a => PredictorClient.predict(p, a && fullKeys.map((fk, i) => ({ tokenString: fk, value: a.row.columns[i] })).toObject(a => a.tokenString, a => a.value)))
         .done();
     }
   }
