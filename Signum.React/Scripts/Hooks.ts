@@ -64,6 +64,8 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   }, options);
 
   observer.observe(element);
+
+  return observer;
 }
 
 export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300): { size: Size | undefined, setContainer: (element: T | null) => void } {
