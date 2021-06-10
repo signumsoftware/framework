@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { whenVisible } from '../Hooks';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   innerRef?: React.Ref<HTMLTextAreaElement>;
@@ -28,7 +29,7 @@ export default function TextArea(p: TextAreaProps) {
       if (ta.offsetParent != null)
         handleResize(ta);
       else
-        whenVisible(ta, visible => visible && handleResize(ta));
+        whenVisible(ta, visible => visible && handleResize(ta), { root: document.documentElement });
     }
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);
@@ -55,17 +56,3 @@ export default function TextArea(p: TextAreaProps) {
 }
 
 TextArea.defaultProps = { autoResize: true, minHeight: "50px" };
-
-function whenVisible(element: HTMLElement, callback: (visible: boolean) => void) {
-  var options = {
-    root: document.documentElement
-  }
-
-  var observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      callback(entry.intersectionRatio > 0);
-    });
-  }, options);
-
-  observer.observe(element);
-}
