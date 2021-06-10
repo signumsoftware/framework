@@ -64,6 +64,8 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   }, options);
 
   observer.observe(element);
+
+  return observer;
 }
 
 export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300): { size: Size | undefined, setContainer: (element: T | null) => void } {
@@ -77,18 +79,22 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
   }
 
   const initialHandle = React.useRef<number | null>(null);
+  const visibleObserver = React.useRef<IntersectionObserver | null>(null);
 
   function setContainer(div: T | null) {
 
     if (initialHandle.current)
       clearTimeout(initialHandle.current);
 
+    if (visibleObserver.current)
+      visibleObserver.current.disconnect();
+
     if (divElement.current = div) {
 
       if (div.clientHeight == 0 && div.clientWidth == 0)
         setSize(undefined);
 
-      whenVisible(div, (visible) => {
+      visibleObserver.current = whenVisible(div, (visible) => {
         if (visible) {
           if (initialTimeout)
             initialHandle.current = setTimeout(setNewSize, initialTimeout);
@@ -124,6 +130,9 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
 
       if (initialHandle.current)
         clearTimeout(initialHandle.current);
+
+      if (visibleObserver.current)
+        visibleObserver.current.disconnect();
 
       window.removeEventListener("resize", onResize);
     };
