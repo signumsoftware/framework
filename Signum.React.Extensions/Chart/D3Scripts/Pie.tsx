@@ -21,21 +21,21 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var pInnerRadius = parameters.InnerRadious || "0";
   var pSort = parameters.Sort;
+  var pValueAsPercent = parameters.ValueAsPercent;
+  var dataTotal = data.rows.sum(r => valueColumn.getValue(r));
 
   var size = d3.scaleLinear()
     .domain([0, d3.max(data.rows, r => valueColumn.getValue(r))!])
     .range([0, 1]);
-
   var outerRadious = d3.min([width / 2, height])! / 3;
   var rInner = outerRadious * parseFloat(pInnerRadius);
   var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
 
-
   var pie = d3.pie<ChartRow>()
-    .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a))!, size(valueColumn.getValue(b))!)) :
-      pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a))!, size(valueColumn.getValue(b))!)) :
+    .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
+      pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
         (a, b) => 0)
-    .value(r => size(valueColumn.getValue(r))!);
+    .value(r => size(valueColumn.getValue(r)));
 
   var arc = d3.arc<d3.PieArcDatum<ChartRow>>()
     .outerRadius(outerRadious)
@@ -77,7 +77,9 @@ export default function renderPie({ data, width, height, parameters, loading, on
               textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
               fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
               onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-              {((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : ''}
+              {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?
+                `${keyColumn.getValueNiceName(slice.data)} : %${Math.round(valueColumn.getValue(slice.data) * 100 / dataTotal)}` :
+                keyColumn.getValueNiceName(slice.data)}
             </text>
           </g>;
         })}
