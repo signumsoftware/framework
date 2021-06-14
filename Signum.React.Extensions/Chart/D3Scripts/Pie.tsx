@@ -78,7 +78,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
               fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
               onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
               {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?
-                `${keyColumn.getValueNiceName(slice.data)} : %${Math.round(valueColumn.getValue(slice.data) * 100 / dataTotal)}` :
+                `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data) / dataTotal).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}` :
                 keyColumn.getValueNiceName(slice.data)}
             </text>
           </g>;
