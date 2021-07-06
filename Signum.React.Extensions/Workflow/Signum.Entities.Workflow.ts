@@ -144,7 +144,7 @@ export const CaseEntity = new Type<CaseEntity>("Case");
 export interface CaseEntity extends Entities.Entity {
   Type: "Case";
   workflow: WorkflowEntity;
-  parentCase: CaseEntity | null;
+  parentCase: Entities.Lite<CaseEntity> | null;
   description: string;
   mainEntity: ICaseMainEntity;
   startDate: string;

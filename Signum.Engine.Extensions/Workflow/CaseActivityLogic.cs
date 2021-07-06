@@ -568,7 +568,7 @@ namespace Signum.Engine.Workflow
                         if (w.HasExpired())
                             throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate!.Value.ToString()));
 
-                        var parentCase = args.TryGetArgC<CaseEntity>();
+                        var parentCase = args.TryGetArgC<Lite<CaseEntity>>();
 
                         var wfGraph = WorkflowLogic.GetWorkflowNodeGraph(w.ToLite());
                         if (parentCase == null && !wfGraph.IsStartCurrentUser())
@@ -1082,7 +1082,7 @@ namespace Signum.Engine.Workflow
                     var subWorkflow = decActivity.SubWorkflow.Workflow;
                     foreach (var se in subEntities)
                     {
-                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case);
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
                         caseActivity.Previous = surrogate.ToLite();
                         caseActivity.Execute(CaseActivityOperation.Register);
                     }
