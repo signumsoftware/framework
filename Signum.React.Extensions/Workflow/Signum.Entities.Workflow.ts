@@ -436,6 +436,7 @@ export interface WorkflowConfigurationEmbedded extends Entities.EmbeddedEntity {
   scriptRunnerPeriod: number;
   avoidExecutingScriptsOlderThan: number | null;
   chunkSizeRunningScripts: number;
+  isBudgetActive: boolean;
 }
 
 export const WorkflowConnectionEntity = new Type<WorkflowConnectionEntity>("WorkflowConnection");
