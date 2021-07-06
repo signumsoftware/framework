@@ -21,7 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, Anonymous
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
+  Anonymous, toDurationFormat, durationToString
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -1061,13 +1062,13 @@ export class TokenCompleter {
 
     var token = this.queryCache[fullKey];
     if (token) {
-      if (hasAggregate(token) && (options && SubTokensOptions.CanAggregate) == 0)
+      if (hasAggregate(token) && (options & SubTokensOptions.CanAggregate) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (aggregates not allowed)`);
 
-      if (hasAnyOrAll(token) && (options && SubTokensOptions.CanAnyAll) == 0)
+      if (hasAnyOrAll(token) && (options & SubTokensOptions.CanAnyAll) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Any/All not allowed)`);
 
-      if (hasElement(token) && (options && SubTokensOptions.CanElement) == 0)
+      if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
       return;
     }
@@ -1736,7 +1737,15 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "DateTime",
     formatter: qt => {
       const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+    }
+  },
+  {
+    name: "Time",
+    isApplicable: qt => qt.filterType == "Time",
+    formatter: qt => {
+      const durationFormat = toDurationFormat(qt.format);
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1753,7 +1762,7 @@ export const formatRules: FormatRule[] = [
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
         return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      });
+      }, "date-cell");
     }
   },
   {
@@ -1770,7 +1779,7 @@ export const formatRules: FormatRule[] = [
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
         return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      });
+      }, "date-cell");
     }
   },
   {

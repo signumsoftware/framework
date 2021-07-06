@@ -40,6 +40,7 @@ namespace Signum.Entities.DynamicQuery
 
                     case FilterType.Decimal:
                     case FilterType.Embedded:
+                    case FilterType.Time:
                         return false;
 
                     case FilterType.DateTime:
@@ -247,6 +248,7 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfYear), () => utc + QueryTokenMessage.DayOfYear.NiceToString()),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfWeek), () => utc + QueryTokenMessage.DayOfWeek.NiceToString()),
                 new DateToken(parent),
+                precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.TimeOfDay), () => utc + QueryTokenMessage.TimeOfDay.NiceToString()),
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
                 precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
                 precision < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
@@ -393,6 +395,7 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.Guid:
                     case FilterType.Boolean: return "#000000";
                     case FilterType.DateTime: return "#5100A1";
+                    case FilterType.Time: return "#9956db";
                     case FilterType.Enum: return "#800046";
                     case FilterType.Lite: return "#2B91AF";
                     case FilterType.Embedded: return "#156F8A";
@@ -437,6 +440,7 @@ namespace Signum.Entities.DynamicQuery
                 case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
                 case FilterType.Decimal: return QueryTokenMessage.DecimalNumber.NiceToString();
                 case FilterType.String: return QueryTokenMessage.Text.NiceToString();
+                case FilterType.Time: return QueryTokenMessage.TimeOfDay.NiceToString();
                 case FilterType.DateTime:
                     if (type.UnNullify() == typeof(Date))
                         return QueryTokenMessage.Date.NiceToString();
@@ -544,6 +548,7 @@ namespace Signum.Entities.DynamicQuery
         MinuteStart,
         [Description("Second Start")]
         SecondStart,
+        TimeOfDay,
         [Description("More than one column named {0}")]
         MoreThanOneColumnNamed0,
         [Description("number")]
@@ -570,6 +575,6 @@ namespace Signum.Entities.DynamicQuery
         _0Mod1,
         Null,
         Not,
-        Distinct
+        Distinct,
     }
 }

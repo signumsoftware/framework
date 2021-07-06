@@ -246,6 +246,7 @@ namespace Signum.Entities.DynamicQuery
         Decimal,
         String,
         DateTime,
+        Time,
         Lite,
         Embedded,
         Boolean,
