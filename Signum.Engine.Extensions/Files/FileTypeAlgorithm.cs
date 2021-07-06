@@ -60,33 +60,37 @@ namespace Signum.Engine.Files
 
         public virtual void SaveFileInDisk(IFilePath fp)
         {
-            string? fullPhysicalPath = null;
-            try
-            {
-                string path = Path.GetDirectoryName(fp.FullPhysicalPath())!;
-                fullPhysicalPath = path;
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-                File.WriteAllBytes(fp.FullPhysicalPath(), fp.BinaryFile);
-                fp.BinaryFile = null!;
-            }
-            catch (IOException ex)
-            {
-                ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
-                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal!.Identity!.Name);
+            string fullPhysicalPath = fp.FullPhysicalPath();
+            using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
+                try
+                {
+                    string directory = Path.GetDirectoryName(fullPhysicalPath)!;
+                    if (!Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+                    File.WriteAllBytes(fp.FullPhysicalPath(), fp.BinaryFile);
+                    fp.BinaryFile = null!;
+                }
+                catch (IOException ex)
+                {
+                    ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
+                    ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal!.Identity!.Name);
 
-                throw;
-            }
+                    throw;
+                }
         }
 
         public virtual Stream OpenRead(IFilePath path)
         {
-            return File.OpenRead(path.FullPhysicalPath());
+            string fullPhysicalPath = path.FullPhysicalPath();
+            using (HeavyProfiler.Log("OpenRead", () => fullPhysicalPath))
+                return File.OpenRead(fullPhysicalPath);
         }
 
         public virtual byte[] ReadAllBytes(IFilePath path)
         {
-            return File.ReadAllBytes(path.FullPhysicalPath());
+            string fullPhysicalPath = path.FullPhysicalPath();
+            using (HeavyProfiler.Log("ReadAllBytes", () => fullPhysicalPath))
+                return File.ReadAllBytes(fullPhysicalPath);
         }
 
         public virtual void MoveFile(IFilePath ofp, IFilePath fp)
@@ -94,7 +98,14 @@ namespace Signum.Engine.Files
             if (WeakFileReference)
                 return;
 
-            System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
+            string source = ofp.FullPhysicalPath();
+            string target = fp.FullPhysicalPath();
+            using (HeavyProfiler.Log("ReadAllBytes", () =>
+            "SOURCE: " + source + "\n" +
+            "TARGET:" + target))
+            {
+                System.IO.File.Move(source, target);
+            }
         }
 
         public virtual void DeleteFiles(IEnumerable<IFilePath> files)
@@ -104,7 +115,9 @@ namespace Signum.Engine.Files
 
             foreach (var f in files)
             {
-                File.Delete(f.FullPhysicalPath());
+                string fullPhysicalPath = f.FullPhysicalPath();
+                using (HeavyProfiler.Log("DeleteFile", () => fullPhysicalPath))
+                    File.Delete(fullPhysicalPath);
             }
         }
 
@@ -115,10 +128,11 @@ namespace Signum.Engine.Files
 
             foreach (var f in files)
             {
-                string path = f.FullPhysicalPath();
-                
-                if(File.Exists(path))
-                    File.Delete(path);
+                string fullPhysicalPath = f.FullPhysicalPath();
+
+                using (HeavyProfiler.Log("DeleteFileIfExists", () => fullPhysicalPath))
+                    if (File.Exists(fullPhysicalPath))
+                        File.Delete(fullPhysicalPath);
             }
         }
 
