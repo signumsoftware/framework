@@ -20,6 +20,7 @@ export interface ModalFindOptions {
   message?: React.ReactNode;
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
+  autoSkipIfZero?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }

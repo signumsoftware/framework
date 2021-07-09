@@ -5,7 +5,7 @@
 }*/
 
 @media (min-width: 768px) {
-    .modal-medium,
+    .modal-md,
     .modal-lg,
     .modal-xl {
         min-width: 730px;
