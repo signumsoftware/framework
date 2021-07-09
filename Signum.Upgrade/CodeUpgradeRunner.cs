@@ -86,9 +86,8 @@ namespace Signum.Upgrade
         {
             using (Repository rep = new Repository(folder))
             {
-                var subModules = rep.Submodules.Select(a => a.Name);
-                var status = rep.RetrieveStatus();
-                return status.Any(a => a.State != FileStatus.Ignored && !subModules.Contains(a.FilePath));
+                var status = rep.RetrieveStatus(new StatusOptions { ExcludeSubmodules = true, Show = StatusShowOption.IndexAndWorkDir });
+                return status.Any(a => a.State != FileStatus.Ignored);
             }
         }
 
