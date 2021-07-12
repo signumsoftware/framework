@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Signum.Entities.Workflow
 {
@@ -12,5 +12,7 @@ namespace Signum.Entities.Workflow
         public double? AvoidExecutingScriptsOlderThan { get; set; }
 
         public int ChunkSizeRunningScripts { get; set; } = 100;
+
+        public bool IsBudgetActive { get; set; } = false;
     }
 }

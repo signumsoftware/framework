@@ -739,7 +739,8 @@ namespace Signum.Engine.Workflow
                     {
                         var usedWorkflows = Database.Query<CaseEntity>()
                                                 .Where(c => c.Workflow.Is(w) && c.ParentCase != null)
-                                                .Select(c => c.ParentCase!.Workflow)
+                                                .Select(c => c.ParentCase!.Entity.Workflow.ToLite())
+                                                .Distinct()
                                                 .ToList();
 
                         if (usedWorkflows.Any())

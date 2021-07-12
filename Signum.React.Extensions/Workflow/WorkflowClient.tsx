@@ -420,19 +420,6 @@ function registerCustomContexts() {
     },
     getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase)
   };
-
-  DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
-    getTypeContext: ctx => {
-      var actx = getCaseActivityContext(ctx);
-      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
-    },
-    getCodeContext: cc => {
-      addActx(cc);
-      cc.assignments["pmctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
-      return cc.createNewContext("pmctx");
-    },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase!.mainEntity)
-  };
 }
 
 export function getCaseActivityContext(ctx: TypeContext<any>): TypeContext<CaseActivityEntity> | undefined {

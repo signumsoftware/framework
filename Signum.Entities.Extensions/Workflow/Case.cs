@@ -12,7 +12,7 @@ namespace Signum.Entities.Workflow
         
         public WorkflowEntity Workflow { get; set; }
 
-        public CaseEntity? ParentCase { get; set; }
+        public Lite<CaseEntity>? ParentCase { get; set; }
 
         [StringLengthValidator(Min = 1, Max = 100)]
         public string Description { get; set; }

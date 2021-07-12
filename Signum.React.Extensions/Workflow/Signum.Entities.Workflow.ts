@@ -144,7 +144,7 @@ export const CaseEntity = new Type<CaseEntity>("Case");
 export interface CaseEntity extends Entities.Entity {
   Type: "Case";
   workflow: WorkflowEntity;
-  parentCase: CaseEntity | null;
+  parentCase: Entities.Lite<CaseEntity> | null;
   description: string;
   mainEntity: ICaseMainEntity;
   startDate: string;
@@ -436,6 +436,7 @@ export interface WorkflowConfigurationEmbedded extends Entities.EmbeddedEntity {
   scriptRunnerPeriod: number;
   avoidExecutingScriptsOlderThan: number | null;
   chunkSizeRunningScripts: number;
+  isBudgetActive: boolean;
 }
 
 export const WorkflowConnectionEntity = new Type<WorkflowConnectionEntity>("WorkflowConnection");
