@@ -20,6 +20,19 @@
     <Member Name="LoginWithWindowsAuthenticator" Description="Login mit Windows-Authentifikator" />
     <Member Name="RoleMapping" Description="Rollenzuordnung" />
   </Type>
+  <Type Name="ActiveDirectoryMessage">
+    <Member Name="AccountEnabled" Description="Konto aktiviert" />
+    <Member Name="CompanyName" Description="Firmenname" />
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="GivenName" Description="Vorname" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="JobTitle" Description="Berufsbezeichnung" />
+    <Member Name="Mail" Description="Mail" />
+    <Member Name="OnlyActiveUsers" Description="Nur aktive Benutzer" />
+    <Member Name="OnPremisesExtensionAttributes" Description="On premises extension attributes" />
+    <Member Name="OnPremisesImmutableId" Description="On premises immutable id" />
+    <Member Name="Surname" Description="Nachname" />
+  </Type>
   <Type Name="ActiveDirectoryPermission">
     <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
   </Type>
@@ -337,6 +350,7 @@
     <Member Name="Real" Description="Real" />
     <Member Name="RealGroupable" Description="Echte gruppierbare" />
     <Member Name="String" Description="String" />
+    <Member Name="Time" Description="Zeit" />
   </Type>
   <Type Name="ChartMessage">
     <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} kann nur aus dem Diagrammfenster erstellt werden" />
@@ -1543,6 +1557,23 @@
   <Type Name="OmniboxPermission">
     <Member Name="ViewOmnibox" Description="Omnibox anzeigen" />
   </Type>
+  <Type Name="OnPremisesExtensionAttributesModel" Description="On premises extension attributes">
+    <Member Name="ExtensionAttribute1" Description="Extension attribute 1" />
+    <Member Name="ExtensionAttribute10" Description="Extension attribute 10" />
+    <Member Name="ExtensionAttribute11" Description="Extension attribute 11" />
+    <Member Name="ExtensionAttribute12" Description="Extension attribute 12" />
+    <Member Name="ExtensionAttribute13" Description="Extension attribute 13" />
+    <Member Name="ExtensionAttribute14" Description="Extension attribute 14" />
+    <Member Name="ExtensionAttribute15" Description="Extension attribute 15" />
+    <Member Name="ExtensionAttribute2" Description="Extension attribute 2 " />
+    <Member Name="ExtensionAttribute3" Description="Extension attribute 3" />
+    <Member Name="ExtensionAttribute4" Description="Extension attribute 4" />
+    <Member Name="ExtensionAttribute5" Description="Extension attribute 5" />
+    <Member Name="ExtensionAttribute6" Description="Extension attribute 6" />
+    <Member Name="ExtensionAttribute7" Description="Extension attribute 7" />
+    <Member Name="ExtensionAttribute8" Description="Extension attribute 8" />
+    <Member Name="ExtensionAttribute9" Description="Extension attribute 9" />
+  </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="DBOnly" Description="Nur DB" />
@@ -1953,35 +1984,17 @@
   </Type>
   <Type Name="SchedulerMessage">
     <Member Name="Day0At1In2" Description="Tag {0} auf {1} in {2}" />
-    <Member Name="Each0Hours" Description="Alle {0} Stunden" />
     <Member Name="Each0Minutes" Description="Alle {0} Minuten" />
-    <Member Name="ScheduleRuleDailyDN_Everydayat" Description="Jeden Tag um " />
-    <Member Name="ScheduleRuleDailyEntity" Description="Täglich" />
-    <Member Name="ScheduleRuleDayDN_StartingOn" Description="Beginnend am" />
-    <Member Name="ScheduleRuleHourlyEntity" Description="Alle X Stunden" />
-    <Member Name="ScheduleRuleMinutelyEntity" Description="Alle X Minuten" />
     <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="und an Feiertagen" />
     <Member Name="ScheduleRuleWeekDaysDN_At" Description="an" />
     <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="aber Feiertage" />
-    <Member Name="ScheduleRuleWeekDaysDN_Calendar" Description="Kalender" />
-    <Member Name="ScheduleRuleWeekDaysDN_F" Description="Fr" />
-    <Member Name="ScheduleRuleWeekDaysDN_Friday" Description="Freitag" />
-    <Member Name="ScheduleRuleWeekDaysDN_Holiday" Description="Feiertag" />
-    <Member Name="ScheduleRuleWeekDaysDN_M" Description="Mo" />
-    <Member Name="ScheduleRuleWeekDaysDN_Monday" Description="Montag" />
-    <Member Name="ScheduleRuleWeekDaysDN_S" Description="So" />
+    <Member Name="ScheduleRuleWeekDaysDN_Fr" Description="Fr" />
+    <Member Name="ScheduleRuleWeekDaysDN_Mo" Description="Mo" />
     <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="Sa" />
-    <Member Name="ScheduleRuleWeekDaysDN_Saturday" Description="Samstag" />
-    <Member Name="ScheduleRuleWeekDaysDN_Sunday" Description="Sonntag" />
-    <Member Name="ScheduleRuleWeekDaysDN_T" Description="Di" />
+    <Member Name="ScheduleRuleWeekDaysDN_Su" Description="So" />
     <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Do" />
-    <Member Name="ScheduleRuleWeekDaysDN_Thursday" Description="Donnerstag" />
-    <Member Name="ScheduleRuleWeekDaysDN_Tuesday" Description="Dienstag" />
-    <Member Name="ScheduleRuleWeekDaysDN_W" Description="Mi" />
-    <Member Name="ScheduleRuleWeekDaysDN_Wednesday" Description="Mittwoch" />
-    <Member Name="ScheduleRuleWeekDaysEntity" Description="Tage der Woche" />
-    <Member Name="ScheduleRuleWeeklyDN_DayOfTheWeek" Description="Tag der Woche" />
-    <Member Name="ScheduleRuleWeeklyEntity" Description="wöchentlich" />
+    <Member Name="ScheduleRuleWeekDaysDN_Tu" Description="Di" />
+    <Member Name="ScheduleRuleWeekDaysDN_We" Description="Mi" />
     <Member Name="TaskIsNotRunning" Description="Die Aufgabe wird nicht ausgeführt" />
   </Type>
   <Type Name="SchedulerPermission">
@@ -2272,6 +2285,7 @@
     <Member Name="_0AlreadySynchronized" Description="{0} bereits synchronisiert" />
     <Member Name="All" Description="Alle" />
     <Member Name="AllLanguages" Description="Alle Sprachen" />
+    <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
     <Member Name="Edit" Description="bearbeiten" />
@@ -2420,6 +2434,9 @@
   <Type Name="UserADMixin">
     <Member Name="OID" Description="OID" />
     <Member Name="SID" Description="SID" />
+  </Type>
+  <Type Name="UserADQuery">
+    <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
   </Type>
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="In xml exportieren" />
