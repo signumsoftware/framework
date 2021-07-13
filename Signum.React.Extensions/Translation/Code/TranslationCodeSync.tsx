@@ -10,7 +10,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";
 import "../Translation.css"
-import { decodeDots } from './TranslationCodeStatus'
+import { decodeDots, encodeDots } from './TranslationCodeStatus'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
 
@@ -40,8 +40,8 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
       <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
       <br />
       {result && result.totalTypes > 0 && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
-      {result && result.totalTypes == 0 && <Link to={`~/translation/status`}>
-        {TranslationMessage.BackToTranslationStatus.niceToString()}
+      {result && result.totalTypes == 0 && <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`}>
+        {TranslationMessage.BackToSyncAssembly0.niceToString(assembly)}
       </Link>}
     </div>
   );

@@ -64,6 +64,8 @@ namespace Signum.Entities.Translation
         NewTranslations,
 
         BackToTranslationStatus,
+        [Description("Back to sync assembly {0}")]
+        BackToSyncAssembly0,
 
         ThisFieldIsTranslatable,
     }

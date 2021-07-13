@@ -23,7 +23,7 @@ export interface FileDownloaderProps {
 
 const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
-function getFileName(toStr: string) {
+export function getFileName(toStr: string) {
   if (units.some(u => toStr.endsWith(" " + u)))
     return toStr.beforeLast(" - ");
 
