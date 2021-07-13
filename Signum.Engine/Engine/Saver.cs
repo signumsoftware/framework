@@ -66,6 +66,11 @@ namespace Signum.Engine
 
                 SaveGraph(schema, identifiables);
 
+                EntityCache.Add(identifiables);
+                EntityCache.Add(notModified);
+
+                GraphExplorer.CleanModifications(modifiables);
+
                 foreach (var node in identifiables)
                     schema.OnSaved(node, new SavedEventArgs
                     {
@@ -73,11 +78,6 @@ namespace Signum.Engine
                         WasNew = wasNew.Contains(node),
                         WasSelfModified = wasSelfModified.Contains(node),
                     });
-
-                EntityCache.Add(identifiables);
-                EntityCache.Add(notModified);
-
-                GraphExplorer.CleanModifications(modifiables);
             }
         }
 
