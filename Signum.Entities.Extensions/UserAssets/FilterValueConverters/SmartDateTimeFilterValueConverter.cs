@@ -109,7 +109,7 @@ namespace Signum.Entities.UserAssets
 
                         year += MonthDivMod(ref month);
 
-                        var date = new DateTime(year, month, now.Day).WeekStart().AddDays((int)dayOfWeek);
+                        var date = new DateTime(year, month, now.Day).WeekStart().AddDays(((int)dayOfWeek - (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek));
                         if(inc.HasText())
                         {
                             date = date.AddDays(int.Parse(inc));
