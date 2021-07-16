@@ -3,7 +3,7 @@ import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker, DropdownList } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration, tryGetTypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -256,15 +256,14 @@ ValueLineRenderers.renderers["ComboBox"] = (vl) => {
 };
 
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
-  var ti: TypeInfo;
-  function getTi() {
-    return ti ?? (ti = getTypeInfo(vl.props.type!.name));
-  }
 
-  if (vl.props.comboBoxItems)
-    return vl.props.comboBoxItems.map(a =>
-      typeof a == "string" ? getTi().members[a] && toOptionItem(getTi().members[a]) :
-        toOptionItem(a)).filter(a => !!a);
+  var ti = tryGetTypeInfo(vl.props.type!.name);
+
+  if (vl.props.comboBoxItems) {
+    return vl.props.comboBoxItems
+      .map(a => typeof a == "string" && ti != null && ti.kind == "Enum" ? toOptionItem(ti.members[a]) : toOptionItem(a))
+      .filter(a => !!a);
+  }
 
   if (vl.props.type!.name == "boolean")
     return ([
@@ -272,10 +271,19 @@ function getOptionsItems(vl: ValueLineController): OptionItem[] {
       { label: BooleanEnum.niceToString("True")!, value: true }
     ]);
 
-  return Dic.getValues(getTi().members).map(m => toOptionItem(m));
+  if (ti != null && ti.kind == "Enum")
+    return Dic.getValues(ti.members).map(m => toOptionItem(m));
+
+  throw new Error("Unable to get Options from " + vl.props.type!.name);
 }
 
-function toOptionItem(m: MemberInfo | OptionItem): OptionItem {
+function toOptionItem(m: MemberInfo | OptionItem | string): OptionItem {
+
+  if (typeof m == "string")
+    return {
+      value: m,
+      label: m,
+    }
 
   if ((m as MemberInfo).name)
     return {
