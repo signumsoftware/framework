@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { whenVisible } from '../Hooks';
 
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   innerRef?: React.Ref<HTMLTextAreaElement>;
@@ -9,6 +10,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 export default function TextArea(p: TextAreaProps) {
 
   var textAreaRef = React.useRef<HTMLTextAreaElement | null | undefined>();
+  const visibleObserver = React.useRef<IntersectionObserver | null>(null);
 
     function handleResize(ta: HTMLTextAreaElement) {
     if (ta.style.height == ta.scrollHeight + 'px') { // do not move to a variable
@@ -24,11 +26,15 @@ export default function TextArea(p: TextAreaProps) {
 
   const handleRef = React.useCallback((ta: HTMLTextAreaElement | null) => {
     textAreaRef.current = ta;
+
+    if (visibleObserver.current)
+      visibleObserver.current.disconnect();
+
     if (ta && p.autoResize) {
       if (ta.offsetParent != null)
         handleResize(ta);
       else
-        whenVisible(ta, visible => visible && handleResize(ta));
+        visibleObserver.current = whenVisible(ta, visible => visible && handleResize(ta), { root: document.documentElement });
     }
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);
@@ -37,6 +43,13 @@ export default function TextArea(p: TextAreaProps) {
     if (p.autoResize && textAreaRef.current && p.value != null)
       handleResize(textAreaRef.current);
   }, [p.value]);
+
+  React.useEffect(() => {
+    return () => {
+      if (visibleObserver.current)
+        visibleObserver.current.disconnect();
+    };
+  }, []);
 
   return (
     <textarea {...props} onInput={e => {
@@ -55,17 +68,3 @@ export default function TextArea(p: TextAreaProps) {
 }
 
 TextArea.defaultProps = { autoResize: true, minHeight: "50px" };
-
-function whenVisible(element: HTMLElement, callback: (visible: boolean) => void) {
-  var options = {
-    root: document.documentElement
-  }
-
-  var observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      callback(entry.intersectionRatio > 0);
-    });
-  }, options);
-
-  observer.observe(element);
-}

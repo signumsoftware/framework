@@ -19,7 +19,7 @@ export interface EntityComboProps extends EntityBaseProps {
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
   refreshKey?: string;
   initiallyFocused?: boolean;
-  comboHtmlAttributes?: React.AllHTMLAttributes<any>;
+  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactChild;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -111,7 +111,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             refreshKey={p.refreshKey}
             delayLoadData={p.delayLoadData}
             toStringFromData={p.toStringFromData}
-            selectHtmlAttributes={p.comboHtmlAttributes}
+            selectHtmlAttributes={p.selectHtmlAttributes}
             liteToString={p.liteToString}
             onRenderItem={p.onRenderItem}
           />

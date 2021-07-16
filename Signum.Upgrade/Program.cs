@@ -53,6 +53,8 @@ namespace Signum.Upgrade
                 new Upgrade_20210331_ReactWidgets5(),
                 new Upgrade_20210414_SimplifyQueryTokenString(),
                 new Upgrade_20210415_ReactWidgets503(),
+                new Upgrade_20210511_MSAL2(),
+                new Upgrade_20210513_UpdateNugets(),    
             }.Run(uctx);
         }
     }

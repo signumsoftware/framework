@@ -769,7 +769,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.state.selectedRows == null)
       return [];
 
-    return this.state.selectedRows.map(a => a.entity!);
+    return this.state.selectedRows.map(a => a.entity).notNull();
   }
 
   getGroupedSelectedEntities(): Promise<Lite<Entity>[]> {

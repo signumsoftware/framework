@@ -5,11 +5,12 @@ import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName } from '../Reflection'
+import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, durationToString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { toFilterRequests } from '../Finder';
+import { PropertyRoute } from '../Lines'
 
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
   valueToken?: string | QueryTokenString<any>;
@@ -144,6 +145,11 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     return token && (token.filterType == "Integer" || token.filterType == "Decimal");
   }
 
+  isMultiLine() {
+    let token = this.state.token;
+    return token && token.filterType == "String" && token.propertyRoute && PropertyRoute.parseFull(token.propertyRoute).member?.isMultiline;
+  }
+
   render() {
 
     const p = this.props;
@@ -219,6 +225,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       s.token && (s.token.type.isLite || s.token!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
+      p.formControlClass && this.isMultiLine() && "sf-multi-line",
 
       p.isBadge == false ? "" :
         "badge badge-pill " +
@@ -230,12 +237,14 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );
 
-    if (p.formControlClass)
+    if (p.formControlClass) {
       return (
         <div className={className} style={p.customStyle} {...p.htmlAttributes}>
           {this.renderValue(this.state.value)}
         </div>
       );
+    }
+     
 
     if (p.isLink) {
       return (
@@ -286,6 +295,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       case "DateTime":
         const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "Date" | "DateTime");
         return DateTime.fromISO(value).toFormatFixed(momentFormat);
+      case "Time":
+        const durationFormat = toDurationFormat(this.props.format ?? token.format);
+        return durationToString(value, durationFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);

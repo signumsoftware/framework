@@ -71,7 +71,12 @@ export default function FilterBuilder(p: FilterBuilderProps) {
 
   function handleDeleteAllFilters(e: React.MouseEvent) {
     e.preventDefault();
-    p.filterOptions.clear();
+
+    var filtersCount = p.filterOptions.length;
+    p.filterOptions.filter(fo => !fo.frozen).forEach(fo => p.filterOptions.remove(fo));
+    if (p.filterOptions.length == filtersCount)
+      return;
+
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
     forceUpdate().then(handleHeightChanged).done();

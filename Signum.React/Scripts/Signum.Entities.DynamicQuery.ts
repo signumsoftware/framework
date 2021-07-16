@@ -43,6 +43,7 @@ export type FilterType =
   "Decimal" |
   "String" |
   "DateTime" |
+  "Time" |
   "Lite" |
   "Embedded" |
   "Boolean" |
@@ -100,6 +101,7 @@ export module QueryTokenMessage {
   export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
   export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");
   export const SecondStart = new MessageKey("QueryTokenMessage", "SecondStart");
+  export const TimeOfDay = new MessageKey("QueryTokenMessage", "TimeOfDay");
   export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
   export const Number = new MessageKey("QueryTokenMessage", "Number");
   export const Of = new MessageKey("QueryTokenMessage", "Of");

@@ -88,12 +88,12 @@ export default function FramePage(p: FramePageProps) {
     const queryString = QueryString.parse(p.location.search);
 
     if (queryString.waitData) {
-      if (window.opener.dataForChildWindow == undefined) {
+      if (window.opener!.dataForChildWindow == undefined) {
         throw new Error("No dataForChildWindow in parent found!")
       }
 
-      var pack = window.opener.dataForChildWindow as EntityPack<Entity>;
-      window.opener.dataForChildWindow = undefined;
+      var pack = window.opener!.dataForChildWindow as EntityPack<Entity>;
+      window.opener!.dataForChildWindow = undefined;
       var txt = JSON.stringify(pack);
       return Promise.resolve({
         pack,
