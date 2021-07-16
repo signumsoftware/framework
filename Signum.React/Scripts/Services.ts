@@ -1,4 +1,4 @@
-import { ModelState, isEntity } from './Signum.Entities'
+import { ModelState, isEntity, ModelEntity } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
 
 export interface AjaxOptions {
@@ -204,6 +204,8 @@ export module ThrowErrorFilter {
             var obj = JSON.parse(text);
             if (response.status == 400 && !(obj as WebApiHttpError).exceptionType)
               throw new ValidationError(obj as ModelState);
+            else if ((obj as WebApiHttpError).model)
+              throw new ModelRequestedError((obj as WebApiHttpError).model!);
             else
               throw new ServiceError(obj as WebApiHttpError);
           }
@@ -313,6 +315,7 @@ export interface WebApiHttpError {
   exceptionMessage: string | null;
   stackTrace: string | null;
   exceptionId: string | null;
+  model?: ModelEntity;
   innerException: WebApiHttpError | null;
 }
 
@@ -321,6 +324,14 @@ export class ValidationError {
 
   constructor(modelState: ModelState) {
     this.modelState = modelState;
+  }
+}
+
+export class ModelRequestedError {
+  model: ModelEntity;
+
+  constructor(model: ModelEntity) {
+    this.model = model;
   }
 }
 

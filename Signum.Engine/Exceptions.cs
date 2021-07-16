@@ -266,4 +266,16 @@ namespace Signum.Engine
             this.Ids = ids;
         }
     }
+
+
+    [Serializable]
+    public class ModelRequestedException : Exception
+    {
+        public ModelRequestedException(ModelEntity model) : base("Model Requested")
+        {
+            this.Model = model;
+        }
+
+        public ModelEntity Model { get; set; }
+    }
 }
