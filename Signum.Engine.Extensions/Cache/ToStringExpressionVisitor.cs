@@ -177,11 +177,25 @@ namespace Signum.Engine.Cache
             if (node.Method.DeclaringType == typeof(string) && node.Method.Name == nameof(string.Format) ||
               node.Method.DeclaringType == typeof(StringExtensions) && node.Method.Name == nameof(StringExtensions.FormatWith))
             {
+                if (node.Arguments[0].Type == typeof(IFormatProvider))
+                    throw new NotSupportedException("string.Format with IFormatProvider");
+
                 var formatStr = Visit(node.Arguments[0]);
-                var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
 
+                if (node.Arguments.Count == 2 && node.Arguments[1] is NewArrayExpression nae)
+                {
+                    var expressions = nae.Expressions.Select(a => Visit(ToString(a))).ToList();
 
-                return node.Update(null!, new Sequence<Expression> { formatStr, remainging });
+                    return node.Update(null!, new[] { formatStr, Expression.NewArrayInit(nae.Type.ElementType()!, expressions) });
+                }
+                else
+                {
+                    var remainging = node.Arguments.Skip(1).Select(a => Visit(ToString(a))).ToList();
+
+                    return node.Update(null!, new Sequence<Expression> { formatStr, remainging });
+                }
+
+              
             }
 
             var obj = base.Visit(node.Object);
