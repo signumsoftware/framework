@@ -1389,7 +1389,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return new Updateable<E>(query, null);
         }
 
-        public static int UnsafeUpdate<E, V>(this IQueryable<E> query, Expression<Func<E, V>> propertyExpression, Expression<Func<E, V>> valueExpression, string? message = null)
+        public static int UnsafeUpdate<E, X>(this IQueryable<E> query, Expression<Func<E, X>> propertyExpression, Expression<Func<E, X>> valueExpression, string? message = null)
             where E : Entity
         {
             return new Updateable<E>(query, null).Set(propertyExpression, valueExpression).Execute(message);
@@ -1399,6 +1399,12 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
              where E : Entity
         {
             return new Updateable<MListElement<E, V>>(query, null);
+        }
+
+        public static int UnsafeUpdateMList<E, V, X>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, X>> propertyExpression, Expression<Func<MListElement<E, V>, X>> valueExpression, string? message = null)
+             where E : Entity
+        {
+            return new Updateable<MListElement<E, V>>(query, null).Set(propertyExpression, valueExpression).Execute(message);
         }
 
         public static IUpdateable<V> UnsafeUpdateView<V>(this IQueryable<V> query)

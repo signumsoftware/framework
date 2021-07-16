@@ -111,11 +111,14 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     .then(a => a.default.open(fo, modalOptions))
     .then(a => a?.row.entity);
 
-  if (modalOptions?.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
-        if (data.length == 1)
+        if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data[0]);
+
+        if (data.length == 0 && modalOptions?.autoSkipIfZero)
+          return Promise.resolve(undefined);
 
         return getPromiseSearchModal();
       });
@@ -172,10 +175,13 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     .then(a => a.default.openMany(fo, modalOptions))
     .then(a => a?.rows.map(a => a.entity!));
 
-  if (modalOptions?.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
-        if (data.length == 1)
+        if (data.length == 1 && modalOptions?.autoSelectIfOne)
+          return Promise.resolve(data);
+
+        if (data.length == 0 && modalOptions?.autoSkipIfZero)
           return Promise.resolve(data);
 
         return getPromiseSearchModal();
