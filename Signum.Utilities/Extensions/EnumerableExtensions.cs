@@ -1014,7 +1014,8 @@ namespace Signum.Utilities
             using (var enumA = colA.GetEnumerator())
             using (var enumB = colB.GetEnumerator())
             {
-                while ((okA &= enumA.MoveNext()) || (okB &= enumB.MoveNext()))
+                while ((okA &= enumA.MoveNext()) | 
+                       (okB &= enumB.MoveNext()))
                 {
                     var first = okA ? enumA.Current : default!;
                     var second = okB ? enumB.Current : default!;
