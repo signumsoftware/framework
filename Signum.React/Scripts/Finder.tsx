@@ -234,6 +234,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
     elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
     currentPage: fo.pagination && fo.pagination.currentPage,
     systemTimeMode: fo.systemTime && fo.systemTime.mode,
+    systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
     systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
     systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
     ...extra
@@ -290,6 +291,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
     } as Pagination,
     systemTime: query.systemTimeMode && {
       mode: query.systemTimeMode,
+      joinMode: query.systemTimeJoinMode,
       startDate: query.systemTimeStartDate,
       endDate: query.systemTimeEndDate,
     }

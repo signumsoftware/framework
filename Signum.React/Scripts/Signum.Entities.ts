@@ -309,6 +309,7 @@ export module JavascriptMessage {
   export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
   export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
   export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
+  export const joinMode = new MessageKey("JavascriptMessage", "joinMode");
   export const loading = new MessageKey("JavascriptMessage", "loading");
   export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
   export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");

@@ -133,6 +133,12 @@ export type RoundingType =
   "Round" |
   "RoundMiddle";
 
+export const SystemTimeJoinMode = new EnumType<SystemTimeJoinMode>("SystemTimeJoinMode");
+export type SystemTimeJoinMode =
+  "Current" |
+  "FirstCompatible" |
+  "AllCompatible";
+
 export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
 export type SystemTimeMode =
   "AsOf" |

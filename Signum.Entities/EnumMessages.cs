@@ -338,6 +338,8 @@ namespace Signum.Entities
         deactivateTimeMachine,
         [Description("Show Records")]
         showRecords,
+        [Description("Join mode")]
+        joinMode,
         [Description("Loading...")]
         loading,
         [Description("No actions found")]

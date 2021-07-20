@@ -348,6 +348,7 @@ namespace Signum.React.ApiControllers
     public class SystemTimeTS
     {
         public SystemTimeMode mode;
+        public SystemTimeJoinMode? joinMode;
         public DateTimeOffset? startDate;
         public DateTimeOffset? endDate;
 
@@ -363,18 +364,21 @@ namespace Signum.React.ApiControllers
             else if (systemTime is SystemTime.Between between)
             {
                 mode = SystemTimeMode.Between;
+                joinMode = ToSystemTimeJoinMode(between.JoinBehaviour);
                 startDate = between.StartDateTime;
                 endDate = between.EndtDateTime;
             }
             else if (systemTime is SystemTime.ContainedIn containedIn)
             {
                 mode = SystemTimeMode.ContainedIn;
+                joinMode = ToSystemTimeJoinMode(containedIn.JoinBehaviour);
                 startDate = containedIn.StartDateTime;
                 endDate = containedIn.EndtDateTime;
             }
             else if (systemTime is SystemTime.All all)
             {
                 mode = SystemTimeMode.All;
+                joinMode = ToSystemTimeJoinMode(all.JoinBehaviour);
                 startDate = null;
                 endDate = null;
             }
@@ -389,11 +393,33 @@ namespace Signum.React.ApiControllers
         {
             switch (mode)
             {
-                case SystemTimeMode.All: return new SystemTime.All();
                 case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate!.Value);
-                case SystemTimeMode.Between: return new SystemTime.Between(startDate!.Value, endDate!.Value);
-                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate!.Value, endDate!.Value);
+                case SystemTimeMode.Between: return new SystemTime.Between(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value));
+                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value));
+                case SystemTimeMode.All: return new SystemTime.All(ToJoinBehaviour(joinMode!.Value));
                 default: throw new InvalidOperationException($"Unexpected {mode}");
+            }
+        }
+
+        public static JoinBehaviour ToJoinBehaviour(SystemTimeJoinMode joinMode)
+        {
+            switch (joinMode)
+            {
+                case SystemTimeJoinMode.Current: return JoinBehaviour.Current;
+                case SystemTimeJoinMode.FirstCompatible: return JoinBehaviour.FirstCompatible;
+                case SystemTimeJoinMode.AllCompatible: return JoinBehaviour.AllCompatible;
+                default: throw new UnexpectedValueException(joinMode);
+            }
+        }
+
+        public static SystemTimeJoinMode ToSystemTimeJoinMode(JoinBehaviour joinBehaviour)
+        {
+            switch (joinBehaviour)
+            {
+                case JoinBehaviour.Current: return SystemTimeJoinMode.Current;
+                case JoinBehaviour.FirstCompatible: return SystemTimeJoinMode.FirstCompatible;
+                case JoinBehaviour.AllCompatible: return SystemTimeJoinMode.AllCompatible;
+                default: throw new UnexpectedValueException(joinBehaviour);
             }
         }
     }
