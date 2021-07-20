@@ -244,7 +244,7 @@ namespace Signum.Entities
         /// <summary>
         /// Entity created for business definition
         /// By default ordered by id Ascending
-        /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...
+        /// ie: ProductEntity, OperationSymbol, PermissionSymbol, CountryEntity...
         /// </summary>
         Master,
 
