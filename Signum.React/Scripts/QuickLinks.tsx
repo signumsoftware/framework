@@ -348,7 +348,35 @@ export class QuickLinkExplore extends QuickLink {
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.findOptions));
     else
-      Finder.explore(this.findOptions);
+      Finder.explore(this.findOptions).done();
+  }
+}
+
+export class QuickLinkExplorePromise extends QuickLink {
+  findOptionsPromise: Promise<FindOptions>;
+
+  constructor(queryName: any, findOptionsPromise: Promise<FindOptions>, options?: QuickLinkOptions) {
+    super(getQueryKey(queryName), {
+      isVisible: Finder.isFindable(queryName, false),
+      text: () => getQueryNiceName(queryName),
+      ...options
+    });
+
+    this.findOptionsPromise = findOptionsPromise;
+  }
+
+  handleClick = (e: React.MouseEvent<any>) => {
+    if (e.button == 2)
+      return;
+
+    e.persist();
+
+    this.findOptionsPromise.then(fo => {
+      if (e.ctrlKey || e.button == 1)
+        window.open(Finder.findOptionsPath(fo));
+      else
+        Finder.explore(fo).done();
+    }).done();
   }
 }
 
