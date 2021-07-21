@@ -116,7 +116,7 @@ function SearchModal(p: SearchModalProps) {
   const okEnabled = p.isMany ? selectedRows.current.length > 0 : selectedRows.current.length == 1;
 
   return (
-    <Modal size={p.size ?? qs?.modalSize ?? "lg"} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf - search - modal">
+    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf - search - modal">
       <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
