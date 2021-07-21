@@ -2,6 +2,7 @@ import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
+import { BsSize } from './Components';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -21,6 +22,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   autoSkipIfZero?: boolean;
+  modalSize?: BsSize;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
