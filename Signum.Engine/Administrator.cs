@@ -153,22 +153,37 @@ namespace Signum.Engine
         internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
         public static IDisposable OverrideViewNameReplacer(Func<ObjectName, ObjectName> replacer)
         {
-            var old = registeredViewNameReplacer.Value;
-            registeredViewNameReplacer.Value = old == null ? replacer : n =>
-            {
-                var rep = replacer(n);
-                if (rep != n)
-                    return rep;
-
-                return old!(n);
-            };
-            return new Disposable(() => registeredViewNameReplacer.Value = old);
+            registeredViewNameReplacer.Value += replacer;
+            return new Disposable(() => registeredViewNameReplacer.Value -= replacer);
         }
+
+        public static event Func<ObjectName, ObjectName>? GlobalViewNameReplacer;
 
         public static ObjectName ReplaceViewName(ObjectName name)
         {
-            var replacer = registeredViewNameReplacer.Value;
-            return replacer == null ? name : replacer(name);
+            var scopeReplacer = registeredViewNameReplacer.Value;
+            if(scopeReplacer != null)
+            {
+                foreach (var rep in scopeReplacer.GetInvocationListTyped())
+                {
+                    var on = rep(name);
+                    if (on != null)
+                        return on;
+                }
+            }
+
+            var globalReplacer = GlobalViewNameReplacer;
+            if (globalReplacer != null)
+            {
+                foreach (var rep in globalReplacer.GetInvocationListTyped())
+                {
+                    var on = rep(name);
+                    if (on != null)
+                        return on;
+                }
+            }
+
+            return name;
         }
 
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName? database)
