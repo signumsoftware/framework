@@ -168,7 +168,7 @@ export default function FramePage(p: FramePageProps) {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
-      if (packEntity.entity.id != null && entity.id == null)
+      if (packEntity.entity.id != null && entity.id != packEntity.entity.id)
         AppContext.history.push(Navigator.navigateRoute(packEntity.entity));
       else {
         if (reloadComponent) {
