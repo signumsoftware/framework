@@ -192,6 +192,11 @@ namespace Signum.Entities
         ViewSelected,
         Operations,
         NoResultsFound,
+        NoResultsInThisPage,
+        [Description("No results found in page {0}, {1}")]
+        NoResultsFoundInPage01,
+        [Description("go back to page one")]
+        GoBackToPageOne,
         Explore,
         PinnedFilter,
         Label,

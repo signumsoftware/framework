@@ -361,7 +361,7 @@ export interface ResultTable {
   columns: string[];
   rows: ResultRow[];
   pagination: Pagination
-  totalElements: number;
+  totalElements?: number;
 }
 
 
