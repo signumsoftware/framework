@@ -13,7 +13,7 @@ namespace Signum.React.DiffLog
     public class DiffLogController : ControllerBase
     {
         [HttpGet("api/diffLog/{id}")]
-        public DiffLogResult GetOperationDiffLog(string id)
+        public DiffLogResult GetOperationDiffLog(string id, bool simplify)
         {
             var operationLog = Database.Retrieve<OperationLogEntity>(PrimaryKey.Parse(id, typeof(OperationLogEntity)));
 
@@ -21,17 +21,22 @@ namespace Signum.React.DiffLog
 
             StringDistance sd = new StringDistance();
 
-            var prevFinal = logs.Min?.Mixin<DiffLogMixin>().FinalState.Text;
+            var prevFinal = DiffLogLogic.SimplifyDump(logs.Min?.Mixin<DiffLogMixin>().FinalState.Text, simplify);
 
-            string? nextInitial = logs.Max != null ? logs.Max.Mixin<DiffLogMixin>().InitialState.Text :
+            string? nextInitial = logs.Max != null ? DiffLogLogic.SimplifyDump(logs.Max.Mixin<DiffLogMixin>().InitialState.Text, simplify) :
                 operationLog.Target!.Exists() ? GetDump(operationLog.Target!) : null;
+
+            string? initial = DiffLogLogic.SimplifyDump(operationLog.Mixin<DiffLogMixin>().InitialState.Text, simplify);
+            string? final = DiffLogLogic.SimplifyDump(operationLog.Mixin<DiffLogMixin>().FinalState.Text, simplify);
 
             return new DiffLogResult
             {
                 prev = logs.Min?.ToLite(),
-                diffPrev = prevFinal == null || operationLog.Mixin<DiffLogMixin>().InitialState.Text == null ? null : sd.DiffText(prevFinal, operationLog.Mixin<DiffLogMixin>().InitialState.Text),
-                diff = sd.DiffText(operationLog.Mixin<DiffLogMixin>().InitialState.Text, operationLog.Mixin<DiffLogMixin>().FinalState.Text),
-                diffNext = operationLog.Mixin<DiffLogMixin>().FinalState.Text == null || nextInitial == null ? null : sd.DiffText(operationLog.Mixin<DiffLogMixin>().FinalState.Text, nextInitial),
+                diffPrev = prevFinal == null || initial == null ? null : sd.DiffText(prevFinal, initial),
+                initial = initial,
+                diff = sd.DiffText(initial, final),
+                final = final,
+                diffNext = final == null || nextInitial == null ? null : sd.DiffText(final, nextInitial),
                 next = logs.Max?.ToLite(),
             };
         }
@@ -50,9 +55,9 @@ namespace Signum.React.DiffLog
     {
         public Lite<OperationLogEntity>? prev { get; internal set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffPrev { get; internal set; }
-
+        public string? initial { get; internal set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diff { get; internal set; }
-
+        public string? final { get; internal set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffNext { get; internal set; }
         public Lite<OperationLogEntity>? next { get; internal set; }
     }

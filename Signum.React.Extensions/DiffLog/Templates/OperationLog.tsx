@@ -41,7 +41,9 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
 
 export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
-  const result = useAPI(() => API.diffLog(p.ctx.value.id!), [p.ctx.value.id], { avoidReset: true });
+  var [simplify, setSimplify] = React.useState(true);
+
+  const result = useAPI(() => API.diffLog(p.ctx.value.id!, simplify), [p.ctx.value.id, simplify], { avoidReset: true });
 
   var mctx = p.ctx.subCtx(DiffLogMixin);
 
@@ -86,7 +88,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderInitialState() {
     return (
       <Tab eventKey="initialState" title={mctx.niceName(d => d.initialState)}>
-        <pre><code>{mctx.value.initialState.text}</code></pre>
+        <pre><code>{result ? result.initial: mctx.value.initialState.text}</code></pre>
       </Tab>
     );
   }
@@ -115,7 +117,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   function renderFinalState() {
     return (
       <Tab eventKey="finalState" title={mctx.niceName(d => d.finalState)}>
-        <pre><code>{mctx.value.finalState.text}</code></pre>
+        <pre><code>{result ? result.final : mctx.value.finalState.text}</code></pre>
       </Tab>
     );
   }
@@ -175,15 +177,18 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   }
   const target = p.ctx.value.target;
   return (
-    <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
-      {result?.prev && renderPrev(result.prev)}
-      {result?.diffPrev && renderPrevDiff(result.diffPrev)}
-      {renderInitialState()}
-      {renderDiff()}
-      {renderFinalState()}
-      {result?.diffNext && renderNextDiff(result.diffNext)}
-      {result && (result.next ? renderNext(result.next) : target && renderCurrentEntity(target))}
-    </Tabs>
+    <div>
+      <label><input type="checkbox" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes</label>
+      <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
+        {result?.prev && renderPrev(result.prev)}
+        {result?.diffPrev && renderPrevDiff(result.diffPrev)}
+        {renderInitialState()}
+        {renderDiff()}
+        {renderFinalState()}
+        {result?.diffNext && renderNextDiff(result.diffNext)}
+        {result && (result.next ? renderNext(result.next) : target && renderCurrentEntity(target))}
+      </Tabs>
+    </div>
   );
 }
 

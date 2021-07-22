@@ -100,8 +100,8 @@ export function timeMachineRoute(lite: Lite<Entity>) {
 
 export namespace API {
 
-  export function diffLog(id: string | number): Promise<DiffLogResult> {
-    return ajaxGet({ url: "~/api/diffLog/" + id });
+  export function diffLog(id: string | number, simplify: boolean): Promise<DiffLogResult> {
+    return ajaxGet({ url: "~/api/diffLog/" + id + "?simplify=" + simplify});
   }
 
   export function retrieveVersion(lite: Lite<Entity>, asOf: string,): Promise<Entity> {
@@ -116,7 +116,9 @@ export namespace API {
 export interface DiffLogResult {
   prev: Lite<OperationLogEntity>;
   diffPrev: DiffBlock;
+  initial: string;
   diff: DiffBlock;
+  final: string;
   diffNext: DiffBlock;
   next: Lite<OperationLogEntity>;
 }
