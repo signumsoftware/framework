@@ -2,24 +2,20 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, toMList, liteKey } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import * as SCL from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
-import { Dropdown, DropdownButton } from 'react-bootstrap';
-import { getQueryKey, Type } from '@framework/Reflection';
+import { Dropdown } from 'react-bootstrap';
+import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
-import { useAPI } from '@framework/Hooks'
-import { FilterOptionParsed, SearchControl } from '@framework/Search'
+import { FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
-import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString'
-import UserQuery from './Templates/UserQuery'
-import { RefreshMode } from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import { QueryString } from '@framework/QueryString'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -32,6 +28,7 @@ function decodeUserQueryFromUrl() {
 
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
+  const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
     let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
@@ -39,8 +36,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   });
 
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
-
   const oldExtraParams = React.useRef(p.searchControl.extraParams);
+  
   React.useEffect(() => {
     oldExtraParams.current = p.searchControl.extraParams;
     p.searchControl.extraParams = () => ({ ...oldExtraParams.current(), userQuery: currentUserQuery && liteKey(currentUserQuery) });
@@ -202,19 +199,31 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        {
-          userQueries?.map((uq, i) =>
-            <Dropdown.Item key={i}
-              className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
-              onClick={() => handleOnClick(uq)}>
-              {uq.toStr}
-            </Dropdown.Item>)
-        }
+        {userQueries && userQueries.length > 10 &&
+          <div>
+            <input type="text"
+              className="form-control form-control-sm"
+              value={filter}
+              placeholder={SearchMessage.Search.niceToString()}
+              onChange={e => setFilter(e.currentTarget.value)} />
+            <Dropdown.Divider />
+          </div>}
+        <div style={{ maxHeight: "300px", overflowX: "auto" }}>
+          {userQueries?.map((uq, i) => {
+            if (filter == undefined || uq.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
+              return (
+                <Dropdown.Item key={i}
+                  className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
+                  onClick={() => handleOnClick(uq)}>
+                  {uq.toStr}
+                </Dropdown.Item>
+              );
+          })}
+        </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
         <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
         {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}
-      </Dropdown.Menu>
+        {canSave && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}      </Dropdown.Menu>
     </Dropdown>
   );
 }
@@ -225,6 +234,3 @@ function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {
 
   return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOptionParsed(a) && anyPinned(a.filters));
 }
-
-
-
