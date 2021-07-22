@@ -3337,7 +3337,7 @@ namespace Signum.Engine.Linq
 
                     Expression equal = DbExpressionNominator.FullNominate(eq)!;
 
-                    if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible)
+                    if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                     {
                         Alias newAlias = aliasGenerator.NextSelectAlias();
                         source = new JoinExpression(JoinType.OuterApply, source,
