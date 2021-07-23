@@ -16,6 +16,8 @@ import * as Operations from '@framework/Operations';
 import { FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOptionParsed } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
+import { AutoFocus } from '@framework/Components/AutoFocus'
+import { KeyCodes } from '../../../Framework/Signum.React/Scripts/Components'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -201,14 +203,18 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       <Dropdown.Menu>
         {userQueries && userQueries.length > 10 &&
           <div>
-            <input type="text"
-              className="form-control form-control-sm"
-              value={filter}
-              placeholder={SearchMessage.Search.niceToString()}
-              onChange={e => setFilter(e.currentTarget.value)} />
+            <AutoFocus disabled={!isOpen}>
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={filter}
+                placeholder={SearchMessage.Search.niceToString()}
+                onKeyDown={handleSearchKeyDown}
+                onChange={e => setFilter(e.currentTarget.value)} />
+            </AutoFocus>
             <Dropdown.Divider />
           </div>}
-        <div style={{ maxHeight: "300px", overflowX: "auto" }}>
+        <div id="userquery-items-container" style={{ maxHeight: "300px", overflowX: "auto" }}>
           {userQueries?.map((uq, i) => {
             if (filter == undefined || uq.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
               return (
@@ -226,6 +232,18 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         {canSave && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}      </Dropdown.Menu>
     </Dropdown>
   );
+
+  function handleSearchKeyDown(e: React.KeyboardEvent<any>) {
+
+    if (!e.shiftKey && e.keyCode == KeyCodes.down) {
+
+      e.preventDefault();
+      const div = document.getElementById("userquery-items-container")!;
+      var item = Array.from(div.querySelectorAll("a.dropdown-item")).firstOrNull();
+      if (item)
+        (item as HTMLAnchorElement).focus();
+    }
+  }
 }
 
 function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {
