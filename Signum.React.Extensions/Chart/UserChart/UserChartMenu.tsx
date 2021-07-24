@@ -13,6 +13,8 @@ import { ChartRequestViewHandle } from '../Templates/ChartRequestView'
 import * as UserAssetClient from '../../UserAssets/UserAssetClient'
 import { useForceUpdate } from '@framework/Hooks'
 import { tryGetOperationInfo } from '@framework/Operations'
+import { AutoFocus } from '@framework/Components/AutoFocus'
+import { KeyCodes } from '@framework/Components'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
@@ -124,14 +126,18 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       <Dropdown.Menu>
         {userCharts && userCharts.length > 10 &&
           <div>
-            <input type="text"
-              className="form-control form-control-sm"
-              value={filter}
-              placeholder={SearchMessage.Search.niceToString()}
-              onChange={e => setFilter(e.currentTarget.value)} />
+            <AutoFocus disabled={!isOpen}>
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={filter}
+                placeholder={SearchMessage.Search.niceToString()}
+                onChange={e => setFilter(e.currentTarget.value)}
+                onKeyDown={handleSearchKeyDown} />
+            </AutoFocus>
             <Dropdown.Divider />
           </div>}
-        <div style={{ maxHeight: "300px", overflowX: "auto" }}>
+        <div id="userchart-items-container" style={{ maxHeight: "300px", overflowX: "auto" }}>
           {userCharts?.map((uc, i) => {
             if (filter == undefined || uc.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
               return (
@@ -148,4 +154,16 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       </Dropdown.Menu>
     </Dropdown>
   );
+
+  function handleSearchKeyDown(e: React.KeyboardEvent<any>) {
+
+    if (!e.shiftKey && e.keyCode == KeyCodes.down) {
+
+      e.preventDefault();
+      const div = document.getElementById("userchart-items-container")!;
+      var item = Array.from(div.querySelectorAll("a.dropdown-item")).firstOrNull();
+      if (item)
+        (item as HTMLAnchorElement).focus();
+    }
+  }
 }
