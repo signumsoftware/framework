@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
+import * as Finder from '../Finder';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions, FindOptionsParsed } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
@@ -8,10 +9,10 @@ import { AutoFocus } from '../Components/AutoFocus';
 import { Entity, EntityPack, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
-import { namespace } from 'd3';
 import { useForceUpdate } from '../Hooks';
 import SearchControlLoaded from './SearchControlLoaded';
 import MessageModal from '../Modals/MessageModal';
+import { BsSize } from '../Components';
 
 interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
   findOptions: FindOptions;
@@ -19,6 +20,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   isMany: boolean;
   title?: React.ReactNode;
   message?: React.ReactNode;
+  size?: BsSize;
   avoidReturnCreate?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
@@ -109,10 +111,12 @@ function SearchModal(p: SearchModalProps) {
     }
   }
 
+  var qs = Finder.getSettings(p.findOptions.queryName);
+
   const okEnabled = p.isMany ? selectedRows.current.length > 0 : selectedRows.current.length == 1;
 
   return (
-    <Modal size="lg" show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
+    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf - search - modal">
       <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
@@ -168,6 +172,7 @@ namespace SearchModal {
       isMany={false}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false)}
+      size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
       onOKClicked={modalOptions?.onOKClicked}
     />)
@@ -181,6 +186,7 @@ namespace SearchModal {
       isMany={true}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true)}
+      size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
       onOKClicked={modalOptions?.onOKClicked}
     />);
@@ -193,6 +199,7 @@ namespace SearchModal {
       isMany={true}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message}
+      size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
     />);
   }

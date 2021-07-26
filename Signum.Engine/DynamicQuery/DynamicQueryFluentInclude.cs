@@ -10,6 +10,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class DynamicQueryFluentInclude
     {
+        //public static FluentInclude<T> WithQuery<T, A>(this FluentInclude<T> fi, Func<Expression<Func<T, A>>> lazyQuerySelector)  <-- C# Generic argument inference not so smart as to do this
         public static FluentInclude<T> WithQuery<T>(this FluentInclude<T> fi, Func<Expression<Func<T, object?>>> lazyQuerySelector)
             where T : Entity
         {

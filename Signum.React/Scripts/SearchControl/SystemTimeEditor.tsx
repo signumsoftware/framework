@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
-import { SystemTimeMode } from '../Signum.Entities.DynamicQuery'
+import { SystemTimeJoinMode, SystemTimeMode } from '../Signum.Entities.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets';
 import { QueryTokenString, toLuxonFormat } from '../Reflection';
@@ -104,16 +104,36 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
     st.startDate = st.mode == "All" ? undefined : (st.startDate || DateTime.local().toISO());
     st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || DateTime.local().toISO());
+    st.joinMode = isInterval(st.mode)  ? "FirstCompatible" : undefined;
 
     p.onChanged();
   }
 
+  function handleChangeJoinMode(e: React.ChangeEvent<HTMLSelectElement>) {
+    let st = p.findOptions.systemTime!;
+    st.joinMode = e.currentTarget.value as SystemTimeJoinMode;
+
+    p.onChanged();
+  }
+
+  function isInterval(mode: SystemTimeMode) {
+    return mode == "All" || mode == "Between" || mode == "ContainedIn";
+  }
+
   function renderMode() {
-    var st = p.findOptions.systemTime!;
 
     return (
-      <select value={st.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeMode}>
-        {SystemTimeMode.values().map((st, i) => <option key={i} value={st}>{SystemTimeMode.niceToString(st)}</option>)}
+      <select value={p.findOptions.systemTime!.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeMode}>
+        {SystemTimeMode.values().map((stm, i) => <option key={i} value={stm}>{SystemTimeMode.niceToString(stm)}</option>)}
+      </select>
+    );
+  }
+
+  function renderJoinMode() {
+    
+    return (
+      <select value={p.findOptions.systemTime!.joinMode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeJoinMode}>
+        {SystemTimeJoinMode.values().map((stjm, i) => <option key={i} value={stjm}>{SystemTimeJoinMode.niceToString(stjm)}</option>)}
       </select>
     );
   }
@@ -149,6 +169,10 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
       {renderMode()}
       {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && renderDateTime("startDate")}
       {(mode == "Between" || mode == "ContainedIn") && renderDateTime("endDate")}
+      {isInterval(mode) && <>
+        <span style={{ paddingTop: "3px" }} className="ml-3">{JavascriptMessage.joinMode.niceToString()}</span>
+        {renderJoinMode()}
+        </>}
       {renderShowPeriod()}
       {renderShowOperations()}
     </div>

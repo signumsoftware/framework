@@ -310,6 +310,17 @@ namespace Signum.Engine.Linq
             return Add(castExpr);
         }
 
+        protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if(isFullNominate)
+                return Add(new SqlCastExpression(castExpr.Type, expression!, castExpr.DbType));
+
+            if (expression != castExpr.Expression)
+                castExpr = new SqlCastLazyExpression(castExpr.Type, expression!, castExpr.DbType);
+            return castExpr;
+        }
+
         protected internal override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)

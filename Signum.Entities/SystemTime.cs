@@ -38,10 +38,15 @@ namespace Signum.Entities
             public override string ToString() => $"AS OF {DateTime:u}";
         }
 
+
+
         public abstract class Interval : SystemTime
         {
-
-
+            public JoinBehaviour JoinBehaviour; 
+            public Interval(JoinBehaviour includeJoins)
+            {
+                this.JoinBehaviour = includeJoins;
+            }
         }
 
         public class Between : Interval
@@ -49,7 +54,7 @@ namespace Signum.Entities
             public DateTimeOffset StartDateTime { get; private set; }
             public DateTimeOffset EndtDateTime { get; private set; }
 
-            public Between(DateTimeOffset startDateTime, DateTimeOffset endDateTime)
+            public Between(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
             {
                 this.StartDateTime = startDateTime;
                 this.EndtDateTime = endDateTime;
@@ -63,7 +68,7 @@ namespace Signum.Entities
             public DateTimeOffset StartDateTime { get; private set; }
             public DateTimeOffset EndtDateTime { get; private set; }
 
-            public ContainedIn(DateTimeOffset startDateTime, DateTimeOffset endDateTime)
+            public ContainedIn(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
             {
                 this.StartDateTime = startDateTime;
                 this.EndtDateTime = endDateTime;
@@ -74,12 +79,19 @@ namespace Signum.Entities
 
         public class All : Interval
         {
-            public All()
+            public All(JoinBehaviour joinBehaviour) : base(joinBehaviour)
             {
             }
 
             public override string ToString() => $"ALL";
         }
+    }
+
+    public enum JoinBehaviour
+    {
+        Current,
+        FirstCompatible,
+        AllCompatible,
     }
 
     public static class SystemTimeExtensions

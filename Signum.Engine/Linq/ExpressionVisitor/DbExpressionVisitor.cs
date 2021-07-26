@@ -191,6 +191,14 @@ namespace Signum.Engine.Linq
             return castExpr;
         }
 
+        protected internal virtual Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if (expression != castExpr.Expression)
+                return new SqlCastLazyExpression(castExpr.Type, expression, castExpr.DbType);
+            return castExpr;
+        }
+
         protected internal virtual Expression VisitTable(TableExpression table)
         {
             return table;
