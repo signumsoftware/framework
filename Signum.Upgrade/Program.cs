@@ -55,6 +55,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210415_ReactWidgets503(),
                 new Upgrade_20210511_MSAL2(),
                 new Upgrade_20210513_UpdateNugets(),    
+                new Upgrade_20210726_SimplifyDockerBuild(),
             }.Run(uctx);
         }
     }
