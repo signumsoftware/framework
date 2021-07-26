@@ -518,6 +518,8 @@ namespace Signum.Engine.Maps
             BeforeDatabaseAccess = null;
         }
 
+        public event Action? InvalidateCache; 
+
         public event Action? Initializing;
 
         public void Initialize()
@@ -527,10 +529,17 @@ namespace Signum.Engine.Maps
             if (Initializing == null)
                 return;
 
+            if (InvalidateCache != null)
+            {
+                foreach (var ic in InvalidateCache.GetInvocationListTyped())
+                    using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                        ic();
+            }
+
             using (ExecutionMode.Global())
-                foreach (var item in Initializing.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType!.ToString()))
-                        item();
+                foreach (var init in Initializing.GetInvocationListTyped())
+                    using (HeavyProfiler.Log("Initialize", () => init.Method.DeclaringType!.ToString()))
+                        init();
 
             Initializing = null;
         }
@@ -565,6 +574,8 @@ namespace Signum.Engine.Maps
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
+
+            InvalidateCache += GlobalLazy.ResetAll;
         }
 
         public static Schema Current
