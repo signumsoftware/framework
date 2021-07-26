@@ -188,16 +188,25 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
   const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
-  const labelText = p.searchControl.props.largeToolbarButtons == true ?
-    (UserQueryMessage.UserQueries_UserQueries.niceToString() + (currentUserQueryToStr ? ` - ${currentUserQueryToStr.etc(50)}` : "")) : undefined;
 
   var canSave = Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) != null;
 
-  const label = <span title={currentUserQueryToStr}><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{labelText ? " " + labelText : undefined}</span>;
+  const label = (
+    <span title={currentUserQueryToStr}>
+      <FontAwesomeIcon icon={["far", "list-alt"]} />
+      {p.searchControl.props.largeToolbarButtons == true && <>
+        &nbsp;
+        {UserQueryMessage.UserQueries_UserQueries.niceToString()}
+        {currentUserQueryToStr && " - "}
+        {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
+      </>
+      }
+    </span>
+  );
   return (
     <Dropdown
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant={currentUserQuery ? "info" : "light"} >
+      <Dropdown.Toggle id="userQueriesDropDown" className={classes("sf-userquery-dropdown", currentUserQuery ? "border-info" : undefined)} variant={"light"} >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
