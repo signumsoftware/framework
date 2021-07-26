@@ -116,7 +116,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
             </title>
           </rect>)}
 
-        {parseFloat(parameters["NumberOpacity"]) > 0 &&
+        {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
           s.orderBy(r => keyColumn.getKey(r.data.rowValue))
             .filter(r => (y(r[1])! - y(r[0])!) > 10)
             .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"

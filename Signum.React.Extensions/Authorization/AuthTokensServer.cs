@@ -24,6 +24,7 @@ namespace Signum.React.Authorization
     {
         public static Func<AuthTokenConfigurationEmbedded> Configuration;
         public static Action<UserEntity, AuthToken?, AuthToken?> OnAuthToken;
+        public static Func<string, bool> AuthenticateHeader = (authHeader) => true;
 
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
@@ -66,10 +67,10 @@ namespace Signum.React.Authorization
             AuthHeader = "Signum_Authorization";
         }
 
-        static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
+        public static SignumAuthenticationResult? TokenAuthenticator(FilterContext ctx)
         {
             var authHeader = ctx.HttpContext.Request.Headers[AuthHeader].FirstOrDefault();
-            if (authHeader == null)
+            if (authHeader == null || !AuthenticateHeader(authHeader))
             {
                 return null;
             }
