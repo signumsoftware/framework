@@ -70,6 +70,14 @@ namespace Signum.React.Selenium
             return new FrameModalProxy<T>(element) { Disposing = disposing };
         }
 
+        public SearchModalProxy OkWaitSearchModal()
+        {
+            var element = this.OkButton.Find().CaptureOnClick();
+            var disposing = this.Disposing;
+            this.Disposing = null;
+            return new SearchModalProxy(element) { Disposing = disposing };
+        }
+
         public bool OkPressed;
         public void OkWaitClosed(bool consumeAlert = false)
         {

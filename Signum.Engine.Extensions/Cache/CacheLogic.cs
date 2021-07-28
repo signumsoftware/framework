@@ -85,6 +85,7 @@ namespace Signum.Engine.Cache
 
                 sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
                 sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
+                sb.Schema.InvalidateCache += CacheLogic.ForceReset;
             }
         }
 

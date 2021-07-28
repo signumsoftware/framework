@@ -67,7 +67,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
           ],
           columnOptionsMode: "InsertStart",
           orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
-          systemTime: { mode: "All" }
+          systemTime: { mode: "All", joinMode: "FirstCompatible" }
         }}
           onSelectionChanged={() => forceUpdate()}
         />
