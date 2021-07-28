@@ -83,8 +83,8 @@ namespace Signum.Engine.Maps
         internal IntervalExpression? IntervalExpression(Alias tableAlias)
         {
             return new IntervalExpression(typeof(NullableInterval<DateTimeOffset>),
-                StartColumnName == null ? null : new SqlCastExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
-                EndColumnName == null ? null : new SqlCastExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
+                StartColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
+                EndColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
                 PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTimeOffset>), tableAlias, PostgreeSysPeriodColumnName)
             );
         }

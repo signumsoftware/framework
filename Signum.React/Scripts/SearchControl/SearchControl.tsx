@@ -192,7 +192,6 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
         view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
 
-
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
         showContextMenu={p.showContextMenu ?? qs?.showContextMenu ?? ((fo) => fo.groupResults ? "Basic" : true)}
         hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}

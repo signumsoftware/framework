@@ -61,6 +61,7 @@ namespace Signum.React.Facades
         {
             DescriptionManager.Invalidated += InvalidateCache;
             Schema.Current.OnMetadataInvalidated += InvalidateCache;
+            Schema.Current.InvalidateCache += InvalidateCache;
 
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));

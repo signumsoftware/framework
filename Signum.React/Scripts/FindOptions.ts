@@ -1,7 +1,8 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
+import { BsSize } from './Components';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -21,6 +22,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   autoSkipIfZero?: boolean;
+  modalSize?: BsSize;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
@@ -359,7 +361,7 @@ export interface ResultTable {
   columns: string[];
   rows: ResultRow[];
   pagination: Pagination
-  totalElements: number;
+  totalElements?: number;
 }
 
 
@@ -376,6 +378,7 @@ export interface Pagination {
 
 export interface SystemTime {
   mode: SystemTimeMode;
+  joinMode?: SystemTimeJoinMode;
   startDate?: string;
   endDate?: string;
 }

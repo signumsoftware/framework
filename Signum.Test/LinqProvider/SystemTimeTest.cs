@@ -37,7 +37,7 @@ namespace Signum.Test.LinqProvider
             if (!Connector.Current.SupportsTemporalTables)
                 return;
 
-            using (SystemTime.Override(new SystemTime.All()))
+            using (SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible)))
             {
                 var list = (from f in Database.Query<FolderEntity>()
                             where f.Parent != null
@@ -61,7 +61,7 @@ namespace Signum.Test.LinqProvider
                 return;
 
             NullableInterval<DateTimeOffset> period;
-            using (SystemTime.Override(new SystemTime.All()))
+            using (SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible)))
             {
                 period = Database.Query<FolderEntity>().Where(a => a.Name == "X2").Select(a => a.SystemPeriod()).Single();
             }
@@ -72,12 +72,12 @@ namespace Signum.Test.LinqProvider
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
 
-            using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1))))
+            using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1), JoinBehaviour.AllCompatible)))
             {
                 var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
 
-            using (SystemTime.Override(new SystemTime.ContainedIn(period.Max.Value, period.Max.Value.AddSeconds(1))))
+            using (SystemTime.Override(new SystemTime.ContainedIn(period.Max.Value, period.Max.Value.AddSeconds(1), JoinBehaviour.AllCompatible)))
             {
                 var list = Database.Query<FolderEntity>().Where(f2 => f2.Name == "X2").Select(a => a.SystemPeriod()).ToList();
             }
