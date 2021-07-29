@@ -67,6 +67,16 @@ namespace Signum.React.Selenium
             return EntityInfoInternal(null);
         }
 
+        public bool IsReadonly()
+        {
+            return Element.TryFindElement(By.CssSelector(".form-control[readonly]")) != null;
+        }
+
+        public bool IsDisabled()
+        {
+            return this.Element.GetAttribute("disabled") == "true";
+        }
+
 
     }
 }

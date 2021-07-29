@@ -66,6 +66,12 @@ namespace Signum.React.Selenium
             return container.OperationDisabled(symbol.Symbol);
         }
 
+        public static bool OperationNotPresent<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol) 
+            where T : Entity
+        {
+            return container.OperationButton(symbol).TryFind() == null;
+        }
+
         public static void OperationClick(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
         {
             container.OperationButton(symbol).Find().ButtonClick();
