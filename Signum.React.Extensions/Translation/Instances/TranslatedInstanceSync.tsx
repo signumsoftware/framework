@@ -76,15 +76,19 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
 
   useTitle(message);
 
+  var deletedTranslations = result?.deletedTranslations ? <p className="text-warning">{TranslationMessage._0OutdatedTranslationsFor1HaveBeenDeleted.niceToString(result?.deletedTranslations, getTypeInfo(type).niceName)}</p> : null;
+
   if (result && result.totalInstances == 0) {
     return (
       <div>
         <div className="mb-2">
           <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
         </div>
+        {deletedTranslations}
         {result && result.totalInstances == 0 && <Link to={`~/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>}
+        
       </div>
     );
   }
@@ -94,6 +98,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
       <div className="mb-2">
         <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
       </div>
+      {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}
     </div>
   );

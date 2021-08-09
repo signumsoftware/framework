@@ -237,15 +237,24 @@ namespace Signum.Engine.Translation
                     select mle).Any();
         }
 
-        public static void CleanTranslations(Type t)
+        public static int CleanTranslations(Type t)
         {
             var routes = TranslateableRoutes.GetOrThrow(t).Keys.Select(pr => pr.ToPropertyRouteEntity()).Where(a => !a.IsNew).ToList();
 
             int deletedPr = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType == t.ToTypeEntity() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
+            int deleteInconsistent = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType == t.ToTypeEntity() && (a.RowId != null) != a.PropertyRoute.Path.Contains("/")).UnsafeDelete();
 
             int deletedInstance = giRemoveTranslationsForMissingEntities.GetInvoker(t)();
 
-            int deleteInconsistent = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType == t.ToTypeEntity() && (a.RowId != null) != a.PropertyRoute.Path.Contains("/")).UnsafeDelete();
+            var mlistsRoutes = TranslateableRoutes.GetOrThrow(t).GroupBy(a => a.Key.GetMListItemsRoute()?.Parent).Select(a => a.Key).NotNull();
+
+            var deletedMList = 0; 
+            foreach (var pr in mlistsRoutes)
+            {
+                deletedMList += giRemoveTranslationsForMissingRowIds.GetInvoker(t, pr.Type.ElementType()!)(pr);
+            }
+
+            return deletedPr + deleteInconsistent + deletedInstance + deletedMList;
         }
 
         static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new GenericInvoker<Func<int>>(() => RemoveTranslationsForMissingEntities<Entity>());
@@ -255,6 +264,18 @@ namespace Signum.Engine.Translation
                     where ti.PropertyRoute.RootType == typeof(T).ToTypeEntity()
                     join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
                     where e == null
+                    select ti).UnsafeDelete();
+        }
+
+        static GenericInvoker<Func<PropertyRoute, int>> giRemoveTranslationsForMissingRowIds = new GenericInvoker<Func<PropertyRoute, int>>(pr => RemoveTranslationsForMissingRowIds<Entity, EmbeddedEntity>(pr));
+        static int RemoveTranslationsForMissingRowIds<T, E>(PropertyRoute route) where T : Entity
+        {
+            Expression<Func<T, MList<E>>> expression = route.GetLambdaExpression<T, MList<E>>(false);
+            var prefix = route.PropertyString() + "/";
+            return (from ti in Database.Query<TranslatedInstanceEntity>()
+                    where ti.PropertyRoute.RootType == typeof(T).ToTypeEntity() && ti.PropertyRoute.Path.StartsWith(prefix)
+                    join mle in Database.MListQuery(expression).DefaultIfEmpty() on new { ti.Instance.Entity, ti.RowId } equals new { Entity = (Entity)mle.Parent, RowId = mle.RowId.ToString() }
+                    where mle == null
                     select ti).UnsafeDelete();
         }
 
@@ -537,11 +558,7 @@ namespace Signum.Engine.Translation
 
                 tr.Commit();
             }
-
-            CleanTranslations(t);
         }
-
-      
     }
 
     public class TypeCulturePair
