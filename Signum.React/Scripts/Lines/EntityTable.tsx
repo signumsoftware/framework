@@ -362,12 +362,13 @@ export function EntityTableRow(p: EntityTableRowProps) {
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.draggable;
     return (
-      <tr style={{ backgroundColor: rowAtts?.style?.backgroundColor ?? undefined }}
+      <tr {...rowAtts}
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
-        className={drag?.dropClass}
-      onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
+        onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}
+        className={classes(drag?.dropClass, rowAtts?.className)}
+      >
       {p.firstColumnVisible && <td>
           <div className="item-group">
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}

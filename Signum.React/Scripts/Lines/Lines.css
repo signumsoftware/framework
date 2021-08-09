@@ -390,6 +390,11 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 6px;
 }
 
+table .form-group.form-group-sm {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
 /*form-inline*/
 .form-inline .sf-query-token-builder {
     vertical-align: middle;

@@ -618,6 +618,7 @@ export function reloadTypes(): Promise<void> {
   return ajaxGet<TypeInfoDictionary>({
     url: "~/api/reflection/types?" + QueryString.stringify({
       user: AppContext.currentUser?.id,
+      userTicks: AppContext.currentUser?.ticks,
       culture: AppContext.currentCulture
     })
   })

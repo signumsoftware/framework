@@ -66,7 +66,9 @@
     margin-top: 0px
 }*/
 
-.sf-ok-button
+.sf-ok-button,
+.sf-yes-button,
+.sf-no-button
 {
     min-width: 70px;
 }
