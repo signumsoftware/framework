@@ -195,16 +195,16 @@ namespace Signum.Entities.Chart
         [Description("Chart")]
         ChartToken,
         [Description("Chart settings")]
-        Chart_ChartSettings,
+        ChartSettings,
         [Description("Dimension")]
-        Chart_Dimension,
+        Dimension,
         DrawChart,
         [Description("Group")]
-        Chart_Group,
+        Group,
         [Description("Query {0} is not allowed")]
-        Chart_Query0IsNotAllowed,
+        Query0IsNotAllowed,
         [Description("Toggle info")]
-        Chart_ToggleInfo,
+        ToggleInfo,
         [Description("Colors for {0}")]
         ColorsFor0,
         CreatePalette,
@@ -212,6 +212,7 @@ namespace Signum.Entities.Chart
         MyCharts,
         CreateNew,
         Edit,
+        ApplyChanges,
         ViewPalette,
         [Description("Chart for")]
         ChartFor,
