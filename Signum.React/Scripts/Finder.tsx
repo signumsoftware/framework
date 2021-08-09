@@ -332,24 +332,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
   current = current.filter(a => a.token != null);
 
-  if (current.length < ideal.length) {
-    const toRemove: ColumnOption[] = [];
-
-    let j = 0;
-    for (let i = 0; i < ideal.length; i++) {
-      if (j < current.length && similar(current[j], ideal[i]))
-        j++;
-      else
-        toRemove.push({ token: ideal[i].name, });
-    }
-    if (toRemove.length + current.length == ideal.length) {
-      return {
-        mode: "Remove",
-        columns: toRemove
-      };
-    }
-  }
-  else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
+if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
     return {
       mode: "Add",
       columns: current.slice(ideal.length).map(c => ({
@@ -360,6 +343,26 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       }) as ColumnOption)
     };
   }
+
+  if (current.length < ideal.length) {
+    const toRemove: ColumnOption[] = [];
+
+    let j = 0;
+    for (let i = 0; i < ideal.length; i++) {
+      if (j < current.length && similar(current[j], ideal[i]))
+        j++;
+      else
+        toRemove.push({ token: ideal[i].name, });
+    }
+
+    if (toRemove.length + current.length == ideal.length && toRemove.length < current.length) {
+      return {
+        mode: "Remove",
+        columns: toRemove
+      };
+    }
+  }
+  
 
   return {
     mode: "Replace",
@@ -583,7 +586,7 @@ function equalOrders(as: OrderOption[] | undefined, bs: OrderOption[] | undefine
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
@@ -599,7 +602,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
