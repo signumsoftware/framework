@@ -492,13 +492,11 @@ namespace Signum.Entities.UserQueries
     {
         Edit,
         [Description("Create")]
-        UserQueries_CreateNew,
-        [Description("Edit")]
-        UserQueries_Edit,
+        CreateNew,
         [Description("Back to Default")]
-        UserQueries_BackToDefault,
-        [Description("User Queries")]
-        UserQueries_UserQueries,
+        BackToDefault,
+        [Description("Apply changes")]
+        ApplyChanges,
         [Description("The Filter Operation {0} is not compatible with {1}")]
         TheFilterOperation0isNotCompatibleWith1,
         [Description("{0} is not filterable")]

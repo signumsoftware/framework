@@ -71,10 +71,9 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
 
 export module UserQueryMessage {
   export const Edit = new MessageKey("UserQueryMessage", "Edit");
-  export const UserQueries_CreateNew = new MessageKey("UserQueryMessage", "UserQueries_CreateNew");
-  export const UserQueries_Edit = new MessageKey("UserQueryMessage", "UserQueries_Edit");
-  export const UserQueries_BackToDefault = new MessageKey("UserQueryMessage", "UserQueries_BackToDefault");
-  export const UserQueries_UserQueries = new MessageKey("UserQueryMessage", "UserQueries_UserQueries");
+  export const CreateNew = new MessageKey("UserQueryMessage", "CreateNew");
+  export const BackToDefault = new MessageKey("UserQueryMessage", "BackToDefault");
+  export const ApplyChanges = new MessageKey("UserQueryMessage", "ApplyChanges");
   export const TheFilterOperation0isNotCompatibleWith1 = new MessageKey("UserQueryMessage", "TheFilterOperation0isNotCompatibleWith1");
   export const _0IsNotFilterable = new MessageKey("UserQueryMessage", "_0IsNotFilterable");
   export const Use0ToFilterCurrentEntity = new MessageKey("UserQueryMessage", "Use0ToFilterCurrentEntity");

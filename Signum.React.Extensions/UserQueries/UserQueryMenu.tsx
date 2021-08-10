@@ -1,23 +1,26 @@
 import * as React from 'react'
+import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '@framework/Globals'
+import { classes, softCast } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation } from './Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation, QueryFilterEmbedded, PinnedQueryFilterEmbedded } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
 import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
-import { FilterOptionParsed } from '@framework/Search'
-import { isFilterGroupOptionParsed } from '@framework/FindOptions'
+import { FilterOption, FilterOptionParsed } from '@framework/Search'
+import { isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '../../../Framework/Signum.React/Scripts/Components'
+import type StringDistance from './StringDistance'
+import { translated } from '../Translation/TranslatedInstanceTools'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -132,7 +135,38 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .done();
   }
 
-  async function createUserQuery(): Promise<void> {
+  async function applyChanges(): Promise<UserQueryEntity> {
+    const sc = p.searchControl;
+
+    const uqOld = await Navigator.API.fetchAndForget(currentUserQuery!);
+    const foOld = await UserQueryClient.Converter.toFindOptions(uqOld, undefined)
+
+    const uqNew = await createUserQuery();
+    const foNew = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
+
+    const sd = await import("./StringDistance").then(mod => new mod.default());
+
+    uqOld.groupResults = uqNew.groupResults;
+    uqOld.includeDefaultFilters = uqNew.includeDefaultFilters;
+    uqOld.filters = UserQueryMerger.mergeFilters(uqOld.filters, uqNew.filters, foOld.filterOptions ?? [], foNew.filterOptions ?? [], 0, sd);
+    uqOld.columns = UserQueryMerger.mergeColumns(uqOld.columns, uqNew.columns, sd);
+    uqOld.columnsMode = uqNew.columnsMode;
+    uqOld.orders = uqNew.orders;
+    uqOld.paginationMode = uqNew.paginationMode;
+    uqOld.elementsPerPage = uqNew.elementsPerPage;
+
+    return uqOld;
+  }
+
+  function handleApplyChanges() {
+    applyChanges()
+      .then(uqOld => Navigator.view(uqOld))
+      .then(() => reloadList())
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
+      .done();
+  }
+
+  async function createUserQuery(): Promise<UserQueryEntity> {
 
     const sc = p.searchControl;
 
@@ -154,7 +188,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
-    const uq = await Navigator.view(UserQueryEntity.New({
+    return UserQueryEntity.New({
       query: qe,
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
       groupResults: fo.groupResults,
@@ -177,14 +211,21 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       refreshMode: p.searchControl.state.refreshMode ?? "Auto",
-    }));
+    });
+  }
 
-    if (uq?.id) {
-      await reloadList();
+  function handleCreateUserQuery() {
 
-      setCurrentUserQuery(toLite(uq));
-      applyUserQuery(toLite(uq));
-    }
+    createUserQuery()
+      .then(uq => Navigator.view(uq))
+      .then(uq => {
+        if (uq?.id) {
+          reloadList().then(() => {
+            setCurrentUserQuery(toLite(uq));
+            applyUserQuery(toLite(uq));
+          }).done();
+        }
+      }).done();
   }
 
   const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
@@ -196,7 +237,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       <FontAwesomeIcon icon={["far", "list-alt"]} />
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
-        {UserQueryMessage.UserQueries_UserQueries.niceToString()}
+        {UserQueryEntity.nicePluralName()}
         {currentUserQueryToStr && " - "}
         {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
       </>
@@ -236,9 +277,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.UserQueries_BackToDefault.niceToString()}</Dropdown.Item>
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.UserQueries_Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={() => { createUserQuery().done() }}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.UserQueries_CreateNew.niceToString()}</Dropdown.Item>}      </Dropdown.Menu>
+        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="mr-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
     </Dropdown>
   );
 
@@ -260,4 +302,151 @@ function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {
     return false;
 
   return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOptionParsed(a) && anyPinned(a.filters));
+}
+
+
+export interface FilterPair {
+  key: MListElement<QueryFilterEmbedded>;
+  elements: MListElement<QueryFilterEmbedded>[];
+  filter: FilterOption
+}
+
+export namespace UserQueryMerger {
+  export function mergeColumns(oldUqColumns: MList<QueryColumnEmbedded>, newUqColumns: MList<QueryColumnEmbedded>, sd: StringDistance) {
+    const choices = sd.levenshteinChoices(oldUqColumns, newUqColumns, c => c.added == null ? 5 : c.removed == null ? 5 : distanceColumns(c.added.element, c.removed.element));
+
+    return choices.flatMap(ch => {
+      if (ch.added == null)
+        return [];
+
+      if (ch.removed == null)
+        return [ch.added];
+
+
+      const oldCol = ch.removed.element;
+      const newCol = ch.added.element;
+
+      oldCol.token = newCol.token;
+      oldCol.displayName = newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName;
+      oldCol.summaryToken = newCol.summaryToken;
+      oldCol.hiddenColumn = newCol.hiddenColumn;
+      //preserve rowId
+      return [ch.removed];
+    });
+  }
+
+  export function mergeFilters(oldUqFilters: MList<QueryFilterEmbedded>, newUqFilters: MList<QueryFilterEmbedded>,
+    oldFilterOptions: FilterOption[], newFilterOptions: FilterOption[],
+    identation: number, sd: StringDistance): MList<QueryFilterEmbedded> {
+
+    const oldGroups = oldUqFilters.groupWhen(a => a.element.indentation == identation);
+    const newGroups = newUqFilters.groupWhen(a => a.element.indentation == identation);
+
+    if (oldGroups.length != oldFilterOptions.length || newUqFilters.length != newFilterOptions.length)
+      throw Error("Unexpected filter lengths");
+
+    const oldPairs = oldGroups.map((gr, i) => softCast<FilterPair>({ key: gr.key, elements: gr.elements, filter: oldFilterOptions[i] }));
+    const newPairs = newGroups.map((gr, i) => softCast<FilterPair>({ key: gr.key, elements: gr.elements, filter: newFilterOptions[i] }));
+
+    const choices = sd.levenshteinChoices(oldPairs, newPairs, c => c.added == null ? 5 : c.removed == null ? 5 : distanceFilter(c.added.filter, c.removed.filter));
+
+    const result = choices.flatMap(ch => {
+      if (ch.added == null)
+        return [];
+
+      if (ch.removed == null)
+        return [ch.added.key, ...ch.added.elements];
+
+      const merged = mergeFilters(
+        ch.removed.elements,
+        ch.added.elements,
+        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters : [],
+        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters : [], identation + 1, sd);
+
+
+      const oldF = ch.removed.key.element;
+      const newF = ch.added.key.element;
+
+      oldF.token = newF.token;
+      oldF.isGroup = newF.isGroup;
+      oldF.groupOperation = newF.groupOperation;
+      oldF.operation = newF.operation;
+      oldF.valueString = similarValues(ch.added.filter.value, ch.removed.filter.value) ? oldF.valueString : newF.valueString;
+      if (newF.pinned == null)
+        oldF.pinned = null;
+      else {
+        oldF.pinned ??= PinnedQueryFilterEmbedded.New();
+        oldF.pinned.label = newF.pinned.label == translated(oldF.pinned, a => a.label) ? oldF.pinned.label : newF.pinned.label;
+        oldF.pinned.column = newF.pinned.column;
+        oldF.pinned.row = newF.pinned.row;
+        oldF.pinned.active = newF.pinned.active;
+        oldF.pinned.splitText = newF.pinned.splitText;
+      }
+
+      oldF.modified = true;
+
+      //preserve rowId
+      return [ch.removed.key, ...merged];
+    });
+
+    return result;
+  }
+
+  function similarValues(val1: any, val2: any) {
+    if (val1 == val2)
+      return true;
+
+    var dt1 = DateTime.fromISO(val1);
+    var dt2 = DateTime.fromISO(val2);
+
+    if (dt1.isValid && dt2.isValid && Math.abs(dt1.diff(dt2, "hour").hours) < 2)
+      return true;
+
+    return false;
+  }
+
+  function distanceColumns(qc1: QueryColumnEmbedded, qc2: QueryColumnEmbedded): number {
+    return (qc1.token?.tokenString == qc2.token?.tokenString ? 0 : 3) +
+      (qc1.summaryToken?.tokenString == qc2.summaryToken?.tokenString ? 0 : 1) +
+      (qc1.displayName == qc2.displayName ? 0 : 1) +
+      (qc1.hiddenColumn ? 0 : 1);
+  }
+
+  function distanceFilter(fo: FilterOption, fo2: FilterOption): number {
+    if (isFilterGroupOption(fo)) {
+      if (isFilterGroupOption(fo2)) {
+        return (fo.token?.toString() == fo2.token?.toString() ? 0 : 1) +
+          (fo.groupOperation == fo2.groupOperation ? 0 : 1) +
+          (similarValues(fo.value, fo2.value) ? 0 : 1) +
+          distancePinned(fo.pinned, fo2.pinned) +
+          Array.range(0, Math.max(fo.filters.length, fo2.filters.length)).sum(i => fo.filters[i] == null ? 5 : fo2.filters[i] == null ? 5 : distanceFilter(fo.filters[i], fo2.filters[i]));
+      }
+      else return 10;
+    }
+    else {
+      if (isFilterGroupOption(fo2))
+        return 10;
+      else
+        return (fo.token?.toString() == fo2.token?.toString() ? 0 : 1) +
+          (fo.operation == fo2.operation ? 0 : 1) +
+          (fo.value == fo2.value ? 0 : 1) +
+          distancePinned(fo.pinned, fo2.pinned);
+    }
+  }
+
+  function distancePinned(pin: PinnedFilter | undefined, pin2: PinnedFilter | undefined) {
+    if (pin == null && pin2 == null)
+      return 0;
+
+    if (pin == null || pin2 == null)
+      return 4;
+
+    return (pin.active == pin2.active ? 0 : 1) +
+      (pin.column == pin2.column ? 0 : 1) +
+      (pin.row == pin2.row ? 0 : 1) +
+      (pin.label == pin2.label ? 0 : 1) +
+      (pin.splitText == pin2.splitText ? 0 : 1);
+  }
+
+
 }

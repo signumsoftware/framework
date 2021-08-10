@@ -68,6 +68,10 @@ namespace Signum.Entities.Translation
         BackToSyncAssembly0,
 
         ThisFieldIsTranslatable,
+
+
+        [Description("{0} outdated translatiosn for {1} have been deleted")]
+        _0OutdatedTranslationsFor1HaveBeenDeleted,
     }
 
     public enum TranslationJavascriptMessage

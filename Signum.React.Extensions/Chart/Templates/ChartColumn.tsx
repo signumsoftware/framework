@@ -139,7 +139,7 @@ export function ChartColumn(p: ChartColumnProps) {
           }} title={getTitle(sc.columnType).map(a => ChartColumnType.niceToString(a)).join("\n")}>
             {ChartColumnType.niceToString(sc.columnType)}
           </span>
-          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "font-weight-bold")} onClick={handleExpanded}>{ChartMessage.Chart_ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
+          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "font-weight-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
         </td>
       </tr>
       {expanded && <tr className="sf-chart-token-config">

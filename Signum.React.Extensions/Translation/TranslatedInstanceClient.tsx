@@ -148,7 +148,8 @@ export interface TypeInstancesChanges {
   masterCulture: string;
   totalInstances: number;
   routes: { [propertyRoute: string]: TranslateableRouteType }
-  instances: InstanceChange[]
+  instances: InstanceChange[];
+  deletedTranslations: number;
 }
 
 export interface InstanceChange {

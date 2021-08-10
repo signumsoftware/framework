@@ -75,7 +75,8 @@ namespace Signum.React.Translation
 
                         writer.WritePropertyName(ctx.LowerCaseName);
 
-                        var value = entity == null || entity.IsNew ? null : TranslatedInstanceLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
+                        var value = entity == null || entity.IsNew || hastMList && rowId == null /*UserQuery apply changes*/ ? null :
+                        TranslatedInstanceLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
 
                         writer.WriteStringValue(value);
                     }

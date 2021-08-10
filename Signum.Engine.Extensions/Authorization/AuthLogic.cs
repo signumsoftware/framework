@@ -482,7 +482,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-
+        public static void LoadRoles() => LoadRoles(XDocument.Load("AuthRules.xml"));
         public static void LoadRoles(XDocument doc)
         {
             var roleInfos = doc.Root!.Element("Roles")!.Elements("Role").Select(x => new
@@ -589,6 +589,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
+   
         public static void AutomaticImportAuthRules()
         {
             AutomaticImportAuthRules("AuthRules.xml");

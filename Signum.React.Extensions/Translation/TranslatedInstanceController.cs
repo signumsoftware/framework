@@ -67,6 +67,7 @@ namespace Signum.React.Translation
 
             var supportByInstance = (from kvpCult in support
                                      from kvpLocIns in kvpCult.Value
+                                     where master.ContainsKey(kvpLocIns.Key)
                                      where filtered(kvpLocIns.Key)
                                      let newText = master.TryGet(kvpLocIns.Key, null)
                                      group (lockIns: kvpLocIns.Key, translatedInstance: kvpLocIns.Value, culture: kvpCult.Key, newText: newText) by kvpLocIns.Key.Instance into gInstance
@@ -101,7 +102,9 @@ namespace Signum.React.Translation
         public TypeInstancesChangesTS Sync(string type, string culture)
         {
             Type t = TypeLogic.GetType(type);
-
+            
+            var deletedTranslations = TranslatedInstanceLogic.CleanTranslations(t);
+            
             var c = CultureInfo.GetCultureInfo(culture);
 
             int totalInstances;
@@ -133,7 +136,8 @@ namespace Signum.React.Translation
                             })
                         }
                     )
-                }).ToList()
+                }).ToList(),
+                DeletedTranslations = deletedTranslations,
             };
         }
 
@@ -226,6 +230,8 @@ namespace Signum.React.Translation
         public List<InstanceChangesTS> Instances;
 
         public Dictionary<string, TranslateableRouteType> Routes { get; internal set; }
+
+        public int DeletedTranslations; 
     }
 
     public class InstanceChangesTS

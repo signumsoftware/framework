@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dropdown } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Lite, toLite, newMListElement, SearchMessage } from '@framework/Signum.Entities'
+import { Lite, toLite, newMListElement, SearchMessage, MList } from '@framework/Signum.Entities'
 import { is } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -15,6 +15,8 @@ import { useForceUpdate } from '@framework/Hooks'
 import { tryGetOperationInfo } from '@framework/Operations'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
+import { UserQueryMerger } from '../../UserQueries/UserQueryMenu'
+import { translated } from '../../Translation/TranslatedInstanceTools'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
@@ -61,9 +63,46 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       const cr = crv.chartRequest;
       const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
       UserChartClient.Converter.applyUserChart(newCR, userChart, undefined)
-        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart)); crv.hideFiltersAndSettings(); })
+        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart, undefined, translated(userChart, a => a.displayName))); crv.hideFiltersAndSettings(); })
         .done();
     }).done();
+  }
+
+  async function applyChanges(): Promise<UserChartEntity> {
+
+    var crv = p.chartRequestView;
+
+    const ucOld = await Navigator.API.fetchAndForget(crv.userChart!);
+    const crmOld = await UserChartClient.Converter.toChartRequest(ucOld, undefined)
+
+    const ucNew = await createUserChart();
+    const crmNew = crv.chartRequest;
+
+    const sd = await import("../../UserQueries/StringDistance").then(mod => new mod.default());
+
+    ucOld.chartScript = ucNew.chartScript;
+    ucOld.maxRows = ucNew.maxRows;
+    ucOld.filters = UserQueryMerger.mergeFilters(ucOld.filters, ucNew.filters,
+      Finder.toFilterOptions(crmOld.filterOptions ?? []),
+      Finder.toFilterOptions(crmNew.filterOptions ?? []), 0, sd);
+    ucOld.columns = UserChartMerger.mergeColumns(ucOld.columns, ucNew.columns);
+    ucOld.parameters = ucNew.parameters;
+
+    return ucOld;
+  }
+
+  function handleApplyChanges() {
+    var crv = p.chartRequestView;
+    applyChanges()
+      .then(userChart => Navigator.view(userChart))
+      .then(() => reloadList())
+      .then(list => {
+        if (!list.some(a => is(a, crv.userChart)))
+          crv.onChange(p.chartRequestView.chartRequest, undefined);
+        else
+          handleSelect(crv.userChart!);
+      })
+      .done();
   }
 
   function handleEdit() {
@@ -82,7 +121,19 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   }
 
 
- async function onCreate() {
+  function handleCreate() {
+
+    createUserChart()
+      .then(uc => Navigator.view(uc))
+      .then(uc => {
+        if (uc?.id) {
+          crView.onChange(crView.chartRequest, toLite(uc, undefined, translated(uc, a => a.displayName)));
+          crView.hideFiltersAndSettings();
+        }
+      }).done();
+  }
+
+  async function createUserChart() : Promise<UserChartEntity> {
     const crView = p.chartRequestView;
 
     const cr = crView.chartRequest;
@@ -97,7 +148,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       filters: fos.map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
-    const uc = await Navigator.view(UserChartEntity.New({
+    const uc = UserChartEntity.New({
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
       query: query,
       chartScript: cr.chartScript,
@@ -105,12 +156,9 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
-    }));
+    });
 
-    if (uc?.id) {
-      crView.onChange(cr, toLite(uc));
-      crView.hideFiltersAndSettings();
-    }
+    return uc;
   }
 
   const crView = p.chartRequestView;
@@ -149,8 +197,9 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           })}
         </div>
         {Boolean(userCharts?.length) && <Dropdown.Divider />}
+        {crView.userChart && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="mr-2" />{ChartMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
         {crView.userChart && canSave && <Dropdown.Item onClick={handleEdit}><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={() => onCreate().done()}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>
   );
@@ -165,5 +214,20 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       if (item)
         (item as HTMLAnchorElement).focus();
     }
+  }
+}
+
+export namespace UserChartMerger {
+  export function mergeColumns(oldUqColumns: MList<ChartColumnEmbedded>, newUqColumns: MList<ChartColumnEmbedded>) {
+    newUqColumns.forEach((newMle, i) => {
+
+      var oldMle = oldUqColumns[i];
+      newMle.rowId = oldMle.rowId;
+
+      if (newMle.element.displayName == translated(oldMle.element, a => a.displayName))
+        newMle.element.displayName = oldMle.element.displayName;
+    });
+
+    return newUqColumns;
   }
 }

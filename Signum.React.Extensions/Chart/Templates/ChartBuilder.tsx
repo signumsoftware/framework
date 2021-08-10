@@ -100,14 +100,14 @@ export default function ChartBuilder(p: ChartBuilderProps) {
       <div className="col-lg-10">
         <div className="sf-chart-tokens card">
           <div className="card-header">
-            <h6 className="card-title mb-0">{ChartMessage.Chart_ChartSettings.niceToString()}</h6>
+            <h6 className="card-title mb-0">{ChartMessage.ChartSettings.niceToString()}</h6>
           </div>
           <div className="card-body">
             <table className="table" style={{ marginBottom: "0px" }}>
               <thead>
                 <tr>
                   <th className="sf-chart-token-narrow">
-                    {ChartMessage.Chart_Dimension.niceToString()}
+                    {ChartMessage.Dimension.niceToString()}
                   </th>
                   <th className="sf-chart-token-wide">
                     Token
