@@ -149,7 +149,8 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
+                    if (Schema.Current.IsAllowed(typeof(ToolbarEntity), false) == null)
+                        Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
@@ -168,7 +169,8 @@ namespace Signum.Engine.Toolbar
             {
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
+                    if (Schema.Current.IsAllowed(typeof(ToolbarMenuEntity), false) == null)
+                        Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
                     return null;
                 };
 
