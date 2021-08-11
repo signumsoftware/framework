@@ -28,6 +28,18 @@ namespace Signum.Engine.Authorization
     {
         public static Func<ClientCredentialProvider> GetClientCredentialProvider = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetAuthProvider();
 
+        public static List<string> CurrentADGroups()
+        {
+            var oid = UserEntity.Current.Mixin<UserADMixin>().OID;
+            if (oid == null)
+                return new List<string>();
+
+            ClientCredentialProvider authProvider = MicrosoftGraphLogic.GetClientCredentialProvider();
+            GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+            var result = graphClient.Users[oid.ToString()].GetMemberGroups().Request().PostAsync().Result.ToList();
+            return result;
+        }
+
         public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
         {
             ClientCredentialProvider authProvider = GetClientCredentialProvider();
