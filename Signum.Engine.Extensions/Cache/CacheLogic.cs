@@ -695,7 +695,11 @@ namespace Signum.Engine.Cache
             var controller = controllers.GetOrThrow(type, "{0} is not registered in CacheLogic");
 
             if (controller == null)
-                throw new InvalidOperationException("{0} is just semi cached".FormatWith(type.TypeName()));
+            {
+                var attr = Schema.Current.Settings.TypeAttribute<EntityKindAttribute>(type);
+                throw new InvalidOperationException("{0} is just semi cached".FormatWith(type.TypeName()) +
+                    (attr?.EntityData == EntityData.Transactional ? " (consider changing it to EntityData.Master)" : ""));
+            }
 
             return controller;
         }
