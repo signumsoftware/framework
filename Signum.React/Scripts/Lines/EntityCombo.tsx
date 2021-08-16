@@ -21,6 +21,7 @@ export interface EntityComboProps extends EntityBaseProps {
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactChild;
+  nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
 }
@@ -113,6 +114,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             toStringFromData={p.toStringFromData}
             selectHtmlAttributes={p.selectHtmlAttributes}
             liteToString={p.liteToString}
+            nullPlaceHolder={p.nullPlaceHolder}
             onRenderItem={p.onRenderItem}
           />
           {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
@@ -134,6 +136,7 @@ export interface EntityComboSelectProps {
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactNode;
   liteToString?: (e: Entity) => string;
+  nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
 }
@@ -221,7 +224,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return (
       <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
-        {getOptionLites().map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : " - "}</option>)}
+        {getOptionLites().map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
     );
 
