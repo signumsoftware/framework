@@ -108,6 +108,10 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
+  return defaultFind(fo, modalOptions);
+}
+
+export function defaultFind(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
     .then(a => a?.row.entity);
@@ -172,6 +176,10 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
+  return defaultFindMany(fo, modalOptions);
+}
+
+export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
     .then(a => a?.rows.map(a => a.entity!));
