@@ -2,7 +2,7 @@ import * as React from "react";
 import { DateTime } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
-import { Dic, classes } from './Globals'
+import { Dic, classes, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -1304,6 +1304,25 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
     .then(rt => rt.rows[0].columns[0]);
+}
+
+export function inDBArray<R1, R2>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null]>;
+export function inDBArray<R1, R2, R3>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null]>;
+export function inDBArray<R1, R2, R3, R4>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string, QueryTokenString<R4> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null, AddToLite<R4> | null]>;
+export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenString<any> | string)[]): Promise<any[]> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
+    columnOptionsMode: "Replace",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt.rows[0].columns);
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
