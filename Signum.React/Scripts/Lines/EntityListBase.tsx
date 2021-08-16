@@ -11,6 +11,7 @@ export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
   onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[]; /*Not only filter, also order, skip, take is supported*/
+  onAddElement?: (list: MList<Lite<Entity> | ModifiableEntity /*T*/>, newItem: Lite<Entity> | ModifiableEntity /*T*/) => void,
   ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
@@ -149,7 +150,11 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       throw new Error("entityOrLite should be already converted");
 
     const list = this.props.ctx.value!;
-    list.push(newMListElement(entityOrLite));
+    if (this.props.onAddElement)
+      this.props.onAddElement(list, entityOrLite);
+    else {
+      list.push(newMListElement(entityOrLite));
+    }
     this.setValue(list);
   }
 
