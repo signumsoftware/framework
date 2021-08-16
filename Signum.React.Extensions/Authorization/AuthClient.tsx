@@ -279,7 +279,7 @@ export namespace Options {
   export let resetPassword: boolean;
 }
 
-export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows" | "webauthn";
+export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows";
 
 export module API {
   export interface LoginRequest {
