@@ -2,18 +2,19 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity } from './Signum.Entities.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal';
+import ValueLineModal from '@framework/ValueLineModal';
 import { FindOptions, FindOptionsParsed, ResultRow } from '@framework/FindOptions';
-import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal';
+import MessageModal from '@framework/Modals/MessageModal';
 import { Lite, SearchMessage } from '@framework/Signum.Entities';
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
-import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
+import SelectorModal from '@framework/SelectorModal';
+import { QueryString } from '@framework/QueryString';
 import { isPermissionAuthorized } from './AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 
-export function start(options: { routes: JSX.Element[]  }) {
+export function start(options: { routes: JSX.Element[] }) {
+  Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
 
   Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
     type: UserEntity,
@@ -82,11 +83,35 @@ export function start(options: { routes: JSX.Element[]  }) {
     ],
   });
 
+  Finder.addSettings({
+    queryName: UserADQuery.ActiveDirectoryGroups,
+    defaultFilters: [
+      {
+        groupOperation: "Or",
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        filters: [
+          { token: "DisplayName", operation: "StartsWith" },
+        ],
+      },
+      //{
+      //  pinned: { label: ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
+      //  token: "AccountEnabled", operation: "EqualTo", value: true
+      //},
+      //{ token: "CreationType", operation: "DistinctTo", value: "Invitation" }
+    ],
+    defaultOrders: [
+      { token: "DisplayName", orderType: "Ascending" }
+    ],
+  });
+
 }
 
 function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
   return Finder.findRow({
     queryName: UserADQuery.ActiveDirectoryUsers,
+    filterOptions: [
+      { token: "InGroup", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
+    ],
     columnOptions: [
       { token: "DisplayName" },
       { token: "UserPrincipalName" },
@@ -110,6 +135,34 @@ export function toActiveDirectoryUser(row: ResultRow, scl: SearchControlLoaded):
   });
 }
 
+export function findActiveDirectoryGroup(): Promise<Lite<ADGroupEntity> | undefined> {
+  return Finder.findRow({
+    queryName: UserADQuery.ActiveDirectoryGroups,
+    filterOptions: [
+      { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
+    ]
+  }, { searchControlProps: { allowChangeOrder: false } })
+    .then(a => a && API.createADGroup(toADGroupRequest(a.row, a.searchControl)));
+}
+
+export function findManyActiveDirectoryGroup(): Promise<Lite<ADGroupEntity>[] | undefined> {
+  return Finder.findManyRows({
+    queryName: UserADQuery.ActiveDirectoryGroups,
+    filterOptions: [
+      { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
+    ]
+  }, { searchControlProps: { allowChangeOrder: false } })
+    .then(a => a && Promise.all(a.rows.map(r => API.createADGroup(toADGroupRequest(r, a.searchControl)))));
+}
+
+export function toADGroupRequest(row: ResultRow, scl: SearchControlLoaded): ADGroupRequest {
+
+  const columns = scl.state.resultTable!.columns;
+  return ({
+    id: row.columns[columns.indexOf("Id")],
+    displayName: row.columns[columns.indexOf("DisplayName")],
+  });
+}
 
 function getSearch(fo: FindOptionsParsed): string | null {
   var bla = fo.filterOptions.firstOrNull(a => a.pinned?.splitText == true)?.value;
@@ -150,6 +203,10 @@ export module API {
   export function createADUser(model: ActiveDirectoryUser): Promise<Lite<UserEntity>> {
     return ajaxPost({ url: `~/api/createADUser` }, model);
   }
+
+  export function createADGroup(request: ADGroupRequest): Promise<Lite<ADGroupEntity>> {
+    return ajaxPost({ url: `~/api/createADGroup` }, request);
+  }
 }
 
 export interface ActiveDirectoryUser {
@@ -159,3 +216,7 @@ export interface ActiveDirectoryUser {
   objectID: string;
 }
 
+export interface ADGroupRequest {
+  id: string;
+  displayName: string
+}

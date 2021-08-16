@@ -2,6 +2,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System;
 using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Signum.Entities.Authorization
@@ -101,7 +102,8 @@ namespace Signum.Entities.Authorization
 
     public enum UserADQuery
     {
-        ActiveDirectoryUsers
+        ActiveDirectoryUsers,
+        ActiveDirectoryGroups,
     }
 
     public enum ActiveDirectoryMessage
@@ -117,6 +119,11 @@ namespace Signum.Entities.Authorization
         AccountEnabled,
         OnPremisesExtensionAttributes,
         OnlyActiveUsers,
+        InGroup,
+        Description,
+        SecurityEnabled,
+        Visibility,
+        HasUser,
     }
 
     [Serializable]
@@ -137,5 +144,23 @@ namespace Signum.Entities.Authorization
         public string ExtensionAttribute13 { get; set; }
         public string ExtensionAttribute14 { get; set; }
         public string ExtensionAttribute15 { get; set; }
+    }
+
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master), PrimaryKey(typeof(Guid))]
+    public class ADGroupEntity : Entity
+    {
+        [UniqueIndex]
+        [StringLengthValidator(Max = 100)]
+        public string DisplayName { get; set; }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => DisplayName);
+    }
+
+    [AutoInit]
+    public static class ADGroupOperation
+    {
+        public static readonly ExecuteSymbol<ADGroupEntity> Save;
+        public static readonly DeleteSymbol<ADGroupEntity> Delete;
     }
 }

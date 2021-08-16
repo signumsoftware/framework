@@ -48,10 +48,26 @@ export module ActiveDirectoryMessage {
   export const AccountEnabled = new MessageKey("ActiveDirectoryMessage", "AccountEnabled");
   export const OnPremisesExtensionAttributes = new MessageKey("ActiveDirectoryMessage", "OnPremisesExtensionAttributes");
   export const OnlyActiveUsers = new MessageKey("ActiveDirectoryMessage", "OnlyActiveUsers");
+  export const InGroup = new MessageKey("ActiveDirectoryMessage", "InGroup");
+  export const Description = new MessageKey("ActiveDirectoryMessage", "Description");
+  export const SecurityEnabled = new MessageKey("ActiveDirectoryMessage", "SecurityEnabled");
+  export const Visibility = new MessageKey("ActiveDirectoryMessage", "Visibility");
+  export const HasUser = new MessageKey("ActiveDirectoryMessage", "HasUser");
 }
 
 export module ActiveDirectoryPermission {
   export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+}
+
+export const ADGroupEntity = new Type<ADGroupEntity>("ADGroup");
+export interface ADGroupEntity extends Entities.Entity {
+  Type: "ADGroup";
+  displayName: string;
+}
+
+export module ADGroupOperation {
+  export const Save : Entities.ExecuteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Save");
+  export const Delete : Entities.DeleteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Delete");
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -438,6 +454,7 @@ export interface UserADMixin extends Entities.MixinEntity {
 
 export module UserADQuery {
   export const ActiveDirectoryUsers = new QueryKey("UserADQuery", "ActiveDirectoryUsers");
+  export const ActiveDirectoryGroups = new QueryKey("UserADQuery", "ActiveDirectoryGroups");
 }
 
 export const UserEntity = new Type<UserEntity>("User");

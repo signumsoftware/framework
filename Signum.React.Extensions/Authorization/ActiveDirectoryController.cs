@@ -52,5 +52,26 @@ namespace Signum.React.Authorization
 
             throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
         }
+
+        [HttpPost("api/createADGroup")]
+        public Lite<ADGroupEntity> CreateADUser([FromBody][Required] ADGroupRequest groupRequest)
+        {
+            var group = Database.Query<ADGroupEntity>().SingleOrDefault(a => a.Id == groupRequest.Id);
+            if (group != null)
+                return group.ToLite();
+
+            group = new ADGroupEntity
+            {
+                DisplayName = groupRequest.DisplayName,
+            }.SetId(groupRequest.Id);
+
+            return group.Execute(ADGroupOperation.Save).ToLite();
+        }
+
+        public class ADGroupRequest
+        {
+            public Guid Id; 
+            public string DisplayName;
+        }
     }
 }

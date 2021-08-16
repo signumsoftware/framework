@@ -3,8 +3,6 @@ import * as msal from "@azure/msal-browser";
 import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
-import { LoginAuthMessage } from "../Signum.Entities.Authorization";
-import { ifError } from "../../../../Framework/Signum.React/Scripts/Globals";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
