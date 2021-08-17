@@ -72,6 +72,14 @@ namespace Signum.Entities
             return result;
         }
 
+        public PropertyRoute AddMany(string fieldOrProperties)
+        {
+            var result = this;
+            foreach (var field in fieldOrProperties.Split('.'))
+                result = result.Add(field);
+            return result;
+        }
+
         public PropertyRoute Add(string fieldOrProperty)
         {
             return Add(GetMember(fieldOrProperty));
@@ -79,6 +87,9 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
+            if (fieldOrProperty.Contains("."))
+                throw new ArgumentException($"{nameof(fieldOrProperty)} contains '.'");
+
             if (fieldOrProperty.StartsWith("["))
             {
                 var mixinName = ExtractMixin(fieldOrProperty);

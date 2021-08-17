@@ -2,7 +2,7 @@ import * as React from "react";
 import { DateTime } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
-import { Dic, classes } from './Globals'
+import { Dic, classes, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -108,6 +108,10 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
+  return defaultFind(fo, modalOptions);
+}
+
+export function defaultFind(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
     .then(a => a?.row.entity);
@@ -172,6 +176,10 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
+  return defaultFindMany(fo, modalOptions);
+}
+
+export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
     .then(a => a?.rows.map(a => a.entity!));
@@ -332,24 +340,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
   current = current.filter(a => a.token != null);
 
-  if (current.length < ideal.length) {
-    const toRemove: ColumnOption[] = [];
-
-    let j = 0;
-    for (let i = 0; i < ideal.length; i++) {
-      if (j < current.length && similar(current[j], ideal[i]))
-        j++;
-      else
-        toRemove.push({ token: ideal[i].name, });
-    }
-    if (toRemove.length + current.length == ideal.length) {
-      return {
-        mode: "Remove",
-        columns: toRemove
-      };
-    }
-  }
-  else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
+if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
     return {
       mode: "Add",
       columns: current.slice(ideal.length).map(c => ({
@@ -360,6 +351,26 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       }) as ColumnOption)
     };
   }
+
+  if (current.length < ideal.length) {
+    const toRemove: ColumnOption[] = [];
+
+    let j = 0;
+    for (let i = 0; i < ideal.length; i++) {
+      if (j < current.length && similar(current[j], ideal[i]))
+        j++;
+      else
+        toRemove.push({ token: ideal[i].name, });
+    }
+
+    if (toRemove.length + current.length == ideal.length && toRemove.length < current.length) {
+      return {
+        mode: "Remove",
+        columns: toRemove
+      };
+    }
+  }
+  
 
   return {
     mode: "Replace",
@@ -583,7 +594,7 @@ function equalOrders(as: OrderOption[] | undefined, bs: OrderOption[] | undefine
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
@@ -599,7 +610,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
@@ -1293,6 +1304,25 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
     .then(rt => rt.rows[0].columns[0]);
+}
+
+export function inDBArray<R1, R2>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null]>;
+export function inDBArray<R1, R2, R3>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null]>;
+export function inDBArray<R1, R2, R3, R4>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string, QueryTokenString<R4> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null, AddToLite<R4> | null]>;
+export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenString<any> | string)[]): Promise<any[]> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
+    columnOptionsMode: "Replace",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt.rows[0].columns);
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;

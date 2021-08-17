@@ -13,6 +13,7 @@ import { useController } from './LineBase'
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
+  firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
   /**Consider using EntityTable.typedColumns to get Autocompletion**/
   columns?: EntityTableColumn<any /*T*/, any>[],
   fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle) => Promise<any>;
@@ -272,7 +273,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
             !isEmpty &&
             <thead ref={c.thead}>
               <tr className={p.theadClasses ?? "bg-light"}>
-                {firstColumnVisible && <th></th>}
+                {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}></th>}
                 {
                   p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
