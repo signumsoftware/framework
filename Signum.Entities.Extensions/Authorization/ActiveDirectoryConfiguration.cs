@@ -21,14 +21,18 @@ namespace Signum.Entities.Authorization
         [Format(FormatAttribute.Password)]
         public string? DirectoryRegistry_Password { get; set; }
 
+        //Azure Portal -> Azure Active Directory -> App Registrations -> + New Registration
+
         [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
-        public string? Azure_ApplicationID { get; set; }
+        public string? Azure_ApplicationID { get; set; } 
 
         [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
         public string? Azure_DirectoryID { get; set; }
 
+        //Only for Microsoft Graph / Sending Emails 
+        //Your App Registration -> Certificates & secrets -> + New client secret
         [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
-        public string? Azure_ClientSecret { get; set; }
+        public string? Azure_ClientSecret { get; set; } 
 
         public bool LoginWithWindowsAuthenticator { get; set; }
         public bool LoginWithActiveDirectoryRegistry { get; set; }
