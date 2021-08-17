@@ -56,6 +56,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210511_MSAL2(),
                 new Upgrade_20210513_UpdateNugets(),    
                 new Upgrade_20210726_SimplifyDockerBuild(),
+                new Upgrade_20210816_RemoveWebAuth(),
             }.Run(uctx);
         }
     }
