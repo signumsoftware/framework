@@ -274,7 +274,7 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="WhenHasValue" Description="Wann hat Wert" />
+    <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
     <Member Name="AddElement" Description="Element hinzufügen" />
