@@ -173,7 +173,7 @@ namespace Signum.Engine.Workflow
                             ca.DoneBy = UserEntity.Current.ToLite();
                             ca.DoneDate = DateTime.Now;
                             ca.DoneType = DoneType.Jump;
-                            ca.DoneDecision = CaseActivityMessage.CanceledCase.NiceToString();
+                            ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
                             ca.Save();
 
                             foreach (var notification in ca.Notifications().ToList())
@@ -187,7 +187,40 @@ namespace Signum.Engine.Workflow
                         c.Save();
                     }
                 }.Register();
-                
+
+                IQueryable<CaseActivityEntity> CancelledCases(CaseEntity c)
+                {
+                    return c.CaseActivities().Where(a => a.DoneBy != null && a.DoneType == DoneType.Jump &&
+                            (a.DoneDecision == CaseActivityMessage.CanceledCase.ToString() || a.DoneDecision == CaseActivityMessage.CanceledCase.NiceToString()));
+                }
+
+                new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
+                {
+                    CanExecute = c => c.FinishDate != null  && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+                    Execute = (c, _) =>
+                    {
+                        var currentActivities = CancelledCases(c).ToList();
+
+                        foreach (var ca in currentActivities)
+                        {
+                            ca.DoneBy = null;
+                            ca.DoneDate = null;
+                            ca.DoneType = null;
+                            ca.DoneDecision = null;
+                            ca.Save();
+
+                            foreach (var notification in ca.Notifications().ToList())
+                            {
+                                notification.State = CaseNotificationState.New;
+                                notification.Save();
+                            }
+                        }
+
+                        c.FinishDate = null;
+                        c.Save();
+                    }
+                }.Register();
+
 
                 sb.Include<CaseActivityEntity>()
                     .WithIndex(a => new { a.ScriptExecution!.ProcessIdentifier }, a => a.DoneDate == null)
