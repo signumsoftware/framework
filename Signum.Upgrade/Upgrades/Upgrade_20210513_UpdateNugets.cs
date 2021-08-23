@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
-            uctx.ForeachCodeFile(@"*.cspoj", file =>
+            uctx.ForeachCodeFile(@"*.csproj", file =>
             {
                 file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.1.4");
                 file.UpdateNugetReference("SciSharp.TensorFlow.Redist", "2.4.1");

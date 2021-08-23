@@ -15,7 +15,7 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
-            uctx.ForeachCodeFile(@"*.cspoj", file =>
+            uctx.ForeachCodeFile(@"*.csproj", file =>
             {
                 file.UpdateNugetReference("Signum.Analyzer", "3.1.0");
                 file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "4.3.5");
