@@ -13,7 +13,7 @@ using System.IO;
 using static Tensorflow.Binding;
 using Tensorflow;
 using Tensorflow.Keras.Optimizers;
-using NumSharp;
+using Tensorflow.NumPy;
 
 namespace Signum.Engine.MachineLearning.TensorFlow
 {
@@ -385,7 +385,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
 
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
-                    return np.array(inputValues).reshape(-1, inputValues.Length);
+                    return np.array(inputValues).reshape((-1, inputValues.Length));
             }
         }
 

@@ -36,9 +36,8 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         public static Tensor FullyConnectedLinearLayer(Tensor input, int outputDim, NeuralNetworkInitializer initializer, int seed)
         {
-            System.Diagnostics.Debug.Assert(input.shape.Rank == 1);
-            int inputDim = input.shape[1];
-
+            int inputDim = (int)input.shape[1];
+            
             IInitializer? init = GetInitializer(initializer, seed);
             IVariableV1 W = tf.compat.v1.get_variable("W", new int[] { inputDim, outputDim }, tf.float32, init);
 
@@ -84,7 +83,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
 
         private static Tensor ClassificationError(Tensor calculatedOutputs, Tensor labels)
         {
-            var correct_pred = tf.equal(tf.argmax(calculatedOutputs, 1), tf.argmax(labels, 1));
+            var correct_pred = tf.equal(tf.arg_max(calculatedOutputs, 1), tf.arg_max(labels, 1));
             return tf.reduce_mean(tf.cast(correct_pred, tf.float32));
         }
 
