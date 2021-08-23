@@ -1,0 +1,29 @@
+using Signum.Utilities;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Signum.Upgrade.Upgrades
+{
+    class Upgrade_20210824_UpdateNugets : CodeUpgradeBase
+    {
+        public override string Description => "Upgrade some Nugets";
+
+        public override void Execute(UpgradeContext uctx)
+        {
+            uctx.ForeachCodeFile(@"*.cspoj", file =>
+            {
+                file.UpdateNugetReference("Signum.Analyzer", "3.0.0");
+                file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "4.3.5");
+                file.UpdateNugetReference("Microsoft.VisualStudio.Azure.Containers.Tools.Targets", "1.11.1");
+                file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.1.5");
+                file.UpdateNugetReference("SciSharp.TensorFlow.Redist", "2.6.0");
+                file.UpdateNugetReference("Microsoft.NET.Test.Sdk", "16.11.0");
+            });
+        }
+    }
+}
