@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,25 +39,25 @@ namespace Signum.Analyzer
             return containingType.GetBaseTypesAndThis().SelectMany(x => x.GetMembers());
         }
 
-        public static bool IsLite(this TypeInfo e)
+        public static bool IsLite(this ITypeSymbol type)
         {
-            if (e.Type is INamedTypeSymbol namedSymbol && namedSymbol.MetadataName == "Lite`1" && namedSymbol.ContainingNamespace.ToString() == "Signum.Entities")
+            if (type is INamedTypeSymbol namedSymbol && namedSymbol.MetadataName == "Lite`1" && namedSymbol.ContainingNamespace.ToString() == "Signum.Entities")
             {
                 return true;
             }
             return false;
         }
 
-        public static INamedTypeSymbol GetLiteEntityType(this TypeInfo e)
+        public static INamedTypeSymbol GetLiteEntityType(this ITypeSymbol type)
         {
-            var namedSymbol = e.Type as INamedTypeSymbol;
+            var namedSymbol = type as INamedTypeSymbol;
             
             return namedSymbol?.TypeArguments.FirstOrDefault() as INamedTypeSymbol; 
         }
 
-        public static bool IsEntity(this TypeInfo e)
+        public static bool IsEntity(this ITypeSymbol type)
         {
-            if (e.Type is INamedTypeSymbol namedSymbol && GetBaseTypesAndThis(namedSymbol).Any(t => t.Name == "Entity" && t.ContainingNamespace.ToString() == "Signum.Entities"))
+            if (type is INamedTypeSymbol namedSymbol && GetBaseTypesAndThis(namedSymbol).Any(t => t.Name == "Entity" && t.ContainingNamespace.ToString() == "Signum.Entities"))
             {
                 return true;
             }

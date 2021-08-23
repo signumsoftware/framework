@@ -176,7 +176,7 @@ namespace TestHelper
             var solution = new AdhocWorkspace()
                 .CurrentSolution
                 .AddProject( projectId, TestProjectName, TestProjectName, language)
-                .WithProjectParseOptions(projectId, new CSharpParseOptions(LanguageVersion.CSharp8))
+                .WithProjectParseOptions(projectId, new CSharpParseOptions(LanguageVersion.CSharp9))
                 .WithProjectCompilationOptions(projectId, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithNullableContextOptions(NullableContextOptions.Enable))
                 .AddMetadataReference(projectId, CorlibReference)
                 .AddMetadataReference(projectId, SystemCoreReference)

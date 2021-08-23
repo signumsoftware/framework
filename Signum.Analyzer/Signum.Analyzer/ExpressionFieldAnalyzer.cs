@@ -20,7 +20,7 @@ namespace Signum.Analyzer
             "'{0}' should reference an static field of type Expression<T> with the same signature ({1})", "Expressions",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "A property or method can use ExpressionFieldAttribute pointing to an static fied of type Expression<T> to use it in LINQ queries");
+            description: "A property or method can use ExpressionFieldAttribute pointing to an static fied of type Expression<T> to use it in LINQ queries.");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -112,7 +112,7 @@ namespace Signum.Analyzer
 
         private static INamedTypeSymbol GetExpressionType(ISymbol memberSymbol, SemanticModel sm)
         {
-            var parameters = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).Parameters.Select(p => (p.Type, p.NullableAnnotation)).ToList() : new List<(ITypeSymbol, NullableAnnotation)>();
+            var parameters = memberSymbol is IMethodSymbol symbol ? symbol.Parameters.Select(p => (p.Type, p.NullableAnnotation)).ToList() : new List<(ITypeSymbol, NullableAnnotation)>();
 
             if (!memberSymbol.IsStatic)
                 parameters.Insert(0, ((ITypeSymbol)memberSymbol.ContainingSymbol, NullableAnnotation.NotAnnotated));
@@ -139,19 +139,15 @@ namespace Signum.Analyzer
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)
         {
-            if (member is MethodDeclarationSyntax)
+            if (member is MethodDeclarationSyntax method)
             {
-                var method = (MethodDeclarationSyntax)member;
-
                 if (method.ExpressionBody != null)
                     return method.ExpressionBody.Expression;
 
                 return OnlyReturn(context, ident, att, method.Body.Statements);
             }
-            else if (member is PropertyDeclarationSyntax)
+            else if (member is PropertyDeclarationSyntax property)
             {
-                var property = (PropertyDeclarationSyntax)member;
-
                 if (property.ExpressionBody != null)
                     return property.ExpressionBody.Expression;
 
@@ -192,8 +188,7 @@ namespace Signum.Analyzer
                 return null;
             }
 
-            var ret = only as ReturnStatementSyntax;
-            if (ret == null)
+            if (!(only is ReturnStatementSyntax ret))
             {
                 Diagnostic(context, ident, only.GetLocation(), "no return");
                 return null;

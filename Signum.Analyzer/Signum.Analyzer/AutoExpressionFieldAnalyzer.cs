@@ -20,7 +20,7 @@ namespace Signum.Analyzer
             "'{0}' should call As.Expression(() => ...) ({1})", "Expressions",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "A Property or Method can use AutoExpressionFieldAttribute and As.Expression(() => ...) to extract their implementation to a hidden static field with the expression tree, that will be used by Signum LINQ provider to translate it to SQL");
+            description: "A Property or Method can use AutoExpressionFieldAttribute and As.Expression(() => ...) to extract their implementation to a hidden static field with the expression tree, that will be used by Signum LINQ provider to translate it to SQL.");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -70,8 +70,7 @@ namespace Signum.Analyzer
                 if (expr == null)
                     return;
 
-                var inv = expr as InvocationExpressionSyntax;
-                if (inv == null || !(context.SemanticModel.GetSymbolInfo(inv) is SymbolInfo si))
+                if (!(expr is InvocationExpressionSyntax inv) || !(context.SemanticModel.GetSymbolInfo(inv) is SymbolInfo si))
                 {
                     Diagnostic(context, ident, att.GetLocation(), "no As.Expression", fixable: true);
                     return;
@@ -119,19 +118,15 @@ namespace Signum.Analyzer
 
         public static ExpressionSyntax GetSingleBody(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, MemberDeclarationSyntax member)
         {
-            if (member is MethodDeclarationSyntax)
+            if (member is MethodDeclarationSyntax method)
             {
-                var method = (MethodDeclarationSyntax)member;
-
                 if (method.ExpressionBody != null)
                     return method.ExpressionBody.Expression;
 
                 return OnlyReturn(context, ident, att, method.Body.Statements);
             }
-            else if (member is PropertyDeclarationSyntax)
+            else if (member is PropertyDeclarationSyntax property)
             {
-                var property = (PropertyDeclarationSyntax)member;
-
                 if (property.ExpressionBody != null)
                     return property.ExpressionBody.Expression;
 
@@ -172,8 +167,7 @@ namespace Signum.Analyzer
                 return null;
             }
 
-            var ret = only as ReturnStatementSyntax;
-            if (ret == null)
+            if (!(only is ReturnStatementSyntax ret))
             {
                 Diagnostic(context, ident, only.GetLocation(), "no return");
                 return null;

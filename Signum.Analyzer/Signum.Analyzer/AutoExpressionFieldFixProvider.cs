@@ -64,10 +64,9 @@ namespace Signum.Analyzer
 
             var lambda = (LambdaExpressionSyntax)invoke.ArgumentList.Arguments[0].Expression;
 
-            var docRoot = await document.GetSyntaxRootAsync();
+            var docRoot = await document.GetSyntaxRootAsync(c);
 
-            var type = declaration is MethodDeclarationSyntax ?
-                ((MethodDeclarationSyntax)declaration).ReturnType :
+            var type = declaration is MethodDeclarationSyntax syntax ? syntax.ReturnType :
                 ((PropertyDeclarationSyntax)declaration).Type;
 
             var newRoot = docRoot.ReplaceNode(lambda.Body, SyntaxFactory.CastExpression(type, (ExpressionSyntax)lambda.Body));
@@ -77,17 +76,17 @@ namespace Signum.Analyzer
 
         private async Task<Document> AddAsExpression(Document document, MemberDeclarationSyntax declaration, CancellationToken c)
         {
-            var typeSyntax = declaration.Ancestors().OfType<TypeDeclarationSyntax>().First();
+            //var typeSyntax = declaration.Ancestors().OfType<TypeDeclarationSyntax>().First();
 
-            var sm = await document.GetSemanticModelAsync(c);
+            //var sm = await document.GetSemanticModelAsync(c);
 
-            var type = sm.GetDeclaredSymbol(typeSyntax, c);
+            //var type = sm.GetDeclaredSymbol(typeSyntax, c);
 
-            var symbol = sm.GetDeclaredSymbol(declaration);
+            //var symbol = sm.GetDeclaredSymbol(declaration);
 
-            string name = declaration is MethodDeclarationSyntax ?
-                ((MethodDeclarationSyntax)declaration).Identifier.ToString() :
-                ((PropertyDeclarationSyntax)declaration).Identifier.ToString();
+            //string name = declaration is MethodDeclarationSyntax ?
+            //    ((MethodDeclarationSyntax)declaration).Identifier.ToString() :
+            //    ((PropertyDeclarationSyntax)declaration).Identifier.ToString();
 
             var bodyExpression = GetSingleBody(declaration);
       
@@ -95,7 +94,7 @@ namespace Signum.Analyzer
 
             newBody = newBody.WithLeadingTrivia(bodyExpression.GetLeadingTrivia());
 
-            var docRoot = await document.GetSyntaxRootAsync();
+            var docRoot = await document.GetSyntaxRootAsync(c);
 
             var newRoot = docRoot.ReplaceNode(bodyExpression, newBody);
 
@@ -117,10 +116,8 @@ namespace Signum.Analyzer
 
         public static ExpressionSyntax GetSingleBody(MemberDeclarationSyntax member)
         {
-            if (member is MethodDeclarationSyntax)
+            if (member is MethodDeclarationSyntax method)
             {
-                var method = (MethodDeclarationSyntax)member;
-
                 if (method.ExpressionBody != null)
                     return method.ExpressionBody.Expression;
 
