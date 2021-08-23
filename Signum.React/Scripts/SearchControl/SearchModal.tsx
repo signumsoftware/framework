@@ -13,6 +13,7 @@ import { useForceUpdate } from '../Hooks';
 import SearchControlLoaded from './SearchControlLoaded';
 import MessageModal from '../Modals/MessageModal';
 import { BsSize } from '../Components';
+import { DomUtils } from '../Globals';
 
 interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
   findOptions: FindOptions;
@@ -106,7 +107,12 @@ function SearchModal(p: SearchModalProps) {
     var scl = sc?.searchControlLoaded;
     var containerDiv = scl?.containerDiv;
     if (containerDiv) {
-      var maxHeight = (window.innerHeight - SearchModal.marginVertical);
+      var rect = containerDiv.getBoundingClientRect();
+      var modalContent = DomUtils.closest(containerDiv.offsetParent as HTMLElement, ".modal-content")!;
+      const marginModal = 28; 
+      const marginTop = rect.top + marginModal;
+      const marginButton = (modalContent!.offsetHeight - rect.bottom) + marginModal;
+      const maxHeight = window.innerHeight - marginTop - marginButton;
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
     }
   }
@@ -161,8 +167,7 @@ function SearchModal(p: SearchModalProps) {
 
 
 namespace SearchModal {
-  export let marginVertical = 300;
-  export let minHeight = 600;
+  export let minHeight = 400;
 
   export function open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 

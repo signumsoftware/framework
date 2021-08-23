@@ -163,6 +163,7 @@
     <Member Name="groupResults" Description="Resultate der Gruppe" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
     <Member Name="insertColumn" Description="Spalte einfügen" />
+    <Member Name="joinMode" Description="Join-Modus" />
     <Member Name="loading" Description="Lädt gerade..." />
     <Member Name="loseCurrentChanges" Description="Änderungen verlieren?" />
     <Member Name="moveDown" Description="Nach unten" />
@@ -274,7 +275,7 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="WhenHasValue" Description="Wann hat Wert" />
+    <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
     <Member Name="AddElement" Description="Element hinzufügen" />
@@ -406,6 +407,7 @@
     <Member Name="Find" Description="Finden" />
     <Member Name="FinderOf0" Description="Finder von {0}" />
     <Member Name="First0Results_N" Description="erste {0} Ergebnis[se]." />
+    <Member Name="GoBackToPageOne" Description="zurück zur ersten Seite" />
     <Member Name="GroupKey" Description="Gruppenschlüssel" />
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
@@ -417,6 +419,8 @@
     <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
     <Member Name="NoFiltersSpecified" Description="Keine Filter angegeben" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
+    <Member Name="NoResultsFoundInPage01" Description="Keine Ergebnisse auf Seite {0} gefunden, {1} " />
+    <Member Name="NoResultsInThisPage" Description="Keine Ergebnisse auf dieser Seite" />
     <Member Name="Of" Description="von" />
     <Member Name="Operation" Description="Operation" />
     <Member Name="Operations" Description="Operationen" />
@@ -477,6 +481,11 @@
   <Type Name="SynchronizerMessage">
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
+  </Type>
+  <Type Name="SystemTimeJoinMode">
+    <Member Name="AllCompatible" Description="Alle kompatibel" />
+    <Member Name="Current" Description="Aktuell" />
+    <Member Name="FirstCompatible" Description="Erste kompatibel" />
   </Type>
   <Type Name="SystemTimeMode">
     <Member Name="All" Description="Alle" />
