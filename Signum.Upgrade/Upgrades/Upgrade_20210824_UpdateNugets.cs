@@ -17,7 +17,7 @@ namespace Signum.Upgrade.Upgrades
         {
             uctx.ForeachCodeFile(@"*.cspoj", file =>
             {
-                file.UpdateNugetReference("Signum.Analyzer", "3.0.0");
+                file.UpdateNugetReference("Signum.Analyzer", "3.1.0");
                 file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "4.3.5");
                 file.UpdateNugetReference("Microsoft.VisualStudio.Azure.Containers.Tools.Targets", "1.11.1");
                 file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.1.5");
