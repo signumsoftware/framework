@@ -79,7 +79,32 @@ var result = entity is Lite<Entity>;
         {
             TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
 Lite<Entity> lite = null;
-var result = lite is not Entity;       
+var result = lite is Entity entity;       
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityEntityCaseStatement()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+switch(lite)
+{
+    case Entity entity: break;
+}     
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityEntityCaseExpression()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+var a = lite switch
+{
+    Entity entity=> true,
+    _ => false
+};
             ");
         }
 

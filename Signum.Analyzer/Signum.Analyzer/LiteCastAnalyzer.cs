@@ -42,6 +42,8 @@ namespace Signum.Analyzer
             context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.AsExpression);
             context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.IsExpression);
             context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.IsPatternExpression);
+            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.CasePatternSwitchLabel);
+            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.SwitchExpressionArm);
         }
 
         private void AnalyzeNode(SyntaxNodeAnalysisContext context)
@@ -77,6 +79,24 @@ namespace Signum.Analyzer
                 if(oldType.IsEntity() || oldType.IsLite())
                 {
                     CheckPattern(context, oldType, ip.Pattern);
+                }
+            }
+            else if (context.Node is CasePatternSwitchLabelSyntax sls)
+            {
+                var oldType = sls.Parent.Parent is SwitchStatementSyntax sss ? context.SemanticModel.GetTypeInfo(sss.Expression).Type : null;
+
+                if (oldType != null && (oldType.IsEntity() || oldType.IsLite()))
+                {
+                    CheckPattern(context, oldType, sls.Pattern);
+                }
+            }
+            else if (context.Node is SwitchExpressionArmSyntax sea)
+            {
+                var oldType = sea.Parent is SwitchExpressionSyntax ses ? context.SemanticModel.GetTypeInfo(ses.GoverningExpression).Type : null;
+
+                if (oldType != null && (oldType.IsEntity() || oldType.IsLite()))
+                {
+                    CheckPattern(context, oldType, sea.Pattern);
                 }
             }
             else throw new InvalidOperationException("Unexpected " + context.Node);

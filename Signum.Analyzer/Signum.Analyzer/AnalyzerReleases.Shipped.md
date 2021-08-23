@@ -12,19 +12,17 @@ SF0004 | Lite | Error | LiteCastAnalyzer
 
 ## Release 3.0
 
-### New Rules
-
-Rule ID | Category | Severity | Notes
---------|----------|----------|--------------------
-
-### Removed Rules
-
-Rule ID | Category | Severity | Notes
---------|----------|----------|--------------------
-
 ### Changed Rules
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|--------------------
 SF0004 | Lite | Error | Fix Pattern mathing
+
+## Release 3.1
+
+### Changed Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|--------------------
+SF0004 | Lite | Error | Fix Pattern mathing for case statement and case expression
 
