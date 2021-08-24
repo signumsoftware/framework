@@ -23,6 +23,7 @@ namespace Signum.Upgrade.Upgrades
                 file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.1.5");
                 file.UpdateNugetReference("SciSharp.TensorFlow.Redist", "2.6.0");
                 file.UpdateNugetReference("Microsoft.NET.Test.Sdk", "16.11.0");
+                file.UpdateNugetReference("DocumentFormat.OpenXml", "2.13.1");
             });
         }
     }
