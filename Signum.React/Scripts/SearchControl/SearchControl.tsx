@@ -44,6 +44,7 @@ export interface SearchControlProps {
   allowChangeColumns?: boolean;
   allowChangeOrder?: boolean;
   create?: boolean;
+  createButtonClass?: string;
   view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   defaultRefreshMode?: RefreshMode;
@@ -190,6 +191,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
         create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
+        createButtonClass={p.createButtonClass}
+
         view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}

@@ -67,6 +67,7 @@ export interface SearchControlLoadedProps {
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
+  createButtonClass?: string;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
   defaultRefreshMode?: RefreshMode;
@@ -631,7 +632,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className="sf-query-button btn btn-light sf-create ml-2" title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate} >
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate } { ...p.createButtonHtmlProps } >
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
