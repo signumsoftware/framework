@@ -33,6 +33,7 @@ namespace Signum.Entities.Workflow
     {
         public static readonly ExecuteSymbol<CaseEntity> SetTags;
         public static readonly ExecuteSymbol<CaseEntity> Cancel;
+        public static readonly ExecuteSymbol<CaseEntity> Reactivate;
     }
 
     public interface ICaseMainEntity : IEntity

@@ -169,7 +169,8 @@ namespace Signum.Entities.Workflow
         ShowHelp,
         HideHelp,
         CanceledCase,
-        AlreadyFinished
+        AlreadyFinished,
+        NotCanceled
     }
 
 
