@@ -198,9 +198,9 @@ namespace Signum.Engine.Alerts
                     var lite = prop is Entity e ? e.ToLite() :
                                 prop is Lite<Entity> l ? l : null;
 
-                    var url = ReplacePlaceHolders(m.Groups["url"].Value, alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
+                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
 
-                    var text = ReplacePlaceHolders(m.Groups["text"].Value, alert) ?? (lite != null ? lite.ToString() : null);
+                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite != null ? lite.ToString() : null);
 
                     return @$"<a href=""{url}"">{text}</a>";
 
