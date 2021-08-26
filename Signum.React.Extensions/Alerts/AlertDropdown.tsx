@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { isRtl } from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
-import { getTypeInfo } from '@framework/Reflection'
+import { getTypeInfo, symbolNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, NavItem } from 'react-bootstrap'
@@ -173,7 +173,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
                       { token: AlertEntity.token(a => a.entity.id) },
                       { token: AlertEntity.token(a => a.entity.alertDate) },
                       { token: AlertEntity.token(a => a.entity.alertType) },
-                      { token: AlertEntity.token(a => a.text) },
+                      { token: AlertEntity.token("Text") },
                       { token: AlertEntity.token(a => a.entity.target) },
                       { token: AlertEntity.token(a => a.entity).expression("CurrentState") },
                       { token: AlertEntity.token(a => a.entity.createdBy) },
@@ -199,11 +199,11 @@ export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) 
     <Toast onClose={() => p.onClose([p.alert])} className={p.className}>
       <Toast.Header>
         {icon && <span className="mr-2">{icon}</span>}
-        <strong className="mr-auto">{p.alert.title ?? p.alert.alertType?.name ?? AlertEntity.niceName()}</strong>
+        <strong className="mr-auto">{AlertsClient.getTitle(p.alert.titleField, p.alert.alertType)}</strong>
         <small>{DateTime.fromISO(p.alert.alertDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        {AlertsClient.formatText(p.alert.text, p.alert, p.refresh)}
+        {AlertsClient.formatText(p.alert.textField || p.alert.textFromAlertType || "", p.alert, p.refresh)}
         {p.alert.createdBy && <small className="sf-alert-signature">{p.alert.createdBy?.toStr}</small>}
       </Toast.Body>
     </Toast>

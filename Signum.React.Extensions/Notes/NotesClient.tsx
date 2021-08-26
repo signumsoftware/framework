@@ -2,7 +2,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { NoteEntity, NoteTypeEntity, NoteOperation } from './Signum.Entities.Notes'
+import { NoteEntity, NoteOperation } from './Signum.Entities.Notes'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as AuthClient from '../Authorization/AuthClient'
 

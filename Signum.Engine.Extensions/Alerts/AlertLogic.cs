@@ -39,13 +39,25 @@ namespace Signum.Engine.Alerts
 
         public static Func<IUserEntity?> DefaultRecipient = () => null;
 
-        public static HashSet<AlertTypeEntity> SystemAlertTypes = new HashSet<AlertTypeEntity>();
+        public static Dictionary<AlertTypeSymbol, AlertTypeOptions> SystemAlertTypes = new Dictionary<AlertTypeSymbol, AlertTypeOptions>();
+
+        public static string? GetText(this AlertTypeSymbol? alertType)
+        {
+            if (alertType == null)
+                return null;
+
+            var options = SystemAlertTypes.GetOrThrow(alertType);
+
+            return options.GetText?.Invoke();
+        }
+
         public static bool Started = false;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null!)));
         }
+
 
         public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
         {
@@ -60,7 +72,7 @@ namespace Signum.Engine.Alerts
                         a.AlertType,
                         a.State,
                         a.Title,
-                        Text = a.Text.Etc(100),
+                        Text = a.Text!.Etc(100),
                         a.Target,
                         a.Recipient,
                         a.CreationDate,
@@ -71,9 +83,14 @@ namespace Signum.Engine.Alerts
 
                 AlertGraph.Register();
 
-                
+                As.ReplaceExpression((AlertEntity a) => a.Text, a => a.TextField.HasText() ? a.TextField : a.AlertType.GetText());
 
-                sb.Include<AlertTypeEntity>()
+                Schema.Current.EntityEvents<AlertEntity>().Retrieved += (a, ctx) =>
+                {
+                    a.TextFromAlertType = a.AlertType?.GetText();
+                };
+
+                sb.Include<AlertTypeSymbol>()
                     .WithSave(AlertTypeOperation.Save)
                     .WithDelete(AlertTypeOperation.Delete)
                     .WithQuery(() => t => new
@@ -84,7 +101,7 @@ namespace Signum.Engine.Alerts
                         t.Key,
                     });
 
-                SemiSymbolLogic<AlertTypeEntity>.Start(sb, () => SystemAlertTypes);
+                SemiSymbolLogic<AlertTypeSymbol>.Start(sb, () => SystemAlertTypes.Keys);
 
                 if (registerExpressionsFor != null)
                 {
@@ -140,7 +157,7 @@ namespace Signum.Engine.Alerts
                 var limit = DateTime.Now.AddMinutes(-task.SendNotificationsOlderThan);
 
                 var query = Database.Query<AlertEntity>()
-                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == 0 && a.Recipient != null && a.CreationDate < limit)
+                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.CreationDate < limit)
                 .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
                             task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
                             task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));
@@ -164,7 +181,7 @@ namespace Signum.Engine.Alerts
 
                 emails.BulkInsertQueryIds(a => a.Target!);
 
-                query.UnsafeUpdate().Set(a => a.EmailNotificationsSent, a => 1).Execute();
+                query.UnsafeUpdate().Set(a => a.EmailNotificationsSent, a => true).Execute();
 
                 return emailPackage.ToLite();
             });
@@ -187,7 +204,7 @@ namespace Signum.Engine.Alerts
                     return null;
 
                 var alert = (AlertEntity)alertObject;
-                var text = alert.Text;
+                var text = alert.Text ?? "";
 
                 var newText = LinkPlaceholder.Replace(text, m =>
                 {
@@ -262,20 +279,21 @@ namespace Signum.Engine.Alerts
             }
         }
 
-        public static void RegisterAlertType(AlertTypeEntity alertType)
+        public static void RegisterAlertType(AlertTypeSymbol alertType, Enum localizableTextMessage) => RegisterAlertType(alertType, new AlertTypeOptions { GetText = () => localizableTextMessage.NiceToString() });
+        public static void RegisterAlertType(AlertTypeSymbol alertType, AlertTypeOptions? options = null)
         {
             if (!alertType.Key.HasText())
                 throw new InvalidOperationException("alertType must have a key, use MakeSymbol method after the constructor when declaring it");
 
-            SystemAlertTypes.Add(alertType);
+            SystemAlertTypes.Add(alertType, options ?? new AlertTypeOptions());
         }
 
-        public static AlertEntity? CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlert(entity.ToLiteFat(), text, alertType, alertDate, createdBy, title, recipient);
+            return CreateAlert(entity.ToLiteFat(), alertType, text, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
@@ -284,8 +302,8 @@ namespace Signum.Engine.Alerts
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
                 CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
-                Text = text,
-                Title = title,
+                TitleField = title,
+                TextField = text,
                 Target = (Lite<Entity>)entity,
                 AlertType = alertType,
                 Recipient = recipient
@@ -294,19 +312,19 @@ namespace Signum.Engine.Alerts
             return result.Execute(AlertOperation.Save);
         }
 
-        public static AlertEntity? CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlertForceNew(entity.ToLite(), text, alertType, alertDate, createdBy, title, recipient);
+            return CreateAlertForceNew(entity.ToLite(), alertType, text, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
 
             using (Transaction tr = Transaction.ForceNew())
             {
-                var alert = entity.CreateAlert(text, alertType, alertDate, createdBy);
+                var alert = entity.CreateAlert(alertType, text, alertDate, createdBy);
 
                 return tr.Commit(alert);
             }
@@ -328,7 +346,7 @@ namespace Signum.Engine.Alerts
                 a => a.Recipient.Is(UserEntity.Current));
         }
 
-        public static void AttendAllAlerts(Lite<Entity> target, AlertTypeEntity alertType)
+        public static void AttendAllAlerts(Lite<Entity> target, AlertTypeSymbol alertType)
         {
             using (AuthLogic.Disable())
             {
@@ -350,6 +368,11 @@ namespace Signum.Engine.Alerts
         }
     }
 
+    public class AlertTypeOptions
+    {
+        public Func<string>? GetText; 
+    }
+
     public class AlertGraph : Graph<AlertEntity, AlertState>
     {
         public static void Register()
@@ -364,8 +387,8 @@ namespace Signum.Engine.Alerts
                     AlertDate = TimeZoneManager.Now,
                     CreatedBy = UserHolder.Current.ToLite(),
                     Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
-                    Text = "",
-                    Title = null,
+                    TitleField = null,
+                    TextField = null,
                     Target = a.ToLite(),
                     AlertType = null
                 }
@@ -379,8 +402,8 @@ namespace Signum.Engine.Alerts
                     AlertDate = TimeZoneManager.Now,
                     CreatedBy = UserHolder.Current.ToLite(),
                     Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
-                    Text = "",
-                    Title = null,
+                    TitleField = null,
+                    TextField = null,
                     Target = null!,
                     AlertType = null
                 }

@@ -15,7 +15,7 @@ export interface NoteEntity extends Entities.Entity {
   creationDate: string;
   text: string;
   createdBy: Entities.Lite<Basics.IUserEntity>;
-  noteType: NoteTypeEntity | null;
+  noteType: NoteTypeSymbol | null;
 }
 
 export module NoteMessage {
@@ -34,13 +34,13 @@ export module NoteOperation {
   export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol("Operation", "NoteOperation.Save");
 }
 
-export const NoteTypeEntity = new Type<NoteTypeEntity>("NoteType");
-export interface NoteTypeEntity extends Basics.SemiSymbol {
-  Type: "NoteType";
+export module NoteTypeOperation {
+  export const Save : Entities.ExecuteSymbol<NoteTypeSymbol> = registerSymbol("Operation", "NoteTypeOperation.Save");
 }
 
-export module NoteTypeOperation {
-  export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol("Operation", "NoteTypeOperation.Save");
+export const NoteTypeSymbol = new Type<NoteTypeSymbol>("NoteType");
+export interface NoteTypeSymbol extends Basics.SemiSymbol {
+  Type: "NoteType";
 }
 
 

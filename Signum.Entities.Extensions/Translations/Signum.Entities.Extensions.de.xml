@@ -71,7 +71,10 @@
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
     <Member Name="Text" Description="Text" />
+    <Member Name="TextField" Description="Textfeld" />
+    <Member Name="TextFromAlertType" Description="Text aus Benachrichtigungstyp" />
     <Member Name="Title" Description="Titel" />
+    <Member Name="TitleField" Description="Titelfeld" />
   </Type>
   <Type Name="AlertMessage">
     <Member Name="_0HiddenAlerts" Description="{0} versteckte Benachrichtigungen" />
@@ -108,11 +111,11 @@
     <Member Name="New" Description="Neu" />
     <Member Name="Saved" Description="Gespeichert" />
   </Type>
-  <Type Name="AlertTypeEntity" Description="Benachrichtigungstyp" />
   <Type Name="AlertTypeOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="AlertTypeSymbol" Description="Benachrichtigungstyp" />
   <Type Name="AllowedRule`2">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="AllowedBase" Description="Base erlaubt" />
@@ -1543,10 +1546,10 @@
     <Member Name="CreateNoteFromEntity" Description="Notiz aus Entität erstellen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="NoteTypeEntity" Description="Noitztyp" PluralDescription="Noitztypen" />
   <Type Name="NoteTypeOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="NoteTypeSymbol" Description="Notiztyp" />
   <Type Name="OmniboxMessage">
     <Member Name="ComplementWordsRegex" Description="\b(der|die|das|den|dem|von) " />
     <Member Name="No" Description="nein" />
@@ -2611,33 +2614,6 @@
     <Member Name="ViewLogMyLast" Description="Zeige mein letztes log" />
   </Type>
   <Type Name="ViewNamePropEmbedded" />
-  <Type Name="WebAuthnAssertionOptionsEntity" Description="WebAuthn Assertion Options" Gender="n">
-    <Member Name="CreationDate" Description="Erstellungsdatum" />
-    <Member Name="Json" Description="Json" />
-  </Type>
-  <Type Name="WebAuthnConfigurationEmbedded" Description="Web-Authn-Konfiguration">
-    <Member Name="Origin" Description="Origin" />
-    <Member Name="ServerDomain" Description="Serverdomäne" />
-    <Member Name="ServerName" Description="Servername" />
-    <Member Name="TimestampDriftTolerance" Description="Timestamp drift tolerance" />
-  </Type>
-  <Type Name="WebAuthnCredentialEntity" Description="WebAuthn Credential" PluralDescription="WebAuthnCredentials" Gender="n">
-    <Member Name="Aaguid" Description="Aaguid" />
-    <Member Name="Counter" Description="Zähler" />
-    <Member Name="CreationDate" Description="Erstellungsdatum" />
-    <Member Name="CredentialId" Description="CredentialId" />
-    <Member Name="CredType" Description="Cred-Typ" />
-    <Member Name="PublicKey" Description="Public key" />
-    <Member Name="User" Description="Benutzer" />
-  </Type>
-  <Type Name="WebAuthnCredentialOperation">
-    <Member Name="Delete" Description="Löschen" />
-  </Type>
-  <Type Name="WebAuthnMakeCredentialsOptionsEntity" Description="WebAuthn Make Credentials Options" Gender="n">
-    <Member Name="CreationDate" Description="Erstellungsdatum" />
-    <Member Name="Json" Description="Json" />
-    <Member Name="User" Description="Benutzer" />
-  </Type>
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />

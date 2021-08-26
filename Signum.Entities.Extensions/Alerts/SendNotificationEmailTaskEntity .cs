@@ -19,7 +19,7 @@ namespace Signum.Entities.Alerts
         public SendAlertTypeBehavior SendBehavior { get; set; }
 
         [PreserveOrder, NoRepeatValidator]
-        public MList<AlertTypeEntity> AlertTypes { get; set; } = new MList<AlertTypeEntity>();
+        public MList<AlertTypeSymbol> AlertTypes { get; set; } = new MList<AlertTypeSymbol>();
     }
 
     public enum SendAlertTypeBehavior

@@ -7,7 +7,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import ValueLineModal from '@framework/ValueLineModal'
-import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
+import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
@@ -16,10 +16,11 @@ import * as Finder from '@framework/Finder'
 import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
+import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 
 export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
-  Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => import('./Templates/AlertType')));
+  Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
 
   const couldHaveAlerts = options.showAlerts ?? ((typeName, when) => true);
 
@@ -43,26 +44,36 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],
+    hideOnCanExecute: true
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(AlertOperation.Unattend, {
+    hideOnCanExecute: true
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
     onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())).done(),
+    hideOnCanExecute: true,
     contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
-    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() }
+    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
   }));
 
-  Finder.registerPropertyFormatter(AlertEntity.tryPropertyRoute(a => a.text), new Finder.CellFormatter((cell, ctx) => {
+  var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
 
     var alert: Partial<AlertEntity> = {
       target: ctx.row.columns[ctx.columns.indexOf("Target")]
     };
-
     return formatText(cell, alert);
-  }));
+  });
+
+  Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
 
   Finder.addSettings({
     queryName: AlertEntity,
-    hiddenColumns: [{ token: "Target" }]
+    hiddenColumns: [{ token: "Target" }],
+    formatters: {
+      "Text": cellFormatter
+    }
   })
 }
 
@@ -101,9 +112,17 @@ function chooseDate(): Promise<DateTime | undefined> {
 
 let LinkPlaceholder = /\[(?<prop>(\w|\d|\.)+)(\:(?<text>.+))?\](\((?<url>.+)\))?/g;
 
-export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement{
+export function getTitle(titleField: string | null, type: AlertTypeSymbol | null): string | null {
+  if (titleField)
+    return titleField;
 
-  debugger;
+  if (type!.key)
+    return symbolNiceName(type! as Entity & ISymbol);
+
+  return type!.name;
+}
+  export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement{
+
   var nodes: (string | React.ReactElement)[] = [];
   var pos = 0;
   for (const match of Array.from(text.matchAll(LinkPlaceholder))) {
@@ -120,9 +139,9 @@ export function formatText(text: string, alert: Partial<AlertEntity>, onNavigate
       nodes.push(<Link to={replacePlaceHolders(groups.url, alert)!}>{replacePlaceHolders(groups.text, alert) ?? lite?.toStr}</Link>);
     else if (lite != null) {
       if (groups.text)
-        nodes.push(<EntityLink lite={lite}>{replacePlaceHolders(groups.text, alert)}</EntityLink>);
+        nodes.push(<EntityLink lite={lite} onNavigated={onNavigated}>{replacePlaceHolders(groups.text, alert)}</EntityLink>);
       else
-        nodes.push(<EntityLink lite={lite}/>);
+        nodes.push(<EntityLink lite={lite} onNavigated={onNavigated} />);
     }
 
     pos = match.index! + match[0].length;

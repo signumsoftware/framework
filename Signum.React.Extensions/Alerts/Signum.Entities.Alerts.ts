@@ -21,14 +21,15 @@ export interface AlertEntity extends Entities.Entity {
   creationDate: string;
   alertDate: string | null;
   attendedDate: string | null;
-  title: string | null;
-  text: string;
+  titleField: string | null;
+  textField: string | null;
+  textFromAlertType: string | null;
   createdBy: Entities.Lite<Basics.IUserEntity> | null;
   recipient: Entities.Lite<Basics.IUserEntity> | null;
   attendedBy: Entities.Lite<Basics.IUserEntity> | null;
-  alertType: AlertTypeEntity | null;
+  alertType: AlertTypeSymbol | null;
   state: AlertState;
-  emailNotificationsSent: number;
+  emailNotificationsSent: boolean;
 }
 
 export module AlertMessage {
@@ -52,6 +53,8 @@ export module AlertMessage {
   export const CloseAll = new MessageKey("AlertMessage", "CloseAll");
   export const AllMyAlerts = new MessageKey("AlertMessage", "AllMyAlerts");
   export const NewUnreadNotifications = new MessageKey("AlertMessage", "NewUnreadNotifications");
+  export const Title = new MessageKey("AlertMessage", "Title");
+  export const Text = new MessageKey("AlertMessage", "Text");
 }
 
 export module AlertOperation {
@@ -69,14 +72,14 @@ export type AlertState =
   "Saved" |
   "Attended";
 
-export const AlertTypeEntity = new Type<AlertTypeEntity>("AlertType");
-export interface AlertTypeEntity extends Basics.SemiSymbol {
-  Type: "AlertType";
+export module AlertTypeOperation {
+  export const Save : Entities.ExecuteSymbol<AlertTypeSymbol> = registerSymbol("Operation", "AlertTypeOperation.Save");
+  export const Delete : Entities.DeleteSymbol<AlertTypeSymbol> = registerSymbol("Operation", "AlertTypeOperation.Delete");
 }
 
-export module AlertTypeOperation {
-  export const Save : Entities.ExecuteSymbol<AlertTypeEntity> = registerSymbol("Operation", "AlertTypeOperation.Save");
-  export const Delete : Entities.DeleteSymbol<AlertTypeEntity> = registerSymbol("Operation", "AlertTypeOperation.Delete");
+export const AlertTypeSymbol = new Type<AlertTypeSymbol>("AlertType");
+export interface AlertTypeSymbol extends Basics.SemiSymbol {
+  Type: "AlertType";
 }
 
 export const DelayOption = new EnumType<DelayOption>("DelayOption");
@@ -100,7 +103,7 @@ export interface SendNotificationEmailTaskEntity extends Entities.Entity, Schedu
   Type: "SendNotificationEmailTask";
   sendNotificationsOlderThan: number;
   sendBehavior: SendAlertTypeBehavior;
-  alertTypes: Entities.MList<AlertTypeEntity>;
+  alertTypes: Entities.MList<AlertTypeSymbol>;
 }
 
 export module SendNotificationEmailTaskOperation {

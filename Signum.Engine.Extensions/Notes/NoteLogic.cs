@@ -22,7 +22,7 @@ namespace Signum.Engine.Notes
         public static IQueryable<NoteEntity> Notes(this Entity ident) => 
             As.Expression(() => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident)));
 
-        static HashSet<NoteTypeEntity> SystemNoteTypes = new HashSet<NoteTypeEntity>();
+        static HashSet<NoteTypeSymbol> SystemNoteTypes = new HashSet<NoteTypeSymbol>();
         static bool started = false;
 
         public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
@@ -47,7 +47,7 @@ namespace Signum.Engine.Notes
                     Construct = (a, _) => new NoteEntity{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
                 }.Register();
 
-                sb.Include<NoteTypeEntity>()
+                sb.Include<NoteTypeSymbol>()
                     .WithSave(NoteTypeOperation.Save)
                     .WithQuery(() => t => new
                     {
@@ -57,7 +57,7 @@ namespace Signum.Engine.Notes
                         t.Key,
                     });
                 
-                SemiSymbolLogic<NoteTypeEntity>.Start(sb, () => SystemNoteTypes);
+                SemiSymbolLogic<NoteTypeSymbol>.Start(sb, () => SystemNoteTypes);
 
                 if (registerExpressionsFor != null)
                 {
@@ -70,7 +70,7 @@ namespace Signum.Engine.Notes
             }
         }
 
-        public static void RegisterNoteType(NoteTypeEntity noteType)
+        public static void RegisterNoteType(NoteTypeSymbol noteType)
         {
             if (!noteType.Key.HasText())
                 throw new InvalidOperationException("noteType must have a key, use MakeSymbol method after the constructor when declaring it");
@@ -79,7 +79,7 @@ namespace Signum.Engine.Notes
         }
 
 
-        public static NoteEntity? CreateNote<T>(this Lite<T> entity, string text, NoteTypeEntity noteType, Lite<UserEntity>? user = null, string? title = null) where T : class, IEntity
+        public static NoteEntity? CreateNote<T>(this Lite<T> entity, string text, NoteTypeSymbol noteType, Lite<UserEntity>? user = null, string? title = null) where T : class, IEntity
         {
             if (started == false)
                 return null;

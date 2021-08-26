@@ -27,7 +27,7 @@ namespace Signum.Entities.Notes
             return " - ".Combine(Title, Text.FirstNonEmptyLine()).Etc(100);
         }
 
-        public NoteTypeEntity? NoteType { get; set; }
+        public NoteTypeSymbol? NoteType { get; set; }
     }
 
     [AutoInit]
@@ -53,14 +53,14 @@ namespace Signum.Entities.Notes
         ViewNotes
     }
 
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class NoteTypeEntity : SemiSymbol
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
+    public class NoteTypeSymbol : SemiSymbol
     {
-        public NoteTypeEntity()
+        public NoteTypeSymbol()
         {
         }
 
-        public NoteTypeEntity(Type declaringType, string fieldName) : base(declaringType, fieldName)
+        public NoteTypeSymbol(Type declaringType, string fieldName) : base(declaringType, fieldName)
         {
         }
     }
@@ -68,6 +68,6 @@ namespace Signum.Entities.Notes
     [AutoInit]
     public static class NoteTypeOperation
     {
-        public static ExecuteSymbol<NoteTypeEntity> Save;
+        public static ExecuteSymbol<NoteTypeSymbol> Save;
     }
 }

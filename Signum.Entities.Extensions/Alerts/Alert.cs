@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Entities.Scheduler;
 using Signum.Entities;
+using System.Reflection;
 
 namespace Signum.Entities.Alerts
 {
@@ -21,11 +22,22 @@ namespace Signum.Entities.Alerts
 
         public DateTime? AttendedDate { get; set; }
 
+
+        [AutoExpressionField]
+        public string Title => As.Expression(() => TitleField! ?? AlertType!.NiceToString()); //Replaced in Logic
+
         [StringLengthValidator(Max = 100)]
-        public string? Title { get; set; }
+        public string? TitleField { get; set; }
+
+
+        [AutoExpressionField]
+        public string? Text => As.Expression(() => TextField); //Replaced in Logic
 
         [StringLengthValidator(Min = 1, MultiLine = true)]
-        public string Text { get; set; }
+        public string? TextField { get; set; }
+
+        [Ignore]
+        public string? TextFromAlertType { get; set; }
 
         public Lite<IUserEntity>? CreatedBy { get; set; }
 
@@ -33,16 +45,16 @@ namespace Signum.Entities.Alerts
 
         public Lite<IUserEntity>? AttendedBy { get; set; }
 
-        public AlertTypeEntity? AlertType { get; set; }
+        public AlertTypeSymbol? AlertType { get; set; }
 
         public AlertState State { get; set; }
 
-        public int EmailNotificationsSent { get; set; }
+        public bool EmailNotificationsSent { get; set; }
 
-        public override string ToString()
-        {
-            return Text.FirstNonEmptyLine()?.Etc(100)!;
-        }
+
+        [AutoExpressionField]
+        public override string ToString() => As.Expression(() => Title);
+       
 
         [AutoExpressionField]
         public bool Attended => As.Expression(() => AttendedDate.HasValue);
@@ -61,6 +73,14 @@ namespace Signum.Entities.Alerts
             AttendedDate.HasValue ? AlertCurrentState.Attended :
             AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted :
             AlertCurrentState.Future);
+
+        protected override string? PropertyValidation(PropertyInfo pi)
+        {
+            if(pi.Name == nameof(TitleField) && TitleField == null && AlertType == null)
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     public enum AlertState
@@ -102,14 +122,14 @@ namespace Signum.Entities.Alerts
         Custom
     }
 
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class AlertTypeEntity : SemiSymbol
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
+    public class AlertTypeSymbol : SemiSymbol
     {
-        public AlertTypeEntity()
+        public AlertTypeSymbol()
         {
         }
 
-        public AlertTypeEntity(Type declaringType, string fieldName) : base(declaringType, fieldName)
+        public AlertTypeSymbol(Type declaringType, string fieldName) : base(declaringType, fieldName)
         {
         }
     }
@@ -117,8 +137,8 @@ namespace Signum.Entities.Alerts
     [AutoInit]
     public static class AlertTypeOperation
     {
-        public static ExecuteSymbol<AlertTypeEntity> Save;
-        public static DeleteSymbol<AlertTypeEntity> Delete;
+        public static ExecuteSymbol<AlertTypeSymbol> Save;
+        public static DeleteSymbol<AlertTypeSymbol> Delete;
     }
 
     public enum AlertMessage
@@ -152,5 +172,7 @@ namespace Signum.Entities.Alerts
         CloseAll,
         AllMyAlerts,
         NewUnreadNotifications,
+        Title,
+        Text,
     }
 }
