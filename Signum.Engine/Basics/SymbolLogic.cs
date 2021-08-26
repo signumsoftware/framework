@@ -76,6 +76,12 @@ namespace Signum.Engine
                 Schema.Current.InvalidateMetadata);
 
                 sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
+                Symbol.CallRetrived += (ss) =>
+                {
+                    if (ss is T t)
+                        if (t.Key != null && t.FieldInfo == null)
+                            SymbolLogic_Retrieved(t, new PostRetrievingContext());
+                };
             }
         }
 
