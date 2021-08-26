@@ -55,13 +55,13 @@ namespace Signum.Engine.Authorization
 
         public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);
 
-        static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<string> groups)> ADGRoupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<string> groups)>();
+        static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)> ADGRoupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)>();
 
-        public static List<string> CurrentADGroups()
+        public static List<Guid> CurrentADGroups()
         {
             var oid = UserEntity.Current.Mixin<UserADMixin>().OID;
             if (oid == null)
-                return new List<string>();
+                return new List<Guid>();
 
             var tuple = ADGRoupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
                 addValueFactory: user => (DateTime.Now, CurrentADGroupsInternal(oid.Value)),
@@ -70,7 +70,7 @@ namespace Signum.Engine.Authorization
             return tuple.groups;
         }
 
-        private static List<string> CurrentADGroupsInternal(Guid oid)
+        private static List<Guid> CurrentADGroupsInternal(Guid oid)
         {
             using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
             {
@@ -78,7 +78,7 @@ namespace Signum.Engine.Authorization
                 GraphServiceClient graphClient = new GraphServiceClient(authProvider);
                 var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
-                return result.Select(a => string.Intern(a.Id)).ToList();
+                return result.Select(a => Guid.Parse(a.Id)).ToList();
             }
         }
 

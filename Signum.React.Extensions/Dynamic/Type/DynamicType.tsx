@@ -40,8 +40,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
     ctx.value.modified = true;
   }
 
-    entityHasChanges() {
-        const entity = this.props.ctx.value;
+  entityHasChanges() {
+    const entity = this.props.ctx.value;
 
     GraphExplorer.propagateAll(entity);
 
