@@ -632,7 +632,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate } { ...p.createButtonHtmlProps } >
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },

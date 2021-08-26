@@ -141,7 +141,10 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity" || qt.filterType == "Enum" && !isState(qt.type);
+  export let tokenCanSetPropery = (qt: QueryToken) =>
+    qt.filterType == "Lite" && qt.key != "Entity" ||
+    qt.filterType == "Enum" && !isState(qt.type) ||
+    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "Date";
 
   export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
