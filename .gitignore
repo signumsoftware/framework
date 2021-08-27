@@ -40,3 +40,5 @@ Signum.React/node_modules/*.js
 /Signum.TSGenerator/Binaries/*
 /Signum.React/node_modules/**
 /Signum.React/ts_out/*
+/Signum.React.Extensions/ts_out/*
+/Signum.React.Extensions/node_modules/**

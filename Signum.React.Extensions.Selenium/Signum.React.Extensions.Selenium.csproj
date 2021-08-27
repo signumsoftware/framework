@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
+		<PackageReference Include="Selenium.Support" Version="3.141.0" />
+		<PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+		<PackageReference Include="Signum.Analyzer" Version="3.1.0" />
+		<ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
+		<ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
+		<ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
+		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
+	</ItemGroup>
+</Project>

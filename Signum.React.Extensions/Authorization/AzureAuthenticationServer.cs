@@ -1,0 +1,104 @@
+using System;
+using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
+using Signum.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http;
+using System.Security.Principal;
+using System.Linq;
+using System.DirectoryServices.AccountManagement;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Signum.Engine;
+using Signum.Engine.Operations;
+using Signum.Engine.Basics;
+
+namespace Signum.React.Authorization
+{
+
+    public class AzureADAuthenticationServer
+    {
+        public static bool LoginAzureADAuthentication(ActionContext ac, string jwt, bool throwErrors)
+        {
+            using (AuthLogic.Disable())
+            {
+                try
+                {
+                    var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
+
+                    if (!ada.GetConfig().LoginWithAzureAD)
+                        return false;
+
+                    var principal = ValidateToken(jwt, out var jwtSecurityToken);
+                    var ctx = new AzureClaimsAutoCreateUserContext(principal);
+
+                    UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
+
+                    if(user == null)
+                    {
+                        user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
+                        (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
+                    }
+
+                    if (user == null)
+                    {
+                        user = ada.OnAutoCreateUser(ctx);
+
+                        if (user == null)
+                            return false;
+                    }
+                    else
+                    {
+                        ada.UpdateUser(user, ctx);
+                    }
+
+                    AuthServer.OnUserPreLogin(ac, user);
+                    AuthServer.AddUserSession(ac, user);
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    ex.LogException();
+                    if (throwErrors)
+                        throw;
+
+                    return false;
+                }
+            }
+        }
+
+        //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
+        public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
+        {
+            var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
+
+            string stsDiscoveryEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
+
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
+
+            OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
+            TokenValidationParameters validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = ada.GetConfig().Azure_ApplicationID,
+                ValidIssuer = "https://login.microsoftonline.com/" + ada.GetConfig().Azure_DirectoryID + "/v2.0",
+
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                IssuerSigningKeys = config.SigningKeys, //2. .NET Core equivalent is "IssuerSigningKeys" and "SigningKeys"
+                ValidateLifetime = true
+            };
+            JwtSecurityTokenHandler tokendHandler = new JwtSecurityTokenHandler();
+
+            var result = tokendHandler.ValidateToken(jwt, validationParameters, out SecurityToken secutityToken);
+
+            jwtSecurityToken = (JwtSecurityToken)secutityToken;
+            return result;
+        }
+
+    }
+
+}

@@ -1,0 +1,6 @@
+﻿import { QueryToken } from '@framework/FindOptions'
+
+export interface QueryTokenEmbedded {
+    token?: QueryToken;
+    parseException?: string;
+}

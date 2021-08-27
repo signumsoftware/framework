@@ -1,0 +1,9 @@
+diff a/Signum.Entities.Extensions/MachineLearning/PredictorCodification.cs b/Signum.Entities.Extensions/MachineLearning/PredictorCodification.cs	(rejected hunks)
+@@ -17,7 +17,6 @@
+         public int OriginalColumnIndex { get; set; }
+ 
+         //For flatting collections
+-        [SqlDbType(Size = 100)]
+                 public string SplitKey0 { get; set; }
+ 
+                 public string SplitKey1 { get; set; }
