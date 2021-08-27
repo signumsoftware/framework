@@ -83,7 +83,7 @@ namespace Signum.Entities
             return Key.GetHashCode();
         }
 
-        internal static Action<Symbol> CallRetrived = ss => { };
+        internal static Action<Symbol> CallRetrieved = ss => { };
 
         public string NiceToString()
         {

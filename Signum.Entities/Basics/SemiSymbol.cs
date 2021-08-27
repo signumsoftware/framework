@@ -64,11 +64,11 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Min = 3, Max = 200)]
         public string? Key { get; set; }
 
-        internal static Action<SemiSymbol> CallRetrived = ss => { };
+        internal static Action<SemiSymbol> CallRetrieved = ss => { };
 
         public string NiceToString()
         {
-            CallRetrived(this);
+            CallRetrieved(this);
             return this.FieldInfo?.NiceName() ?? this.Name;
         }
 
