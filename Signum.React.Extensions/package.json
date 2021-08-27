@@ -14,7 +14,7 @@
   "author": "Signum Software",
   "license": "MIT",
   "resolutions": {
-    "@types/react": "file:../../Framework/Signum.React/node_modules/@types/react"
+    "@types/react": "file:../Signum.React/node_modules/@types/react"
   },
   "dependencies": {
     "@types/codemirror": "0.0.108",
@@ -26,6 +26,6 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "@azure/msal-browser": "2.14.1",
-    "@types/react": "file:../../Framework/Signum.React/node_modules/@types/react"
+    "@types/react": "file:../Signum.React/node_modules/@types/react"
   }
 }

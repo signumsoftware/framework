@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
-    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
-    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
   </ItemGroup>

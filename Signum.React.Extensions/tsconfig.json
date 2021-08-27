@@ -13,10 +13,10 @@
     "strict": true,
     "declarationMap": true,
     "paths": {
-      "@framework/*": [ "../../Framework/Signum.React/Scripts/*" ],
+      "@framework/*": [ "../Signum.React/Scripts/*" ],
       "*": [
-        "../../Framework/Signum.React/node_modules/@types/*",
-        "../../Framework/Signum.React/node_modules/*",
+        "../Signum.React/node_modules/@types/*",
+        "../Signum.React/node_modules/*",
         "./*"
       ]
     },
@@ -26,12 +26,12 @@
     ]
   },
   "exclude": [
-    "../../Framework/Signum.React/ts_out",
-    "../../Framework/Signum.React/node_modules",
+    "../Signum.React/ts_out",
+    "../Signum.React/node_modules",
     "./node_modules",
     "./ts_out"
   ],
   "references": [
-    { "path": "../../Framework/Signum.React" }
+    { "path": "../Signum.React" }
   ]
 }
