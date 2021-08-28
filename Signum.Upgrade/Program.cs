@@ -59,6 +59,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210816_RemoveWebAuth(),
                 new Upgrade_20210824_UpdateNugets(),
                 new Upgrade_20210828_ExtensionsLoveFramework(),
+                new Upgrade_20210829_TypeScript44(),
             }.Run(uctx);
         }
     }
