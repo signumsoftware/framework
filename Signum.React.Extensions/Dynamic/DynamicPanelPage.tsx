@@ -475,7 +475,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
 export function RefreshClientsStep() {
   function handleRefreshClient(e: React.MouseEvent<any>) {
     e.preventDefault();
-    window.location.reload(true);
+    window.location.reload();
   }
 
   return (

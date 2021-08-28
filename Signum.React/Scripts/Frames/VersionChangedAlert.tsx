@@ -19,7 +19,7 @@ export function VersionChangedAlert(p: { blink?: boolean }) {
 
   function handleRefresh(e: React.MouseEvent<any>) {
     e.preventDefault();
-    location.reload(true);
+    location.reload();
   }
 
   if (VersionFilter.latestVersion == VersionFilter.initialVersion)

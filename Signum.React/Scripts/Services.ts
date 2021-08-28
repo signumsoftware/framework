@@ -38,7 +38,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
   return wrapRequest(options, () => {
 
     const cache = options.cache || "no-cache";
-    const isIE11 = !!window.MSInputMethodContext && !!(document as any).documentMode;
+    const isIE11 = !!(window as any).MSInputMethodContext && !!(document as any).documentMode;
 
     const headers = {
       'Accept': 'application/json',
@@ -253,8 +253,8 @@ export function getFileName(response: Response) {
 }
 
 export function saveFileBlob(blob: Blob, fileName: string) {
-  if (window.navigator.msSaveBlob)
-    window.navigator.msSaveBlob(blob, fileName);
+  if ((window.navigator as any).msSaveBlob)
+    (window.navigator as any).msSaveBlob(blob, fileName);
   else {
     const url = window.URL.createObjectURL(blob);
     a.href = url;

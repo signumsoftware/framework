@@ -21,7 +21,6 @@ import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
 
-
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 

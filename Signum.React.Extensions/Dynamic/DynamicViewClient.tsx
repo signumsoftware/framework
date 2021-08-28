@@ -263,7 +263,7 @@ export function patchComponent(component: React.ComponentClass<{ ctx: TypeContex
       viewOverride(replacer);
       return replacer.result;
     } catch (error) {
-      return <div className="alert alert-danger">ERROR: {error?.message}</div>;
+      return <div className="alert alert-danger">ERROR: {(error as Error)?.message}</div>;
     }
   };
 

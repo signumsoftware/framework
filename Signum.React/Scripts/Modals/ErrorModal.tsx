@@ -117,7 +117,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(true); }}>
+          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
             <FontAwesomeIcon icon="sync-alt" />
           </button>
         </div>,
