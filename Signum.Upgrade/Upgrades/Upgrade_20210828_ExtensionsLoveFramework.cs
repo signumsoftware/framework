@@ -27,7 +27,7 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ChangeCodeFile(@"Southwind.React\webpack.config.js", file =>
             {
-                file.Replace(@"\Extensions\", @"\Framework\");
+                file.Replace(@"/Extensions/", @"/Framework/");
             });
 
             uctx.ChangeCodeFile(@"Southwind.React/tsconfig.json", file =>
