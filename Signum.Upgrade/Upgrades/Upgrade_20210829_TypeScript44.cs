@@ -22,7 +22,7 @@ namespace Signum.Upgrade.Upgrades
                 file.UpdateNpmPackage("typescript", "4.4.2");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.React.csproj", file =>
+            uctx.ChangeCodeFile(@"Southwind.React/Southwind.React.csproj", file =>
             {
                 file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "4.4.2");
             });
