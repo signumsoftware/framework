@@ -40,11 +40,16 @@ namespace Signum.Upgrade.Upgrades
                 file.Replace(@"/Extensions/", @"/Framework/");
             });
 
+            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =>
+            {
+                file.Replace(@"""Extensions/", @"""Framework/");
+            });
+
             uctx.ChangeCodeFile(@".gitmodules", file =>
             {
                 file.RemoveAllLines(a => a.Contains("extensions", StringComparison.InvariantCultureIgnoreCase));
             });
-
+            
             if (SafeConsole.Ask("Do you want to delete 'Extensions' folder with all his content?"))
             {
                 Directory.Delete(Path.Combine(uctx.RootFolder, "Extensions"), true);
