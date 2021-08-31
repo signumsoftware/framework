@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
@@ -36,6 +37,41 @@ namespace Signum.Engine
                 else
                 {
                     merge?.Invoke(key, newVal!, oldVal!);
+                }
+            }
+        }
+
+        public static async Task SynchronizeAsync<K, N, O>(
+          Dictionary<K, N> newDictionary,
+          Dictionary<K, O> oldDictionary,
+          Func<K, N, Task>? createNew,
+          Func<K, O, Task>? removeOld,
+          Func<K, N, O, Task>? merge)
+            where K : notnull
+        {
+            HashSet<K> keys = new HashSet<K>();
+            keys.UnionWith(oldDictionary.Keys);
+            keys.UnionWith(newDictionary.Keys);
+
+            foreach (var key in keys)
+            {
+                var oldExists = oldDictionary.TryGetValue(key, out var oldVal);
+                var newExists = newDictionary.TryGetValue(key, out var newVal);
+
+                if (!oldExists)
+                {
+                    if (createNew != null)
+                        await createNew.Invoke(key, newVal!);
+                }
+                else if (!newExists)
+                {
+                    if (removeOld != null)
+                        await removeOld.Invoke(key, oldVal!);
+                }
+                else
+                {
+                    if (merge != null)
+                        await merge.Invoke(key, newVal!, oldVal!);
                 }
             }
         }
