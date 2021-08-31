@@ -313,9 +313,9 @@ export class QuickLinkAction extends QuickLink {
 }
 
 export class QuickLinkLink extends QuickLink {
-  url: string;
+  url: string | (() => Promise<string>);
 
-  constructor(name: string, text: () => string, url: string, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, url: string | (()=> Promise<string>), options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.url = url;
@@ -324,7 +324,14 @@ export class QuickLinkLink extends QuickLink {
 
 
   handleClick = (e: React.MouseEvent<any>) => {
-    AppContext.pushOrOpenInTab(this.url, e);
+    if (typeof this.url === "string")
+      AppContext.pushOrOpenInTab(this.url, e);
+    else {
+      e.persist();
+      this.url()
+        .then(url => AppContext.pushOrOpenInTab(url, e))
+        .done();
+    }
   }
 }
 

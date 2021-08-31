@@ -12,7 +12,7 @@ import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
-import * as QuickLink from '@framework/QuickLinks'
+import * as QuickLinks from '@framework/QuickLinks'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
@@ -54,7 +54,7 @@ export function start(options: { routes: JSX.Element[] }) {
     alternatives: eoc => [],
   }));
 
-  QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
+  QuickLinks.registerQuickLink(DynamicTypeEntity, ctx => new QuickLinks.QuickLinkLink("ViewDynamicPanel",
     () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
       isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
       icon: "arrows-alt",
