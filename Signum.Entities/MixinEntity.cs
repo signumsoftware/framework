@@ -169,6 +169,15 @@ namespace Signum.Entities
             return entity;
         }
 
+        public static T InitiMixin<T, M>(this T entity, Action<M> initiMixinLambda)
+            where T : IModifiableEntity
+            where M : MixinEntity
+        {
+            M mixin = ((ModifiableEntity)(IModifiableEntity)entity).Mixin<M>();
+            initiMixinLambda(mixin);
+            return entity;
+        }
+
         static class MixinSetterCache<T> where T : MixinEntity
         {
             static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
