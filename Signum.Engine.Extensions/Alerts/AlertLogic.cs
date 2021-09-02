@@ -125,19 +125,19 @@ namespace Signum.Engine.Alerts
             {
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                 {
-                    Text = @"
-<p>Hi @[m:Entity],</p>
-<p>You have some pending alerts:</p>
+                    Text = $@"
+<p>{AlertMessage.Hi0.NiceToString("@[m:Entity]")},</p>
+<p>{AlertMessage.YouHaveSomePendingAlerts.NiceToString()}</p>
 <ul>
- @foreach[m:Alerts] as $a
+@foreach[m:Alerts] as $a
     <li>
-        <strong>@[$a.AlertType]:</strong><br/>
+        <strong>@[$a.Title]:</strong><br/>
         @[m:TextFormatted]<br/>
         <small>@[$a.AlertDate] @[$a.CreatedBy]</small>
     </li>
  @endforeach
 </ul>
-<p>Please visit <a href=""@[g:UrlLeft]"">@[g:UrlLeft]</a></p>",
+<p>{AlertMessage.PleaseVisit0.NiceToString(@"<a href=""@[g:UrlLeft]"">@[g:UrlLeft]</a>")}</p>",
                     Subject = AlertMessage.NewUnreadNotifications.NiceToString(),
                 }).ToMList()
             });

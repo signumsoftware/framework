@@ -27,7 +27,7 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ChangeCodeFile(@"Southwind.React\webpack.config.js", file =>
             {
-                file.Replace(@"\Extensions\", @"\Framework\");
+                file.Replace(@"/Extensions/", @"/Framework/");
             });
 
             uctx.ChangeCodeFile(@"Southwind.React/tsconfig.json", file =>
@@ -40,11 +40,16 @@ namespace Signum.Upgrade.Upgrades
                 file.Replace(@"/Extensions/", @"/Framework/");
             });
 
+            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =>
+            {
+                file.Replace(@"""Extensions/", @"""Framework/");
+            });
+
             uctx.ChangeCodeFile(@".gitmodules", file =>
             {
                 file.RemoveAllLines(a => a.Contains("extensions", StringComparison.InvariantCultureIgnoreCase));
             });
-
+            
             if (SafeConsole.Ask("Do you want to delete 'Extensions' folder with all his content?"))
             {
                 Directory.Delete(Path.Combine(uctx.RootFolder, "Extensions"), true);

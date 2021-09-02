@@ -174,5 +174,12 @@ namespace Signum.Entities.Alerts
         NewUnreadNotifications,
         Title,
         Text,
+        [Description("Hi {0},")]
+        Hi0,
+        [Description("You have some pending alerts:")]
+        YouHaveSomePendingAlerts,
+        [Description("Please visit {0}")]
+        PleaseVisit0,
     }
+
 }

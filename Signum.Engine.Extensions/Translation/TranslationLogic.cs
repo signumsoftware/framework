@@ -27,7 +27,7 @@ namespace Signum.Engine.Translation
 
             var targetDirectory =
                       fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
-                      fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
+                      fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Framework\Signum.Entities.Extensions\Translations" :
                       fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
                       fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
                       throw new InvalidOperationException("Unexpected file with name " + fi.Name);
