@@ -198,20 +198,34 @@ namespace Signum.Engine
 
         static void Validate<T>(IEnumerable<T> entities) where T : Entity
         {
+#if DEBUG
+            var errors = new List<IntegrityCheckWithEntity>();
             foreach (var e in entities)
             {
                 var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
                 {
-#if DEBUG
                     var withEntites = ic.WithEntities(GraphExplorer.FromRoots(entities));
-                    throw new IntegrityCheckException(withEntites);
-#else
-                    throw new IntegrityCheckException(ic);
-#endif
+                    errors.AddRange(withEntites);
                 }
             }
+            if (errors.Count > 0)
+                throw new IntegrityCheckException(errors);
+#else
+            var errors = new Dictionary<Guid, IntegrityCheck>();
+            foreach (var e in entities)
+            {
+                var ic = e.FullIntegrityCheck();
+
+                if (ic != null)
+                {
+                    errors.AddRange(ic);
+                }
+            }
+            if (errors.Count > 0)
+                throw new IntegrityCheckException(errors);
+#endif
         }
 
         static readonly GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
