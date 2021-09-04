@@ -482,36 +482,36 @@ namespace Signum.Engine
             return GetDateTime(ordinal);
         }
 
-        public Date GetDate(int ordinal)
+        public DateOnly GetDateOnly(int ordinal)
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetDate);
-            Date dt;
+            LastMethodName = nameof(GetDateOnly);
+            DateOnly dt;
             switch (typeCodes[ordinal])
             {
                 case TypeCode.DateTime:
-                    dt = new Date(reader.GetDateTime(ordinal));
+                    dt = reader.GetDateTime(ordinal).ToDate();
                     break;
                 case FieldReader.tcNpgsqlDate:
-                    dt = new Date((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal));
+                    dt = ((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)).ToDate();
                     break;
                 default:
-                    dt = new Date(ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)));
+                    dt = ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)).ToDate();
                     break;
             }
 
             return dt;
         }
 
-        public Date? GetNullableDate(int ordinal)
+        public DateOnly? GetNullableDateOnly(int ordinal)
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetNullableDate);
+            LastMethodName = nameof(GetNullableDateOnly);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
             }
-            return GetDate(ordinal);
+            return GetDateOnly(ordinal);
         }
 
         public DateTimeOffset GetDateTimeOffset(int ordinal)
@@ -567,6 +567,33 @@ namespace Signum.Engine
                 return null;
             }
             return GetTimeSpan(ordinal);
+        }
+
+        public TimeOnly GetTimeOnly(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            LastMethodName = nameof(GetTimeOnly);
+            switch (typeCodes[ordinal])
+            {
+                case tcTimeSpan:
+                    if (isPostgres)
+                        return TimeOnly.FromTimeSpan(((NpgsqlDataReader)reader).GetTimeSpan(ordinal));
+                    else
+                        return TimeOnly.FromTimeSpan(((SqlDataReader)reader).GetTimeSpan(ordinal));
+                default:
+                    return TimeOnly.FromTimeSpan(ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal)));
+            }
+        }
+
+        public TimeOnly? GetNullableTimeOnly(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableTimeOnly);
+            if (reader.IsDBNull(ordinal))
+            {
+                return null;
+            }
+            return GetTimeOnly(ordinal);
         }
 
 

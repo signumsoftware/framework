@@ -30,7 +30,7 @@ namespace Signum.Engine.Templating
 
             public abstract void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
 
-            public abstract void Synchronize(SynchronizationContext sc);
+            public abstract void Synchronize(TemplateSynchronizationContext sc);
         }
 
         public class LiteralNode : TextNode
@@ -57,7 +57,7 @@ namespace Signum.Engine.Templating
                 sb.Append(Text);               
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 return;
             }
@@ -92,7 +92,7 @@ namespace Signum.Engine.Templating
                 ValueProvider.Declare(variables);
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 ValueProvider!.Synchronize(sc, "@declare");
             }
@@ -137,7 +137,7 @@ namespace Signum.Engine.Templating
                 ValueProvider!.ToStringBrackets(sb, variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 ValueProvider!.Synchronize(sc, IsRaw ? "@raw[]" : "@[]");
             }
@@ -198,7 +198,7 @@ namespace Signum.Engine.Templating
                 }
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 foreach (var item in Nodes)
                     item.Synchronize(sc);
@@ -241,7 +241,7 @@ namespace Signum.Engine.Templating
                 sb.Append("@endforeach");
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 ValueProvider!.Synchronize(sc, "@foreach[]");
 
@@ -320,7 +320,7 @@ namespace Signum.Engine.Templating
                 sb.Append("@endany");
             }
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 Condition.Synchronize(sc, "@any[]");
                 
@@ -404,7 +404,7 @@ namespace Signum.Engine.Templating
             }
 
 
-            public override void Synchronize(SynchronizationContext sc)
+            public override void Synchronize(TemplateSynchronizationContext sc)
             {
                 Condition.Synchronize(sc, "if[]");
                 

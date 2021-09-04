@@ -92,13 +92,13 @@ namespace Signum.React.Facades
                     }
                 }
 
-                if (mc.Method.DeclaringType == typeof(Date))
+                if (mc.Method.DeclaringType == typeof(DateOnly))
                 {
                     switch (mc.Method.Name)
                     {
-                        case  nameof(Date.ToShortString): return ToJavascriptToString(param, mc.Object!, "d");
-                        case  nameof(Date.ToLongString): return ToJavascriptToString(param, mc.Object!, "D");
-                        case  nameof(Date.ToString): return ToJavascriptToString(param, mc.Object!, "d");
+                        case  nameof(DateOnly.ToShortDateString): return ToJavascriptToString(param, mc.Object!, "d");
+                        case  nameof(DateOnly.ToLongDateString): return ToJavascriptToString(param, mc.Object!, "D");
+                        case  nameof(DateOnly.ToString): return ToJavascriptToString(param, mc.Object!, "d");
                     }
                 }
 
@@ -154,7 +154,7 @@ namespace Signum.React.Facades
             if (expr.Type.UnNullify() == typeof(DateTime))
                 return "dateToString(" + r + ", 'DateTime'" +  formatFull + ")";
 
-            if (expr.Type.UnNullify() == typeof(Date))
+            if (expr.Type.UnNullify() == typeof(DateOnly))
                 return "dateToString(" + r + ", 'Date'" + formatFull + ")";
 
             if (expr.Type.UnNullify() == typeof(TimeSpan))

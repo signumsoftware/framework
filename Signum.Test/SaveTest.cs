@@ -374,7 +374,7 @@ namespace Signum.Test
                 var list = Database.Query<AlbumEntity>().Select(a => new NoteWithDateEntity
                 {
                     CreationTime = DateTime.Now,
-                    CreationDate = Date.Today,
+                    CreationDate = DateTime.Now.ToDate(),
                     Text = "Nice album " + a.Name,
                     Target = a
                 }).ToList();

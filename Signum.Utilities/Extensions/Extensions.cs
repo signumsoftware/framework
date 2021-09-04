@@ -377,9 +377,9 @@ namespace Signum.Utilities
         }
 
 
-        public static IEnumerable<Date> To(this Date start, Date endNotIncluded)
+        public static IEnumerable<DateOnly> To(this DateOnly start, DateOnly endNotIncluded)
         {
-            for (Date i = start; i < endNotIncluded; i = i.AddDays(1))
+            for (DateOnly i = start; i < endNotIncluded; i = i.AddDays(1))
                 yield return i;
         }
 

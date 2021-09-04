@@ -253,7 +253,7 @@ namespace Signum.Entities.UserAssets
 
             DateTime dateTime = 
                 value is string s ? DateTime.ParseExact(s, type == typeof(DateTime) ? "o" : "yyyy-MM-dd", CultureInfo.InvariantCulture) :
-                value is Date d ? (DateTime)d : 
+                value is DateOnly d ? d.ToDateTime(): 
                 value is DateTime dt ? dt : throw new UnexpectedValueException(value);
 
             SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
@@ -271,7 +271,7 @@ namespace Signum.Entities.UserAssets
                 return new Result<object?>.Error(e.ErrorText);
 
             if (res is Result<SmartDateTimeSpan>.Success s)
-                return new Result<object?>.Success(type.UnNullify() == typeof(Date) ? (object)(Date)s.Value.ToDateTime() : (object)s.Value.ToDateTime());
+                return new Result<object?>.Success(type.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDate() : (object)s.Value.ToDateTime());
 
             throw new UnexpectedValueException(res);
         }

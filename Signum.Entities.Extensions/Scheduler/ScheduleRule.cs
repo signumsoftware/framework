@@ -91,7 +91,7 @@ namespace Signum.Entities.Scheduler
 
         bool IsAllowed(DateTime dateTime)
         {
-            if (Calendar != null && Calendar.IsHoliday(dateTime))
+            if (Calendar != null && Calendar.IsHoliday(dateTime.ToDate()))
                 return Holiday;
 
             switch (dateTime.DayOfWeek)

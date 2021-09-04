@@ -143,7 +143,7 @@ namespace Signum.React.Filters
 
     public static class UrlHelperExtensions
     {
-        public static string Action<T>(this UrlHelper helper, string action, object values) where T : ControllerBase
+        public static string? Action<T>(this UrlHelper helper, string action, object values) where T : ControllerBase
         {
             return helper.Action(new UrlActionContext
             {

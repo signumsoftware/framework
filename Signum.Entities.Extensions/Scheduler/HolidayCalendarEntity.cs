@@ -16,7 +16,7 @@ namespace Signum.Entities.Scheduler
         
         public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
-        public bool IsHoliday(DateTime date)
+        public bool IsHoliday(DateOnly date)
         {
             return Holidays.Any(h => h.Date == date);
         }
@@ -51,7 +51,7 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public class HolidayEmbedded : EmbeddedEntity
     {
-        public Date Date { get; set; } = Date.Today;
+        public DateOnly Date { get; set; }
 
         [StringLengthValidator(Min = 3, Max = 100)]
         public string? Name { get; set; }

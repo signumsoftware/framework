@@ -599,17 +599,15 @@ namespace Signum.TSGenerator
                 return "string";
 
             if (type.FullName == typeof(DateTime).FullName ||
-                type.FullName == "Signum.Utilities.Date"
-                )
-                return "string";
+                type.FullName == typeof(DateOnly).FullName ||
+                type.FullName == typeof(DateTimeOffset).FullName ||
+                type.FullName == typeof(TimeSpan).FullName ||
+                type.FullName == typeof(TimeOnly).FullName ||
+                type.FullName == typeof(Guid).FullName)
+                return "string /*" + type.Name + "*/";
 
-            if (type.FullName == typeof(DateTimeOffset).FullName)
-                return "string";
-
-            if (type.FullName == typeof(Guid).FullName ||
-                type.FullName == typeof(Byte[]).FullName ||
-                type.FullName == typeof(TimeSpan).FullName)
-                return "string";
+            if (type.FullName == typeof(Byte[]).FullName)
+                return "string /*Byte[]*/";
 
             if (type.IsGenericParameter)
                 return type.Name;

@@ -21,7 +21,7 @@ export type EntityAction =
   "New";
 
 export interface IUserAssetEntity extends Entities.Entity {
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
@@ -52,7 +52,7 @@ export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   text: string;
   action: EntityAction;
   overrideEntity: boolean;
-  guid: string;
+  guid: string /*Guid*/;
   customResolution: Entities.ModelEntity | null;
 }
 

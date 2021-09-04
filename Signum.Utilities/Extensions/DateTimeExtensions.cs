@@ -78,7 +78,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static int YearsTo(this Date start, Date end)
+        public static int YearsTo(this DateOnly start, DateOnly end)
         {
             int result = end.Year - start.Year;
             if (end < start.AddYears(result))
@@ -96,7 +96,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static int MonthsTo(this Date start, Date end)
+        public static int MonthsTo(this DateOnly start, DateOnly end)
         {
             int result = end.Month - start.Month + (end.Year - start.Year) * 12;
             if (end < start.AddMonths(result))
@@ -190,6 +190,17 @@ namespace Signum.Utilities
 
             return a.Value > b.Value ? a.Value : b.Value;
         }
+
+        public static DateTime ToDateTime(this DateOnly date)
+        {
+            return date.ToDateTime(new TimeOnly());
+        }
+
+        public static DateOnly ToDate(this DateTime dateTime)
+        {
+            return DateOnly.FromDateTime(dateTime);
+        }
+
 
         /// <param name="precision">Using Milliseconds does nothing, using Days use DateTime.Date</param>
         public static DateTime TrimTo(this DateTime dateTime, DateTimePrecision precision)
@@ -317,6 +328,11 @@ namespace Signum.Utilities
             return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
         }
 
+        public static string ToIsoString(this DateOnly dateOnly)
+        {
+            return dateOnly.ToString("yyyy-MM-dd");
+        }
+
         public static string ToAgoString(this DateTime dateTime)
         {
             return ToAgoString(dateTime, dateTime.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now);
@@ -355,9 +371,9 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
         }
 
-        public static Date YearStart(this Date date)
+        public static DateOnly YearStart(this DateOnly date)
         {
-            return new Date(date.Year, 1, 1);
+            return new DateOnly(date.Year, 1, 1);
         }
 
         public static DateTime QuarterStart(this DateTime dateTime)
@@ -367,11 +383,11 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, quarterMonthStart, 1, 0, 0, 0, dateTime.Kind);
         }
 
-        public static Date QuarterStart(this Date date)
+        public static DateOnly QuarterStart(this DateOnly date)
         {
             var quarterMonthStart = (((date.Month - 1) / 4) * 4) + 1;
 
-            return new Date(date.Year, quarterMonthStart, 1);
+            return new DateOnly(date.Year, quarterMonthStart, 1);
         }
 
         public static int Quarter(this DateTime dateTime)
@@ -379,7 +395,7 @@ namespace Signum.Utilities
             return ((dateTime.Month - 1) / 4) + 1;
         }
 
-        public static int Quarter(this Date date)
+        public static int Quarter(this DateOnly date)
         {
             return ((date.Month - 1) / 4) + 1;
         }
@@ -389,19 +405,21 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
         }
 
-        public static Date MonthStart(this Date date)
+        public static DateOnly MonthStart(this DateOnly date)
         {
-            return new Date(date.Year, date.Month, 1);
+            return new DateOnly(date.Year, date.Month, 1);
         }
 
         public static DateTime WeekStart(this DateTime dateTime) => dateTime.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
         public static DateTime WeekStart(this DateTime dateTime, DayOfWeek startOfWeek)
         {
-            return ((Date)dateTime).WeekStart(startOfWeek);
+            var date = dateTime.Date;
+            int diff = (7 + (date.DayOfWeek - startOfWeek)) % 7;
+            return date.AddDays(-diff);
         }
 
-        public static Date WeekStart(this Date date) => date.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
-        public static Date WeekStart(this Date date, DayOfWeek startOfWeek)
+        public static DateOnly WeekStart(this DateOnly date) => date.WeekStart(CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+        public static DateOnly WeekStart(this DateOnly date, DayOfWeek startOfWeek)
         {
             int diff = (7 + (date.DayOfWeek - startOfWeek)) % 7;
             return date.AddDays(-diff);
@@ -439,11 +457,11 @@ namespace Signum.Utilities
             return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
         }
 
-        public static int WeekNumber(this Date date)
+        public static int WeekNumber(this DateOnly date)
         {
             var cc = CultureInfo.CurrentCulture;
 
-            return cc.Calendar.GetWeekOfYear(date, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+            return cc.Calendar.GetWeekOfYear(date.ToDateTime(new TimeOnly()), cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
         }
 
         /// <summary>

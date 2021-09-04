@@ -55,7 +55,7 @@ namespace Signum.React.Facades
                 s.Converters.Add(new JsonStringEnumConverter());
                 s.Converters.Add(new ResultTableConverter());
                 s.Converters.Add(new TimeSpanConverter());
-                s.Converters.Add(new DateConverter());
+                s.Converters.Add(new DateOnlyConverter());
 
             });
 

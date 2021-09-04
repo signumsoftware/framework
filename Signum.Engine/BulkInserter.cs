@@ -190,7 +190,7 @@ namespace Signum.Engine
         private static Type ConvertType(Type type)
         {
             var result = type.UnNullify();
-            if (result == typeof(Date))
+            if (result == typeof(DateOnly))
                 return typeof(DateTime);
 
             return result;

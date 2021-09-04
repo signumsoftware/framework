@@ -182,7 +182,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   parameters: Entities.MList<ChartParameterEmbedded>;
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module UserChartOperation {

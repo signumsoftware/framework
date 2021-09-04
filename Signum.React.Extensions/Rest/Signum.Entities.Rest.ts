@@ -32,9 +32,9 @@ export interface RestLogEntity extends Entities.Entity {
   Type: "RestLog";
   httpMethod: string | null;
   url: string;
-  startDate: string;
-  endDate: string;
-  replayDate: string | null;
+  startDate: string /*DateTime*/;
+  endDate: string /*DateTime*/;
+  replayDate: string /*DateTime*/ | null;
   requestBody: string | null;
   queryString: Entities.MList<QueryStringValueEmbedded>;
   user: Entities.Lite<Basics.IUserEntity> | null;

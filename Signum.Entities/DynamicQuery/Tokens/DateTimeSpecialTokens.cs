@@ -24,16 +24,16 @@ namespace Signum.Entities.DynamicQuery
         private static MethodInfo GetMethodInfoDateTime(QueryTokenMessage name)
         {
             return
-                name == QueryTokenMessage.MonthStart ? miMonthStart :
-                name == QueryTokenMessage.QuarterStart ? miQuarterStart :
-                name == QueryTokenMessage.WeekStart ? miWeekStart :
-                name == QueryTokenMessage.HourStart ? miHourStart :
-                name == QueryTokenMessage.MinuteStart ? miMinuteStart :
-                name == QueryTokenMessage.SecondStart ? miSecondStart :
+                name == QueryTokenMessage.MonthStart ? miDTMonthStart :
+                name == QueryTokenMessage.QuarterStart ? miDTQuarterStart :
+                name == QueryTokenMessage.WeekStart ? miDTWeekStart :
+                name == QueryTokenMessage.HourStart ? miDTHourStart :
+                name == QueryTokenMessage.MinuteStart ? miDTMinuteStart :
+                name == QueryTokenMessage.SecondStart ? miDTSecondStart :
                 throw new InvalidOperationException("Unexpected name");
         }
 
-        private static MethodInfo GetMethodInfoDate(QueryTokenMessage name)
+        private static MethodInfo GetMethodInfoDateOnly(QueryTokenMessage name)
         {
             return
                 name == QueryTokenMessage.MonthStart ? miDMonthStart :
@@ -41,6 +41,25 @@ namespace Signum.Entities.DynamicQuery
                 name == QueryTokenMessage.WeekStart ? miDWeekStart :
                 throw new InvalidOperationException("Unexpected name");
         }
+
+        private static MethodInfo GetMethodInfoTimeSpan(QueryTokenMessage name)
+        {
+            return
+               name == QueryTokenMessage.HourStart ? miTSHourStart :
+                name == QueryTokenMessage.MinuteStart ? miTSMinuteStart :
+                name == QueryTokenMessage.SecondStart ? miTSSecondStart :
+                throw new InvalidOperationException("Unexpected name");
+        }
+
+        private static MethodInfo GetMethodInfoTimeOnly(QueryTokenMessage name)
+        {
+            return
+               name == QueryTokenMessage.HourStart ? miTOHourStart :
+                name == QueryTokenMessage.MinuteStart ? miTOMinuteStart :
+                name == QueryTokenMessage.SecondStart ? miTOSecondStart :
+                throw new InvalidOperationException("Unexpected name");
+        }
+
 
         public override string ToString()
         {
@@ -87,23 +106,37 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        public static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
-        public static MethodInfo miQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(DateTime.MinValue));
-        public static MethodInfo miWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateTime.MinValue));
-        public static MethodInfo miHourStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.HourStart(DateTime.MinValue));
-        public static MethodInfo miMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));
-        public static MethodInfo miSecondStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.SecondStart(DateTime.MinValue));
+        public static MethodInfo miDTMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+        public static MethodInfo miDTQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(DateTime.MinValue));
+        public static MethodInfo miDTWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateTime.MinValue));
+        public static MethodInfo miDTHourStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.HourStart(DateTime.MinValue));
+        public static MethodInfo miDTMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));
+        public static MethodInfo miDTSecondStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.SecondStart(DateTime.MinValue));
 
-        public static MethodInfo miDMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(Date.MinValue));
-        public static MethodInfo miDQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(Date.MinValue));
-        public static MethodInfo miDWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(Date.MinValue));
+        public static MethodInfo miDMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateOnly.MinValue));
+        public static MethodInfo miDQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(DateOnly.MinValue));
+        public static MethodInfo miDWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateOnly.MinValue));
+
+        public static MethodInfo miTSHourStart = ReflectionTools.GetMethodInfo(() => TimeSpanExtensions.TrimToHours(TimeSpan.Zero));
+        public static MethodInfo miTSMinuteStart = ReflectionTools.GetMethodInfo(() => TimeSpanExtensions.TrimToMinutes(TimeSpan.Zero));
+        public static MethodInfo miTSSecondStart = ReflectionTools.GetMethodInfo(() => TimeSpanExtensions.TrimToSeconds(TimeSpan.Zero));
+
+        public static MethodInfo miTOHourStart = ReflectionTools.GetMethodInfo(() => TimeOnlyExtensions.TrimToHours(TimeOnly.MinValue));
+        public static MethodInfo miTOMinuteStart = ReflectionTools.GetMethodInfo(() => TimeOnlyExtensions.TrimToMinutes(TimeOnly.MinValue));
+        public static MethodInfo miTOSecondStart = ReflectionTools.GetMethodInfo(() => TimeOnlyExtensions.TrimToSeconds(TimeOnly.MinValue));
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = parent.BuildExpression(context);
-            var mi = parent.Type.UnNullify() == typeof(Date) ? 
-                    GetMethodInfoDate(this.Name) :
-                    GetMethodInfoDateTime(this.Name);
+
+            var ut = parent.Type.UnNullify();
+
+            var mi = 
+                ut == typeof(DateTime) ? GetMethodInfoDateTime(this.Name) :
+                ut == typeof(DateOnly) ? GetMethodInfoDateOnly(this.Name) :
+                ut == typeof(TimeOnly) ? GetMethodInfoTimeOnly(this.Name) :
+                ut == typeof(TimeSpan) ? GetMethodInfoTimeSpan(this.Name) :
+                 throw new UnexpectedValueException(ut);
 
             return Expression.Call(mi, exp.UnNullify()).Nullify();
         }

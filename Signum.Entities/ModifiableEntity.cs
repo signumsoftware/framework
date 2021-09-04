@@ -19,14 +19,14 @@ using System.Diagnostics;
 namespace Signum.Entities
 {
 
-    public interface IModifiableEntity : INotifyPropertyChanged, IDataErrorInfo
+    public interface IModifiableEntity : INotifyPropertyChanged
     {
 
     }
 
 
     [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
-    public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable
+    public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable, IDataErrorInfo
     {
         static Func<bool>? isRetrievingFunc = null;
         static public bool IsRetrieving
@@ -300,6 +300,8 @@ namespace Signum.Entities
             get { return IntegrityCheck()?.Errors.Values.ToString("\r\n"); }
         }
 
+        
+
         public IntegrityCheck? IntegrityCheck()
         {
             using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
@@ -327,16 +329,19 @@ namespace Signum.Entities
             }
         }
 
+
+        string IDataErrorInfo.Error => this.Error ?? "";
+
         //override for per-property checks
         [HiddenProperty]
-        string? IDataErrorInfo.this[string columnName]
+        string IDataErrorInfo.this[string columnName]
         {
             get
             {
                 if (columnName == null)
                     return ((IDataErrorInfo)this).Error;
                 else
-                    return PropertyCheck(columnName);
+                    return PropertyCheck(columnName) ?? "";
             }
         }
 

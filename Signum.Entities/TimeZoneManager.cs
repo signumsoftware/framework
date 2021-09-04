@@ -49,7 +49,12 @@ namespace Signum.Entities
             }
         }
 
-        public static Date Today => (Date)Now.Date;
+        public static DateOnly Today => Now.ToDate();
+
+        public static DateTime ToDateTimeAutoUTC(this DateOnly date)
+        {
+            return date.ToDateTime(new TimeOnly(), Mode == TimeZoneMode.Local ? DateTimeKind.Local : DateTimeKind.Utc);
+        }
 
         public static DateTime ToUserInterface(this DateTime dbDateTime)
         {

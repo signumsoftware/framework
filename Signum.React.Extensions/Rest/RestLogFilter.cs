@@ -36,7 +36,7 @@ namespace Signum.React.RestLog
                 context.HttpContext.Items[OriginalResponseStreamKey] = context.HttpContext.Response.Body;
                 context.HttpContext.Response.Body = new MemoryStream();
 
-                var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>();
+                var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
                 var queryParams = context.HttpContext.Request.Query
                      .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })

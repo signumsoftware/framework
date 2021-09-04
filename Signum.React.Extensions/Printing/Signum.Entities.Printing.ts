@@ -13,11 +13,11 @@ import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 export const PrintLineEntity = new Type<PrintLineEntity>("PrintLine");
 export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
   Type: "PrintLine";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   testFileType: Files.FileTypeSymbol | null;
   file: Files.FilePathEmbedded;
   package: Entities.Lite<PrintPackageEntity> | null;
-  printedOn: string | null;
+  printedOn: string /*DateTime*/ | null;
   referred: Entities.Lite<Entities.Entity> | null;
   state: PrintLineState;
 }

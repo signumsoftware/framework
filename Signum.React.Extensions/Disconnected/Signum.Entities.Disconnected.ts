@@ -16,7 +16,7 @@ export interface DisconnectedCreatedMixin extends Entities.MixinEntity {
 export const DisconnectedExportEntity = new Type<DisconnectedExportEntity>("DisconnectedExport");
 export interface DisconnectedExportEntity extends Entities.Entity {
   Type: "DisconnectedExport";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   machine: Entities.Lite<DisconnectedMachineEntity>;
   lock: number | null;
   createDatabase: number | null;
@@ -49,7 +49,7 @@ export interface DisconnectedExportTableEmbedded extends Entities.EmbeddedEntity
 export const DisconnectedImportEntity = new Type<DisconnectedImportEntity>("DisconnectedImport");
 export interface DisconnectedImportEntity extends Entities.Entity {
   Type: "DisconnectedImport";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   machine: Entities.Lite<DisconnectedMachineEntity> | null;
   restoreDatabase: number | null;
   synchronizeSchema: number | null;
@@ -83,7 +83,7 @@ export interface DisconnectedImportTableEmbedded extends Entities.EmbeddedEntity
 export const DisconnectedMachineEntity = new Type<DisconnectedMachineEntity>("DisconnectedMachine");
 export interface DisconnectedMachineEntity extends Entities.Entity {
   Type: "DisconnectedMachine";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   machineName: string;
   state: DisconnectedMachineState;
   seedMin: number;

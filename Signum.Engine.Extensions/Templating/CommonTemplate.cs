@@ -225,7 +225,7 @@ namespace Signum.Engine.Templating
         }
     }
 
-    public class SynchronizationContext
+    public class TemplateSynchronizationContext
     {
         public ScopedDictionary<string, ValueProviderBase> Variables;
         public Type? ModelType;
@@ -235,7 +235,7 @@ namespace Signum.Engine.Templating
 
         public bool HasChanges;
 
-        public SynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription queryDescription, Type? modelType)
+        public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription queryDescription, Type? modelType)
         {
             Variables = new ScopedDictionary<string, ValueProviderBase>(null);
             ModelType = modelType;

@@ -18,9 +18,9 @@ export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
   Type: "Alert";
   target: Entities.Lite<Entities.Entity> | null;
-  creationDate: string;
-  alertDate: string | null;
-  attendedDate: string | null;
+  creationDate: string /*DateTime*/;
+  alertDate: string /*DateTime*/ | null;
+  attendedDate: string /*DateTime*/ | null;
   titleField: string | null;
   textField: string | null;
   textFromAlertType: string | null;

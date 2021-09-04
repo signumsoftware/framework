@@ -86,8 +86,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void DateParameters()
         {
-            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == DateTime.Today).ToList();
-            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == Date.Today).ToList();
+            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == DateTime.Today.ToDate()).ToList();
         }
 
         [Fact]
@@ -216,7 +215,7 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
 
-            Dump((NoteWithDateEntity n) => (n.CreationDate - n.CreationDate).TotalDays.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationDate.DayNumber - n.CreationDate.DayNumber).InSql());
         }
 
         [Fact]

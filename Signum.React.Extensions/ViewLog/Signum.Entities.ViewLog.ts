@@ -13,8 +13,8 @@ export interface ViewLogEntity extends Entities.Entity {
   target: Entities.Lite<Entities.Entity>;
   user: Entities.Lite<Basics.IUserEntity>;
   viewAction: string;
-  startDate: string;
-  endDate: string;
+  startDate: string /*DateTime*/;
+  endDate: string /*DateTime*/;
   data: Basics.BigStringEmbedded;
 }
 

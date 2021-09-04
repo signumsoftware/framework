@@ -10,9 +10,9 @@ namespace Signum.Entities.Calendar
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CalendarDayEntity : Entity
     {
-        public Date Date { get; set; }
+        public DateOnly Date { get; set; }
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Date.ToShortString());
+        public override string ToString() => As.Expression(() => Date.ToShortDateString());
     }
 }

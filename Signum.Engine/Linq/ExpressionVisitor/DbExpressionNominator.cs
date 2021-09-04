@@ -394,7 +394,7 @@ namespace Signum.Engine.Linq
 
             var obj = Visit(m.Object!);
 
-            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(Date)))
+            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(DateOnly)))
                 format = DateTimeExtensions.ToCustomFormatString(format, culture);
 
             if (isPostgres)
@@ -523,7 +523,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        static int DaysBetween(Date a, Date b) => (a - b).Days;
+        static int DaysBetween(DateOnly a, DateOnly b) => a.DayNumber - b.DayNumber;
 
         private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression leftSide, Expression rightSide)
         {
@@ -537,8 +537,8 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
-                if (sqlEnums == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
-                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(Date.Today, Date.Today))), typeof(double)));
+                if (sqlEnums == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
+                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
 
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {

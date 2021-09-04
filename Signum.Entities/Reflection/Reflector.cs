@@ -442,7 +442,7 @@ namespace Signum.Entities.Reflection
             if (type.IsEnum)
                 return null;
 
-            if (type == typeof(Date))
+            if (type == typeof(DateOnly))
                 return "d";
 
             switch (Type.GetTypeCode(type))
