@@ -41,7 +41,7 @@ namespace Signum.Upgrade.Upgrades
                 file.Replace(@"/Extensions/", @"/Framework/");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =>
+            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =
             {
                 file.Replace(@"""Extensions/", @"""Framework/");
             });
@@ -51,7 +51,7 @@ namespace Signum.Upgrade.Upgrades
                 file.RemoveAllLines(a => a.Contains("extensions", StringComparison.InvariantCultureIgnoreCase));
             });
 
-            uctx.ChangeCodeFile(@"*.ts, *.tsx", file =>
+            uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
             {
                 file.Replace(@"../../../../Extensions/Signum.React.Extensions/", @"@extensions/");
                 file.Replace(@"../../../Extensions/Signum.React.Extensions/", @"@extensions/");
