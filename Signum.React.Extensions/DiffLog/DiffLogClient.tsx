@@ -20,7 +20,7 @@ import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineModal } from './Templates/TimeMachinePage';
-import { QueryString } from '../../../Framework/Signum.React/Scripts/QueryString';
+import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));

@@ -12,7 +12,7 @@ import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
 import { decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
-import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
+import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
 export default function TranslationCodeView(p: RouteComponentProps<{ culture: string; assembly: string }>) {

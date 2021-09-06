@@ -8,7 +8,7 @@ import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.
 import * as ExcelClient from './ExcelClient'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
+import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode } from '@framework/FindOptions'
 
 export interface ExcelMenuProps {
