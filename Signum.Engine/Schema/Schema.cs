@@ -23,6 +23,8 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
+        public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+
         Version? version;
         public Version Version
         {

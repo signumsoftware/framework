@@ -129,6 +129,16 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
+        public void DateTimeFunctionsConvert()
+        {
+            Dump((NoteWithDateEntity n) => n.CreationTime.ToDate());
+            Dump((NoteWithDateEntity n) => DateOnly.FromDateTime(n.CreationTime));
+
+            Dump((NoteWithDateEntity n) => n.CreationDate.ToDateTime());
+            Dump((NoteWithDateEntity n) => n.CreationDate.ToDateTime(TimeOnly.MaxValue));
+        }
+
+        [Fact]
         public void DayOfWeekWhere()
         {
             var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();

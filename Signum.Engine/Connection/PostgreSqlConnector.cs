@@ -539,7 +539,7 @@ END; $$;");
             Expression valueExpr = Expression.Convert(
               !dbType.IsDate() ? value :
               value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-              value.Type.UnNullify() == typeof(DateOnly) ? Expression.Convert(Expression.Convert(value, typeof(DateOnly?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
+              value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly?)), Expression.Constant(Schema.Current.DateTimeKind)) :
               value,
               typeof(object));
 

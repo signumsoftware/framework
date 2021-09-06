@@ -196,9 +196,44 @@ namespace Signum.Utilities
             return date.ToDateTime(new TimeOnly());
         }
 
+        public static DateTime? ToDateTime(this DateOnly? date)
+        {
+            return date == null ? null: date.Value.ToDateTime(new TimeOnly());
+        }
+
+        public static DateTime ToDateTime(this DateOnly date, DateTimeKind kind)
+        {
+            return date.ToDateTime(new TimeOnly(), kind);
+        }
+
+        public static DateTime? ToDateTime(this DateOnly? date, DateTimeKind kind)
+        {
+            return date == null ? null : date.Value.ToDateTime(new TimeOnly(), kind);
+        }
+
+        public static TimeSpan? ToTimeSpan(this TimeOnly? time)
+        {
+            return time == null ? null : time.Value.ToTimeSpan();
+        }
+
+        public static TimeOnly ToTimeOnly(this TimeSpan time)
+        {
+            return TimeOnly.FromTimeSpan(time);
+        }
+
+        public static TimeOnly? ToTimeOnly(this TimeSpan? time)
+        {
+            return time == null ? null : TimeOnly.FromTimeSpan(time.Value);
+        }
+
         public static DateOnly ToDate(this DateTime dateTime)
         {
             return DateOnly.FromDateTime(dateTime);
+        }
+
+        public static DateOnly? ToDate(this DateTime? dateTime)
+        {
+            return dateTime == null ? null : DateOnly.FromDateTime(dateTime.Value);
         }
 
 

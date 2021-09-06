@@ -184,6 +184,8 @@ namespace Signum.Engine
         public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value);
 
         protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
+        protected static MethodInfo miToDateTimeKind = ReflectionTools.GetMethodInfo(() => DateOnly.MinValue.ToDateTime(DateTimeKind.Utc));
+        protected static MethodInfo miToTimeSpan = ReflectionTools.GetMethodInfo(() => TimeOnly.MaxValue.ToTimeSpan());
         protected static DateTime? AssertDateTime(DateTime? dateTime)
         {
 
