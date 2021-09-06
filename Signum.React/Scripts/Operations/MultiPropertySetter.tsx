@@ -368,7 +368,7 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
     if (tis[0].kind == "Enum") {
       const ti = tis.single()!;
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} comboBoxItems={members} onChange={handleValueChange} />;
+      return <ValueLine ctx={ctx} optionItems={members} onChange={handleValueChange} />;
     }
 
     if (tr.name == IsByAll || tis.some(ti => !ti!.isLowPopulation))

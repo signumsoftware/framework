@@ -60,7 +60,7 @@ export default function WorkflowEventModelComponent(p: WorkflowEventModelCompone
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(we => we.name)} />
-      <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} comboBoxItems={getTypeComboItems()} onChange={loadTask} />
+      <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} optionItems={getTypeComboItems()} onChange={loadTask} />
       {ctx.value.task && <WorkflowEventTask ctx={ctx.subCtx(a => a.task!)} mainEntityType={ctx.value.mainEntityType} isConditional={isConditional()} />}
       {ctx.value.timer && <WorkflowTimer ctx={ctx.subCtx(a => a.timer!)} mainEntityType={ctx.value.mainEntityType}/>}
     </div>
