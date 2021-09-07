@@ -192,7 +192,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     vl.valueHtmlAttributes = { onBlur: onRedraw };
   }
   else if (scriptParameter.type == "Enum") {
-    vl.valueLineType = "ComboBox";
+    vl.valueLineType = "DropDownList";
     vl.type = { name: "string", isNotNullable: true };
 
     const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
@@ -204,7 +204,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
       resetValue = compatible.firstOrNull()?.name;
     }
 
-    vl.comboBoxItems = compatible.map(ev => ({
+    vl.optionItems = compatible.map(ev => ({
       value: ev.name,
       label: ev.name
     } as OptionItem));

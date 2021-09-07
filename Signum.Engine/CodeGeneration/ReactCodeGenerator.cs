@@ -140,7 +140,7 @@ namespace Signum.Engine.CodeGeneration
             {
                 var typesToShow = types.Keys.OrderBy(a => types[a]).ThenBy(a => a.FullName).ToList();
 
-                var selectedTypes = new ConsoleSwitch<int, Type>("Chose types for a new Logic module:")
+                var selectedTypes = new ConsoleSwitch<int, Type>("Chose types for a new React module:")
                     .Load(typesToShow, t => (types[t] ? "-" : " ") + t.FullName)
                     .ChooseMultiple();
 

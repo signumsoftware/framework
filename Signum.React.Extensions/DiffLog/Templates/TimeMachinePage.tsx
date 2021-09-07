@@ -20,7 +20,7 @@ import * as DiffLogClient from '../DiffLogClient'
 import { DiffDocument } from './DiffDocument'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { IModalProps, openModal } from '../../../../Framework/Signum.React/Scripts/Modals'
+import { IModalProps, openModal } from '@framework/Modals'
 
 export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
 

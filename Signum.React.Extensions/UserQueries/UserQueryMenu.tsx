@@ -18,7 +18,7 @@ import { FilterOption, FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
-import { KeyCodes } from '../../../Framework/Signum.React/Scripts/Components'
+import { KeyCodes } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
 

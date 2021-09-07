@@ -53,7 +53,7 @@ import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
-import { OperationMenuItem } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations';
+import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 

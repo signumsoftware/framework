@@ -844,14 +844,14 @@ ZONE".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
         {
             if (isPostgres)
             {
-                if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ/\\. -]"))
+                if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
                     return "\"" + ident + "\"";
 
                 return ident;
             }
             else
             {
-                if (KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ/\\. -]"))
+                if (KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
                     return "[" + ident + "]";
 
                 return ident;
