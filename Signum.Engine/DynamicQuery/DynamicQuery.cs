@@ -890,7 +890,7 @@ namespace Signum.Engine.DynamicQuery
 
         private static HashSet<QueryToken> GetRootKeyTokens(HashSet<QueryToken> keyTokens)
         {
-            return keyTokens.Where(t => !keyTokens.Any(t2 => t.FullKey().StartsWith(t2.FullKey() + "."))).ToHashSet();
+            return keyTokens.Where(t => !keyTokens.Any(t2 => t2.Dominates(t))).ToHashSet();
         }
 
 
