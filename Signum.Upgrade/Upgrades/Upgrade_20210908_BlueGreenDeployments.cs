@@ -53,7 +53,7 @@ Write-Host
 
 Write-Host '# SWAP slots' $slotName '<-> production' -ForegroundColor Magenta
 az webapp deployment slot swap --resource-group $resourceGroup --name bg365-officecontrol --slot $slotName
-.\Framework\Utils\CheckUrl.exe dead $url
+.\Framework\Utils\CheckUrl.exe alive $url
 Write-Host
 
 Write-Host '# STOP slot' $slotName -ForegroundColor DarkRed
