@@ -138,12 +138,12 @@ namespace Signum.Upgrade
             this.Content = newContent;
         }
 
-        public void Replace(Regex regex, Expression<MatchEvaluator> evaluator)
+        public void Replace(Regex regex, MatchEvaluator evaluator)
         {
-            var newContent = regex.Replace(this.Content, evaluator.Compile());
+            var newContent = regex.Replace(this.Content, evaluator);
 
             if (newContent == this.Content)
-                Warning($"Unable to match {regex} to replace it by {evaluator}");
+                Warning($"Unable to match {regex} to replace it");
 
             this.Content = newContent;
         }
