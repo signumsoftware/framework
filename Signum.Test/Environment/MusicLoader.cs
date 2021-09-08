@@ -55,7 +55,7 @@ namespace Signum.Test.Environment
 
             smashingPumpkins.Execute(BandOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), CreationDate = DateTime.Now.AddHours(+8).ToDate(), Text = "American alternative rock band", Target = smashingPumpkins }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(), Text = "American alternative rock band", Target = smashingPumpkins }
                 .Execute(NoteWithDateOperation.Save);
 
             LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
@@ -85,7 +85,7 @@ namespace Signum.Test.Environment
                 Label = virgin
             }.Execute(AlbumOperation.Save);
 
-            new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDate(), Text = "The blue one with the angel", Target = mellon }
+            new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
             LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }

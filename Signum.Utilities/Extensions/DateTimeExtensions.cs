@@ -226,12 +226,12 @@ namespace Signum.Utilities
             return time == null ? null : TimeOnly.FromTimeSpan(time.Value);
         }
 
-        public static DateOnly ToDate(this DateTime dateTime)
+        public static DateOnly ToDateOnly(this DateTime dateTime)
         {
             return DateOnly.FromDateTime(dateTime);
         }
 
-        public static DateOnly? ToDate(this DateTime? dateTime)
+        public static DateOnly? ToDateOnly(this DateTime? dateTime)
         {
             return dateTime == null ? null : DateOnly.FromDateTime(dateTime.Value);
         }

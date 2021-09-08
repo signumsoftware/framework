@@ -49,7 +49,7 @@ namespace Signum.Entities
             }
         }
 
-        public static DateOnly Today => Now.ToDate();
+        public static DateOnly Today => Now.ToDateOnly();
 
         public static DateTime ToDateTimeAutoUTC(this DateOnly date)
         {

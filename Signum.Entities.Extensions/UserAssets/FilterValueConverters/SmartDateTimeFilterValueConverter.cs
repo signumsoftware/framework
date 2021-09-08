@@ -271,7 +271,7 @@ namespace Signum.Entities.UserAssets
                 return new Result<object?>.Error(e.ErrorText);
 
             if (res is Result<SmartDateTimeSpan>.Success s)
-                return new Result<object?>.Success(type.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDate() : (object)s.Value.ToDateTime());
+                return new Result<object?>.Success(type.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDateOnly() : (object)s.Value.ToDateTime());
 
             throw new UnexpectedValueException(res);
         }

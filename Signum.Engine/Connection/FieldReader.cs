@@ -490,13 +490,13 @@ namespace Signum.Engine
             switch (typeCodes[ordinal])
             {
                 case TypeCode.DateTime:
-                    dt = reader.GetDateTime(ordinal).ToDate();
+                    dt = reader.GetDateTime(ordinal).ToDateOnly();
                     break;
                 case FieldReader.tcNpgsqlDate:
-                    dt = ((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)).ToDate();
+                    dt = ((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)).ToDateOnly();
                     break;
                 default:
-                    dt = ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)).ToDate();
+                    dt = ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)).ToDateOnly();
                     break;
             }
 
