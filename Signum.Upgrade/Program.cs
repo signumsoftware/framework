@@ -60,6 +60,9 @@ namespace Signum.Upgrade
                 new Upgrade_20210824_UpdateNugets(),
                 new Upgrade_20210828_ExtensionsLoveFramework(),
                 new Upgrade_20210829_TypeScript44(),
+                new Upgrade_2021xxxx_SimplifyNamespaces(),
+                new Upgrade_2021xxxx_SimplifyNamespaces(),
+                new Upgrade_2021xxxx_GLobalUsings(),
             }.Run(uctx);
         }
     }
