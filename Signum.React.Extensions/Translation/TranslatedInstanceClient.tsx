@@ -10,10 +10,10 @@ import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
 import * as CultureClient from './CultureClient'
 import { DiffBlock } from '../DiffLog/DiffLogClient';
 import { AutomaticTranslation } from './TranslationClient';
-import { Binding, tasks } from '../../../Framework/Signum.React/Scripts/Lines';
-import { LineBaseController, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase';
-import { ValueLineController, ValueLineProps } from '../../../Framework/Signum.React/Scripts/Lines/ValueLine';
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals';
+import { Binding, tasks } from '@framework/Lines';
+import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
+import { ValueLineController, ValueLineProps } from '@framework/Lines/ValueLine';
+import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
 

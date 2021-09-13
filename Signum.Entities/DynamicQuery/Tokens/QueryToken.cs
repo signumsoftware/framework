@@ -468,6 +468,20 @@ namespace Signum.Entities.DynamicQuery
         {
             return this.Key == key || this.Parent != null && this.Parent.ContainsKey(key);
         }
+
+        internal bool Dominates(QueryToken t)
+        {
+            if (t is CollectionAnyAllToken)
+                return false;
+
+            if (t is CollectionElementToken)
+                return false;
+
+            if (t.Parent == null)
+                return false;
+
+            return t.Parent.Equals(this) || this.Dominates(t.Parent);
+        }
     }
 
     public class BuildExpressionContext

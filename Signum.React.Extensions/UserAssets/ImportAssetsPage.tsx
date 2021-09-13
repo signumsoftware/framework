@@ -8,8 +8,8 @@ import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction } from './Signum.Entities.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
-import { EntityLine } from '../../../Framework/Signum.React/Scripts/Lines'
-import { EntityLink } from '../../../Framework/Signum.React/Scripts/Search'
+import { EntityLine } from '@framework/Lines'
+import { EntityLink } from '@framework/Search'
 
 interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 

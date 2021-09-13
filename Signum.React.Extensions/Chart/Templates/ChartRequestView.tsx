@@ -22,8 +22,8 @@ import "@framework/SearchControl/Search.css"
 import "../Chart.css"
 import { ChartScript } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { AutoFocus } from '../../../../Framework/Signum.React/Scripts/Components/AutoFocus';
-import PinnedFilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/PinnedFilterBuilder';
+import { AutoFocus } from '@framework/Components/AutoFocus';
+import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 
 
 interface ChartRequestViewProps {

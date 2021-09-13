@@ -293,23 +293,26 @@ namespace Signum.Engine.Alerts
             return CreateAlert(entity.ToLiteFat(), alertType, text, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;
 
-            var result = new AlertEntity
+            using (AuthLogic.Disable())
             {
-                AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
-                TitleField = title,
-                TextField = text,
-                Target = (Lite<Entity>)entity,
-                AlertType = alertType,
-                Recipient = recipient
-            };
+                var result = new AlertEntity
+                {
+                    AlertDate = alertDate ?? TimeZoneManager.Now,
+                    CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
+                    TitleField = title,
+                    TextField = text,
+                    Target = (Lite<Entity>)entity,
+                    AlertType = alertType,
+                    Recipient = recipient
+                };
 
-            return result.Execute(AlertOperation.Save);
+                return result.Execute(AlertOperation.Save);
+            }
         }
 
         public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
@@ -317,7 +320,7 @@ namespace Signum.Engine.Alerts
             return CreateAlertForceNew(entity.ToLite(), alertType, text, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;

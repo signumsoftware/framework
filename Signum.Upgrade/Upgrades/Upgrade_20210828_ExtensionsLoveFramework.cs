@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Signum.Upgrade.Upgrades
@@ -49,7 +50,20 @@ namespace Signum.Upgrade.Upgrades
             {
                 file.RemoveAllLines(a => a.Contains("extensions", StringComparison.InvariantCultureIgnoreCase));
             });
-            
+
+            uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
+            {
+                file.Replace(@"../../../../Extensions/Signum.React.Extensions/", @"@extensions/");
+                file.Replace(@"../../../Extensions/Signum.React.Extensions/", @"@extensions/");
+                file.Replace(@"../../Extensions/Signum.React.Extensions/", @"@extensions/");
+
+                file.Replace(@"../../../../Framework/Signum.React/Scripts/", @"@framework/");
+                file.Replace(@"../../../Framework/Signum.React/Scripts/", @"@framework/");
+                file.Replace(@"../../Framework/Signum.React/Scripts/", @"@framework/");
+
+                
+            });
+
             if (SafeConsole.Ask("Do you want to delete 'Extensions' folder with all his content?"))
             {
                 Directory.Delete(Path.Combine(uctx.RootFolder, "Extensions"), true);

@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import "../Translation.css"
 import { decodeDots, encodeDots } from './TranslationCodeStatus'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
-import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
+import { useTitle } from '@framework/AppContext'
 
 export default function TranslationCodeSync(p: RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }>) {
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
