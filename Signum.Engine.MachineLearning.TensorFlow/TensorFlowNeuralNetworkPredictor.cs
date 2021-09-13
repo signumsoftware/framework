@@ -209,7 +209,7 @@ namespace Signum.Engine.MachineLearning.TensorFlow
                 }
             }
 
-            var best = candidate.WithMin(a => a.ResultValidation.Loss!.Value);
+            var best = candidate.WithMin(a => a.ResultValidation.Loss!.Value)!;
 
             p.ResultTraining = best.ResultTraining;
             p.ResultValidation = best.ResultValidation;
