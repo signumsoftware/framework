@@ -423,6 +423,8 @@ function internalComboBoxText(vl: ValueLineController) {
         <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
           textField="label"
+          focusFirstItem
+          autoSelectMatches
           renderListItem={renderItem}
         />)
       }
