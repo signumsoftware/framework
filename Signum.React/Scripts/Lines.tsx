@@ -75,7 +75,7 @@ export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBasePr
   if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
-    if (!vProps.unitText &&
+    if (vProps.unitText === undefined &&
       state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
       vProps.unitText = state.ctx.propertyRoute.member!.unit;
