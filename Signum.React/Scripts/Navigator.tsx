@@ -35,9 +35,6 @@ export function start(options: { routes: JSX.Element[] }) {
 
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
-  ErrorModalOptions.renderServiceMessage = se => <RenderServiceMessageDefault error={se} />;
-  ErrorModalOptions.renderValidationMessage = ve => <RenderValidationMessageDefault error={ve} />;
-  ErrorModalOptions.renderMessage = e => <RenderMessageDefault error={e} />;
 }
 
 export namespace NavigatorManager {

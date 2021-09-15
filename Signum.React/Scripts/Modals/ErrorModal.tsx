@@ -184,14 +184,14 @@ export namespace ErrorModalOptions {
   }
 
   export function renderServiceMessage(se: ServiceError): React.ReactNode {
-    return undefined;
+    return <RenderServiceMessageDefault error={se} />;
   }
 
   export function renderValidationMessage(ve: ValidationError): React.ReactNode {
-    return undefined;
+    return <RenderValidationMessageDefault error={ve} />;
   }
 
   export function renderMessage(e: any): React.ReactNode {
-    return undefined;
+    return <RenderMessageDefault error={e} />;
   }
 }
