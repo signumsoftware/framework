@@ -6,6 +6,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -328,4 +329,15 @@ export interface DragConfig {
   onDragOver?: React.DragEventHandler<any>;
   onDrop?: React.DragEventHandler<any>;
   dropClass?: string;
+}
+
+
+tasks.push(taskSetMove);
+export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
+    state.ctx.propertyRoute &&
+    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+    state.ctx.propertyRoute.member!.preserveOrder) {
+    (state as EntityListBaseProps).move = true;
+  }
 }

@@ -133,3 +133,39 @@ export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBa
 export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) {
   tasks.forEach(t => t(lineBase, state, originalProps));
 }
+
+tasks.push(taskSetNiceName);
+export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (!state.labelText &&
+    state.ctx.propertyRoute &&
+    state.ctx.propertyRoute.propertyRouteType == "Field") {
+    state.labelText = state.ctx.propertyRoute.member!.niceName;
+  }
+}
+
+tasks.push(taskSetReadOnlyProperty);
+export function taskSetReadOnlyProperty(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (!state.ctx.readOnly &&
+    state.ctx.propertyRoute &&
+    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+    state.ctx.propertyRoute.member!.isReadOnly) {
+    state.ctx.readOnly = true;
+  }
+}
+
+tasks.push(taskSetReadOnly);
+export function taskSetReadOnly(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (!state.ctx.readOnly &&
+    state.ctx.binding.getIsReadonly()) {
+    state.ctx.readOnly = true;
+  }
+}
+
+tasks.push(taskSetMandatory);
+export function taskSetMandatory(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (state.ctx.propertyRoute && state.mandatory == undefined &&
+    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+    state.ctx.propertyRoute.member!.required) {
+    state.mandatory = true;
+  }
+}
