@@ -22,6 +22,7 @@ export interface AlertEntity extends Entities.Entity {
   alertDate: string | null;
   attendedDate: string | null;
   titleField: string | null;
+  textArguments: string | null;
   textField: string | null;
   textFromAlertType: string | null;
   createdBy: Entities.Lite<Basics.IUserEntity> | null;

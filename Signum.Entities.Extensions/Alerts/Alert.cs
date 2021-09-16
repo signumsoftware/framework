@@ -29,9 +29,11 @@ namespace Signum.Entities.Alerts
         [StringLengthValidator(Max = 100)]
         public string? TitleField { get; set; }
 
-
         [AutoExpressionField]
         public string? Text => As.Expression(() => TextField); //Replaced in Logic
+
+        [StringLengthValidator(MultiLine = true)]
+        public string? TextArguments { get; set; }
 
         [StringLengthValidator(Min = 1, MultiLine = true)]
         public string? TextField { get; set; }
@@ -50,7 +52,6 @@ namespace Signum.Entities.Alerts
         public AlertState State { get; set; }
 
         public bool EmailNotificationsSent { get; set; }
-
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Title);

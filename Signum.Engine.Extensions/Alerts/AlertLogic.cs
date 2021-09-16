@@ -288,12 +288,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType, options ?? new AlertTypeOptions());
         }
 
-        public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlert(entity.ToLiteFat(), alertType, text, alertDate, createdBy, title, recipient);
+            return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;
@@ -305,6 +305,7 @@ namespace Signum.Engine.Alerts
                     AlertDate = alertDate ?? TimeZoneManager.Now,
                     CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
                     TitleField = title,
+                    TextArguments = textArguments?.ToString("\n###\n"),
                     TextField = text,
                     Target = (Lite<Entity>)entity,
                     AlertType = alertType,
@@ -315,19 +316,19 @@ namespace Signum.Engine.Alerts
             }
         }
 
-        public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlertForceNew(entity.ToLite(), alertType, text, alertDate, createdBy, title, recipient);
+            return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;
 
             using (Transaction tr = Transaction.ForceNew())
             {
-                var alert = entity.CreateAlert(alertType, text, alertDate, createdBy);
+                var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient);
 
                 return tr.Commit(alert);
             }
