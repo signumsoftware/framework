@@ -78,7 +78,7 @@ az webapp start --resource-group $resourceGroup --name $appName --slot $slotName
 Write-Host
 
 Write-Host '# SWAP slots' $slotName '<-> production' -ForegroundColor Magenta
-az webapp deployment slot swap --resource-group $resourceGroup --name bg365-officecontrol --slot $slotName
+az webapp deployment slot swap --resource-group $resourceGroup --name $appName --slot $slotName
 .\Framework\Utils\CheckUrl.exe alive $url
 Write-Host
 
