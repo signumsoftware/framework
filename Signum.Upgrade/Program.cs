@@ -61,6 +61,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210828_ExtensionsLoveFramework(),
                 new Upgrade_20210829_TypeScript44(),
                 new Upgrade_20210908_BlueGreenDeployments(),
+                new Upgrade_20210916_UpdateNugets(),
             }.Run(uctx);
         }
     }
