@@ -27,6 +27,32 @@ namespace Signum.Upgrade.Upgrades
                 file.InsertBeforeLastLine(a => a.Contains("LICENSE"), "**/appsettings.*.json");
             });
 
+            uctx.ChangeCodeFile(@"Southwind.React/App/Layout.tsx", file =>
+            {
+                file.ReplaceLine(a => a.Contains("<VersionInfo />"), "<VersionInfo extraInformation={(window as any).__serverName} />");
+            });
+
+            uctx.ChangeCodeFile(@"Southwind.React/appsettings.json", file =>
+            {
+                file.InsertAfterFirstLine(a => a.Contains("StartBackgroundProcesses"), @"""ServerName"": ""local"",");
+            });
+
+            uctx.ChangeCodeFile(@"Southwind.React/appsettings.live.json", file =>
+            {
+                file.InsertAfterFirstLine(a => a.Contains("StartBackgroundProcesses"), @"""ServerName"": ""live"",");
+            });
+
+            uctx.ChangeCodeFile(@"Southwind.React/Views/Home/Index.cshtml", file =>
+            {
+                file.InsertAfterLastLine(a => a.Contains("@using"), @"@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration");
+
+                if (file.Content.Contains("@Json.Serialize"))
+                    file.InsertBeforeFirstLine(a => a.Contains("@Json.Serialize"), @"var __serverName = @Json.Serialize(Configuration.GetValue<string>(""ServerName"", ""none""));");
+                else
+                    file.InsertBeforeFirstLine(a => a.Contains("</script>"), @"    var __serverName = @Json.Serialize(Configuration.GetValue<string>(""ServerName"", ""none""));");
+            });
+
             uctx.ChangeCodeFile(@"deployToAzure.ps1", file =>
             {
                 var regex = new Regex(@"az webapp restart ((--name (?<appName>[a-zA-Z\-0-9]+) *)|(--resource-group (?<resourceGroup>[a-zA-Z\-0-9]+) *))*");
