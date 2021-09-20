@@ -394,6 +394,8 @@ namespace Signum.Engine.UserAssets
             }
         }
 
+        public static void ImportAll(string filePath) => ImportAll(File.ReadAllBytes(filePath));
+
         public static void ImportAll(byte[] document)
         {
             Import(document, Preview(document));
