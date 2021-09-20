@@ -1,12 +1,14 @@
+using Signum.Entities;
+using Signum.Utilities;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Signum.Utilities
+namespace Signum.Engine.Operations
 {
     public static class ArgsExtensions
     {
@@ -38,13 +40,23 @@ namespace Signum.Utilities
             foreach (var obj in args)
             {
                 if (obj is T t)
-                    yield return t;
+                    if (obj is DateTime dt)
+                        yield return (T)(object)dt.FromUserInterface();
+                    else
+                        yield return t;
+
                 else if (obj is string s && typeof(T).IsEnum && Enum.IsDefined(typeof(T), s))
                     yield return (T)Enum.Parse(typeof(T), s);
                 else if (obj is IComparable && ReflectionTools.IsNumber(obj.GetType()) && ReflectionTools.IsNumber(typeof(T)))
                     yield return ReflectionTools.ChangeType<T>(obj);
                 else if (obj is IComparable && ReflectionTools.IsDate(obj.GetType()) && ReflectionTools.IsDate(typeof(T)))
-                    yield return ReflectionTools.ChangeType<T>(obj);
+                {
+                    var result = ReflectionTools.ChangeType<T>(obj);
+                    if (result is DateTime dt)
+                        result = (T)(object)dt.FromUserInterface();
+
+                    yield return result;
+                }
                 else if (obj is List<object> list)
                 {
                     var type = typeof(T).ElementType();
@@ -70,7 +82,7 @@ namespace Signum.Utilities
             }
         }
 
-   
+
 
         static readonly GenericInvoker<Func<List<object>, IList>> giConvertToList = new GenericInvoker<Func<List<object>, IList>>(list => ConvertToList<int>(list));
 
