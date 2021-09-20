@@ -261,8 +261,6 @@ namespace Signum.Entities.DynamicQuery
 
         public static List<QueryToken> TimeSpanProperties(QueryToken parent, DateTimePrecision precision)
         {
-            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
-
             return new List<QueryToken?>
             {
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Hours), () => QueryTokenMessage.Hour.NiceToString()),
