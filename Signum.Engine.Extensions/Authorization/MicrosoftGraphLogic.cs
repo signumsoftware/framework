@@ -64,8 +64,8 @@ namespace Signum.Engine.Authorization
                 return new List<Guid>();
 
             var tuple = ADGRoupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
-                addValueFactory: user => (DateTime.Now, CurrentADGroupsInternal(oid.Value)),
-                updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > DateTime.Now ? old : (DateTime.Now, CurrentADGroupsInternal(oid.Value)));
+                addValueFactory: user => (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)),
+                updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > TimeZoneManager.Now ? old : (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)));
 
             return tuple.groups;
         }

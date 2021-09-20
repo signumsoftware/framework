@@ -670,7 +670,7 @@ namespace Signum.Engine.Templating
         {
             try
             {
-                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false);
+                var obj = dateTimeExpression == null ? TimeZoneManager.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false);
                 this.dateTimeExpression = dateTimeExpression;
             }
             catch (Exception e)

@@ -171,7 +171,7 @@ namespace Signum.Engine.Workflow
                         foreach (var ca in currentActivities)
                         {
                             ca.DoneBy = UserEntity.Current.ToLite();
-                            ca.DoneDate = DateTime.Now;
+                            ca.DoneDate = TimeZoneManager.Now;
                             ca.DoneType = DoneType.Jump;
                             ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
                             ca.Save();
@@ -183,7 +183,7 @@ namespace Signum.Engine.Workflow
                             }
                         }
 
-                        c.FinishDate = DateTime.Now;
+                        c.FinishDate = TimeZoneManager.Now;
                         c.Save();
                     }
                 }.Register();
