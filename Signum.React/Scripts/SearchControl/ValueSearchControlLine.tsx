@@ -20,7 +20,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   findOptions?: FindOptions;
   valueToken?: string | QueryTokenString<any>;
   multipleValues?: { vertical?: boolean, showType?: boolean };
-  labelText?: React.ReactChild;
+  labelText?: React.ReactChild | (() => React.ReactChild);
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   unitText?: React.ReactChild;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
@@ -137,9 +137,13 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);
 
+    var labelText = this.props.labelText == undefined ? undefined :
+      typeof this.props.labelText == "function" ? this.props.labelText() :
+        this.props.labelText;
+
     return (
       <FormGroup ctx={this.props.ctx}
-        labelText={this.props.labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
+        labelText={labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
         htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
         helpText={this.props.helpText && this.valueSearchControl && this.props.helpText(this.valueSearchControl)}
