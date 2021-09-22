@@ -71,6 +71,7 @@
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
     <Member Name="Text" Description="Text" />
+    <Member Name="TextArguments" Description="Textargumente" />
     <Member Name="TextField" Description="Textfeld" />
     <Member Name="TextFromAlertType" Description="Text aus Benachrichtigungstyp" />
     <Member Name="Title" Description="Titel" />

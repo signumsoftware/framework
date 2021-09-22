@@ -271,10 +271,15 @@ namespace Signum.React.ApiControllers
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
-            
+
             var val = value is JsonElement jtok ?
                  jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
                  value;
+
+            if (val is DateTime dt)
+                val = dt.FromUserInterface();
+            else if (val is ObservableCollection<DateTime?> col)
+                val = col.Select(dt => dt?.FromUserInterface()).ToObservableCollection();
 
             return new FilterCondition(parsedToken, operation, val);
         }

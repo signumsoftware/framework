@@ -20,6 +20,8 @@ namespace Signum.Entities
         CreateFromRegex,
         [Description("State should be {0} (instead of {1})")]
         StateShouldBe0InsteadOf1,
+        [Description("The state of {0} should be {1} (instead of {2})")]
+        TheStateOf0ShouldBe1InsteadOf2,
         [Description("(in user interface)")]
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]

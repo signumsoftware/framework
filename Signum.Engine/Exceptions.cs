@@ -12,6 +12,8 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine
 {
@@ -92,7 +94,7 @@ namespace Signum.Engine
                                             return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
 
                                         if (f is FieldReference fr)
-                                            colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
+                                            return colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
 
                                         if (f is FieldImplementedBy ib)
                                         {
@@ -148,6 +150,48 @@ namespace Signum.Engine
                     Index.Columns.CommaAnd(c => c.Name),
                     HumanValues != null ? HumanValues.CommaAnd(a => a is string? $"'{a}'" : a == null ? "NULL" : a.ToString()) : 
                     Values);
+            }
+        }
+
+        public static void AssertNoOne<T>(IQueryable<T> query, Expression<Func<T, bool>> expression)
+            where T : Entity
+        {
+            if (query.Any(expression))
+            {
+
+                var param = expression.Parameters.SingleEx();
+
+                IEnumerable<(PropertyInfo pi, object? value)> PropPairs(Expression exp)
+                {
+                    return exp switch
+                    {
+                        BinaryExpression { NodeType: ExpressionType.And or ExpressionType.AndAlso } be => PropPairs(be.Left).Concat(PropPairs(be.Right)),
+
+                        BinaryExpression
+                        {
+                            NodeType: ExpressionType.Equal,
+                            Left: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
+                            Right: var other
+                        } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
+
+                        BinaryExpression
+                        {
+                            NodeType: ExpressionType.Equal,
+                            Left: var other,
+                            Right: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
+                        } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
+
+                        _ => throw new UnexpectedValueException(exp)
+                    };
+                }
+
+                var pairs = PropPairs(expression.Body);
+
+                throw new InvalidOperationException(EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).FormatWith(
+                    typeof(T).NiceName(),
+                    pairs.CommaAnd(a => a.pi.NiceName()),
+                    pairs.CommaAnd(a => a.value is string ? $"'{a}'" : a.value == null ? "NULL" : a.value.ToString())));
+
             }
         }
     }

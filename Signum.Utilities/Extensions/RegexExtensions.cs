@@ -34,7 +34,7 @@ namespace Signum.Utilities
             return match.Groups.Cast<Group>();
         }
 
-        public static T MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
+        public static T? MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
         {
             StringDistance sd = new StringDistance();
             return collection.WithMin(item => sd.LevenshteinDistance(stringSelector(item), pattern));

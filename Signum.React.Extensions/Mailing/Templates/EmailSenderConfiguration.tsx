@@ -25,7 +25,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
               <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
               <ValueLine ctx={net.subCtx(s => s.username)} />
               {!sc.readOnly && net.subCtx(a => a.password).propertyRoute?.canModify() &&
-                <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} />}
+                <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} mandatory={false} />}
               <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
               <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
                 <div>
@@ -44,8 +44,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
           <ValueLine ctx={ews.subCtx(s => s.useDefaultCredentials)} />
           <ValueLine ctx={ews.subCtx(s => s.username)} />
           {!sc.readOnly &&
-            <DoublePassword ctx={new TypeContext<string>(ews, undefined, undefined as any, Binding.create(ews.value, v => v.newPassword))} isNew={ews.value.isNew} />}
-          <ValueLine ctx={ews.subCtx(s => s.password)} />
+            <DoublePassword ctx={new TypeContext<string>(ews, undefined, undefined as any, Binding.create(ews.value, v => v.newPassword))} isNew={ews.value.isNew} mandatory={false} />}
         </div>
       } />
       <EntityDetail ctx={sc.subCtx(s => s.microsoftGraph)} labelColumns={3}/>

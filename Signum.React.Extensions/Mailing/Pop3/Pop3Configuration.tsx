@@ -36,7 +36,7 @@ export default function Pop3Configuration(p: { ctx: TypeContext<Pop3Configuratio
           <ValueLine ctx={sc.subCtx(s => s.username)} />
         </div>
         {!sc.readOnly && sc.subCtx(a => a.password).propertyRoute?.canModify() && <div className="col-sm-auto">
-          <DoublePassword ctx={new TypeContext<string>(sc, { formGroupStyle: "Basic" }, undefined as any, Binding.create(sc.value, v => v.newPassword))} isNew={sc.value.isNew} />
+          <DoublePassword ctx={new TypeContext<string>(sc, { formGroupStyle: "Basic" }, undefined as any, Binding.create(sc.value, v => v.newPassword))} isNew={sc.value.isNew} mandatory={false} />
         </div>}
       </div>
       

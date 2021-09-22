@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CheckUrl": {
+      "commandName": "Project",
+      "commandLineArgs": "alive \"https://bg365-officecontrol-bg365-officecontrol-test.azurewebsites.net/\""
+    }
+  }
+}

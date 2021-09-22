@@ -261,8 +261,6 @@ namespace Signum.Entities.DynamicQuery
 
         public static List<QueryToken> TimeSpanProperties(QueryToken parent, DateTimePrecision precision)
         {
-            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
-
             return new List<QueryToken?>
             {
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Hours), () => QueryTokenMessage.Hour.NiceToString()),
@@ -467,6 +465,20 @@ namespace Signum.Entities.DynamicQuery
         public bool ContainsKey(string key)
         {
             return this.Key == key || this.Parent != null && this.Parent.ContainsKey(key);
+        }
+
+        internal bool Dominates(QueryToken t)
+        {
+            if (t is CollectionAnyAllToken)
+                return false;
+
+            if (t is CollectionElementToken)
+                return false;
+
+            if (t.Parent == null)
+                return false;
+
+            return t.Parent.Equals(this) || this.Dominates(t.Parent);
         }
     }
 

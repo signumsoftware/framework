@@ -41,7 +41,7 @@ namespace Signum.Upgrade.Upgrades
                 file.Replace(@"/Extensions/", @"/Framework/");
             });
 
-            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =
+            uctx.ChangeCodeFile(@"Southwind.React/Dockerfile", file =>
             {
                 file.Replace(@"""Extensions/", @"""Framework/");
             });
