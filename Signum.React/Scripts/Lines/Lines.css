@@ -38,7 +38,7 @@ input[type=checkbox].form-control {
 
 .form-control.sf-multi-line {
     height: auto;
-    white-space: pre;
+    white-space: pre-line;
 }
 
 .numeric {

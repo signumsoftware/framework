@@ -1,3 +1,4 @@
+
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -139,22 +140,16 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
     if (p.columnCount && p.columnWidth)
       return {
         columns: `${p.columnCount} ${p.columnWidth}px`,
-        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
       };
 
     if (p.columnCount)
       return {
         columnCount: p.columnCount,
-        MozColumnCount: p.columnCount,
-        WebkitColumnCount: p.columnCount,
       };
 
     if (p.columnWidth)
       return {
         columnWidth: p.columnWidth,
-        MozColumnWidth: p.columnWidth,
-        WebkitColumnWidth: p.columnWidth,
       };
 
     return undefined;
@@ -193,7 +188,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
           name={liteKey(lite)}
           onChange={e => c.handleOnChange(lite)} />
         &nbsp;
-        <span className="sf-entitStrip-link">{lite.toStr}</span>
+        <span>{lite.toStr}</span>
       </label>);
   }
 }

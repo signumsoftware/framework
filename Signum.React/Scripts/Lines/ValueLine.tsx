@@ -4,7 +4,7 @@ import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widget
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -423,6 +423,8 @@ function internalComboBoxText(vl: ValueLineController) {
         <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
           textField="label"
+          focusFirstItem
+          autoSelectMatches
           renderListItem={renderItem}
         />)
       }
@@ -979,25 +981,75 @@ function internalRadioGroup(vl: ValueLineController) {
     if (p.columnCount && p.columnWidth)
       return {
         columns: `${p.columnCount} ${p.columnWidth}px`,
-        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
       };
 
     if (p.columnCount)
       return {
         columnCount: p.columnCount,
-        MozColumnCount: p.columnCount,
-        WebkitColumnCount: p.columnCount,
       };
 
     if (p.columnWidth)
       return {
         columnWidth: p.columnWidth,
-        MozColumnWidth: p.columnWidth,
-        WebkitColumnWidth: p.columnWidth,
       };
 
     return undefined;
   }
 }
 
+tasks.push(taskSetUnit);
+export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
+    const vProps = state as ValueLineProps;
+
+    if (vProps.unitText === undefined &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.unitText = state.ctx.propertyRoute.member!.unit;
+    }
+  }
+}
+
+tasks.push(taskSetFormat);
+export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
+    const vProps = state as ValueLineProps;
+
+    if (!vProps.formatText &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.formatText = state.ctx.propertyRoute.member!.format;
+      if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
+        vProps.valueLineType = "Password";
+    }
+  }
+}
+
+
+export let maxValueLineSize = 100;
+
+tasks.push(taskSetHtmlProperties);
+export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  const vl = lineBase instanceof ValueLineController ? lineBase : undefined;
+  const pr = state.ctx.propertyRoute;
+  const s = state as ValueLineProps;
+  if (vl && pr?.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
+
+    var member = pr.member!;
+
+    if (member.maxLength != undefined && !s.ctx.readOnly) {
+
+      if (!s.valueHtmlAttributes)
+        s.valueHtmlAttributes = {};
+
+      if (s.valueHtmlAttributes.maxLength == undefined)
+        s.valueHtmlAttributes.maxLength = member.maxLength;
+
+      if (s.valueHtmlAttributes.size == undefined)
+        s.valueHtmlAttributes.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
+    }
+
+    if (member.isMultiline)
+      s.valueLineType = "TextArea";
+  }
+}

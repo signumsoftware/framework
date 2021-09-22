@@ -199,24 +199,24 @@ namespace Signum.React.Translation
                 typeDescription = t.TypeConflict == null || (tc == null && !isTarget) ? null : /*Message, Symbol, etc...*/
                 new LocalizedDescriptionTS
                 {
-                    description = tc?.Original.Description ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a=>a.Value.AutomaticTranslations)) : null),
-                    pluralDescription = tc?.Original.PluralDescription,
-                    gender = tc?.Original.Gender?.ToString(),
+                    description = tc?.Original.Description ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a => a.Value.AutomaticTranslations).Select(a => a.Singular)) : null),
+                    pluralDescription = tc?.Original.PluralDescription ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a => a.Value.AutomaticTranslations).Select(a => a.Plural)) : null),
+                    gender = tc?.Original.Gender?.ToString() ?? (isTarget ? DisctincOnly(t.TypeConflict.SelectMany(a => a.Value.AutomaticTranslations).Select(a => a.Gender?.ToString())) : null),
                     automaticTranslations = tc?.AutomaticTranslations.ToArray(),
                 },
-                members = t.MemberConflicts.EmptyIfNull().Where(kvp=> kvp.Value.ContainsKey(ci) || isTarget).Select(kvp => new LocalizedMemberTS
+                members = t.MemberConflicts.EmptyIfNull().Where(kvp => kvp.Value.ContainsKey(ci) || isTarget).Select(kvp => new LocalizedMemberTS
                 {
                     name = kvp.Key,
-                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget ? DisctincOnly(kvp.Value.SelectMany(a => a.Value.AutomaticTranslations)) : null),
+                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget ? DisctincOnly(kvp.Value.SelectMany(a => a.Value.AutomaticTranslations).Select(a => a.Text)) : null),
                     automaticTranslations = kvp.Value.TryGetC(ci)?.AutomaticTranslations.ToArray()
                 }).ToDictionary(a => a.name),
             };
         }
 
-        string? DisctincOnly(IEnumerable<AutomaticTranslation> automaticTranslations)
+        string? DisctincOnly(IEnumerable<string?> automaticTranslations)
         {
             if (automaticTranslations.Count() >= 2)
-                return automaticTranslations.Select(a => a.Text).Distinct().Only();
+                return automaticTranslations.Distinct().Only();
 
             return null;
         }
@@ -271,7 +271,7 @@ namespace Signum.React.Translation
             public string? gender;
             public string? description;
             public string? pluralDescription;
-            public AutomaticTranslation[]? automaticTranslations;
+            public AutomaticTypeTranslation[]? automaticTranslations;
         }
 
         public class LocalizedMemberTS
@@ -350,7 +350,7 @@ namespace Signum.React.Translation
             {
                 name = ci.Name,
                 englishName = ci.EnglishName,
-                pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(ci.TwoLetterISOLanguageName)?.Pronoms.ToList(),
+                pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(ci.TwoLetterISOLanguageName)?.Determiner.ToList(),
             };
         }
     }

@@ -12,8 +12,8 @@ export interface EntityRadioButtonListProps extends EntityBaseProps {
   columnWidth?: number;
   avoidFieldSet?: boolean;
   refreshKey?: string;
-  renderRadio?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityRadioButtonListController) => React.ReactElement;
-  groupKey: string;
+  nullPlaceHolder?: string;
+  onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
 }
 
 export class EntityRadioButtonListController extends EntityBaseController<EntityRadioButtonListProps> {
@@ -31,7 +31,7 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
     state.columnWidth = 200;
   }
 
-  handleOnChange = (lite: Lite<Entity>) => {
+  handleOnChange = (lite: Lite<Entity> | null) => {
     if (lite == null)
       this.setValue(lite);
     else
@@ -51,14 +51,14 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("SF-RadioButton-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      <div className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
         {renderButtons()}
         {renderRadioList()}
       </div>
     );
 
   return (
-    <fieldset className={classes("SF-RadioButton-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+    <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
           <span>{p.labelText}</span>
@@ -71,7 +71,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   function renderButtons() {
     return (
-      <span className="float-right">
+      <span className="ml-2">
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
       </span>
@@ -80,7 +80,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   function renderRadioList() {
     return (
-      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} groupKey={p.groupKey} />
+      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} />
     );
   }
 });
@@ -89,7 +89,6 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 interface EntityRadioButtonListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
   controller: EntityRadioButtonListController;
-  groupKey: string;
 }
 
 export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectProps) {
@@ -123,10 +122,30 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
   }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
-    <div className="sf-radiobutton-elements switch-field">
+    <div className="sf-radiobutton-elements" style={getColumnStyle()}>
       {renderContent()}
     </div>
   );
+
+
+  function getColumnStyle(): React.CSSProperties | undefined {
+    if (p.columnCount && p.columnWidth)
+      return {
+        columns: `${p.columnCount} ${p.columnWidth}px`,
+      };
+
+    if (p.columnCount)
+      return {
+        columnCount: p.columnCount,
+      };
+
+    if (p.columnWidth)
+      return {
+        columnWidth: p.columnWidth,
+      };
+
+    return undefined;
+  }
 
   function maybeToLite(entityOrLite: Entity | Lite<Entity>): Lite<Entity> {
     const entity = entityOrLite as Entity;
@@ -141,20 +160,20 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
     if (data == undefined)
       return undefined;
 
-    const fixedData = [...data];
+    const fixedData = [null, ...data];
 
     const value = p.ctx.value!;
+    if (!fixedData.some(d => is(d, value as Entity | Lite<Entity>)))
+        fixedData.insertAt(0, maybeToLite(value as Entity | Lite<Entity>))
 
-    var groupString = new Date().getTime().toString();
     return fixedData.map((lite, i) =>
-      <label className="sf-radiobutton-element" key={i}>
-        <div className={"buttonRadioItem" + (value && is(value as Lite<Entity>, lite) ? " buttonRadioItemChecked" : "")} onClick={e => c.handleOnChange(lite)}>
-          <input type="radio" style={{ marginLeft:"10px" }}
-            checked={value && is(value as Lite<Entity>, lite)}
-            disabled={p.ctx.readOnly}
-            name={"RadioGroup" + groupString} />
-          <span className="sf-entitStrip-link">{lite.toStr}</span>
-        </div>
+      <label className="sf-radio-element" key={i}>
+        <input type="radio" style={{ marginLeft: "10px" }}
+          checked={is(value as Lite<Entity>, lite)}
+          onClick={e => c.handleOnChange(lite)}
+          disabled={p.ctx.readOnly}/>
+        &nbsp;
+        <span>{c.props.onRenderItem ? c.props.onRenderItem(lite) : lite?.toStr ?? p.nullPlaceHolder ?? " - "}</span>
       </label>);
   }
 }

@@ -137,7 +137,7 @@ namespace Signum.Utilities.NaturalLanguage
             return null;
         }
 
-        public ReadOnlyCollection<PronomInfo> Pronoms { get; } = new ReadOnlyCollection<PronomInfo>(new[]
+        public ReadOnlyCollection<PronomInfo> Determiner { get; } = new ReadOnlyCollection<PronomInfo>(new[]
         {
             new PronomInfo('m', "der", "die"),
             new PronomInfo('f', "die", "die"),

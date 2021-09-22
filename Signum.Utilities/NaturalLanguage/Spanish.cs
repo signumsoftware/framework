@@ -100,7 +100,7 @@ namespace Signum.Utilities.NaturalLanguage
             new PronomInfo('f', "la", "las")
         });
 
-        public ReadOnlyCollection<PronomInfo> Pronoms
+        public ReadOnlyCollection<PronomInfo> Determiner
         {
             get { return pronoms; }
         }

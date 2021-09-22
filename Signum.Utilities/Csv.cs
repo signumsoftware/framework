@@ -364,14 +364,7 @@ namespace Signum.Utilities
 
         private static char GetListSeparator(CultureInfo culture)
         {
-            //Temp Hack https://github.com/dotnet/runtime/issues/43795
-            if (culture.NumberFormat.NumberDecimalSeparator == ",")
-                return ';';
-
-
-            return ',';
-
-            //return culture.TextInfo.ListSeparator.SingleEx();
+            return culture.TextInfo.ListSeparator.SingleEx();
         }
 
         static class CsvMemberCache<T>

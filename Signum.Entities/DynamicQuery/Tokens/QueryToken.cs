@@ -261,8 +261,6 @@ namespace Signum.Entities.DynamicQuery
 
         public static List<QueryToken> TimeSpanProperties(QueryToken parent, DateTimePrecision precision)
         {
-            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
-
             return new List<QueryToken?>
             {
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Hours), () => QueryTokenMessage.Hour.NiceToString()),
@@ -272,7 +270,7 @@ namespace Signum.Entities.DynamicQuery
 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalDays), () => QueryTokenMessage.TotalDays.NiceToString()),
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalHours), () => QueryTokenMessage.TotalHours.NiceToString()),
-                precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMinutes), () => QueryTokenMessage.TotalMilliseconds.NiceToString()),
+                precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMinutes), () => QueryTokenMessage.TotalMinutes.NiceToString()),
                 precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalSeconds), () => QueryTokenMessage.TotalSeconds.NiceToString()),
                 precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMilliseconds), () => QueryTokenMessage.TotalMilliseconds.NiceToString()),
             }.NotNull().ToList();
@@ -468,6 +466,20 @@ namespace Signum.Entities.DynamicQuery
         {
             return this.Key == key || this.Parent != null && this.Parent.ContainsKey(key);
         }
+
+        internal bool Dominates(QueryToken t)
+        {
+            if (t is CollectionAnyAllToken)
+                return false;
+
+            if (t is CollectionElementToken)
+                return false;
+
+            if (t.Parent == null)
+                return false;
+
+            return t.Parent.Equals(this) || this.Dominates(t.Parent);
+        }
     }
 
     public class BuildExpressionContext
@@ -531,6 +543,7 @@ namespace Signum.Entities.DynamicQuery
         TotalDays,
         TotalHours,
         TotalSeconds,
+        TotalMinutes,
         TotalMilliseconds,
         Minute,
         Month,

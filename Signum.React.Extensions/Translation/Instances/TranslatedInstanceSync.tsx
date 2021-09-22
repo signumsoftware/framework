@@ -202,7 +202,7 @@ export function TranslationProperty({ property }: { property: PropertyChange }) 
 
 
   function handleOnChange(e: React.FormEvent<any>) {
-    property.translatedText = TranslationMember.normalizeString((e.currentTarget as HTMLSelectElement).value);
+    property.translatedText = TranslationMember.normalizeString((e.currentTarget as HTMLSelectElement).value)!;
     forceUpdate();
   }
 

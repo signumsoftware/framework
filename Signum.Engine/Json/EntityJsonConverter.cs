@@ -462,6 +462,9 @@ namespace Signum.Engine.Json
                             converter.Read(ref reader, pi.PropertyType, options, oldValue) :
                             JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
 
+                        if (newValue is DateTime dt)
+                            newValue = dt.FromUserInterface();
+
                         if (Factory.Strategy == EntityJsonConverterStrategy.Full)
                         {
                             pc.SetValue?.Invoke(entity, newValue);

@@ -37,20 +37,6 @@ li.menu-item-1 > a {
     width: 100%;
 }
 
-.menu-item-1 {
-    background-color: #f3f3f3;
-}
-
-li.menu-item-1 > a {
-    padding-top: 5px;
-    padding-bottom: 5px;
-
-}
-
-.sidebar .divider {
-    height: 2px;
-    background-color: #e7e7e7;
-}
 
 body:not(.rtl) .sidebar .dropdown-item .icon {
     width: 20px;
