@@ -370,6 +370,20 @@ namespace Signum.Engine.Alerts
                     .UnsafeDelete();
             }
         }
+
+
+        public static void DeleteUnattendedAlerts(this Entity target, AlertTypeSymbol alertType, Lite<UserEntity> recipient) =>
+            target.ToLite().DeleteUnattendedAlerts(alertType, recipient);
+        public static void DeleteUnattendedAlerts(this Lite<Entity> target, AlertTypeSymbol alertType, Lite<UserEntity> recipient)
+        {
+            using (AuthLogic.Disable())
+            {
+                Database.Query<AlertEntity>()
+                    .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType == alertType && a.Recipient == recipient)
+                    .UnsafeDelete();
+            }
+        }
+
     }
 
     public class AlertTypeOptions
