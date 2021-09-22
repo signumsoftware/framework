@@ -270,7 +270,7 @@ namespace Signum.Entities.DynamicQuery
 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalDays), () => QueryTokenMessage.TotalDays.NiceToString()),
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalHours), () => QueryTokenMessage.TotalHours.NiceToString()),
-                precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMinutes), () => QueryTokenMessage.TotalMilliseconds.NiceToString()),
+                precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMinutes), () => QueryTokenMessage.TotalMinutes.NiceToString()),
                 precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalSeconds), () => QueryTokenMessage.TotalSeconds.NiceToString()),
                 precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalMilliseconds), () => QueryTokenMessage.TotalMilliseconds.NiceToString()),
             }.NotNull().ToList();
@@ -543,6 +543,7 @@ namespace Signum.Entities.DynamicQuery
         TotalDays,
         TotalHours,
         TotalSeconds,
+        TotalMinutes,
         TotalMilliseconds,
         Minute,
         Month,
