@@ -20,60 +20,70 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (disableQueryFilter)
-                return base.VisitConstant(c);
 
-            if (typeof(IQueryable).IsAssignableFrom(c.Type))
+            using (HeavyProfiler.Log("VisitConstant"))
             {
-                IQueryable query = (IQueryable)c.Value!;
+                if (disableQueryFilter)
+                    return base.VisitConstant(c);
 
-                if (query.IsBase())
+                if (typeof(IQueryable).IsAssignableFrom(c.Type))
                 {
-                    Type queryType = c.Type.GetGenericArguments().SingleEx();
+                    IQueryable query = (IQueryable)c.Value!;
 
-                    if (filter)
+                    if (query.IsBase())
                     {
-                        if (typeof(Entity).IsAssignableFrom(queryType))
+                        Type queryType = c.Type.GetGenericArguments().SingleEx();
+
+                        if (filter)
                         {
-                            LambdaExpression? rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
-                            if (rawFilter != null)
-                            {
-                                Expression clean = ExpressionCleaner.Clean(rawFilter)!;
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
+                            if (typeof(Entity).IsAssignableFrom(queryType))
+                                using (HeavyProfiler.Log("queryType"))
+                                {
+                                    LambdaExpression? rawFilter = null;
+                                    using (HeavyProfiler.Log("rawFilter"))
+                                        rawFilter =giFilter.GetInvoker(queryType)(Schema.Current);
 
-                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
-                            }
+                                    if (rawFilter != null)
+                                    {
+                                        Expression clean = ExpressionCleaner.Clean(rawFilter)!;
+                                        var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
+                                        using (HeavyProfiler.Log("Call"))
+                                            return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                                    }
+                                }
+                            else if (queryType.IsInstantiationOf(typeof(MListElement<,>)))
+                                using (HeavyProfiler.Log("MListElement"))
+                                {
+                                    Type entityType = queryType.GetGenericArguments()[0];
+
+                                    LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
+                                    if (rawFilter != null)
+                                    {
+                                        var param = Expression.Parameter(queryType, "mle");
+                                        var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
+
+                                        Expression clean = ExpressionCleaner.Clean(lambda)!;
+                                        var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
+
+                                        return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
+                                    }
+                                }
                         }
-                        else if (queryType.IsInstantiationOf(typeof(MListElement<,>)))
-                        {
-                            Type entityType = queryType.GetGenericArguments()[0];
 
-                            LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
-                            if (rawFilter != null)
-                            {
-                                var param = Expression.Parameter(queryType, "mle");
-                                var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
-
-                                Expression clean = ExpressionCleaner.Clean(lambda)!;
-                                var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
-
-                                return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
-                            }
-                        }
+                        return c;
                     }
+                    else
+                    {
+                        /// <summary>
+                        /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
+                        /// </summary>
+                        return DbQueryProvider.Clean(query.Expression, filter, null)!;
+                    }
+                }
 
-                    return c;
-                }
-                else
-                {
-                    /// <summary>
-                    /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
-                    /// </summary>
-                    return DbQueryProvider.Clean(query.Expression, filter, null)!;
-                }
+                return base.VisitConstant(c);
             }
 
-            return base.VisitConstant(c);
         }
 
         bool disableQueryFilter = false;
