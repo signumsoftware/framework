@@ -342,6 +342,7 @@
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />
     <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
     <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
     <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="WeekStart" Description="Wochenstart" />
