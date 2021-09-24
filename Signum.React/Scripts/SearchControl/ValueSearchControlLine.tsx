@@ -67,15 +67,13 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (isEntity(ctx.value))
       return {
         queryName: ctx.value.Type,
-        parentToken: QueryTokenString.entity(),
-        parentValue: ctx.value
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
       };
 
     if (isLite(ctx.value))
       return {
         queryName: ctx.value.EntityType,
-        parentToken: QueryTokenString.entity(),
-        parentValue: ctx.value
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
       };
 
     throw new Error("Impossible to determine 'findOptions' because 'ctx' is not a 'TypeContext<Entity>'. Set it explicitly");

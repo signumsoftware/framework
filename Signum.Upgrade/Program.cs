@@ -62,6 +62,7 @@ namespace Signum.Upgrade
                 new Upgrade_20210829_TypeScript44(),
                 new Upgrade_20210908_BlueGreenDeployments(),
                 new Upgrade_20210916_UpdateNugets(),
+                new Upgrade_20210924_RemoveParentTokenParentValue(),
             }.Run(uctx);
         }
     }

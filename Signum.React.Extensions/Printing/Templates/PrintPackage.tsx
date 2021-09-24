@@ -12,7 +12,7 @@ export default function PrintPackage(p : { ctx: TypeContext<PrintPackageEntity> 
       <ValueLine ctx={e.subCtx(f => f.name)} />
       <fieldset>
         <legend>{PrintLineEntity.nicePluralName()}</legend>
-        <SearchControl findOptions={{ queryName: PrintLineEntity, parentToken: PrintLineEntity.token(e => e.package), parentValue: e.value }} />
+        <SearchControl findOptions={{ queryName: PrintLineEntity, filterOptions: [{ token: PrintLineEntity.token(e => e.package), value: e.value }]}} />
       </fieldset>
     </div>
   );

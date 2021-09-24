@@ -1021,7 +1021,7 @@ export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
 
   if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined && fo.filterOptions) {
     var trivialColumns = fo.filterOptions
-      .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && fo.token.toString().contains(".") && fo.pinned == null)
+      .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
 
     if (trivialColumns.length) {

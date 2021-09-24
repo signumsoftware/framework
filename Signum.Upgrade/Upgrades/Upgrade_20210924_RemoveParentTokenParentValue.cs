@@ -16,13 +16,9 @@ namespace Signum.Upgrade.Upgrades
 
         public override void Execute(UpgradeContext uctx)
         {
-            Regex regex = new Regex(@"parentToken\s*:\s*(?<parentToken>[^,]+),(\s|\n)+parentValue\s*:\s*(?<parentValue>[^,}]+)");
+            Regex regex = new Regex(@"parentToken\s*:\s*(?<parentToken>[^,]+),(\s|\n)+parentValue\s*:\s*(?<parentValue>[^,}\r\n]+)");
 
-            uctx.ForeachCodeFile(@"*.csproj", new[] {
-                uctx.RootFolder,
-                Path.Combine(uctx.RootFolder, "Framework/Signum.React"),
-                Path.Combine(uctx.RootFolder, "Framework/Signum.React.Extensions")
-            }, file =>
+            uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
             {
                 file.Replace(regex, r => $"filterOptions: [{{ token: {r.Groups["parentToken"]}, value: {r.Groups["parentValue"]}}}]");
             });

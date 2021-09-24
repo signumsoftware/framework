@@ -14,8 +14,7 @@ export default function JoyrideStep(p : { ctx: TypeContext<JoyrideEntity> }){
       <EntityStrip ctx={ctx.subCtx(a => a.steps)}
         findOptions={{
           queryName: JoyrideStepEntity,
-          parentToken: JoyrideStepEntity.token(e => e.culture),
-          parentValue: ctx.value.culture
+          filterOptions: [{ token: JoyrideStepEntity.token(e => e.culture), value: ctx.value.culture}]
         }}
       />
       <div className="row">

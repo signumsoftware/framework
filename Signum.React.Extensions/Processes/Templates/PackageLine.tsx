@@ -17,8 +17,7 @@ export default function Package(p : { ctx: TypeContext<PackageLineEntity> }){
         badgeColor="danger"
         findOptions={{
           queryName: ProcessExceptionLineEntity,
-          parentToken: ProcessExceptionLineEntity.token(e => e.line),
-          parentValue: ctx.value
+          filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.line), value: ctx.value}]
         }} />
     </div>
   );

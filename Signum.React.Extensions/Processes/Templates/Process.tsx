@@ -62,8 +62,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
         ref={vscl}
         findOptions={{
           queryName: ProcessExceptionLineEntity,
-          parentToken: ProcessExceptionLineEntity.token(e => e.process),
-          parentValue: ctx3.value
+          filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.process), value: ctx3.value}]
         }} />
     </div>
   );

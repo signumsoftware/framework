@@ -15,8 +15,8 @@ export default function Pop3Reception(p : { ctx: TypeContext<Pop3ReceptionEntity
       <ValueLine ctx={sc.subCtx(s => s.endDate)} />
       <ValueLine ctx={sc.subCtx(s => s.newEmails)} />
       <EntityLine ctx={sc.subCtx(s => s.exception)} />
-      <ValueSearchControlLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, parentToken: EmailMessageEntity.token(a => a.entity).mixin(EmailReceptionMixin).append(a => a.receptionInfo!.reception), parentValue: sc.value }} />
-      <ValueSearchControlLine ctx={sc} findOptions={{ queryName: ExceptionEntity, parentToken: ExceptionEntity.token(a => a.entity).expression("Pop3Reception"), parentValue: sc.value }} />
+      <ValueSearchControlLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, filterOptions: [{ token: EmailMessageEntity.token(a => a.entity).mixin(EmailReceptionMixin).append(a => a.receptionInfo!.reception), value: sc.value }]}} />
+      <ValueSearchControlLine ctx={sc} findOptions={{ queryName: ExceptionEntity, filterOptions: [{ token: ExceptionEntity.token(a => a.entity).expression("Pop3Reception"), value: sc.value }]}} />
     </div>
   );
 }
