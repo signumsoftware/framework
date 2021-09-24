@@ -330,7 +330,7 @@ ul.sf-context-menu li a:not([disabled]) {
     padding: 0 .5em;
 }
 
-.rw-list-option.rw-state-selected span[style]{
+.sf-query-token-part .rw-list-option.rw-state-selected span[style] {
     color: inherit !important;
 }
 
