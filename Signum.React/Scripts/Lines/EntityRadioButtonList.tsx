@@ -108,7 +108,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.expandParentColumn(fo);
+        Finder.defaultNoColumns(fo);
         var limit = fo?.pagination?.elementsPerPage ?? 999;
         Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
           .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))

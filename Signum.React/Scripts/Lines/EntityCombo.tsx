@@ -192,7 +192,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       const fo = p.findOptions;
       if (fo) {
         var hasColumns = fo.columnOptions?.length;
-        Finder.expandParentColumn(fo);
+        Finder.defaultNoColumns(fo);
         if (!hasColumns) {
           fo.columnOptions = [];
           fo.columnOptionsMode = "Replace";
