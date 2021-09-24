@@ -198,7 +198,7 @@ namespace Signum.Engine.Alerts
 
             static Regex LinkPlaceholder = new Regex(@"\[(?<prop>(\w|\d|\.)+)(\:(?<text>.+))?\](\((?<url>.+)\))?");
 
-            public HtmlString? TextFormatted(TemplateParameters tp)
+            public static HtmlString? TextFormatted(TemplateParameters tp)
             {
                 if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
                     return null;
@@ -217,7 +217,7 @@ namespace Signum.Engine.Alerts
 
                     var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
 
-                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite != null ? lite.ToString() : null);
+                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 
                     return @$"<a href=""{url}"">{text}</a>";
 
@@ -227,7 +227,7 @@ namespace Signum.Engine.Alerts
                     return new HtmlString(newText);
 
                 if (alert.Target != null)
-                    return new HtmlString(@$"{text}<br/><a href=""{EntityUrl(alert.Target)}"">{alert.Target.ToString()}</a>");
+                    return new HtmlString(@$"{text}<br/><a href=""{EntityUrl(alert.Target)}"">{alert.Target}</a>");
 
                 return new HtmlString(text);
             }
@@ -241,7 +241,7 @@ namespace Signum.Engine.Alerts
 
             static Regex TextPlaceHolder = new Regex(@"({(?<prop>(\w|\d|\.)+)})");
 
-            private string? ReplacePlaceHolders(string? value, AlertEntity alert)
+            private static string? ReplacePlaceHolders(string? value, AlertEntity alert)
             {
                 if (value == null)
                     return null;
