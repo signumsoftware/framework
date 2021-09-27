@@ -343,7 +343,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
   current = current.filter(a => a.token != null);
 
-if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
+  if (ideal.every((idl, i) => i < current.length && similar(current[i], idl))) {
     return {
       mode: "Add",
       columns: current.slice(ideal.length).map(c => ({
@@ -1020,9 +1020,7 @@ export function defaultNoColumns(fo: FindOptions): FindOptions {
 export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
 
   if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined && fo.filterOptions) {
-    var trivialColumns = fo.filterOptions
-      .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
-      .map(fo => ({ token: fo.token }) as ColumnOption);
+    var trivialColumns = getTrivialColumns(fo.filterOptions);
 
     if (trivialColumns.length) {
       fo.columnOptions = trivialColumns;
@@ -1033,6 +1031,12 @@ export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
   return fo;
 }
 
+
+export function getTrivialColumns(fos: FilterOption[]) {
+  return fos
+    .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
+    .map(fo => ({ token: fo.token }) as ColumnOption);
+}
 export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
   return getQueryDescription(getQueryKey(queryName)).then(qd => {
