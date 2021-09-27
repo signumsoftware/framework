@@ -7,7 +7,7 @@ import { DashboardEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 import { RouteComponentProps } from "react-router";
 import "../Dashboard.css"
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
@@ -25,9 +25,11 @@ export default function DashboardPage(p: DashboardPageProps) {
 
   var entityKey = getQueryEntity(p);
 
-  const entity = useAPI(signal => entityKey ? Navigator.API.fetchAndForget(parseLite(entityKey)) : Promise.resolve(null), [p.match.params.dashboardId]);
+  const entity = useAPI(signal => entityKey ? Navigator.API.fetchAndForget(parseLite(entityKey)) : Promise.resolve(null), [entityKey]);
 
   const rtl = React.useMemo(() => document.body.classList.contains("rtl"), []);
+
+  const refreshCounter = useInterval(dashboard?.autoRefreshPeriod == null ? null : dashboard.autoRefreshPeriod * 1000, 0, old => old + 1);
 
   return (
     <div>
@@ -54,7 +56,7 @@ export default function DashboardPage(p: DashboardPageProps) {
         </div>
       }
 
-      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} deps={entity?.ticks} />}
+      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} deps={[refreshCounter, entity]} />}
     </div>
   );
 }

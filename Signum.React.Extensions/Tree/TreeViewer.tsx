@@ -23,6 +23,7 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString } from '@framework/Reflection';
+import * as Hooks from '../../Signum.React/Scripts/Hooks'
 
 interface TreeViewerProps {
   typeName: string;
@@ -35,6 +36,7 @@ interface TreeViewerProps {
   filterOptions: FilterOption[];
   initialShowFilters?: boolean;
   showToolbar?: boolean;
+  deps?: React.DependencyList;
 }
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
@@ -90,12 +92,16 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
     var path = TreeClient.treePath(newProps.typeName, newProps.filterOptions);
-    if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions))
+    if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions)) {
+      this.searchIfDeps(newProps);
       return;
+    }
 
     if (this.state.filterOptions && this.state.queryDescription) {
-      if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions)))
+      if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions))) {
+        this.searchIfDeps(newProps);
         return;
+      }
     }
 
     this.state = {
@@ -106,6 +112,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.forceUpdate();
 
     this.initilize(newProps.typeName, newProps.filterOptions);
+  }
+
+  searchIfDeps(newProps: TreeViewerProps) {
+    if (Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? [])) {
+      this.search(false);
+    }
   }
 
   initilize(typeName: string, filterOptions: FilterOption[]) {

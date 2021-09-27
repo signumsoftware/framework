@@ -20,13 +20,13 @@ import SelectorModal from '@framework/SelectorModal'
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
-  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity]);
+  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
 
   const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
     ChartClient.getChartScript(chartRequest!.chartScript)
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
       .then(result => ({ result }))
-      .catch(error => ({ error })), [chartRequest], { avoidReset: true });
+      .catch(error => ({ error })), [chartRequest, ...p.deps ?? []], { avoidReset: true });
 
 
   const [showData, setShowData] = React.useState(p.part.showData);
