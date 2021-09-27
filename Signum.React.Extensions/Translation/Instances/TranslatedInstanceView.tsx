@@ -9,11 +9,11 @@ import { RouteComponentProps } from "react-router";
 import { Link} from "react-router-dom";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
-import { EntityLink } from '../../../../Framework/Signum.React/Scripts/Search'
+import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../DiffLog/Templates/DiffDocument'
-import TextArea from '../../../../Framework/Signum.React/Scripts/Components/TextArea'
-import { KeyCodes } from '../../../../Framework/Signum.React/Scripts/Components'
-import { useTitle } from '../../../../Framework/Signum.React/Scripts/AppContext'
+import TextArea from '@framework/Components/TextArea'
+import { KeyCodes } from '@framework/Components'
+import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
 export default function TranslationInstanceView(p: RouteComponentProps<{ type: string; culture?: string; }>) {

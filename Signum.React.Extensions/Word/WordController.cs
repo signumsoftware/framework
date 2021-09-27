@@ -22,8 +22,8 @@ namespace Signum.React.Word
         [HttpPost("api/word/createReport")]
         public FileStreamResult CreateReport([Required, FromBody]CreateWordReportRequest request)
         {
-            var template = request.template.RetrieveAndRemember();
-            var modifiableEntity = request.entity ?? request.lite.RetrieveAndRemember();
+            var template = request.Template.RetrieveAndRemember();
+            var modifiableEntity = request.Entity ?? request.Lite.RetrieveAndRemember();
 
             var file = template.CreateReportFileContent(modifiableEntity);
 
@@ -32,9 +32,9 @@ namespace Signum.React.Word
 
         public class CreateWordReportRequest
         {
-            public Lite<WordTemplateEntity> template { get; set; }
-            public Lite<Entity> lite { get; set; }
-            public ModifiableEntity entity { get; set; }
+            public Lite<WordTemplateEntity> Template { get; set; }
+            public Lite<Entity> Lite { get; set; }
+            public ModifiableEntity Entity { get; set; }
         }
 
         [HttpPost("api/word/constructorType")]
@@ -50,14 +50,14 @@ namespace Signum.React.Word
         {
             object type = QueryLogic.ToQueryName(queryKey);
 
-            var entity = request.lite?.RetrieveAndForget();
+            var entity = request.Lite?.RetrieveAndForget();
 
             return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }
 
         public class GetWordTemplatesRequest
         {
-            public Lite<Entity> lite { get; set; }
+            public Lite<Entity> Lite { get; set; }
         }
     }
 }

@@ -30,8 +30,6 @@ export interface ModalFindOptions {
 export interface FindOptions {
   queryName: PseudoType | QueryKey;
   groupResults?: boolean;
-  parentToken?: string | QueryTokenString<any>;
-  parentValue?: any;
 
   includeDefaultFilters?: boolean;
   filterOptions?: FilterOption[];

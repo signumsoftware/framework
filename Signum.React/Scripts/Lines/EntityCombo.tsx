@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString, isEntity } from '../Signum.Entities'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
+import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
@@ -11,16 +11,17 @@ import { classes } from '../Globals';
 import { useController } from './LineBase'
 import { useMounted } from '../Hooks'
 import { DropdownList } from 'react-widgets'
+import { ResultTable } from '../Search'
 
 
 export interface EntityComboProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   data?: Lite<Entity>[];
-  labelTextWithData?: (data: Lite<Entity>[] | undefined | null) => React.ReactChild;
+  labelTextWithData?: (data: Lite<Entity>[] | ResultTable | undefined | null) => React.ReactChild;
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactChild;
+  onRenderItem?: (lite: ResultRow | undefined, resultTable?: ResultTable) => React.ReactChild;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -130,11 +131,11 @@ export interface EntityComboSelectProps {
   type: TypeReference;
   findOptions?: FindOptions;
   data?: Lite<Entity>[];
-  mandatoryClass: string | null; 
-  onDataLoaded?: (data: Lite<Entity>[] | undefined) => void;
+  mandatoryClass: string | null;
+  onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: Lite<Entity> | undefined) => React.ReactNode;
+  onRenderItem?: (lite: ResultRow | undefined) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -155,12 +156,12 @@ export function normalizeEmptyArray(data: Lite<Entity>[] | undefined) {
 
 export interface  EntityComboHandle {
   getSelect(): HTMLSelectElement | null;
-  getData(): Lite<Entity>[] | undefined;
+  getData(): Lite<Entity>[] | ResultTable | undefined;
 }
 //Extracted to another component
 export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) {
 
-  const [data, _setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  const [data, _setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   const requestStarted = React.useRef(false);
 
   const [loadData, setLoadData] = React.useState<boolean>(!p.delayLoadData);
@@ -173,7 +174,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     getSelect: () => selectRef.current
   }));
 
-  function setData(data: Lite<Entity>[]) {
+  function setData(data: Lite<Entity>[] | ResultTable) {
     if (mounted.current) {
       _setData(data);
       if (p.onDataLoaded)
@@ -190,10 +191,14 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.expandParentColumn(fo);
-        var limit = fo?.pagination?.elementsPerPage ?? 999;
-        Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
-          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+        var hasColumns = fo.columnOptions?.length;
+        Finder.defaultNoColumns(fo);
+        if (!hasColumns) {
+          fo.columnOptions = [];
+          fo.columnOptionsMode = "Replace";
+        }
+        Finder.getResultTable(fo)
+          .then(data => setData(data))
           .done();
       }
       else
@@ -212,24 +217,19 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   if (p.onRenderItem) {
     return (
-      <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionLites()} onChange={lite => p.onChange(lite ?? null)} value={lite}
-        filter="contains"
-        dataKey="value"
-        textField="label"
-        renderValue={a => p.onRenderItem!(a.item)}
-        renderListItem={a => p.onRenderItem!(a.item)}
+      <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()} onChange={row => p.onChange(row?.entity ?? null)} value={getResultRow(lite)}
+        renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item)}
+        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined: a.item)}
       />
     );
   } else {
     return (
       <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
-        {getOptionLites().map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
+        {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
     );
-
   }
-
 
   function handleOnChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const current = event.currentTarget as HTMLSelectElement;
@@ -240,10 +240,25 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       if (!current.value) {
         p.onChange(null);
       } else {
-        const liteFromData = data!.filter(a => liteKey(a) == current.value).single();
+        const liteFromData = Array.isArray(data) ? data!.single(a => liteKey(a) == current.value) :
+          data?.rows.single(a => liteKey(a.entity!) == current.value).entity!;
         p.onChange(liteFromData);
       }
     }
+  }
+
+  function getResultRow(lite: Lite<Entity> | undefined): ResultRow {
+
+    if (lite == null)
+      return ({ entity: undefined }) as ResultRow;
+
+    if (Array.isArray(data))
+      return ({ entity: lite }) as ResultRow;
+
+    if (typeof data == "object")
+      return data.rows.singleOrNull(a => is(lite, a.entity)) ?? ({ entity: lite }) as ResultRow;
+
+    return ({ entity: lite }) as ResultRow;
   }
 
   function getLite() {
@@ -257,19 +272,23 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return v as Lite<Entity>;
   }
 
-  function getOptionLites() {
+  function getOptionRows() {
 
     const lite = getLite();
 
-    const elements = [undefined, ...data ?? []];
+    var rows = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
+      typeof data == "object" ? data.rows :
+        [];
+
+    const elements: ResultRow[] = [{ entity: undefined } as ResultRow/*Because DropDownList*/, ...rows];
 
     if (lite) {
-      var index = elements.findIndex(a => is(a, lite));
+      var index = elements.findIndex(a => is(a?.entity, lite));
       if (index == -1)
-        elements.insertAt(1, lite);
+        elements.insertAt(1, { entity: lite } as ResultRow);
       else {
         if (!p.toStringFromData)
-          elements[index] = lite;
+          elements[index]!.entity = lite;
       }
     }
 

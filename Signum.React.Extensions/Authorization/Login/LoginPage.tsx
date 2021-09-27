@@ -7,6 +7,7 @@ import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import MessageModal from '@framework/Modals/MessageModal'
+import * as AppContext from '@framework/AppContext'
 import "./Login.css"
 
 
@@ -18,6 +19,7 @@ export interface LoginContext {
 
 export default function LoginPage() {
 
+  AppContext.useTitle(AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString());
 
   const [loading, setLoading] = React.useState<string | undefined>(undefined);
 

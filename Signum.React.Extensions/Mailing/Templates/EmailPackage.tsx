@@ -14,8 +14,7 @@ export default function EmailPackage(p : { ctx: TypeContext<EmailPackageEntity> 
         <legend>{EmailMessageEntity.nicePluralName()}</legend>
         <SearchControl findOptions={{
           queryName: EmailMessageEntity,
-          parentToken: EmailMessageEntity.token(e => e.package),
-          parentValue: e.value
+          filterOptions: [{ token: EmailMessageEntity.token(e => e.package), value: e.value}]
         }} />
       </fieldset>
     </div>

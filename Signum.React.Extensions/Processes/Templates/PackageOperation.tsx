@@ -13,7 +13,7 @@ export default function PackageOperation(p : { ctx: TypeContext<PackageOperation
       <EntityLine ctx={e.subCtx(f => f.operation)} readOnly={true} />
       <fieldset>
         <legend>{PackageLineEntity.nicePluralName()}</legend>
-        <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentToken: PackageLineEntity.token(e => e.package), parentValue: e.value }} />
+        <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [{ token: PackageLineEntity.token(e => e.package), value: e.value }]}} />
       </fieldset>
     </div>
   );

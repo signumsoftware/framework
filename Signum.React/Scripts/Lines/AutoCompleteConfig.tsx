@@ -142,7 +142,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     options?: FindOptionsAutocompleteConfigOptions,
   ) {
     if (typeof this.findOptions == "object")
-      Finder.expandParentColumn(this.findOptions);
+      Finder.defaultNoColumns(this.findOptions);
 
     Dic.assign(this, options);
   }

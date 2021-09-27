@@ -91,6 +91,7 @@ export module QueryTokenMessage {
   export const TotalDays = new MessageKey("QueryTokenMessage", "TotalDays");
   export const TotalHours = new MessageKey("QueryTokenMessage", "TotalHours");
   export const TotalSeconds = new MessageKey("QueryTokenMessage", "TotalSeconds");
+  export const TotalMinutes = new MessageKey("QueryTokenMessage", "TotalMinutes");
   export const TotalMilliseconds = new MessageKey("QueryTokenMessage", "TotalMilliseconds");
   export const Minute = new MessageKey("QueryTokenMessage", "Minute");
   export const Month = new MessageKey("QueryTokenMessage", "Month");

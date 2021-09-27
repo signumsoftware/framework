@@ -54,12 +54,15 @@ namespace Signum.Upgrade
                 new Upgrade_20210414_SimplifyQueryTokenString(),
                 new Upgrade_20210415_ReactWidgets503(),
                 new Upgrade_20210511_MSAL2(),
-                new Upgrade_20210513_UpdateNugets(),    
+                new Upgrade_20210513_UpdateNugets(),
                 new Upgrade_20210726_SimplifyDockerBuild(),
                 new Upgrade_20210816_RemoveWebAuth(),
                 new Upgrade_20210824_UpdateNugets(),
                 new Upgrade_20210828_ExtensionsLoveFramework(),
                 new Upgrade_20210829_TypeScript44(),
+                new Upgrade_20210908_BlueGreenDeployments(),
+                new Upgrade_20210916_UpdateNugets(),
+                new Upgrade_20210924_RemoveParentTokenParentValue(),
                 new Upgrade_20210927_ReplaceRefreshKey(),
             }.Run(uctx);
         }

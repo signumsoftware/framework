@@ -16,8 +16,7 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
   DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
     queryName: DynamicValidationEntity,
-    parentToken: DynamicValidationEntity.token(a => a.entityType!.cleanName),
-    parentValue: type
+    filterOptions: [{ token: DynamicValidationEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
     { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },

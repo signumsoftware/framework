@@ -390,7 +390,7 @@ namespace Signum.Utilities.Reflection
             return false;
         }
 
-        internal static bool IsDate(Type type)
+        public static bool IsDate(Type type)
         {
             return type == typeof(Date)
                 || type == typeof(DateTime)

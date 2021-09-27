@@ -67,7 +67,11 @@ namespace Signum.Engine.Translation
             {
                 var valid = gr.Where(a => a.Original.Description != null);
 
-                var originalDescriptions = valid.Select(a => a.Original.Description!).ToList();
+                var originalDescriptions = valid.Select(a =>
+                    (a.Original.Options.HasFlag(DescriptionOptions.Gender) ? (NaturalLanguageTools.GetDeterminer(a.Original.Gender, false, gr.Key) + " " + a.Original.Description!) : a.Original.Description) +
+                    (a.Original.Options.HasFlag(DescriptionOptions.PluralDescription) ? "\n" + a.Original.PluralDescription : "")
+                ).ToList();
+
                 foreach (var tr in translators)
                 {
                     var translations = tr.TranslateBatch(originalDescriptions, gr.Key.Name, target.Culture.Name);
@@ -76,7 +80,18 @@ namespace Signum.Engine.Translation
                         valid.ZipForeach(translations, (sp, translated) =>
                         {
                             if (translated != null)
-                                sp.AutomaticTranslations.Add(new AutomaticTranslation { Text = translated, TranslatorName = tr.Name });
+                            {
+                                var lines = translated.Lines();
+                                var singular = lines[0];
+                                var plural = sp.Original.Options.HasFlag(DescriptionOptions.PluralDescription) ? lines[1] : null;
+
+                                char? gender = null;
+
+                                if(sp.Original.Options.HasFlag(DescriptionOptions.Gender) && NaturalLanguageTools.TryGetGenderFromDeterminer(singular.TryBefore(" "), false, target.Culture, out gender))
+                                    singular = singular.After(" ");
+
+                                sp.AutomaticTranslations.Add(new AutomaticTypeTranslation { Singular = singular, Plural = plural, Gender = gender, TranslatorName = tr.Name });
+                            }
                         });
                     }
 
@@ -221,7 +236,7 @@ namespace Signum.Engine.Translation
     {
         public LocalizedType Original;
 
-        public List<AutomaticTranslation> AutomaticTranslations = new List<AutomaticTranslation>();
+        public List<AutomaticTypeTranslation> AutomaticTranslations = new List<AutomaticTypeTranslation>();
 
         public override string ToString()
         {
@@ -229,10 +244,12 @@ namespace Signum.Engine.Translation
         }
     }
 
-    public class AutomaticTranslation
+    public class AutomaticTypeTranslation
     {
         public string TranslatorName;
-        public string Text;
+        public char? Gender;
+        public string Singular;
+        public string? Plural;
     }
 
     public class MemberNameConflict
@@ -245,6 +262,12 @@ namespace Signum.Engine.Translation
         {
             return "Conflict {0} -> {1}".FormatWith(Original, AutomaticTranslations.Count);
         }
+    }
+
+    public class AutomaticTranslation
+    {
+        public string TranslatorName;
+        public string Text;
     }
 
     public class NamespaceSyncStats

@@ -98,14 +98,19 @@ namespace Signum.Utilities
                     Console.WriteLine(value);
                 }
 
-                SafeConsole.WriteColor(ConsoleColor.White, " " + keys[i]);
-                Console.WriteLine(" - " + dictionary[key].Description);
+                PrintOption(key, dictionary[key]);
             }
 
             if (skip + take >= dictionary.Count) return;
             SafeConsole.WriteColor(ConsoleColor.White, " +");
             Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
         }
+
+        public Action<string, WithDescription<V>> PrintOption = (key, vwd) =>
+        {
+            SafeConsole.WriteColor(ConsoleColor.White, " " + key);
+            Console.WriteLine(" - " + vwd.Description);
+        };
 
         public V[]? ChooseMultiple(string[]? args = null)
         {
@@ -203,7 +208,7 @@ namespace Signum.Utilities
 
             var sd = new StringDistance();
             var best = dictionary.Keys.WithMin(a => sd.LevenshteinDistance(input.ToLowerInvariant(), a.ToLowerInvariant()));
-            if (sd.LevenshteinDistance(input.ToLowerInvariant(), best.ToLowerInvariant()) <= 2)
+            if (best != null && sd.LevenshteinDistance(input.ToLowerInvariant(), best.ToLowerInvariant()) <= 2)
             {
                 if (SafeConsole.Ask($"Did you mean '{best}'?"))
                     return dictionary.GetOrThrow(best);

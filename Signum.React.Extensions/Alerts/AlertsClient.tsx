@@ -34,8 +34,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: AlertEntity,
-    parentToken: AlertEntity.token(e => e.target),
-    parentValue: ctx.lite
+    filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
     icon: "bell",
@@ -61,7 +60,8 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
   var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
 
     var alert: Partial<AlertEntity> = {
-      target: ctx.row.columns[ctx.columns.indexOf("Target")]
+      target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
+      textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
     return formatText(cell, alert);
   });
@@ -70,7 +70,10 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
 
   Finder.addSettings({
     queryName: AlertEntity,
-    hiddenColumns: [{ token: "Target" }],
+    hiddenColumns: [
+      { token: AlertEntity.token(a => a.target) },
+      { token: AlertEntity.token(a => a.entity.textArguments) }
+    ],
     formatters: {
       "Text": cellFormatter
     }
@@ -121,8 +124,7 @@ export function getTitle(titleField: string | null, type: AlertTypeSymbol | null
 
   return type!.name;
 }
-  export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement{
-
+export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement {
   var nodes: (string | React.ReactElement)[] = [];
   var pos = 0;
   for (const match of Array.from(text.matchAll(LinkPlaceholder))) {
@@ -158,24 +160,31 @@ export function getTitle(titleField: string | null, type: AlertTypeSymbol | null
 }
 
 const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
+const NumericPlaceholder = /^[ \d]+$/;
 
 function replacePlaceHolders(value: string | null | undefined, alert: Partial<AlertEntity>) {
   if (value == null)
     return null;
 
   return value.replace(TextPlaceholder, args => {
-    return getPropertyValue(args[1], alert)?.ToString()!;
+
+    var prop = args[1];
+
+    if (NumericPlaceholder.test(prop))
+      return alert.textArguments?.split("\n###\n")[parseInt(prop)];
+
+    return getPropertyValue(prop, alert)?.ToString()! ?? "";
   });
 }
 
-function getPropertyValue(str: string, object: any) : any{
+function getPropertyValue(str: string, object: Partial<AlertEntity>): any {
   if (str.contains(".")) {
     var obj2 = getPropertyValue(str.before("."), object);
 
     return obj2 == null ? obj2 : obj2[str.after(".").firstLower()];
   }
 
-  return object[str.firstLower()]
+  return (object as any)[str.firstLower()]
 }
 
 export module API {
@@ -185,7 +194,7 @@ export module API {
   }
 
   export function myAlertsCount(): Promise<NumAlerts> {
-    return ajaxGet({ url: "~/api/alerts/myAlertsCount", avoidNotifyPendingRequests : true });
+    return ajaxGet({ url: "~/api/alerts/myAlertsCount", avoidNotifyPendingRequests: true });
   }
 }
 

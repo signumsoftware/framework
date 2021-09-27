@@ -24,14 +24,16 @@ namespace Signum.Entities.Alerts
 
 
         [AutoExpressionField]
-        public string Title => As.Expression(() => TitleField! ?? AlertType!.NiceToString()); //Replaced in Logic
+        public string Title => As.Expression(() => TitleField! ?? (AlertType != null ? AlertType.NiceToString() : CreationDate.ToString())); //Replaced in Logic
 
         [StringLengthValidator(Max = 100)]
         public string? TitleField { get; set; }
 
-
         [AutoExpressionField]
         public string? Text => As.Expression(() => TextField); //Replaced in Logic
+
+        [StringLengthValidator(MultiLine = true)]
+        public string? TextArguments { get; set; }
 
         [StringLengthValidator(Min = 1, MultiLine = true)]
         public string? TextField { get; set; }
@@ -51,10 +53,9 @@ namespace Signum.Entities.Alerts
 
         public bool EmailNotificationsSent { get; set; }
 
-
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Title);
-       
+
 
         [AutoExpressionField]
         public bool Attended => As.Expression(() => AttendedDate.HasValue);
@@ -76,7 +77,7 @@ namespace Signum.Entities.Alerts
 
         protected override string? PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(TitleField) && TitleField == null && AlertType == null)
+            if (pi.Name == nameof(TitleField) && TitleField == null && AlertType == null)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
             return base.PropertyValidation(pi);
@@ -174,5 +175,12 @@ namespace Signum.Entities.Alerts
         NewUnreadNotifications,
         Title,
         Text,
+        [Description("Hi {0},")]
+        Hi0,
+        [Description("You have some pending alerts:")]
+        YouHaveSomePendingAlerts,
+        [Description("Please visit {0}")]
+        PleaseVisit0,
     }
+
 }

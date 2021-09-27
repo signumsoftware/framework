@@ -12,7 +12,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => import('./Expression/DynamicExpression')));
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, parentToken: DynamicExpressionEntity.token(e => e.fromType), parentValue: type + "Entity" }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, filterOptions: [{ token: DynamicExpressionEntity.token(e => e.fromType), value: type + "Entity" }]}} />);
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicExpressionEntity, t => [
     { token: t.append(p => p.entity.body), type: "Code" },
     { token: t.append(p => p.name), type: "Text" },

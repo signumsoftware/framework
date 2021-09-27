@@ -1406,17 +1406,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resultTable = this.state.resultTable;
 
+    var resFO = this.state.resultFindOptions!;
+
     if (resultTable.rows.length == 0) {
-      if (resultTable.totalElements == 0 || this.props.showFooter == false)
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
         return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
       else
         return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
-          this.state.resultFindOptions!.pagination.currentPage,
+          resFO.pagination.currentPage,
           <a href="#" onClick={e => {
             e.preventDefault();
             this.handlePagination({
               mode: "Paginate",
-              elementsPerPage: this.state.resultFindOptions!.pagination.elementsPerPage,
+              elementsPerPage: resFO.pagination.elementsPerPage,
               currentPage: 1
             });
           }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>

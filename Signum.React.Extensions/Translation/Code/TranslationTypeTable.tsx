@@ -119,7 +119,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
   }
 }
 
-TranslationMember.normalizeString = (str: string): string => {
+TranslationMember.normalizeString = (str: string | undefined): string | undefined => {
   return str;
 };
 
@@ -140,23 +140,43 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
 
   const forceUpdate = useForceUpdate();
   
+  const translatedTypes = Dic.getValues(p.type.cultures)
+    .filter(a => a.typeDescription?.automaticTranslations)
+    .flatMap(a => a.typeDescription!.automaticTranslations.map(at => ({
+      singular: at.singular,
+      plural: at.plural,
+      gender: at.gender,
+      translatorName: at.translatorName,
+      culture: a.culture
+    })));
 
-
-  function handleOnChange(e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleOnChangeTextArea(e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) {
     const { loc } = p;
     const td = loc.typeDescription!;
     td.description = TranslationMember.normalizeString(e.currentTarget.value);
 
-    API.pluralize(loc.culture, td.description).then(plural => {
+    API.pluralize(loc.culture, td.description!).then(plural => {
       td.pluralDescription = plural;
       forceUpdate();
     }).done();
 
-    API.gender(loc.culture, td.description).then(gender => {
+    API.gender(loc.culture, td.description!).then(gender => {
       td.gender = gender;
       forceUpdate();
     }).done();
 
+    forceUpdate();
+  }
+
+  function handleOnSelect(e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) {
+    const { loc } = p;
+
+    var val = e.currentTarget.value;
+    debugger;
+    var line = !val ? null : translatedTypes.first(a => a.singular == val);
+    td.description = TranslationMember.normalizeString(line?.singular);
+    td.pluralDescription = TranslationMember.normalizeString(line?.plural);
+    td.gender = line?.gender;
     forceUpdate();
   }
 
@@ -181,22 +201,20 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     const { loc } = p;
     const td = loc.typeDescription!;
 
-    const translatedTypes = Dic.getValues(p.type.cultures)
-      .filter(a => a.typeDescription?.automaticTranslations)
-      .flatMap(a => a.typeDescription!.automaticTranslations.map(at => ({ text: at.text, translatorName: at.translatorName, culture: a.culture })));
+   
 
     if (!translatedTypes.length || avoidCombo)
       return (
         <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.description ?? ""}
           onChange={e => { loc.typeDescription!.description = e.currentTarget.value; forceUpdate(); }}
-          onBlur={handleOnChange} innerRef={handleOnTextArea} />
+          onBlur={handleOnChangeTextArea} innerRef={handleOnTextArea} />
       );
 
     return (
       <span>
-        <select value={td.description ?? ""} onChange={handleOnChange} onKeyDown={handleKeyDown}>
+        <select value={td.description ?? ""} onChange={handleOnSelect} onKeyDown={handleKeyDown}>
           {initialElementIf(!td.description).concat(
-            translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.text}>{a.text}</option>))}
+            translatedTypes.map(a => <option key={a.culture + a.translatorName} title={`from '${a.culture}' using ${a.translatorName}`} value={a.singular}>{a.singular}</option>))}
         </select>
         &nbsp;
                 <a href="#" onClick={handleAvoidCombo}>{TranslationMessage.Edit.niceToString()}</a>

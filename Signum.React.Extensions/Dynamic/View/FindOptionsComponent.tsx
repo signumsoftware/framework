@@ -60,8 +60,7 @@ export function FindOptionsLine(p : FindOptionsLineProps){
         }))
         .then(sfo => ({
           queryName: sfo?.queryKey,
-          parentToken: sfo?.parentToken,
-          parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
+          filterOptions: [{ token: sfo?.parentToken, value: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity> }]
         } as FindOptionsExpr));
 
     promise.then(fo => modifyFindOptions(fo)).done();
@@ -89,7 +88,6 @@ export function FindOptionsLine(p : FindOptionsLineProps){
   }
 
   function clean(fo: FindOptionsExpr) {
-    delete fo.parsedParentToken;
     if (fo.filterOptions) fo.filterOptions.forEach(f => delete f.parsedToken);
     if (fo.orderOptions) fo.orderOptions.forEach(o => delete o.parsedToken);
     if (fo.columnOptions) fo.columnOptions.forEach(c => delete c.parsedToken);
@@ -241,20 +239,13 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
   function handleChangeQueryKey(queryKey: string | undefined) {
     const fo = p.findOptions;
     fo.queryName = queryKey;
-    delete fo.parsedParentToken;
     delete fo.parentToken;
-    delete fo.parentValue;
     delete fo.filterOptions;
     delete fo.columnOptions;
     delete fo.orderOptions;
     forceUpdate();
   }
 
-  function handleChangeParentColumn(newToken: QueryToken | undefined) {
-    p.findOptions.parentToken = newToken?.fullKey;
-    p.findOptions.parsedParentToken = newToken;
-    forceUpdate();
-  }
 
   var dn = p.dn;
   const fo = p.findOptions;
@@ -264,30 +255,15 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
 
         {fo.queryName &&
           <div>
-            <div className="row">
-              <div className="col-sm-6">
-                <QueryTokenBuilderString label="parentToken" parsedToken={fo.parsedParentToken} token={fo.parentToken}
-                onChange={handleChangeParentColumn} queryKey={fo.queryName} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
-              </div>
-              <div className="col-sm-6">
-                {fo.parsedParentToken &&
-                <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.parentValue)} refreshView={() => forceUpdate()}
-                    type={FilterOptionsComponent.getValueType(fo.parsedParentToken)} defaultValue={null} />}
-              </div>
-            </div>
+            <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
+              <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.includeDefaultFilters)} refreshView={() => forceUpdate()} type="boolean" defaultValue={null} />
+            } />
+            <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
+              <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
+            } />
 
-
-          <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.includeDefaultFilters)} refreshView={() => forceUpdate()} type="boolean" defaultValue={null} />
-          } />
-        <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} extraButtons={() =>
-          <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-          } />
-
-          <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} />
-          <PaginationComponent dn={dn} findOptions={fo} refreshView={() => forceUpdate()} />
-
-
+            <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => forceUpdate()} />
+            <PaginationComponent dn={dn} findOptions={fo} refreshView={() => forceUpdate()} />
           </div>
         }
       </div>

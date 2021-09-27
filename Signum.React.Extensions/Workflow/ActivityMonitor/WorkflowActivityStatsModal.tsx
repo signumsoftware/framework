@@ -43,9 +43,10 @@ const [show, setShow] = React.useState<boolean>(true);
           showGroupButton={true}
           findOptions={{
             queryName: CaseActivityEntity,
-            parentToken: CaseActivityEntity.token(e => e.entity.workflowActivity),
-            parentValue: stats.workflowActivity,
-            filterOptions: toFilterOptions(p.config.filters.filter(f => !isAggregate(f))),
+            filterOptions: [
+              { token: CaseActivityEntity.token(e => e.entity.workflowActivity), value: stats.workflowActivity },
+              ...toFilterOptions(p.config.filters.filter(f => !isAggregate(f)))
+            ],
             columnOptionsMode: "Add",
             columnOptions: p.config.columns
               .filter(c => c.token && c.token.fullKey.contains("."))

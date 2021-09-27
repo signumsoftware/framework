@@ -22,6 +22,7 @@ export interface AlertEntity extends Entities.Entity {
   alertDate: string | null;
   attendedDate: string | null;
   titleField: string | null;
+  textArguments: string | null;
   textField: string | null;
   textFromAlertType: string | null;
   createdBy: Entities.Lite<Basics.IUserEntity> | null;
@@ -55,6 +56,9 @@ export module AlertMessage {
   export const NewUnreadNotifications = new MessageKey("AlertMessage", "NewUnreadNotifications");
   export const Title = new MessageKey("AlertMessage", "Title");
   export const Text = new MessageKey("AlertMessage", "Text");
+  export const Hi0 = new MessageKey("AlertMessage", "Hi0");
+  export const YouHaveSomePendingAlerts = new MessageKey("AlertMessage", "YouHaveSomePendingAlerts");
+  export const PleaseVisit0 = new MessageKey("AlertMessage", "PleaseVisit0");
 }
 
 export module AlertOperation {

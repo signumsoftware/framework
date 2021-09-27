@@ -20,9 +20,9 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu';
-import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems';
-import { SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/Search';
+import ContextMenu from '@framework/SearchControl/ContextMenu';
+import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
+import { SearchControlLoaded } from '@framework/Search';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });

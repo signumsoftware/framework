@@ -4,7 +4,7 @@ import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 import { useForceUpdate } from '@framework/Hooks'
-import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { TypeEntity } from '@framework/Signum.Entities.Basics'
 
 interface WorkflowEventModelComponentProps {
   ctx: TypeContext<WorkflowEventModel>;
@@ -60,7 +60,7 @@ export default function WorkflowEventModelComponent(p: WorkflowEventModelCompone
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(we => we.name)} />
-      <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} comboBoxItems={getTypeComboItems()} onChange={loadTask} />
+      <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} optionItems={getTypeComboItems()} onChange={loadTask} />
       {ctx.value.task && <WorkflowEventTask ctx={ctx.subCtx(a => a.task!)} mainEntityType={ctx.value.mainEntityType} isConditional={isConditional()} />}
       {ctx.value.timer && <WorkflowTimer ctx={ctx.subCtx(a => a.timer!)} mainEntityType={ctx.value.mainEntityType}/>}
     </div>
@@ -105,7 +105,7 @@ function WorkflowTimer(p: { ctx: TypeContext<WorkflowTimerEmbedded>, mainEntityT
     <div>
       <EntityDetail ctx={ctx.subCtx(te => te.duration)} />
       <EntityLine ctx={ctx.subCtx(te => te.condition)}
-        findOptions={{ queryName: WorkflowTimerConditionEntity, parentToken: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), parentValue: p.mainEntityType }} />
+        findOptions={{ queryName: WorkflowTimerConditionEntity, filterOptions: [{ token: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), value: p.mainEntityType }]}} />
     </div>
   );
 }

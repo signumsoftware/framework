@@ -299,6 +299,7 @@ namespace Signum.Engine.Processes
 
             var totalCount = remainingNotExceptionsLines.Count();
             int j = 0;
+            executingProcess.ProgressChanged(0, totalCount);
             while (true)
             {
                 List<T> lines = remainingNotExceptionsLines.Take(groupsOf).ToList();
@@ -341,7 +342,8 @@ namespace Signum.Engine.Processes
                             });
                         }
 
-                        executingProcess.ProgressChanged(j++, totalCount);
+                        j++;
+                        executingProcess.ProgressChanged(j, totalCount);
                     }
                 }
             }

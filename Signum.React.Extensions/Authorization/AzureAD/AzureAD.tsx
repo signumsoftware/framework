@@ -3,6 +3,7 @@ import * as msal from "@azure/msal-browser";
 import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
+import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
@@ -57,6 +58,9 @@ export function signIn(ctx: LoginContext) {
 
       if (e && e.name == "ClientAuthError" && e.errorCode == "user_cancelled")
         return;
+
+      if (e instanceof msal.AuthError)
+        throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
 
       throw e;
     })
