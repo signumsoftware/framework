@@ -12,7 +12,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: string | number; }) {
 
   function renderBasic() {
     const db = p.dashboard;

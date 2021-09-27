@@ -54,7 +54,7 @@ export default function DashboardPage(p: DashboardPageProps) {
         </div>
       }
 
-      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} refreshKey={entity?.ticks} />}
+      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} deps={entity?.ticks} />}
     </div>
   );
 }

@@ -18,7 +18,7 @@ export interface EntityComboProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   data?: Lite<Entity>[];
   labelTextWithData?: (data: Lite<Entity>[] | ResultTable | undefined | null) => React.ReactChild;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   onRenderItem?: (lite: ResultRow | undefined, resultTable?: ResultTable) => React.ReactChild;
@@ -41,9 +41,9 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   doView(entity: ModifiableEntity | Lite<Entity>) {
     var promise = super.doView(entity) ?? Promise.resolve(undefined);
 
-    if (this.props.refreshKey == null) {
+    if (this.props.deps == null) {
       promise = promise.then(a => {
-        this.props.refreshKey = new Date().getTime().toString();
+        this.props.deps = [new Date().getTime().toString()];
         this.forceUpdate();
         return a;
       });
@@ -110,7 +110,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             findOptions={p.findOptions}
             onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
             mandatoryClass={c.mandatoryClass}
-            refreshKey={p.refreshKey}
+            deps={p.deps}
             delayLoadData={p.delayLoadData}
             toStringFromData={p.toStringFromData}
             selectHtmlAttributes={p.selectHtmlAttributes}
@@ -133,7 +133,7 @@ export interface EntityComboSelectProps {
   data?: Lite<Entity>[];
   mandatoryClass: string | null;
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
   onRenderItem?: (lite: ResultRow | undefined) => React.ReactNode;
   liteToString?: (e: Entity) => string;
@@ -206,7 +206,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
           .then(data => setData(data.orderBy(a => a)))
           .done();
     }
-  }, [normalizeEmptyArray(p.data), p.type.name, p.refreshKey, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   const lite = getLite();
 
