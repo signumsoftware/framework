@@ -220,7 +220,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   return data && data.result;
 }
 
-function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
+export function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
 
   if (depsA.length !== depsB.length)
     return false;

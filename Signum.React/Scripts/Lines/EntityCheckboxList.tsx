@@ -14,7 +14,7 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   renderCheckbox?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityCheckboxListController) => React.ReactElement; 
 }
 
@@ -127,7 +127,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [normalizeEmptyArray(p.data), p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-checkbox-elements" style={getColumnStyle()}>

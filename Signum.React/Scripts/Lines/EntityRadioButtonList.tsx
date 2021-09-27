@@ -11,7 +11,7 @@ export interface EntityRadioButtonListProps extends EntityBaseProps {
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   renderRadio?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityRadioButtonListController) => React.ReactElement;
   groupKey: string;
 }
@@ -120,7 +120,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [p.data, p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-radiobutton-elements switch-field">
