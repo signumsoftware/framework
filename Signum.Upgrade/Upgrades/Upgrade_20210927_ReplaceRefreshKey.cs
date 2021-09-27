@@ -19,7 +19,7 @@ namespace Signum.Upgrade.Upgrades
             uctx.ForeachCodeFile($@"*.tsx, *.ts", uctx.ReactDirectory, file =>
             {
                 file.Replace(new Regex(@"refreshKey\s*=\s*{(?<val>(?:[^{}]|(?<Open>[{])|(?<-Open>[}]))+)}"),
-                    m => $@"deps = {{[{m.Groups["val"].Value}]}}");
+                    m => $@"deps={{[{m.Groups["val"].Value}]}}");
             });
         }        
     }
