@@ -60,7 +60,7 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
   return (
     <FullscreenComponent onReload={e => { e.preventDefault(); setRefreshCount(a => a + 1); }} onCreateNew={part.createNew ? handleCreateNew : undefined} typeInfos={typeInfos}>
       <SearchControl
-        refreshKey={refreshCount}
+        deps={[refreshCount]}
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
         showFooter={part.showFooter}

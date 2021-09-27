@@ -11,7 +11,7 @@ export interface EntityRadioButtonListProps extends EntityBaseProps {
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   nullPlaceHolder?: string;
   onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
 }
@@ -119,7 +119,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [p.data, p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-radiobutton-elements" style={getColumnStyle()}>

@@ -13,6 +13,7 @@ import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
+import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
@@ -72,7 +73,7 @@ export interface SearchControlLoadedProps {
   largeToolbarButtons: boolean;
   defaultRefreshMode?: RefreshMode;
   avoidChangeUrl: boolean;
-  refreshKey: any;
+  deps?: React.DependencyList;
   extraOptions: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
@@ -161,7 +162,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
-    if (this.props.refreshKey != props.refreshKey) {
+    if (!Hooks.areEqual(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
