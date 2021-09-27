@@ -20,7 +20,7 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
             {
-                file.Replace(regex, r => $"filterOptions: [{{ token: {r.Groups["parentToken"]}, value: {r.Groups["parentValue"]}}}]");
+                file.Replace(regex, r => $"filterOptions: [{{ token: {r.Groups["parentToken"]}, value: {r.Groups["parentValue"]}}}] ");
             });
         }
     }
