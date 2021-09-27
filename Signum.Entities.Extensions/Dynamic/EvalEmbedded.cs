@@ -109,7 +109,7 @@ namespace Signum.Entities.Dynamic
                                     var lines = code.Split('\n');
                                     return new CompilationResult
                                     {
-                                        CompilationErrors = allCustomErrors.Count() + " Errors:\r\n" + allCustomErrors.ToString(e => {
+                                        CompilationErrors = allCustomErrors.Count + " Errors:\r\n" + allCustomErrors.ToString(e => {
                                             return "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1];
                                         }, "\r\n\r\n")
                                     };
