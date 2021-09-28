@@ -13,6 +13,7 @@ export interface CodeMirrorProps {
   value?: string | null,
   className?: string,
   errorLineNumber?: number;
+  onInit?: (cm: CodeMirror.EditorFromTextArea) => void;
 }
 
 
@@ -36,6 +37,8 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
     codeMirror.on('focus', () => focusChanged(true));
     codeMirror.on('blur', () => focusChanged.bind(false));
     codeMirror.setValue(p.value ?? '');
+    if (p.onInit)
+      p.onInit(codeMirror);
 
     return () => {
       codeMirror.toTextArea();
