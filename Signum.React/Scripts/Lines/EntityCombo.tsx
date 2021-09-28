@@ -218,13 +218,16 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   if (p.onRenderItem) {
     return (
       <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()} onChange={row => p.onChange(row?.entity ?? null)} value={getResultRow(lite)}
+        title={lite?.toStr}
         renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item)}
         renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined: a.item)}
       />
     );
   } else {
     return (
-      <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""} onClick={() => setLoadData(true)}
+      <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+        title={lite?.toStr}
+        onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
         {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
