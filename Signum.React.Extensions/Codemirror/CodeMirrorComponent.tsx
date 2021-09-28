@@ -17,7 +17,7 @@ export interface CodeMirrorProps {
 
 
 export interface CodeMirrorComponentHandler {
-  focus() : void;
+  codeMirror?: CodeMirror.EditorFromTextArea;
 }
 
 export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
@@ -80,7 +80,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
   }
 
   React.useImperativeHandle(ref, () => ({
-    focus
+    codeMirror: codeMirrorRef.current
   }));
 
   function focusChanged(focused: boolean) {
