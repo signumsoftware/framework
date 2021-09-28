@@ -21,7 +21,7 @@ import { getTypeInfo } from '@framework/Reflection'
 export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity>) {
 
   const treeViewRef = React.useRef<TreeViewer>(null);
-  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity, ...p.deps ?? []]);
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userQuery.query.key), [p.part.userQuery.query.key]);
 
 

@@ -34,14 +34,12 @@ export function start(options: { routes: JSX.Element[] }) {
 
   DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
     queryName: DynamicViewEntity,
-    parentToken: DynamicViewEntity.token(a => a.entityType!.cleanName),
-    parentValue: type
+    filterOptions: [{ token: DynamicViewEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
 
   DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
     queryName: DynamicViewSelectorEntity,
-    parentToken: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName),
-    parentValue: type
+    filterOptions: [{ token: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [

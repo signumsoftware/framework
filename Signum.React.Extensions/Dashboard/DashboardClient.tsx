@@ -27,6 +27,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
   part: T;
   entity?: Lite<Entity>;
+  deps?: React.DependencyList;
 }
 
 interface IconColor {

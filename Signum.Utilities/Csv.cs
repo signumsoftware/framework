@@ -165,8 +165,8 @@ namespace Signum.Utilities
 
         public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
-            encoding = encoding ?? DefaultEncoding;
-            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
+            encoding ??= DefaultEncoding;
+            culture ??= DefaultCulture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
                 return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
@@ -180,7 +180,7 @@ namespace Signum.Utilities
 
         public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
-            encoding = encoding ?? DefaultEncoding;
+            encoding ??= DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
             var defOptions = options ?? new CsvReadOptions<T>();
 
@@ -395,7 +395,7 @@ namespace Signum.Utilities
         {
             if (s.StartsWith("\"") && s.EndsWith("\""))
             {
-                string str = s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+                string str = s[1..^1].Replace("\"\"", "\"");
 
                 return Regex.Replace(str, "(?<!\r)\n", "\r\n");
             }

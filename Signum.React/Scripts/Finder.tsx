@@ -236,7 +236,7 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
-  fo = expandParentColumn(fo);
+  fo = autoRemoveTrivialColumns(fo);
 
   const query = {
     groupResults: fo.groupResults || undefined,
@@ -343,7 +343,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
   current = current.filter(a => a.token != null);
 
-if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
+  if (ideal.every((idl, i) => i < current.length && similar(current[i], idl))) {
     return {
       mode: "Add",
       columns: current.slice(ideal.length).map(c => ({
@@ -710,7 +710,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
   const fo: FindOptions = { ...findOptions };
 
-  expandParentColumn(fo);
+  autoRemoveTrivialColumns(fo);
 
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
@@ -815,7 +815,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
     return [fo.value];
   }
 
-  var allValues = [fo.parentValue, ...(fo.filterOptions ?? []).flatMap(fo => getValues(fo))];
+  var allValues = (fo.filterOptions ?? []).flatMap(fo => getValues(fo));
 
   var allNewTypes = allValues.flatMap(a => getTypeIfNew(a));
 
@@ -1006,31 +1006,37 @@ export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function expandParentColumn(fo: FindOptions): FindOptions {
+export function defaultNoColumns(fo: FindOptions): FindOptions {
 
-  if (!fo.parentToken)
-    return fo;
+  if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined) {
 
-  fo.filterOptions = [
-    { token: fo.parentToken, operation: "EqualTo", value: fo.parentValue, frozen: true },
-    ...(fo.filterOptions ?? [])
-  ];
-
-  if (!fo.parentToken.toString().contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
-    fo.columnOptions = [
-      { token: fo.parentToken },
-      ...(fo.columnOptions ?? [])
-    ];
-
-    fo.columnOptionsMode = "Remove";
+    fo.columnOptions = [];
+    fo.columnOptionsMode = "Replace";
   }
-
-  fo.parentToken = undefined;
-  fo.parentValue = undefined;
 
   return fo;
 }
 
+export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
+
+  if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined && fo.filterOptions) {
+    var trivialColumns = getTrivialColumns(fo.filterOptions);
+
+    if (trivialColumns.length) {
+      fo.columnOptions = trivialColumns;
+      fo.columnOptionsMode = "Remove";
+    }
+  }
+
+  return fo;
+}
+
+
+export function getTrivialColumns(fos: FilterOption[]) {
+  return fos
+    .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
+    .map(fo => ({ token: fo.token }) as ColumnOption);
+}
 export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
   return getQueryDescription(getQueryKey(queryName)).then(qd => {

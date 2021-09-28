@@ -40,8 +40,7 @@ export function start() {
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
-    parentToken: OperationLogEntity.token(e => e.target),
-    parentValue: ctx.lite
+    filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite}]
   },
     {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).operations && Finder.isFindable(OperationLogEntity, false),

@@ -12,7 +12,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, refreshKey?: string | number; }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; }) {
 
   function renderBasic() {
     const db = p.dashboard;
@@ -163,6 +163,7 @@ interface CombinedColumn {
 export interface PanelPartProps {
   ctx: TypeContext<PanelPartEmbedded>;
   entity?: Entity;
+  deps?: React.DependencyList;
 }
 
 export interface PanelPartState {
@@ -191,6 +192,7 @@ export function PanelPart(p: PanelPartProps) {
       partEmbedded: part,
       part: content,
       entity: lite,
+      deps: p.deps,
     });
   }
 
@@ -229,6 +231,7 @@ export function PanelPart(p: PanelPartProps) {
               partEmbedded: part,
               part: content,
               entity: lite,
+              deps: p.deps,
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>

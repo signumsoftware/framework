@@ -575,15 +575,15 @@ namespace Signum.Engine.Linq
                     });
                 }
 
-                switch (unit)
-                { 
-                    case SqlEnums.day: return Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60 * 24.0)));
-                    case SqlEnums.hour: return Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60.0)));
-                    case SqlEnums.minute: return Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000 * 60.0)));
-                    case SqlEnums.second: return Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000.0)));
-                    case SqlEnums.millisecond: return Add(DateDiff(SqlEnums.millisecond));
-                    default: throw new UnexpectedValueException(unit);
-                }
+                return unit switch
+                {
+                    SqlEnums.day => Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60 * 24.0))),
+                    SqlEnums.hour => Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60.0))),
+                    SqlEnums.minute => Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000 * 60.0))),
+                    SqlEnums.second => Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000.0))),
+                    SqlEnums.millisecond => Add(DateDiff(SqlEnums.millisecond)),
+                    _ => throw new UnexpectedValueException(unit),
+                };
             }
         }
 

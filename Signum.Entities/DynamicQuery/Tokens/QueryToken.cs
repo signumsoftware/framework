@@ -316,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
         public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
         {
             if (parent.HasAllOrAny())
-                options = options & ~SubTokensOptions.CanElement;
+                options &= ~SubTokensOptions.CanElement;
 
             List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 
@@ -365,7 +365,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool Equals(object? obj)
         {
-            return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
+            return obj is QueryToken token && obj.GetType() == this.GetType() && Equals(token);
         }
 
         public bool Equals(QueryToken? other)
@@ -385,20 +385,20 @@ namespace Signum.Entities.DynamicQuery
                 if (IsCollection(Type))
                     return "#CE6700";
 
-                switch (QueryUtils.TryGetFilterType(Type))
+                return QueryUtils.TryGetFilterType(Type) switch
                 {
-                    case FilterType.Integer:
-                    case FilterType.Decimal:
-                    case FilterType.String:
-                    case FilterType.Guid:
-                    case FilterType.Boolean: return "#000000";
-                    case FilterType.DateTime: return "#5100A1";
-                    case FilterType.Time: return "#9956db";
-                    case FilterType.Enum: return "#800046";
-                    case FilterType.Lite: return "#2B91AF";
-                    case FilterType.Embedded: return "#156F8A";
-                    default: return "#7D7D7D";
-                }
+                    FilterType.Integer or 
+                    FilterType.Decimal or 
+                    FilterType.String or 
+                    FilterType.Guid or 
+                    FilterType.Boolean => "#000000",
+                    FilterType.DateTime => "#5100A1",
+                    FilterType.Time => "#9956db",
+                    FilterType.Enum => "#800046",
+                    FilterType.Lite => "#2B91AF",
+                    FilterType.Embedded => "#156F8A",
+                    _ => "#7D7D7D",
+                };
             }
         }
 

@@ -13,8 +13,7 @@ export default function SMSSendPackage(p: { ctx: TypeContext<SMSUpdatePackageEnt
         searchOnLoad={true}
         findOptions={{
           queryName: SMSMessageEntity,
-          parentToken: "Entity.UpdatePackage",
-          parentValue: p.ctx.value,
+          filterOptions: [{ token: "Entity.UpdatePackage", value: p.ctx.value}],
         }} />
     </div>);
 }

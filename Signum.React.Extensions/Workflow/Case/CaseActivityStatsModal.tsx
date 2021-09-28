@@ -80,7 +80,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
     return (
       <div>
         <h3>{CaseNotificationEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: CaseNotificationEntity, parentToken: CaseNotificationEntity.token(e => e.caseActivity), parentValue: p.stats.caseActivity }} />
+        <SearchControl findOptions={{ queryName: CaseNotificationEntity, filterOptions: [{ token: CaseNotificationEntity.token(e => e.caseActivity), value: p.stats.caseActivity }]}} />
       </div>
     );
   }
@@ -89,7 +89,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
     return (
       <div>
         <h3>{OperationLogEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: OperationLogEntity, parentToken: OperationLogEntity.token(e => e.target), parentValue: p.stats.caseActivity }} />
+        <SearchControl findOptions={{ queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: p.stats.caseActivity }]}} />
       </div>
     );
   }

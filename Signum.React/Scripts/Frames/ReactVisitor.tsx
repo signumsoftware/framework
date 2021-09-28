@@ -260,8 +260,6 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
   return {
     queryName: fo.queryName,
     groupResults: fo.groupResults,
-    parentToken: fo.parentToken,
-    parentValue: fo.parentValue,
     filterOptions: fo.filterOptions && fo.filterOptions.map(f => cloneFilter(f)),
     orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ token: o.token, orderType: o.orderType } as OrderOption)),
     columnOptions: fo.columnOptions && fo.columnOptions.map(c => ({ token: c.token, displayName: c.displayName } as ColumnOption)),
