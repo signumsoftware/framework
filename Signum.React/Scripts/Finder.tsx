@@ -1757,7 +1757,20 @@ export const formatRules: FormatRule[] = [
   {
     name: "Object",
     isApplicable: qt => true,
-    formatter: qt => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
+    formatter: qt => new CellFormatter(cell => cell ? <span className="text-nowrap">{cell.toStr ?? cell.toString()}</span> : undefined)
+  },
+  {
+    name: "MultiLine",
+    isApplicable: qt => {
+      if (qt.type.name == "string" && qt.propertyRoute != null) {
+        var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+        if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
+          return true;
+      }
+
+      return false;
+    },
+    formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
   },
   {
     name: "Password",
@@ -1773,7 +1786,7 @@ export const formatRules: FormatRule[] = [
 
       var ei = getEnumInfo(qt.type.name, cell);
 
-      return <span>{ei ? ei.niceName : cell}</span>
+      return <span className="text-nowrap">{ei ? ei.niceName : cell}</span>
     })
   },
   {
@@ -1785,14 +1798,14 @@ export const formatRules: FormatRule[] = [
   {
     name: "Guid",
     isApplicable: qt => qt.filterType == "Guid",
-    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid text-nowrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
     isApplicable: qt => qt.filterType == "DateTime",
     formatter: qt => {
       const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date text-nowrap">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1800,7 +1813,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "Time",
     formatter: qt => {
       const durationFormat = toDurationFormat(qt.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date text-nowrap">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1816,7 +1829,7 @@ export const formatRules: FormatRule[] = [
             undefined;
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        return <bdi className={classes("date", "text-nowrap", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       }, "date-cell");
     }
   },
@@ -1833,7 +1846,7 @@ export const formatRules: FormatRule[] = [
             undefined;
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        return <bdi className={classes("date", "text-nowrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       }, "date-cell");
     }
   },
@@ -1842,7 +1855,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
     formatter: qt => {
       const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell)}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="text-nowrap">{numberFormat.format(cell)}</span>, "numeric-cell");
     }
   },
   {
@@ -1850,7 +1863,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
     formatter: qt => {
       const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="text-nowrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
     }
   },
   {
