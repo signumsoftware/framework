@@ -708,9 +708,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
 
-  const fo: FindOptions = { ...findOptions };
-
-  autoRemoveTrivialColumns(fo);
+  const fo = autoRemoveTrivialColumns(findOptions);
 
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
 
@@ -1006,29 +1004,37 @@ export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function defaultNoColumns(fo: FindOptions): FindOptions {
+export function defaultNoColumnsAllRows(fo: FindOptions): FindOptions {
 
-  if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined) {
+  const newFO = { ...fo };
 
-    fo.columnOptions = [];
-    fo.columnOptionsMode = "Replace";
+  if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined) {
+
+    newFO.columnOptions = [];
+    newFO.columnOptionsMode = "Replace";
   }
 
-  return fo;
+  if (newFO.pagination == undefined) {
+    newFO.pagination = { mode: "All" };
+  }
+
+  return newFO;
 }
 
 export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
 
-  if (fo.columnOptions == undefined && fo.columnOptionsMode == undefined && fo.filterOptions) {
-    var trivialColumns = getTrivialColumns(fo.filterOptions);
+  var newFO = { ...fo };
+
+  if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined && newFO.filterOptions) {
+    var trivialColumns = getTrivialColumns(newFO.filterOptions);
 
     if (trivialColumns.length) {
-      fo.columnOptions = trivialColumns;
-      fo.columnOptionsMode = "Remove";
+      newFO.columnOptions = trivialColumns;
+      newFO.columnOptionsMode = "Remove";
     }
   }
 
-  return fo;
+  return newFO;
 }
 
 

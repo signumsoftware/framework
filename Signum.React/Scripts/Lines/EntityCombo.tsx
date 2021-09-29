@@ -191,13 +191,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        var hasColumns = fo.columnOptions?.length;
-        Finder.defaultNoColumns(fo);
-        if (!hasColumns) {
-          fo.columnOptions = [];
-          fo.columnOptionsMode = "Replace";
-        }
-        Finder.getResultTable(fo)
+        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo))
           .then(data => setData(data))
           .done();
       }

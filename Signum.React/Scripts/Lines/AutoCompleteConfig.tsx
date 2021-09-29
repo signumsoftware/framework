@@ -131,6 +131,7 @@ interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions
 }
 
 export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow | AutocompleteConstructor<Entity>>{
+  findOptions: FindOptions | ((subStr: string) => FindOptions);
   getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[];
   requiresInitialLoad?: boolean;
   showType?: boolean;
@@ -138,11 +139,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   customRenderItem?: (row: ResultRow, table: ResultTable, subStr: string) => React.ReactNode;
 
   constructor(
-    public findOptions: FindOptions | ((subStr: string) => FindOptions),
+    findOptions: FindOptions | ((subStr: string) => FindOptions),
     options?: FindOptionsAutocompleteConfigOptions,
   ) {
-    if (typeof this.findOptions == "object")
-      Finder.defaultNoColumns(this.findOptions);
+    this.findOptions = findOptions;
 
     Dic.assign(this, options);
   }
@@ -198,7 +198,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   async getItems(subStr: string): Promise<(ResultRow | AutocompleteConstructor<Entity>)[]> {
 
-    var fo = typeof this.findOptions == "object" ? this.findOptions : this.findOptions(subStr);
+    var fo = Finder.defaultNoColumnsAllRows(typeof this.findOptions == "object" ? this.findOptions : this.findOptions(subStr));
     const qs = Finder.getSettings(fo.queryName);
 
     return Finder.getQueryDescription(fo.queryName)
@@ -261,7 +261,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (lite.id == undefined)
       return Promise.resolve({ entity: lite } as ResultRow);
 
-    var fo = typeof this.findOptions == "object" ? this.findOptions : this.findOptions("");
+    var fo = Finder.defaultNoColumnsAllRows(typeof this.findOptions == "object" ? this.findOptions : this.findOptions(""));
 
     fo = {
       ...fo,

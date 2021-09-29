@@ -5,6 +5,8 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { useController } from './LineBase'
+import { ResultTable } from '../Search'
+import { ResultRow } from '../FindOptions'
 
 export interface EntityRadioButtonListProps extends EntityBaseProps {
   data?: Lite<Entity>[];
@@ -96,7 +98,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
   const c = props.controller;
   const p = c.props;
 
-  var [data, setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  var [data, setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   var requestStarted = React.useRef(false);
 
   React.useEffect(() => {
@@ -108,10 +110,8 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.defaultNoColumns(fo);
-        var limit = fo?.pagination?.elementsPerPage ?? 999;
-        Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
-          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo))
+          .then(data => setData(data))
           .done();
       }
       else
@@ -160,20 +160,23 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
     if (data == undefined)
       return undefined;
 
-    const fixedData = [null, ...data];
+    const fixedData = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
+      typeof data == "object" ? data.rows :
+        [];
+
 
     const value = p.ctx.value!;
-    if (!fixedData.some(d => is(d, value as Entity | Lite<Entity>)))
-        fixedData.insertAt(0, maybeToLite(value as Entity | Lite<Entity>))
+    if (!fixedData.some(d => is(d.entity, value as Entity | Lite<Entity>)))
+      fixedData.insertAt(0, { entity: maybeToLite(value as Entity | Lite<Entity>) } as ResultRow);
 
     return fixedData.map((lite, i) =>
       <label className="sf-radio-element" key={i}>
         <input type="radio" style={{ marginLeft: "10px" }}
-          checked={is(value as Lite<Entity>, lite)}
-          onClick={e => c.handleOnChange(lite)}
+          checked={is(value as Lite<Entity>, lite.entity)}
+          onClick={e => c.handleOnChange(lite.entity!)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        <span>{c.props.onRenderItem ? c.props.onRenderItem(lite) : lite?.toStr ?? p.nullPlaceHolder ?? " - "}</span>
+        {c.props.onRenderItem ? c.props.onRenderItem(lite.entity!) : <span>lite?.toStr ?? p.nullPlaceHolder ?? " - "</span>}
       </label>);
   }
 }
