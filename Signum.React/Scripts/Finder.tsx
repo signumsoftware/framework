@@ -1004,7 +1004,7 @@ export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function defaultNoColumnsAllRows(fo: FindOptions): FindOptions {
+export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefined): FindOptions {
 
   const newFO = { ...fo };
 
@@ -1015,7 +1015,7 @@ export function defaultNoColumnsAllRows(fo: FindOptions): FindOptions {
   }
 
   if (newFO.pagination == undefined) {
-    newFO.pagination = { mode: "All" };
+    newFO.pagination = count == undefined ? { mode: "All" } :  { mode: "Firsts", elementsPerPage: count };
   }
 
   return newFO;

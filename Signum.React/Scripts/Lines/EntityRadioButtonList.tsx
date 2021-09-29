@@ -110,7 +110,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo))
+        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
           .then(data => setData(data))
           .done();
       }
