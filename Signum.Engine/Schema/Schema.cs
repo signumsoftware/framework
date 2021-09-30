@@ -23,6 +23,8 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
+        public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
+
         Version? version;
         public Version Version
         {
