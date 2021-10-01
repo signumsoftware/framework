@@ -241,7 +241,6 @@ export class ContextualOperationContext<T extends Entity> {
     if (!(this.context.container instanceof SearchControlLoaded))
       return undefined;
 
-    debugger;
     const tokenName = token.toString();
 
     const sc = this.context.container;
