@@ -17,7 +17,7 @@ import { ResultTable } from '../Search'
 export interface EntityComboProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   data?: Lite<Entity>[];
-  labelTextWithData?: (data: Lite<Entity>[] | ResultTable | undefined | null) => React.ReactChild;
+  labelTextWithData?: (data: Lite<Entity>[] | undefined | null, resultTable?: ResultTable | null) => React.ReactChild;
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
@@ -67,7 +67,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
   const c = useController(EntityComboController, props, ref);
   const p = c.props;
   const hasValue = !!c.props.ctx.value;
-  const comboRef = React.useRef<EntityComboHandle>(null);
+  const comboRef = React.useRef<EntityComboSelectHandle>(null);
 
   React.useEffect(() => {
     if (p.initiallyFocused)
@@ -93,9 +93,19 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
     </span>
   );
 
+  function getLabelText() {
+
+    if (p.labelTextWithData == null)
+      return p.labelText;
+
+    var data = c.props.data || comboRef.current && comboRef.current.getData();
+
+    return p.labelTextWithData(data == null ? null : Array.isArray(data) ? data : data.rows.map(a => a.entity!), data && (Array.isArray(data) ? undefined : data));
+  }
+
   return (
     <FormGroup ctx={c.props.ctx}
-      labelText={p.labelTextWithData == null ? p.labelText : p.labelTextWithData(c.props.data || comboRef.current && comboRef.current.getData())}
+      labelText={getLabelText()}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >
@@ -154,12 +164,12 @@ export function normalizeEmptyArray(data: Lite<Entity>[] | undefined) {
   return data;
 }
 
-export interface  EntityComboHandle {
+export interface  EntityComboSelectHandle {
   getSelect(): HTMLSelectElement | null;
   getData(): Lite<Entity>[] | ResultTable | undefined;
 }
 //Extracted to another component
-export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboHandle>) {
+export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: EntityComboSelectProps, ref: React.Ref<EntityComboSelectHandle>) {
 
   const [data, _setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   const requestStarted = React.useRef(false);
