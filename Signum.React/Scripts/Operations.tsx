@@ -228,7 +228,7 @@ export class ContextualOperationContext<T extends Entity> {
     this.context = context;
   }
 
-  getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, throwIfNotFound = true, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+  getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
     var result = this.tryGetValueFromSearchControl(token, automaticEntityPrefix);
     if (result == null)
@@ -237,15 +237,16 @@ export class ContextualOperationContext<T extends Entity> {
     return result.value;
   }
 
-  tryGetValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, throwIfNotFound = true, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
+  tryGetValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
     if (!(this.context.container instanceof SearchControlLoaded))
       return undefined;
 
+    debugger;
     const tokenName = token.toString();
 
     const sc = this.context.container;
     const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != null) {
+    if (colIndex != -1) {
       const row = sc.state.selectedRows!.first();
       const val = row.columns[colIndex];
       return { value: val };
@@ -256,7 +257,7 @@ export class ContextualOperationContext<T extends Entity> {
       return { value: filter?.value };
 
     if (automaticEntityPrefix) {
-      var result = this.getValueFromSearchControl(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, throwIfNotFound, false);
+      var result = this.tryGetValueFromSearchControl(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
       if (result != null)
         return result as any;
     }
