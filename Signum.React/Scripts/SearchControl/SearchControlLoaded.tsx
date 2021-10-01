@@ -152,13 +152,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.searchOnLoad)
       this.doSearch({ force: true }).done();
-
-    this.containerDiv!.addEventListener("scroll", (e) => {
-
-      var table = this.thead!.parentElement!;
-      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
-      this.thead!.style.transform = translate;
-    });
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
@@ -434,7 +427,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   containerDiv?: HTMLDivElement | null;
-  thead?: HTMLTableSectionElement | null;
 
   render() {
     const p = this.props;
@@ -483,7 +475,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
           <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
-            <thead ref={th => this.thead = th}>
+            <thead>
               {this.renderHeaders()}
             </thead>
             <tbody>
