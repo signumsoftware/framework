@@ -57,7 +57,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
     };
 
     Finder.exploreOrView(fo)
-      .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!))
+      .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!.notNull()))
       .then(alerts => setAlerts(alerts))
       .done();
   }

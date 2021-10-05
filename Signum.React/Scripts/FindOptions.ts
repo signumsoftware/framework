@@ -32,10 +32,10 @@ export interface FindOptions {
   groupResults?: boolean;
 
   includeDefaultFilters?: boolean;
-  filterOptions?: FilterOption[];
-  orderOptions?: OrderOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
   columnOptionsMode?: ColumnOptionsMode;
-  columnOptions?: ColumnOption[];
+  columnOptions?: (ColumnOption | null | undefined)[];
   pagination?: Pagination;
   systemTime?: SystemTime;
 }

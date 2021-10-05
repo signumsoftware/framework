@@ -351,10 +351,10 @@ export interface ChartOptions {
   chartScript?: string,
   maxRows?: number | null,
   groupResults?: boolean,
-  filterOptions?: FilterOption[];
-  orderOptions?: OrderOption[];
-  columnOptions?: ChartColumnOption[];
-  parameters?: ChartParameterOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
+  columnOptions?: (ChartColumnOption | null | undefined)[];
+  parameters?: (ChartParameterOption | null | undefined)[];
 }
 
 export interface ChartColumnOption {
@@ -441,11 +441,11 @@ export module Encoder {
       userChart: userChart && liteKey(userChart)
     };
 
-    Finder.Encoder.encodeFilters(query, co.filterOptions);
-    Finder.Encoder.encodeOrders(query, co.orderOptions);
-    encodeParameters(query, co.parameters);
+    Finder.Encoder.encodeFilters(query, co.filterOptions?.notNull());
+    Finder.Encoder.encodeOrders(query, co.orderOptions?.notNull());
+    encodeParameters(query, co.parameters?.notNull());
 
-    encodeColumn(query, co.columnOptions);
+    encodeColumn(query, co.columnOptions?.notNull());
 
     return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
