@@ -98,7 +98,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.setState({ token: undefined, value: undefined });
     if (props.valueToken)
-      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
+      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
         .then(st => {
           this.setState({ token: st });
           this.props.onTokenLoaded && this.props.onTokenLoaded();

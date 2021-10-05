@@ -35,7 +35,7 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
       initialShowFilters={false}
       typeName={ti.name}
       allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti) !== null}
-      filterOptions={fo.filterOptions ?? []}
+      filterOptions={fo.filterOptions}
       key={ti.name}
     />
   );

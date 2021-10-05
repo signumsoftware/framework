@@ -252,9 +252,9 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
     ...extra
   };
 
-  Encoder.encodeFilters(query, fo.filterOptions);
-  Encoder.encodeOrders(query, fo.orderOptions);
-  Encoder.encodeColumns(query, fo.columnOptions);
+  Encoder.encodeFilters(query, fo.filterOptions?.notNull());
+  Encoder.encodeOrders(query, fo.orderOptions?.notNull());
+  Encoder.encodeColumns(query, fo.columnOptions?.notNull());
 
   return query;
 }
@@ -396,28 +396,28 @@ function parseBoolean(value: any): boolean | undefined {
   return undefined;
 }
 
-export function parseFilterOptions(fos: FilterOption[], groupResults: boolean, qd: QueryDescription): Promise<FilterOptionParsed[]> {
+export function parseFilterOptions(fos: (FilterOption | null | undefined)[], groupResults: boolean, qd: QueryDescription): Promise<FilterOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (groupResults ? SubTokensOptions.CanAggregate : 0);
 
-  fos.forEach(fo => completer.requestFilter(fo, sto));
+  fos.notNull().forEach(fo => completer.requestFilter(fo, sto));
 
   return completer.finished()
-    .then(() => fos.map(fo => completer.toFilterOptionParsed(fo)))
+    .then(() => fos.notNull().map(fo => completer.toFilterOptionParsed(fo)))
     .then(filters => parseFilterValues(filters).then(() => filters));
 }
 
 
 
-export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boolean, qd: QueryDescription): Promise<OrderOptionParsed[]> {
+export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)[], groupResults: boolean, qd: QueryDescription): Promise<OrderOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  orderOptions.forEach(a => completer.request(a.token.toString(), sto));
+  orderOptions.notNull().forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
-    .then(() => orderOptions.map(oo => ({
+    .then(() => orderOptions.notNull().map(oo => ({
       token: completer.get(oo.token.toString()),
       orderType: oo.orderType ?? "Ascending",
     }) as OrderOptionParsed));
@@ -570,15 +570,16 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
   if (!findOptions.groupResults && findOptions.orderOptions) {
     var defaultOrder = getDefaultOrder(qd, qs);
 
-    if (equalOrders(defaultOrder, findOptions.orderOptions))
+    if (equalOrders(defaultOrder, findOptions.orderOptions.notNull()))
       findOptions.orderOptions = undefined;
   }
 
   if (findOptions.filterOptions) {
     var defaultFilters = getDefaultFilter(qd, qs);
-    if (defaultFilters && defaultFilters.length <= findOptions.filterOptions.length) {
-      if (equalFilters(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
-        findOptions.filterOptions = findOptions.filterOptions.slice(defaultFilters.length);
+    var filterOptions = findOptions.filterOptions.notNull();
+    if (defaultFilters && defaultFilters.length <= filterOptions.length) {
+      if (equalFilters(defaultFilters, filterOptions.slice(0, defaultFilters.length))) {
+        findOptions.filterOptions = filterOptions.slice(defaultFilters.length);
         findOptions.includeDefaultFilters = true;
       }
     }
@@ -710,7 +711,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
   const fo = autoRemoveTrivialColumns(findOptions);
 
-  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
+  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -733,14 +734,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
 
   if (fo.filterOptions)
-    fo.filterOptions.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
+    fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
   if (fo.orderOptions)
-    fo.orderOptions.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
-    fo.columnOptions.filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
   return completer.finished().then(() => {
@@ -751,19 +752,19 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
       systemTime: fo.systemTime,
 
-      columnOptions: (fo.columnOptions ?? []).map(co => ({
+      columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => ({
         token: completer.get(co.token.toString()),
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
       }) as ColumnOptionParsed),
 
-      orderOptions: (fo.orderOptions ?? []).map(oo => ({
+      orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
         token: completer.get(oo.token.toString()),
         orderType: oo.orderType,
       }) as OrderOptionParsed),
 
-      filterOptions: (fo.filterOptions ?? []).map(fo => completer.toFilterOptionParsed(fo)),
+      filterOptions: (fo.filterOptions?.notNull() ?? []).map(fo => completer.toFilterOptionParsed(fo)),
     };
 
     return parseFilterValues(result.filterOptions)
@@ -813,7 +814,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
     return [fo.value];
   }
 
-  var allValues = (fo.filterOptions ?? []).flatMap(fo => getValues(fo));
+  var allValues = (fo.filterOptions?.notNull() ?? []).flatMap(fo => getValues(fo));
 
   var allNewTypes = allValues.flatMap(a => getTypeIfNew(a));
 
@@ -850,7 +851,7 @@ export function exploreOrView(findOptions: FindOptions): Promise<void> {
   });
 }
 
-export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], valueToken?: string, multipleValues?: boolean): Promise<any> {
+export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: string, multipleValues?: boolean): Promise<any> {
   return getQueryDescription(queryName).then(qd => {
     return parseFilterOptions(filterOptions, false, qd).then(fops => {
 
@@ -954,9 +955,9 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   }
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
+export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
@@ -979,9 +980,9 @@ export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<T[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]> {
+export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<T[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
@@ -1026,7 +1027,7 @@ export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
   var newFO = { ...fo };
 
   if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined && newFO.filterOptions) {
-    var trivialColumns = getTrivialColumns(newFO.filterOptions);
+    var trivialColumns = getTrivialColumns(newFO.filterOptions.notNull());
 
     if (trivialColumns.length) {
       newFO.columnOptions = trivialColumns;
