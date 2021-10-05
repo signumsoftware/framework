@@ -76,7 +76,7 @@ namespace Signum.Engine.Authorization
             {
                 ClientCredentialProvider authProvider = MicrosoftGraphLogic.GetClientCredentialProvider();
                 GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-                var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Top(1000).Select("id, displayName, ODataType").GetAsync().Result.ToList();
+                var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
                 return result.Select(a => Guid.Parse(a.Id)).ToList();
             }
