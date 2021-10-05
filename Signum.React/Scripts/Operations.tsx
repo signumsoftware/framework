@@ -6,7 +6,7 @@ import {
   OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName } from './Reflection';
+import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString } from './Reflection';
 import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
@@ -228,24 +228,38 @@ export class ContextualOperationContext<T extends Entity> {
     this.context = context;
   }
 
-  getSearchControlColumnValue(tokenName: string, throwIfNotFound = true): unknown {
+  getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetValueFromSearchControl(token, automaticEntityPrefix);
+    if (result == null)
+      throw new Error(`No column '${token}' found`);
+
+    return result.value;
+  }
+
+  tryGetValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
     if (!(this.context.container instanceof SearchControlLoaded))
       return undefined;
 
+    const tokenName = token.toString();
+
     const sc = this.context.container;
     const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != null) {
+    if (colIndex != -1) {
       const row = sc.state.selectedRows!.first();
       const val = row.columns[colIndex];
-      return val;
+      return { value: val };
     }
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
-      return filter?.value;
+      return { value: filter?.value };
 
-    if (throwIfNotFound)
-      throw new Error(`No column '${tokenName}' found`);
+    if (automaticEntityPrefix) {
+      var result = this.tryGetValueFromSearchControl(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
+      if (result != null)
+        return result as any;
+    }
 
     return undefined;
   }

@@ -2,13 +2,14 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
+import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
+import { ResultTable } from '../Search'
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
@@ -16,7 +17,8 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   columnWidth?: number;
   avoidFieldSet?: boolean;
   deps?: React.DependencyList;
-  renderCheckbox?: (lite: Lite<Entity>, index: number, checked: boolean, controller: EntityCheckboxListController) => React.ReactElement; 
+  onRenderCheckbox?: (row: ResultRow, index: number, checked: boolean, controller: EntityCheckboxListController, resultTable?: ResultTable) => React.ReactElement;
+  onRenderItem?: (row: ResultRow, index: number, checked: boolean, controller: EntityCheckboxListController, resultTable?: ResultTable) => React.ReactElement;
 }
 
 export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
@@ -105,7 +107,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
   const c = props.controller;
   const p = c.props;
 
-  var [data, setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  var [data, setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   var requestStarted = React.useRef(false);
 
   React.useEffect(() => {
@@ -117,10 +119,8 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.defaultNoColumns(fo);
-        var limit = fo?.pagination?.elementsPerPage ?? 999;
-        Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
-          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
+          .then(data => setData(data))
           .done();
       }
       else
@@ -168,27 +168,37 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
     if (data == undefined)
       return undefined;
 
-    const fixedData = [...data];
+    const fixedData = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
+      typeof data == "object" ? data.rows :
+        [];
 
     const list = p.ctx.value!;
 
     list.forEach(mle => {
-      if (!fixedData.some(d => is(d, mle.element as Entity | Lite<Entity>)))
-        fixedData.insertAt(0, maybeToLite(mle.element as Entity | Lite<Entity>))
+      if (!fixedData.some(d => is(d.entity, mle.element as Entity | Lite<Entity>)))
+        fixedData.insertAt(0, { entity: maybeToLite(mle.element as Entity | Lite<Entity>) } as ResultRow)
     });
 
-    if (p.renderCheckbox)
-      return fixedData.map((lite, i) => p.renderCheckbox!(lite, i, list.some(mle => is(mle.element as Entity | Lite<Entity>, lite)), c));
+    const resultTable = Array.isArray(data) ? undefined : data;
 
-    return fixedData.map((lite, i) =>
-      <label className="sf-checkbox-element" key={i}>
-        <input type="checkbox"
-          checked={list.some(mle => is(mle.element as Entity | Lite<Entity>, lite))}
-          disabled={p.ctx.readOnly}
-          name={liteKey(lite)}
-          onChange={e => c.handleOnChange(lite)} />
-        &nbsp;
-        <span>{lite.toStr}</span>
-      </label>);
+    return fixedData.map((row, i) => {
+      var checked = list.some(mle => is(mle.element as Entity | Lite<Entity>, row.entity));
+
+      if (p.onRenderCheckbox)
+        return p.onRenderCheckbox(row, i, checked, c, resultTable);
+
+      return (
+        <label className="sf-checkbox-element" key={i}>
+          <input type="checkbox"
+            checked={checked}
+            disabled={p.ctx.readOnly}
+            name={liteKey(row.entity!)}
+            onChange={e => c.handleOnChange(row.entity!)} />
+          &nbsp;
+          {p.onRenderItem ? p.onRenderItem(row, i, checked, c, resultTable) : <span>{row.entity!.toStr}</span>}
+        </label>
+      );
+    }
+    );
   }
 }

@@ -131,6 +131,7 @@ interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions
 }
 
 export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow | AutocompleteConstructor<Entity>>{
+  findOptions: FindOptions | ((subStr: string) => FindOptions);
   getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[];
   requiresInitialLoad?: boolean;
   showType?: boolean;
@@ -138,11 +139,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   customRenderItem?: (row: ResultRow, table: ResultTable, subStr: string) => React.ReactNode;
 
   constructor(
-    public findOptions: FindOptions | ((subStr: string) => FindOptions),
+    findOptions: FindOptions | ((subStr: string) => FindOptions),
     options?: FindOptionsAutocompleteConfigOptions,
   ) {
-    if (typeof this.findOptions == "object")
-      Finder.defaultNoColumns(this.findOptions);
+    this.findOptions = findOptions;
 
     Dic.assign(this, options);
   }
@@ -198,14 +198,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   async getItems(subStr: string): Promise<(ResultRow | AutocompleteConstructor<Entity>)[]> {
 
-    var fo = typeof this.findOptions == "object" ? this.findOptions : this.findOptions(subStr);
+    var fo = Finder.defaultNoColumnsAllRows(typeof this.findOptions == "object" ? this.findOptions : this.findOptions(subStr), this.count ?? 5);
     const qs = Finder.getSettings(fo.queryName);
 
     return Finder.getQueryDescription(fo.queryName)
       .then(qd => Finder.parseFindOptions({
-        columnOptionsMode: "Replace",
-        columnOptions: [],
-        pagination: { mode: "Firsts", elementsPerPage: this.count ?? 5 },
         ...fo,
         filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
         includeDefaultFilters: false,
@@ -261,12 +258,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     if (lite.id == undefined)
       return Promise.resolve({ entity: lite } as ResultRow);
 
-    var fo = typeof this.findOptions == "object" ? this.findOptions : this.findOptions("");
+    var fo = Finder.defaultNoColumnsAllRows(typeof this.findOptions == "object" ? this.findOptions : this.findOptions(""), 1);
 
     fo = {
       ...fo,
       filterOptions: [{ token: QueryTokenString.entity<Entity>().append(e => e.id), operation: "EqualTo", value: lite.id }],
-      pagination: { mode: "Firsts", elementsPerPage: 1 }
     };
 
     return Finder.getQueryDescription(fo.queryName)

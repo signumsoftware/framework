@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import { Prompt } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
-import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
+import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
@@ -120,16 +120,28 @@ export default function FramePage(p: FramePageProps) {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key).then(pack => ({
-          pack: pack!,
-          createNew: () => Operations.API.construct(ti.name, oi.key)
-        }));
+        return Operations.API.construct(ti.name, oi.key)
+          .then(pack => {
+            if (pack == undefined)
+              throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName));
+            else
+              return ({
+                pack: pack,
+                createNew: () => Operations.API.construct(ti.name, oi.key)
+              });
+          });
       }
 
-      return Constructor.constructPack(ti.name).then(pack => ({
-        pack: pack! as EntityPack<Entity>,
-        createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
-      }));
+      return Constructor.constructPack(ti.name)
+        .then(pack => {
+          if (pack == undefined)
+            throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName))
+          else
+            return ({
+              pack: pack! as EntityPack<Entity>,
+              createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
+            });
+        });
     }
   }
 
