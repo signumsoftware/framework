@@ -228,13 +228,13 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         </Tab>
         {
           ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
-            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: PredictorCodificationEntity.token(e => e.predictor), parentValue: ctx.value }} />
+            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, filterOptions: [{ token: PredictorCodificationEntity.token(e => e.predictor), value: ctx.value }]}} />
           </Tab>
         }
         {
           ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
             {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
-            <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: PredictorEpochProgressEntity.token(e => e.predictor), parentValue: ctx.value }} />
+            <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, filterOptions: [{ token: PredictorEpochProgressEntity.token(e => e.predictor), value: ctx.value }]}} />
           </Tab>
         }
         {

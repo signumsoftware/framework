@@ -25,6 +25,7 @@ interface CSharpCodeMirrorProps {
   isReadOnly?: boolean;
   errorLineNumber?: number;
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
+  onInit?: (cm: CodeMirror.EditorFromTextArea) => void;
 }
 
 export default function CSharpCodeMirror(p: CSharpCodeMirrorProps) {
@@ -54,6 +55,7 @@ export default function CSharpCodeMirror(p: CSharpCodeMirrorProps) {
       options={options}
       onChange={p.isReadOnly ? undefined : p.onChange}
       errorLineNumber={p.errorLineNumber}
+      onInit={p.onInit}
     />
   );
 }

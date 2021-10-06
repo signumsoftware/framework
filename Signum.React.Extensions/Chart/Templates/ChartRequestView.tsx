@@ -32,6 +32,7 @@ interface ChartRequestViewProps {
   onChange: (newChartRequest: ChartRequestModel, userChart?: Lite<UserChartEntity>) => void;
   title?: string;
   showChartSettings?: boolean;
+  searchOnLoad?: boolean;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
 
@@ -62,6 +63,9 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
 
   const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal)));
   React.useEffect(() => {
+    if (p.searchOnLoad)
+      handleOnDrawClick();
+
     return () => { abortableQuery.current.abort(); }
   }, []);
 

@@ -133,19 +133,19 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            switch (State)
+            return State switch
             {
-                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Created.NiceToString(), CreationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(Algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
-                case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
-                case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Finished.NiceToString(), executionEnd);
-                case ProcessState.Error: return "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Error.NiceToString(), executionEnd);
-                default: return "{0} ??".FormatWith(Algorithm);
-            }
+                ProcessState.Created => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Created.NiceToString(), CreationDate),
+                ProcessState.Planned => "{0} {1} for {2}".FormatWith(Algorithm, ProcessState.Planned.NiceToString(), PlannedDate),
+                ProcessState.Canceled => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Canceled.NiceToString(), CancelationDate),
+                ProcessState.Queued => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Queued.NiceToString(), QueuedDate),
+                ProcessState.Executing => "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Executing.NiceToString(), executionStart),
+                ProcessState.Suspending => "{0} {1} since {2}".FormatWith(Algorithm, ProcessState.Suspending.NiceToString(), SuspendDate),
+                ProcessState.Suspended => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Suspended.NiceToString(), SuspendDate),
+                ProcessState.Finished => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Finished.NiceToString(), executionEnd),
+                ProcessState.Error => "{0} {1} on {2}".FormatWith(Algorithm, ProcessState.Error.NiceToString(), executionEnd),
+                _ => "{0} ??".FormatWith(Algorithm),
+            };
         }
     }
 
@@ -215,8 +215,10 @@ namespace Signum.Entities.Processes
         
         public Lite<ExceptionEntity> Exception { get; set; }
 
+#pragma warning disable IDE0052 // Remove unread private members
         static Expression<Func<ProcessExceptionLineEntity, string>> ToStringExpression = pel => "ProcessExceptionLine (" + pel.Id + ")";
         [ExpressionField("ToStringExpression")]
         public override string ToString() => "ProcessExceptionLine (" + (this.IdOrNull == null ? "New" : this.Id.ToString()) + ")";
+#pragma warning restore IDE0052 // Remove unread private members
     }
 }

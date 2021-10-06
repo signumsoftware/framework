@@ -35,8 +35,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: AlertEntity,
-    parentToken: AlertEntity.token(e => e.target),
-    parentValue: ctx.lite
+    filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
     icon: "bell",

@@ -220,7 +220,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   return data && data.result;
 }
 
-function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
+export function areEqual(depsA: React.DependencyList, depsB: React.DependencyList) {
 
   if (depsA.length !== depsB.length)
     return false;

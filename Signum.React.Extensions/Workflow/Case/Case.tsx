@@ -83,8 +83,7 @@ export default function CaseComponent(p: CaseComponentProps) {
               view={false}
               findOptions={{
                 queryName: CaseActivityEntity,
-                parentToken: CaseActivityEntity.token(e => e.case),
-                parentValue: ctx.value,
+                filterOptions: [{ token: CaseActivityEntity.token(e => e.case), value: ctx.value}],
                 columnOptionsMode: "Replace",
                 columnOptions: [
                   { token: CaseActivityEntity.token(e => e.id) },
@@ -111,9 +110,8 @@ export default function CaseComponent(p: CaseComponentProps) {
               view={false}
               findOptions={{
                 queryName: CaseActivityEntity,
-                parentToken: CaseActivityEntity.token(e => e.case),
-                parentValue: ctx.value,
                 filterOptions: [
+                  { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
                   { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
                 ],
                 columnOptionsMode: "Replace",

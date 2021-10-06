@@ -51,8 +51,7 @@ function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
   return Finder.find(
     {
       queryName: SMSMessageEntity,
-      parentToken: "Referred",
-      parentValue: referred,
+      filterOptions: [{ token: "Referred", value: referred}],
       columnOptionsMode: "Remove",
       columnOptions: [{ token: "Referred" }],
     }).done();

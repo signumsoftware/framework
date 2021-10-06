@@ -396,7 +396,7 @@
     <Member Name="Data" Description="Daten" />
     <Member Name="DeletePalette" Description="Palette löschen" />
     <Member Name="Dimension" Description="Dimension" />
-    <Member Name="DrawChart" Description="Diagramm chart" />
+    <Member Name="DrawChart" Description="Diagramm zeichnen" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Group" Description="Gruppe" />
     <Member Name="HideChartSettings" Description="Diagrammeinstellungen ausblenden" />

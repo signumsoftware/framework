@@ -134,7 +134,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   })
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
-    new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: CaseEntity.token(e => e.workflow), parentValue: ctx.lite },
+    new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }]},
       { icon: "tasks", iconColor: "blue" })
   ]);
 

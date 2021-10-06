@@ -777,7 +777,13 @@ export class Binding<T> implements IBinding<T> {
     delete this.parentObject[this.member];
   }
 
+  forceError: string | undefined;
+
   getError(): string | undefined {
+
+    if (this.forceError)
+      return this.forceError;
+
     const parentErrors = (this.parentObject as ModifiableEntity).error;
     return parentErrors && parentErrors[this.member];
   }
@@ -827,7 +833,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     return undefined;
   }
 
-  setError(name: string | undefined): void {
+  setError(value: string | undefined): void {
   }
 }
 
@@ -870,7 +876,7 @@ export class MListElementBinding<T> implements IBinding<T>{
     return undefined;
   }
 
-  setError(name: string | undefined): void {
+  setError(value: string | undefined): void {
   }
 }
 

@@ -194,7 +194,9 @@ namespace Signum.Utilities
             return collection.OrderBy().GroupsOf(groupSize).Select(gr => new IntervalWithEnd<T>(gr.Min(), gr.Max()));
         }
 
-        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup = false, bool initialGroup = false)
+
+
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, BeforeFirstKey beforeFirstKey = BeforeFirstKey.Throw, bool includeKeyInGroup = false)
         {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
             Grouping<T, T>? group = null;
@@ -211,14 +213,25 @@ namespace Signum.Utilities
                 {
                     if (group == null)
                     {
-                        if(!initialGroup)
-                            throw new InvalidOperationException("Parameter initialGroup is false");
-
-                        group = new Grouping<T, T>(default!);
-                        result.Add(group);
+                        switch (beforeFirstKey)
+                        {
+                            case BeforeFirstKey.Throw:
+                                throw new InvalidOperationException("First element should be a group key, or change the value in for beforeFirstKey");
+                            case BeforeFirstKey.Skip:
+                                break;
+                            case BeforeFirstKey.DefaultGroup:
+                                group = new Grouping<T, T>(default!);
+                                result.Add(group);
+                                group.Add(item);
+                                break;
+                            default:
+                                throw new UnexpectedValueException(beforeFirstKey);
+                        }
                     }
-
-                    group.Add(item);
+                    else
+                    {
+                        group.Add(item);
+                    }
                 }
             }
 
@@ -255,5 +268,12 @@ namespace Signum.Utilities
             if (current != null)
                 yield return current;
         }
+    }
+
+    public enum BeforeFirstKey
+    {
+        Throw,
+        Skip,
+        DefaultGroup
     }
 }

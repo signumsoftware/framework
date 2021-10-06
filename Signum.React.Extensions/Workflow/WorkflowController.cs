@@ -39,9 +39,9 @@ namespace Signum.React.Workflow
 
                 return new EntityPackWorkflow
                 {
-                    activity = activity,
-                    canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
-                    canExecuteMainEntity = ep.canExecute,
+                    Activity = activity,
+                    CanExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
+                    CanExecuteMainEntity = ep.canExecute,
                     Extension = ep.extension,
                 };
             }
@@ -57,9 +57,9 @@ namespace Signum.React.Workflow
 
         public class EntityPackWorkflow
         {
-            public CaseActivityEntity activity { get; set; }
-            public Dictionary<string, string> canExecuteActivity { get; set; }
-            public Dictionary<string, string> canExecuteMainEntity { get; set; }
+            public CaseActivityEntity Activity { get; set; }
+            public Dictionary<string, string> CanExecuteActivity { get; set; }
+            public Dictionary<string, string> CanExecuteMainEntity { get; set; }
 
             [JsonExtensionData]
             public Dictionary<string, object?> Extension { get; set; } = new Dictionary<string, object?>();
@@ -74,15 +74,15 @@ namespace Signum.React.Workflow
 
             return new EntityPackCaseFlow
             {
-                pack = SignumServer.GetEntityPack(dbValues.Case),
-                workflowActivity = dbValues.WorkflowActivity,
+                Pack = SignumServer.GetEntityPack(dbValues.Case),
+                WorkflowActivity = dbValues.WorkflowActivity,
             };
         }
 
         public class EntityPackCaseFlow
         {
-            public EntityPackTS pack { get; set; }
-            public IWorkflowNodeEntity workflowActivity { get; set; }
+            public EntityPackTS Pack { get; set; }
+            public IWorkflowNodeEntity WorkflowActivity { get; set; }
         }
 
         [HttpGet("api/workflow/starts")]

@@ -39,8 +39,8 @@ namespace Signum.Engine.Mailing
                 {
                     var dc = EmailLogic.Configuration.DefaultCulture;
 
-                    if (!et.Messages.Any(m => dc.Name.StartsWith(m.CultureInfo.Name)))
-                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.EnglishName)).CommaOr(a => a.EnglishName));
+                    if (!et.Messages.Any(m => m.CultureInfo != null && dc.Name.StartsWith(m.CultureInfo.Name)))
+                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(CultureInfoLogic.EntityToCultureInfo.Value.Keys.Where(c => dc.Name.StartsWith(c.Name)).CommaOr(a => a.EnglishName));
 
                     return null;
                 };

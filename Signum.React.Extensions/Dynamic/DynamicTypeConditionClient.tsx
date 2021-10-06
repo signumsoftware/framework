@@ -23,8 +23,7 @@ export function start(options: { routes: JSX.Element[] }) {
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
     queryName: DynamicTypeConditionEntity,
-    parentToken: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName),
-    parentValue: type
+    filterOptions: [{ token: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
     { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
