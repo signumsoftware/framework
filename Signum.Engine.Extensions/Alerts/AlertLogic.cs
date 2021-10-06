@@ -240,7 +240,7 @@ namespace Signum.Engine.Alerts
             }
 
             static Regex TextPlaceHolder = new Regex(@"({(?<prop>(\w|\d|\.)+)})");
-
+            static Regex NumericPlaceholder = new Regex(@"^[ \d]+$");
             private string? ReplacePlaceHolders(string? value, AlertEntity alert)
             {
                 if (value == null)
@@ -248,12 +248,17 @@ namespace Signum.Engine.Alerts
 
                 return TextPlaceHolder.Replace(value, g =>
                 {
-                    return GetPropertyValue(alert, g.Groups["prop"].Value)?.ToString()!;
+                    var prop = g.Groups["prop"].Value;
+                    if (NumericPlaceholder.IsMatch(prop))
+                        return alert.TextArguments?.Split("\n###\n").ElementAtOrDefault(int.Parse(prop)) ?? "";
+                    
+                    return GetPropertyValue(alert, prop)?.ToString()!;
                 });
             }
 
             private static object? GetPropertyValue(AlertEntity alert, string expresion)
             {
+
                 var parts = expresion.SplitNoEmpty('.');
 
                 var result = SimpleMemberEvaluator.EvaluateExpression(alert, parts);

@@ -7,7 +7,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import ValueLineModal from '@framework/ValueLineModal'
-import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
+import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Entities.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
@@ -21,6 +21,7 @@ import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
+  Navigator.addSettings(new EntitySettings(SendNotificationEmailTaskEntity, e => import('./Templates/SendNotificationEmailTask')));
 
   const couldHaveAlerts = options.showAlerts ?? ((typeName, when) => true);
 
@@ -129,7 +130,7 @@ export function formatText(text: string, alert: Partial<AlertEntity>, onNavigate
   var nodes: (string | React.ReactElement)[] = [];
   var pos = 0;
   for (const match of Array.from(text.matchAll(LinkPlaceholder))) {
-    nodes.push(text.substring(pos, match.index))
+    nodes.push(replacePlaceHolders(text.substring(pos, match.index), alert)!)
 
     var groups = (match as any).groups as { prop: string, text?: string, url?: string };
 
@@ -150,7 +151,7 @@ export function formatText(text: string, alert: Partial<AlertEntity>, onNavigate
     pos = match.index! + match[0].length;
   }
 
-  nodes.push(text.substring(pos));
+  nodes.push(replacePlaceHolders(text.substring(pos), alert)!);
 
   if (nodes.length == 1 && alert.target != null) {
     nodes.push(<br />);
