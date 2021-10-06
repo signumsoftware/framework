@@ -57,8 +57,8 @@ export default function ValueLineModal(p: ValueLineModalProps) {
     initiallyFocused: props.initiallyFocused,
   };
 
-  const disabled = p.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
-  const valueOnChanged = p.options.allowEmptyValue == false ? () => forceUpdate() : undefined;
+  const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
+  const valueOnChanged = p.options.allowEmptyValue == false ? forceUpdate : undefined;
 
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
