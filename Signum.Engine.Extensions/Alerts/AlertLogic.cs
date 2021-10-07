@@ -206,8 +206,12 @@ namespace Signum.Engine.Alerts
                 var alert = (AlertEntity)alertObject;
                 var text = alert.Text ?? "";
 
-                var newText = LinkPlaceholder.Replace(text, m =>
+                var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
                 {
+                    var m = pair.match;
+                    if (m == null)
+                        return ReplacePlaceHolders(pair.after, alert);
+
                     var propEx = m.Groups["prop"].Value;
 
                     var prop = GetPropertyValue(alert, propEx);
@@ -219,9 +223,8 @@ namespace Signum.Engine.Alerts
 
                     var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 
-                    return @$"<a href=""{url}"">{text}</a>";
-
-                });
+                    return @$"<a href=""{url}"">{text}</a>" + ReplacePlaceHolders(pair.after, alert);
+                }).ToString("");
 
                 if (text != newText)
                     return new HtmlString(newText);
