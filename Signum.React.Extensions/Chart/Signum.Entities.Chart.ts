@@ -160,13 +160,17 @@ export module D3ChartScript {
   export const Treemap : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Treemap");
 }
 
-export module GoogleMapsCharScript {
-  export const Heatmap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Heatmap");
-  export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Markermap");
+export module GoogleMapsChartScript {
+  export const Heatmap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsChartScript.Heatmap");
+  export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsChartScript.Markermap");
 }
 
 export module HtmlChartScript {
   export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
+}
+
+export module SvgMapsChartScript {
+  export const SvgMap : ChartScriptSymbol = registerSymbol("ChartScript", "SvgMapsChartScript.SvgMap");
 }
 
 export const UserChartEntity = new Type<UserChartEntity>("UserChart");

@@ -12,7 +12,7 @@ import {
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript, HtmlChartScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
@@ -26,7 +26,7 @@ import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string }) {
+export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
   options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
@@ -64,8 +64,12 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
 
   if (options.googleMapsApiKey) {
     window.__google_api_key = options.googleMapsApiKey;
-    registerChartScriptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
-    registerChartScriptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
+    registerChartScriptComponent(GoogleMapsChartScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
+    registerChartScriptComponent(GoogleMapsChartScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
+  }
+
+  if (options.svgMap) {
+    registerChartScriptComponent(SvgMapsChartScript.SvgMap, () => import("./SvgMap/SvgMap"));
   }
 }
 
@@ -329,8 +333,8 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
-    case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
-    case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue.toString();
+    case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
+    case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue?.toString();
     default: throw new Error("Unexpected parameter type");
   }
 
@@ -764,6 +768,7 @@ export module API {
     });
 
     var chartTable: ChartTable = {
+      date: DateTime.local().toISO(),
       columns: cols.filter(c => c != null).toObjectDistinct(c => c!.name) as any,
       rows: rows
     };
@@ -809,6 +814,7 @@ export module API {
 }
 
 export interface ChartTable {
+  date: string;
   columns: {
     entity?: ChartColumn<Lite<Entity>>;
     c0?: ChartColumn<unknown>;

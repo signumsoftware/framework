@@ -19,7 +19,7 @@ namespace Signum.Engine.Chart
     {
         public static Dictionary<ChartScriptSymbol, ChartScript> Scripts = new Dictionary<ChartScriptSymbol, ChartScript>();
 
-        internal static void Start(SchemaBuilder sb, bool googleMapsChartScripts)
+        internal static void Start(SchemaBuilder sb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -56,6 +56,11 @@ namespace Signum.Engine.Chart
                 {
                     RegisterScript(new HeatmapChartScript());
                     RegisterScript(new MarkermapChartScript());
+                }
+
+                if(svgMapUrls != null)
+                {
+                    RegisterScript(new SvgMapScript(svgMapUrls));
                 }
 
             }
