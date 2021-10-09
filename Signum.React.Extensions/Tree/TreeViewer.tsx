@@ -23,6 +23,7 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString } from '@framework/Reflection';
+import * as Hooks from '../../Signum.React/Scripts/Hooks'
 
 interface TreeViewerProps {
   typeName: string;
@@ -32,9 +33,10 @@ interface TreeViewerProps {
   onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
   onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
   onSearch?: () => void;
-  filterOptions: FilterOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
   initialShowFilters?: boolean;
   showToolbar?: boolean;
+  deps?: React.DependencyList;
 }
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
@@ -85,17 +87,21 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   componentWillMount() {
-    this.initilize(this.props.typeName, this.props.filterOptions);
+    this.initilize(this.props.typeName, this.props.filterOptions ?? []);
   }
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
     var path = TreeClient.treePath(newProps.typeName, newProps.filterOptions);
-    if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions))
+    if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions)) {
+      this.searchIfDeps(newProps);
       return;
+    }
 
     if (this.state.filterOptions && this.state.queryDescription) {
-      if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions)))
+      if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions))) {
+        this.searchIfDeps(newProps);
         return;
+      }
     }
 
     this.state = {
@@ -105,10 +111,16 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     };
     this.forceUpdate();
 
-    this.initilize(newProps.typeName, newProps.filterOptions);
+    this.initilize(newProps.typeName, newProps.filterOptions ?? []);
   }
 
-  initilize(typeName: string, filterOptions: FilterOption[]) {
+  searchIfDeps(newProps: TreeViewerProps) {
+    if (Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? [])) {
+      this.search(false);
+    }
+  }
+
+  initilize(typeName: string, filterOptions: (FilterOption | null | undefined)[]) {
 
     Finder.getQueryDescription(typeName)
       .then(qd => {

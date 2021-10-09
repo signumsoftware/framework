@@ -10,8 +10,6 @@ namespace Signum.Utilities
 {
     public static class StreamExtensions
     {
-        const int BufferSize = 32768;
-
         public static byte[] ReadAllBytes(this Stream str)
         {
             using (MemoryStream ms = new MemoryStream())

@@ -94,6 +94,7 @@ namespace Signum.Engine
             SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
 
             Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            Console.WriteLine("Check the synchronization script before running it!");
             var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
 
             if(answer == "open")

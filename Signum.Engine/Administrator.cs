@@ -86,8 +86,51 @@ namespace Signum.Engine
             return Schema.Current.GenerationScipt();
         }
 
+       
+
+        public static void NewDatabase()
+        {
+            var databaseName = Connector.Current.DatabaseName();
+            if (Database.View<SysTables>().Any())
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Red, $"Are you sure you want to delete all the data in the database '{databaseName}'?");
+                Console.Write($"Confirm by writing the name of the database:");
+                string val = Console.ReadLine()!;
+                if (val.ToLower() != databaseName.ToLower())
+                {
+                    Console.WriteLine($"Wrong name. No changes where made");
+                    Console.WriteLine();
+                    return;
+                }
+            }
+
+            Console.Write("Creating new database...");
+            Administrator.TotalGeneration();
+            Console.WriteLine("Done.");
+        }
+
+        public static Func<bool> AvoidSimpleSynchronize = () => true;
+
+        public static void Synchronize()
+        {
+            if (AvoidSimpleSynchronize())
+                return; 
+
+            Console.WriteLine();
+
+            SqlPreCommand? command = Administrator.TotalSynchronizeScript();
+            if (command == null)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized!");
+                return;
+            }
+
+            command.OpenSqlFileRetry();
+        }
+
         public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
         {
+
             var command = Schema.Current.SynchronizationScript(interactive, schemaOnly);
 
             if (command == null)

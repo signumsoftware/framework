@@ -19,7 +19,7 @@ export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
       {!e.value.isNew &&
         <fieldset>
           <legend>{ProcessExceptionLineEntity.nicePluralName()}</legend>
-          <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: ProcessExceptionLineEntity.token(e => e.line), parentValue: e.value }} />
+          <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.line), value: e.value }]}} />
         </fieldset>
       }
     </div>

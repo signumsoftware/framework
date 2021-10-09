@@ -51,7 +51,7 @@ export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
 /*
  *  <div>
       <FullscreenComponent onReload={handleReload}>
-        <ErrorBoundary refreshKey={infos.current}>
+        <ErrorBoundary deps={infos.current}>
 
           {infos.current && infos.current. cs && parameters &&
             <CombinedReactChart

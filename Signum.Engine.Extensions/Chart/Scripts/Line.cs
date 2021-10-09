@@ -28,7 +28,15 @@ namespace Signum.Engine.Chart.Scripts
                 },
                 new ChartScriptParameterGroup("Number")
                 {
-                    new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } }
+                    new ChartScriptParameter("NumberMinWidth", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20 } },
+                    new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                },
+               new ChartScriptParameterGroup("Circle")
+                {
+                    new ChartScriptParameter("CircleAutoReduce", ChartParameterType.Enum) { ValueDefinition = EnumValueList.Parse("Yes|No") },
+                    new ChartScriptParameter("CircleRadius", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 5 } },
+                    new ChartScriptParameter("CircleStroke", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2 } },
+                    new ChartScriptParameter("CircleRadiusHover", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 15 } },
                 },
                 new ChartScriptParameterGroup("Color")
                 {

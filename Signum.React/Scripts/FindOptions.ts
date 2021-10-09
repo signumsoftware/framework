@@ -30,14 +30,12 @@ export interface ModalFindOptions {
 export interface FindOptions {
   queryName: PseudoType | QueryKey;
   groupResults?: boolean;
-  parentToken?: string | QueryTokenString<any>;
-  parentValue?: any;
 
   includeDefaultFilters?: boolean;
-  filterOptions?: FilterOption[];
-  orderOptions?: OrderOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
   columnOptionsMode?: ColumnOptionsMode;
-  columnOptions?: ColumnOption[];
+  columnOptions?: (ColumnOption | null | undefined)[];
   pagination?: Pagination;
   systemTime?: SystemTime;
 }

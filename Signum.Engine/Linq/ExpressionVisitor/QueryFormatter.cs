@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -391,7 +392,9 @@ namespace Signum.Engine.Linq
                     sb.Append(s == "" ? "''" : ("'" + s + "'"));
                 else if (c.Value is TimeSpan ts)
                     sb.Append(@$"CONVERT(time, '{ts}')");
-                else 
+                else if (ReflectionTools.IsDecimalNumber(c.Value.GetType()))
+                    sb.Append(((IFormattable)c.Value).ToString("0.00####", CultureInfo.InvariantCulture));
+                else
                     sb.Append(c.ToString());
             }
 

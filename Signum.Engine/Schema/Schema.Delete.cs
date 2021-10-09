@@ -36,7 +36,13 @@ namespace Signum.Engine.Maps
         int parameterIndex;
         private SqlPreCommandSimple DeclarePrimaryKeyVariable<T>(T entity, Expression<Func<T, bool>> where) where T : Entity
         {
-            var query = DbQueryProvider.Single.GetMainSqlCommand(Database.Query<T>().Where(where).Select(a => a.Id).Expression);
+            var query = Database.Query<T>().Where(where);
+
+            var uniqueFilters = Schema.Current.AttachToUniqueFilter?.GetInvocationListTyped().Select(f => f.Invoke(entity)).NotNull().ToList();
+            if (uniqueFilters != null && uniqueFilters.Any())
+                uniqueFilters.ForEach(f => query = query.Where(e => f.Evaluate(e)));
+
+            var queryCommand = DbQueryProvider.Single.GetMainSqlCommand(query.Select(a => a.Id).Expression);
 
             string variableName = this.Name.Name + "Id_" + (parameterIndex++);
             if (!Schema.Current.Settings.IsPostgres)
@@ -44,11 +50,11 @@ namespace Signum.Engine.Maps
 
             entity.SetId(new Entities.PrimaryKey(entity.id!.Value.Object, variableName));
 
-            string queryString = query.PlainSql().Lines().ToString(" ");
+            string queryCommandString = queryCommand.PlainSql().Lines().ToString(" ");
 
             var result = Schema.Current.Settings.IsPostgres ?
-            new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryString});") :
-            new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryString}), 1 / 0);");
+            new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryCommandString});") :
+            new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)}; SET {variableName} = COALESCE(({queryCommandString}), 1 / 0);");
 
             return result;
         }

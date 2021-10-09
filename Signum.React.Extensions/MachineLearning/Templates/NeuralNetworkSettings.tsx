@@ -52,9 +52,8 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
       <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
         {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
           queryName: PredictorCodificationEntity,
-          parentToken: PredictorCodificationEntity.token(e => e.predictor),
-          parentValue: p,
           filterOptions: [
+            { token: PredictorCodificationEntity.token(e => e.predictor), value: p },
             { token: PredictorCodificationEntity.token(e => e.usage), value: usage }
           ]
         }} />}

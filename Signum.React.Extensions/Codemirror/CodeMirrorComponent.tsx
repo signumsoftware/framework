@@ -13,11 +13,12 @@ export interface CodeMirrorProps {
   value?: string | null,
   className?: string,
   errorLineNumber?: number;
+  onInit?: (cm: CodeMirror.EditorFromTextArea) => void;
 }
 
 
 export interface CodeMirrorComponentHandler {
-  focus() : void;
+  codeMirror?: CodeMirror.EditorFromTextArea;
 }
 
 export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent(p: CodeMirrorProps, ref: React.Ref<CodeMirrorComponentHandler>) {
@@ -36,6 +37,8 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
     codeMirror.on('focus', () => focusChanged(true));
     codeMirror.on('blur', () => focusChanged.bind(false));
     codeMirror.setValue(p.value ?? '');
+    if (p.onInit)
+      p.onInit(codeMirror);
 
     return () => {
       codeMirror.toTextArea();
@@ -80,7 +83,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
   }
 
   React.useImperativeHandle(ref, () => ({
-    focus
+    codeMirror: codeMirrorRef.current
   }));
 
   function focusChanged(focused: boolean) {

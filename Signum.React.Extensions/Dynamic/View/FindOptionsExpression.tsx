@@ -9,8 +9,6 @@ import * as NodeUtils from './NodeUtils'
 export interface FindOptionsExpr {
   queryName?: string;
   parentToken?: string;
-  parsedParentToken?: QueryToken;
-  parentValue?: ExpressionOrValue<any>;
 
   filterOptions?: FilterOptionExpr[];
   includeDefaultFilters?: boolean;
@@ -48,9 +46,6 @@ export interface ColumnOptionExpr {
 export function toFindOptions(dn: any/*NodeUtils.DesignerNode<BaseNode>*/, ctx: TypeContext<ModifiableEntity>, foe: FindOptionsExpr): FindOptions {
   return {
     queryName: foe.queryName!,
-    parentToken: foe.parentToken,
-    parentValue: NodeUtils.evaluate(dn, ctx, foe, f => f.parentValue),
-
     filterOptions: [
       ...(foe.filterOptions ? foe.filterOptions
         .filter(fo => NodeUtils.evaluateAndValidate(dn, ctx, fo, f => f.applicable, NodeUtils.isBooleanOrNull) != false)

@@ -273,8 +273,7 @@ function ScriptComponent(p : { ctx: TypeContext<WorkflowScriptPartEmbedded>, mai
       <legend>{ctx.niceName()}</legend>
       <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
         queryName: WorkflowScriptEntity,
-        parentToken: WorkflowScriptEntity.token(e => e.entity.mainEntityType),
-        parentValue: p.mainEntityType
+        filterOptions: [{ token: WorkflowScriptEntity.token(e => e.entity.mainEntityType), value: p.mainEntityType}]
       }} />
       <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
     </fieldset>

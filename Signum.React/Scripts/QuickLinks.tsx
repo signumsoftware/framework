@@ -40,17 +40,17 @@ export function clearQuickLinks() {
 
 export interface RegisteredQuickLink<T extends Entity> {
   factory: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>;
-  options?: QuickLinkOptions;
+  options?: QuickLinkRegisterOptions;
 }
 
 
 export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
   onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
 }
 
 export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
   const typeName = getTypeName(type);
 
   const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
@@ -247,7 +247,11 @@ export interface QuickLinkOptions {
   iconColor?: string;
   color?: BsColor;
   group?: QuickLinkGroup | null;
-  allowsMultiple?: boolean
+  openInAnotherTab?: boolean;
+
+}
+export interface QuickLinkRegisterOptions {
+  allowsMultiple?: boolean;
 }
 
 export abstract class QuickLink {
@@ -259,6 +263,8 @@ export abstract class QuickLink {
   iconColor?: string;
   color?: BsColor;
   group?: QuickLinkGroup;
+  openInAnotherTab?: boolean;
+  
 
   static defaultGroup: QuickLinkGroup = {
     name: "quickLinks",
@@ -321,15 +327,22 @@ export class QuickLinkLink extends QuickLink {
     this.url = url;
   }
 
-
-
   handleClick = (e: React.MouseEvent<any>) => {
-    if (typeof this.url === "string")
-      AppContext.pushOrOpenInTab(this.url, e);
+    if (typeof this.url === "string") {
+      if (this.openInAnotherTab)
+        window.open(this.url);
+      else
+        AppContext.pushOrOpenInTab(this.url, e);
+    }
     else {
       e.persist();
       this.url()
-        .then(url => AppContext.pushOrOpenInTab(url, e))
+        .then(url => {
+          if (this.openInAnotherTab)
+            window.open(url);
+          else
+            AppContext.pushOrOpenInTab(url, e)
+        })
         .done();
     }
   }

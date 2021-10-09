@@ -49,9 +49,9 @@ interface CountIconProps {
 
 export function CountIcon(p: CountIconProps) {
 
-  const refreshKey = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
+  const deps = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
-  return <ValueSearchControl refreshKey={refreshKey}
+  return <ValueSearchControl deps={[deps]}
     findOptions={p.findOptions}
     customClass="icon"
     customStyle={{ color: p.color }}
