@@ -92,7 +92,7 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
               name={val}
               onChange={e => c.handleOnChange(e, val)} />
             &nbsp;
-                        <span className="sf-entitStrip-link">{ti.members[val].niceName}</span>
+            <span>{ti.members[val].niceName}</span>
           </label>)}
       </div>
     );
@@ -103,22 +103,16 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
     if (p.columnCount && p.columnWidth)
       return {
         columns: `${p.columnCount} ${p.columnWidth}px`,
-        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
       };
 
     if (p.columnCount)
       return {
         columnCount: p.columnCount,
-        MozColumnCount: p.columnCount,
-        WebkitColumnCount: p.columnCount,
       };
 
     if (p.columnWidth)
       return {
         columnWidth: p.columnWidth,
-        MozColumnWidth: p.columnWidth,
-        WebkitColumnWidth: p.columnWidth,
       };
 
     return undefined;

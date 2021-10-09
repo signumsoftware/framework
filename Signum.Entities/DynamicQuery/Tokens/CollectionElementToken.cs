@@ -82,21 +82,8 @@ namespace Signum.Entities.DynamicQuery
             return parent.IsAllowed();
         }
 
-        public override bool HasAllOrAny()
-        {
-            return
-                CollectionElementType != CollectionElementType.Element &&
-                CollectionElementType != CollectionElementType.Element2 &&
-                CollectionElementType != CollectionElementType.Element3;
-        }
 
-        public override bool HasElement()
-        {
-            return base.HasElement() ||
-                CollectionElementType == CollectionElementType.Element ||
-                CollectionElementType == CollectionElementType.Element2 ||
-                CollectionElementType == CollectionElementType.Element3;
-        }
+        public override bool HasElement() => true;
 
         public override PropertyRoute? GetPropertyRoute()
         {

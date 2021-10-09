@@ -343,7 +343,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static bool IsColumnToken(string tokenString)
         {
-            return tokenString.IndexOf('.') == -1 && tokenString != "Entity";
+            return !tokenString.Contains('.') && tokenString != "Entity";
         }
 
         public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)

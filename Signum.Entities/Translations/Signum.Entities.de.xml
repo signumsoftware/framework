@@ -257,6 +257,7 @@
     <Member Name="Setters" Description="Setters" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0} (statt {1}) sein" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} hat keine Enität zurückgegeben" />
+    <Member Name="TheStateOf0ShouldBe1InsteadOf2" Description="Der Zustand von {0} sollte {1} sein (anstatt von {2})" />
   </Type>
   <Type Name="OperationSymbol" Description="Operation" />
   <Type Name="OrderType" Description="Reihenfolgentyp">
@@ -341,6 +342,7 @@
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />
     <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
     <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
     <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="WeekStart" Description="Wochenstart" />

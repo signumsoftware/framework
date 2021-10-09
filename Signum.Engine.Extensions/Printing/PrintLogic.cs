@@ -66,7 +66,7 @@ namespace Signum.Engine.Printing
 
                 SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>
                 {
-                    var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= DateTime.Now.AddMinutes(-DeleteFilesAfter));
+                    var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= TimeZoneManager.Now.AddMinutes(-DeleteFilesAfter));
                     foreach (var line in lines)
                     {
                         try

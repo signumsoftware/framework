@@ -12,8 +12,7 @@ export default function SMSSendPackage(p: { ctx: TypeContext<SMSSendPackageEntit
       <SearchControl
         findOptions={{
           queryName: SMSMessageEntity,
-          parentToken: "Entity.SendPackage",
-          parentValue: p.ctx.value,
+          filterOptions: [{ token: "Entity.SendPackage", value: p.ctx.value}],
         }} />
     </div>);
 }

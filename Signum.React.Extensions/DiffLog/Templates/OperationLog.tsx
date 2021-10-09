@@ -68,6 +68,21 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     );
   }
 
+  function renderPrevDisabled() {
+    return (
+      <Tab eventKey="prev" disabled title={
+          <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
+            <FontAwesomeIcon icon="arrow-circle-left" />
+            &nbsp;
+            {DiffLogMessage.PreviousLog.niceToString()}
+          </span>
+      }>
+      </Tab>
+    );
+  }
+
+
+
   function renderPrevDiff(diffPrev: Array<DiffPair<Array<DiffPair<string>>>>) {
     const eq = isEqual(diffPrev);
 
@@ -81,6 +96,21 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     return (
       <Tab eventKey="prevDiff" title={title as any}>
         <DiffDocument diff={diffPrev} />
+      </Tab>
+    );
+  }
+
+  function renderPrevDiffDisabled() {
+
+    const title = (
+      <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
+        <FontAwesomeIcon icon="fast-backward" className={`colorIcon gray`} />
+        <FontAwesomeIcon icon="step-backward" className={`colorIcon gray`} />
+      </span>
+    );
+
+    return (
+      <Tab eventKey="prevDiff" title={title as any} disabled>
       </Tab>
     );
   }
@@ -180,8 +210,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     <div>
       <label><input type="checkbox" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes</label>
       <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
-        {result?.prev && renderPrev(result.prev)}
-        {result?.diffPrev && renderPrevDiff(result.diffPrev)}
+        {result?.prev ? renderPrev(result.prev) : renderPrevDisabled() }
+        {result?.diffPrev ? renderPrevDiff(result.diffPrev) : renderPrevDiffDisabled()}
         {renderInitialState()}
         {renderDiff()}
         {renderFinalState()}

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { classes } from '../Globals'
+import { areEqual, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
@@ -11,7 +11,7 @@ import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
 import { toFilterRequests } from '../Finder';
 import { PropertyRoute } from '../Lines'
-
+import * as Hooks from '../Hooks'
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
   valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
@@ -30,7 +30,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   format?: string;
   throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
-  refreshKey?: any;
+  deps?: React.DependencyList;
   searchControlProps?: Partial<SearchControlProps>;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
@@ -80,7 +80,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
       toString(this.props.valueToken) == toString(newProps.valueToken)) {
 
-      if (this.props.refreshKey != newProps.refreshKey)
+      if (!Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
         this.refreshValue(newProps)
 
     } else {
@@ -98,7 +98,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     this.setState({ token: undefined, value: undefined });
     if (props.valueToken)
-      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll)
+      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
         .then(st => {
           this.setState({ token: st });
           this.props.onTokenLoaded && this.props.onTokenLoaded();

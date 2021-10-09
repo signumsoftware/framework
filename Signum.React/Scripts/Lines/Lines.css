@@ -38,7 +38,7 @@ input[type=checkbox].form-control {
 
 .form-control.sf-multi-line {
     height: auto;
-    white-space: pre;
+    white-space: pre-line;
 }
 
 .numeric {
@@ -283,11 +283,6 @@ body.rtl .form-group.row > label {
         margin-bottom: 0px;
     }
 
-/*https://github.com/jquense/react-widgets/blob/v4/packages/react-widgets/src/less/dropdown-list.less Disable temporal hack*/
-.rw-dropdown-list-input {
-    max-width: initial !important;
-}
-
 /*form xs*/
 
 select.form-control-xs:not([size]):not([multiple]),
@@ -335,8 +330,13 @@ input[type=checkbox].form-control-xs {
     min-height: 24px;
 }
 
-.rw-widget-xs .rw-dropdown-list-input {
+.rw-widget-xs .rw-dropdown-list-input,
+.rw-widget-xs .rw-combobox-input {
     padding: 0 0.4em;
+}
+
+.form-control.form-control-sm.rw-combobox.rw-widget {
+    padding: 0px;
 }
 
 .rw-widget-xs .rw-widget-picker {
@@ -370,7 +370,9 @@ input[type=checkbox].form-control-xs {
     min-height: 28px;
 }
 
-.form-control-sm.rw-dropdown-list.rw-widget{
+.form-control-sm.rw-dropdown-list.rw-widget,
+.form-control-sm.rw-combobox.rw-widget
+{
     padding: 0px;
 }
 
@@ -472,4 +474,14 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     height: 100%;
     width: 100%;
     padding: 0.25rem 0.5rem;
+}
+
+.try-no-wrap{
+
+}
+
+@media (min-width: 768px){
+    .try-no-wrap {
+        white-space: nowrap;
+    }
 }

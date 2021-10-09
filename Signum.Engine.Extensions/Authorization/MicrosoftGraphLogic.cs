@@ -55,7 +55,7 @@ namespace Signum.Engine.Authorization
 
         public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);
 
-        static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)> ADGRoupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)>();
+        static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)> ADGroupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)>();
 
         public static List<Guid> CurrentADGroups()
         {
@@ -63,9 +63,9 @@ namespace Signum.Engine.Authorization
             if (oid == null)
                 return new List<Guid>();
 
-            var tuple = ADGRoupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
-                addValueFactory: user => (DateTime.Now, CurrentADGroupsInternal(oid.Value)),
-                updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > DateTime.Now ? old : (DateTime.Now, CurrentADGroupsInternal(oid.Value)));
+            var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
+                addValueFactory: user => (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)),
+                updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > TimeZoneManager.Now ? old : (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)));
 
             return tuple.groups;
         }
@@ -76,7 +76,7 @@ namespace Signum.Engine.Authorization
             {
                 ClientCredentialProvider authProvider = MicrosoftGraphLogic.GetClientCredentialProvider();
                 GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-                var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Select("id, displayName, ODataType").GetAsync().Result.ToList();
+                var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
                 return result.Select(a => Guid.Parse(a.Id)).ToList();
             }
@@ -94,7 +94,7 @@ namespace Signum.Engine.Authorization
                         e.DisplayName
                     });
 
-                Schema.Current.OnMetadataInvalidated += () => ADGRoupsCache.Clear();
+                Schema.Current.OnMetadataInvalidated += () => ADGroupsCache.Clear();
 
                 new Graph<ADGroupEntity>.Execute(ADGroupOperation.Save)
                 {

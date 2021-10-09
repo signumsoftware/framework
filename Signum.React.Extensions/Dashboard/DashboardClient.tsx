@@ -19,7 +19,7 @@ import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
+import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
 
 
@@ -27,6 +27,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
   part: T;
   entity?: Lite<Entity>;
+  deps?: React.DependencyList;
 }
 
 interface IconColor {

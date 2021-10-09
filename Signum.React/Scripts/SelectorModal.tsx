@@ -84,28 +84,30 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
     dialogClassName={dialogClassName} />);
 };
 
-SelectorModal.chooseType = (options: TypeInfo[]): Promise<TypeInfo | undefined> => {
+SelectorModal.chooseType = (options: TypeInfo[], config?: SelectorConfig<TypeInfo>): Promise<TypeInfo | undefined> => {
   return SelectorModal.chooseElement(options,
     {
       buttonDisplay: a => a.niceName ?? "",
       buttonName: a => a.name,
       title: SelectorMessage.TypeSelector.niceToString(),
-      message: SelectorMessage.PleaseSelectAType.niceToString()
+      message: SelectorMessage.PleaseSelectAType.niceToString(),
+      ...config
     });
 };
 
-SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, title?: React.ReactNode, message?: React.ReactNode, values?: T[]): Promise<T | undefined> => {
+SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, values?: T[], config?: SelectorConfig<T>): Promise<T | undefined> => {
     return SelectorModal.chooseElement(values ?? enumType.values(),
       {
         buttonDisplay: a => enumType.niceToString(a),
         buttonName: a => a,
-        title: title ?? SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
-        message: message ?? SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
+        title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
         size: "md",
+        ...config
       });
 };
 
-SelectorModal.chooseLite = <T extends Entity>(type: Type<T>, values?: Lite<T>[]): Promise<Lite<T> | undefined> => {
+SelectorModal.chooseLite = <T extends Entity>(type: Type<T>, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> => {
   return (values ? Promise.resolve(values):  Finder.API.fetchAllLites({ types: type.typeName }))
     .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
       {
@@ -114,6 +116,7 @@ SelectorModal.chooseLite = <T extends Entity>(type: Type<T>, values?: Lite<T>[])
         title: SelectorMessage._0Selector.niceToString(type.niceName()),
         message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(type.niceName()),
         size: "md",
+        ...config
       }));
 };
 

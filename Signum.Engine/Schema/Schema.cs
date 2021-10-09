@@ -24,6 +24,7 @@ namespace Signum.Engine.Maps
         public TimeZoneMode TimeZoneMode { get; set; }
 
         public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+        public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
 
         Version? version;
         public Version Version
@@ -47,7 +48,7 @@ namespace Signum.Engine.Maps
         string? applicationName;
         public string ApplicationName
         {
-            get { return applicationName ?? (applicationName = AppDomain.CurrentDomain.FriendlyName); }
+            get { return applicationName ??= AppDomain.CurrentDomain.FriendlyName; }
             set { applicationName = value; }
         }
 
@@ -308,9 +309,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-
-
-        FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
+        static FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
             where T : Entity
         {
             if (one == null)
@@ -380,7 +379,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        private Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
+        private static Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
         {
             if (one == null)
                 return two;
@@ -593,7 +592,7 @@ namespace Signum.Engine.Maps
         public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
         {
-            var list = (FieldMList)Schema.Current.Field(mListProperty);
+            var list = (FieldMList)Field(mListProperty);
 
             return list.TableMList;
         }
@@ -703,7 +702,7 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(route, typeof(IEntity).Name));
         }
 
-        private Implementations? CalculateExpressionImplementations(PropertyRoute route)
+        private static Implementations? CalculateExpressionImplementations(PropertyRoute route)
         {
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 return null;
@@ -769,7 +768,7 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<ITable> GetDatabaseTables()
         {
-            foreach (var table in Schema.Current.Tables.Values)
+            foreach (var table in this.Tables.Values)
             {
                 yield return table;
 

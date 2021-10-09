@@ -88,11 +88,11 @@ function copyModal(lite: Lite<TreeEntity>) {
 }
 
 
-export function treePath(typeName: string, filterOptions?: FilterOption[]): string {
+export function treePath(typeName: string, filterOptions?: (FilterOption | null | undefined)[]): string {
 
   const query: any = {};
   if (filterOptions)
-    Finder.Encoder.encodeFilters(query, filterOptions);
+    Finder.Encoder.encodeFilters(query, filterOptions.notNull());
 
   return AppContext.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
 }
@@ -164,13 +164,13 @@ export function getAllTreeTypes() {
   return getAllTypes().filter(t => isTree(t));
 }
 
-export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<T> | undefined>;
-export function openTree(typeName: string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
-export function openTree(type: Type<TreeEntity> | string, filterOptions?: FilterOption[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
+export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<T> | undefined>;
+export function openTree(typeName: string, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
+export function openTree(type: Type<TreeEntity> | string, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
   const typeName = type instanceof Type ? type.typeName : type;
 
   return import("./TreeModal")
-    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions ?? [], options));
+    .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions?.notNull() ?? [], options));
 }
 
 export interface TreeModalOptions {

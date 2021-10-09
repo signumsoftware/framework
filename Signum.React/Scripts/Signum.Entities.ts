@@ -383,6 +383,7 @@ export module OperationMessage {
   export const Create = new MessageKey("OperationMessage", "Create");
   export const CreateFromRegex = new MessageKey("OperationMessage", "CreateFromRegex");
   export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
+  export const TheStateOf0ShouldBe1InsteadOf2 = new MessageKey("OperationMessage", "TheStateOf0ShouldBe1InsteadOf2");
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
@@ -542,6 +543,7 @@ export module SelectorMessage {
   export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
   export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
   export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
+  export const CreationOf0Cancelled = new MessageKey("SelectorMessage", "CreationOf0Cancelled");
 }
 
 export interface Symbol extends Entity {
@@ -560,6 +562,7 @@ export module ValidationMessage {
   export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
   export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
   export const _0ShouldBe12 = new MessageKey("ValidationMessage", "_0ShouldBe12");
+  export const _0ShouldBe1 = new MessageKey("ValidationMessage", "_0ShouldBe1");
   export const _0ShouldBe1InsteadOf2 = new MessageKey("ValidationMessage", "_0ShouldBe1InsteadOf2");
   export const _0HasToBeBetween1And2 = new MessageKey("ValidationMessage", "_0HasToBeBetween1And2");
   export const _0HasToBeLowercase = new MessageKey("ValidationMessage", "_0HasToBeLowercase");

@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
-import { DateTimePicker, DatePicker, DropdownList } from 'react-widgets'
+import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes } from '../Globals'
+import { Dic, addClass, classes, softCast } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -20,8 +20,8 @@ export interface ValueLineProps extends LineBaseProps {
   autoTrimString?: boolean;
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
-  comboBoxItems?: (OptionItem | MemberInfo | string)[];
-  onRenderComboBoxItem?: (oi: OptionItem) => React.ReactNode;
+  optionItems?: (OptionItem | MemberInfo | string)[];
+  onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
   initiallyFocused?: boolean;
@@ -44,7 +44,8 @@ export interface OptionItem {
 
 export type ValueLineType =
   "Checkbox" |
-  "ComboBox" |
+  "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
+  "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
   "DateTime" |
   "TextBox" |
   "TextArea" |
@@ -111,7 +112,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
       return undefined;
 
     if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
-      return "ComboBox";
+      return "DropDownList";
 
     if (t.name == "boolean")
       return "Checkbox";
@@ -173,7 +174,7 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
   if (c.isHidden)
     return null;
 
-  return ValueLineRenderers.renderers[c.props.valueLineType!](c);
+  return ValueLineRenderers.renderers.get(c.props.valueLineType!)!(c);
 }), (prev, next) => {
   if (
     next.extraButtons || prev.extraButtons)
@@ -183,9 +184,7 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
 });
 
 export namespace ValueLineRenderers {
-  export const renderers: {
-    [valueLineType: string]: (vl: ValueLineController) => JSX.Element;
-  } = {};
+  export const renderers: Map<ValueLineType, (vl: ValueLineController) => JSX.Element> = new Map();
 }
 
 export function isNumber(e: React.KeyboardEvent<any>) {
@@ -224,7 +223,7 @@ function isDuration(e: React.KeyboardEvent<any>): boolean {
   return isNumber(e) || e.key == ":";
 }
 
-ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   const s = vl.props;
 
   const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
@@ -249,18 +248,15 @@ ValueLineRenderers.renderers["Checkbox" as ValueLineType] = (vl) => {
       </FormGroup>
     );
   }
-};
+});
 
-ValueLineRenderers.renderers["ComboBox"] = (vl) => {
-  return internalComboBox(vl);
-};
 
 function getOptionsItems(vl: ValueLineController): OptionItem[] {
 
   var ti = tryGetTypeInfo(vl.props.type!.name);
 
-  if (vl.props.comboBoxItems) {
-    return vl.props.comboBoxItems
+  if (vl.props.optionItems) {
+    return vl.props.optionItems
       .map(a => typeof a == "string" && ti != null && ti.kind == "Enum" ? toOptionItem(ti.members[a]) : toOptionItem(a))
       .filter(a => !!a);
   }
@@ -294,7 +290,12 @@ function toOptionItem(m: MemberInfo | OptionItem | string): OptionItem {
   return m as OptionItem;
 }
 
-function internalComboBox(vl: ValueLineController) {
+ValueLineRenderers.renderers.set("DropDownList", (vl) => {
+  return internalDropDownList(vl);
+});
+
+
+function internalDropDownList(vl: ValueLineController) {
 
   var optionItems = getOptionsItems(vl);
 
@@ -332,7 +333,7 @@ function internalComboBox(vl: ValueLineController) {
           val.toString();
   }
 
-  if (vl.props.onRenderComboBoxItem) {
+  if (vl.props.onRenderDropDownListItem) {
     const handleOptionItem = (e: OptionItem) => {
       vl.setValue(e.value);
     };
@@ -347,8 +348,8 @@ function internalComboBox(vl: ValueLineController) {
             autoComplete="off"
             dataKey="value"
             textField="label"
-            renderValue={a => vl.props.onRenderComboBoxItem!(a.item)}
-            renderListItem={a => vl.props.onRenderComboBoxItem!(a.item)}
+            renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
+            renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
           />)
         }
       </FormGroup>
@@ -373,13 +374,71 @@ function internalComboBox(vl: ValueLineController) {
   }
 }
 
-ValueLineRenderers.renderers["TextBox" as ValueLineType] = (vl) => {
-  return internalTextBox(vl, false);
-};
 
-ValueLineRenderers.renderers["Password" as ValueLineType] = (vl) => {
-  return internalTextBox(vl, true);
+ValueLineRenderers.renderers.set("ComboBoxText", (vl) => {
+  return internalComboBoxText(vl);
+});
+
+
+function internalComboBoxText(vl: ValueLineController) {
+
+  var optionItems = getOptionsItems(vl);
+
+  const s = vl.props;
+  if (!s.type!.isNotNullable || s.ctx.value == undefined)
+    optionItems = [{ value: null, label: " - " }].concat(optionItems);
+
+  if (s.ctx.readOnly) {
+
+    var label = null;
+    if (s.ctx.value != undefined) {
+
+      var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
+
+      label = item ? item.label : s.ctx.value.toString();
+    }
+
+    return (
+      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {vl.withItemGroup(
+          <FormControlReadonly htmlAttributes={{
+            ...vl.props.valueHtmlAttributes,
+            ...({ 'data-value': s.ctx.value } as any) /*Testing*/
+          }} ctx={s.ctx} innerRef={vl.inputElement}>
+            {label}
+          </FormControlReadonly>)}
+      </FormGroup>
+    );
+  }
+
+  const handleOptionItem = (e: string | OptionItem) => {
+    vl.setValue(e == null ? null : typeof e == "string" ? e : e.value);
+  };
+
+  var renderItem = vl.props.onRenderDropDownListItem ? (a: any) => vl.props.onRenderDropDownListItem!(a.item) : undefined;
+
+  return (
+    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {vl.withItemGroup(
+        <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
+          dataKey="value"
+          textField="label"
+          focusFirstItem
+          autoSelectMatches
+          renderListItem={renderItem}
+        />)
+      }
+    </FormGroup>
+  );
 }
+
+ValueLineRenderers.renderers.set("TextBox", (vl) => {
+  return internalTextBox(vl, false);
+});
+
+ValueLineRenderers.renderers.set("Password", (vl) => {
+  return internalTextBox(vl, true);
+});
 
 function internalTextBox(vl: ValueLineController, password: boolean) {
 
@@ -436,7 +495,7 @@ function isIE11(): boolean {
   return (!!(window as any).MSInputMethodContext && !!(document as any).documentMode);
 }
 
-ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("TextArea", (vl) => {
 
   const s = vl.props;
 
@@ -481,15 +540,15 @@ ValueLineRenderers.renderers["TextArea" as ValueLineType] = (vl) => {
       )}
     </FormGroup>
   );
-};
+});
 
-ValueLineRenderers.renderers["Number" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("Number", (vl) => {
   return numericTextBox(vl, isNumber);
-};
+});
 
-ValueLineRenderers.renderers["Decimal" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("Decimal", (vl) => {
   return numericTextBox(vl, isDecimal);
-};
+});
 
 function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
@@ -662,7 +721,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   }
 }
 
-ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const s = vl.props;
   const type = vl.props.type!.name as "Date" | "DateTime";
@@ -686,7 +745,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
     if (m)
       m = trimDateToFormat(m, type, s.formatText);
 
-  // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
+    // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
     vl.setValue(m == null || !m.isValid ? null :
       type == "Date" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
@@ -716,7 +775,7 @@ ValueLineRenderers.renderers["DateTime" as ValueLineType] = (vl) => {
       )}
     </FormGroup>
   );
-}
+});
 
 function defaultRenderDay({ date, label }: { date: Date; label: string }) {
   var dateStr = DateTime.fromJSDate(date).toISODate();
@@ -738,9 +797,9 @@ export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", form
   return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'}); 
 }
 
-ValueLineRenderers.renderers["TimeSpan" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("TimeSpan", (vl) => {
   return durationTextBox(vl, isDuration);
-};
+});
 
 function durationTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
 
@@ -887,9 +946,9 @@ DurationTextBox.defaultProps = {
   format: "hh:mm:ss"
 };
 
-ValueLineRenderers.renderers["RadioGroup" as ValueLineType] = (vl) => {
+ValueLineRenderers.renderers.set("RadioGroup", (vl) => {
   return internalRadioGroup(vl);
-};
+});
 
 function internalRadioGroup(vl: ValueLineController) {
 
@@ -922,25 +981,75 @@ function internalRadioGroup(vl: ValueLineController) {
     if (p.columnCount && p.columnWidth)
       return {
         columns: `${p.columnCount} ${p.columnWidth}px`,
-        MozColumns: `${p.columnCount} ${p.columnWidth}px`,
-        WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
       };
 
     if (p.columnCount)
       return {
         columnCount: p.columnCount,
-        MozColumnCount: p.columnCount,
-        WebkitColumnCount: p.columnCount,
       };
 
     if (p.columnWidth)
       return {
         columnWidth: p.columnWidth,
-        MozColumnWidth: p.columnWidth,
-        WebkitColumnWidth: p.columnWidth,
       };
 
     return undefined;
   }
 }
 
+tasks.push(taskSetUnit);
+export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
+    const vProps = state as ValueLineProps;
+
+    if (vProps.unitText === undefined &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.unitText = state.ctx.propertyRoute.member!.unit;
+    }
+  }
+}
+
+tasks.push(taskSetFormat);
+export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueLineController) {
+    const vProps = state as ValueLineProps;
+
+    if (!vProps.formatText &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.formatText = state.ctx.propertyRoute.member!.format;
+      if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
+        vProps.valueLineType = "Password";
+    }
+  }
+}
+
+
+export let maxValueLineSize = 100;
+
+tasks.push(taskSetHtmlProperties);
+export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  const vl = lineBase instanceof ValueLineController ? lineBase : undefined;
+  const pr = state.ctx.propertyRoute;
+  const s = state as ValueLineProps;
+  if (vl && pr?.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
+
+    var member = pr.member!;
+
+    if (member.maxLength != undefined && !s.ctx.readOnly) {
+
+      if (!s.valueHtmlAttributes)
+        s.valueHtmlAttributes = {};
+
+      if (s.valueHtmlAttributes.maxLength == undefined)
+        s.valueHtmlAttributes.maxLength = member.maxLength;
+
+      if (s.valueHtmlAttributes.size == undefined)
+        s.valueHtmlAttributes.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
+    }
+
+    if (member.isMultiline)
+      s.valueLineType = "TextArea";
+  }
+}

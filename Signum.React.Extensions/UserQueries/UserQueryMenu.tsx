@@ -18,7 +18,7 @@ import { FilterOption, FilterOptionParsed } from '@framework/Search'
 import { isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
-import { KeyCodes } from '../../../Framework/Signum.React/Scripts/Components'
+import { KeyCodes } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
 
@@ -148,7 +148,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     uqOld.groupResults = uqNew.groupResults;
     uqOld.includeDefaultFilters = uqNew.includeDefaultFilters;
-    uqOld.filters = UserQueryMerger.mergeFilters(uqOld.filters, uqNew.filters, foOld.filterOptions ?? [], foNew.filterOptions ?? [], 0, sd);
+    uqOld.filters = UserQueryMerger.mergeFilters(uqOld.filters, uqNew.filters, foOld.filterOptions?.notNull() ?? [], foNew.filterOptions?.notNull() ?? [], 0, sd);
     uqOld.columns = UserQueryMerger.mergeColumns(uqOld.columns, uqNew.columns, sd);
     uqOld.columnsMode = uqNew.columnsMode;
     uqOld.orders = uqNew.orders;
@@ -175,7 +175,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
       queryKey: getQueryKey(fo.queryName),
-      filters: (fo.filterOptions ?? []).map(fo => UserAssetClient.Converter.toFilterNode(fo))
+      filters: (fo.filterOptions ?? []).notNull().map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
     const parsedTokens =
@@ -194,14 +194,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
-      columns: (fo.columnOptions ?? []).map(c => newMListElement(QueryColumnEmbedded.New({
+      columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }) : null,
         hiddenColumn: c.hiddenColumn
       }))),
       columnsMode: fo.columnOptionsMode,
-      orders: (fo.orderOptions ?? []).map(c => newMListElement(QueryOrderEmbedded.New({
+      orders: (fo.orderOptions ?? []).notNull().map(c => newMListElement(QueryOrderEmbedded.New({
         orderType: c.orderType,
         token: QueryTokenEmbedded.New({
           tokenString: c.token.toString(),

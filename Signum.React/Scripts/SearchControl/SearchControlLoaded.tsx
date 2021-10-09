@@ -13,6 +13,7 @@ import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
+import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
@@ -72,7 +73,7 @@ export interface SearchControlLoadedProps {
   largeToolbarButtons: boolean;
   defaultRefreshMode?: RefreshMode;
   avoidChangeUrl: boolean;
-  refreshKey: any;
+  deps?: React.DependencyList;
   extraOptions: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
@@ -151,17 +152,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.searchOnLoad)
       this.doSearch({ force: true }).done();
-
-    this.containerDiv!.addEventListener("scroll", (e) => {
-
-      var table = this.thead!.parentElement!;
-      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
-      this.thead!.style.transform = translate;
-    });
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
-    if (this.props.refreshKey != props.refreshKey) {
+    if (!Hooks.areEqual(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
@@ -433,7 +427,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   containerDiv?: HTMLDivElement | null;
-  thead?: HTMLTableSectionElement | null;
 
   render() {
     const p = this.props;
@@ -482,7 +475,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
           <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
-            <thead ref={th => this.thead = th}>
+            <thead>
               {this.renderHeaders()}
             </thead>
             <tbody>
@@ -1405,17 +1398,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resultTable = this.state.resultTable;
 
+    var resFO = this.state.resultFindOptions!;
+
     if (resultTable.rows.length == 0) {
-      if (resultTable.totalElements == 0 || this.props.showFooter == false)
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
         return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
       else
         return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
-          this.state.resultFindOptions!.pagination.currentPage,
+          resFO.pagination.currentPage,
           <a href="#" onClick={e => {
             e.preventDefault();
             this.handlePagination({
               mode: "Paginate",
-              elementsPerPage: this.state.resultFindOptions!.pagination.elementsPerPage,
+              elementsPerPage: resFO.pagination.elementsPerPage,
               currentPage: 1
             });
           }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>

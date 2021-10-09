@@ -310,6 +310,29 @@ export class ServiceError {
   }
 }
 
+export class ExternalServiceError {
+  serviceName: string;
+  error: any;
+  title?: string;
+  message?: string;
+  additionalInfo?: string;
+
+
+  constructor(
+    serviceName: string,
+    error: any,
+    title?: string,
+    message?: string,
+    additionalInfo?: string,
+  ) {
+    this.serviceName = serviceName;
+    this.error = error;
+    this.title = title,
+      this.message = message;
+    this.additionalInfo = additionalInfo;
+  }
+}
+
 export interface WebApiHttpError {
   exceptionType: string;
   exceptionMessage: string | null;

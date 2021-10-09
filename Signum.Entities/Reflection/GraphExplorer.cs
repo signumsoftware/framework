@@ -368,6 +368,12 @@ namespace Signum.Entities.Reflection
             set { this.Data["integrityErrors"] = value; }
         }
 
+        public IntegrityCheckException(IntegrityCheck error)
+            : this(new Dictionary<Guid, IntegrityCheck> { { error.TemporalId, error } })
+        {
+
+        }
+
         public IntegrityCheckException(List<IntegrityCheckWithEntity> errors)
             : base(errors.ToString("\r\n\r\n"))
         {

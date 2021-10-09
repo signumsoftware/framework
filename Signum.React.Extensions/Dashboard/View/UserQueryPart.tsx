@@ -33,13 +33,14 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       style={p.partEmbedded.style}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
+      deps={p.deps}
     />;
   }
 
-  return <SearchContolInPart part={p.part} findOptions={fo} />;
+  return <SearchContolInPart part={p.part} findOptions={fo} deps={p.deps} />;
 }
 
-function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, part: UserQueryPartEntity }) {
+function SearchContolInPart({ findOptions, part, deps }: { findOptions: FindOptions, part: UserQueryPartEntity, deps?: React.DependencyList }) {
 
   const [refreshCount, setRefreshCount] = React.useState<number>(0)
   const qd = useAPI(() => Finder.getQueryDescription(part.userQuery.query.key), [part.userQuery.query.key]);
@@ -60,7 +61,7 @@ function SearchContolInPart({ findOptions, part }: { findOptions: FindOptions, p
   return (
     <FullscreenComponent onReload={e => { e.preventDefault(); setRefreshCount(a => a + 1); }} onCreateNew={part.createNew ? handleCreateNew : undefined} typeInfos={typeInfos}>
       <SearchControl
-        refreshKey={refreshCount}
+        deps={[refreshCount, ...deps ?? []]}
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
         showFooter={part.showFooter}
@@ -78,6 +79,7 @@ interface BigValueBadgeProps {
   style: BootstrapStyle;
   iconName?: string;
   iconColor?: string;
+  deps?: React.DependencyList;
 }
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
@@ -101,7 +103,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
           <div className={classes("col-9 flip", isRTL ? "text-left" : "text-right")}>
             <h1>
-              <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} />
+              <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps} />
             </h1>
           </div>
         </div>

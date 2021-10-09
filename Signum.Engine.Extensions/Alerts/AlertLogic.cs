@@ -198,7 +198,7 @@ namespace Signum.Engine.Alerts
 
             static Regex LinkPlaceholder = new Regex(@"\[(?<prop>(\w|\d|\.)+)(\:(?<text>.+))?\](\((?<url>.+)\))?");
 
-            public HtmlString? TextFormatted(TemplateParameters tp)
+            public static HtmlString? TextFormatted(TemplateParameters tp)
             {
                 if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
                     return null;
@@ -206,8 +206,12 @@ namespace Signum.Engine.Alerts
                 var alert = (AlertEntity)alertObject;
                 var text = alert.Text ?? "";
 
-                var newText = LinkPlaceholder.Replace(text, m =>
+                var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
                 {
+                    var m = pair.match;
+                    if (m == null)
+                        return ReplacePlaceHolders(pair.after, alert);
+
                     var propEx = m.Groups["prop"].Value;
 
                     var prop = GetPropertyValue(alert, propEx);
@@ -217,17 +221,16 @@ namespace Signum.Engine.Alerts
 
                     var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
 
-                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite != null ? lite.ToString() : null);
+                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 
-                    return @$"<a href=""{url}"">{text}</a>";
-
-                });
+                    return @$"<a href=""{url}"">{text}</a>" + ReplacePlaceHolders(pair.after, alert);
+                }).ToString("");
 
                 if (text != newText)
                     return new HtmlString(newText);
 
                 if (alert.Target != null)
-                    return new HtmlString(@$"{text}<br/><a href=""{EntityUrl(alert.Target)}"">{alert.Target.ToString()}</a>");
+                    return new HtmlString(@$"{text}<br/><a href=""{EntityUrl(alert.Target)}"">{alert.Target}</a>");
 
                 return new HtmlString(text);
             }
@@ -240,20 +243,25 @@ namespace Signum.Engine.Alerts
             }
 
             static Regex TextPlaceHolder = new Regex(@"({(?<prop>(\w|\d|\.)+)})");
-
-            private string? ReplacePlaceHolders(string? value, AlertEntity alert)
+            static Regex NumericPlaceholder = new Regex(@"^[ \d]+$");
+            private static string? ReplacePlaceHolders(string? value, AlertEntity alert)
             {
                 if (value == null)
                     return null;
 
                 return TextPlaceHolder.Replace(value, g =>
                 {
-                    return GetPropertyValue(alert, g.Groups["prop"].Value)?.ToString()!;
+                    var prop = g.Groups["prop"].Value;
+                    if (NumericPlaceholder.IsMatch(prop))
+                        return alert.TextArguments?.Split("\n###\n").ElementAtOrDefault(int.Parse(prop)) ?? "";
+                    
+                    return GetPropertyValue(alert, prop)?.ToString()!;
                 });
             }
 
             private static object? GetPropertyValue(AlertEntity alert, string expresion)
             {
+
                 var parts = expresion.SplitNoEmpty('.');
 
                 var result = SimpleMemberEvaluator.EvaluateExpression(alert, parts);
@@ -288,43 +296,47 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType, options ?? new AlertTypeOptions());
         }
 
-        public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlert(entity.ToLiteFat(), alertType, text, alertDate, createdBy, title, recipient);
+            return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlert<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;
 
-            var result = new AlertEntity
+            using (AuthLogic.Disable())
             {
-                AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
-                TitleField = title,
-                TextField = text,
-                Target = (Lite<Entity>)entity,
-                AlertType = alertType,
-                Recipient = recipient
-            };
+                var result = new AlertEntity
+                {
+                    AlertDate = alertDate ?? TimeZoneManager.Now,
+                    CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
+                    TitleField = title,
+                    TextArguments = textArguments?.ToString("\n###\n"),
+                    TextField = text,
+                    Target = (Lite<Entity>)entity,
+                    AlertType = alertType,
+                    Recipient = recipient
+                };
 
-            return result.Execute(AlertOperation.Save);
+                return result.Execute(AlertOperation.Save);
+            }
         }
 
-        public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+        public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
-            return CreateAlertForceNew(entity.ToLite(), alertType, text, alertDate, createdBy, title, recipient);
+            return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
         }
 
-        public static AlertEntity? CreateAlertForceNew<T>(this Lite<T> entity, AlertTypeSymbol alertType, string? text = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null) where T : class, IEntity
+        public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
         {
             if (Started == false)
                 return null;
 
             using (Transaction tr = Transaction.ForceNew())
             {
-                var alert = entity.CreateAlert(alertType, text, alertDate, createdBy);
+                var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient);
 
                 return tr.Commit(alert);
             }
@@ -366,6 +378,20 @@ namespace Signum.Engine.Alerts
                     .UnsafeDelete();
             }
         }
+
+
+        public static void DeleteUnattendedAlerts(this Entity target, AlertTypeSymbol alertType, Lite<UserEntity> recipient) =>
+            target.ToLite().DeleteUnattendedAlerts(alertType, recipient);
+        public static void DeleteUnattendedAlerts(this Lite<Entity> target, AlertTypeSymbol alertType, Lite<UserEntity> recipient)
+        {
+            using (AuthLogic.Disable())
+            {
+                Database.Query<AlertEntity>()
+                    .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType == alertType && a.Recipient == recipient)
+                    .UnsafeDelete();
+            }
+        }
+
     }
 
     public class AlertTypeOptions

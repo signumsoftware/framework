@@ -86,7 +86,7 @@ namespace Signum.Utilities.ExpressionTrees
             foreach (var item in type.Follow(a => a.IsNested ? a.DeclaringType : null).Reverse())
             {
                 if (sb.Length > 0)
-                    sb.Append(".");
+                    sb.Append('.');
 
                 sb.Append(TypeNameSimple(item, arguments));
             }
@@ -144,7 +144,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return ToSrtringLiteral(s);
             
             if (obj.GetType().IsEnum)
-                return $"{obj.GetType().FullName}.{obj.ToString()}";
+                return $"{obj.GetType().FullName}.{obj}";
 
             return obj.ToString()!;
         }
@@ -152,7 +152,7 @@ namespace Signum.Utilities.ExpressionTrees
         static string ToSrtringLiteral(string input)
         {
             StringBuilder literal = new StringBuilder(input.Length + 2);
-            literal.Append("\"");
+            literal.Append('"');
             foreach (var c in input)
             {
                 switch (c)
@@ -183,7 +183,7 @@ namespace Signum.Utilities.ExpressionTrees
                         break;
                 }
             }
-            literal.Append("\"");
+            literal.Append('"');
             return literal.ToString();
         }
 

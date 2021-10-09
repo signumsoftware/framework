@@ -525,7 +525,7 @@ NodeUtils.register<ValueLineNode>({
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
     valueLineType={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
-    comboBoxItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
+    optionItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
     autoFixString={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
     onChange={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
   />),
@@ -1229,7 +1229,7 @@ export interface SearchControlNode extends BaseNode {
   create?: ExpressionOrValue<boolean>;
   onCreate?: Expression<() => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">>;
   navigate?: ExpressionOrValue<boolean>;
-  refreshKey?: Expression<number | string | undefined>;
+  deps?: Expression<React.DependencyList | undefined>;
   maxResultsHeight?: Expression<number | string>;
   onSearch?: Expression<(fo: FindOptionsParsed, dataChange: boolean) => void>;
   onResult?: Expression<(table: ResultTable, dataChange: boolean) => void>;
@@ -1264,7 +1264,7 @@ NodeUtils.register<SearchControlNode>({
     create: node.create,
     onCreate: node.onCreate,
     navigate: node.navigate,
-    refreshKey: node.refreshKey,
+    deps: node.deps,
     maxResultsHeight: node.maxResultsHeight,
     onSearch: node.onSearch,
     onResult: node.onResult,
@@ -1294,7 +1294,7 @@ NodeUtils.register<SearchControlNode>({
     create={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
     onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
     view={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
-    refreshKey={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
+    deps={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.deps, NodeUtils.isNumberOrStringOrNull)}
     maxResultsHeight={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
     onSearch={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onSearch, NodeUtils.isFunctionOrNull)}
     onResult={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.onResult, NodeUtils.isFunctionOrNull)}
@@ -1340,7 +1340,7 @@ NodeUtils.register<SearchControlNode>({
     }).done();
 }`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.deps)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.maxResultsHeight)} type={null} defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onSearch)} type={null} defaultValue={null} exampleExpression={"(fop, dataChange) => {}"} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onResult)} type={null} defaultValue={null} exampleExpression={"(table, dataChange) => dataChange && ctx.frame.onReload()"} />
@@ -1358,7 +1358,7 @@ export interface ValueSearchControlLineNode extends BaseNode {
   isFormControl?: ExpressionOrValue<boolean>;
   findButton?: ExpressionOrValue<boolean>;
   viewEntityButton?: ExpressionOrValue<boolean>;
-  refreshKey?: Expression<number | string | undefined>;
+  deps?: Expression<React.DependencyList | undefined>;
   formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -1403,7 +1403,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     viewEntityButton: node.viewEntityButton,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
-    refreshKey: node.refreshKey,
+    deps: node.deps,
   }),
   render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
     ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
@@ -1417,7 +1417,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     viewEntityButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.viewEntityButton, NodeUtils.isBooleanOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
-    refreshKey={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
+    deps={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.deps, NodeUtils.isNumberOrStringOrNull)}
   />,
   renderDesigner: dn => {
     return (<div>
@@ -1434,7 +1434,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.findButton)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewEntityButton)} type="boolean" defaultValue={null} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.deps)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
     </div>);
   }
 });

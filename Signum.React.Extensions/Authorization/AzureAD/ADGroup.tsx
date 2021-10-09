@@ -3,7 +3,7 @@ import { EntityLine, EntityTable, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks';
 import { ADGroupEntity, UserADQuery } from '../Signum.Entities.Authorization';
-import { ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search';
+import { ValueSearchControlLine } from '@framework/Search';
 
 export default function ADGroup(p: { ctx: TypeContext<ADGroupEntity> }) {
   const ctx = p.ctx;

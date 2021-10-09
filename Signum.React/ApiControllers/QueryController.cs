@@ -120,13 +120,13 @@ namespace Signum.React.ApiControllers
         [HttpPost("api/query/entitiesLiteWithFilter"), ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesLiteWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
-            return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).ToListAsync();
+            return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).ToListAsync(token);
         }
 
         [HttpPost("api/query/entitiesFullWithFilter"), ProfilerActionSplitter]
         public async Task<List<Entity>> GetEntitiesFullWithFilter([Required, FromBody] QueryEntitiesRequestTS request, CancellationToken token)
         {
-            return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest()).ToListAsync();
+            return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest()).ToListAsync(token);
         }
 
         [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
@@ -271,10 +271,15 @@ namespace Signum.React.ApiControllers
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
-            
+
             var val = value is JsonElement jtok ?
                  jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
                  value;
+
+            if (val is DateTime dt)
+                val = dt.FromUserInterface();
+            else if (val is ObservableCollection<DateTime?> col)
+                val = col.Select(dt => dt?.FromUserInterface()).ToObservableCollection();
 
             return new FilterCondition(parsedToken, operation, val);
         }
@@ -335,13 +340,13 @@ namespace Signum.React.ApiControllers
 
         public Pagination ToPagination()
         {
-            switch (mode)
+            return mode switch
             {
-                case PaginationMode.All: return new Pagination.All();
-                case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage!.Value);
-                case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage!.Value, this.currentPage!.Value);
-                default:throw new InvalidOperationException($"Unexpected {mode}");
-            }
+                PaginationMode.All => new Pagination.All(),
+                PaginationMode.Firsts => new Pagination.Firsts(this.elementsPerPage!.Value),
+                PaginationMode.Paginate => new Pagination.Paginate(this.elementsPerPage!.Value, this.currentPage!.Value),
+                _ => throw new InvalidOperationException($"Unexpected {mode}"),
+            };
         }
     }
 
@@ -391,36 +396,36 @@ namespace Signum.React.ApiControllers
 
         public SystemTime ToSystemTime()
         {
-            switch (mode)
+            return mode switch
             {
-                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate!.Value);
-                case SystemTimeMode.Between: return new SystemTime.Between(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value));
-                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value));
-                case SystemTimeMode.All: return new SystemTime.All(ToJoinBehaviour(joinMode!.Value));
-                default: throw new InvalidOperationException($"Unexpected {mode}");
-            }
+                SystemTimeMode.AsOf => new SystemTime.AsOf(startDate!.Value),
+                SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
+                SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
+                SystemTimeMode.All => new SystemTime.All(ToJoinBehaviour(joinMode!.Value)),
+                _ => throw new InvalidOperationException($"Unexpected {mode}"),
+            };
         }
 
         public static JoinBehaviour ToJoinBehaviour(SystemTimeJoinMode joinMode)
         {
-            switch (joinMode)
+            return joinMode switch
             {
-                case SystemTimeJoinMode.Current: return JoinBehaviour.Current;
-                case SystemTimeJoinMode.FirstCompatible: return JoinBehaviour.FirstCompatible;
-                case SystemTimeJoinMode.AllCompatible: return JoinBehaviour.AllCompatible;
-                default: throw new UnexpectedValueException(joinMode);
-            }
+                SystemTimeJoinMode.Current => JoinBehaviour.Current,
+                SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
+                SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
+                _ => throw new UnexpectedValueException(joinMode),
+            };
         }
 
         public static SystemTimeJoinMode ToSystemTimeJoinMode(JoinBehaviour joinBehaviour)
         {
-            switch (joinBehaviour)
+            return joinBehaviour switch
             {
-                case JoinBehaviour.Current: return SystemTimeJoinMode.Current;
-                case JoinBehaviour.FirstCompatible: return SystemTimeJoinMode.FirstCompatible;
-                case JoinBehaviour.AllCompatible: return SystemTimeJoinMode.AllCompatible;
-                default: throw new UnexpectedValueException(joinBehaviour);
-            }
+                JoinBehaviour.Current => SystemTimeJoinMode.Current,
+                JoinBehaviour.FirstCompatible => SystemTimeJoinMode.FirstCompatible,
+                JoinBehaviour.AllCompatible => SystemTimeJoinMode.AllCompatible,
+                _ => throw new UnexpectedValueException(joinBehaviour),
+            };
         }
     }
 
@@ -514,7 +519,7 @@ namespace Signum.React.ApiControllers
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
 
-        private QueryTokenType? GetQueryTokenType(QueryToken qt)
+        private static QueryTokenType? GetQueryTokenType(QueryToken qt)
         {
             if (qt is AggregateToken)
                 return QueryTokenType.Aggregate;

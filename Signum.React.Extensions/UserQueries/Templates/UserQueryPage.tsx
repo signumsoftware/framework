@@ -13,7 +13,7 @@ import { RouteComponentProps } from "react-router";
 import { useAPI } from '@framework/Hooks'
 import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
-import SearchPage from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchPage'
+import SearchPage from '@framework/SearchControl/SearchPage'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 

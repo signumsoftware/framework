@@ -679,13 +679,13 @@ namespace Signum.Engine.DynamicQuery
 
             if (pagination is Pagination.All)
             {
-                var allList = await query.Query.ToListAsync();
+                var allList = await query.Query.ToListAsync(token);
 
                 return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
             else if (pagination is Pagination.Firsts top)
             {
-                var topList = await query.Query.Take(top.TopElements).ToListAsync();
+                var topList = await query.Query.Take(top.TopElements).ToListAsync(token);
 
                 return new DEnumerableCount<T>(topList, query.Context, null);
             }
@@ -695,7 +695,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     var q = query.Query.OrderAlsoByKeys();
 
-                    var list = await query.Query.ToListAsync();
+                    var list = await query.Query.ToListAsync(token);
 
                     var elements = list;
                     if (pag.CurrentPage != 1)
@@ -714,7 +714,7 @@ namespace Signum.Engine.DynamicQuery
 
                     q = q.Take(pag.ElementsPerPage);
 
-                    var listTask = await q.ToListAsync();
+                    var listTask = await q.ToListAsync(token);
                     var countTask = systemTime is SystemTime.Interval ?
                         (await query.Query.ToListAsync()).Count : //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
                         await query.Query.CountAsync();
@@ -890,7 +890,7 @@ namespace Signum.Engine.DynamicQuery
 
         private static HashSet<QueryToken> GetRootKeyTokens(HashSet<QueryToken> keyTokens)
         {
-            return keyTokens.Where(t => !keyTokens.Any(t2 => t.FullKey().StartsWith(t2.FullKey() + "."))).ToHashSet();
+            return keyTokens.Where(t => !keyTokens.Any(t2 => t2.Dominates(t))).ToHashSet();
         }
 
 

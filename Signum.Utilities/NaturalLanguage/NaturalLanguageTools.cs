@@ -23,6 +23,11 @@ namespace Signum.Utilities
             {"de", new GermanGenderDetector()},
         };
 
+        static Dictionary<string, string> SimpleDeterminers = new Dictionary<string, string>()
+        {
+            {"en", "the"}
+        };
+
         public static Dictionary<string, INumberWriter> NumberWriters = new Dictionary<string, INumberWriter>
         {
             {"es", new SpanishNumberWriter()},
@@ -33,6 +38,8 @@ namespace Signum.Utilities
         {
             {"de", new GermanDiacriticsRemover()},
         };
+
+
 
         public static char? GetGender(string name, CultureInfo? culture = null)
         {
@@ -53,24 +60,49 @@ namespace Signum.Utilities
             if (detector == null)
                 return false;
 
-            return !detector.Pronoms.IsNullOrEmpty();
+            return !detector.Determiner.IsNullOrEmpty();
         }
 
-        public static string? GetPronom(char gender, bool plural, CultureInfo? culture = null)
+
+        public static string? GetDeterminer(char? gender, bool plural, CultureInfo? culture = null)
         {
             if (culture == null)
                 culture = CultureInfo.CurrentUICulture;
 
             var detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
             if (detector == null)
-                return null;
+                return SimpleDeterminers.TryGetC(culture.TwoLetterISOLanguageName);
 
-            var pro = detector.Pronoms.FirstOrDefault(a => a.Gender == gender);
+            var pro = detector.Determiner.FirstOrDefault(a => a.Gender == gender);
 
             if (pro == null)
                 return null;
 
             return plural ? pro.Plural : pro.Singular;
+        }
+
+        public static bool TryGetGenderFromDeterminer(string? determiner, bool plural, CultureInfo culture, out char? gender)
+        {
+            gender = null;
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
+
+            if (determiner == null)
+                return false;
+
+            var detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+            if (detector == null)
+                return SimpleDeterminers.TryGetC(culture.TwoLetterISOLanguageName) == determiner;
+
+            var pro = detector.Determiner.FirstOrDefault(a => (plural ? a.Plural : a.Singular) == determiner);
+
+            if (pro != null)
+            {
+                gender = pro.Gender;
+                return true;
+            }
+
+            return false;
         }
 
         public static string Pluralize(string singularName, CultureInfo? culture = null)
@@ -99,6 +131,8 @@ namespace Signum.Utilities
 
             return SpacePascal(pascalStr, false);
         }
+
+      
 
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
@@ -266,7 +300,7 @@ namespace Signum.Utilities
     {
         char? GetGender(string name);
 
-        ReadOnlyCollection<PronomInfo> Pronoms { get; }
+        ReadOnlyCollection<PronomInfo> Determiner { get; }
     }
 
     public class PronomInfo

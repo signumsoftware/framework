@@ -50,6 +50,30 @@ namespace Signum.Engine.Migrations
                     });
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+                Administrator.AvoidSimpleSynchronize = () =>
+                {
+                    if (Administrator.ExistsTable<SqlMigrationEntity>())
+                    {
+                        var count = Database.Query<SqlMigrationEntity>().Count();
+                        if (count > 0)
+                        {
+                            Console.Write("The database ");
+                            SafeConsole.WriteLineColor(ConsoleColor.White, Connector.Current.DatabaseName());
+                            Console.Write(" contains ");
+                            SafeConsole.WriteLineColor(ConsoleColor.White, count.ToString());
+                            Console.Write(" Sql Migrations!");
+
+                            if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?"))
+                            {
+                                SqlMigrationRunner.SqlMigrations();
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                };
             }
         }
 

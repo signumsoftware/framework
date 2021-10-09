@@ -14,16 +14,14 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
   function handleActivityIsClick() {
     Finder.find<WorkflowEntity>({
       queryName: WorkflowEntity,
-      parentToken: WorkflowEntity.token(a => a.entity.mainEntityType!.cleanName),
-      parentValue: p.typeName,
+      filterOptions: [{ token: WorkflowEntity.token(a => a.entity.mainEntityType!.cleanName), value: p.typeName}],
     }).then(w => {
       if (!w)
         return;
 
       Finder.findMany<WorkflowActivityEntity>({
         queryName: WorkflowActivityEntity,
-        parentToken: WorkflowActivityEntity.token(e => e.lane!.pool!.workflow),
-        parentValue: w
+        filterOptions: [{ token: WorkflowActivityEntity.token(e => e.lane!.pool!.workflow), value: w}]
       }).then(acts => {
 
         if (!acts)

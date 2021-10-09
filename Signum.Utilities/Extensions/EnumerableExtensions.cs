@@ -706,7 +706,7 @@ namespace Signum.Utilities
         #endregion
 
         #region Min Max
-        public static T WithMin<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+        public static T? WithMin<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
           where V : IComparable<V>
         {
             T result = default!;
@@ -726,7 +726,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static T WithMax<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+        public static T? WithMax<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
                where V : IComparable<V>
         {
             T result = default!;

@@ -33,19 +33,15 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const forceUpdate = useForceUpdate();
 
-  const infos = React.useRef<CombinedUserChartInfoTemp[] | undefined>(undefined);
+  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfoTemp)), [p.part]);
 
   const [showData, setShowData] = React.useState(p.part.showData);
 
-
   React.useEffect(() => {
-
-    infos.current = p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfoTemp));
-
     var abortController = new AbortController();
     const signal = abortController.signal;
 
-    infos.current.forEach(c => {
+    infos.forEach(c => {
 
       UserChartClient.Converter.toChartRequest(c.userChart, p.entity)
         .then(chartRequest => {
@@ -84,7 +80,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part]);
+  }, [p.part, ...p.deps ?? []]);
 
 
   function renderError(e: any, key: number) {
@@ -101,15 +97,15 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   }
 
-  if (infos.current == null || infos.current.some(a => a.chartRequest == null || a.chartScript == null))
+  if (infos.some(a => a.chartRequest == null || a.chartScript == null))
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  if (infos.current.some(a => a.error != null)) {
+  if (infos.some(a => a.error != null)) {
     return (
       <div>
         <h4>Error!</h4>
         {
-          infos.current
+          infos
             .filter(m => m.error != null)
             .map((m, i) => renderError(m.error, i))
         }
@@ -119,7 +115,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   return (
     <div>
-      {infos.current.map((info, i) => <PinnedFilterBuilder key={i}
+      {infos.map((info, i) => <PinnedFilterBuilder key={i}
         filterOptions={info.chartRequest!.filterOptions}
         onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
       )}
@@ -129,7 +125,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
         {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {showData ?
-        infos.current.map((c, i) => c.result == null ? <span key={i}>{JavascriptMessage.loading.niceToString()}</span> :
+        infos.map((c, i) => c.result == null ? <span key={i}>{JavascriptMessage.loading.niceToString()}</span> :
           <ChartTableComponent
             chartRequest={c.chartRequest!}
             lastChartRequest={c.chartRequest!}
@@ -138,8 +134,8 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
             onReload={e => { e.preventDefault(); c.makeQuery!(); }}
           />) :
         <ChartRendererCombined
-          infos={infos.current.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript! }))}
-          onReload={e => { infos.current!.forEach(a => a.makeQuery!()) }}
+          infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript! }))}
+          onReload={e => { infos.forEach(a => a.makeQuery!()) }}
           useSameScale={p.part.useSameScale}
         />
       }

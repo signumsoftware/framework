@@ -373,7 +373,7 @@ namespace Signum.Test
 
                 var list = Database.Query<AlbumEntity>().Select(a => new NoteWithDateEntity
                 {
-                    CreationTime = DateTime.Now,
+                    CreationTime = TimeZoneManager.Now,
                     CreationDate = DateTime.Now.ToDateOnly(),
                     Text = "Nice album " + a.Name,
                     Target = a

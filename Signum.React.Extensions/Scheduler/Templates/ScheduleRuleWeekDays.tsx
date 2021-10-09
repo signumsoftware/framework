@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ScheduleRuleWeekDaysEntity } from '../Signum.Entities.Scheduler'
-import { useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useForceUpdate } from '@framework/Hooks';
 
 export default function ScheduleRuleWeekDays(p : { ctx: TypeContext<ScheduleRuleWeekDaysEntity> }){
   const ctx4 = p.ctx.subCtx({ labelColumns: { sm: 4 } });

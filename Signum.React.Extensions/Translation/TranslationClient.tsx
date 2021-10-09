@@ -99,7 +99,14 @@ export interface LocalizedDescription {
   gender?: string;
   description?: string;
   pluralDescription?: string;
-  automaticTranslations: AutomaticTranslation[];
+  automaticTranslations: AutomaticTypeTranslation[];
+}
+
+export interface AutomaticTypeTranslation {
+  translatorName: string;
+  gender?: string;
+  singular: string;
+  plural: string;
 }
 
 export interface LocalizedMember {
@@ -112,3 +119,5 @@ export interface AutomaticTranslation {
   translatorName: string;
   text: string;
 }
+
+
