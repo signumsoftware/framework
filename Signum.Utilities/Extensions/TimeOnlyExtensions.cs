@@ -1,4 +1,6 @@
-﻿namespace Signum.Utilities
+using System;
+
+namespace Signum.Utilities
 {
     public static class TimeOnlyExtensions
     {

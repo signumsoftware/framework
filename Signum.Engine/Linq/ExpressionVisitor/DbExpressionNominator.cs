@@ -1,4 +1,3 @@
-using Microsoft.SqlServer.Server;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -16,6 +15,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using SqlMethodAttribute = Microsoft.Data.SqlClient.Server.SqlMethodAttribute;
 
 namespace Signum.Engine.Linq
 {
@@ -538,13 +538,9 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
-                if (sqlEnums == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
-                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(Date.Today, Date.Today))), typeof(double)));
-                if (sqlEnums == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
+                if (unit == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
                     return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
-                if (unit == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
-                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(() => DaysBetween(Date.Today, Date.Today))), typeof(double)));
-
+              
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {
                     new SqlLiteralExpression(SqlEnums.epoch),
