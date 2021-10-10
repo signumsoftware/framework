@@ -7,9 +7,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Data;
 using Signum.Entities.Reflection;
-using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
-using Microsoft.SqlServer.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
@@ -406,6 +404,7 @@ namespace Signum.Engine.Maps
 
         public string? GetUdtName(Type udtType)
         {
+            var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
             var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
 
             if (att == null)
