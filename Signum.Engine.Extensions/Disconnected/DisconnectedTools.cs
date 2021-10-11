@@ -5,10 +5,9 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using System.Data.Common;
 using System.Data;
+using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.Data.SqlClient.Server;
-using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Disconnected
 {

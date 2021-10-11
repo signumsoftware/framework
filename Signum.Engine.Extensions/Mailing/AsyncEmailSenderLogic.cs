@@ -8,10 +8,9 @@ using Signum.Entities;
 using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
+using System.Data.SqlClient;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Basics;
-using Microsoft.Data.SqlClient.Server;
-using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Mailing
 {

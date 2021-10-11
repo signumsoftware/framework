@@ -7,20 +7,21 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Entities;
+using System.Data.SqlTypes;
+using System.Data.Common;
+//using Microsoft.SqlServer.Types;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.SqlClient;
 using Microsoft.SqlServer.Server;
 using System.IO;
 using Npgsql;
-using System.Data.Common;
-using Microsoft.Data.SqlClient;
-using Microsoft.Data.SqlClient.Server;
 
 namespace Signum.Engine
 {
     public class FieldReader
     {
-        readonly DbDataReader reader;
-        readonly TypeCode[] typeCodes;
+        DbDataReader reader;
+        TypeCode[] typeCodes;
 
         private const TypeCode tcGuid = (TypeCode)20;
         private const TypeCode tcTimeSpan = (TypeCode)21;
@@ -79,20 +80,31 @@ namespace Signum.Engine
                 return null;
             }
 
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => reader.GetByte(ordinal).ToString(),
-                TypeCode.Int16 => reader.GetInt16(ordinal).ToString(),
-                TypeCode.Int32 => reader.GetInt32(ordinal).ToString(),
-                TypeCode.Int64 => reader.GetInt64(ordinal).ToString(),
-                TypeCode.Double => reader.GetDouble(ordinal).ToString(),
-                TypeCode.Single => reader.GetFloat(ordinal).ToString(),
-                TypeCode.Decimal => reader.GetDecimal(ordinal).ToString(),
-                TypeCode.DateTime => reader.GetDateTime(ordinal).ToString(),
-                tcGuid => reader.GetGuid(ordinal).ToString(),
-                TypeCode.String => reader.GetString(ordinal),
-                _ => reader.GetValue(ordinal).ToString(),
-            };
+                case TypeCode.Byte:
+                    return reader.GetByte(ordinal).ToString();
+                case TypeCode.Int16:
+                    return reader.GetInt16(ordinal).ToString();
+                case TypeCode.Int32:
+                    return reader.GetInt32(ordinal).ToString();
+                case TypeCode.Int64:
+                    return reader.GetInt64(ordinal).ToString();
+                case TypeCode.Double:
+                    return reader.GetDouble(ordinal).ToString();
+                case TypeCode.Single:
+                    return reader.GetFloat(ordinal).ToString();
+                case TypeCode.Decimal:
+                    return reader.GetDecimal(ordinal).ToString();
+                case TypeCode.DateTime:
+                    return reader.GetDateTime(ordinal).ToString();
+                case tcGuid:
+                    return reader.GetGuid(ordinal).ToString();
+                case TypeCode.String:
+                    return reader.GetString(ordinal);
+                default:
+                    return reader.GetValue(ordinal).ToString();
+            }
         }
 
         public byte[]? GetByteArray(int ordinal)
@@ -111,16 +123,23 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetBoolean);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Boolean => reader.GetBoolean(ordinal),
-                TypeCode.Byte => reader.GetByte(ordinal) != 0,
-                TypeCode.Int16 => reader.GetInt16(ordinal) != 0,
-                TypeCode.Int32 => reader.GetInt32(ordinal) != 0,
-                TypeCode.Int64 => reader.GetInt64(ordinal) != 0,
-                TypeCode.String => bool.Parse(reader.GetString(ordinal)),
-                _ => ReflectionTools.ChangeType<bool>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Boolean:
+                    return reader.GetBoolean(ordinal);
+                case TypeCode.Byte:
+                    return reader.GetByte(ordinal) != 0;
+                case TypeCode.Int16:
+                    return reader.GetInt16(ordinal) != 0;
+                case TypeCode.Int32:
+                    return reader.GetInt32(ordinal) != 0;
+                case TypeCode.Int64:
+                    return reader.GetInt64(ordinal) != 0;
+                case TypeCode.String:
+                    return bool.Parse(reader.GetString(ordinal));
+                default:
+                    return ReflectionTools.ChangeType<bool>(reader.GetValue(ordinal));
+            }
         }
 
         public bool? GetNullableBoolean(int ordinal)
@@ -138,17 +157,25 @@ namespace Signum.Engine
         public Byte GetByte(int ordinal)
         {
             LastOrdinal = ordinal;
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => reader.GetByte(ordinal),
-                TypeCode.Int16 => (Byte)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Byte)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Byte)reader.GetInt64(ordinal),
-                TypeCode.Double => (Byte)reader.GetDouble(ordinal),
-                TypeCode.Single => (Byte)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Byte)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Byte>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Byte)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Byte)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Byte)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Byte)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Byte)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Byte)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Byte>(reader.GetValue(ordinal));
+            }
         }
 
         public Byte? GetNullableByte(int ordinal)
@@ -167,17 +194,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetChar);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Char)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Char)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Char)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Char)reader.GetInt64(ordinal),
-                TypeCode.Double => (Char)reader.GetDouble(ordinal),
-                TypeCode.Single => (Char)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Char)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Char>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Char)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Char)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Char)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Char)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Char)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Char)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Char)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Char>(reader.GetValue(ordinal));
+            }
         }
 
         public Char? GetNullableChar(int ordinal)
@@ -196,17 +231,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetFloat);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Single)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Single)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Single)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Single)reader.GetInt64(ordinal),
-                TypeCode.Double => (Single)reader.GetDouble(ordinal),
-                TypeCode.Single => reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Single)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Single>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Single)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Single)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Single)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Single)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Single)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Single)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Single>(reader.GetValue(ordinal));
+            }
         }
 
         public Single? GetNullableFloat(int ordinal)
@@ -225,17 +268,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetDouble);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Double)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Double)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Double)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Double)reader.GetInt64(ordinal),
-                TypeCode.Double => reader.GetDouble(ordinal),
-                TypeCode.Single => (Double)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Double)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Double>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Double)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Double)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Double)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Double)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Double)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Double)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Double>(reader.GetValue(ordinal));
+            }
         }
 
         public Double? GetNullableDouble(int ordinal)
@@ -254,17 +305,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetDecimal);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Decimal)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Decimal)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Decimal)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Decimal)reader.GetInt64(ordinal),
-                TypeCode.Double => (Decimal)reader.GetDouble(ordinal),
-                TypeCode.Single => (Decimal)reader.GetFloat(ordinal),
-                TypeCode.Decimal => reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Decimal>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Decimal)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Decimal)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Decimal)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Decimal)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Decimal)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Decimal)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Decimal>(reader.GetValue(ordinal));
+            }
         }
 
         public Decimal? GetNullableDecimal(int ordinal)
@@ -283,17 +342,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetInt16);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Int16)reader.GetByte(ordinal),
-                TypeCode.Int16 => reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Int16)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Int16)reader.GetInt64(ordinal),
-                TypeCode.Double => (Int16)reader.GetDouble(ordinal),
-                TypeCode.Single => (Int16)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Int16)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Int16>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Int16)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Int16)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Int16)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Int16)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Int16)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Int16)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Int16>(reader.GetValue(ordinal));
+            }
         }
 
         public Int16? GetNullableInt16(int ordinal)
@@ -312,17 +379,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetInt32);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Int32)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Int32)reader.GetInt16(ordinal),
-                TypeCode.Int32 => reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Int32)reader.GetInt64(ordinal),
-                TypeCode.Double => (Int32)reader.GetDouble(ordinal),
-                TypeCode.Single => (Int32)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Int32)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Int32>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Int32)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Int32)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Int32)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Int32)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Int32)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Int32)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Int32>(reader.GetValue(ordinal));
+            }
         }
 
         public Int32? GetNullableInt32(int ordinal)
@@ -341,17 +416,25 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetInt64);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                TypeCode.Byte => (Int64)reader.GetByte(ordinal),
-                TypeCode.Int16 => (Int64)reader.GetInt16(ordinal),
-                TypeCode.Int32 => (Int64)reader.GetInt32(ordinal),
-                TypeCode.Int64 => (Int64)reader.GetInt64(ordinal),
-                TypeCode.Double => (Int64)reader.GetDouble(ordinal),
-                TypeCode.Single => (Int64)reader.GetFloat(ordinal),
-                TypeCode.Decimal => (Int64)reader.GetDecimal(ordinal),
-                _ => ReflectionTools.ChangeType<Int64>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.Byte:
+                    return (Int64)reader.GetByte(ordinal);
+                case TypeCode.Int16:
+                    return (Int64)reader.GetInt16(ordinal);
+                case TypeCode.Int32:
+                    return (Int64)reader.GetInt32(ordinal);
+                case TypeCode.Int64:
+                    return (Int64)reader.GetInt64(ordinal);
+                case TypeCode.Double:
+                    return (Int64)reader.GetDouble(ordinal);
+                case TypeCode.Single:
+                    return (Int64)reader.GetFloat(ordinal);
+                case TypeCode.Decimal:
+                    return (Int64)reader.GetDecimal(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Int64>(reader.GetValue(ordinal));
+            }
         }
 
         public Int64? GetNullableInt64(int ordinal)
@@ -370,11 +453,17 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetDateTime);
-            var dt = typeCodes[ordinal] switch
+            DateTime dt;
+            switch (typeCodes[ordinal])
             {
-                TypeCode.DateTime => reader.GetDateTime(ordinal),
-                _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)),
-            };
+                case TypeCode.DateTime:
+                    dt = reader.GetDateTime(ordinal);
+                    break;
+                default:
+                    dt = ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal));
+                    break;
+            }
+
             if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
                 return new DateTime(dt.Ticks, DateTimeKind.Utc);
 
@@ -397,12 +486,20 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetDate);
-            var dt = typeCodes[ordinal] switch
+            Date dt;
+            switch (typeCodes[ordinal])
             {
-                TypeCode.DateTime => new Date(reader.GetDateTime(ordinal)),
-                FieldReader.tcNpgsqlDate => new Date((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)),
-                _ => new Date(ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal))),
-            };
+                case TypeCode.DateTime:
+                    dt = new Date(reader.GetDateTime(ordinal));
+                    break;
+                case FieldReader.tcNpgsqlDate:
+                    dt = new Date((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal));
+                    break;
+                default:
+                    dt = new Date(ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)));
+                    break;
+            }
+
             return dt;
         }
 
@@ -477,11 +574,13 @@ namespace Signum.Engine
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetGuid);
-            return typeCodes[ordinal] switch
+            switch (typeCodes[ordinal])
             {
-                tcGuid => reader.GetGuid(ordinal),
-                _ => ReflectionTools.ChangeType<Guid>(reader.GetValue(ordinal)),
-            };
+                case tcGuid:
+                    return reader.GetGuid(ordinal);
+                default:
+                    return ReflectionTools.ChangeType<Guid>(reader.GetValue(ordinal));
+            }
         }
 
         public Guid? GetNullableGuid(int ordinal)
@@ -495,9 +594,10 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
       
-        static readonly MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
 
-        public T GetUdt<T>(int ordinal) where T : IBinarySerialize
+        public T GetUdt<T>(int ordinal)
+            where T : IBinarySerialize
         {
             LastOrdinal = ordinal;
             LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
@@ -511,7 +611,7 @@ namespace Signum.Engine
             return udt;
         }
 
-        static readonly MethodInfo miGetArray = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetArray<int>(0)).GetGenericMethodDefinition();
+        static MethodInfo miGetArray = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetArray<int>(0)).GetGenericMethodDefinition();
 
         public T[] GetArray<T>(int ordinal)
         {
@@ -525,7 +625,7 @@ namespace Signum.Engine
             return (T[])this.reader[ordinal]; 
         }
 
-        static readonly MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();
+        static MethodInfo miNullableGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableRange<int>(0)).GetGenericMethodDefinition();
         public NpgsqlTypes.NpgsqlRange<T>? GetNullableRange<T>(int ordinal)
         {
             LastOrdinal = ordinal;
@@ -538,7 +638,7 @@ namespace Signum.Engine
             return (NpgsqlTypes.NpgsqlRange<T>)this.reader[ordinal];
         }
 
-        static readonly MethodInfo miGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetRange<int>(0)).GetGenericMethodDefinition();
+        static MethodInfo miGetRange = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetRange<int>(0)).GetGenericMethodDefinition();
         public NpgsqlTypes.NpgsqlRange<T> GetRange<T>(int ordinal)
         {
             LastOrdinal = ordinal;

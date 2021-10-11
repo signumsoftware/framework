@@ -5,7 +5,6 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
-using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -64,7 +63,7 @@ namespace Signum.Engine.Linq
 
         static internal HashSet<Expression> Nominate(Expression? expression, out Expression newExpression, bool isGroupKey = false)
         {
-            var n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression)!;
             return n.candidates;
         }
@@ -72,7 +71,7 @@ namespace Signum.Engine.Linq
         [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominate(Expression? expression)
         {
-            var n = new DbExpressionNominator { isFullNominate = true };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
             Expression? result = n.Visit(expression);
 
             return result;
@@ -81,7 +80,7 @@ namespace Signum.Engine.Linq
         [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominateNotNullable(Expression? expression)
         {
-            var n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
             Expression? result = n.Visit(expression);
 
             return result;
@@ -758,7 +757,7 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                var datePart = new SqlLiteralExpression(unit);
+                SqlLiteralExpression datePart = new SqlLiteralExpression(unit);
 
                 var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(),
                     new[] { datePart, exprStart, exprEnd });
@@ -1700,7 +1699,7 @@ namespace Signum.Engine.Linq
 
             var firsStr = strFormat.Substring(0, matches.FirstEx().Index);
 
-            var arguments = new List<Expression>();
+            List<Expression> arguments = new List<Expression>();
             if (firsStr.HasText())
                 arguments.Add(new SqlConstantExpression(firsStr));
 

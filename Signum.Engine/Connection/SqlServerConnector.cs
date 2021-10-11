@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
 using Signum.Utilities;
@@ -11,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Signum.Engine.Connection;
 using Signum.Engine.SchemaInfoTables;
-using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine
 {

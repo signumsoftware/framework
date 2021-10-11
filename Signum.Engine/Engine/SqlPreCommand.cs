@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.SqlClient;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 using System.IO;
@@ -11,8 +12,6 @@ using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
-using Microsoft.Data.SqlClient.Server;
-using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine
 {

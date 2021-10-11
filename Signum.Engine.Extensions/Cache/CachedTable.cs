@@ -9,6 +9,7 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
+using System.Data.SqlClient;
 using Signum.Engine.Basics;
 using System.Threading;
 using Signum.Utilities.ExpressionTrees;
@@ -16,8 +17,6 @@ using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Entities.Internal;
 using Signum.Engine.Connection;
-using Microsoft.Data.SqlClient.Server;
-using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Cache
 {
