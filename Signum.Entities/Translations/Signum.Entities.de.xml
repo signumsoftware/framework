@@ -460,6 +460,7 @@
     <Member Name="_0Selector" Description="{0}-Selektor" />
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
     <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
+    <Member Name="CreationOf0Cancelled" Description="Erstellung von {0} abgebrochen" />
     <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen {0} wert, um fortzufahren:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
@@ -535,6 +536,7 @@
     <Member Name="_0IsRepeated" Description="{0} ist wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />
+    <Member Name="_0ShouldBe1" Description="{0} sollte {1} sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
