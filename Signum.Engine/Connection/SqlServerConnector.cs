@@ -457,7 +457,7 @@ namespace Signum.Engine
         {
             var csb = new SqlConnectionStringBuilder(connectionString)
             {
-                InitialCatalog = item.ToString()
+                InitialCatalog = item.Name
             };
             return csb.ToString();
         }
