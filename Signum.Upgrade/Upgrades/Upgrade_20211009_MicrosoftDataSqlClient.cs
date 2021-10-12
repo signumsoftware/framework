@@ -19,6 +19,7 @@ namespace Signum.Upgrade.Upgrades
             uctx.ForeachCodeFile(@"*.csproj", file =>
             {
                 file.ReplaceLine(a => a.Contains("System.Data.SqlClient"), @"<PackageReference Include=""Microsoft.Data.SqlClient"" Version=""3.0.0"" />");
+                file.ReplaceLine(a => a.Contains("dotMorten.Microsoft.SqlServer.Types"), @"<PackageReference Include=""Unofficial.Microsoft.SqlServer.Types"" Version=""2.0.1"" />");
             });
 
             uctx.ForeachCodeFile(@"*.cs", file =>

@@ -1,4 +1,3 @@
-using Microsoft.SqlServer.Server;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Entities;

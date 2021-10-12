@@ -1,4 +1,3 @@
-using Microsoft.SqlServer.Server;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
