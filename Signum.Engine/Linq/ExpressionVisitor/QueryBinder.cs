@@ -20,6 +20,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Data.SqlClient.Server;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Linq
 {

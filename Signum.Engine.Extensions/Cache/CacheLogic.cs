@@ -13,7 +13,6 @@ using Signum.Engine.Authorization;
 using System.Drawing;
 using Signum.Entities.Basics;
 using System.Xml.Linq;
-using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
@@ -23,6 +22,7 @@ using System.IO;
 using System.Data;
 using Signum.Engine.Scheduler;
 using System.Runtime.InteropServices;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Cache
 {

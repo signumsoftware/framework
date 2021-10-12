@@ -1,7 +1,7 @@
 using System.IO;
 using Signum.Utilities;
-using System.Data.SqlClient;
 using Signum.Engine.Maps;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Disconnected
 {
