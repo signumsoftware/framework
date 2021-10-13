@@ -166,10 +166,13 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     if (/^id[: ]/.test(subStr)) {
+
+      var id = subStr.substr(3)?.trim();
+
       filters.insertAt(0, {
         token: "Entity.Id",
         operation: "EqualTo",
-        value: subStr.substr(3)
+        value: id 
       });
       return filters;
     }

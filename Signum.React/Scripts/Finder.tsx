@@ -935,7 +935,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       }
 
       if (fop.token.type.name == "Guid") {
-        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(overridenValue.value))
+        if (!isValidGuid(overridenValue.value))
           return undefined;
 
         return ({
@@ -952,6 +952,10 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       value: overridenValue ? overridenValue.value : fop.value,
     } as FilterConditionRequest);
   }
+}
+
+function isValidGuid(str : string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
 export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
@@ -1155,25 +1159,46 @@ export class TokenCompleter {
   }
 
   toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
-    if (isFilterGroupOption(fo))
+    if (isFilterGroupOption(fo)) {
+      const token = fo.token && this.get(fo.token.toString())
+
       return ({
-        token: fo.token && this.get(fo.token.toString()),
+        token: token,
         groupOperation: fo.groupOperation,
-        value: fo.value,
+        value: token && fixValue(fo.value, token),
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
         frozen: false,
         expanded: false,
       } as FilterGroupOptionParsed);
+    }
     else
+    {
+
+      const token = this.get(fo.token.toString());
+
       return ({
-        token: this.get(fo.token.toString()),
+        token: token,
         operation: fo.operation ?? "EqualTo",
-        value: fo.value,
+        value: fixValue(fo.value, token),
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
       } as FilterConditionOptionParsed);
+    }
   }
+}
+
+export function fixValue(val: any, token: QueryToken) {
+  if (token.type.name == "Guid" && typeof val == "string")
+    return isValidGuid(val) ? val : undefined;
+
+  if (token.type.name == "number" && typeof val == "string") {
+    var number = parseFloat(val);
+
+    return isNaN(number) ? undefined : number;
+  }
+
+  return val;
 }
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
