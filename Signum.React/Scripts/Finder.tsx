@@ -955,16 +955,11 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   }
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
+
 function isValidGuid(str : string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
 export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
 export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
 export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
