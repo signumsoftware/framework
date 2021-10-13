@@ -920,13 +920,23 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
       return undefined;
 
-    if (overridenValue && fop.token && typeof overridenValue.value == "string") {
+    var value = overridenValue ? overridenValue.value : fop.value;
+
+    if (fop.token && typeof value == "string") {
       if (fop.token.type.name == "number") {
 
-        var numVal = parseInt(overridenValue.value);
+        var numVal = parseInt(value);
 
-        if (isNaN(numVal))
-          return undefined;
+        if (isNaN(numVal)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
@@ -936,13 +946,21 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       }
 
       if (fop.token.type.name == "Guid") {
-        if (!isValidGuid(overridenValue.value))
-          return undefined;
+        if (!isValidGuid(value)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
           operation: fop.operation,
-          value: overridenValue.value,
+          value: value,
         } as FilterConditionRequest);
       }
     }
@@ -950,7 +968,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     return ({
       token: fop.token.fullKey,
       operation: fop.operation,
-      value: overridenValue ? overridenValue.value : fop.value,
+      value: value,
     } as FilterConditionRequest);
   }
 }
@@ -1167,7 +1185,7 @@ export class TokenCompleter {
       return ({
         token: token,
         groupOperation: fo.groupOperation,
-        value: token && fixValue(fo.value, token),
+        value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
         frozen: false,
@@ -1182,25 +1200,12 @@ export class TokenCompleter {
       return ({
         token: token,
         operation: fo.operation ?? "EqualTo",
-        value: fixValue(fo.value, token),
+        value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
       } as FilterConditionOptionParsed);
     }
   }
-}
-
-export function fixValue(val: any, token: QueryToken) {
-  if (token.type.name == "Guid" && typeof val == "string")
-    return isValidGuid(val) ? val : undefined;
-
-  if (token.type.name == "number" && typeof val == "string") {
-    var number = parseFloat(val);
-
-    return isNaN(number) ? undefined : number;
-  }
-
-  return val;
 }
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
