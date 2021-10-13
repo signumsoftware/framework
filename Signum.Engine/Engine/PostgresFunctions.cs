@@ -1,4 +1,5 @@
-using Microsoft.SqlServer.Server;
+using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Linq;
 

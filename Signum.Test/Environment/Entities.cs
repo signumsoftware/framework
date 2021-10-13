@@ -4,10 +4,10 @@ using System.Linq;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Microsoft.SqlServer.Types;
-using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
+using Microsoft.SqlServer.Types;
+using Microsoft.Data.SqlClient.Server;
 
 namespace Signum.Test.Environment
 {

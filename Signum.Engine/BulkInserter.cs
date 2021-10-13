@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -8,7 +9,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -297,7 +297,7 @@ namespace Signum.Engine
 
                 var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
 
-                DataTable dt = new DataTable();
+                var dt = new DataTable();
                 var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour).ToList();
                 foreach (var c in columns)
                     dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
