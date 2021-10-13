@@ -7,7 +7,7 @@ namespace Signum.Engine.Chart.Scripts
 {
     public class MarkermapChartScript : ChartScript                
     {
-        public MarkermapChartScript(): base(GoogleMapsCharScript.Markermap)
+        public MarkermapChartScript(): base(GoogleMapsChartScript.Markermap)
         {
             this.Icon = ChartScriptLogic.LoadIcon("markermap.png");
             this.Columns = new List<ChartScriptColumn>

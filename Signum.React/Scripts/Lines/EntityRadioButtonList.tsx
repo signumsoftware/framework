@@ -16,6 +16,7 @@ export interface EntityRadioButtonListProps extends EntityBaseProps {
   deps?: React.DependencyList;
   nullPlaceHolder?: string;
   onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
+  nullElement?: "No" | "Always" | "Initially";
 }
 
 export class EntityRadioButtonListController extends EntityBaseController<EntityRadioButtonListProps> {
@@ -82,7 +83,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   function renderRadioList() {
     return (
-      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} />
+      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} nullElement={p.nullElement} />
     );
   }
 });
@@ -91,6 +92,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 interface EntityRadioButtonListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
   controller: EntityRadioButtonListController;
+  nullElement?: "No" | "Always" | "Initially";
 }
 
 export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectProps) {
@@ -164,19 +166,21 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       typeof data == "object" ? data.rows :
         [];
 
+    if (p.nullElement == "Always")
+      fixedData.insertAt(0, { entity: null as any } as ResultRow);
 
-    const value = p.ctx.value!;
-    if (!fixedData.some(d => is(d.entity, value as Entity | Lite<Entity>)))
-      fixedData.insertAt(0, { entity: maybeToLite(value as Entity | Lite<Entity>) } as ResultRow);
+    const value = p.ctx.value as Entity | Lite<Entity> | null;
+    if (!fixedData.some(d => is(d.entity, value)) && (p.nullElement == "Initially" || value != null))
+      fixedData.insertAt(0, { entity: value && maybeToLite(value) } as ResultRow);
 
-    return fixedData.map((lite, i) =>
+    return fixedData.map((row, i) =>
       <label className="sf-radio-element" key={i}>
         <input type="radio" style={{ marginLeft: "10px" }}
-          checked={is(value as Lite<Entity>, lite.entity)}
-          onClick={e => c.handleOnChange(lite.entity!)}
+          checked={is(value, row.entity)}
+          onClick={e => c.handleOnChange(row.entity!)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        {c.props.onRenderItem ? c.props.onRenderItem(lite.entity!) : <span>lite?.toStr ?? p.nullPlaceHolder ?? " - "</span>}
+        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>lite?.toStr ?? p.nullPlaceHolder ?? " - "</span>}
       </label>);
   }
 }

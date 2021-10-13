@@ -75,6 +75,26 @@ export default function renderMultiLines({ data, width, height, parameters, load
 
   var pInterpolate = parameters["Interpolate"];
   var rowByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
+  var circleRadius = parseFloat(parameters["CircleRadius"]!);
+  var circleStroke = parseFloat(parameters["CircleStroke"]!);
+  var circleRadiusHover = parseFloat(parameters["CircleRadiusHover"]!);
+
+  var bw = x.bandwidth();
+  if (parameters["CircleAutoReduce"]! == "Yes") {
+
+    if (circleRadius > bw / 3)
+      circleRadius = bw / 3;
+
+    if (circleRadiusHover > bw / 2)
+      circleRadiusHover = bw / 2;
+
+    if (circleStroke > bw / 8)
+      circleStroke = bw / 8;
+  }
+
+  var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
+  if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
+    numberOpacity = 0;
 
   return (
     <svg direction="ltr" width={width} height={height}>
@@ -99,11 +119,11 @@ export default function renderMultiLines({ data, width, height, parameters, load
               (keyValues.map(k => rowByKey[keyColumn.getKey(k)]))!}
           />
           {/*paint graph - hover area trigger*/}
-          {rowsInOrder
+          {circleRadiusHover > 0 && rowsInOrder
             .filter(r => r.values[s.key] != undefined)
             .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="hover"
               transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
-              r={15}
+              r={circleRadiusHover}
               fill="#fff"
               fillOpacity={0}
               stroke="none"
@@ -119,14 +139,14 @@ export default function renderMultiLines({ data, width, height, parameters, load
         <g key={s.key} className="shape-serie sf-transition"
           transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
           {/*paint graph - points and texts*/}
-          {rowsInOrder
+          {circleRadius > 0 && circleStroke > 0 && rowsInOrder
             .filter(r => r.values[s.key] != undefined)
             .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="point sf-transition"
               stroke={s.color || color(s.key)}
-              strokeWidth={2}
+            strokeWidth={circleStroke}
               fill="white"
               transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
-              r={5}
+            r={circleRadius}
               shapeRendering="initial"
               onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
               cursor="pointer">
@@ -134,12 +154,12 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 {r.values[s.key].valueTitle}
               </title>
             </circle>)}
-          {parseFloat(parameters["NumberOpacity"]) > 0 &&
+          {numberOpacity > 0 &&
             rowsInOrder
               .filter(r => r.values[s.key] != undefined)
               .map(r => <text key={keyColumn.getKey(r.rowValue)} className="point-label sf-transition"
                 textAnchor="middle"
-                opacity={parameters["NumberOpacity"]}
+                opacity={numberOpacity}
                 transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)! - 8)}
                 onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
                 cursor="pointer"

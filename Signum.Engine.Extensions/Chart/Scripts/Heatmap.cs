@@ -7,7 +7,7 @@ namespace Signum.Engine.Chart.Scripts
 {
     public class HeatmapChartScript : ChartScript                
     {
-        public HeatmapChartScript() : base(GoogleMapsCharScript.Heatmap)
+        public HeatmapChartScript() : base(GoogleMapsChartScript.Heatmap)
         {
             this.Icon = ChartScriptLogic.LoadIcon("heatmap.png");
             this.Columns = new List<ChartScriptColumn>

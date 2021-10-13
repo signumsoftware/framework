@@ -59,7 +59,14 @@ namespace Signum.Entities.Chart
     }
 
     [AutoInit]
-    public static class GoogleMapsCharScript
+    public static class SvgMapsChartScript
+    {
+        public static readonly ChartScriptSymbol SvgMap;
+
+    }
+
+    [AutoInit]
+    public static class GoogleMapsChartScript
     {
         public static readonly ChartScriptSymbol Heatmap;
         public static readonly ChartScriptSymbol Markermap;

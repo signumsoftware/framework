@@ -543,6 +543,7 @@ export module SelectorMessage {
   export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
   export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
   export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
+  export const CreationOf0Cancelled = new MessageKey("SelectorMessage", "CreationOf0Cancelled");
 }
 
 export interface Symbol extends Entity {

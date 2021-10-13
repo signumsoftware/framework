@@ -245,7 +245,8 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
       return ({
         groupOperation: f.groupOperation,
         token: f.token,
-        filters: f.filters.map(_ => cloneFilter(_))
+        filters: f.filters.map(_ => cloneFilter(_)),
+        pinned: f.pinned && { ...f.pinned }
       } as FilterGroupOption);
     else
       return ({
@@ -253,6 +254,7 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
         operation: f.operation,
         value: f.value,
         frozen: f.frozen,
+        pinned: f.pinned && { ...f.pinned }
       } as FilterConditionOption)
   }
 
@@ -260,11 +262,11 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
   return {
     queryName: fo.queryName,
     groupResults: fo.groupResults,
-    filterOptions: fo.filterOptions && fo.filterOptions.map(f => cloneFilter(f)),
-    orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ token: o.token, orderType: o.orderType } as OrderOption)),
-    columnOptions: fo.columnOptions && fo.columnOptions.map(c => ({ token: c.token, displayName: c.displayName } as ColumnOption)),
+    filterOptions: fo.filterOptions && fo.filterOptions.map(f => f && cloneFilter(f)),
+    orderOptions: fo.orderOptions && fo.orderOptions.map(o => o && ({ ...o })),
+    columnOptions: fo.columnOptions && fo.columnOptions.map(c => c && ({ ...c })),
     columnOptionsMode: fo.columnOptionsMode,
-    pagination: pa && { mode: pa.mode, elementsPerPage: pa.elementsPerPage, currentPage: pa.currentPage, } as Pagination,
+    pagination: pa && { ...pa } as Pagination,
   };
 }
 

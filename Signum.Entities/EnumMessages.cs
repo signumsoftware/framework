@@ -271,6 +271,9 @@ namespace Signum.Entities
         _0Selector,
         [Description("Please choose a {0} to continue:")]
         PleaseChooseA0ToContinue,
+
+        [Description("Creation of {0} cancelled")]
+        CreationOf0Cancelled
     }
 
     [AllowUnathenticated]

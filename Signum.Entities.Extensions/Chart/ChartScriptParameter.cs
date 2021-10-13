@@ -98,7 +98,7 @@ namespace Signum.Entities.Chart
 
     public class NumberInterval : IChartParameterValueDefinition
     {
-        public decimal DefaultValue;
+        public decimal? DefaultValue;
         public decimal? MinValue;
         public decimal? MaxValue;
 
@@ -131,6 +131,9 @@ namespace Signum.Entities.Chart
 
         public string? Validate(string? parameter, QueryToken? token)
         {
+            if (!parameter.HasText() && DefaultValue == null)
+                return null;
+
             if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
                 return "{0} is not a valid number".FormatWith(parameter);
 
@@ -145,15 +148,7 @@ namespace Signum.Entities.Chart
 
         string IChartParameterValueDefinition.DefaultValue(QueryToken? token)
         {
-            return DefaultValue.ToString(CultureInfo.InvariantCulture);
-        }
-
-        private string ToDecimal(decimal? val)
-        {
-            if (val == null)
-                return "null";
-
-            return val.ToString() + "m";
+            return DefaultValue?.ToString(CultureInfo.InvariantCulture) ?? "";
         }
     }
     
@@ -216,6 +211,7 @@ namespace Signum.Entities.Chart
     public class EnumValue
     {
         public string Name;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public ChartColumnType? TypeFilter;
 
         public override string ToString()
