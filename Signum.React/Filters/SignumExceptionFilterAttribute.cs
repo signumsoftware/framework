@@ -32,6 +32,8 @@ namespace Signum.React.Filters
 
         public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
+        public static Action<HttpContext, ExceptionEntity>? ApplyMixins = null;
+
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
             //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
@@ -61,6 +63,7 @@ namespace Signum.React.Filters
                         e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
                         e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                         e.Session = new BigStringEmbedded();
+                        ApplyMixins?.Invoke(context.HttpContext, e);
                     });
 
                     if (ExpectsJsonResult(context))
