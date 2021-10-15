@@ -270,7 +270,7 @@ export class Gradient {
     if (next == undefined)
       return prev!.color;
 
-    return prev.color.lerp(value - prev.value / next.value - prev.value, next.color);
+    return prev.color.lerp((value - prev.value) / (next.value - prev.value), next.color);
   }
 
   cache: { [num: number]: Color } = {};
