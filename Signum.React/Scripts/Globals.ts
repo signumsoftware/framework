@@ -26,7 +26,7 @@ declare global {
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
-    groupWhenChange<K extends string | number>(this: Array<T>, keySelector: (element: T) => K): { key: K, elements: T[] }[];
+    groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
     orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
     orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
@@ -199,22 +199,27 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
   return result;
 };
 
-Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string | number): { key: any /*string*/, elements: any[] }[] {
-  const result: { key: any, elements: any[] }[] = [];
+Array.prototype.groupWhenChange = function (this: any[], keySelector: (element: any) => any, keyStringifier?: (key: any) => string): { key: any, elements: any[] }[] {
+  const result: { key: any, keyString: string, elements: any[] }[] = [];
 
-  let current: { key: string | number, elements: any[] } | undefined = undefined;
+  keyStringifier ??= a => a.toString();
+
+  let current: { key: any, keyString: string, elements: any[] } | undefined = undefined;
 
   for (let i = 0; i < this.length; i++) {
     const item: any = this[i];
+    const key = keySelector(item);
+    const keyString = keyStringifier(key);
     if (current == undefined) {
-      current = { key: getGroupKey(getGroupKey(item)), elements: [item] };
+
+      current = { key: key, keyString: keyString , elements: [item] };
     }
-    else if (current.key == getGroupKey(item)) {
+    else if (current.keyString == keyString) {
       current.elements.push(item);
     }
     else {
       result.push(current);
-      current = { key: getGroupKey(item), elements: [item] };
+      current = { key: key, keyString: keyString, elements: [item] };
     }
   }
 
