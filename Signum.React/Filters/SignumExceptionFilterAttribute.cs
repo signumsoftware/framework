@@ -32,7 +32,7 @@ namespace Signum.React.Filters
 
         public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
-        public static Action<HttpContext, ExceptionEntity>? ApplyMixins = null;
+        public static Action<ResourceExecutedContext, ExceptionEntity>? ApplyMixins = null;
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
@@ -63,7 +63,7 @@ namespace Signum.React.Filters
                         e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
                         e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                         e.Session = new BigStringEmbedded();
-                        ApplyMixins?.Invoke(context.HttpContext, e);
+                        ApplyMixins?.Invoke(context, e);
                     });
 
                     if (ExpectsJsonResult(context))
