@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
-import { ServiceError, ValidationError } from '../Services';
+import { ExternalServiceError, ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, NormalWindowMessage, ConnectionMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,14 +32,20 @@ export default function ErrorModal(p: ErrorModalProps) {
   const e = p.error;
 
   const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
+  const ese = e instanceof ExternalServiceError ? (e as ExternalServiceError) : undefined;
   const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
   return (
     <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg">
       <div className="modal-header dialog-header-error text-danger">
-        <h5 className="modal-title"> {se ? renderServiceTitle(se) :
-          ve ? renderValidationTitle(ve) :
-            renderTitle(e)}</h5>
+        <h5 className="modal-title">
+          {
+            se ? renderServiceTitle(se) :
+              ve ? renderValidationTitle(ve) :
+                ese ? renderExternalServiceTitle(ese) :
+                  renderTitle(e)
+          }
+        </h5>
         <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
           <span aria-hidden="true">&times;</span>
         </button>
@@ -48,6 +54,7 @@ export default function ErrorModal(p: ErrorModalProps) {
       <div className="modal-body">
         {se ? ErrorModalOptions.renderServiceMessage(se) :
           ve ? ErrorModalOptions.renderValidationMessage(ve) :
+            ese ? ErrorModalOptions.renderExternalServiceMessage(ese) :
             ErrorModalOptions.renderMessage(e)}
       </div>
 
@@ -73,6 +80,15 @@ export default function ErrorModal(p: ErrorModalProps) {
             <a href={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
             <strong>{se.httpError.exceptionId}</strong>
         })</span>}
+      </span>
+    );
+  }
+
+  function renderExternalServiceTitle(ese: ExternalServiceError) {
+    return (
+      <span>
+        <strong>{ese.serviceName}: </strong>
+        {ese.title}
       </span>
     );
   }
@@ -117,7 +133,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(true); }}>
+          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
             <FontAwesomeIcon icon="sync-alt" />
           </button>
         </div>,
@@ -157,6 +173,27 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }) {
   );
 }
 
+export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }) {
+
+  const [showDetails, setShowDetails] = React.useState(false);
+
+  function handleShowDetails(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    setShowDetails(!showDetails);
+  }
+
+  return (
+    <div>
+      {textDanger(p.error.message)}
+      {p.error.additionalInfo && ErrorModalOptions.isExceptionViewable() &&
+        <div>
+          <a href="#" onClick={handleShowDetails}>StackTrace</a>
+          {showDetails && <pre>{p.error.additionalInfo}</pre>}
+        </div>}
+    </div>
+  );
+}
+
 export function RenderValidationMessageDefault(p: { error: ValidationError }) {
   return (
     <div>
@@ -184,14 +221,18 @@ export namespace ErrorModalOptions {
   }
 
   export function renderServiceMessage(se: ServiceError): React.ReactNode {
-    return undefined;
+    return <RenderServiceMessageDefault error={se} />;
+  }
+
+  export function renderExternalServiceMessage(ese: ExternalServiceError): React.ReactNode {
+    return <RenderExternalServiceMessageDefault error={ese} />;
   }
 
   export function renderValidationMessage(ve: ValidationError): React.ReactNode {
-    return undefined;
+    return <RenderValidationMessageDefault error={ve} />;
   }
 
   export function renderMessage(e: any): React.ReactNode {
-    return undefined;
+    return <RenderMessageDefault error={e} />;
   }
 }

@@ -90,7 +90,7 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
     case "m": return "dd LLLL";
     case "u": return "yyyy-MM-dd'T'HH:mm:ss";
     case "s": return "yyyy-MM-dd'T'HH:mm:ss";
-    case "o": return "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    case "o": return "yyyy-MM-dd'T'HH:mm:ss.u";
     case "t": return "t";
     case "T": return "tt";
     case "y": return "LLLL yyyy";
@@ -248,7 +248,11 @@ export namespace NumberFormatSettings {
 
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
 export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale ?? NumberFormatSettings.defaultNumberFormatLocale, toNumberFormatOptions(format));
+    let loc = locale ?? NumberFormatSettings.defaultNumberFormatLocale;
+    if (loc.startsWith("es-")) {
+        loc = "de-DE"; //fix problem for Intl formatting "es" numbers for 4 digits over decimal point 
+    }
+  return new Intl.NumberFormat(loc, toNumberFormatOptions(format));
 }
 
 export function toNumberFormatOptions(format: string | undefined): Intl.NumberFormatOptions | undefined {
@@ -310,10 +314,10 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   //simple euristic
   var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = f.trimEnd("%").tryAfter(".") ?? "";
+  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: style,
-    minimumFractionDigits: afterDot.trimStart("#").length,
+    minimumFractionDigits: afterDot.replace("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
@@ -614,6 +618,7 @@ export function reloadTypes(): Promise<void> {
   return ajaxGet<TypeInfoDictionary>({
     url: "~/api/reflection/types?" + QueryString.stringify({
       user: AppContext.currentUser?.id,
+      userTicks: AppContext.currentUser?.ticks,
       culture: AppContext.currentCulture
     })
   })
@@ -772,7 +777,13 @@ export class Binding<T> implements IBinding<T> {
     delete this.parentObject[this.member];
   }
 
+  forceError: string | undefined;
+
   getError(): string | undefined {
+
+    if (this.forceError)
+      return this.forceError;
+
     const parentErrors = (this.parentObject as ModifiableEntity).error;
     return parentErrors && parentErrors[this.member];
   }
@@ -822,7 +833,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     return undefined;
   }
 
-  setError(name: string | undefined): void {
+  setError(value: string | undefined): void {
   }
 }
 
@@ -865,7 +876,7 @@ export class MListElementBinding<T> implements IBinding<T>{
     return undefined;
   }
 
-  setError(name: string | undefined): void {
+  setError(value: string | undefined): void {
   }
 }
 
@@ -996,7 +1007,7 @@ function sameEntity(a: any, b: any) {
 
 export function getFieldMembers(field: string): LambdaMember[] {
   if (field.contains(".")) {
-    var mixinType = field.before(".").trimStart("[").trimEnd("]");
+    var mixinType = field.before(".").after("[").before("]");
     var fieldName = field.after(".");
 
     return [
@@ -1733,8 +1744,12 @@ export class PropertyRoute {
     this.mixinName = mixinName;
   }
 
-  allParents(): PropertyRoute[] {
-    return [...this.parent == null ? [] : this.parent.allParents(), this];
+  allParents(includeMixins = false): PropertyRoute[] {
+
+    if (!includeMixins && this.propertyRouteType == "Mixin")
+      return this.parent!.allParents(includeMixins);
+
+    return [...this.parent == null ? [] : this.parent.allParents(includeMixins), this];
   }
 
   addLambda(property: ((val: any) => any) | string): PropertyRoute {

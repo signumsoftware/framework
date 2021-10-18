@@ -68,8 +68,9 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300): { size: Size | undefined, setContainer: (element: T | null) => void } {
+export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300, autoResetOnHide = false): { size: Size | undefined, setContainer: (element: T | null) => void } {
   const [size, setSize] = React.useState<Size | undefined>();
+  const sizeRef = useUpdatedRef(size);
   const divElement = React.useRef<T | null>(null);
 
   function setNewSize() {
@@ -95,13 +96,16 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
         setSize(undefined);
 
       visibleObserver.current = whenVisible(div, (visible) => {
+        if (sizeRef.current != null && !autoResetOnHide)
+          return;
+
         if (visible) {
           if (initialTimeout)
             initialHandle.current = setTimeout(setNewSize, initialTimeout);
           else
             setNewSize();
         }
-        else
+        else 
           setSize(undefined);
       });
     }
@@ -216,7 +220,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   return data && data.result;
 }
 
-function areEqual(depsA: ReadonlyArray<any>, depsB: ReadonlyArray<any>) {
+export function areEqual(depsA: React.DependencyList, depsB: React.DependencyList) {
 
   if (depsA.length !== depsB.length)
     return false;

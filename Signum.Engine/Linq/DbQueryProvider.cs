@@ -96,8 +96,10 @@ namespace Signum.Engine.Linq
             Expression replaced = AliasProjectionReplacer.Replace(completed, aliasGenerator);
             log.Switch("OrderBy");
             Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
+            log.Switch("OrderBy");
+            Expression lazyCastRemoved = SqlCastLazyRemover.Remove(orderRewrited);
             log.Switch("Rebinder");
-            Expression rebinded = QueryRebinder.Rebind(orderRewrited);
+            Expression rebinded = QueryRebinder.Rebind(lazyCastRemoved);
             log.Switch("UnusedColumn");
             Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
             log.Switch("Redundant");

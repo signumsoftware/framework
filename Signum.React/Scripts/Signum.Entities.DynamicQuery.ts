@@ -43,6 +43,7 @@ export type FilterType =
   "Decimal" |
   "String" |
   "DateTime" |
+  "Time" |
   "Lite" |
   "Embedded" |
   "Boolean" |
@@ -90,6 +91,7 @@ export module QueryTokenMessage {
   export const TotalDays = new MessageKey("QueryTokenMessage", "TotalDays");
   export const TotalHours = new MessageKey("QueryTokenMessage", "TotalHours");
   export const TotalSeconds = new MessageKey("QueryTokenMessage", "TotalSeconds");
+  export const TotalMinutes = new MessageKey("QueryTokenMessage", "TotalMinutes");
   export const TotalMilliseconds = new MessageKey("QueryTokenMessage", "TotalMilliseconds");
   export const Minute = new MessageKey("QueryTokenMessage", "Minute");
   export const Month = new MessageKey("QueryTokenMessage", "Month");
@@ -100,6 +102,7 @@ export module QueryTokenMessage {
   export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
   export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");
   export const SecondStart = new MessageKey("QueryTokenMessage", "SecondStart");
+  export const TimeOfDay = new MessageKey("QueryTokenMessage", "TimeOfDay");
   export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
   export const Number = new MessageKey("QueryTokenMessage", "Number");
   export const Of = new MessageKey("QueryTokenMessage", "Of");
@@ -130,6 +133,12 @@ export type RoundingType =
   "Ceil" |
   "Round" |
   "RoundMiddle";
+
+export const SystemTimeJoinMode = new EnumType<SystemTimeJoinMode>("SystemTimeJoinMode");
+export type SystemTimeJoinMode =
+  "Current" |
+  "FirstCompatible" |
+  "AllCompatible";
 
 export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
 export type SystemTimeMode =

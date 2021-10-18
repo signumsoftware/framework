@@ -78,7 +78,13 @@ namespace Signum.React.Filters
                             var response = context.HttpContext.Response;
                             response.StatusCode = (int)statusCode;
                             response.ContentType = "application/json";
-                            await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
+
+                            var user = (IUserEntity?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key];
+
+                            using (UserHolder.Current == null && user != null ? UserHolder.UserSession(user) : null)
+                            {
+                                await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
+                            }
                             context.ExceptionHandled = true;
                         }
                     }
@@ -143,6 +149,7 @@ namespace Signum.React.Filters
         {
             this.ExceptionMessage = e.Message;
             this.ExceptionType = e.GetType().FullName!;
+            this.Model = e is ModelRequestedException mre ? mre.Model : null;
             if (includeErrorDetails)
             {
                 this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
@@ -155,6 +162,7 @@ namespace Signum.React.Filters
         public string ExceptionMessage;
         public string? ExceptionId;
         public string? StackTrace;
+        public ModelEntity? Model; 
         public HttpError? InnerException;
     }
 

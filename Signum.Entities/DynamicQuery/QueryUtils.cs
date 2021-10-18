@@ -48,6 +48,9 @@ namespace Signum.Entities.DynamicQuery
             if (uType == typeof(Date) || uType == typeof(DateTimeOffset))
                 return FilterType.DateTime;
 
+            if (uType == typeof(TimeSpan))
+                return FilterType.Time;
+
             if (uType.IsEnum)
                 return FilterType.Enum;
 
@@ -117,6 +120,19 @@ namespace Signum.Entities.DynamicQuery
             },
             {
                 FilterType.DateTime, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo,
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual,
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
+                }
+            },
+            {
+                FilterType.Time, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
@@ -244,7 +260,7 @@ namespace Signum.Entities.DynamicQuery
                     yield return new AggregateToken(AggregateFunction.Min, token);
                     yield return new AggregateToken(AggregateFunction.Max, token);
                 }
-                else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                else if (ft == FilterType.DateTime || ft == FilterType.Time) /*ft == FilterType.String || */
                 {
                     yield return new AggregateToken(AggregateFunction.Min, token);
                     yield return new AggregateToken(AggregateFunction.Max, token);
@@ -327,7 +343,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static bool IsColumnToken(string tokenString)
         {
-            return tokenString.IndexOf('.') == -1 && tokenString != "Entity";
+            return !tokenString.Contains('.') && tokenString != "Entity";
         }
 
         public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)

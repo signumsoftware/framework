@@ -205,9 +205,14 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     else if (packComponent == null)
       p.onExited!(undefined);
     else {
-      var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
-      GraphExplorer.propagateAll(oldEntity);
-      p.onExited!(oldEntity.modified ? undefined : oldEntity);
+      if (p.buttons == "close") { //Even if you cancel, maybe you have executed an operation 
+        var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
+        GraphExplorer.propagateAll(oldEntity);
+        p.onExited!(oldEntity.modified ? undefined : oldEntity);
+      }
+      else {
+        p.onExited!(undefined);
+      }
     }
   }
 

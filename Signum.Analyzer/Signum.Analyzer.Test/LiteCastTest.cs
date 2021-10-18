@@ -20,7 +20,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void CastToEntity()
         {
-            TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
 Lite<Entity> lite = null;
 Entity entity = (Entity)lite;       
             ");
@@ -30,7 +30,7 @@ Entity entity = (Entity)lite;
         public void CastToLite()
         {
          
-            TestDiagnostic("Impossible to convert T to Lite<T>. Consider using ToLite or ToLiteFat", @"
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
 Lite<Entity> lite = (Lite<Entity>)entity;
             ");
@@ -39,7 +39,7 @@ Lite<Entity> lite = (Lite<Entity>)entity;
         [TestMethod]
         public void AsToEntity()
         {
-            TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
 Lite<Entity> lite = null;
 Entity entity = lite as Entity;       
             ");
@@ -49,28 +49,120 @@ Entity entity = lite as Entity;
         public void AsToLite()
         {
 
-            TestDiagnostic("Impossible to convert T to Lite<T>. Consider using ToLite or ToLiteFat", @"
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
 Lite<Entity> lite = entity as Lite<Entity>;
             ");
         }
 
         [TestMethod]
-        public void IsToEntity()
+        public void IsEntity()
         {
-            TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
 Lite<Entity> lite = null;
 var result = lite is Entity;       
             ");
         }
 
         [TestMethod]
-        public void IsToLite()
+        public void IsLite()
         {
 
-            TestDiagnostic("Impossible to convert T to Lite<T>. Consider using ToLite or ToLiteFat", @"
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
 var result = entity is Lite<Entity>;
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityEntity()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+var result = lite is Entity entity;       
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityEntityCaseStatement()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+switch(lite)
+{
+    case Entity entity: break;
+}     
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityEntityCaseExpression()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+var a = lite switch
+{
+    Entity entity=> true,
+    _ => false
+};
+            ");
+        }
+
+        [TestMethod]
+        public void IsNotEntity()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Lite<Entity> lite = null;
+var result = lite is not Signum.Entities.Entity;       
+            ");
+        }
+
+        [TestMethod]
+        public void IsLiteOrLite()
+        {
+
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
+Entity entity = null;
+var result = entity is Lite<Entity> or OperationSymbol;
+            ");
+        }
+
+        [TestMethod]
+        public void IsNotLiteOrLite()
+        {
+
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
+Entity entity = null;
+var result = entity is not (Lite<Entity> or OperationSymbol);
+            ");
+        }
+
+        [TestMethod]
+        public void IsNotLite()
+        {
+
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
+Entity entity = null;
+var result = entity is not Lite<Entity>;
+            ");
+        }
+
+
+        [TestMethod]
+        public void IsLiteProperties()
+        {
+            TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
+Entity entity = null;
+var result = entity is Lite<Signum.Entities.Basics.OperationLogEntity> { EntityOrNull: Signum.Entities.Basics.OperationLogEntity };
+            ");
+        }
+
+        [TestMethod]
+        public void IsEntityPropertiesLite()
+        {
+            TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
+Entity entity = null;
+var result = entity is Signum.Entities.Basics.OperationLogEntity { Target: Entity };
             ");
         }
 
@@ -78,7 +170,7 @@ var result = entity is Lite<Entity>;
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyCSharpDiagnostic(test, assertNoErrors, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, assertNoErrors, Array.Empty<DiagnosticResult>());
             else
                 VerifyCSharpDiagnostic(test, assertNoErrors, new DiagnosticResult
                 {

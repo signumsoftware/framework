@@ -1,4 +1,3 @@
-using Microsoft.SqlServer.Server;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
@@ -20,6 +19,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Data.SqlClient.Server;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Linq
 {
@@ -69,7 +70,7 @@ namespace Signum.Engine.Linq
 
             var result = Visit(expression);
 
-            var expandedResult = QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
+            var expandedResult = QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true, this.systemTime);
 
             return expandedResult;
         }
@@ -534,7 +535,7 @@ namespace Signum.Engine.Linq
         {
             ProjectionExpression rawProjection = this.VisitCastProjection(source);
 
-            var expandedProjector = QueryJoinExpander.ExpandJoins(rawProjection, this, cleanRequests: false);
+            var expandedProjector = QueryJoinExpander.ExpandJoins(rawProjection, this, cleanRequests: false, this.systemTime);
 
             ProjectionExpression projection = (ProjectionExpression)AliasReplacer.Replace(expandedProjector, this.aliasGenerator);
 
@@ -1392,6 +1393,9 @@ namespace Signum.Engine.Linq
             Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
             TableExpression tableExpression = new TableExpression(tableAlias, table, table.SystemVersioned != null ? this.systemTime : null, currentTableHint);
             currentTableHint = null;
+
+            if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.Current)
+                this.systemTime = null;
 
             Alias selectAlias = NextSelectAlias();
 
@@ -2337,7 +2341,7 @@ namespace Signum.Engine.Linq
 
             List<CommandExpression> commands = new List<CommandExpression>();
 
-            ProjectionExpression pr = (ProjectionExpression)QueryJoinExpander.ExpandJoins(VisitCastProjection(source), this, cleanRequests: true);
+            ProjectionExpression pr = (ProjectionExpression)QueryJoinExpander.ExpandJoins(VisitCastProjection(source), this, cleanRequests: true, null);
 
             if (pr.Projector is EntityExpression ee)
             {
@@ -2459,7 +2463,7 @@ namespace Signum.Engine.Linq
                 new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments, returnRowCount: true),
             });
 
-            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
+            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true, null);
         }
 
         internal CommandExpression BindInsert(Expression source, LambdaExpression constructor, ITable table)
@@ -2504,7 +2508,7 @@ namespace Signum.Engine.Linq
                 new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments, returnRowCount: true),
             });
 
-            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
+            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true, null);
         }
 
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null!, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
@@ -3274,19 +3278,21 @@ namespace Signum.Engine.Linq
     {
         Dictionary<SourceExpression, List<ExpansionRequest>> requests;
         AliasGenerator aliasGenerator;
+        SystemTime? systemTime;
 
-        public QueryJoinExpander(Dictionary<SourceExpression, List<ExpansionRequest>> requests, AliasGenerator aliasGenerator)
+        public QueryJoinExpander(Dictionary<SourceExpression, List<ExpansionRequest>> requests, AliasGenerator aliasGenerator, SystemTime? systemTime)
         {
             this.requests = requests;
             this.aliasGenerator = aliasGenerator;
+            this.systemTime = systemTime;
         }
 
-        public static Expression ExpandJoins(Expression expression, QueryBinder binder, bool cleanRequests)
+        public static Expression ExpandJoins(Expression expression, QueryBinder binder, bool cleanRequests, SystemTime? systemTime)
         {
             if (binder.requests.IsEmpty())
                 return expression;
 
-            QueryJoinExpander expander = new QueryJoinExpander(binder.requests, binder.aliasGenerator);
+            QueryJoinExpander expander = new QueryJoinExpander(binder.requests, binder.aliasGenerator, systemTime);
 
             var result = expander.Visit(expression);
 
@@ -3331,7 +3337,18 @@ namespace Signum.Engine.Linq
                         .And(tr.CompleteEntity.ExternalPeriod.Overlaps(tr.CompleteEntity.TablePeriod));
 
                     Expression equal = DbExpressionNominator.FullNominate(eq)!;
-                    source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, tr.Table, equal);
+
+                    if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
+                    {
+                        Alias newAlias = aliasGenerator.NextSelectAlias();
+                        source = new JoinExpression(JoinType.OuterApply, source,
+                            new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, new[] { new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!) }, null, 0),
+                            null);
+                    }
+                    else
+                    {
+                        source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, tr.Table, equal);
+                    }
                 }
                 else if (r is UniqueRequest ur)
                 {

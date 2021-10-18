@@ -82,6 +82,14 @@ namespace Signum.Entities.DynamicQuery
         All
     }
 
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+    public enum SystemTimeJoinMode
+    {
+        Current,
+        FirstCompatible,
+        AllCompatible,
+    }
+
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum SystemTimeProperty
     {

@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -8,7 +9,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -198,20 +198,34 @@ namespace Signum.Engine
 
         static void Validate<T>(IEnumerable<T> entities) where T : Entity
         {
+#if DEBUG
+            var errors = new List<IntegrityCheckWithEntity>();
             foreach (var e in entities)
             {
                 var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
                 {
-#if DEBUG
                     var withEntites = ic.WithEntities(GraphExplorer.FromRoots(entities));
-                    throw new IntegrityCheckException(withEntites);
-#else
-                    throw new IntegrityCheckException(ic);
-#endif
+                    errors.AddRange(withEntites);
                 }
             }
+            if (errors.Count > 0)
+                throw new IntegrityCheckException(errors);
+#else
+            var errors = new Dictionary<Guid, IntegrityCheck>();
+            foreach (var e in entities)
+            {
+                var ic = e.FullIntegrityCheck();
+
+                if (ic != null)
+                {
+                    errors.AddRange(ic);
+                }
+            }
+            if (errors.Count > 0)
+                throw new IntegrityCheckException(errors);
+#endif
         }
 
         static readonly GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
@@ -283,7 +297,7 @@ namespace Signum.Engine
 
                 var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
 
-                DataTable dt = new DataTable();
+                var dt = new DataTable();
                 var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour).ToList();
                 foreach (var c in columns)
                     dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));

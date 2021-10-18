@@ -1,4 +1,4 @@
-import { ModelState, isEntity } from './Signum.Entities'
+import { ModelState, isEntity, ModelEntity } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
 
 export interface AjaxOptions {
@@ -38,7 +38,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
   return wrapRequest(options, () => {
 
     const cache = options.cache || "no-cache";
-    const isIE11 = !!window.MSInputMethodContext && !!(document as any).documentMode;
+    const isIE11 = !!(window as any).MSInputMethodContext && !!(document as any).documentMode;
 
     const headers = {
       'Accept': 'application/json',
@@ -204,6 +204,8 @@ export module ThrowErrorFilter {
             var obj = JSON.parse(text);
             if (response.status == 400 && !(obj as WebApiHttpError).exceptionType)
               throw new ValidationError(obj as ModelState);
+            else if ((obj as WebApiHttpError).model)
+              throw new ModelRequestedError((obj as WebApiHttpError).model!);
             else
               throw new ServiceError(obj as WebApiHttpError);
           }
@@ -242,17 +244,17 @@ export function getFileName(response: Response) {
   const fileNamePartAscii = parts.filter(a => a.trim().startsWith("filename=")).singleOrNull();
 
   if (fileNamePartUTF8)
-    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''").trimEnd("\""));
+    return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''"));
 
   if (fileNamePartAscii)
-    return fileNamePartAscii.trim().after("filename=").trimStart("\"").trimEnd("\"");
+    return fileNamePartAscii.trim().after("filename=").replace("\"", "");
   else
     return "file.dat";
 }
 
 export function saveFileBlob(blob: Blob, fileName: string) {
-  if (window.navigator.msSaveBlob)
-    window.navigator.msSaveBlob(blob, fileName);
+  if ((window.navigator as any).msSaveBlob)
+    (window.navigator as any).msSaveBlob(blob, fileName);
   else {
     const url = window.URL.createObjectURL(blob);
     a.href = url;
@@ -308,11 +310,35 @@ export class ServiceError {
   }
 }
 
+export class ExternalServiceError {
+  serviceName: string;
+  error: any;
+  title?: string;
+  message?: string;
+  additionalInfo?: string;
+
+
+  constructor(
+    serviceName: string,
+    error: any,
+    title?: string,
+    message?: string,
+    additionalInfo?: string,
+  ) {
+    this.serviceName = serviceName;
+    this.error = error;
+    this.title = title,
+      this.message = message;
+    this.additionalInfo = additionalInfo;
+  }
+}
+
 export interface WebApiHttpError {
   exceptionType: string;
   exceptionMessage: string | null;
   stackTrace: string | null;
   exceptionId: string | null;
+  model?: ModelEntity;
   innerException: WebApiHttpError | null;
 }
 
@@ -321,6 +347,14 @@ export class ValidationError {
 
   constructor(modelState: ModelState) {
     this.modelState = modelState;
+  }
+}
+
+export class ModelRequestedError {
+  model: ModelEntity;
+
+  constructor(model: ModelEntity) {
+    this.model = model;
   }
 }
 

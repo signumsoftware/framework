@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -42,9 +43,27 @@ namespace Signum.Engine.CodeGeneration
                     if(File.Exists(clientFile))
                     {
                         var lines = File.ReadAllLines(clientFile).ToList();
-                        var index = lines.FindLastIndex(s => s.Contains("Navigator.addSettings(new EntitySettings")).NotFoundToNull() ??
+                        
+                        {
+                            var index = lines.FindLastIndex(s => s.Contains("Navigator.addSettings(new EntitySettings")).NotFoundToNull() ??
                                lines.FindLastIndex(s => s.Contains("export function start")).NotFoundToNull() ?? 0;
-                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(2));
+                            lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(2));
+                        }
+                        
+                        {
+                            var regex = new Regex(@"\s*}\s*from (""(?<path>[^""]+)""|'(?<path>[^']+)')");
+
+                            var importIndex = lines.FindIndex(a => regex.Match(a) is { } m && m.Success && m.Groups["path"].Value?.TryAfterLast("/") == mod.Types.First().Namespace);
+
+                            if (importIndex >= 0)
+                                lines[importIndex] = regex.Replace(lines[importIndex], m => ", " + mod.Types.Select(a => a.Name).ToString(", ")  + m.ToString());
+                            else
+                            {
+                                var startIndex = lines.FindLastIndex(s => s.Contains("export function start")).NotFoundToNull() ?? 0;
+                                lines.Insert(startIndex, "import { " + mod.Types.Select(a => a.Name).ToString(", ") + " } from './" + mod.Types[0].Namespace! + "';");
+                            }
+                        }
+                        
                         File.WriteAllLines(clientFile, lines);
                     }
                     else
@@ -129,7 +148,9 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual IEnumerable<Module> GetModules()
         {
-            Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, Schema.Current.Tables.ContainsKey);
+            var files = Directory.GetFiles(Path.Combine(GetProjectFolder(), "App"), "*.tsx", new EnumerationOptions { RecurseSubdirectories = true}).GroupToDictionary(a => Path.GetFileNameWithoutExtension(a));
+
+            Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, a => files.ContainsKey(a.Name) || files.ContainsKey(Reflector.CleanTypeName(a)));
 
             return ReactGetModules(types, this.SolutionName);
         }
@@ -138,49 +159,33 @@ namespace Signum.Engine.CodeGeneration
         {
             while (true)
             {
-                var typesToShow = types.Keys.OrderBy(a => types[a]).ThenBy(a => a.FullName).ToList();
+                var typesToShow = types.Keys.OrderBy(a => a.FullName).ToList();
 
-                var selectedTypes = new ConsoleSwitch<int, Type>("Chose types for a new Logic module:")
-                    .Load(typesToShow, t => (types[t] ? "-" : " ") + t.FullName)
+                var selectedTypes = new ConsoleSwitch<int, Type>("Chose types for a new React module:")
+                    .Load(typesToShow)
+                    .Do(cs => cs.PrintOption = (key, vwd) => 
+                    {
+                        var used = types.GetOrThrow(vwd.Value);
+
+                        SafeConsole.WriteColor(used ? ConsoleColor.DarkGray :  ConsoleColor.White, " " + key);
+                        SafeConsole.WriteLineColor(used ? ConsoleColor.DarkGray: ConsoleColor.Gray,  " - " + vwd.Description);
+                    })
                     .ChooseMultiple();
 
                 if (selectedTypes.IsNullOrEmpty())
                     yield break;
 
-                var directories = Directory.GetDirectories(GetProjectFolder(), "App\\").Select(a => Path.GetFileName(a)!);
+                var modules = selectedTypes.GroupBy(a =>  a.Namespace!.After(this.SolutionName + ".Entities").DefaultText(this.SolutionName))
+                    .Select(gr => new Module(gr.Key.TryAfterLast(".") ?? gr.Key, gr.ToList())).ToList();
 
-                string? moduleName;
-                if (directories.IsEmpty())
+                foreach (var m in modules)
                 {
-                    moduleName = AskModuleName(solutionName, selectedTypes);
+                    yield return m;
                 }
-                else
-                {
-                    var selectedName = directories.And("[New Module]").ChooseConsole(message: "Select a Module");
-
-                    if (selectedName == "[New Module]")
-                        moduleName = AskModuleName(solutionName, selectedTypes);
-                    else
-                        moduleName = selectedName;
-                }
-
-                if (!moduleName.HasText())
-                    yield break;
-
-                yield return new Module(moduleName, selectedTypes.ToList());
 
                 types.SetRange(selectedTypes, a => a, a => true);
             }
 
-        }
-
-        private static string AskModuleName(string solutionName, Type[] selected)
-        {
-            string? moduleName = CodeGenerator.GetDefaultModuleName(selected, solutionName);
-            SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
-
-            moduleName = Console.ReadLine().DefaultText(moduleName!);
-            return moduleName;
         }
 
         protected virtual List<Type> CandidateTypes()
@@ -531,7 +536,10 @@ namespace Signum.Engine.CodeGeneration
         {
             type = type.UnNullify();
 
-            if (type.IsEnum || type == typeof(TimeSpan))
+            if (type.IsEnum)
+                return true;
+
+            if (type == typeof(TimeSpan) || type == typeof(Date) || type == typeof(DateTimeOffset) || type == typeof(Guid))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);

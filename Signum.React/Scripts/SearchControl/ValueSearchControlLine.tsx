@@ -20,11 +20,11 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   findOptions?: FindOptions;
   valueToken?: string | QueryTokenString<any>;
   multipleValues?: { vertical?: boolean, showType?: boolean };
-  labelText?: React.ReactChild;
+  labelText?: React.ReactChild | (() => React.ReactChild);
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   unitText?: React.ReactChild;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  helpText?: React.ReactChild;
+  helpText?: (valueSearchControl: ValueSearchControl) => React.ReactChild | undefined;
   initialValue?: any;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
@@ -35,7 +35,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   findButton?: boolean;
   viewEntityButton?: boolean;
   avoidAutoRefresh?: boolean;
-  refreshKey?: any;
+  deps?: React.DependencyList;
   extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
   create?: boolean;
   onCreate?: () => Promise<any>;
@@ -67,15 +67,13 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (isEntity(ctx.value))
       return {
         queryName: ctx.value.Type,
-        parentToken: QueryTokenString.entity(),
-        parentValue: ctx.value
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
       };
 
     if (isLite(ctx.value))
       return {
         queryName: ctx.value.EntityType,
-        parentToken: QueryTokenString.entity(),
-        parentValue: ctx.value
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
       };
 
     throw new Error("Impossible to determine 'findOptions' because 'ctx' is not a 'TypeContext<Entity>'. Set it explicitly");
@@ -137,12 +135,16 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
     let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);
 
+    var labelText = this.props.labelText == undefined ? undefined :
+      typeof this.props.labelText == "function" ? this.props.labelText() :
+        this.props.labelText;
+
     return (
       <FormGroup ctx={this.props.ctx}
-        labelText={this.props.labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
+        labelText={labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
         labelHtmlAttributes={this.props.labelHtmlAttributes}
         htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
-        helpText={this.props.helpText}
+        helpText={this.props.helpText && this.valueSearchControl && this.props.helpText(this.valueSearchControl)}
       >
         <div className={isFormControl ? ((unit || view || extra || find || create) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>
           <ValueSearchControl
@@ -161,7 +163,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             onTokenLoaded={() => this.forceUpdate()}
             onExplored={this.props.onExplored}
             searchControlProps={this.props.searchControlProps}
-            refreshKey={this.props.refreshKey}
+            deps={this.props.deps}
           />
 
           {(view || extra || find || unit) && (isFormControl ?

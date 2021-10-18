@@ -206,6 +206,7 @@ namespace Signum.Entities.Reflection
 
         public static PrimaryKey DummyRowId = new PrimaryKey("dummy");
 
+        //https://dreampuf.github.io/GraphvizOnline/
         public static string SuperGraphviz(this DirectedGraph<Modifiable> modifiables)
         {
             Func<Type, string> color = t => colors[Math.Abs(t.FullName!.GetHashCode()) % colors.Length];
@@ -214,7 +215,7 @@ namespace Signum.Entities.Reflection
             {
                 Node = n,
 
-                Fillcolor = n is Lite<Entity> ? "white" : color(n.GetType()),
+                Fillcolor = color(n.GetType()),
                 Color =
                     n is Lite<Entity> ? color(((Lite<Entity>)n).GetType()) :
                     (n.Modified == ModifiedState.SelfModified ? "red" :
@@ -226,13 +227,15 @@ namespace Signum.Entities.Reflection
                         n is EmbeddedEntity ? "box" :
                         Reflector.IsMList(n.GetType()) ? "hexagon" : "plaintext",
                 Style = n is Entity ? ", style=\"diagonals,filled,bold\"" :
-                        n is Lite<Entity> ? "style=\"solid,bold\"" : "",
+                        n is Lite<Entity> ? ", style=\"solid,bold\"" : "",
 
-                Label = n.ToString()!.Etc(30, "..").RemoveDiacritics()
+                Label = n.ToString()!.Etc(30, "..").RemoveDiacritics(),
 
+                Tooltip = n.GetType().TypeName() + " (" + n.Modified + ")"
             }).ToList();
 
-            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2} shape={3}{4}, label=\"{5}\"]".FormatWith(modifiables.Comparer.GetHashCode(t.Node! /*CSBUG*/), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label), "\r\n");
+            string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2}, shape={3}{4}, label=\"{5}\", tooltip=\"{6}\"]"
+            .FormatWith(modifiables.Comparer.GetHashCode(t.Node! /*CSBUG*/), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label, t.Tooltip), "\r\n");
 
             string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
 
@@ -363,6 +366,12 @@ namespace Signum.Entities.Reflection
         {
             get { return (Dictionary<Guid, IntegrityCheck>)this.Data["integrityErrors"]!; }
             set { this.Data["integrityErrors"] = value; }
+        }
+
+        public IntegrityCheckException(IntegrityCheck error)
+            : this(new Dictionary<Guid, IntegrityCheck> { { error.TemporalId, error } })
+        {
+
         }
 
         public IntegrityCheckException(List<IntegrityCheckWithEntity> errors)

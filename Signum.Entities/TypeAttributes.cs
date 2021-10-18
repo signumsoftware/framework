@@ -25,28 +25,6 @@ namespace Signum.Entities
         bool? inTypeScript = null;
         public bool? GetInTypeScript() => inTypeScript;
 
-
-        bool? undefined = null;
-        public bool? GetUndefined() => undefined;
-        public bool Undefined
-        {
-            get { return undefined ?? NotSet(); }
-            set { undefined = value; }
-        }
-
-        bool NotSet()
-        {
-            throw new InvalidOperationException("Not Set");
-        }
-
-        bool? @null = null;
-        public bool? GetNull() => @null;
-        public bool Null
-        {
-            get { return @null ?? NotSet(); }
-            set { @null = value; }
-        }
-
         public InTypeScriptAttribute() { }
         public InTypeScriptAttribute(bool inTypeScript)
         {
@@ -244,7 +222,7 @@ namespace Signum.Entities
         /// <summary>
         /// Entity created for business definition
         /// By default ordered by id Ascending
-        /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...
+        /// ie: ProductEntity, OperationSymbol, PermissionSymbol, CountryEntity...
         /// </summary>
         Master,
 

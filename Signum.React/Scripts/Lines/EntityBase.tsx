@@ -191,7 +191,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return (
       <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        title={this.props.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
         {EntityBaseController.viewIcon}
       </a>
     );
@@ -263,7 +263,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return (
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={this.props.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.createIcon}
       </a>
     );
@@ -310,7 +310,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return (
       <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={this.props.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
         {EntityBaseController.findIcon}
       </a>
     );
@@ -336,7 +336,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     return (
       <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        title={this.props.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
         {EntityBaseController.removeIcon}
       </a>
     );

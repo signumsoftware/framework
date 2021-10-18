@@ -309,6 +309,7 @@ export module JavascriptMessage {
   export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
   export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
   export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
+  export const joinMode = new MessageKey("JavascriptMessage", "joinMode");
   export const loading = new MessageKey("JavascriptMessage", "loading");
   export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
   export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
@@ -382,6 +383,7 @@ export module OperationMessage {
   export const Create = new MessageKey("OperationMessage", "Create");
   export const CreateFromRegex = new MessageKey("OperationMessage", "CreateFromRegex");
   export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
+  export const TheStateOf0ShouldBe1InsteadOf2 = new MessageKey("OperationMessage", "TheStateOf0ShouldBe1InsteadOf2");
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
@@ -494,6 +496,9 @@ export module SearchMessage {
   export const ViewSelected = new MessageKey("SearchMessage", "ViewSelected");
   export const Operations = new MessageKey("SearchMessage", "Operations");
   export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
+  export const NoResultsInThisPage = new MessageKey("SearchMessage", "NoResultsInThisPage");
+  export const NoResultsFoundInPage01 = new MessageKey("SearchMessage", "NoResultsFoundInPage01");
+  export const GoBackToPageOne = new MessageKey("SearchMessage", "GoBackToPageOne");
   export const Explore = new MessageKey("SearchMessage", "Explore");
   export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
   export const Label = new MessageKey("SearchMessage", "Label");
@@ -538,6 +543,7 @@ export module SelectorMessage {
   export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
   export const _0Selector = new MessageKey("SelectorMessage", "_0Selector");
   export const PleaseChooseA0ToContinue = new MessageKey("SelectorMessage", "PleaseChooseA0ToContinue");
+  export const CreationOf0Cancelled = new MessageKey("SelectorMessage", "CreationOf0Cancelled");
 }
 
 export interface Symbol extends Entity {
@@ -556,6 +562,7 @@ export module ValidationMessage {
   export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
   export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
   export const _0ShouldBe12 = new MessageKey("ValidationMessage", "_0ShouldBe12");
+  export const _0ShouldBe1 = new MessageKey("ValidationMessage", "_0ShouldBe1");
   export const _0ShouldBe1InsteadOf2 = new MessageKey("ValidationMessage", "_0ShouldBe1InsteadOf2");
   export const _0HasToBeBetween1And2 = new MessageKey("ValidationMessage", "_0HasToBeBetween1And2");
   export const _0HasToBeLowercase = new MessageKey("ValidationMessage", "_0HasToBeLowercase");
@@ -629,6 +636,7 @@ export module ValidationMessage {
   export const ThereAre0InState1 = new MessageKey("ValidationMessage", "ThereAre0InState1");
   export const ThereAre0ThatReferenceThis1 = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
   export const _0IsNotCompatibleWith1 = new MessageKey("ValidationMessage", "_0IsNotCompatibleWith1");
+  export const _0IsRepeated = new MessageKey("ValidationMessage", "_0IsRepeated");
 }
 
 export module VoidEnumMessage {

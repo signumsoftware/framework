@@ -16,19 +16,19 @@ namespace Signum.Analyzer
     {
         public const string DiagnosticId = "SF0003";
         
-        private static DiagnosticDescriptor RuleLiteEntity = new DiagnosticDescriptor(DiagnosticId,
+        private readonly static DiagnosticDescriptor RuleLiteEntity = new DiagnosticDescriptor(DiagnosticId,
             "Prevents comparisons between Lite<T> and T",
-            "Impossible to compare Lite<T> and T. Consider using 'Is' extension method", "Lite",
+            "Impossible to compare Lite<T> and T, consider using 'Is' extension method", "Lite",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Checks that Lite<T> and T are not compared directly. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance");
+            description: "Checks that Lite<T> and T are not compared directly. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
 
-        private static DiagnosticDescriptor RuleEntityTypes = new DiagnosticDescriptor(DiagnosticId,
+        private readonly static DiagnosticDescriptor RuleEntityTypes = new DiagnosticDescriptor(DiagnosticId,
             "Prevents comparisons between Lite<A> and Lite<B>",
             "Impossible to compare Lite<{0}> and Lite<{1}>", "Lite",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Checks that Lite<T> and T are not compared directly. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance");
+            description: "Checks that Lite<T> and T are not compared directly. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
 
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(RuleEntityTypes, RuleLiteEntity); } }
@@ -46,8 +46,8 @@ namespace Signum.Analyzer
 
             var equalsExpression = (BinaryExpressionSyntax)context.Node;
 
-            var left = context.SemanticModel.GetTypeInfo(equalsExpression.Left);
-            var right = context.SemanticModel.GetTypeInfo(equalsExpression.Right);
+            var left = context.SemanticModel.GetTypeInfo(equalsExpression.Left).Type;
+            var right = context.SemanticModel.GetTypeInfo(equalsExpression.Right).Type;
 
             if (
                 left.IsLite() && right.IsEntity() ||
@@ -65,8 +65,8 @@ namespace Signum.Analyzer
                     tRight != null &&
                     tLeft.TypeKind != TypeKind.Interface &&
                     tRight.TypeKind != TypeKind.Interface &&
-                    !tLeft.GetBaseTypesAndThis().Contains(tRight) &&
-                    !tRight.GetBaseTypesAndThis().Contains(tLeft))
+                    !tLeft.GetBaseTypesAndThis().Contains(tRight, SymbolEqualityComparer.Default) &&
+                    !tRight.GetBaseTypesAndThis().Contains(tLeft, SymbolEqualityComparer.Default))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(RuleEntityTypes, equalsExpression.GetLocation(), tLeft.Name, tRight.Name));
                 }

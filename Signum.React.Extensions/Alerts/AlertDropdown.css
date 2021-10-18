@@ -1,0 +1,122 @@
+﻿
+
+@keyframes ring {
+    0% {
+        -webkit-transform: rotate(-15deg);
+        -ms-transform: rotate(-15deg);
+        transform: rotate(-15deg)
+    }
+
+    2% {
+        -webkit-transform: rotate(15deg);
+        -ms-transform: rotate(15deg);
+        transform: rotate(15deg)
+    }
+
+    4% {
+        -webkit-transform: rotate(-18deg);
+        -ms-transform: rotate(-18deg);
+        transform: rotate(-18deg)
+    }
+
+    6% {
+        -webkit-transform: rotate(18deg);
+        -ms-transform: rotate(18deg);
+        transform: rotate(18deg)
+    }
+
+    8% {
+        -webkit-transform: rotate(-22deg);
+        -ms-transform: rotate(-22deg);
+        transform: rotate(-22deg)
+    }
+
+    10% {
+        -webkit-transform: rotate(22deg);
+        -ms-transform: rotate(22deg);
+        transform: rotate(22deg)
+    }
+
+    12% {
+        -webkit-transform: rotate(-18deg);
+        -ms-transform: rotate(-18deg);
+        transform: rotate(-18deg)
+    }
+
+    14% {
+        -webkit-transform: rotate(18deg);
+        -ms-transform: rotate(18deg);
+        transform: rotate(18deg)
+    }
+
+    16% {
+        -webkit-transform: rotate(-12deg);
+        -ms-transform: rotate(-12deg);
+        transform: rotate(-12deg)
+    }
+
+    18% {
+        -webkit-transform: rotate(12deg);
+        -ms-transform: rotate(12deg);
+        transform: rotate(12deg)
+    }
+
+    20% {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+}
+
+
+.ringing {
+    animation: ring 4s ease infinite;
+    transform-origin: 50% 10%;
+}
+
+
+.sf-alerts-badge {
+    padding: 1px 2px;
+    position: relative;
+    top: -10px;
+    left: -5px;
+    border-radius: 10px !important;
+}
+
+.sf-alerts-toasts {
+    position: absolute;
+    top: 52px;
+    right: 5px;
+    z-index: 100;
+    min-width: 350px;
+}
+
+    .sf-alerts-toasts .toast:not(:last-child) {
+        margin-bottom: 0.25rem;
+    }
+
+.sf-alert-signature {
+    display: block;
+    text-align: right;
+}
+
+
+.sf-bell-container {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sf-bell {
+}
+
+    .sf-bell.open {
+        color: #616A6B
+    }
+
+    .sf-bell.active {
+        color: #D4AC0D
+    }
+
+        .sf-bell.active.open {
+            color: #9C640C
+        }

@@ -403,7 +403,7 @@ namespace Signum.React.ApiControllers
 
             foreach (var setter in setters)
             {
-                var pr = route.Add(setter.Property);
+                var pr = route.AddMany(setter.Property);
 
                 SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
 
@@ -487,7 +487,7 @@ namespace Signum.React.ApiControllers
         private static void SetProperty(ModifiableEntity entity, PropertyRoute pr, PropertyRoute parentRoute, object? value)
         {
             var subEntity = pr.Parent == parentRoute ? entity :
-                        (ModifiableEntity)pr.GetLambdaExpression<object, object>(true, parentRoute).Compile()(entity);
+                        (ModifiableEntity)pr.Parent!.GetLambdaExpression<object, object>(true, parentRoute).Compile()(entity);
 
             pr.PropertyInfo!.SetValue(subEntity, value);
         }
@@ -495,7 +495,7 @@ namespace Signum.React.ApiControllers
         private static object? GetProperty(ModifiableEntity entity, PropertyRoute pr, PropertyRoute parentRoute)
         {
             var subEntity = pr.Parent == parentRoute ? entity :
-                        (ModifiableEntity)pr.GetLambdaExpression<object, object>(true, parentRoute).Compile()(entity);
+                        (ModifiableEntity)pr.Parent!.GetLambdaExpression<object, object>(true, parentRoute).Compile()(entity);
 
             return pr.PropertyInfo!.GetValue(subEntity);
         }
@@ -507,7 +507,7 @@ namespace Signum.React.ApiControllers
 
             var body = predicate.Select(p =>
             {
-                var pr = mainRoute.Add(p.Property);
+                var pr = mainRoute.AddMany(p.Property);
 
                 var lambda = pr.GetLambdaExpression<object, object>(true, mainRoute.GetMListItemsRoute());
 

@@ -137,6 +137,22 @@ export default function MessageModal(p: MessageModalProps) {
               {JavascriptMessage.cancel.niceToString()}
             </button>
           </div>);
+      case "yes_cancel":
+        return (
+          <div className="btn-toolbar">
+            <button
+              className="btn btn-primary sf-close-button sf-yes-button"
+              onClick={() => handleButtonClicked("yes")}
+              name="yes">
+              {BooleanEnum.niceToString("True")}
+            </button>
+            <button
+              className="btn btn-secondary sf-close-button sf-cancel-button"
+              onClick={() => handleButtonClicked("cancel")}
+              name="cancel">
+              {JavascriptMessage.cancel.niceToString()}
+            </button>
+          </div>);
     }
   }
 

@@ -14,6 +14,7 @@ export interface ContextMenuPosition {
 export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
   onHide: (e: MouseEvent | TouchEvent) => void;
+  alignRight?: boolean;
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps> {
@@ -42,14 +43,14 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     return result;
   }
 
-  static getPositionElement(button: HTMLElement): ContextMenuPosition {
+  static getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
     const op = DomUtils.offsetParent(button);
 
     const recOp = op!.getBoundingClientRect();
     const recButton = button.getBoundingClientRect();
 
     var result = ({
-      left: recButton.left - recOp.left,
+      left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
       top: recButton.top + recButton.height - recOp.top,
       width: (op ? op.offsetWidth : window.innerWidth)
     }) as ContextMenuPosition;
@@ -59,12 +60,12 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
   render() {
 
-    const { position, onHide, ref, ...props } = this.props;
+    const { position, onHide, ref, alignRight, ...props } = this.props;
 
     const style: React.CSSProperties = { zIndex: 9999, display: "block", position: "absolute" };
 
     style.top = position.top + "px";
-    if (document.body.className.contains("rtl-mode"))
+    if (document.body.className.contains("rtl-mode") !== Boolean(alignRight))
       style.right = (position.width - position.left) + "px";
     else
       style.left = position.left + "px";

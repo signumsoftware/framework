@@ -80,7 +80,7 @@ namespace Signum.Upgrade
 
         public WarningLevel HasWarnings { get; internal set; }
 
-        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", "Extensions" };
+        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", "Extensions", ".git", ".vs", ".vscode" };
 
         public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarning = WarningLevel.Error)
         {

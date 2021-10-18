@@ -64,9 +64,24 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(Min = 3, Max = 200)]
         public string? Key { get; set; }
 
-        internal string? NiceToString()
+        internal static Action<SemiSymbol> CallRetrieved = ss => { };
+
+        public string NiceToString()
         {
-            return this.FieldInfo?.NiceName();
+            CallRetrieved(this);
+            return this.FieldInfo?.NiceName() ?? this.Name;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is SemiSymbol ss &&
+                obj.GetType() == this.GetType() &&
+                (ss.Key == Key || base.Equals(ss));
+        }
+
+        public override int GetHashCode()
+        {
+            return Key?.GetHashCode() ?? base.GetHashCode();
         }
 
 
@@ -97,7 +112,7 @@ namespace Signum.Entities.Basics
         public string Name { get; set; }
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => this.Name);
+        public override string ToString() => As.Expression(() => this.Key ?? this.Name);
 
         public static void SetFromDatabase<S>(Dictionary<string, S> fromDatabase)
             where S : SemiSymbol

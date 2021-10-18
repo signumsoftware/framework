@@ -27,6 +27,7 @@ export default function EntityLink(p: EntityLinkProps) {
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}
+      className="try-no-wrap"
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >

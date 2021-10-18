@@ -89,7 +89,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
 }
 
 MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: API.PropertySetter[]): Promise<API.PropertySetter[] | undefined> => {
-  var settersOrDefault = setters ?? [];
+  var settersOrDefault = setters ?? [{ property: null!, operation: null! } as API.PropertySetter];
   return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
 };
 
@@ -199,7 +199,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     const s = p.setter;
     s.property = newProperty == null ? undefined! :
       p.root.propertyRouteType == "Root" ? newProperty.propertyPath() :
-        newProperty.propertyPath().after(p.root.propertyPath()).trimStart('.');
+        removeInitialPoin(newProperty.propertyPath().after(p.root.propertyPath()));
 
     s.operation = newProperty == null || p.isPredicate ? null! : getPropertyOperations(newProperty.typeReference()).firstOrNull()!;
 
@@ -212,6 +212,13 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
       p.onSetterChanged();
       forceUpdate();
     }).done();
+  }
+
+  function removeInitialPoin(str: string) {
+    if (str.startsWith("."))
+      return str.after(".");
+
+    return str;
   }
 
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
@@ -361,7 +368,7 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
     if (tis[0].kind == "Enum") {
       const ti = tis.single()!;
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} comboBoxItems={members} onChange={handleValueChange} />;
+      return <ValueLine ctx={ctx} optionItems={members} onChange={handleValueChange} />;
     }
 
     if (tr.name == IsByAll || tis.some(ti => !ti!.isLowPopulation))
@@ -411,14 +418,15 @@ interface PropertyPartProps {
 
 export function PropertyPart(p: PropertyPartProps) {
 
-  var tr = p.parentRoute.typeReference();
+  if (p.parentRoute.propertyRouteType != "Mixin") {
+    var tr = p.parentRoute.typeReference();
+    if (tr.name.contains(",") || tr.name == IsByAll)
+      return null;
 
-  if (tr.name.contains(",") || tr.name == IsByAll)
-    return null;
-
-  var ti = tryGetTypeInfo(tr.name);
-  if (p.parentRoute.propertyRouteType != "Root" && ti != null && (ti.entityKind == "Part" || ti?.entityKind != "SharedPart"))
-    return null;
+    var ti = tryGetTypeInfo(tr.name);
+    if (p.parentRoute.propertyRouteType != "Root" && ti != null && (ti.entityKind == "Part" || ti?.entityKind != "SharedPart"))
+      return null;
+  }
 
   const subMembers = Dic.getValues(p.parentRoute.subMembers());
 

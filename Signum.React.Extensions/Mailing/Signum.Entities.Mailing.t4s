@@ -1,0 +1,11 @@
+﻿export interface Pop3ConfigurationEntity {
+    newPassword: string;
+}
+
+export interface SmtpNetworkDeliveryEmbedded {
+    newPassword: string;
+}
+
+export interface ExchangeWebServiceEmbedded {
+    newPassword: string;
+}

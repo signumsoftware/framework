@@ -9,6 +9,7 @@ import { MemberInfo } from './Reflection';
 import { BsSize } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
+import { AutoFocus } from './Components/AutoFocus';
 
 interface ValueLineModalProps extends IModalProps<any> {
   options: ValueLineModalOptions;
@@ -56,8 +57,8 @@ export default function ValueLineModal(p: ValueLineModalProps) {
     initiallyFocused: props.initiallyFocused,
   };
 
-  const disabled = p.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
-  const valueOnChanged = p.options.allowEmptyValue == false ? () => forceUpdate() : undefined;
+  const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
+  const valueOnChanged = p.options.allowEmptyValue == false ? forceUpdate : undefined;
 
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
@@ -71,8 +72,10 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         <p>
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
-        <ValueLine
-          formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+        <AutoFocus>
+          <ValueLine
+            formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+        </AutoFocus>
       </div>
       <div className="modal-footer">
         <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>

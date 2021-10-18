@@ -51,6 +51,15 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
         );
 
       case "Paginate":
+        if (resultTable.rows.length == 0) {
+          if (resultTable.totalElements == 0)
+            return <span>{SearchMessage._0Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
+              <span className="sf-pagination-strong" key={1}>{resultTable.totalElements && numberFormat.format(resultTable.totalElements)}</span>)
+            }</span>;
+          else
+            return <span>{SearchMessage.NoResultsInThisPage.niceToString()}</span>;
+        }
+
         return (
           <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
             <span className={"sf-pagination-strong"} key={1}>{numberFormat.format(PaginateMath.startElementIndex(pagination))}</span>,
@@ -129,7 +138,7 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
     if (!resultTable || resultTable.pagination.mode != "Paginate")
       return "\u00a0";
 
-    const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
+    const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements!);
 
     return (
       <PaginationComponent

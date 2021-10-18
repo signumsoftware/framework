@@ -163,6 +163,7 @@
     <Member Name="groupResults" Description="Resultate der Gruppe" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
     <Member Name="insertColumn" Description="Spalte einfügen" />
+    <Member Name="joinMode" Description="Join-Modus" />
     <Member Name="loading" Description="Lädt gerade..." />
     <Member Name="loseCurrentChanges" Description="Änderungen verlieren?" />
     <Member Name="moveDown" Description="Nach unten" />
@@ -256,6 +257,7 @@
     <Member Name="Setters" Description="Setters" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0} (statt {1}) sein" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} hat keine Enität zurückgegeben" />
+    <Member Name="TheStateOf0ShouldBe1InsteadOf2" Description="Der Zustand von {0} sollte {1} sein (anstatt von {2})" />
   </Type>
   <Type Name="OperationSymbol" Description="Operation" />
   <Type Name="OrderType" Description="Reihenfolgentyp">
@@ -274,7 +276,7 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="WhenHasValue" Description="Wann hat Wert" />
+    <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
     <Member Name="AddElement" Description="Element hinzufügen" />
@@ -336,9 +338,11 @@
     <Member Name="SecondStart" Description="Start Sekunde" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
+    <Member Name="TimeOfDay" Description="Tageszeit" />
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />
     <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
     <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
     <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="WeekStart" Description="Wochenstart" />
@@ -405,6 +409,7 @@
     <Member Name="Find" Description="Finden" />
     <Member Name="FinderOf0" Description="Finder von {0}" />
     <Member Name="First0Results_N" Description="erste {0} Ergebnis[se]." />
+    <Member Name="GoBackToPageOne" Description="zurück zur ersten Seite" />
     <Member Name="GroupKey" Description="Gruppenschlüssel" />
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
@@ -416,6 +421,8 @@
     <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
     <Member Name="NoFiltersSpecified" Description="Keine Filter angegeben" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
+    <Member Name="NoResultsFoundInPage01" Description="Keine Ergebnisse auf Seite {0} gefunden, {1} " />
+    <Member Name="NoResultsInThisPage" Description="Keine Ergebnisse auf dieser Seite" />
     <Member Name="Of" Description="von" />
     <Member Name="Operation" Description="Operation" />
     <Member Name="Operations" Description="Operationen" />
@@ -453,6 +460,7 @@
     <Member Name="_0Selector" Description="{0}-Selektor" />
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
     <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
+    <Member Name="CreationOf0Cancelled" Description="Erstellung von {0} abgebrochen" />
     <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen {0} wert, um fortzufahren:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
@@ -476,6 +484,11 @@
   <Type Name="SynchronizerMessage">
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
+  </Type>
+  <Type Name="SystemTimeJoinMode">
+    <Member Name="AllCompatible" Description="Alle kompatibel" />
+    <Member Name="Current" Description="Aktuell" />
+    <Member Name="FirstCompatible" Description="Erste kompatibel" />
   </Type>
   <Type Name="SystemTimeMode">
     <Member Name="All" Description="Alle" />
@@ -520,8 +533,10 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsRepeated" Description="{0} ist wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />
+    <Member Name="_0ShouldBe1" Description="{0} sollte {1} sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />

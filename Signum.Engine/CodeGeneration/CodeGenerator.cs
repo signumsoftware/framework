@@ -76,27 +76,12 @@ namespace Signum.Engine.CodeGeneration
         {
             StringDistance sd = new StringDistance();
 
-            string? name = null;
-            foreach (var item in selected)
-            {
-                if (name == null)
-                    name = item.FullName!.RemovePrefix(solutionName + ".Entities");
-                else
-                {
-                    int length = sd.LongestCommonSubstring(name, item.FullName!, out int startName, out int rubbish);
-
-                    name = name.Substring(startName, length);
-
-                    if (name.IsEmpty())
-                        return null;
-                }
-            }
+            string? name = selected.Select(a => (a.Namespace ?? "").RemovePrefix(solutionName + ".Entities")).Distinct().Only();
 
             if (name == null)
                 return null;
 
-            if (name.Contains("."))
-                return name.Before(".").DefaultToNull() ?? name.After(".");
+            name = name.Replace(".", "");
 
             return name;
         }

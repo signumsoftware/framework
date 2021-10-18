@@ -90,7 +90,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectNoColumns()
         {
-            var list = Database.Query<AlbumEntity>().Select(a => new { DateTime.Now, Album = (AlbumEntity?)null, Artist = (Lite<ArtistEntity>?)null }).ToList();
+            var list = Database.Query<AlbumEntity>().Select(a => new { TimeZoneManager.Now, Album = (AlbumEntity?)null, Artist = (Lite<ArtistEntity>?)null }).ToList();
         }
 
         [Fact]

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Data.SqlClient;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 using System.IO;
@@ -12,6 +11,8 @@ using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
+using Microsoft.Data.SqlClient.Server;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -93,6 +94,7 @@ namespace Signum.Engine
             SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, command.PlainSql());
 
             Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+            Console.WriteLine("Check the synchronization script before running it!");
             var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
 
             if(answer == "open")

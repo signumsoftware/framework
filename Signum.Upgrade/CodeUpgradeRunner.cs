@@ -5,12 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Signum.Upgrade
 {
     public class CodeUpgradeRunner: IEnumerable<CodeUpgradeBase>
     {
         public List<CodeUpgradeBase> Upgrades = new List<CodeUpgradeBase>();
+
+        public CodeUpgradeRunner(bool autoDiscover)
+        {
+            if (autoDiscover)
+                Upgrades = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType == typeof(CodeUpgradeBase)).Select(t => (CodeUpgradeBase)Activator.CreateInstance(t)!).ToList();
+        }
 
         public IEnumerator<CodeUpgradeBase> GetEnumerator() => Upgrades.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Upgrades.GetEnumerator();
@@ -86,9 +93,8 @@ namespace Signum.Upgrade
         {
             using (Repository rep = new Repository(folder))
             {
-                var subModules = rep.Submodules.Select(a => a.Name);
-                var status = rep.RetrieveStatus();
-                return status.Any(a => a.State != FileStatus.Ignored && !subModules.Contains(a.FilePath));
+                var status = rep.RetrieveStatus(new StatusOptions { ExcludeSubmodules = true, Show = StatusShowOption.IndexAndWorkDir });
+                return status.Any(a => a.State != FileStatus.Ignored);
             }
         }
 

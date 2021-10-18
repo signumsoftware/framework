@@ -138,12 +138,12 @@ namespace Signum.Upgrade
             this.Content = newContent;
         }
 
-        public void Replace(Regex regex, Expression<MatchEvaluator> evaluator)
+        public void Replace(Regex regex, MatchEvaluator evaluator)
         {
-            var newContent = regex.Replace(this.Content, evaluator.Compile());
+            var newContent = regex.Replace(this.Content, evaluator);
 
             if (newContent == this.Content)
-                Warning($"Unable to match {regex} to replace it by {evaluator}");
+                Warning($"Unable to match {regex} to replace it");
 
             this.Content = newContent;
         }
@@ -187,50 +187,33 @@ namespace Signum.Upgrade
 
         /// <param name="fromLine">Not included</param>
         /// <param name="toLine">Not included</param>
-        public void ReplaceBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
+        public void ReplaceBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text) =>
+            ReplaceBetween(fromLine, +1, toLine, -1, text);
+
+        /// <param name="fromLine">Not included</param>
+        /// <param name="toLine">Not included</param>
+        public void ReplaceBetweenIncluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text) =>
+            ReplaceBetween(fromLine, +0, toLine, -0, text);
+
+        public void ReplaceBetween(Expression<Predicate<string>> fromLine, int fromDelta, Expression<Predicate<string>> toLine, int toDelta, string text)
         {
             ProcessLines(lines =>
             {
                 var from = lines.FindIndex(fromLine.Compile());
                 if (from == -1)
                 {
-                    Warning($"Unable to find a line where {fromLine} to insert after {text}");
+                    Warning($"Unable to find a line where {fromLine} to insert after it the text: {text}");
                     return false;
                 }
                 var to = lines.FindIndex(from + 1, toLine.Compile());
                 if(to == -1)
                 {
-                    Warning($"Unable to find a line where {toLine} after line {to} to insert before {text}");
+                    Warning($"Unable to find a line where {toLine} after line {to} to insert before it the text: {text}");
                     return false;
                 }
                 var indent = GetIndent(lines[from]);
-                lines.RemoveRange(from + 1, to - from - 1);
-                lines.InsertRange(from + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
-                return true;
-            });
-        }
-
-        /// <param name="fromLine">Not included</param>
-        /// <param name="toLine">Not included</param>
-        public void ReplaceBetweenIncluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, string text)
-        {
-            ProcessLines(lines =>
-            {
-                var from = lines.FindIndex(fromLine.Compile());
-                if (from == -1)
-                {
-                    Warning($"Unable to find a line where {fromLine} to insert after {text}");
-                    return false;
-                }
-                var to = lines.FindIndex(from + 1, toLine.Compile());
-                if (to == -1)
-                {
-                    Warning($"Unable to find a line where {toLine} after line {to} to insert before {text}");
-                    return false;
-                }
-                var indent = GetIndent(lines[from]);
-                lines.RemoveRange(from, (to - from) + 1);
-                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, indent)));
+                lines.RemoveRange(from + fromDelta, (to + toDelta) - (from + fromDelta) + 1);
+                lines.InsertRange(from + fromDelta, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }

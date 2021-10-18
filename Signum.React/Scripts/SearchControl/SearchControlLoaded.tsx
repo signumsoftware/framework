@@ -13,6 +13,7 @@ import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
+import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
@@ -67,18 +68,19 @@ export interface SearchControlLoadedProps {
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
+  createButtonClass?: string;
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
   defaultRefreshMode?: RefreshMode;
   avoidChangeUrl: boolean;
-  refreshKey: any;
+  deps?: React.DependencyList;
   extraOptions: any;
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
-  onCreate?: () => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => void;
+  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined, scl: SearchControlLoaded) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -150,17 +152,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (this.props.searchOnLoad)
       this.doSearch({ force: true }).done();
-
-    this.containerDiv!.addEventListener("scroll", (e) => {
-
-      var table = this.thead!.parentElement!;
-      var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
-      this.thead!.style.transform = translate;
-    });
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
-    if (this.props.refreshKey != props.refreshKey) {
+    if (!Hooks.areEqual(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
@@ -432,7 +427,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
   containerDiv?: HTMLDivElement | null;
-  thead?: HTMLTableSectionElement | null;
 
   render() {
     const p = this.props;
@@ -481,7 +475,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
           <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
-            <thead ref={th => this.thead = th}>
+            <thead>
               {this.renderHeaders()}
             </thead>
             <tbody>
@@ -631,7 +625,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className="sf-query-button btn btn-light sf-create ml-2" title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate} >
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
@@ -674,7 +668,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => {
     if (this.props.onCreateFinished) {
-      this.props.onCreateFinished(entity);
+      this.props.onCreateFinished(entity, this);
     } else {
       this.dataChanged();
     }
@@ -688,7 +682,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const onCreate = this.props.onCreate;
 
     if (onCreate) {
-      onCreate()
+      onCreate(this)
         .then(val => {
           if (val != "no_change")
             this.handleCreated(val);
@@ -769,7 +763,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.state.selectedRows == null)
       return [];
 
-    return this.state.selectedRows.map(a => a.entity!);
+    return this.state.selectedRows.map(a => a.entity).notNull();
   }
 
   getGroupedSelectedEntities(): Promise<Lite<Entity>[]> {
@@ -1404,8 +1398,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resultTable = this.state.resultTable;
 
+    var resFO = this.state.resultFindOptions!;
+
     if (resultTable.rows.length == 0) {
-      return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
+        return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFound.niceToString()}</td></tr>;
+      else
+        return <tr><td colSpan={columnsCount}>{SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
+          resFO.pagination.currentPage,
+          <a href="#" onClick={e => {
+            e.preventDefault();
+            this.handlePagination({
+              mode: "Paginate",
+              elementsPerPage: resFO.pagination.elementsPerPage,
+              currentPage: 1
+            });
+          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+        )}</td></tr>;
     }
 
     const qs = this.props.querySettings;

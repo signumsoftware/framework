@@ -13,6 +13,7 @@ import { useController } from './LineBase'
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
+  firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
   /**Consider using EntityTable.typedColumns to get Autocompletion**/
   columns?: EntityTableColumn<any /*T*/, any>[],
   fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle) => Promise<any>;
@@ -272,7 +273,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
             !isEmpty &&
             <thead ref={c.thead}>
               <tr className={p.theadClasses ?? "bg-light"}>
-                {firstColumnVisible && <th></th>}
+                {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}></th>}
                 {
                   p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
@@ -362,12 +363,13 @@ export function EntityTableRow(p: EntityTableRowProps) {
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.draggable;
     return (
-      <tr style={{ backgroundColor: rowAtts?.style?.backgroundColor ?? undefined }}
+      <tr {...rowAtts}
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
-        className={drag?.dropClass}
-      onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}>
+        onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}
+        className={classes(drag?.dropClass, rowAtts?.className)}
+      >
       {p.firstColumnVisible && <td>
           <div className="item-group">
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}

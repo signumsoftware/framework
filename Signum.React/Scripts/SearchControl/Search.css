@@ -77,6 +77,8 @@ table.sf-search-results > tbody > tr > td {
     border-right: 1px solid #eee;
     cursor: pointer;
     background-color: #f8f8f8;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
 }
 
     .sf-search-results > thead > tr > th.sf-th-selection {
@@ -137,6 +139,10 @@ table.sf-search-results th.sf-current-column {
         background-color: #f2dede;
         border-bottom: 2px solid #a94442;
     }
+
+.date-cell {
+    text-align: right
+}
 
 .numeric-cell {
     text-align: right
@@ -326,7 +332,7 @@ ul.sf-context-menu li a:not([disabled]) {
     padding: 0 .5em;
 }
 
-.rw-list-option.rw-state-selected span[style]{
+.sf-query-token-part .rw-list-option.rw-state-selected span[style] {
     color: inherit !important;
 }
 

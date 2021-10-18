@@ -19,7 +19,7 @@ export function VersionChangedAlert(p: { blink?: boolean }) {
 
   function handleRefresh(e: React.MouseEvent<any>) {
     e.preventDefault();
-    location.reload(true);
+    location.reload();
   }
 
   if (VersionFilter.latestVersion == VersionFilter.initialVersion)
@@ -37,14 +37,14 @@ export function VersionChangedAlert(p: { blink?: boolean }) {
 VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
 VersionChangedAlert.defaultProps = { blink: true };
 
-export function VersionInfo() {
+export function VersionInfo(p: { extraInformation?: string }) {
   return (
     <div className="nav-link">
       <OverlayTrigger
         placement={"bottom"}
         overlay={
           <Tooltip id={`tooltip-buildId`}>
-            <VersionInfoTooltip />
+            <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
         }
       >
@@ -54,7 +54,7 @@ export function VersionInfo() {
   );
 }
 
-function VersionInfoTooltip(p: {}) {
+function VersionInfoTooltip(p: { extraInformation?: string}) {
 
   var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
 
@@ -65,6 +65,8 @@ function VersionInfoTooltip(p: {}) {
       {bt.toFormat("DDDD")}
       <br />
       {bt.toFormat("tt")} ({bt.toRelative()})
+      {p.extraInformation && <br/>}
+      {p.extraInformation}
     </div>
   );
 }

@@ -47,7 +47,7 @@ namespace Signum.Engine.Maps
         string? applicationName;
         public string ApplicationName
         {
-            get { return applicationName ?? (applicationName = AppDomain.CurrentDomain.FriendlyName); }
+            get { return applicationName ??= AppDomain.CurrentDomain.FriendlyName; }
             set { applicationName = value; }
         }
 
@@ -308,9 +308,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-
-
-        FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
+        static FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
             where T : Entity
         {
             if (one == null)
@@ -380,7 +378,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        private Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
+        private static Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
         {
             if (one == null)
                 return two;
@@ -520,6 +518,8 @@ namespace Signum.Engine.Maps
             BeforeDatabaseAccess = null;
         }
 
+        public event Action? InvalidateCache; 
+
         public event Action? Initializing;
 
         public void Initialize()
@@ -529,10 +529,17 @@ namespace Signum.Engine.Maps
             if (Initializing == null)
                 return;
 
+            if (InvalidateCache != null)
+            {
+                foreach (var ic in InvalidateCache.GetInvocationListTyped())
+                    using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                        ic();
+            }
+
             using (ExecutionMode.Global())
-                foreach (var item in Initializing.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType!.ToString()))
-                        item();
+                foreach (var init in Initializing.GetInvocationListTyped())
+                    using (HeavyProfiler.Log("Initialize", () => init.Method.DeclaringType!.ToString()))
+                        init();
 
             Initializing = null;
         }
@@ -567,6 +574,8 @@ namespace Signum.Engine.Maps
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
+
+            InvalidateCache += GlobalLazy.ResetAll;
         }
 
         public static Schema Current
@@ -582,7 +591,7 @@ namespace Signum.Engine.Maps
         public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
         {
-            var list = (FieldMList)Schema.Current.Field(mListProperty);
+            var list = (FieldMList)Field(mListProperty);
 
             return list.TableMList;
         }
@@ -692,7 +701,7 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(route, typeof(IEntity).Name));
         }
 
-        private Implementations? CalculateExpressionImplementations(PropertyRoute route)
+        private static Implementations? CalculateExpressionImplementations(PropertyRoute route)
         {
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 return null;
@@ -758,7 +767,7 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<ITable> GetDatabaseTables()
         {
-            foreach (var table in Schema.Current.Tables.Values)
+            foreach (var table in this.Tables.Values)
             {
                 yield return table;
 

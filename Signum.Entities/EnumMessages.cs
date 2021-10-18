@@ -20,6 +20,8 @@ namespace Signum.Entities
         CreateFromRegex,
         [Description("State should be {0} (instead of {1})")]
         StateShouldBe0InsteadOf1,
+        [Description("The state of {0} should be {1} (instead of {2})")]
+        TheStateOf0ShouldBe1InsteadOf2,
         [Description("(in user interface)")]
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]
@@ -192,6 +194,11 @@ namespace Signum.Entities
         ViewSelected,
         Operations,
         NoResultsFound,
+        NoResultsInThisPage,
+        [Description("No results found in page {0}, {1}")]
+        NoResultsFoundInPage01,
+        [Description("go back to page one")]
+        GoBackToPageOne,
         Explore,
         PinnedFilter,
         Label,
@@ -264,6 +271,9 @@ namespace Signum.Entities
         _0Selector,
         [Description("Please choose a {0} to continue:")]
         PleaseChooseA0ToContinue,
+
+        [Description("Creation of {0} cancelled")]
+        CreationOf0Cancelled
     }
 
     [AllowUnathenticated]
@@ -338,6 +348,8 @@ namespace Signum.Entities
         deactivateTimeMachine,
         [Description("Show Records")]
         showRecords,
+        [Description("Join mode")]
+        joinMode,
         [Description("Loading...")]
         loading,
         [Description("No actions found")]

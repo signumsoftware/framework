@@ -1,10 +1,10 @@
-using Microsoft.SqlServer.Server;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -63,7 +63,7 @@ namespace Signum.Engine.Linq
 
         static internal HashSet<Expression> Nominate(Expression? expression, out Expression newExpression, bool isGroupKey = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
+            var n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression)!;
             return n.candidates;
         }
@@ -71,7 +71,7 @@ namespace Signum.Engine.Linq
         [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominate(Expression? expression)
         {
-            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
+            var n = new DbExpressionNominator { isFullNominate = true };
             Expression? result = n.Visit(expression);
 
             return result;
@@ -80,7 +80,7 @@ namespace Signum.Engine.Linq
         [return: NotNullIfNotNull("expression")]
         static internal Expression? FullNominateNotNullable(Expression? expression)
         {
-            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
+            var n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
             Expression? result = n.Visit(expression);
 
             return result;
@@ -310,6 +310,17 @@ namespace Signum.Engine.Linq
             return Add(castExpr);
         }
 
+        protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if(isFullNominate)
+                return Add(new SqlCastExpression(castExpr.Type, expression!, castExpr.DbType));
+
+            if (expression != castExpr.Expression)
+                castExpr = new SqlCastLazyExpression(castExpr.Type, expression!, castExpr.DbType);
+            return castExpr;
+        }
+
         protected internal override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
             if (!innerProjection)
@@ -496,7 +507,7 @@ namespace Signum.Engine.Linq
             return Add(new SqlFunctionExpression(type, newObj, sqlFunction, newExpressions));
         }
 
-        private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression expression)
+        private Expression? TrySqlDifference(SqlEnums unit, Type type, Expression expression)
         {
             if (innerProjection)
                 return null;
@@ -504,17 +515,17 @@ namespace Signum.Engine.Linq
             expression = expression.RemoveUnNullify();
 
             if (expression is BinaryExpression be && be.NodeType == ExpressionType.Subtract)
-                return TrySqlDifference(sqlEnums, type, be.Left, be.Right);
+                return TrySqlDifference(unit, type, be.Left, be.Right);
 
             if (expression is MethodCallExpression mc && mc.Method.Name == nameof(DateTime.Subtract))
-                return TrySqlDifference(sqlEnums, type, mc.Object!, mc.Arguments.SingleEx());
+                return TrySqlDifference(unit, type, mc.Object!, mc.Arguments.SingleEx());
 
             return null;
         }
 
         static int DaysBetween(Date a, Date b) => (a - b).Days;
 
-        private Expression? TrySqlDifference(SqlEnums sqlEnums, Type type, Expression leftSide, Expression rightSide)
+        private Expression? TrySqlDifference(SqlEnums unit, Type type, Expression leftSide, Expression rightSide)
         {
             Expression left = Visit(leftSide);
             if (!Has(left.RemoveNullify()))
@@ -526,8 +537,8 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
-                if (sqlEnums == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
-                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(Date.Today, Date.Today))), typeof(double)));
+                if (unit == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
+                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(() => DaysBetween(Date.Today, Date.Today))), typeof(double)));
 
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {
@@ -535,31 +546,44 @@ namespace Signum.Engine.Linq
                     Expression.Subtract(left, right),
                 });
 
-                if (sqlEnums == SqlEnums.second)
+                if (unit == SqlEnums.second)
                     return Add(secondsDouble);
 
 
-                if (sqlEnums == SqlEnums.millisecond)
+                if (unit == SqlEnums.millisecond)
                     return Add(Expression.Multiply(secondsDouble, new SqlConstantExpression(1000.0)));
 
-                double scale = sqlEnums switch
+                double scale = unit switch
                 {
                     SqlEnums.minute => 60,
                     SqlEnums.hour => 60 * 60,
                     SqlEnums.day => 60 * 60 * 24,
-                    _ => throw new UnexpectedValueException(sqlEnums),
+                    _ => throw new UnexpectedValueException(unit),
                 };
 
                 return Add(Expression.Divide(secondsDouble, new SqlConstantExpression(scale)));
             }
             else
             {
-                return Add(new SqlFunctionExpression(type, null, SqlFunction.DATEDIFF.ToString(), new Expression[]
+                SqlFunctionExpression DateDiff(SqlEnums unit)
                 {
-                    new SqlLiteralExpression(sqlEnums),
-                    right,
-                    left
-                }));
+                    return new SqlFunctionExpression(typeof(double), null, SqlFunction.DATEDIFF.ToString(), new Expression[]
+                    {
+                        new SqlLiteralExpression(unit),
+                        right,
+                        left
+                    });
+                }
+
+                return unit switch
+                {
+                    SqlEnums.day => Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60 * 24.0))),
+                    SqlEnums.hour => Add(Expression.Divide(DateDiff(SqlEnums.second), new SqlConstantExpression(60 * 60.0))),
+                    SqlEnums.minute => Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000 * 60.0))),
+                    SqlEnums.second => Add(Expression.Divide(DateDiff(SqlEnums.millisecond), new SqlConstantExpression(1000.0))),
+                    SqlEnums.millisecond => Add(DateDiff(SqlEnums.millisecond)),
+                    _ => throw new UnexpectedValueException(unit),
+                };
             }
         }
 
@@ -733,7 +757,7 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                SqlLiteralExpression datePart = new SqlLiteralExpression(unit);
+                var datePart = new SqlLiteralExpression(unit);
 
                 var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(),
                     new[] { datePart, exprStart, exprEnd });
@@ -1675,7 +1699,7 @@ namespace Signum.Engine.Linq
 
             var firsStr = strFormat.Substring(0, matches.FirstEx().Index);
 
-            List<Expression> arguments = new List<Expression>();
+            var arguments = new List<Expression>();
             if (firsStr.HasText())
                 arguments.Add(new SqlConstantExpression(firsStr));
 

@@ -66,6 +66,11 @@ namespace Signum.Engine
 
                 SaveGraph(schema, identifiables);
 
+                EntityCache.Add(identifiables);
+                EntityCache.Add(notModified);
+
+                GraphExplorer.CleanModifications(modifiables);
+
                 foreach (var node in identifiables)
                     schema.OnSaved(node, new SavedEventArgs
                     {
@@ -73,11 +78,6 @@ namespace Signum.Engine
                         WasNew = wasNew.Contains(node),
                         WasSelfModified = wasSelfModified.Contains(node),
                     });
-
-                EntityCache.Add(identifiables);
-                EntityCache.Add(notModified);
-
-                GraphExplorer.CleanModifications(modifiables);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Signum.Engine
             {
                 IGrouping<(Type type, bool isNew), Entity> group = clone.Sinks()
                     .GroupBy(ident => (ident.GetType(), ident.IsNew))
-                    .WithMin(g => stats[g.Key] - g.Count());
+                    .WithMin(g => stats[g.Key] - g.Count())!;
 
                 foreach (var node in group)
                     clone.RemoveFullNode(node, inv.RelatedTo(node));

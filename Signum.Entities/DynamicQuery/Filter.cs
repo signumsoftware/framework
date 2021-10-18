@@ -48,7 +48,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Expression GetExpression(BuildExpressionContext ctx)
         {
-            if (!(Token is CollectionAnyAllToken anyAll))
+            if (Token is not CollectionAnyAllToken anyAll)
             {
                 return this.GroupOperation == FilterGroupOperation.And ?
                     Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
@@ -185,9 +185,9 @@ namespace Signum.Entities.DynamicQuery
             else
             {
                 var val = Value;
-                if (Token.Type == typeof(string) && (val == null || val is string && string.IsNullOrEmpty((string)val)))
+                if (Token.Type == typeof(string) && (val == null || val is string str && string.IsNullOrEmpty(str)))
                 {
-                    val = val ?? "";
+                    val ??= "";
                     left = Expression.Coalesce(left, Expression.Constant(""));
                 }
 
@@ -246,6 +246,7 @@ namespace Signum.Entities.DynamicQuery
         Decimal,
         String,
         DateTime,
+        Time,
         Lite,
         Embedded,
         Boolean,

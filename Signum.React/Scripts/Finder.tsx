@@ -2,7 +2,7 @@ import * as React from "react";
 import { DateTime } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
-import { Dic, classes } from './Globals'
+import { Dic, classes, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -21,7 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
+  Anonymous, toDurationFormat, durationToString
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -35,6 +36,7 @@ import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { BsSize } from "./Components";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -57,7 +59,7 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<T>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
     pinned: { splitText: true },
@@ -106,15 +108,22 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
   if (qs?.onFind && !(modalOptions?.useDefaultBehaviour))
     return qs.onFind(fo, modalOptions);
 
+  return defaultFind(fo, modalOptions);
+}
+
+export function defaultFind(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => Options.getSearchModal()
     .then(a => a.default.open(fo, modalOptions))
-    .then(rr => rr?.entity);
+    .then(a => a?.row.entity);
 
-  if (modalOptions?.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
-        if (data.length == 1)
+        if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data[0]);
+
+        if (data.length == 0 && modalOptions?.autoSkipIfZero)
+          return Promise.resolve(undefined);
 
         return getPromiseSearchModal();
       });
@@ -132,7 +141,12 @@ export namespace Options {
 
   export let entityColumnHeader: () => React.ReactChild = () => "";
 
-  export let tokenCanSetPropery = (qt: QueryToken) => qt.filterType == "Lite" && qt.key != "Entity"; 
+  export let tokenCanSetPropery = (qt: QueryToken) =>
+    qt.filterType == "Lite" && qt.key != "Entity" ||
+    qt.filterType == "Enum" && !isState(qt.type) ||
+    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "Date";
+
+  export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
   export let defaultPagination: Pagination = {
     mode: "Paginate",
@@ -142,7 +156,7 @@ export namespace Options {
 
 }
 
-export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
+export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -165,14 +179,21 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
     return qs.onFindMany(fo, modalOptions);
 
+  return defaultFindMany(fo, modalOptions);
+}
+
+export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(a => a.default.openMany(fo, modalOptions))
-    .then(rows => rows?.map(a => a.entity!));
+    .then(a => a?.rows.map(a => a.entity!));
 
-  if (modalOptions?.autoSelectIfOne)
+  if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
     return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
-        if (data.length == 1)
+        if (data.length == 1 && modalOptions?.autoSelectIfOne)
+          return Promise.resolve(data);
+
+        if (data.length == 0 && modalOptions?.autoSkipIfZero)
           return Promise.resolve(data);
 
         return getPromiseSearchModal();
@@ -181,7 +202,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   return getPromiseSearchModal();
 }
 
-export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
+export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -215,7 +236,7 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
-  fo = expandParentColumn(fo);
+  fo = autoRemoveTrivialColumns(fo);
 
   const query = {
     groupResults: fo.groupResults || undefined,
@@ -225,14 +246,15 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
     elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
     currentPage: fo.pagination && fo.pagination.currentPage,
     systemTimeMode: fo.systemTime && fo.systemTime.mode,
+    systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
     systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
     systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
     ...extra
   };
 
-  Encoder.encodeFilters(query, fo.filterOptions);
-  Encoder.encodeOrders(query, fo.orderOptions);
-  Encoder.encodeColumns(query, fo.columnOptions);
+  Encoder.encodeFilters(query, fo.filterOptions?.notNull());
+  Encoder.encodeOrders(query, fo.orderOptions?.notNull());
+  Encoder.encodeColumns(query, fo.columnOptions?.notNull());
 
   return query;
 }
@@ -281,6 +303,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
     } as Pagination,
     systemTime: query.systemTimeMode && {
       mode: query.systemTimeMode,
+      joinMode: query.systemTimeJoinMode,
       startDate: query.systemTimeStartDate,
       endDate: query.systemTimeEndDate,
     }
@@ -320,24 +343,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
   current = current.filter(a => a.token != null);
 
-  if (current.length < ideal.length) {
-    const toRemove: ColumnOption[] = [];
-
-    let j = 0;
-    for (let i = 0; i < ideal.length; i++) {
-      if (j < current.length && similar(current[j], ideal[i]))
-        j++;
-      else
-        toRemove.push({ token: ideal[i].name, });
-    }
-    if (toRemove.length + current.length == ideal.length) {
-      return {
-        mode: "Remove",
-        columns: toRemove
-      };
-    }
-  }
-  else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
+  if (ideal.every((idl, i) => i < current.length && similar(current[i], idl))) {
     return {
       mode: "Add",
       columns: current.slice(ideal.length).map(c => ({
@@ -348,6 +354,26 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       }) as ColumnOption)
     };
   }
+
+  if (current.length < ideal.length) {
+    const toRemove: ColumnOption[] = [];
+
+    let j = 0;
+    for (let i = 0; i < ideal.length; i++) {
+      if (j < current.length && similar(current[j], ideal[i]))
+        j++;
+      else
+        toRemove.push({ token: ideal[i].name, });
+    }
+
+    if (toRemove.length + current.length == ideal.length && toRemove.length < current.length) {
+      return {
+        mode: "Remove",
+        columns: toRemove
+      };
+    }
+  }
+  
 
   return {
     mode: "Replace",
@@ -370,28 +396,28 @@ function parseBoolean(value: any): boolean | undefined {
   return undefined;
 }
 
-export function parseFilterOptions(fos: FilterOption[], groupResults: boolean, qd: QueryDescription): Promise<FilterOptionParsed[]> {
+export function parseFilterOptions(fos: (FilterOption | null | undefined)[], groupResults: boolean, qd: QueryDescription): Promise<FilterOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (groupResults ? SubTokensOptions.CanAggregate : 0);
 
-  fos.forEach(fo => completer.requestFilter(fo, sto));
+  fos.notNull().forEach(fo => completer.requestFilter(fo, sto));
 
   return completer.finished()
-    .then(() => fos.map(fo => completer.toFilterOptionParsed(fo)))
+    .then(() => fos.notNull().map(fo => completer.toFilterOptionParsed(fo)))
     .then(filters => parseFilterValues(filters).then(() => filters));
 }
 
 
 
-export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boolean, qd: QueryDescription): Promise<OrderOptionParsed[]> {
+export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)[], groupResults: boolean, qd: QueryDescription): Promise<OrderOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
   var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-  orderOptions.forEach(a => completer.request(a.token.toString(), sto));
+  orderOptions.notNull().forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
-    .then(() => orderOptions.map(oo => ({
+    .then(() => orderOptions.notNull().map(oo => ({
       token: completer.get(oo.token.toString()),
       orderType: oo.orderType ?? "Ascending",
     }) as OrderOptionParsed));
@@ -544,15 +570,16 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription, defau
   if (!findOptions.groupResults && findOptions.orderOptions) {
     var defaultOrder = getDefaultOrder(qd, qs);
 
-    if (equalOrders(defaultOrder, findOptions.orderOptions))
+    if (equalOrders(defaultOrder, findOptions.orderOptions.notNull()))
       findOptions.orderOptions = undefined;
   }
 
   if (findOptions.filterOptions) {
     var defaultFilters = getDefaultFilter(qd, qs);
-    if (defaultFilters && defaultFilters.length <= findOptions.filterOptions.length) {
-      if (equalFilters(defaultFilters, findOptions.filterOptions.slice(0, defaultFilters.length))) {
-        findOptions.filterOptions = findOptions.filterOptions.slice(defaultFilters.length);
+    var filterOptions = findOptions.filterOptions.notNull();
+    if (defaultFilters && defaultFilters.length <= filterOptions.length) {
+      if (equalFilters(defaultFilters, filterOptions.slice(0, defaultFilters.length))) {
+        findOptions.filterOptions = filterOptions.slice(defaultFilters.length);
         findOptions.includeDefaultFilters = true;
       }
     }
@@ -571,7 +598,7 @@ function equalOrders(as: OrderOption[] | undefined, bs: OrderOption[] | undefine
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
@@ -587,7 +614,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
     return true;
 
   if (as == undefined || bs == undefined)
-    return true;
+    return false;
 
   return as.length == bs.length && as.every((a, i) => {
     var b = bs![i];
@@ -682,11 +709,9 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
 
-  const fo: FindOptions = { ...findOptions };
+  const fo = autoRemoveTrivialColumns(findOptions);
 
-  expandParentColumn(fo);
-
-  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions ?? []);
+  fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
 
   var qs: QuerySettings | undefined = querySettings[qd.queryKey];
   const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -709,14 +734,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 
 
   if (fo.filterOptions)
-    fo.filterOptions.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
+    fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
   if (fo.orderOptions)
-    fo.orderOptions.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
-    fo.columnOptions.filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
   return completer.finished().then(() => {
@@ -727,19 +752,19 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
       systemTime: fo.systemTime,
 
-      columnOptions: (fo.columnOptions ?? []).map(co => ({
+      columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => ({
         token: completer.get(co.token.toString()),
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
       }) as ColumnOptionParsed),
 
-      orderOptions: (fo.orderOptions ?? []).map(oo => ({
+      orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
         token: completer.get(oo.token.toString()),
         orderType: oo.orderType,
       }) as OrderOptionParsed),
 
-      filterOptions: (fo.filterOptions ?? []).map(fo => completer.toFilterOptionParsed(fo)),
+      filterOptions: (fo.filterOptions?.notNull() ?? []).map(fo => completer.toFilterOptionParsed(fo)),
     };
 
     return parseFilterValues(result.filterOptions)
@@ -789,7 +814,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
     return [fo.value];
   }
 
-  var allValues = [fo.parentValue, ...(fo.filterOptions ?? []).flatMap(fo => getValues(fo))];
+  var allValues = (fo.filterOptions?.notNull() ?? []).flatMap(fo => getValues(fo));
 
   var allNewTypes = allValues.flatMap(a => getTypeIfNew(a));
 
@@ -826,7 +851,7 @@ export function exploreOrView(findOptions: FindOptions): Promise<void> {
   });
 }
 
-export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], valueToken?: string, multipleValues?: boolean): Promise<any> {
+export function getQueryValue(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], valueToken?: string, multipleValues?: boolean): Promise<any> {
   return getQueryDescription(queryName).then(qd => {
     return parseFilterOptions(filterOptions, false, qd).then(fops => {
 
@@ -895,13 +920,23 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
       return undefined;
 
-    if (overridenValue && fop.token && typeof overridenValue.value == "string") {
+    var value = overridenValue ? overridenValue.value : fop.value;
+
+    if (fop.token && typeof value == "string") {
       if (fop.token.type.name == "number") {
 
-        var numVal = parseInt(overridenValue.value);
+        var numVal = parseInt(value);
 
-        if (isNaN(numVal))
-          return undefined;
+        if (isNaN(numVal)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
@@ -911,13 +946,21 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       }
 
       if (fop.token.type.name == "Guid") {
-        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(overridenValue.value))
-          return undefined;
+        if (!isValidGuid(value)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
           operation: fop.operation,
-          value: overridenValue.value,
+          value: value,
         } as FilterConditionRequest);
       }
     }
@@ -925,14 +968,19 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     return ({
       token: fop.token.fullKey,
       operation: fop.operation,
-      value: overridenValue ? overridenValue.value : fop.value,
+      value: value,
     } as FilterConditionRequest);
   }
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Lite<Entity>[]> {
+
+function isValidGuid(str : string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
+
+export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
+export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
@@ -955,9 +1003,9 @@ export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<T[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], orderOptions: OrderOption[], count: number | null): Promise<Entity[]> {
+export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<T[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
@@ -980,31 +1028,45 @@ export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function expandParentColumn(fo: FindOptions): FindOptions {
+export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefined): FindOptions {
 
-  if (!fo.parentToken)
-    return fo;
+  const newFO = { ...fo };
 
-  fo.filterOptions = [
-    { token: fo.parentToken, operation: "EqualTo", value: fo.parentValue, frozen: true },
-    ...(fo.filterOptions ?? [])
-  ];
+  if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined) {
 
-  if (!fo.parentToken.toString().contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
-    fo.columnOptions = [
-      { token: fo.parentToken },
-      ...(fo.columnOptions ?? [])
-    ];
-
-    fo.columnOptionsMode = "Remove";
+    newFO.columnOptions = [];
+    newFO.columnOptionsMode = "Replace";
   }
 
-  fo.parentToken = undefined;
-  fo.parentValue = undefined;
+  if (newFO.pagination == undefined) {
+    newFO.pagination = count == undefined ? { mode: "All" } :  { mode: "Firsts", elementsPerPage: count };
+  }
 
-  return fo;
+  return newFO;
 }
 
+export function autoRemoveTrivialColumns(fo: FindOptions): FindOptions {
+
+  var newFO = { ...fo };
+
+  if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined && newFO.filterOptions) {
+    var trivialColumns = getTrivialColumns(newFO.filterOptions.notNull());
+
+    if (trivialColumns.length) {
+      newFO.columnOptions = trivialColumns;
+      newFO.columnOptionsMode = "Remove";
+    }
+  }
+
+  return newFO;
+}
+
+
+export function getTrivialColumns(fos: FilterOption[]) {
+  return fos
+    .filter(fo => !isFilterGroupOption(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
+    .map(fo => ({ token: fo.token }) as ColumnOption);
+}
 export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
 
   return getQueryDescription(getQueryKey(queryName)).then(qd => {
@@ -1059,13 +1121,13 @@ export class TokenCompleter {
 
     var token = this.queryCache[fullKey];
     if (token) {
-      if (hasAggregate(token) && (options && SubTokensOptions.CanAggregate) == 0)
+      if (hasAggregate(token) && (options & SubTokensOptions.CanAggregate) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (aggregates not allowed)`);
 
-      if (hasAnyOrAll(token) && (options && SubTokensOptions.CanAnyAll) == 0)
+      if (hasAnyOrAll(token) && (options & SubTokensOptions.CanAnyAll) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Any/All not allowed)`);
 
-      if (hasElement(token) && (options && SubTokensOptions.CanElement) == 0)
+      if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
       return;
     }
@@ -1117,9 +1179,11 @@ export class TokenCompleter {
   }
 
   toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
-    if (isFilterGroupOption(fo))
+    if (isFilterGroupOption(fo)) {
+      const token = fo.token && this.get(fo.token.toString())
+
       return ({
-        token: fo.token && this.get(fo.token.toString()),
+        token: token,
         groupOperation: fo.groupOperation,
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
@@ -1127,14 +1191,20 @@ export class TokenCompleter {
         frozen: false,
         expanded: false,
       } as FilterGroupOptionParsed);
+    }
     else
+    {
+
+      const token = this.get(fo.token.toString());
+
       return ({
-        token: this.get(fo.token.toString()),
+        token: token,
         operation: fo.operation ?? "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
       } as FilterConditionOptionParsed);
+    }
   }
 }
 
@@ -1283,6 +1353,25 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(rt => rt.rows[0].columns[0]);
 }
 
+export function inDBArray<R1, R2>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null]>;
+export function inDBArray<R1, R2, R3>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null]>;
+export function inDBArray<R1, R2, R3, R4>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string, QueryTokenString<R4> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null, AddToLite<R4> | null]>;
+export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenString<any> | string)[]): Promise<any[]> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
+    columnOptionsMode: "Replace",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt.rows[0].columns);
+}
+
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
 
 export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
@@ -1319,8 +1408,6 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
-
-
 
 export module API {
 
@@ -1398,7 +1485,9 @@ export module API {
 
 
 
-
+function shouldIgnoreValues(pinned?: PinnedFilter | null) {
+  return pinned != null && (pinned.active == "Always" || pinned.active == "WhenHasValue");
+}
 
 export module Encoder {
 
@@ -1426,7 +1515,7 @@ export module Encoder {
       if (isFilterGroupOption(fo)) {
         query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || Boolean(fo.pinned)));
+        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
         query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
@@ -1546,7 +1635,7 @@ export module Decoder {
             groupOperation: FilterGroupOperation.assertDefined(parts[1]),
             value: ignoreValues ? null : unscapeTildes(parts[2]),
             pinned: pinned,
-            filters: toFilterList(gr.elements, identation + 1, ignoreValues || Boolean(pinned)),
+            filters: toFilterList(gr.elements, identation + 1, ignoreValues || shouldIgnoreValues(pinned)),
           }) as FilterGroupOption;
         }
       });
@@ -1629,6 +1718,7 @@ export interface QuerySettings {
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
   inPlaceNavigation?: boolean;
+  modalSize?: BsSize;
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
@@ -1699,7 +1789,20 @@ export const formatRules: FormatRule[] = [
   {
     name: "Object",
     isApplicable: qt => true,
-    formatter: qt => new CellFormatter(cell => cell ? <span>{cell.toStr ?? cell.toString()}</span> : undefined)
+    formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toStr ?? cell.toString()}</span> : undefined)
+  },
+  {
+    name: "MultiLine",
+    isApplicable: qt => {
+      if (qt.type.name == "string" && qt.propertyRoute != null) {
+        var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+        if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
+          return true;
+      }
+
+      return false;
+    },
+    formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
   },
   {
     name: "Password",
@@ -1715,7 +1818,7 @@ export const formatRules: FormatRule[] = [
 
       var ei = getEnumInfo(qt.type.name, cell);
 
-      return <span>{ei ? ei.niceName : cell}</span>
+      return <span className="try-no-wrap">{ei ? ei.niceName : cell}</span>
     })
   },
   {
@@ -1727,14 +1830,22 @@ export const formatRules: FormatRule[] = [
   {
     name: "Guid",
     isApplicable: qt => qt.filterType == "Guid",
-    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
     name: "Date",
     isApplicable: qt => qt.filterType == "DateTime",
     formatter: qt => {
       const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+    }
+  },
+  {
+    name: "Time",
+    isApplicable: qt => qt.filterType == "Time",
+    formatter: qt => {
+      const durationFormat = toDurationFormat(qt.format);
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1750,8 +1861,8 @@ export const formatRules: FormatRule[] = [
             undefined;
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      });
+        return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      }, "date-cell");
     }
   },
   {
@@ -1767,8 +1878,8 @@ export const formatRules: FormatRule[] = [
             undefined;
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      });
+        return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+      }, "date-cell");
     }
   },
   {
@@ -1776,7 +1887,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
     formatter: qt => {
       const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell)}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, "numeric-cell");
     }
   },
   {
@@ -1784,7 +1895,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
     formatter: qt => {
       const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span>{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
+      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
     }
   },
   {

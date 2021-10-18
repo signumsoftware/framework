@@ -40,17 +40,17 @@ export function clearQuickLinks() {
 
 export interface RegisteredQuickLink<T extends Entity> {
   factory: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>;
-  options?: QuickLinkOptions;
+  options?: QuickLinkRegisterOptions;
 }
 
 
 export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
   onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
 }
 
 export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
   const typeName = getTypeName(type);
 
   const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
@@ -247,7 +247,11 @@ export interface QuickLinkOptions {
   iconColor?: string;
   color?: BsColor;
   group?: QuickLinkGroup | null;
-  allowsMultiple?: boolean
+  openInAnotherTab?: boolean;
+
+}
+export interface QuickLinkRegisterOptions {
+  allowsMultiple?: boolean;
 }
 
 export abstract class QuickLink {
@@ -259,6 +263,8 @@ export abstract class QuickLink {
   iconColor?: string;
   color?: BsColor;
   group?: QuickLinkGroup;
+  openInAnotherTab?: boolean;
+  
 
   static defaultGroup: QuickLinkGroup = {
     name: "quickLinks",
@@ -313,18 +319,32 @@ export class QuickLinkAction extends QuickLink {
 }
 
 export class QuickLinkLink extends QuickLink {
-  url: string;
+  url: string | (() => Promise<string>);
 
-  constructor(name: string, text: () => string, url: string, options?: QuickLinkOptions) {
+  constructor(name: string, text: () => string, url: string | (()=> Promise<string>), options?: QuickLinkOptions) {
     super(name, options);
     this.text = text;
     this.url = url;
   }
 
-
-
   handleClick = (e: React.MouseEvent<any>) => {
-    AppContext.pushOrOpenInTab(this.url, e);
+    if (typeof this.url === "string") {
+      if (this.openInAnotherTab)
+        window.open(this.url);
+      else
+        AppContext.pushOrOpenInTab(this.url, e);
+    }
+    else {
+      e.persist();
+      this.url()
+        .then(url => {
+          if (this.openInAnotherTab)
+            window.open(url);
+          else
+            AppContext.pushOrOpenInTab(url, e)
+        })
+        .done();
+    }
   }
 }
 
@@ -348,7 +368,35 @@ export class QuickLinkExplore extends QuickLink {
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.findOptions));
     else
-      Finder.explore(this.findOptions);
+      Finder.explore(this.findOptions).done();
+  }
+}
+
+export class QuickLinkExplorePromise extends QuickLink {
+  findOptionsPromise: Promise<FindOptions>;
+
+  constructor(queryName: any, findOptionsPromise: Promise<FindOptions>, options?: QuickLinkOptions) {
+    super(getQueryKey(queryName), {
+      isVisible: Finder.isFindable(queryName, false),
+      text: () => getQueryNiceName(queryName),
+      ...options
+    });
+
+    this.findOptionsPromise = findOptionsPromise;
+  }
+
+  handleClick = (e: React.MouseEvent<any>) => {
+    if (e.button == 2)
+      return;
+
+    e.persist();
+
+    this.findOptionsPromise.then(fo => {
+      if (e.ctrlKey || e.button == 1)
+        window.open(Finder.findOptionsPath(fo));
+      else
+        Finder.explore(fo).done();
+    }).done();
   }
 }
 

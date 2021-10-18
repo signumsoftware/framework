@@ -1,7 +1,8 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
+import { BsSize } from './Components';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -20,6 +21,8 @@ export interface ModalFindOptions {
   message?: React.ReactNode;
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
+  autoSkipIfZero?: boolean;
+  modalSize?: BsSize;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
@@ -27,14 +30,12 @@ export interface ModalFindOptions {
 export interface FindOptions {
   queryName: PseudoType | QueryKey;
   groupResults?: boolean;
-  parentToken?: string | QueryTokenString<any>;
-  parentValue?: any;
 
   includeDefaultFilters?: boolean;
-  filterOptions?: FilterOption[];
-  orderOptions?: OrderOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
   columnOptionsMode?: ColumnOptionsMode;
-  columnOptions?: ColumnOption[];
+  columnOptions?: (ColumnOption | null | undefined)[];
   pagination?: Pagination;
   systemTime?: SystemTime;
 }
@@ -358,7 +359,7 @@ export interface ResultTable {
   columns: string[];
   rows: ResultRow[];
   pagination: Pagination
-  totalElements: number;
+  totalElements?: number;
 }
 
 
@@ -375,6 +376,7 @@ export interface Pagination {
 
 export interface SystemTime {
   mode: SystemTimeMode;
+  joinMode?: SystemTimeJoinMode;
   startDate?: string;
   endDate?: string;
 }
@@ -472,6 +474,17 @@ filterOperations["String"] = [
 ];
 
 filterOperations["DateTime"] = [
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn"
+];
+
+filterOperations["Time"] = [
   "EqualTo",
   "DistinctTo",
   "GreaterThan",

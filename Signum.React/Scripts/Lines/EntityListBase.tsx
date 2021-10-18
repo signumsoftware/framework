@@ -6,11 +6,13 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
   onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[]; /*Not only filter, also order, skip, take is supported*/
+  onAddElement?: (list: MList<Lite<Entity> | ModifiableEntity /*T*/>, newItem: Lite<Entity> | ModifiableEntity /*T*/) => void,
   ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
@@ -149,7 +151,11 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       throw new Error("entityOrLite should be already converted");
 
     const list = this.props.ctx.value!;
-    list.push(newMListElement(entityOrLite));
+    if (this.props.onAddElement)
+      this.props.onAddElement(list, entityOrLite);
+    else {
+      list.push(newMListElement(entityOrLite));
+    }
     this.setValue(list);
   }
 
@@ -323,4 +329,15 @@ export interface DragConfig {
   onDragOver?: React.DragEventHandler<any>;
   onDrop?: React.DragEventHandler<any>;
   dropClass?: string;
+}
+
+
+tasks.push(taskSetMove);
+export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
+    state.ctx.propertyRoute &&
+    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+    state.ctx.propertyRoute.member!.preserveOrder) {
+    (state as EntityListBaseProps).move = true;
+  }
 }
