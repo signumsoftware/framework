@@ -206,8 +206,12 @@ namespace Signum.Engine.Alerts
                 var alert = (AlertEntity)alertObject;
                 var text = alert.Text ?? "";
 
-                var newText = LinkPlaceholder.Replace(text, m =>
+                var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
                 {
+                    var m = pair.match;
+                    if (m == null)
+                        return ReplacePlaceHolders(pair.after, alert);
+
                     var propEx = m.Groups["prop"].Value;
 
                     var prop = GetPropertyValue(alert, propEx);
@@ -219,9 +223,8 @@ namespace Signum.Engine.Alerts
 
                     var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 
-                    return @$"<a href=""{url}"">{text}</a>";
-
-                });
+                    return @$"<a href=""{url}"">{text}</a>" + ReplacePlaceHolders(pair.after, alert);
+                }).ToString("");
 
                 if (text != newText)
                     return new HtmlString(newText);
@@ -240,7 +243,7 @@ namespace Signum.Engine.Alerts
             }
 
             static Regex TextPlaceHolder = new Regex(@"({(?<prop>(\w|\d|\.)+)})");
-
+            static Regex NumericPlaceholder = new Regex(@"^[ \d]+$");
             private static string? ReplacePlaceHolders(string? value, AlertEntity alert)
             {
                 if (value == null)
@@ -248,12 +251,17 @@ namespace Signum.Engine.Alerts
 
                 return TextPlaceHolder.Replace(value, g =>
                 {
-                    return GetPropertyValue(alert, g.Groups["prop"].Value)?.ToString()!;
+                    var prop = g.Groups["prop"].Value;
+                    if (NumericPlaceholder.IsMatch(prop))
+                        return alert.TextArguments?.Split("\n###\n").ElementAtOrDefault(int.Parse(prop)) ?? "";
+                    
+                    return GetPropertyValue(alert, prop)?.ToString()!;
                 });
             }
 
             private static object? GetPropertyValue(AlertEntity alert, string expresion)
             {
+
                 var parts = expresion.SplitNoEmpty('.');
 
                 var result = SimpleMemberEvaluator.EvaluateExpression(alert, parts);

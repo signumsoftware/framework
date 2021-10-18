@@ -281,6 +281,11 @@ namespace Signum.Entities.Authorization
         {
             return Fallback == current && Conditions.IsNullOrEmpty();
         }
+
+        public TypeAllowedAndConditions WithoutCondition(TypeConditionSymbol typeCondition)
+        {
+            return new TypeAllowedAndConditions(this.Fallback, this.Conditions.Where(a => !a.TypeCondition.Is(typeCondition)));
+        }
     }
 
     [Serializable]

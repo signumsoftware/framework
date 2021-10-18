@@ -7,11 +7,12 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
-using System.Data.SqlClient;
 using Signum.Entities.Workflow;
 using Signum.Engine.Operations;
 using Signum.Entities.Basics;
 using Signum.Engine.Scheduler;
+using Microsoft.Data.SqlClient.Server;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Workflow
 {

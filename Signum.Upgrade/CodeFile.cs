@@ -212,8 +212,8 @@ namespace Signum.Upgrade
                     return false;
                 }
                 var indent = GetIndent(lines[from]);
-                lines.RemoveRange(from + fromDelta, (to + toDelta) - (from + fromDelta) - 1);
-                lines.InsertRange(from + 1, text.Lines().Select(a => IndentAndReplace(a, indent)));
+                lines.RemoveRange(from + fromDelta, (to + toDelta) - (from + fromDelta) + 1);
+                lines.InsertRange(from + fromDelta, text.Lines().Select(a => IndentAndReplace(a, indent)));
                 return true;
             });
         }

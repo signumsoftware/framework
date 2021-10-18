@@ -27,6 +27,9 @@
     .sidebar {
         width: 251px;
         min-width: 251px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 }
 

@@ -156,7 +156,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
-    var filters = [...fo.filterOptions ?? []];
+    var filters = [...fo.filterOptions?.notNull() ?? []];
 
     /*When overriden in Finder very often uses not seen columns (like Telephone) that are not seen in autocomplete, better to use false by default and you can opt-in by adding includeDefaultFilters if needed */
     if (fo.includeDefaultFilters ?? false) {
@@ -166,10 +166,13 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     if (/^id[: ]/.test(subStr)) {
+
+      var id = subStr.substr(3)?.trim();
+
       filters.insertAt(0, {
         token: "Entity.Id",
         operation: "EqualTo",
-        value: subStr.substr(3)
+        value: id 
       });
       return filters;
     }

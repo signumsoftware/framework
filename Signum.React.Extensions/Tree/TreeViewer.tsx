@@ -33,7 +33,7 @@ interface TreeViewerProps {
   onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
   onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
   onSearch?: () => void;
-  filterOptions: FilterOption[];
+  filterOptions?: (FilterOption | null | undefined)[];
   initialShowFilters?: boolean;
   showToolbar?: boolean;
   deps?: React.DependencyList;
@@ -87,7 +87,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   componentWillMount() {
-    this.initilize(this.props.typeName, this.props.filterOptions);
+    this.initilize(this.props.typeName, this.props.filterOptions ?? []);
   }
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
@@ -111,7 +111,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     };
     this.forceUpdate();
 
-    this.initilize(newProps.typeName, newProps.filterOptions);
+    this.initilize(newProps.typeName, newProps.filterOptions ?? []);
   }
 
   searchIfDeps(newProps: TreeViewerProps) {
@@ -120,7 +120,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  initilize(typeName: string, filterOptions: FilterOption[]) {
+  initilize(typeName: string, filterOptions: (FilterOption | null | undefined)[]) {
 
     Finder.getQueryDescription(typeName)
       .then(qd => {

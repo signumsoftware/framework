@@ -77,12 +77,12 @@ namespace Signum.React.Authorization
                         }
                         else
                         {
-                            if (!config.AutoUpdateUsers)
-                                return null;
-
-                            using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                            if (config.AutoUpdateUsers)
                             {
-                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                                {
+                                    ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                }
                             }
                         }
                     }
