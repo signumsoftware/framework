@@ -11,7 +11,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
+export default function renderBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartScriptProps): React.ReactElement<any> {
 
   const isMargin = parameters["Labels"] == "Margin" || parameters["Labels"] == "MarginAll";
   const isInside = parameters["Labels"] == "Inside" || parameters["Labels"] == "InsideAll";
@@ -61,7 +61,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
     .range([0, yRule.size('content')]);
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
-  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)));
+  var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)), memo);
 
   var size = xRule.size('content');
   var labelMargin = 10;

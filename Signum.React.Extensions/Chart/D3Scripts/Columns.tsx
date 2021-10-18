@@ -73,7 +73,7 @@ export default function renderColumns(props: ChartScriptProps): React.ReactEleme
       <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
-      {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters: props.parameters, initialLoad: props.initialLoad, onDrillDown: props.onDrillDown, colIndex: 0, colCount: 1 })}
+      {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters: props.parameters, initialLoad: props.initialLoad, onDrillDown: props.onDrillDown, colIndex: 0, colCount: 1, memo: props.memo })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <XAxis xRule={xRule} yRule={yRule} />
@@ -83,7 +83,7 @@ export default function renderColumns(props: ChartScriptProps): React.ReactEleme
 }
 
 
-export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, initialLoad, onDrillDown, colIndex, colCount }: ChartScriptHorizontalProps & {
+export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, initialLoad, onDrillDown, colIndex, colCount, memo }: ChartScriptHorizontalProps & {
   colIndex: number, colCount: number
 }) {
 
@@ -96,7 +96,7 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
 
   var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
   var color = parameters["ForceColor"] ? () => parameters["ForceColor"] :
-    ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!));
+    ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!), memo);
 
   var size = yRule.size('content');
   var labelMargin = 10;

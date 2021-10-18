@@ -25,6 +25,7 @@ import { toLuxonFormat } from '@framework/Reflection';
 import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
+import { MemoRepository } from './D3Scripts/Components/ReactChart';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -82,6 +83,7 @@ export interface ChartScriptProps {
   width: number;
   height: number;
   initialLoad: boolean;
+  memo: MemoRepository;
   chartRequest: ChartRequestModel;
 }
 
@@ -831,6 +833,7 @@ export interface ChartTable {
 }
 
 export interface ChartRow {
+  active?: boolean;
   entity?: Lite<Entity>;
   c0?: unknown;
   c1?: unknown;

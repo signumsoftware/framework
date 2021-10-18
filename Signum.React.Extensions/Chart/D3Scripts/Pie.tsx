@@ -7,7 +7,7 @@ import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 
-export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -29,7 +29,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     .range([0, 1]);
   var outerRadious = d3.min([width / 2, height])! / 3;
   var rInner = outerRadious * parseFloat(pInnerRadius);
-  var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
+  var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo);
 
   var pie = d3.pie<ChartRow>()
     .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :

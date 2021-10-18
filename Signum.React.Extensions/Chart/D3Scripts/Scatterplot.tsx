@@ -10,7 +10,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -66,7 +66,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
   var color: (val: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey), memo);
     color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
 
   } else {

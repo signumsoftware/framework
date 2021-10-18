@@ -9,7 +9,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -31,17 +31,17 @@ export default function renderTreeMap({ data, width, height, parameters, loading
     color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
   }
   else if (colorSchemeColumn) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)), memo, "colorSchemeColumn");
     color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo, "colorCategory");
     color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)), memo, "parentColor");
     folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
 

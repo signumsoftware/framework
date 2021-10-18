@@ -17,6 +17,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
 import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
+import { MemoRepository } from '../../Chart/D3Scripts/Components/ReactChart'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -24,6 +25,7 @@ export interface CombinedUserChartInfoTemp {
   chartScript?: ChartClient.ChartScript;
   parameters?: { [parameter: string]: string } | undefined;
   chartRequest?: ChartRequestModel;
+  memo: MemoRepository;
   result?: ChartClient.API.ExecuteChartResult;
   makeQuery?: () => Promise<void>;
   error?: any;
@@ -46,6 +48,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       UserChartClient.Converter.toChartRequest(c.userChart, p.entity)
         .then(chartRequest => {
           c.chartRequest = chartRequest;
+          c.memo = new MemoRepository();
           forceUpdate();
           if (!signal.aborted) {
 
@@ -134,7 +137,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
             onReload={e => { e.preventDefault(); c.makeQuery!(); }}
           />) :
         <ChartRendererCombined
-          infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript! }))}
+          infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}
           onReload={e => { infos.forEach(a => a.makeQuery!()) }}
           useSameScale={p.part.useSameScale}
         />

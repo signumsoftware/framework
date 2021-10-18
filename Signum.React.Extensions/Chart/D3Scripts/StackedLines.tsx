@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -83,7 +83,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     .domain([min, max])
     .range([0, yRule.size('content')]);
 
-  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key), memo);
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var pInterpolate = parameters["Interpolate"];

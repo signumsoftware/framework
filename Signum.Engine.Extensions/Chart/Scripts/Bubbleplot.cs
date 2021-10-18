@@ -28,6 +28,8 @@ namespace Signum.Engine.Chart.Scripts
                 new ChartScriptParameterGroup("Margin")
                 {
                     new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
+                    new ChartScriptParameter("TopMargin", ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
+                    new ChartScriptParameter("RightMargin", ChartParameterType.String) {  ValueDefinition = new StringValue("0.15*") },
                 },
                 new ChartScriptParameterGroup("Label")
                 {

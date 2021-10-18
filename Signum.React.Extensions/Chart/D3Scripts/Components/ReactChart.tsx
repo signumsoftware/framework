@@ -29,6 +29,8 @@ export default function ReactChart(p: ReactChartProps) {
   const oldData = useThrottle(p.data, 200, { enabled: isSimple});
   const initialLoad = oldData == null && p.data != null && isSimple;
 
+  const memo = React.useMemo(() => new MemoRepository(), [p.chartRequest, p.chartRequest.chartScript]);
+
   const { size, setContainer } = useSize();
 
   return (
@@ -44,6 +46,7 @@ export default function ReactChart(p: ReactChartProps) {
           height: size.height,
           width: size.width,
           initialLoad: initialLoad,
+          memo: memo,
         })
       }
     </div>
@@ -52,5 +55,22 @@ export default function ReactChart(p: ReactChartProps) {
 
 ReactChart.maxRowsForAnimation = 500;
 
+
+export class MemoRepository {
+  cache: Map<string, { val: unknown, deps: unknown[] }> = new Map();
+
+  memo<T>(name: string, deps: unknown[], factory: () => T): T {
+    var box = this.cache.get(name);
+    if (box == null || !areEqual(box.deps, deps)) {
+      box = {
+        val: factory(),
+        deps: deps,
+      };
+      this.cache.set(name, box);
+    }
+
+    return box.val as T;
+  }
+}
 
 

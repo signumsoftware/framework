@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartScriptProps): React.ReactElement<any> {
   
   var xRule = Rule.create({
     _1: 5,
@@ -71,7 +71,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
 
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key), memo);
 
   var pInterpolate = parameters["Interpolate"];
   var rowByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));

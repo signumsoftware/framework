@@ -9,6 +9,7 @@ import { XKeyTicks, YScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { MemoRepository } from './Components/ReactChart';
 
 export default function renderLine(props: ChartScriptProps): React.ReactElement<any> {
 
@@ -64,7 +65,7 @@ export default function renderLine(props: ChartScriptProps): React.ReactElement<
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
 
-      {paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown: props.onDrillDown, initialLoad: props.initialLoad })}
+      {paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown: props.onDrillDown, initialLoad: props.initialLoad, memo: props.memo })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <XAxis xRule={xRule} yRule={yRule} />
@@ -83,6 +84,7 @@ export interface ChartScriptHorizontalProps {
   parameters: { [name: string]: string },
   onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   initialLoad: boolean;
+  memo: MemoRepository;
 }
 
 export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown, initialLoad }: ChartScriptHorizontalProps) {

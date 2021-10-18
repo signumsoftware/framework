@@ -13,7 +13,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -83,7 +83,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
     .range([0, yRule.size('content')]);
 
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(c => c.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(c => c.key), memo);
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :

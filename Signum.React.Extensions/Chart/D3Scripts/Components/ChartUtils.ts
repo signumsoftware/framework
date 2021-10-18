@@ -8,6 +8,7 @@ import { coalesce, Dic } from "@framework/Globals";
 import { getTypeInfo, parseDuration, tryGetTypeInfo } from "@framework/Reflection";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
+import { MemoRepository } from "./ReactChart";
 
 
 
@@ -490,32 +491,18 @@ interface CachedColorOrdinal {
   scale: d3.ScaleOrdinal<string, string>;
 }
 
-export function colorCategory(parameters: { [name: string]: string }, domain: string[]): d3.ScaleOrdinal<string, string> {
-
-  const cacheKey = "_cachedColorOrdinal_"; 
+export function colorCategory(parameters: { [name: string]: string }, domain: string[], memo: MemoRepository, memoKey?: string, deps?: []): d3.ScaleOrdinal<string, string> {
 
   var category = parameters["ColorCategory"];
   var categorySteps = parseInt(parameters["ColorCategorySteps"]);
-  if (parameters[cacheKey]) {
-    const cached = parameters[cacheKey] as any as CachedColorOrdinal;
 
-    if (cached.category == category && cached.categorySteps == categorySteps) {
-      domain.forEach(a => cached.scale(a));
-      return cached.scale;
-    }
-  }
+  return memo.memo<d3.ScaleOrdinal<string, string>>(memoKey ?? "colorCategory", [category, categorySteps, ...(deps ?? [])], () => {
 
-  var scheme = getColorScheme(category, categorySteps);
-
-  const newCached: CachedColorOrdinal = {
-    category: category,
-    categorySteps: categorySteps,
-    scale: d3.scaleOrdinal(scheme).domain(domain),
-  };
-
-  parameters[cacheKey] = newCached as any;
-
-  return newCached.scale;
+    var scheme = getColorScheme(category, categorySteps);
+    var scale = d3.scaleOrdinal(scheme);
+    domain.forEach(a => scale(a));
+    return scale;
+  });
 }
 
 

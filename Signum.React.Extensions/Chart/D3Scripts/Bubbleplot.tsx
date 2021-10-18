@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 
 
-export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -22,12 +22,14 @@ export default function renderBubbleplot({ data, width, height, parameters, load
     _3: 5,
     ticks: 4,
     content: '*',
+    _margin: parameters["RightMargin"],
     _4: 5,
   }, width);
   //xRule.debugX(chart)
 
   var yRule = Rule.create({
     _1: 5,
+    _topMargin: parameters["TopMargin"],
     content: '*',
     ticks: 4,
     _2: 5,
@@ -56,13 +58,11 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var y = scaleFor(verticalColumn, data.rows.map(r => verticalColumn.getValue(r)), 0, yRule.size('content'), parameters["VerticalScale"]);
 
-  var xTickSize = verticalColumn.type == "Date" || verticalColumn.type == "DateTime" ? 100 : 60;
 
   var orderRows = data.rows.orderBy(r => colorKeyColumn.getValueKey(r));
   var color: (r: ChartRow) => string;
   if (parameters["ColorScale"] == "Ordinal") {
-    var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"], parseInt(parameters["ColorCategorySteps"]));
-    var categoryColor = d3.scaleOrdinal(scheme).domain(orderRows.map(r => colorKeyColumn.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, []/*orderRows.map(r => colorKeyColumn.getValueKey(r))*/, memo);
     color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
   } else {
     var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(r => colorKeyColumn.getValue(r) as number), 0, 1, parameters["ColorScale"]);
@@ -89,12 +89,13 @@ export default function renderBubbleplot({ data, width, height, parameters, load
       <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
         {orderRows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
           className="shape-serie sf-transition"
+          opacity={r.active == false ? .5 : undefined }
           transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
           cursor="pointer"
           onClick={e => onDrillDown(r, e)}
         >
           <circle className="shape sf-transition"
-            stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
+            stroke={r.active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
             strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
             fillOpacity={parseFloat(parameters["FillOpacity"])}
             shapeRendering="initial"
