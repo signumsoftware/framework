@@ -9,7 +9,7 @@ import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
-import { useThrottle, useSize, useAPI } from '@framework/Hooks';
+import { useThrottle, useSize, useAPI, areEqual } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
 
 export interface ReactChartProps {
@@ -19,6 +19,7 @@ export interface ReactChartProps {
   loading: boolean;
   onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
+  onBackgroundClick?: (e: React.MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
 }
 
@@ -26,7 +27,7 @@ export interface ReactChartProps {
 export default function ReactChart(p: ReactChartProps) {
 
   const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
-  const oldData = useThrottle(p.data, 200, { enabled: isSimple});
+  const oldData = useThrottle(p.data, 200, { enabled: isSimple });
   const initialLoad = oldData == null && p.data != null && isSimple;
 
   const memo = React.useMemo(() => new MemoRepository(), [p.chartRequest, p.chartRequest.chartScript]);
@@ -34,7 +35,7 @@ export default function ReactChart(p: ReactChartProps) {
   const { size, setContainer } = useSize();
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} onClick={p.onBackgroundClick}>
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,

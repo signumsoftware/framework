@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
 import * as Finder from '@framework/Finder'
@@ -8,7 +7,7 @@ import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartMessage, ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
-import ChartRenderer from '../../Chart/Templates/ChartRenderer'
+import ChartRenderer, { handleDrillDown } from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
@@ -16,18 +15,27 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
+import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from './DashboardView'
+import { filterOperations } from '@framework/FindOptions'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
+  const originalLength = React.useMemo(() => chartRequest?.filterOptions.length, [chartRequest]);
+  if (chartRequest != null) {
+    chartRequest.filterOptions.splice(originalLength!);
+    chartRequest.filterOptions.push(
+      ...p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
+    );
+  }
 
   const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
     ChartClient.getChartScript(chartRequest!.chartScript)
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
       .then(result => ({ result }))
-      .catch(error => ({ error })), [chartRequest, ...p.deps ?? []], { avoidReset: true });
-
+      .catch(error => ({ error })),
+    [chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(chartRequest, null)), ...p.deps ?? []], { avoidReset: true });
 
   const [showData, setShowData] = React.useState(p.part.showData);
   
@@ -57,6 +65,11 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   const result = resultOrError?.result;
+
+  if (result?.chartTable) {
+    var dashboardFilter = p.filterController.filters.get(p.partEmbedded);
+    setActive(result.chartTable, chartRequest, dashboardFilter);
+  }
 
   function handleReload(e?: React.MouseEvent<any>) {
     e?.preventDefault();
@@ -103,6 +116,36 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           lastChartRequest={chartRequest}
           data={result?.chartTable}
           loading={result === null}
+          onBackgroundClick={e => {
+            if (!e.ctrlKey) {
+              p.filterController.clear(p.partEmbedded);
+            }
+          }}
+          onDrillDown={(row, e) => {
+            e.stopPropagation();
+            if (e.altKey)
+              handleDrillDown(row, e, chartRequest, handleReload);
+            else {
+              const dashboardFilter = p.filterController.filters.get(p.partEmbedded);
+              const filterRow = toDashboardFilterRow(row, chartRequest);
+
+              if (e.ctrlKey) {
+                const already = dashboardFilter?.rows.firstOrNull(fr => equalsDFR(fr, filterRow));
+                if (already) {
+                  dashboardFilter!.rows.remove(already);
+                  p.filterController.setFilter(dashboardFilter!);
+                }
+                else {
+                  const db = dashboardFilter ?? { partEmbedded: p.partEmbedded, queryKey: chartRequest.queryKey, rows: [] } as DashboardFilter;
+                  db.rows.push(filterRow);
+                  p.filterController.setFilter(db);
+                }
+              } else {
+                const db = { partEmbedded: p.partEmbedded, queryKey: chartRequest.queryKey, rows: [filterRow] } as DashboardFilter;
+                p.filterController.setFilter(db);
+              }
+            }
+          }}
           onReload={handleReload}
           autoRefresh={p.part.autoRefresh}
           typeInfos={typeInfos}
@@ -111,4 +154,39 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       }
     </div>
   );
+}
+
+
+function toDashboardFilterRow(row: ChartClient.ChartRow, chartRequest: ChartRequestModel): DashboardFilterRow {
+  var filters = chartRequest.columns.map((c, i) => ({
+    token: c.element.token?.token,
+    value: (row as any)["c" + i],
+  })).filter(a => a.token != null && a.token.queryTokenType != "Aggregate");
+
+  return { filters: filters } as DashboardFilterRow;
+}
+
+
+
+function setActive(chartTable: ChartClient.ChartTable, request: ChartRequestModel, dashboardFilter?: DashboardFilter) {
+
+  if (!dashboardFilter?.rows.length) {
+    chartTable.rows.forEach(row => delete row.active);
+  } else {
+
+    var tokenToColumn = request.columns
+      .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
+      .filter(a => a.tokenString != null)
+      .groupBy(a => a.tokenString)
+      .toObject(gr => gr.key!, gr => gr.elements.first().colName);
+
+    chartTable.rows.forEach(row => {
+      row.active = dashboardFilter.rows.some(r => {
+        return r.filters.every(f => {
+          var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
+          return f.value == rowVal && is(f.value, rowVal, false, false);
+        });
+      })
+    });
+  }
 }

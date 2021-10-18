@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Entity, getToString, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, is, Lite, MListElement, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
@@ -11,8 +11,99 @@ import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
+import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, QueryToken, ResultRow } from '@framework/FindOptions'
+import { ChartRow } from '../../Chart/ChartClient'
+import { FilterConditionComponent } from '../../../Signum.React/Scripts/SearchControl/FilterBuilder'
+import { FilterGroupOperation } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
+
+
+export class DashboardFilterController {
+
+
+  forceUpdate: () => void;
+
+  filters: Map<PanelPartEmbedded, DashboardFilter> = new Map();
+  lastChange: Map<string /*queryKEy*/, number> = new Map();
+
+  constructor(forceUpdate: () => void) {
+    this.forceUpdate = forceUpdate;
+  }
+
+  setFilter(filter: DashboardFilter) {
+    this.lastChange.set(filter.queryKey, new Date().getTime());
+    this.filters.set(filter.partEmbedded, filter);
+    this.forceUpdate();
+  }
+
+  clear(partEmbedded: PanelPartEmbedded) {
+    this.filters.delete(partEmbedded);
+    this.forceUpdate();
+  }
+  
+  getFilterOptions(partEmbedded: PanelPartEmbedded, queryKey: string): FilterOptionParsed[] {
+    var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.rows?.length);
+
+    var result = otherFilters.filter(a => a.queryKey == queryKey).map(
+      df => groupFilter("Or", df.rows.map(
+        r => groupFilter("And", r.filters.map(
+          f => ({ token: f.token, operation: "EqualTo", value: f.value, frozen: false }) as FilterConditionOptionParsed
+        ))
+      ).notNull())
+    ).notNull();
+
+    return result;
+  }
+
+  
+
+}
+
+function groupFilter(groupOperation: FilterGroupOperation, filters: FilterOptionParsed[]): FilterOptionParsed | undefined {
+
+  if (filters.length == 0)
+    return undefined;
+
+  if (filters.length == 1)
+    return filters[0];
+
+  return ({
+    groupOperation: groupOperation,
+    filters: filters
+  }) as FilterGroupOptionParsed;
+}
+
+export interface DashboardFilter {
+  queryKey: string;
+  rows: DashboardFilterRow[];
+  partEmbedded: PanelPartEmbedded;
+}
+
+export interface DashboardFilterRow {
+  filters: { token: QueryToken, value: unknown }[];
+}
+
+export function equalsDFR(row1: DashboardFilterRow, row2: DashboardFilterRow): boolean {
+  if (row1.filters.length != row2.filters.length)
+    return false;
+
+  for (var i = 0; i < row1.filters.length; i++) {
+    var f1 = row1.filters[i];
+    var f2 = row2.filters[i];
+
+    if (!(f1.token.fullKey == f2.token.fullKey &&
+      (f1.value === f2.value || is(f1.value as Lite<Entity>, f2.value as Lite<Entity>, false, false))))
+      return false;
+  }
+
+  return true;
+}
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; }) {
+
+  const forceUpdate = useForceUpdate();
+  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
+
 
   function renderBasic() {
     const db = p.dashboard;
@@ -34,7 +125,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
 
                   return (
                     <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} />
+                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} />
                     </div>
                   );
                 })}
@@ -70,7 +161,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} />)}
                 </div>
               );
             })}
@@ -164,6 +255,7 @@ export interface PanelPartProps {
   ctx: TypeContext<PanelPartEmbedded>;
   entity?: Entity;
   deps?: React.DependencyList;
+  filterController: DashboardFilterController;
 }
 
 export interface PanelPartState {
@@ -193,6 +285,7 @@ export function PanelPart(p: PanelPartProps) {
       part: content,
       entity: lite,
       deps: p.deps,
+      filterController: p.filterController
     });
   }
 
@@ -232,6 +325,7 @@ export function PanelPart(p: PanelPartProps) {
               part: content,
               entity: lite,
               deps: p.deps,
+              filterController: p.filterController
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>

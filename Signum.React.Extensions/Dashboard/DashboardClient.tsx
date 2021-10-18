@@ -21,6 +21,7 @@ import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
+import { DashboardFilter, DashboardFilterController } from './View/DashboardView';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -28,6 +29,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   part: T;
   entity?: Lite<Entity>;
   deps?: React.DependencyList;
+  filterController: DashboardFilterController;
 }
 
 interface IconColor {
