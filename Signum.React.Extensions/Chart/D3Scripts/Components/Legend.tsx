@@ -26,25 +26,25 @@ export default function Legend(p: LegendProps) {
   var legendMargin = yRule.size('legend') + 4;
 
   var textWidth = legendScale.bandwidth() - legendMargin;
-
   return (
     <g>
       <g className="color-legend" transform={translate(xRule.start('content'), yRule.start('legend'))}>
-        {pivot.columns.map((s, i) =><g> <rect key={s.key} className="color-rect" transform={translate(legendScale(i.toString())!, 0)}
-          width={yRule.size('legend')}
-          height={yRule.size('legend')}
-          fill={s.color ?? color(s.key)} />
-          {(textWidth > 30) && <TextEllipsis key={s.key} transform={translate(legendScale(i.toString())! + legendMargin, yRule.size('legend')  / 2 + 1)}
-            maxWidth={textWidth} className="color-text"
-            dominantBaseline="middle">
-            {s.niceName!}
-          </TextEllipsis>
-          }
-          <title>
-            {s.niceName}
-          </title>
+        {pivot.columns.map((s, i) =>
+          <g key={s.key}>
+            <rect  className="color-rect" transform={translate(legendScale(i.toString())!, 0)}
+              width={yRule.size('legend')}
+              height={yRule.size('legend')}
+              fill={s.color ?? color(s.key)} />
+            {(textWidth > 30) && <TextEllipsis transform={translate(legendScale(i.toString())! + legendMargin, yRule.size('legend') / 2 + 1)}
+              maxWidth={textWidth} className="color-text"
+              dominantBaseline="middle">
+              {s.niceName!}
+            </TextEllipsis>}
+            <title>
+              {s.niceName}
+            </title>
           </g>
-          )}
+        )}
       </g>
     </g>
   );
