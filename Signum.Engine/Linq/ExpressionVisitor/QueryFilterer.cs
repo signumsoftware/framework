@@ -37,22 +37,22 @@ namespace Signum.Engine.Linq
                         if (filter)
                         {
                             if (typeof(Entity).IsAssignableFrom(queryType))
-                                using (HeavyProfiler.Log("queryType"))
+                                using (HeavyProfiler.LogNoStackTrace("queryType"))
                                 {
                                     LambdaExpression? rawFilter = null;
-                                    using (HeavyProfiler.Log("rawFilter"))
+                                    using (HeavyProfiler.LogNoStackTrace("rawFilter"))
                                         rawFilter =giFilter.GetInvoker(queryType)(Schema.Current);
 
                                     if (rawFilter != null)
                                     {
                                         Expression clean = ExpressionCleaner.Clean(rawFilter)!;
                                         var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
-                                        using (HeavyProfiler.Log("Call"))
+                                        using (HeavyProfiler.LogNoStackTrace("Call"))
                                             return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                                     }
                                 }
                             else if (queryType.IsInstantiationOf(typeof(MListElement<,>)))
-                                using (HeavyProfiler.Log("MListElement"))
+                                using (HeavyProfiler.LogNoStackTrace("MListElement"))
                                 {
                                     Type entityType = queryType.GetGenericArguments()[0];
 
