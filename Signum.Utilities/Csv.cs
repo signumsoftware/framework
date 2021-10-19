@@ -361,7 +361,7 @@ namespace Signum.Utilities
             return regexCache.GetOrAdd(separator, s =>
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
         }
-
+  
         private static char GetListSeparator(CultureInfo culture)
         {
             return culture.TextInfo.ListSeparator.SingleEx();

@@ -38,6 +38,15 @@ namespace Signum.Engine.Isolation
                         iso.Name
                     });
 
+                Schema.Current.AttachToUniqueFilter += entity =>
+                {
+                    var type = entity.GetType();
+                    var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
+
+                    return hasIsolationMixin == false ? null :
+                        e => e.Mixin<IsolationMixin>().Isolation == entity.Mixin<IsolationMixin>().Isolation;
+                };
+
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.SchemaCompleted += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
