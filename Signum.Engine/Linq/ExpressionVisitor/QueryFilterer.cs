@@ -21,7 +21,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitConstant(ConstantExpression c)
         {
 
-            using (HeavyProfiler.Log("VisitConstant"))
+            using (HeavyProfiler.LogNoStackTrace("VisitConstant"))
             {
                 if (disableQueryFilter)
                     return base.VisitConstant(c);
