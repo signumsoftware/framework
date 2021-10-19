@@ -163,22 +163,22 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, char? listSeparator = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding ??= DefaultEncoding;
             culture ??= DefaultCulture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, options, listSeparator).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, char? listSeparator = null) where T : class, new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, options, listSeparator).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, options).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, char? listSeparator = null) where T : class, new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding ??= DefaultEncoding;
             var defCulture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -187,7 +187,7 @@ namespace Signum.Utilities
             var members = CsvMemberCache<T>.Members;
             var parsers = members.Select(m => GetParser(defCulture, m, defOptions.ParserFactory)).ToList();
 
-            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout, listSeparator);
+            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout, options?.ListSeparator);
 
             if (defOptions.AsumeSingleLine)
             {
@@ -437,6 +437,7 @@ namespace Signum.Utilities
         public Func<Match, T>? Constructor;
         public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
+        public char? ListSeparator;
     }
 
 
