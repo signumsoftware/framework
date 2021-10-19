@@ -95,7 +95,7 @@ namespace Signum.Engine
                 return null;
 
 
-            var list = connector.Schema.DatabaseNames().Select(a => a?.ToString()).ToList();
+            var list = connector.Schema.DatabaseNames().Select(a => a?.Name).ToList();
 
             if (list.Contains(null))
             {
