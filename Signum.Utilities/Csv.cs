@@ -163,7 +163,7 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null, char? listSeparator = null) where T : class, new()
+        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
         {
             encoding ??= DefaultEncoding;
             culture ??= DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -361,8 +361,6 @@ namespace Signum.Utilities
             return regexCache.GetOrAdd(separator, s =>
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
         }
-
-
   
         private static char GetListSeparator(CultureInfo culture)
         {
