@@ -187,7 +187,7 @@ namespace Signum.Utilities
             var members = CsvMemberCache<T>.Members;
             var parsers = members.Select(m => GetParser(defCulture, m, defOptions.ParserFactory)).ToList();
 
-            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout, options?.ListSeparator);
+            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout, defOptions.ListSeparator);
 
             if (defOptions.AsumeSingleLine)
             {
