@@ -118,7 +118,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
           return pair.isPositive;
 
-        if ("conditions".startsWith(pair.token.after("!")) && rule.allowed.conditions.length)
+        if ("conditions".startsWith(pair.token.after("!")) && rule.availableConditions.length)
           return pair.isPositive;
       }
 

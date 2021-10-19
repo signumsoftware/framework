@@ -30,7 +30,7 @@ export default function MoveTreeModelComponent(p : MoveTreeModelComponentProps){
 
       {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
         <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
-          findOptions={{ queryName: typeName, parentToken: QueryTokenString.entity<TreeEntity>().expression("Parent"), parentValue: ctx.value.newParent }}
+          findOptions={{ queryName: typeName, filterOptions: [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }]}}
           onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }])} />}
     </div>
   );

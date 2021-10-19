@@ -57,6 +57,10 @@ namespace Signum.Entities.Authorization
 
                 if (pi.Name == nameof(DomainServer) && !DomainServer.HasText())
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (pi.Name == nameof(DirectoryRegistry_Username) && DirectoryRegistry_Username != null)
+                    if (DirectoryRegistry_Username.Contains("@") || DirectoryRegistry_Username.Contains("\\") || DirectoryRegistry_Username.Contains("/"))
+                        return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString(pi.NiceName(), "Simple Username");
             }
 
             if (LoginWithAzureAD)

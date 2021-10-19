@@ -82,7 +82,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
   }
 
   function handleAdmnister() {
-    Finder.explore({ queryName: ExcelReportEntity, parentToken: ExcelReportEntity.token(a => a.query!.key), parentValue: p.searchControl.props.findOptions.queryKey })
+    Finder.explore({ queryName: ExcelReportEntity, filterOptions: [{ token: ExcelReportEntity.token(a => a.query!.key), value: p.searchControl.props.findOptions.queryKey }]})
       .then(() => reloadList())
       .done();
   }

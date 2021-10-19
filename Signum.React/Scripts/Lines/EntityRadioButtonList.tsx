@@ -5,15 +5,18 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { useController } from './LineBase'
+import { ResultTable } from '../Search'
+import { ResultRow } from '../FindOptions'
 
 export interface EntityRadioButtonListProps extends EntityBaseProps {
   data?: Lite<Entity>[];
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean;
-  refreshKey?: string;
+  deps?: React.DependencyList;
   nullPlaceHolder?: string;
   onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
+  nullElement?: "No" | "Always" | "Initially";
 }
 
 export class EntityRadioButtonListController extends EntityBaseController<EntityRadioButtonListProps> {
@@ -80,7 +83,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   function renderRadioList() {
     return (
-      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} />
+      <EntityRadioButtonListSelect ctx={p.ctx} controller={c} nullElement={p.nullElement} />
     );
   }
 });
@@ -89,6 +92,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 interface EntityRadioButtonListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
   controller: EntityRadioButtonListController;
+  nullElement?: "No" | "Always" | "Initially";
 }
 
 export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectProps) {
@@ -96,7 +100,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
   const c = props.controller;
   const p = c.props;
 
-  var [data, setData] = React.useState<Lite<Entity>[] | undefined>(p.data);
+  var [data, setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   var requestStarted = React.useRef(false);
 
   React.useEffect(() => {
@@ -108,10 +112,8 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       requestStarted.current = true;
       const fo = p.findOptions;
       if (fo) {
-        Finder.expandParentColumn(fo);
-        var limit = fo?.pagination?.elementsPerPage ?? 999;
-        Finder.fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], limit)
-          .then(data => setData(fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr)))
+        Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
+          .then(data => setData(data))
           .done();
       }
       else
@@ -119,7 +121,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
           .then(data => setData(data.orderBy(a => a.toStr)))
           .done();
     }
-  }, [p.data, p.type!.name, p.refreshKey, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [p.data, p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
   return (
     <div className="sf-radiobutton-elements" style={getColumnStyle()}>
@@ -160,20 +162,25 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
     if (data == undefined)
       return undefined;
 
-    const fixedData = [null, ...data];
+    const fixedData = Array.isArray(data) ? data.map(lite => ({ entity: lite } as ResultRow)) :
+      typeof data == "object" ? data.rows :
+        [];
 
-    const value = p.ctx.value!;
-    if (!fixedData.some(d => is(d, value as Entity | Lite<Entity>)))
-        fixedData.insertAt(0, maybeToLite(value as Entity | Lite<Entity>))
+    if (p.nullElement == "Always")
+      fixedData.insertAt(0, { entity: null as any } as ResultRow);
 
-    return fixedData.map((lite, i) =>
+    const value = p.ctx.value as Entity | Lite<Entity> | null;
+    if (!fixedData.some(d => is(d.entity, value)) && (p.nullElement == "Initially" || value != null))
+      fixedData.insertAt(0, { entity: value && maybeToLite(value) } as ResultRow);
+
+    return fixedData.map((row, i) =>
       <label className="sf-radio-element" key={i}>
         <input type="radio" style={{ marginLeft: "10px" }}
-          checked={is(value as Lite<Entity>, lite)}
-          onClick={e => c.handleOnChange(lite)}
+          checked={is(value, row.entity)}
+          onClick={e => c.handleOnChange(row.entity!)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        <span>{c.props.onRenderItem ? c.props.onRenderItem(lite) : lite?.toStr ?? p.nullPlaceHolder ?? " - "}</span>
+        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>lite?.toStr ?? p.nullPlaceHolder ?? " - "</span>}
       </label>);
   }
 }

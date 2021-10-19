@@ -1018,10 +1018,12 @@ namespace Signum.Engine.Linq
         public IntervalExpression(Type type, Expression? min, Expression? max, Expression? postgresRange)
             :base(DbExpressionType.Interval, type)
         {
+#pragma warning disable IDE0075 // Simplify conditional expression
             var isNullable =
                  type.IsInstantiationOf(typeof(NullableInterval<>)) ? true :
                  type.IsInstantiationOf(typeof(Interval<>)) ? false :
                  throw new UnexpectedValueException(type);
+#pragma warning restore IDE0075 // Simplify conditional expression
 
             this.ElementType = isNullable ?  type.GetGenericArguments()[0].Nullify() : type.GetGenericArguments()[0];
             

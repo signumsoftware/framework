@@ -108,8 +108,7 @@ export function start(options: {
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
       {
         queryName: EmailMessageEntity,
-        parentToken: "Target",
-        parentValue: ctx.lite,
+        filterOptions: [{ token: "Target", value: ctx.lite}],
       },
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),

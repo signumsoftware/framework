@@ -13,7 +13,6 @@ using Signum.Engine.Authorization;
 using System.Drawing;
 using Signum.Entities.Basics;
 using System.Xml.Linq;
-using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
@@ -23,6 +22,7 @@ using System.IO;
 using System.Data;
 using Signum.Engine.Scheduler;
 using System.Runtime.InteropServices;
+using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Cache
 {
@@ -146,7 +146,7 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                 tr = ((DbQueryProvider)simpleQuery.Provider).GetRawTranslateResult(simpleQuery.Expression);
 
-            OnChangeEventHandler onChange = (object sender, SqlNotificationEventArgs args) =>
+            void onChange(object sender, SqlNotificationEventArgs args)
             {
                 try
                 {
@@ -167,7 +167,7 @@ namespace Signum.Engine.Cache
                 {
                     e.LogException(c => c.ControllerName = exceptionContext);
                 }
-            };
+            }
 
             SimpleReader? reader = null;
 
@@ -300,7 +300,7 @@ namespace Signum.Engine.Cache
                     {
                         try
                         {
-                            Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item.ToString()}"));
+                            Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item}"));
 
                         }
                         catch (SqlException ex)
@@ -512,8 +512,6 @@ namespace Signum.Engine.Cache
                 NotifyInvalidateAllConnectedTypes(typeof(T));
             }
 
-            static object syncLock = new object();
-
             public override void Load()
             {
                 LoadAllConnectedTypes(typeof(T));
@@ -561,7 +559,6 @@ namespace Signum.Engine.Cache
             {
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
-#pragma warning disable CS8631
             public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
             {
                // throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
@@ -571,7 +568,6 @@ namespace Signum.Engine.Cache
 
                 return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
             }
-#pragma warning restore CS8631
 
             public Type Type
             {
@@ -595,8 +591,7 @@ namespace Signum.Engine.Cache
         {
             var topUserData = Transaction.TopParentUserData();
 
-            var hs = topUserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
-            if (hs == null)
+            if (topUserData.TryGetC(DisabledCachesKey) is not HashSet<Type> hs)
             {
                 topUserData[DisabledCachesKey] = hs = new HashSet<Type>();
             }
@@ -609,9 +604,7 @@ namespace Signum.Engine.Cache
             if (!Transaction.HasTransaction)
                 return false;
 
-            HashSet<Type>? disabledTypes = Transaction.TopParentUserData().TryGetC(DisabledCachesKey) as HashSet<Type>;
-
-            return disabledTypes != null && disabledTypes.Contains(type);
+            return Transaction.TopParentUserData().TryGetC(DisabledCachesKey) is HashSet<Type> disabledTypes && disabledTypes.Contains(type);
         }
 
         internal static void DisableTypeInTransaction(Type type)
@@ -817,7 +810,7 @@ Remember that the Start could be called with an empty database!");
                 }
                 else
                 {
-                    EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
+                    void onInvalidation(object? sender, CacheEventArgs args)
                     {
                         if (args == CacheEventArgs.Invalidated)
                         {
@@ -833,7 +826,7 @@ Remember that the Start could be called with an empty database!");
 
                             Transaction.PostRealCommit += dic => invalidate(sender, args);
                         }
-                    };
+                    }
 
                     foreach (var t in invalidateWith.Types)
                     {

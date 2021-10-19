@@ -5,12 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Signum.Upgrade
 {
     public class CodeUpgradeRunner: IEnumerable<CodeUpgradeBase>
     {
         public List<CodeUpgradeBase> Upgrades = new List<CodeUpgradeBase>();
+
+        public CodeUpgradeRunner(bool autoDiscover)
+        {
+            if (autoDiscover)
+                Upgrades = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType == typeof(CodeUpgradeBase)).Select(t => (CodeUpgradeBase)Activator.CreateInstance(t)!).ToList();
+        }
 
         public IEnumerator<CodeUpgradeBase> GetEnumerator() => Upgrades.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Upgrades.GetEnumerator();

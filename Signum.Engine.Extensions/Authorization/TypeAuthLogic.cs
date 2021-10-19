@@ -148,11 +148,13 @@ namespace Signum.Engine.Authorization
             if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
 
-            TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);
-            if (temp.HasValue)
-                return new TypeAllowedAndConditions(temp.Value);
+            var allowed = cache.GetAllowed(RoleEntity.Current, type);
 
-            return cache.GetAllowed(RoleEntity.Current, type);
+            var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
+            if (overrideTypeAllowed != null)
+                return overrideTypeAllowed(allowed);
+
+            return allowed;
         }
 
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type type)
@@ -170,18 +172,20 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        static readonly Variable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>> tempAllowed =
-            Statics.ThreadVariable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>>("temporallyAllowed");
+        static readonly Variable<ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>> tempAllowed =
+            Statics.ThreadVariable<ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>>("temporallyAllowed");
 
-        public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
+        public static IDisposable OverrideTypeAllowed<T>(Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)
             where T : Entity
         {
-            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<(Type type, TypeAllowed typeAllowed)>.Empty).Push((typeof(T), typeAllowed));
+            var old = tempAllowed.Value;
+
+            tempAllowed.Value = (old ?? ImmutableStack<(Type type, Func<TypeAllowedAndConditions, TypeAllowedAndConditions> typeAllowedOverride)>.Empty).Push((typeof(T), typeAllowedOverride));
 
             return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
         }
 
-        internal static TypeAllowed? GetTemporallyAllowed(Type type)
+        internal static Func<TypeAllowedAndConditions, TypeAllowedAndConditions>? GetOverrideTypeAllowed(Type type)
         {
             var ta = tempAllowed.Value;
             if (ta == null || ta.IsEmpty)
@@ -192,7 +196,7 @@ namespace Signum.Engine.Authorization
             if (pair.type == null)
                 return null;
 
-            return pair.typeAllowed;
+            return pair.typeAllowedOverride;
         }
     }
 

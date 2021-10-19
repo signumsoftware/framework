@@ -96,11 +96,12 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
 
       if (t?.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
       {
-        var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+        var token = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
 
-        if (col.parent)
+        if (token.parent || t.token.queryTokenType == "Aggregate")
           columns.push({
-            token: col.fullKey
+            token: token.fullKey,
+            summaryToken: t.token.queryTokenType == "Aggregate" ? t.token.fullKey : undefined,
           });
       }
     });
@@ -110,6 +111,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       filterOptions: toFilterOptions(filters),
       includeDefaultFilters: false,
       columnOptions: columns,
+      columnOptionsMode: "InsertStart",
     };
 
     if (newWindow)

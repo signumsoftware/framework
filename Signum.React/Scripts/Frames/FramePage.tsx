@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import { Prompt } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
-import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo } from '../Signum.Entities'
+import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
@@ -51,6 +51,12 @@ export default function FramePage(p: FramePageProps) {
   useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
 
   React.useEffect(() => {
+
+    var currentEntity = stateRef.current?.pack.entity;
+
+    if (currentEntity && currentEntity.Type == type && currentEntity.id == id)
+      return;
+
     loadEntity()
       .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
         pack: a.pack!,
@@ -120,16 +126,28 @@ export default function FramePage(p: FramePageProps) {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key).then(pack => ({
-          pack: pack!,
-          createNew: () => Operations.API.construct(ti.name, oi.key)
-        }));
+        return Operations.API.construct(ti.name, oi.key)
+          .then(pack => {
+            if (pack == undefined)
+              throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName));
+            else
+              return ({
+                pack: pack,
+                createNew: () => Operations.API.construct(ti.name, oi.key)
+              });
+          });
       }
 
-      return Constructor.constructPack(ti.name).then(pack => ({
-        pack: pack! as EntityPack<Entity>,
-        createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
-      }));
+      return Constructor.constructPack(ti.name)
+        .then(pack => {
+          if (pack == undefined)
+            throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName))
+          else
+            return ({
+              pack: pack! as EntityPack<Entity>,
+              createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
+            });
+        });
     }
   }
 
@@ -147,7 +165,7 @@ export default function FramePage(p: FramePageProps) {
     }
   }
 
-  if (!state || state.pack.entity.Type != type || state.pack.entity.id != id) {
+  if (!state) {
     return (
       <div className="normal-control">
         {renderTitle()}
@@ -168,30 +186,42 @@ export default function FramePage(p: FramePageProps) {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
-      if (packEntity.entity.id != null && entity.id != packEntity.entity.id)
-        AppContext.history.push(Navigator.navigateRoute(packEntity.entity));
+      var newRoute = is(packEntity.entity, entity) ? undefined :
+        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type) :
+        Navigator.navigateRoute(packEntity.entity);
+
+      if (reloadComponent) {
+        setState(undefined)
+          .then(() => loadComponent(packEntity))
+          .then(gc => {
+            if (mounted.current) {
+             
+              setState({
+                pack: packEntity,
+                getComponent: gc,
+                refreshCount: state.refreshCount + 1,
+
+              }).then(() => {
+                if (newRoute)
+                   AppContext.history.push(newRoute);
+
+                callback && callback();
+              }).done();
+            }
+          })
+          .done();
+      }
       else {
-        if (reloadComponent) {
-          setState(undefined)
-            .then(() => loadComponent(packEntity))
-            .then(gc => {
-              if (mounted.current)
-                setState({
-                  pack: packEntity,
-                  getComponent: gc,
-                  refreshCount: state.refreshCount + 1,
-                  
-                }).then(callback).done();
-            })
-            .done();
-        }
-        else {
-          setState({
-            pack: packEntity,
-            getComponent: state.getComponent,
-            refreshCount: state.refreshCount + 1,
-          }).then(callback).done();
-        }
+        setState({
+          pack: packEntity,
+          getComponent: state.getComponent,
+          refreshCount: state.refreshCount + 1,
+        }).then(() => {
+          if (newRoute)
+            AppContext.history.push(newRoute);
+
+          callback && callback();
+        }).done();
       }
     },
     onClose: () => onClose(),
@@ -216,10 +246,11 @@ export default function FramePage(p: FramePageProps) {
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
+  var outdated = !state.pack.entity.isNew && (state.pack.entity.Type != type || state.pack.entity.id != id);
 
   return (
-    <div className="normal-control">
-      <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
+    <div className="normal-control" style={{ opacity: outdated ? .5 : undefined }}>
+      <Prompt when={!(state.pack.entity.isNew && id != null)} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
       {renderTitle()}
       <div className="sf-button-widget-container">
         {renderWidgets(wc)}

@@ -100,8 +100,27 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
     .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))!)
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
-
   var color = parameters["Color"]!;// 'steelblue'
+  var circleRadius = parseFloat(parameters["CircleRadius"]!);
+  var circleStroke = parseFloat(parameters["CircleStroke"]!);
+  var circleRadiusHover = parseFloat(parameters["CircleRadiusHover"]!);
+
+  var bw = x.bandwidth();
+  if (parameters["CircleAutoReduce"]! == "Yes") {
+
+    if (circleRadius > bw / 3)
+      circleRadius = bw / 3;
+
+    if (circleRadiusHover > bw / 2)
+      circleRadiusHover = bw / 2;
+
+    if (circleStroke > bw / 8)
+      circleStroke = bw / 8;
+  }
+
+  var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
+  if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
+    numberOpacity = 0;
 
   return (
     <>
@@ -111,7 +130,7 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
       </g>
 
       {/*paint graph - hover area trigger*/}
-      <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+      {circleRadiusHover > 0 && <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
         {orderedRows
           .map(r => <circle key={keyColumn.getValueKey(r)}
             transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
@@ -120,24 +139,25 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
             fillOpacity={0}
             stroke="none"
             cursor="pointer"
-            r={15}
+            r={circleRadiusHover}
             onClick={e => onDrillDown(r, e)}>
             <title>
               {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
             </title>
           </circle>)}
       </g>
+      }
 
       {/*paint graph - points*/}
-      <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
+      {circleRadius > 0 && circleStroke > 0 && <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
         {orderedRows
           .map(r => <circle key={keyColumn.getValueKey(r)}
             transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))!)}
             className="point sf-transition"
             stroke={color}
-            strokeWidth={2}
+            strokeWidth={circleStroke}
             fill="white"
-            r={5}
+            r={circleRadius}
             onClick={e => onDrillDown(rowByKey[keyColumn.getValueKey(r)], e)}
             cursor="pointer"
             shapeRendering="initial">
@@ -146,15 +166,16 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
             </title>
           </circle>)}
       </g>
+      }
 
       { /*Point labels*/
-        parseFloat(parameters["NumberOpacity"]!) > 0 &&
+        numberOpacity > 0 &&
         <g className="point-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
           {orderedRows
             .map(r => <text key={keyColumn.getValueKey(r)} transform={translate(x(keyColumn.getValueKey(r))!, -y(valueColumn.getValue(r))! - 10)}
               className="point-label sf-transition"
               r={5}
-              opacity={parseFloat(parameters["NumberOpacity"]!)}
+              opacity={numberOpacity}
               textAnchor="middle"
               onClick={e => onDrillDown(r, e)}
               cursor="pointer"

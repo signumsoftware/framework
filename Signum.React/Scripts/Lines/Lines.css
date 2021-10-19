@@ -475,3 +475,13 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     width: 100%;
     padding: 0.25rem 0.5rem;
 }
+
+.try-no-wrap{
+
+}
+
+@media (min-width: 768px){
+    .try-no-wrap {
+        white-space: nowrap;
+    }
+}

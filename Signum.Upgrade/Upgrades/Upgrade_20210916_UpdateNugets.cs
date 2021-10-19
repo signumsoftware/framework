@@ -12,7 +12,7 @@ namespace Signum.Upgrade.Upgrades
 {
     class Upgrade_20210916_UpdateNugets : CodeUpgradeBase
     {
-        public override string Description => "Blue Green Deployments";
+        public override string Description => "Update nugets";
 
         public override void Execute(UpgradeContext uctx)
         {

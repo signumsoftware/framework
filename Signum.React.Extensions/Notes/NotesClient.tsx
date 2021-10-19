@@ -21,8 +21,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
   QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: NoteEntity,
-    parentToken: NoteEntity.token(e => e.target),
-    parentValue: ctx.lite
+    filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
     icon: "sticky-note",

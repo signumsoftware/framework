@@ -53,7 +53,7 @@ namespace Signum.Engine.Excel
                     workbookPart.Workbook.CalculationProperties!.FullCalculationOnLoad = true;
                 }
 
-                WorksheetPart worksheetPart = document.GetWorksheetPartByName(ExcelMessage.Data.NiceToString());
+                WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName(ExcelMessage.Data.NiceToString());
                 
                 CellBuilder cb = PlainExcelGenerator.CellBuilder;
                 

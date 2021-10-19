@@ -311,8 +311,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
             <Tab eventKey="connections" title="Apply To">
               <SearchControl findOptions={{
                 queryName: DynamicMixinConnectionEntity,
-                parentToken: DynamicMixinConnectionEntity.token(e => e.mixinName),
-                parentValue: dt.typeName
+                filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.mixinName), value: dt.typeName}]
               }} />
             </Tab>
           }
@@ -322,8 +321,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
             {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
                 <SearchControl findOptions={{
                   queryName: DynamicMixinConnectionEntity,
-                  parentToken: DynamicMixinConnectionEntity.token(e => e.entityType),
-                parentValue: typeEntity
+                  filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.entityType), value: typeEntity}]
                 }} />
               }
             </Tab>

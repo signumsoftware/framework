@@ -55,7 +55,7 @@ namespace Signum.Entities.UserAssets
 
                     if (mixin == null)
                         return new Result<object?>.Error("Mixin {0} not found on {1}".FormatWith(mixinName, result.GetType().FullName));
-                    
+
                     result = mixin;
 
                     if (result == null)
@@ -63,12 +63,12 @@ namespace Signum.Entities.UserAssets
                 }
                 else
                 {
-                    var prop = result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
-
-                    if (prop == null)
-                        return new Result<object?>.Error("Property {0} not found on {1}".FormatWith(part, result.GetType().FullName));
-
-                    result = prop.GetValue(result, null);
+                    if (result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public) is { } prop)
+                        result = prop.GetValue(result, null);
+                    else if (result.GetType().GetMethod(part, BindingFlags.Instance | BindingFlags.Public) is { } method)
+                        result = method.Invoke(result, null);
+                    else
+                        return new Result<object?>.Error("Property or Method {0} not found on {1}".FormatWith(part, result.GetType().FullName));
 
                     if (result == null)
                         return new Result<object?>.Success(null);
