@@ -187,7 +187,7 @@ namespace Signum.Utilities
             var members = CsvMemberCache<T>.Members;
             var parsers = members.Select(m => GetParser(defCulture, m, defOptions.ParserFactory)).ToList();
 
-            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout);
+            Regex regex = GetRegex(defCulture, defOptions.RegexTimeout, defOptions.ListSeparator);
 
             if (defOptions.AsumeSingleLine)
             {
@@ -354,14 +354,14 @@ namespace Signum.Utilities
 
         static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
-        static Regex GetRegex(CultureInfo culture, TimeSpan timeout)
+        static Regex GetRegex(CultureInfo culture, TimeSpan timeout, char? listSeparator = null)
         {
-            char separator = GetListSeparator(culture);
+            char separator = listSeparator ?? GetListSeparator(culture);
 
             return regexCache.GetOrAdd(separator, s =>
                 new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
         }
-
+  
         private static char GetListSeparator(CultureInfo culture)
         {
             return culture.TextInfo.ListSeparator.SingleEx();
@@ -437,6 +437,7 @@ namespace Signum.Utilities
         public Func<Match, T>? Constructor;
         public Func<Exception, Match?, bool>? SkipError;
         public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
+        public char? ListSeparator;
     }
 
 

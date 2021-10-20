@@ -273,10 +273,7 @@ namespace Signum.Engine.Mailing
                     switch (tr.WhenNone)
                     {
                         case WhenNoneRecipientsBehaviour.ThrowException:
-                            if (groups.Count() == 0)
-                                throw new InvalidOperationException($"Impossible to send {this.template} because {tr.Kind} Token ({tr.Token}) returned no result");
-                            else
-                                throw new InvalidOperationException($"Impossible to send {this.template} because {tr.Kind} Token ({tr.Token}) returned results without Email addresses");
+                            throw new InvalidOperationException($"Impossible to send {this.template} because {tr.Kind} Token ({tr.Token}) returned no result or no result with Email address");
 
                         case WhenNoneRecipientsBehaviour.NoMessage:
                             yield break;

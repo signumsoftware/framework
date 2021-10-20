@@ -12,6 +12,9 @@ using Signum.React.Extensions.Isolation;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System;
+using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.Isolation;
 
 namespace Signum.React.Isolation
 {
@@ -22,14 +25,22 @@ namespace Signum.React.Isolation
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             SchemaMap.GetColorProviders += GetMapColors;
+
+            SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => {
+                e.Mixin<IsolationMixin>().Isolation = IsolationEntity.Current ?? (Lite<IsolationEntity>?)ctx.HttpContext.Items[IsolationFilter.Signum_Isolation_Key];
+            };
         }
 
-        public static MvcOptions AddIsolationFilter(this MvcOptions options)
+        public static MvcOptions AddIsolationFilter(this MvcOptions options, int atIndex = -1)
         {
             if (!options.Filters.OfType<SignumAuthenticationFilter>().Any())
                 throw new InvalidOperationException("SignumAuthenticationFilter not found");
 
-            options.Filters.Add(new IsolationFilter());
+            if (atIndex >= 0)
+                options.Filters.Insert(atIndex, new IsolationFilter());
+            else
+                options.Filters.Add(new IsolationFilter());
+
             return options;
         }
 
