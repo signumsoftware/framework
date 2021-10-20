@@ -248,6 +248,15 @@ export module CalendarMessage {
   export const Today = new MessageKey("CalendarMessage", "Today");
 }
 
+export const ComparisonType = new EnumType<ComparisonType>("ComparisonType");
+export type ComparisonType =
+  "EqualTo" |
+  "DistinctTo" |
+  "GreaterThan" |
+  "GreaterThanOrEqualTo" |
+  "LessThan" |
+  "LessThanOrEqualTo";
+
 export module ConnectionMessage {
   export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
   export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");

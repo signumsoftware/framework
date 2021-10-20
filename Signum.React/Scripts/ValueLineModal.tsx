@@ -58,7 +58,8 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
-  const valueOnChanged = p.options.allowEmptyValue == false ? forceUpdate : undefined;
+
+  const error = p.options.validateValue ? p.options.validateValue(ctx.value) : undefined;
 
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
@@ -74,11 +75,14 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         </p>
         <AutoFocus>
           <ValueLine
-            formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+            formGroupStyle={vlp.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
         </AutoFocus>
+        {p.options.validateValue && <p className="text-danger">
+          { error}
+        </p>}
       </div>
       <div className="modal-footer">
-        <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
+        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
@@ -102,6 +106,7 @@ export interface ValueLineModalOptions {
   title?: React.ReactChild;
   message?: React.ReactChild;
   labelText?: React.ReactChild;
+  validateValue?: (val: any) => string | undefined;
   formatText?: string;
   unitText?: string;
   initiallyFocused?: boolean;

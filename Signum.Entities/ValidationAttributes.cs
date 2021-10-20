@@ -668,6 +668,7 @@ namespace Signum.Entities
         public override string HelpMessage => ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), Number.ToString());
     }
 
+    [InTypeScript(true)]
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum ComparisonType
     {
