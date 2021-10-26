@@ -12,8 +12,8 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartScriptProps): React.ReactElement<any> {
-  
+export default function renderMultiLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
+
   var xRule = Rule.create({
     _1: 5,
     title: 15,
@@ -96,84 +96,124 @@ export default function renderMultiLines({ data, width, height, parameters, load
   if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
     numberOpacity = 0;
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
-      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
+      </g>
 
+      {columnsInOrder.map(s => {
 
-      {columnsInOrder.map(s =>
-        <g key={s.key} className="shape-serie-hover sf-transition"
-          transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
-          <path className="shape sf-transition"
-            stroke={s.color || color(s.key)}
-            transform={initialLoad ? scale(1, 0) : scale(1, 1)}
-            fill="none"
-            strokeWidth={3}
-            shapeRendering="initial"
-            d={d3.line<PivotRow | undefined>()
-              .defined(r => r?.values[s.key]?.value != null)
-              .x(r => x(keyColumn.getKey(r!.rowValue))!)
-              .y(r => -y(r!.values[s.key].value)!)
-              .curve(ChartUtils.getCurveByName(pInterpolate)!)
-              (keyValues.map(k => rowByKey[keyColumn.getKey(k)]))!}
-          />
-          {/*paint graph - hover area trigger*/}
-          {circleRadiusHover > 0 && rowsInOrder
-            .filter(r => r.values[s.key] != undefined)
-            .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="hover"
-              transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
-              r={circleRadiusHover}
-              fill="#fff"
-              fillOpacity={0}
-              stroke="none"
-              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
-              cursor="pointer">
-              <title>
-                {r.values[s.key].valueTitle}
-              </title>
-            </circle>)}
-        </g>)}
-
-      {columnsInOrder.map(s =>
-        <g key={s.key} className="shape-serie sf-transition"
-          transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
-          {/*paint graph - points and texts*/}
-          {circleRadius > 0 && circleStroke > 0 && rowsInOrder
-            .filter(r => r.values[s.key] != undefined)
-            .map(r => <circle key={keyColumn.getKey(r.rowValue)} className="point sf-transition"
+        return (
+          <g key={s.key} className="shape-serie-hover sf-transition"
+            transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+            <path className="shape sf-transition"
               stroke={s.color || color(s.key)}
-            strokeWidth={circleStroke}
-              fill="white"
-              transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)!)}
-            r={circleRadius}
+              opacity={dashboardFilter && !(c.c1 && detector?.({ c1: s.value }) == true) ? .5 : undefined}
+              transform={initialLoad ? scale(1, 0) : scale(1, 1)}
+              fill="none"
+              strokeWidth={3}
               shapeRendering="initial"
-              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
-              cursor="pointer">
-              <title>
-                {r.values[s.key].valueTitle}
-              </title>
-            </circle>)}
-          {numberOpacity > 0 &&
-            rowsInOrder
-              .filter(r => r.values[s.key] != undefined)
-              .map(r => <text key={keyColumn.getKey(r.rowValue)} className="point-label sf-transition"
-                textAnchor="middle"
-                opacity={numberOpacity}
-                transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(r.values[s.key].value)! - 8)}
-                onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
-                cursor="pointer"
-                shapeRendering="initial">
-                {r.values[s.key].valueNiceName}
-              </text>)
-          }
-        </g>)}
+              d={d3.line<PivotRow | undefined>()
+                .defined(r => r?.values[s.key]?.value != null)
+                .x(r => x(keyColumn.getKey(r!.rowValue))!)
+                .y(r => -y(r!.values[s.key].value)!)
+                .curve(ChartUtils.getCurveByName(pInterpolate)!)
+                (keyValues.map(k => rowByKey[keyColumn.getKey(k)]))!}
+            />
+            {/*paint graph - hover area trigger*/}
+            {circleRadiusHover > 0 && rowsInOrder
+              .map(r => {
+                var row = r.values[s.key];
+                if (row == null)
+                  return undefined;
 
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
+                return (
+                  <circle key={keyColumn.getKey(r.rowValue)} className="hover"
+                    transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)!)}
+                    r={circleRadiusHover}
+                    fill="#fff"
+                    fillOpacity={0}
+                    stroke="none"
+                    onClick={e => onDrillDown(row.rowClick, e)}
+                    cursor="pointer">
+                    <title>
+                      {row.valueTitle}
+                    </title>
+                  </circle>
+                );
+              })}
+          </g>
+        )
+      })}
+
+      {
+        columnsInOrder.map(s =>
+          <g key={s.key} className="shape-serie sf-transition"
+            transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+            {/*paint graph - points and texts*/}
+            {circleRadius > 0 && circleStroke > 0 && rowsInOrder
+              .map(r => {
+                var row = r.values[s.key];
+                if (row == null)
+                  return undefined;
+
+                var active = detector?.(row.rowClick);
+                var key = keyColumn.getKey(r.rowValue);
+
+                return (
+                  <circle key={key} className="point sf-transition"
+                    opacity={active == false ? .5 : undefined}
+                    stroke={active == true ? "black" : s.color || color(s.key)}
+                    strokeWidth={active == true ? 3 : circleStroke}
+                    fill="white"
+                    transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(row.value)!)}
+                    r={circleRadius}
+                    shapeRendering="initial"
+                    onClick={e => onDrillDown(row.rowClick, e)}
+                    cursor="pointer">
+                    <title>
+                      {row.valueTitle}
+                    </title>
+                  </circle>
+                );
+              })}
+            {numberOpacity > 0 &&
+              rowsInOrder
+                .map(r => {
+
+                  var row = r.values[s.key];
+                  if (row == null)
+                    return undefined;
+
+                  var active = detector?.(row.rowClick);
+                  return (
+                    <text key={keyColumn.getKey(r.rowValue)} className="point-label sf-transition"
+                      textAnchor="middle"
+                      opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
+                      transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)! - 8)}
+                      onClick={e => onDrillDown(row.rowClick, e)}
+                      cursor="pointer"
+                      shapeRendering="initial">
+                      {row.valueNiceName}
+                    </text>
+                  );
+                })
+            }
+          </g>
+        )
+      }
+
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </g>
     </svg>
   );
 }

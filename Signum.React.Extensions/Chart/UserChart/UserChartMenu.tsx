@@ -222,10 +222,12 @@ export namespace UserChartMerger {
     newUqColumns.forEach((newMle, i) => {
 
       var oldMle = oldUqColumns[i];
-      newMle.rowId = oldMle.rowId;
+      if (oldMle) {
+        newMle.rowId = oldMle.rowId;
 
-      if (newMle.element.displayName == translated(oldMle.element, a => a.displayName))
-        newMle.element.displayName = oldMle.element.displayName;
+        if (newMle.element.displayName == translated(oldMle.element, a => a.displayName))
+          newMle.element.displayName = oldMle.element.displayName;
+      }
     });
 
     return newUqColumns;

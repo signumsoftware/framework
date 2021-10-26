@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 
 
-export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -83,13 +83,14 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
-      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
-
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
+      </g>
       <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
         {orderRows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
           className="shape-serie sf-transition"
-          opacity={r.active == false ? .5 : undefined }
+          opacity={r.active == false ? .5 : undefined}
           transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
           cursor="pointer"
           onClick={e => onDrillDown(r, e)}
@@ -125,8 +126,10 @@ export default function renderBubbleplot({ data, width, height, parameters, load
       </g>
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </g>
     </svg>
   );
 }

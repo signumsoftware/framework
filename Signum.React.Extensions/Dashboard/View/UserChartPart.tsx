@@ -121,8 +121,10 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
               p.filterController.clear(p.partEmbedded);
             }
           }}
+          dashboardFilter={p.filterController.filters.get(p.partEmbedded)}
           onDrillDown={(row, e) => {
             e.stopPropagation();
+            debugger;
             if (e.altKey)
               handleDrillDown(row, e, chartRequest, handleReload);
             else {
@@ -133,15 +135,19 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
                 const already = dashboardFilter?.rows.firstOrNull(fr => equalsDFR(fr, filterRow));
                 if (already) {
                   dashboardFilter!.rows.remove(already);
-                  p.filterController.setFilter(dashboardFilter!);
+                  if (dashboardFilter!.rows.length == 0)
+                    p.filterController.filters.delete(dashboardFilter!.partEmbedded);
+                  else
+                    p.filterController.setFilter(dashboardFilter!);
                 }
                 else {
-                  const db = dashboardFilter ?? { partEmbedded: p.partEmbedded, queryKey: chartRequest.queryKey, rows: [] } as DashboardFilter;
+                  const db = dashboardFilter ?? new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
                   db.rows.push(filterRow);
                   p.filterController.setFilter(db);
                 }
               } else {
-                const db = { partEmbedded: p.partEmbedded, queryKey: chartRequest.queryKey, rows: [filterRow] } as DashboardFilter;
+                const db = new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
+                db.rows.push(filterRow);
                 p.filterController.setFilter(db);
               }
             }
@@ -161,7 +167,7 @@ function toDashboardFilterRow(row: ChartClient.ChartRow, chartRequest: ChartRequ
   var filters = chartRequest.columns.map((c, i) => ({
     token: c.element.token?.token,
     value: (row as any)["c" + i],
-  })).filter(a => a.token != null && a.token.queryTokenType != "Aggregate");
+  })).filter(a => a.token != null && a.token.queryTokenType != "Aggregate" && a.value !== undefined);
 
   return { filters: filters } as DashboardFilterRow;
 }
@@ -170,23 +176,9 @@ function toDashboardFilterRow(row: ChartClient.ChartRow, chartRequest: ChartRequ
 
 function setActive(chartTable: ChartClient.ChartTable, request: ChartRequestModel, dashboardFilter?: DashboardFilter) {
 
-  if (!dashboardFilter?.rows.length) {
+  var detector = dashboardFilter?.getActiveDetector(request);
+  if (detector == null)
     chartTable.rows.forEach(row => delete row.active);
-  } else {
-
-    var tokenToColumn = request.columns
-      .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
-      .filter(a => a.tokenString != null)
-      .groupBy(a => a.tokenString)
-      .toObject(gr => gr.key!, gr => gr.elements.first().colName);
-
-    chartTable.rows.forEach(row => {
-      row.active = dashboardFilter.rows.some(r => {
-        return r.filters.every(f => {
-          var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
-          return f.value == rowVal && is(f.value, rowVal, false, false);
-        });
-      })
-    });
-  }
+  else
+    chartTable.rows.forEach(row => row.active = detector!(row));
 }

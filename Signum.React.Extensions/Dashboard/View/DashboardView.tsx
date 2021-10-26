@@ -40,7 +40,7 @@ export class DashboardFilterController {
     this.filters.delete(partEmbedded);
     this.forceUpdate();
   }
-  
+
   getFilterOptions(partEmbedded: PanelPartEmbedded, queryKey: string): FilterOptionParsed[] {
     var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.rows?.length);
 
@@ -55,7 +55,7 @@ export class DashboardFilterController {
     return result;
   }
 
-  
+
 
 }
 
@@ -73,10 +73,35 @@ function groupFilter(groupOperation: FilterGroupOperation, filters: FilterOption
   }) as FilterGroupOptionParsed;
 }
 
-export interface DashboardFilter {
-  queryKey: string;
-  rows: DashboardFilterRow[];
+export class DashboardFilter {
   partEmbedded: PanelPartEmbedded;
+  queryKey: string;
+  rows: DashboardFilterRow[] = [];
+
+  constructor(partEmbedded: PanelPartEmbedded, queryKey: string) {
+    this.partEmbedded = partEmbedded;
+    this.queryKey = queryKey;
+  }
+
+
+  getActiveDetector(request: ChartRequestModel): ((row: ChartRow) => boolean) | undefined {
+
+    if (this.rows.length == 0)
+      return undefined;
+
+    var tokenToColumn = request.columns
+      .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
+      .filter(a => a.tokenString != null)
+      .groupBy(a => a.tokenString)
+      .toObject(gr => gr.key!, gr => gr.elements.first().colName);
+
+    return row => this.rows.some(r => {
+      return r.filters.every(f => {
+        var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
+        return f.value == rowVal || is(f.value, rowVal, false, false);
+      });
+    });
+  }
 }
 
 export interface DashboardFilterRow {
@@ -99,7 +124,7 @@ export function equalsDFR(row1: DashboardFilterRow, row2: DashboardFilterRow): b
   return true;
 }
 
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; reload: () => void;  }) {
 
   const forceUpdate = useForceUpdate();
   var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
@@ -125,7 +150,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
 
                   return (
                     <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} />
+                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} />
                     </div>
                   );
                 })}
@@ -161,7 +186,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} reload={p.reload} />)}
                 </div>
               );
             })}
@@ -256,13 +281,8 @@ export interface PanelPartProps {
   entity?: Entity;
   deps?: React.DependencyList;
   filterController: DashboardFilterController;
+  reload: () => void;
 }
-
-export interface PanelPartState {
-  component?: React.ComponentClass<DashboardClient.PanelPartContentProps<IPartEntity>>;
-  lastType?: string;
-}
-
 
 export function PanelPart(p: PanelPartProps) {
   const content = p.ctx.value.content;
@@ -296,7 +316,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
+      <FontAwesomeIcon icon={icon} color={color} className="mr-1" />{titleText}
     </span>;
 
   var style = part.style == undefined ? undefined : part.style.toLowerCase();
@@ -309,11 +329,10 @@ export function PanelPart(p: PanelPartProps) {
       )}>
         {renderer.handleEditClick &&
           <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-            <FontAwesomeIcon icon="edit" />&nbsp;Edit
+            <FontAwesomeIcon icon="edit" className="mr-1" />Edit
           </a>
         }
-        &nbsp;
-      {renderer.handleTitleClick == undefined ? title :
+        {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
       </div>

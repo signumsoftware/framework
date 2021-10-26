@@ -11,6 +11,7 @@ import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
 import { useThrottle, useSize, useAPI, areEqual } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
+import { DashboardFilter } from '../../../Dashboard/View/DashboardView';
 
 export interface ReactChartProps {
   chartRequest: ChartRequestModel,
@@ -21,6 +22,7 @@ export interface ReactChartProps {
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
+  dashboardFilter?: DashboardFilter;
 }
 
 
@@ -48,6 +50,7 @@ export default function ReactChart(p: ReactChartProps) {
           width: size.width,
           initialLoad: initialLoad,
           memo: memo,
+          dashboardFilter: p.dashboardFilter
         })
       }
     </div>

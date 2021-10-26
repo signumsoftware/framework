@@ -91,6 +91,7 @@ export function stratifyTokens(
 
 export interface Folder {
   folder: unknown;
+  active?: boolean;
 }
 
 export function isFolder(obj: any): obj is Folder {

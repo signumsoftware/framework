@@ -22,6 +22,7 @@ import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
 import { DashboardFilter, DashboardFilterController } from './View/DashboardView';
+import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -43,7 +44,7 @@ export interface PartRenderer<T extends IPartEntity> {
   defaultTitle?: (elenent: T) => string;
   withPanel?: (element: T) => boolean;
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
-  handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
+  handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => Promise<boolean>;
 }
 
 
@@ -86,7 +87,7 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
+        return Navigator.view(p.userChart!).then(e => Boolean(e));
       },
     handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (p, e, ev) => {
@@ -104,14 +105,14 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        SelectorModal.chooseElement(p.userCharts.map(a => a.element), {
+        return SelectorModal.chooseElement(p.userCharts.map(a => a.element), {
           buttonDisplay: a => a.displayName ?? "",
           buttonName: a => a.id!.toString(),
           title: SelectorMessage.SelectAnElement.niceToString(),
           message: SelectorMessage.PleaseSelectAnElement.niceToString()
         })
-          .then(lite => lite && AppContext.pushOrOpenInTab(Navigator.navigateRoute(lite!), ev))
-          .done();
+          .then(lite => lite && Navigator.view(lite!))
+          .then(entity => Boolean(entity));
       },
     handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (p, e, ev) => {
@@ -141,7 +142,7 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+        return Navigator.view(p.userQuery!).then(uq => Boolean(uq));
       },
     handleTitleClick:
       (p, e, ev) => {
@@ -161,7 +162,7 @@ export function start(options: { routes: JSX.Element[] }) {
     handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
-        AppContext.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+        return Navigator.view(p.userQuery!).then(uq => Boolean(uq));
       },
     handleTitleClick:
       (p, e, ev) => {
@@ -180,7 +181,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return wc.frame.pack.embeddedDashboards.map(d => {
       return {
         position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
-        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} />,
+        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
         eventKey: liteKey(toLite(d)),
         title: d.displayName,
       } as EmbeddedWidget;
@@ -258,6 +259,7 @@ declare module '@framework/Signum.Entities' {
 export interface DashboardWidgetProps {
   pack: EntityPack<Entity>;
   dashboard: DashboardEntity;
+  frame: EntityFrame;
 }
 
 export function DashboardWidget(p: DashboardWidgetProps) {
@@ -269,7 +271,8 @@ export function DashboardWidget(p: DashboardWidgetProps) {
 
   return React.createElement(component, {
     dashboard: p.dashboard,
-    entity: p.pack.entity
+    entity: p.pack.entity,
+    reload: () => p.frame.onReload(),
   });
 }
 

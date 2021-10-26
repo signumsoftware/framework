@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderMultiColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -77,33 +77,48 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key), memo);
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
-      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
-
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
+      </g>
       {columnsInOrder.map(s => <g key={s.key} className="shape-serie"
         transform={translate(xRule.start('content'), yRule.end('content'))} >
 
         {rowsInOrder
           .filter(r => r.values[s.key] != undefined)
-          .map(r => <rect key={keyColumn.getKey(r.rowValue)}
-            className="shape sf-transition"
-            stroke={xSubscale.bandwidth() > 4 ? '#fff' : undefined}
-            fill={s.color || color(s.key)}
-            transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(
-              x(keyColumn.getKey(r.rowValue))! + xSubscale(s.key)!,
-              - y(r.values[s.key].value)!
-            )}
-            width={xSubscale.bandwidth()}
-            height={y(r.values[s.key].value)}
-            onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
-            cursor="pointer">
-            <title>
-              {r.values[s.key].valueTitle}
-            </title>
-          </rect>)}
+          .map(r => {
+            var row = r.values[s.key];
+            if (row == undefined)
+              return undefined;
+
+            var active = detector?.(row.rowClick);
+            var key = keyColumn.getKey(r.rowValue);
+
+            return (
+              <rect key={key}
+                className="shape sf-transition"
+                opacity={active == false ? .5 : undefined}
+                stroke={active == true ? "black" : xSubscale.bandwidth() > 4 ? '#fff' : undefined}
+                strokeWidth={active == true ? 3 : undefined}
+                fill={s.color || color(s.key)}
+                transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(
+                  x(key)! + xSubscale(s.key)!,
+                  - y(row.value)!
+                )}
+                width={xSubscale.bandwidth()}
+                height={y(row.value)}
+                onClick={e => onDrillDown(row.rowClick, e)}
+                cursor="pointer">
+                <title>
+                  {row.valueTitle}
+                </title>
+              </rect>
+            );
+          })}
 
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           rowsInOrder
@@ -129,11 +144,13 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
       </g>
       )}
 
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
-      
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))}/>
+
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </g>
     </svg>
   );
 }

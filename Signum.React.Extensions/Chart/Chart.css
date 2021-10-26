@@ -120,6 +120,7 @@ body.rtl .sf-chart-token .sf-query-token {
 
     .sf-chart-container svg {
         shape-rendering: crispEdges;
+        user-select: none;
     }
 
 .sf-chart-color-table {

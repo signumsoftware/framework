@@ -1,3 +1,4 @@
+import { QueryToken } from "@framework/FindOptions";
 import * as d3 from "d3";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient";
 
@@ -23,6 +24,7 @@ export function toPivotTable(data: ChartTable,
     columns: Object.values(usedCols.toObject(c => c.name, c => ({
       color: null,
       key: c.name,
+      token: c.token,
       niceName: c.title,
     } as PivotColumn))),
     rows,
@@ -38,6 +40,8 @@ export function groupedPivotTable(data: ChartTable,
     niceName: colSplit.getNiceName(v),
     color: colSplit.getColor(v),
     key: colSplit.getKey(v),
+    token: colSplit.token,
+    value: v,
   }) as PivotColumn));
 
   var rows = data.rows.groupBy(r => "k" + col0.getValueKey(r))
@@ -75,6 +79,8 @@ export interface PivotTable {
 export interface PivotColumn {
   key: string;
   color?: string | null;
+  token?: QueryToken;
+  value?: unknown;
   niceName?: string | null;
 }
 

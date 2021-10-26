@@ -8,7 +8,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -115,7 +115,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
             translate((yr - minDate.getFullYear()) * (cellSize * (7 + 1)), 0)}>
 
           <text transform={horizontal ? translate(-6, cellSize * 3.5) + rotate(-90) :
-            translate(cellSize * 3.5, -6)} textAnchor="middle">
+            translate(cellSize * 3.5, -6)} textAnchor="middle" opacity={dashboardFilter ? .5 : undefined}>
             {yr}
           </text>
 
@@ -123,7 +123,9 @@ export default function renderCalendarStream({ data, width, height, parameters, 
             const r = rowYByDate[cleanDate(d)];
             return <rect key={d.toISOString()}
               className="sf-transition"
-              stroke="#ccc"
+              opacity={dashboardFilter && !r?.active == true ? .5 : undefined}
+              stroke={r?.active == true ? "black" : "#ccc"}
+              strokeWidth={r?.active == true ? 2 : undefined}
               fill={r == undefined || initialLoad ? "#fff" : color(r)}
               width={cellSize}
               height={cellSize}
@@ -137,15 +139,18 @@ export default function renderCalendarStream({ data, width, height, parameters, 
             </rect>
           })}
 
-          {d3.timeMonths(new Date(yr, 0, 1), new Date(yr + 1, 0, 1))
-            .map(m => <path key={m.toString()}
-              className="month"
-              stroke="#666"
-              strokeWidth={1}
-              fill="none"
-              d={horizontal ? monthPathH(m) : monthPathV(m)} />
-            )
-          }
+          <g opacity={dashboardFilter ? .5 : undefined}>
+            {d3.timeMonths(new Date(yr, 0, 1), new Date(yr + 1, 0, 1))
+              .map(m => <path key={m.toString()}
+
+                className="month"
+                stroke="#666"
+                strokeWidth={1}
+                fill="none"
+                d={horizontal ? monthPathH(m) : monthPathV(m)} />
+              )
+            }
+          </g>
         </g>)}
       </g>
     </svg>
