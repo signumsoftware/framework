@@ -7,13 +7,13 @@ namespace Signum.React.Selenium
 {
     public class SearchPageProxy : IDisposable
     {
-        public RemoteWebDriver Selenium { get; private set; }
+        public WebDriver Selenium { get; private set; }
         public SearchControlProxy SearchControl { get; private set; }
         public ResultTableProxy Results { get { return SearchControl.Results; } }
         public FiltersProxy Filters { get { return SearchControl.Filters; } }
         public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
 
-        public SearchPageProxy(RemoteWebDriver selenium)
+        public SearchPageProxy(WebDriver selenium)
         {
             this.Selenium = selenium;
             this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));

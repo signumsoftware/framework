@@ -19,7 +19,7 @@ namespace Signum.React.Selenium
         public static TimeSpan ThrowExceptionForDeveloperAfter = TimeSpan.FromMilliseconds(5 * 1000);
         public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
 
-        public static T Wait<T>(this RemoteWebDriver selenium, Func<T> condition, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+        public static T Wait<T>(this WebDriver selenium, Func<T> condition, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             try
             {
@@ -78,20 +78,20 @@ namespace Signum.React.Selenium
               System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         }
 
-        public static string WaitNewWindow(this RemoteWebDriver selenium, Action action)
+        public static string WaitNewWindow(this WebDriver selenium, Action action)
         {
             var old = selenium.WindowHandles.ToHashSet();
             action();
             return selenium.Wait(() => selenium.WindowHandles.SingleOrDefaultEx(a => !old.Contains(a)))!;
         }
 
-        public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
+        public static void WaitEquals<T>(this WebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
             T lastValue = default(T)!;
             selenium.Wait(() => EqualityComparer<T>.Default.Equals(lastValue = value(), expectedValue), () => "expression to be " + expectedValue + " but is " + lastValue, timeout);
         }
 
-        public static IWebElement? TryFindElement(this RemoteWebDriver selenium, By locator)
+        public static IWebElement? TryFindElement(this WebDriver selenium, By locator)
         {
             return selenium.FindElements(locator).FirstOrDefault();
         }
@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
             return element.FindElements(locator).FirstOrDefault();
         }
 
-        public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+        public static IWebElement WaitElementPresent(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(),
                 actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
@@ -113,7 +113,7 @@ namespace Signum.React.Selenium
                 actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout)!;
         }
 
-        public static void AssertElementPresent(this RemoteWebDriver selenium, By locator)
+        public static void AssertElementPresent(this WebDriver selenium, By locator)
         {
             if (!selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} not found".FormatWith(locator));
@@ -125,7 +125,7 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} not found".FormatWith(locator));
         }
 
-        public static bool IsElementPresent(this RemoteWebDriver selenium, By locator)
+        public static bool IsElementPresent(this WebDriver selenium, By locator)
         {
             return selenium.FindElements(locator).Any();
         }
@@ -135,7 +135,7 @@ namespace Signum.React.Selenium
             return element.FindElements(locator).Any();
         }
 
-        public static void WaitElementNotPresent(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+        public static void WaitElementNotPresent(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             selenium.Wait(() => !selenium.IsElementPresent(locator),
                 actionDescription ?? (Func<string>)(() => "{0} to be not present".FormatWith(locator)), timeout);
@@ -147,7 +147,7 @@ namespace Signum.React.Selenium
                 actionDescription ?? (Func<string>)(() => "{0} to be not present".FormatWith(locator)), timeout);
         }
 
-        public static void AssertElementNotPresent(this RemoteWebDriver selenium, By locator)
+        public static void AssertElementNotPresent(this WebDriver selenium, By locator)
         {
             if (selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
@@ -174,7 +174,7 @@ namespace Signum.React.Selenium
             return SeleniumExtras.WaitHelpers.ExpectedConditions.StalenessOf(element)(element.GetDriver());
         }
 
-        public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+        public static IWebElement WaitElementVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(a => a.Displayed),
                 actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
@@ -186,7 +186,7 @@ namespace Signum.React.Selenium
                 actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout)!;
         }
 
-        public static void AssertElementVisible(this RemoteWebDriver selenium, By locator)
+        public static void AssertElementVisible(this WebDriver selenium, By locator)
         {
             var elements = selenium.FindElements(locator);
 
@@ -197,7 +197,7 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} found but not visible".FormatWith(locator));
         }
 
-        public static bool IsElementVisible(this RemoteWebDriver selenium, By locator)
+        public static bool IsElementVisible(this WebDriver selenium, By locator)
         {
             var elements = selenium.FindElements(locator);
             try
@@ -223,7 +223,7 @@ namespace Signum.React.Selenium
             }
         }
 
-        public static void WaitElementNotVisible(this RemoteWebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
+        public static void WaitElementNotVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
         {
             selenium.Wait(() => !selenium.IsElementVisible(locator),
                 actionDescription ?? (Func<string>)(() => "{0} to be not visible".FormatWith(locator)), timeout);
@@ -235,7 +235,7 @@ namespace Signum.React.Selenium
                 actionDescription ?? (Func<string>)(() => "{0} to be not visible".FormatWith(locator)), timeout);
         }
 
-        public static void AssertElementNotVisible(this RemoteWebDriver selenium, By locator)
+        public static void AssertElementNotVisible(this WebDriver selenium, By locator)
         {
             if (selenium.IsElementVisible(locator))
                 throw new InvalidOperationException("{0} is visible".FormatWith(locator));
@@ -247,9 +247,9 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} is visible".FormatWith(locator));
         }
 
-        public static RemoteWebDriver GetDriver(this IWebElement element)
+        public static WebDriver GetDriver(this IWebElement element)
         {
-            return (RemoteWebDriver)((IWrapsDriver)element).WrappedDriver;
+            return (WebDriver)((IWrapsDriver)element).WrappedDriver;
         }
 
         public static void SetChecked(this IWebElement element, bool isChecked)
@@ -263,7 +263,7 @@ namespace Signum.React.Selenium
         }
 
         //[DebuggerStepThrough]
-        //public static bool IsAlertPresent(this RemoteWebDriver selenium)
+        //public static bool IsAlertPresent(this WebDriver selenium)
         //{
         //    try
         //    {
@@ -276,7 +276,7 @@ namespace Signum.React.Selenium
         //    }
         //}
 
-        public static void ConsumeAlert(this RemoteWebDriver selenium)
+        public static void ConsumeAlert(this WebDriver selenium)
         {
             var alertPresent = selenium.Wait(() => MessageModalProxyExtensions.IsMessageModalPresent(selenium));
 
@@ -366,7 +366,7 @@ namespace Signum.React.Selenium
             return button.GetDriver().CapturePopup(() => button.DoubleClick());
         }
 
-        public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
+        public static IWebElement CapturePopup(this WebDriver selenium, Action clickToOpen)
         {
             var body = selenium.FindElement(By.TagName("body"));
             var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
@@ -463,7 +463,7 @@ namespace Signum.React.Selenium
             js.ExecuteScript("arguments[0].focus(); arguments[0].blur(); return true", element);
         }
 
-        public static void Retry<T>(this RemoteWebDriver driver, int times, Action action) where T : Exception
+        public static void Retry<T>(this WebDriver driver, int times, Action action) where T : Exception
         {
             for (int i = 0; i < times; i++)
             {

@@ -35,12 +35,12 @@ namespace Signum.React.Selenium
             this.WaitNotVisible();
         }
 
-        public static string GetMessageText(RemoteWebDriver selenium, MessageModalProxy modal)
+        public static string GetMessageText(WebDriver selenium, MessageModalProxy modal)
         {
             return modal.Element.FindElement(By.ClassName("text-warning")).Text;
         }
 
-        public static string GetMessageTitle(RemoteWebDriver selenium, MessageModalProxy modal)
+        public static string GetMessageTitle(WebDriver selenium, MessageModalProxy modal)
         {
             return modal.Element.FindElement(By.ClassName("modal-title")).Text;
         }
@@ -48,7 +48,7 @@ namespace Signum.React.Selenium
 
     public static class MessageModalProxyExtensions
     {
-        public static bool IsMessageModalPresent(this RemoteWebDriver selenium)
+        public static bool IsMessageModalPresent(this WebDriver selenium)
         {
             var message = GetMessageModal(selenium);
 
@@ -58,7 +58,7 @@ namespace Signum.React.Selenium
             return true;
         }
 
-        public static MessageModalProxy? GetMessageModal(this RemoteWebDriver selenium)
+        public static MessageModalProxy? GetMessageModal(this WebDriver selenium)
         {
             var element = selenium.TryFindElement(By.ClassName("message-modal"));
 
@@ -68,7 +68,7 @@ namespace Signum.React.Selenium
             return new MessageModalProxy(element.GetParent());
         }
 
-        public static void CloseMessageModal(this RemoteWebDriver selenium, MessageModalButton button)
+        public static void CloseMessageModal(this WebDriver selenium, MessageModalButton button)
         {
             var message = selenium.Wait(() => GetMessageModal(selenium))!;
 

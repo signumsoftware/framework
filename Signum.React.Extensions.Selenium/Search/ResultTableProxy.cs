@@ -13,7 +13,7 @@ namespace Signum.React.Selenium
 {
     public class ResultTableProxy
     {
-        public RemoteWebDriver Selenium { get; private set; }
+        public WebDriver Selenium { get; private set; }
 
         public IWebElement Element;
 
