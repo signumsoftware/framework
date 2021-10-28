@@ -681,7 +681,7 @@ namespace Signum.Engine.Workflow
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.Start);
 
-                        var wec = new WorkflowExecuteStepContext(ca.Case, ca.Previous?.RetrieveAndForget());
+                        var wec = new WorkflowExecuteStepContext(ca.Case, ca.Previous?.Retrieve());
 
                         wec.ExecuteConnection(prevConn);
 

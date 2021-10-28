@@ -68,7 +68,7 @@ export function start(options: {
       Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
         if (!lite)
           return;
-        Navigator.API.fetchAndForget(lite).then(entity =>
+        Navigator.API.fetch(lite).then(entity =>
           ctx.defaultClick(entity))
           .done();
       }).done();
@@ -162,7 +162,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
 
 export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
-  Navigator.API.fetchAndForget(et)
+  Navigator.API.fetch(et)
     .then(emailTemplate => emailTemplate.model ? API.getConstructorType(emailTemplate.model) : Promise.resolve(undefined))
     .then(ct => {
       if (!ct)

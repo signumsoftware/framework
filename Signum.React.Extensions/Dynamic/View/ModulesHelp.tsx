@@ -31,9 +31,9 @@ modules.React.useEffect(() => {
   modules["Globals"] = "";
   modules["Navigator"] = `modules.Navigator.view(e);
 modules.Navigator.API.fetchEntity("${p.cleanName}", [id]).then(entity => { /* do something here ... */ }).done();
-modules.Navigator.API.fetchAndForget([lite]).then(entity => { /* do something here ... */ }).done();
+modules.Navigator.API.fetch([lite]).then(entity => { /* do something here ... */ }).done();
 
-NOTE: fetchAndRemember stores the result entity in lite.Entity.
+NOTE: fetchAndRemember stores the result entity in lite.entity.
 modules.Navigator.API.fetchAndRemember([lite]).then(entity => { /* do something here ... */ }).done();
 `;
   modules["Finder"] = `modules.Finder.find("${p.cleanName}");

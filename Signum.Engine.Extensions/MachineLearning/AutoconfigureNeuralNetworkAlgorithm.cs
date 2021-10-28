@@ -15,7 +15,7 @@ namespace Signum.Engine.MachineLearning
         {   
             var conf = (AutoconfigureNeuralNetworkEntity)ep.Data!;
 
-            var initial = conf.InitialPredictor.RetrieveAndForget();
+            var initial = conf.InitialPredictor.Retrieve();
             Random r = conf.Seed == null ? 
                 new Random(): 
                 new Random(conf.Seed.Value);

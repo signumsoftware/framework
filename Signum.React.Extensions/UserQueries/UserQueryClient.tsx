@@ -59,7 +59,7 @@ export function start(options: { routes: JSX.Element[] }) {
         if (uq.entityType == undefined)
           window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
         else
-          Navigator.API.fetchAndForget(uq.entityType)
+          Navigator.API.fetch(uq.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
             .then(lite => {
               if (!lite)
@@ -120,7 +120,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
 function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParsed, cic: ContextualItemsContext<Entity>): void {
   var sc = cic.container as SearchControlLoaded;
 
-  Navigator.API.fetchAndForget(uq)
+  Navigator.API.fetch(uq)
     .then(uqe => Converter.toFindOptions(uqe, undefined)
       .then(fo => {
 

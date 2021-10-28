@@ -73,7 +73,7 @@ namespace Signum.React.Mailing
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 
-            var entity = request.lite?.RetrieveAndForget();
+            var entity = request.lite?.Retrieve();
 
             return EmailTemplateLogic.GetApplicableEmailTemplates(queryName, entity, visibleOn);
         }

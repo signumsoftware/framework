@@ -66,7 +66,7 @@ namespace Signum.Engine.Mailing
                             Name = args.TryGetArgC<string>()
                         }.Save();
 
-                        foreach (var m in messages.Select(m => m.RetrieveAndForget()))
+                        foreach (var m in messages.Select(m => m.Retrieve()))
                         {
                             new EmailMessageEntity()
                             {

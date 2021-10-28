@@ -113,7 +113,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
       if (isLite) {
         const lite = entityOrLite as Lite<Entity>;
-        return Navigator.API.fetchAndForget(lite);
+        return Navigator.API.fetch(lite);
       }
 
       const entity = entityOrLite as Entity;

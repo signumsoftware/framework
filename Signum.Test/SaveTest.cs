@@ -54,7 +54,7 @@ namespace Signum.Test
 
                 m.Save();
 
-                var m2 = m.ToLite().RetrieveAndForget();
+                var m2 = m.ToLite().Retrieve();
 
                 Assert.Contains(m2.ToLite(), m2.Friends);
 

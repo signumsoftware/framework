@@ -28,7 +28,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
   register(QueryModel, {
     createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
     createFromEntities: (wt, lites) => {
-      return Navigator.API.fetchAndForget(wt).then(template => QueryModel.New({
+      return Navigator.API.fetch(wt).then(template => QueryModel.New({
         queryKey: template.query!.key,
         filters: [{ token: QueryTokenString.entity().toString(), operation: "IsIn", value: lites }],
         orders: [],
@@ -143,7 +143,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
 
 export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
-  Navigator.API.fetchAndForget(wt)
+  Navigator.API.fetch(wt)
     .then(wordTemplate => wordTemplate.model ? API.getConstructorType(wordTemplate.model) : Promise.resolve(undefined))
     .then(ct => {
       if (!ct || ctx.lites.length == 1 && ctx.lites.single().EntityType == ct)

@@ -274,7 +274,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/nextConnections")]
         public List<Lite<IWorkflowNodeEntity>> GetNextJumps([Required, FromBody]NextConnectionsRequest request)
         {
-            return request.workflowActivity.RetrieveAndForget()
+            return request.workflowActivity.Retrieve()
                 .NextConnectionsFromCache(request.connectionType)
                 .Select(a => a.To.ToLite())
                 .ToList();

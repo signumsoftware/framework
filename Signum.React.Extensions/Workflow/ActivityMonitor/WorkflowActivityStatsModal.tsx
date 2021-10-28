@@ -71,7 +71,7 @@ const [show, setShow] = React.useState<boolean>(true);
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
-    Navigator.API.fetchAndForget(p.stats.workflowActivity)
+    Navigator.API.fetch(p.stats.workflowActivity)
       .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))))
       .done();
   }

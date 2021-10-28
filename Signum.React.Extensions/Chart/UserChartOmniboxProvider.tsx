@@ -32,7 +32,7 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
     if (result.userChart == undefined)
       return undefined;
 
-    return Navigator.API.fetchAndForget(result.userChart)
+    return Navigator.API.fetch(result.userChart)
       .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
       .then(cr => ChartClient.Encoder.chartPathPromise(cr, result.userChart));
   }
