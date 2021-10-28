@@ -14,7 +14,7 @@ namespace Signum.Engine.Basics
     {
         [AutoExpressionField]
         public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr) =>
-            As.Expression(() => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString());
+            As.Expression(() => prdn.RootType.Is(pr.RootType.ToTypeEntity()) && prdn.Path == pr.PropertyString());
 
         public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties = null!;
 
@@ -42,7 +42,7 @@ namespace Signum.Engine.Basics
 
             var type = (TypeEntity)arg;
 
-            var prs = Database.Query<PropertyRouteEntity>().Where(a => a.RootType == type).ToList();
+            var prs = Database.Query<PropertyRouteEntity>().Where(a => a.RootType.Is(type)).ToList();
 
             return prs.Select(pr => table.DeleteSqlSync(pr, p => p.RootType.CleanName == pr.RootType.CleanName && p.Path == pr.Path)).Combine(Spacing.Simple);
         }
@@ -82,7 +82,7 @@ namespace Signum.Engine.Basics
 
         public static List<PropertyRouteEntity> RetrieveOrGenerateProperties(TypeEntity typeEntity)
         {
-            var retrieve = Database.Query<PropertyRouteEntity>().Where(f => f.RootType == typeEntity).ToDictionary(a => a.Path);
+            var retrieve = Database.Query<PropertyRouteEntity>().Where(f => f.RootType.Is(typeEntity)).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.EntityToType.GetOrThrow(typeEntity), typeEntity, forSync: false).ToDictionary(a => a.Path);
 
             return generate.Select(kvp => retrieve.TryGetC(kvp.Key) ?? kvp.Value).ToList();
@@ -107,7 +107,7 @@ namespace Signum.Engine.Basics
         {
             TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(route.RootType);
             string path = route.PropertyString();
-            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path) ??
+            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType.Is(type) && f.Path == path) ??
                  new PropertyRouteEntity
                  {
                      RootType = type,

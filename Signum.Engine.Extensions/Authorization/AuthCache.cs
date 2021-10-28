@@ -82,7 +82,7 @@ namespace Signum.Entities.Authorization
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
 
-            IQueryable<RT> query = Database.Query<RT>().Where(a => IsEquals.Evaluate(a.Resource, resource) && a.Role == role);
+            IQueryable<RT> query = Database.Query<RT>().Where(a => IsEquals.Evaluate(a.Resource, resource) && a.Role.Is(role));
             if (miniCache.GetAllowedBase(role).Equals(allowed))
             {
                 if (query.UnsafeDelete() == 0)
@@ -187,7 +187,7 @@ namespace Signum.Entities.Authorization
         {
             using (AuthLogic.Disable())
             {
-                var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
+                var current = Database.Query<RT>().Where(r => r.Role.Is(rules.Role) && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
                 Synchronizer.Synchronize(should, current,

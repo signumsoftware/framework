@@ -182,7 +182,7 @@ namespace Signum.Engine.Translation
                 if (!TranslateableRoutes.GetOrThrow(type).Keys.Any(pr => AnyNoTranslated(pr, ci)))
                     return TranslatedSummaryState.Completed;
 
-                if (Database.Query<TranslatedInstanceEntity>().Count(ti => ti.PropertyRoute.RootType == type.ToTypeEntity() && ti.Culture == ci.ToCultureInfoEntity()) == 0)
+                if (Database.Query<TranslatedInstanceEntity>().Count(ti => ti.PropertyRoute.RootType.Is(type.ToTypeEntity()) && ti.Culture.Is(ci.ToCultureInfoEntity())) == 0)
                     return TranslatedSummaryState.None;
 
                 return TranslatedSummaryState.Pending;
@@ -211,7 +211,7 @@ namespace Signum.Engine.Translation
                     !Database.Query<TranslatedInstanceEntity>().Any(ti =>
                         ti.Instance.Is(e) &
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
-                        ti.Culture == ci.ToCultureInfoEntity() &&
+                        ti.Culture.Is(ci.ToCultureInfoEntity()) &&
                         ti.OriginalText == str)
                     select e).Any();
         }
@@ -232,7 +232,7 @@ namespace Signum.Engine.Translation
                         ti.Instance.Is(mle.Parent) &&
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
                         ti.RowId == mle.RowId.ToString() &&
-                        ti.Culture == ci.ToCultureInfoEntity() &&
+                        ti.Culture.Is(ci.ToCultureInfoEntity()) &&
                         ti.OriginalText == str)
                     select mle).Any();
         }
@@ -241,8 +241,8 @@ namespace Signum.Engine.Translation
         {
             var routes = TranslateableRoutes.GetOrThrow(t).Keys.Select(pr => pr.ToPropertyRouteEntity()).Where(a => !a.IsNew).ToList();
 
-            int deletedPr = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType == t.ToTypeEntity() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
-            int deleteInconsistent = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType == t.ToTypeEntity() && (a.RowId != null) != a.PropertyRoute.Path.Contains("/")).UnsafeDelete();
+            int deletedPr = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType.Is(t.ToTypeEntity()) && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
+            int deleteInconsistent = Database.Query<TranslatedInstanceEntity>().Where(a => a.PropertyRoute.RootType.Is(t.ToTypeEntity()) && (a.RowId != null) != a.PropertyRoute.Path.Contains("/")).UnsafeDelete();
 
             int deletedInstance = giRemoveTranslationsForMissingEntities.GetInvoker(t)();
 
@@ -261,7 +261,7 @@ namespace Signum.Engine.Translation
         static int RemoveTranslationsForMissingEntities<T>() where T : Entity
         {
             return (from ti in Database.Query<TranslatedInstanceEntity>()
-                    where ti.PropertyRoute.RootType == typeof(T).ToTypeEntity()
+                    where ti.PropertyRoute.RootType.Is(typeof(T).ToTypeEntity())
                     join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
                     where e == null
                     select ti).UnsafeDelete();
@@ -273,7 +273,7 @@ namespace Signum.Engine.Translation
             Expression<Func<T, MList<E>>> expression = route.GetLambdaExpression<T, MList<E>>(false);
             var prefix = route.PropertyString() + "/";
             return (from ti in Database.Query<TranslatedInstanceEntity>()
-                    where ti.PropertyRoute.RootType == typeof(T).ToTypeEntity() && ti.PropertyRoute.Path.StartsWith(prefix)
+                    where ti.PropertyRoute.RootType.Is(typeof(T).ToTypeEntity()) && ti.PropertyRoute.Path.StartsWith(prefix)
                     join mle in Database.MListQuery(expression).DefaultIfEmpty() on new { ti.Instance.Entity, ti.RowId } equals new { Entity = (Entity)mle.Parent, RowId = mle.RowId.ToString() }
                     where mle == null
                     select ti).UnsafeDelete();

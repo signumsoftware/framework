@@ -567,7 +567,7 @@ namespace Signum.Engine.MachineLearning
                         var publication = arg.GetArg<PredictorPublicationSymbol>();
 
                         Database.Query<PredictorEntity>()
-                        .Where(a => a.Publication == publication)
+                        .Where(a => a.Publication.Is(publication))
                         .UnsafeUpdate()
                         .Set(a => a.Publication, a => null)
                         .Execute();

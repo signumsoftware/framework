@@ -139,7 +139,7 @@ namespace Signum.Test.LinqProvider
 
             BandEntity smashing = (from b in Database.Query<BandEntity>()
                                    from a in b.Members
-                                   where a == wretzky
+                                   where a.Is(wretzky)
                                    select b).SingleEx();
         }
 
@@ -151,7 +151,7 @@ namespace Signum.Test.LinqProvider
 
             BandEntity smashing = (from b in Database.Query<BandEntity>()
                                    from a in b.Members
-                                   where a.ToLite() == wretzky.ToLite()
+                                   where a.ToLite().Is(wretzky.ToLite())
                                    select b).SingleEx();
         }
 
@@ -182,7 +182,7 @@ namespace Signum.Test.LinqProvider
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
             var albums = (from a in Database.Query<AlbumEntity>()
-                          where a.Author.ToLite() == michael.ToLite()
+                          where a.Author.ToLite().Is(michael.ToLite())
                           select a.ToLite()).ToList();
         }
 
@@ -192,7 +192,7 @@ namespace Signum.Test.LinqProvider
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
             var albums = (from n in Database.Query<NoteWithDateEntity>()
-                          where n.Target.ToLite() == michael.ToLite()
+                          where n.Target.ToLite().Is(michael.ToLite())
                           select n.ToLite()).ToList();
         }
 
@@ -355,7 +355,7 @@ namespace Signum.Test.LinqProvider
         {
             var pa = Database.Query<PersonalAwardEntity>().FirstEx();
 
-            var albums = Database.Query<BandEntity>().Where(a => a.LastAward == pa).ToList();
+            var albums = Database.Query<BandEntity>().Where(a => a.LastAward.Is(pa)).ToList();
         }
 
         [Fact]
@@ -425,7 +425,7 @@ namespace Signum.Test.LinqProvider
         {
             GrammyAwardEntity award = new GrammyAwardEntity();
 
-            var count = Database.Query<BandEntity>().Count(a => a.LastAward == award);
+            var count = Database.Query<BandEntity>().Count(a => a.LastAward.Is(award));
 
             Assert.Equal(0, count);
         }
@@ -436,7 +436,7 @@ namespace Signum.Test.LinqProvider
         {
             GrammyAwardEntity award = new GrammyAwardEntity();
 
-            var count = Database.Query<BandEntity>().Count(a => a.LastAward != award);
+            var count = Database.Query<BandEntity>().Count(a => !a.LastAward.Is(award));
 
             Assert.True(count > 0);
         }
@@ -446,7 +446,7 @@ namespace Signum.Test.LinqProvider
         {
             GrammyAwardEntity award = new GrammyAwardEntity();
 
-            var count = Database.Query<ArtistEntity>().Count(a => a.LastAward == award);
+            var count = Database.Query<ArtistEntity>().Count(a => a.LastAward.Is(award));
 
             Assert.Equal(0, count);
         }

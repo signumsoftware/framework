@@ -52,7 +52,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
-            return Database.Query<CaseTagEntity>().Where(a => a.Case == lite).Select(a => a.TagType).ToList();
+            return Database.Query<CaseTagEntity>().Where(a => a.Case.Is(lite)).Select(a => a.TagType).ToList();
         }
 
         public class EntityPackWorkflow

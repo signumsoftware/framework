@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed>(sb,
                     toKey: qn => QueryLogic.ToQueryName(qn.Key),
                     toEntity: QueryLogic.GetQueryEntity,
-                    isEquals: (q1, q2) => q1 == q2,
+                    isEquals: (q1, q2) => q1.Is(q2),
                     merger: new QueryMerger(),
                     invalidateWithTypes: true,
                     coercer: QueryCoercer.Instance);

@@ -32,7 +32,7 @@ namespace Signum.Engine.Operations
 
         [AutoExpressionField]
         public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o) => 
-            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Operation == o));
+            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Operation.Is(o)));
 
         static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 

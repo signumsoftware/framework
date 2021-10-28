@@ -46,7 +46,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) => 
-            As.Expression(() => Database.Query<CaseEntity>().Where(a => a.Workflow == w));
+            As.Expression(() => Database.Query<CaseEntity>().Where(a => a.Workflow.Is(w)));
 
         [AutoExpressionField]
         public static bool CurrentUserHasNotification(this CaseActivityEntity ca) =>
@@ -85,7 +85,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e) => 
-            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case == e));
+            As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.Is(e)));
 
 
         [AutoExpressionField]
@@ -334,7 +334,7 @@ namespace Signum.Engine.Workflow
 
                 QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                         from cn in Database.Query<CaseNotificationEntity>()
-                        where cn.User == UserEntity.Current.ToLite()
+                        where cn.User.Is(UserEntity.Current.ToLite())
                         let ca = cn.CaseActivity.Entity
                         let previous = ca.Previous!.Entity
                         select new
@@ -453,7 +453,7 @@ namespace Signum.Engine.Workflow
             using (AuthLogic.Disable())
                 return Database.Query<CaseNotificationEntity>()
                     .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
-                    .Where(n => n.User == UserEntity.Current.ToLite() && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
+                    .Where(n => n.User.Is(UserEntity.Current.ToLite()) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
                     .UnsafeUpdate()
                     .Set(n => n.State, n => CaseNotificationState.InProgress)
                     .Execute();
@@ -548,7 +548,7 @@ namespace Signum.Engine.Workflow
 
             if (ca.DoneBy == null)
                 ca.Notifications()
-                  .Where(n => n.User == UserEntity.Current.ToLite() && n.State == CaseNotificationState.New)
+                  .Where(n => n.User.Is(UserEntity.Current.ToLite()) && n.State == CaseNotificationState.New)
                   .UnsafeUpdate()
                   .Set(a => a.State, a => CaseNotificationState.Opened)
                   .Execute();
@@ -698,7 +698,7 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.Pending },
                     CanDelete = ca => ca.Case.ParentCase != null ? CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(ca.Case.ParentCase) :
-                    ca.Case.CaseActivities().Any(a => a != ca) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
+                    ca.Case.CaseActivities().Any(a => !a.Is(ca)) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
                     !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     Delete = (ca, _) =>
                     {
@@ -911,7 +911,7 @@ namespace Signum.Engine.Workflow
             {
                 if (((WorkflowActivityEntity)ca.WorkflowActivity).RequiresOpen)
                 {
-                    if (!ca.Notifications().Any(cn => cn.User == UserEntity.Current.ToLite() && cn.State != CaseNotificationState.New))
+                    if (!ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current.ToLite()) && cn.State != CaseNotificationState.New))
                         throw new ApplicationException(CaseActivityMessage.TheActivity0RequiresToBeOpened.NiceToString(ca.WorkflowActivity));
                 }
             }
@@ -1088,7 +1088,7 @@ namespace Signum.Engine.Workflow
 
             private static void TryToRecompose(CaseEntity childCase)
             {
-                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow == childCase.Workflow).All(a => a.FinishDate.HasValue))
+                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
                 {
                     var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
                     if (decompositionCaseActivity.DoneDate != null)
@@ -1459,7 +1459,7 @@ namespace Signum.Engine.Workflow
 
             ca.Notifications()
                .UnsafeUpdate()
-               .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+               .Set(a => a.State, a => a.User.Is(UserEntity.Current.ToLite()) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
                .Execute();
         }
 

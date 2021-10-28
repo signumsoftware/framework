@@ -55,7 +55,7 @@ namespace Signum.Engine.Word
 
         [AutoExpressionField]
         public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
-            As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model == e));
+            As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model.Is(e)));
 
         public static void Start(SchemaBuilder sb)
         {

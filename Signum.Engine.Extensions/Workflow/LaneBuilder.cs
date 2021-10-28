@@ -324,7 +324,7 @@ namespace Signum.Engine.Workflow
                 {
                     var sw = wa.SubWorkflow!.Workflow;
                     var wb = new WorkflowBuilder(sw);
-                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase!.Entity) && c.ParentCase.Entity!.Workflow == wa.Lane.Pool.Workflow);
+                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase!.Entity) && c.ParentCase.Entity!.Workflow.Is(wa.Lane.Pool.Workflow));
                 }
 
                 var caseActivities = node.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
