@@ -8,13 +8,13 @@ namespace Signum.React.Selenium
 {
     public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IDisposable where T : ModifiableEntity
     {
-        public RemoteWebDriver Selenium { get; private set; }
+        public WebDriver Selenium { get; private set; }
 
         public IWebElement Element { get; private set; }
 
         public PropertyRoute Route { get; private set; }
 
-        public FramePageProxy(RemoteWebDriver selenium)
+        public FramePageProxy(WebDriver selenium)
         {
             this.Selenium = selenium;
             this.Element = selenium.WaitElementPresent(By.CssSelector(".normal-control"));

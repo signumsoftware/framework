@@ -506,7 +506,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
   if (ti?.kind == "Entity") {
 
     if (isLite(value))
-      return Navigator.API.fetchAndForget(value);
+      return Navigator.API.fetch(value);
 
     if (isEntity(value))
       return Promise.resolve(value);

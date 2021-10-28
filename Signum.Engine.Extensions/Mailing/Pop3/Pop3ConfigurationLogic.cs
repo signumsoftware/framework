@@ -336,7 +336,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                             EmailMessageEntity? dup =null;
                             if (duplicate != null)
-                                dup = duplicate.l.RetrieveAndForget();
+                                dup = duplicate.l.Retrieve();
 
                             if (duplicate != null && AreDuplicates(email, dup!))
                             {

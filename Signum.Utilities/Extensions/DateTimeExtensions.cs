@@ -376,12 +376,12 @@ namespace Signum.Utilities
 
         public static int Quarter(this DateTime dateTime)
         {
-            return ((dateTime.Month - 1) / 4) + 1;
+            return ((dateTime.Month - 1) / 3) + 1;
         }
 
         public static int Quarter(this Date date)
         {
-            return ((date.Month - 1) / 4) + 1;
+            return ((date.Month - 1) / 3) + 1;
         }
 
         public static DateTime MonthStart(this DateTime dateTime)

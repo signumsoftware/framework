@@ -55,7 +55,7 @@ namespace Signum.Engine.Word
 
         [AutoExpressionField]
         public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
-            As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model == e));
+            As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model.Is(e)));
 
         public static void Start(SchemaBuilder sb)
         {
@@ -648,7 +648,7 @@ namespace Signum.Engine.Word
                                     toModify.Save();
                                     SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Initialized {se.FullClassName}");
                                 }
-                                else if (MemoryExtensions.SequenceEqual<byte>(toModify.Template.RetrieveAndForget().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
+                                else if (MemoryExtensions.SequenceEqual<byte>(toModify.Template.Retrieve().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
                                 {
                                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.FullClassName}");
                                 }

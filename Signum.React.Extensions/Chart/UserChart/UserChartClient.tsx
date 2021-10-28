@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
         if (uc.entityType == undefined)
           window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}`));
         else
-          Navigator.API.fetchAndForget(uc.entityType)
+          Navigator.API.fetch(uc.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
             .then(lite => {
               if (!lite)

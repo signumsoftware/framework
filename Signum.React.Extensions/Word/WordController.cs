@@ -50,7 +50,7 @@ namespace Signum.React.Word
         {
             object type = QueryLogic.ToQueryName(queryKey);
 
-            var entity = request.Lite?.RetrieveAndForget();
+            var entity = request.Lite?.Retrieve();
 
             return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }

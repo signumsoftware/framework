@@ -35,7 +35,7 @@ namespace Signum.Engine.Scheduler
 
         [AutoExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity st) => 
-            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == st));
+            As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask.Is(st)));
 
 
         [AutoExpressionField]

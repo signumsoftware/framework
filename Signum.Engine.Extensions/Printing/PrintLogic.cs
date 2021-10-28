@@ -127,7 +127,7 @@ namespace Signum.Engine.Printing
                         .Where(a => a.State == PrintLineState.ReadyToPrint);
 
                 if (fileType != null)
-                    query = query.Where(a => a.File.FileType == fileType);
+                    query = query.Where(a => a.File.FileType.Is(fileType));
 
                 if (query.Count() == 0)
                     return null;
@@ -180,7 +180,7 @@ namespace Signum.Engine.Printing
 
         public static IQueryable<PrintLineEntity> ReadyToPrint(Entity entity, FileTypeSymbol fileType)
         {
-            return Database.Query<PrintLineEntity>().Where(a => a.Referred.Is(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint);
+            return Database.Query<PrintLineEntity>().Where(a => a.Referred.Is(entity) && a.File.FileType.Is(fileType) && a.State == PrintLineState.ReadyToPrint);
         }
     }
     public class PrintStat

@@ -131,7 +131,7 @@ namespace Signum.Engine.Disconnected
         static string? ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
-                .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && e != dm)
+                .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && !e.Is(dm))
                 .Select(e => new { e.SeedInterval, Machine = e.ToLite() })
                 .ToList();
 
@@ -302,13 +302,13 @@ namespace Signum.Engine.Disconnected
         public static DisconnectedExportEntity? GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
             return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue)
-                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+                .OrderBy(a => a.Machine.Is(machine) ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static DisconnectedImportEntity? GetUploadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
             return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue)
-                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+                .OrderBy(a => a.Machine.Is(machine) ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static Lite<DisconnectedMachineEntity>? GetDisconnectedMachine(string machineName)

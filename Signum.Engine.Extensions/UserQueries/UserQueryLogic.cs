@@ -38,7 +38,7 @@ namespace Signum.Engine.UserQueries
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query == e));
+                    Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
                 sb.Include<UserQueryEntity>()
                     .WithSave(UserQueryOperation.Save)

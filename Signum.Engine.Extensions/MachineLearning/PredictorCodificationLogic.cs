@@ -67,7 +67,7 @@ namespace Signum.Engine.MachineLearning
 
                 return result;
 
-            }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
+            }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor.Is(ctx.Predictor.ToLite()));
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
 

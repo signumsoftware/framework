@@ -17,18 +17,18 @@ namespace Signum.Analyzer
         public const string DiagnosticId = "SF0004";
         
         private static readonly DiagnosticDescriptor RuleCastToEntityEntity = new DiagnosticDescriptor(DiagnosticId,
-            "Prevents direct convertion from Lite<T> to T",
+            "Prevents direct conversion from Lite<T> to T",
             "Impossible to convert Lite<T> to T, consider using Entity or Retrieve", "Lite",
             DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "Checks direct convertion from Lite<T> to T. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
+            description: "Checks direct conversion from Lite<T> to T. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
 
         private static readonly DiagnosticDescriptor RuleCastToLiteEntity = new DiagnosticDescriptor(DiagnosticId,
-             "Prevents direct convertion from T to Lite<T>",
+             "Prevents direct conversion from T to Lite<T>",
              "Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", "Lite",
              DiagnosticSeverity.Error,
              isEnabledByDefault: true,
-             description: "Checks direct convertion from T to Lite<T>. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
+             description: "Checks direct conversion from T to Lite<T>. C# doesn't catch this because Lite<T> is implemented as an interface to have co-variance.");
 
         public static DiagnosticDescriptor RuleCastToLiteEntity1 => RuleCastToLiteEntity;
 

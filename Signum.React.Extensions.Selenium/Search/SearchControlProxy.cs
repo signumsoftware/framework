@@ -8,7 +8,7 @@ namespace Signum.React.Selenium
 {
     public class SearchControlProxy
     {
-        public RemoteWebDriver Selenium { get; private set; }
+        public WebDriver Selenium { get; private set; }
 
         public IWebElement Element { get; private set; }
 

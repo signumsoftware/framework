@@ -631,14 +631,14 @@ function cloneEntity(obj: any) {
 export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
   return useAPI(signal =>
     lite == null ? Promise.resolve<T | null | undefined>(lite) :
-      API.fetchAndForget(lite),
+      API.fetch(lite),
     [lite && liteKey(lite)]);
 }
 
 export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
   return useAPIWithReload(signal =>
     lite == null ? Promise.resolve<T | null | undefined>(lite) :
-      API.fetchAndForget(lite),
+      API.fetch(lite),
     [lite && liteKey(lite)]);
 }
 
@@ -711,7 +711,7 @@ export module API {
     return fetchEntity(lite.EntityType, lite.id).then(e => lite.entity = e as T);
   }
 
-  export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
+  export function fetch<T extends Entity>(lite: Lite<T>): Promise<T> {
 
     if (lite.id == null)
       throw new Error("Lite has no Id");

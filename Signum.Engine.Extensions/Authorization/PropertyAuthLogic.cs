@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed>(sb,
                     toKey: PropertyRouteEntity.ToPropertyRouteFunc,
                     toEntity: PropertyRouteLogic.ToPropertyRouteEntity,
-                    isEquals: (p1, p2) => p1 == p2,
+                    isEquals: (p1, p2) => p1.Is(p2),
                     merger: new PropertyMerger(),
                     invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
@@ -140,7 +140,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetPropertyRules(PropertyRulePack rules)
         {
-            cache.SetRules(rules, r => r.RootType == rules.Type);
+            cache.SetRules(rules, r => r.RootType.Is(rules.Type));
         }
 
         public static void SetMaxAutomaticUpgrade(PropertyRoute property, PropertyAllowed allowed)

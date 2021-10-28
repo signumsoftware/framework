@@ -23,7 +23,7 @@ namespace Signum.Test.LinqProvider
         {
             var neasted = (from l in Database.Query<LabelEntity>()
                            select (from a in Database.Query<AlbumEntity>()
-                                   where a.Label == l
+                                   where a.Label.Is(l)
                                    select  a.ToLite()).ToList()).ToList();
         }
 
@@ -70,7 +70,7 @@ namespace Signum.Test.LinqProvider
         {
             var neasted = (from l in Database.Query<LabelEntity>()
                            select (from a in Database.Query<AlbumEntity>()
-                                   where a.Label == l
+                                   where a.Label.Is(l)
                                    select new { Label = l.ToLite(), Author = a.Author.ToLite(), Album = a.ToLite() }).ToList()).ToList();
         }
 
@@ -82,7 +82,7 @@ namespace Signum.Test.LinqProvider
                                {
                                    Alumum = a.ToLite(),
                                    Friends = (from b in Database.Query<AlbumEntity>()
-                                              where a.Label == b.Label
+                                              where a.Label.Is(b.Label)
                                               select b.ToLite()).ToList()
                                }).ToList();
         }
@@ -137,7 +137,7 @@ namespace Signum.Test.LinqProvider
                            {
                                Label = l.ToLite(),
                                Notes = (from a in Database.Query<AlbumEntity>()
-                                        where a.Label == l
+                                        where a.Label.Is(l)
                                         select a.ToLite()).ToList()
                            }).ToList();
         }
@@ -151,7 +151,7 @@ namespace Signum.Test.LinqProvider
                            {
                                Label = l.ToLite(),
                                Notes = (from a in Database.Query<AlbumEntity>()
-                                        where a.Label == l
+                                        where a.Label.Is(l)
                                         select a.ToLite()).ToList()
                            }).Take(10).ToList();
         }
@@ -164,7 +164,7 @@ namespace Signum.Test.LinqProvider
                            {
                                Label = l.ToLite(),
                                Notes = (from a in Database.Query<AlbumEntity>()
-                                        where a.Label == l
+                                        where a.Label.Is(l)
                                         orderby a.Name
                                         select a.ToLite()).ToList()
                            }).ToList();
@@ -178,7 +178,7 @@ namespace Signum.Test.LinqProvider
                            {
                                Label = l.ToLite(),
                                Notes = (from a in Database.Query<AlbumEntity>()
-                                        where a.Label == l
+                                        where a.Label.Is(l)
                                         orderby a.Name
                                         select a.ToLite()).Take(10).ToList()
                            }).ToList();
@@ -189,7 +189,7 @@ namespace Signum.Test.LinqProvider
         {
             var neasted = (from l in Database.Query<LabelEntity>()
                            select (from a in Database.Query<AlbumEntity>()
-                                   where a.Label == l
+                                   where a.Label.Is(l)
                                    select (from s in a.Songs
                                            select "{0} - {1} - {2}".FormatWith(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
         }
@@ -200,7 +200,7 @@ namespace Signum.Test.LinqProvider
             var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
                            select (from a in Database.Query<AlbumEntity>()
-                                   where a.Label == l
+                                   where a.Label.Is(l)
                                    orderby a.Name
                                    select a.Name).ToList()).ToList();
         }
@@ -212,7 +212,7 @@ namespace Signum.Test.LinqProvider
             var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
                            select (from a in Database.Query<AlbumEntity>()
-                                   where a.Label == l
+                                   where a.Label.Is(l)
                                    orderby a.Name
                                    select (from s in a.Songs
                                            select "{0} - {1} - {2}".FormatWith(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();

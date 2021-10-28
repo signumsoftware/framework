@@ -151,7 +151,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
         if (!lite)
           return Promise.resolve(undefined);
 
-        return Navigator.API.fetchAndForget(lite).then(entity => {
+        return Navigator.API.fetch(lite).then(entity => {
 
           const vp = Navigator.viewDispatcher.getViewPromise(entity, viewName || undefined);
           return Navigator.view(entity,

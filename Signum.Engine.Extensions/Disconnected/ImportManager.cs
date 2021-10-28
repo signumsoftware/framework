@@ -332,7 +332,7 @@ namespace Signum.Engine.Disconnected
 
         private IQueryable<MListElement<DisconnectedImportEntity, DisconnectedImportTableEmbedded>> ImportTableQuery(Lite<DisconnectedImportEntity> import, TypeEntity type)
         {
-            return Database.MListQuery((DisconnectedImportEntity s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.Is(type));
+            return Database.MListQuery((DisconnectedImportEntity s) => s.Copies).Where(dst => dst.Parent.ToLite().Is(import) && dst.Element.Type.Is(type));
         }
 
         public void UnlockTables(Lite<DisconnectedMachineEntity> machine)
@@ -348,7 +348,7 @@ namespace Signum.Engine.Disconnected
         static int UnlockTable<T>(Lite<DisconnectedMachineEntity> machine) where T : Entity
         {
             using (ExecutionMode.Global())
-                return Database.Query<T>().Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine == machine)
+                return Database.Query<T>().Where(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Is(machine))
                     .UnsafeUpdate()
                     .Set(a => a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine, a => null)
                     .Set(a => a.Mixin<DisconnectedSubsetMixin>().LastOnlineTicks, a => null)

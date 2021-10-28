@@ -52,7 +52,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
-            return Database.Query<CaseTagEntity>().Where(a => a.Case == lite).Select(a => a.TagType).ToList();
+            return Database.Query<CaseTagEntity>().Where(a => a.Case.Is(lite)).Select(a => a.TagType).ToList();
         }
 
         public class EntityPackWorkflow
@@ -274,7 +274,7 @@ namespace Signum.React.Workflow
         [HttpPost("api/workflow/nextConnections")]
         public List<Lite<IWorkflowNodeEntity>> GetNextJumps([Required, FromBody]NextConnectionsRequest request)
         {
-            return request.workflowActivity.RetrieveAndForget()
+            return request.workflowActivity.Retrieve()
                 .NextConnectionsFromCache(request.connectionType)
                 .Select(a => a.To.ToLite())
                 .ToList();

@@ -217,7 +217,7 @@ namespace Signum.React.ApiControllers
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
                 {
-                    var entity = lite.RetrieveAndForget();
+                    var entity = lite.Retrieve();
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
@@ -249,7 +249,7 @@ namespace Signum.React.ApiControllers
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
                 {
-                    var entity = lite.RetrieveAndForget();
+                    var entity = lite.Retrieve();
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
                     var op = request.GetOperationSymbol(entity.GetType());
@@ -278,7 +278,7 @@ namespace Signum.React.ApiControllers
             {
                 var errors = ForeachMultiple(request.Lites, lite =>
                 {
-                    var entity = lite.RetrieveAndForget();
+                    var entity = lite.Retrieve();
 
                     MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 

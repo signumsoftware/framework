@@ -25,7 +25,7 @@ export default function DashboardPage(p: DashboardPageProps) {
 
   var entityKey = getQueryEntity(p);
 
-  const entity = useAPI(signal => entityKey ? Navigator.API.fetchAndForget(parseLite(entityKey)) : Promise.resolve(null), [entityKey]);
+  const entity = useAPI(signal => entityKey ? Navigator.API.fetch(parseLite(entityKey)) : Promise.resolve(null), [entityKey]);
 
   const rtl = React.useMemo(() => document.body.classList.contains("rtl"), []);
 

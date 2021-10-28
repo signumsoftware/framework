@@ -106,14 +106,14 @@ namespace Signum.React.Help
                 }
 
                 var currentProperties = entity.Properties.Select(p => p.Property.ToPropertyRoute()).ToHashSet();
-                var hiddenProperties = entity.IsNew ? Enumerable.Empty<PropertyRouteHelpEmbedded>() : entity.ToLite().RetrieveAndForget().Properties
+                var hiddenProperties = entity.IsNew ? Enumerable.Empty<PropertyRouteHelpEmbedded>() : entity.ToLite().Retrieve().Properties
                     .Where(p => !currentProperties.Contains(p.Property.ToPropertyRoute()))
                     .ToList();
                 entity.Properties.AddRange(hiddenProperties);
                 entity.Properties.RemoveAll(a => !a.Description.HasText());
 
                 var currentOperations = entity.Operations.Select(p => p.Operation).ToHashSet();
-                var hiddenOperations = entity.IsNew ? Enumerable.Empty<OperationHelpEmbedded>() : entity.ToLite().RetrieveAndForget().Operations
+                var hiddenOperations = entity.IsNew ? Enumerable.Empty<OperationHelpEmbedded>() : entity.ToLite().Retrieve().Operations
                     .Where(p => !currentOperations.Contains(p.Operation))
                     .ToList();
                 entity.Operations.AddRange(hiddenOperations);

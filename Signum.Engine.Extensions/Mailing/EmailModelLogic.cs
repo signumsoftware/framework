@@ -363,8 +363,7 @@ namespace Signum.Engine.Mailing
             {
                 var emailModelEntity = ToEmailModelEntity(emailModelType);
 
-                var template = Database.Query<EmailTemplateEntity>().SingleOrDefaultEx(t =>
-                    t.Model == emailModelEntity);
+                var template = Database.Query<EmailTemplateEntity>().SingleOrDefaultEx(t => t.Model.Is(emailModelEntity));
 
                 if (template == null)
                 {

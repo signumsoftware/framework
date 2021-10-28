@@ -9,7 +9,7 @@ import { predict } from '../PredictorClient';
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> implements IRenderButtons {
   handleClick = () => {
     var psr = this.props.ctx.value;
-    Navigator.API.fetchAndForget(psr.predictor!).then(p => {
+    Navigator.API.fetch(psr.predictor!).then(p => {
       if (!p.mainQuery.groupResults) {
         predict(p, { "Entity": psr.target }).done();
       } else {

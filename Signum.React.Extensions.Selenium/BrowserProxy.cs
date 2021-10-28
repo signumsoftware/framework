@@ -13,9 +13,9 @@ namespace Signum.React.Selenium
 {
     public class BrowserProxy
     {
-        public readonly RemoteWebDriver Selenium;
+        public readonly WebDriver Selenium;
 
-        public BrowserProxy(RemoteWebDriver selenium)
+        public BrowserProxy(WebDriver selenium)
         {
             this.Selenium = selenium;
         }

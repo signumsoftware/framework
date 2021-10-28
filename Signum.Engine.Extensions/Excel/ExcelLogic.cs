@@ -56,7 +56,7 @@ namespace Signum.Engine.Excel
         {
             ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
 
-            ExcelReportEntity report = excelReport.RetrieveAndForget();
+            ExcelReportEntity report = excelReport.Retrieve();
             AsserExtension(report);
 
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
@@ -73,7 +73,7 @@ namespace Signum.Engine.Excel
         {
             ResultTable queryResult = QueryLogic.Queries.ExecuteQuery(request);
 
-            ExcelReportEntity report = excelReport.RetrieveAndForget();
+            ExcelReportEntity report = excelReport.Retrieve();
             AsserExtension(report);
 
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);

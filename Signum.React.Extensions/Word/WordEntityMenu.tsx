@@ -13,7 +13,7 @@ export interface WordEntityMenuProps {
 
 export default function WordEntityMenu(p : WordEntityMenuProps){
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
-    Navigator.API.fetchAndForget(wt)
+    Navigator.API.fetch(wt)
       .then<string | undefined>(wordTemplate => wordTemplate.model ? WordClient.API.getConstructorType(wordTemplate.model) : undefined)
       .then(ct => {
 

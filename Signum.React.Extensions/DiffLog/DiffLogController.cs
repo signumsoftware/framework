@@ -43,7 +43,7 @@ namespace Signum.React.DiffLog
 
         private string GetDump(Lite<IEntity> target)
         {
-            var entity = target.RetrieveAndForget();
+            var entity = target.Retrieve();
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                 return entity.Dump();

@@ -75,7 +75,7 @@ namespace Signum.Entities.Authorization
         {
             TypeEntity type = (TypeEntity)arg;
 
-            var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource == type));
+            var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
 
             return command;
         }
@@ -84,7 +84,7 @@ namespace Signum.Entities.Authorization
         {
             TypeConditionSymbol condition = (TypeConditionSymbol)arg;
 
-            var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Condition == condition));
+            var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Condition.Is(condition)));
 
             return command;
         }
@@ -107,7 +107,7 @@ namespace Signum.Entities.Authorization
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
 
-            IQueryable<RuleTypeEntity> query = Database.Query<RuleTypeEntity>().Where(a => a.Resource == resource && a.Role == role);
+            IQueryable<RuleTypeEntity> query = Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(resource) && a.Role.Is(role));
             if (miniCache.GetAllowedBase(role).Equals(allowed))
             {
                 if (query.UnsafeDelete() == 0)
@@ -133,7 +133,7 @@ namespace Signum.Entities.Authorization
             {
                 this.resource = resource;
 
-                var list = Database.Query<RuleTypeEntity>().Where(r => r.Resource == resource || r.Resource == null).ToList();
+                var list = Database.Query<RuleTypeEntity>().Where(r => r.Resource.Is(resource) || r.Resource == null).ToList();
 
                 rules = list.Where(a => a.Resource != null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
 
@@ -208,7 +208,7 @@ namespace Signum.Entities.Authorization
         {
             using (AuthLogic.Disable())
             {
-                var current = Database.Query<RuleTypeEntity>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
+                var current = Database.Query<RuleTypeEntity>().Where(r => r.Role.Is(rules.Role) && r.Resource != null).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
                 Synchronizer.Synchronize(should, current,

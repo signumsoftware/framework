@@ -44,7 +44,7 @@ namespace Signum.Engine.Isolation
                     var hasIsolationMixin = MixinDeclarations.IsDeclared(type, typeof(IsolationMixin));
 
                     return hasIsolationMixin == false ? null :
-                        e => e.Mixin<IsolationMixin>().Isolation == entity.Mixin<IsolationMixin>().Isolation;
+                        e => e.Mixin<IsolationMixin>().Isolation.Is(entity.Mixin<IsolationMixin>().Isolation);
                 };
 
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;

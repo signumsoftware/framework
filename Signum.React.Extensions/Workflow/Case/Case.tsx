@@ -148,7 +148,7 @@ function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
 
   function handleOnClick(rr: ResultRow) {
     if (rr.entity)
-      Navigator.API.fetchAndForget(rr.entity).then(caseActivity => {
+      Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
       }).done();
@@ -179,7 +179,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
 
   function handleOnClick(rr: ResultRow) {
     if (rr.entity) {
-      Navigator.API.fetchAndForget(rr.entity).then(caseActivity => {
+      Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.focusElement(bpmnElementID);
 

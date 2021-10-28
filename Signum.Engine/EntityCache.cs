@@ -27,7 +27,7 @@ namespace Signum.Engine
 
                 if (ident == null)
                     dic.Add(tuple, e);
-                else if (ident != e)
+                else if (!object.ReferenceEquals(ident, e))
                 {
                     //Odd but allowed
                     //throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".FormatWith(ie.GetType().Name, ie.id));

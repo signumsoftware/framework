@@ -32,7 +32,7 @@ namespace Signum.Engine.Operations
 
         [AutoExpressionField]
         public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o) => 
-            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Operation == o));
+            As.Expression(() => Database.Query<OperationLogEntity>().Where(a => a.Operation.Is(o)));
 
         static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
@@ -366,7 +366,7 @@ Consider the following options:
         public static T ExecuteLite<T>(this Lite<T> lite, ExecuteSymbol<T> symbol, params object?[]? args)
             where T : class, IEntity
         {
-            T entity = lite.RetrieveAndForget();
+            T entity = lite.Retrieve();
             var op = Find<IExecuteOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             op.Execute(entity, args);
             return entity;
@@ -374,7 +374,7 @@ Consider the following options:
 
         public static Entity ServiceExecuteLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object?[]? args)
         {
-            Entity entity = (Entity)lite.RetrieveAndForget();
+            Entity entity = (Entity)lite.Retrieve();
             var op = Find<IExecuteOperation>(lite.EntityType, operationSymbol);
             op.Execute(entity, args);
             return entity;
@@ -400,14 +400,14 @@ Consider the following options:
         public static void DeleteLite<T>(this Lite<T> lite, DeleteSymbol<T> symbol, params object?[]? args)
             where T : class, IEntity
         {
-            IEntity entity = lite.RetrieveAndForget();
+            IEntity entity = lite.Retrieve();
             var op = Find<IDeleteOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             op.Delete(entity, args);
         }
 
         public static void ServiceDelete(Lite<IEntity> lite, OperationSymbol operationSymbol, params object?[]? args)
         {
-            IEntity entity = lite.RetrieveAndForget();
+            IEntity entity = lite.Retrieve();
             var op = Find<IDeleteOperation>(lite.EntityType, operationSymbol);
             op.Delete(entity, args);
         }
@@ -462,13 +462,13 @@ Consider the following options:
             where F : class, IEntity
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, symbol.Symbol).AssertLite();
-            return (T)op.Construct(Database.RetrieveAndForget(lite), args);
+            return (T)op.Construct(Database.Retrieve(lite), args);
         }
 
         public static Entity ServiceConstructFromLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object?[]? args)
         {
             var op = Find<IConstructorFromOperation>(lite.EntityType, operationSymbol);
-            return (Entity)op.Construct(Database.RetrieveAndForget(lite), args);
+            return (Entity)op.Construct(Database.Retrieve(lite), args);
         }
         #endregion
 

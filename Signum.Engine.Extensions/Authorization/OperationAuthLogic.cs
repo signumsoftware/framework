@@ -45,7 +45,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed>(sb,
                      toKey: s => (operation: s.Operation, type: s.Type.ToType()),
                      toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type.ToTypeEntity() },
-                     isEquals: (o1, o2) => o1.Operation == o2.Operation && o1.Type == o2.Type,
+                     isEquals: (o1, o2) => o1.Operation.Is(o2.Operation) && o1.Type.Is(o2.Type),
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
@@ -134,7 +134,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetOperationRules(OperationRulePack rules)
         {
-            cache.SetRules(rules, r => r.Type == rules.Type);
+            cache.SetRules(rules, r => r.Type.Is(rules.Type));
         }
 
         public static bool GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operation, Type entityType, bool inUserInterface)
