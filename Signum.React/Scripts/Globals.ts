@@ -140,21 +140,28 @@ Array.prototype.clear = function (): void {
 };
 
 Array.prototype.groupBy = function (this: any[],
-  keySelector: (element: any) => string,
+  keySelector: (element: any) => any,
   keyStringifier?: (element: any) => string,
   elementSelector?: (element: any) => unknown):
   { key: any /*string*/; elements: any[] }[] {
 
-  const result: { key: string; elements: any[] }[] = [];
- 
-  const objectGrouped = this.groupToObject(
-    keyStringifier ? e => keyStringifier(keySelector(e)) : keySelector,
-    elementSelector!);
+  const result: { key: any; elements: any[] }[] = [];
+  const obj: { [key: string]: any[] } = {};
+  keyStringifier ??= v => v.toString();
 
-  for (const prop in objectGrouped) {
-    if (objectGrouped.hasOwnProperty(prop)) {
-      var elements = objectGrouped[prop]
-      result.push({ key: keySelector(elements[0]), elements: elements });
+  for (const elem of this) {
+
+    var key = keySelector(elem);
+    var gr = obj[keyStringifier(key)];
+    if (gr) {
+      gr.push(elem);
+    } else {
+      var group = {
+        key: key,
+        elements: [elem]
+      };
+      result.push(group);
+      obj[keyStringifier(key)] = group.elements;
     }
   }
   return result;
