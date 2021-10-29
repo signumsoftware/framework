@@ -1725,6 +1725,9 @@ namespace Signum.Engine.Linq
                     arguments.Add(new SqlConstantExpression(nextStr));
             }
 
+            if (arguments.Count == 1)
+                return Add(arguments.SingleEx());
+
             return Add(new SqlFunctionExpression(typeof(string), null, SqlFunction.CONCAT.ToString(), arguments));
         }
 
