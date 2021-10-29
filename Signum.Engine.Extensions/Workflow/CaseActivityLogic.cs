@@ -160,7 +160,7 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
-
+                
                 new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
                 {
                     CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
@@ -746,6 +746,31 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
+
+                new Execute(CaseActivityOperation.FreeJump)
+                {
+                    FromStates = { CaseActivityState.Pending },
+                    ToStates = { CaseActivityState.Done },
+                    CanBeModified = true,
+                    Execute = (ca, args) =>
+                    {
+                        var to = args.GetArg<Lite<WorkflowActivityEntity>>().Retrieve();
+                        if (!to.Lane.Pool.Workflow.Is(ca.Case.Workflow))
+                            throw new InvalidOperationException($"Activity {to} does not belong to workflow {ca.Case.Workflow}");
+
+                        using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = null }))
+                        {
+                            SaveEntity(ca.Case.MainEntity);
+                        }
+                      
+                        ca.MakeDone(DoneType.Jump, null);
+
+                        var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
+                        ctx.ToActivities.Add(to);
+                        CreateNextActivities(ca.Case, ctx, ca);
+                    }
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
                 new Execute(CaseActivityOperation.Timer)
                 {
                     FromStates = { CaseActivityState.Pending },
@@ -977,7 +1002,7 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? ca)
+            private static void CreateNextActivities(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity? previous)
             {
                 @case.Save();
 
@@ -987,11 +1012,11 @@ namespace Signum.Engine.Workflow
                     {
                         var lastConn = ctx.Connections.OfType<WorkflowConnectionEntity>().Single(a => a.To.Is(twa));
 
-                        Decompose(@case, ca, twa, lastConn, ctx);
+                        Decompose(@case, previous, twa, lastConn, ctx);
                     }
                     else
                     {
-                        var nca = InsertNewCaseActivity(@case, twa, ca);
+                        var nca = InsertNewCaseActivity(@case, twa, previous);
                         ctx.NotifyTransitionContext(nca);
                         InsertCaseActivityNotifications(nca);
                     }
@@ -999,7 +1024,7 @@ namespace Signum.Engine.Workflow
 
                 foreach (var twe in ctx.ToIntermediateEvents)
                 {
-                    InsertNewCaseActivity(@case, twe, ca);
+                    InsertNewCaseActivity(@case, twe, previous);
                 }
             }
 
