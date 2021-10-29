@@ -683,7 +683,7 @@ namespace Signum.Engine.Templating
 
         public override object? GetValue(TemplateParameters p)
         {
-            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
+            return dateTimeExpression == null ? TimeZoneManager.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
