@@ -8,9 +8,11 @@ import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import { DashboardFilter } from '../../Dashboard/View/DashboardView';
+import { ChartRequestModel } from '../Signum.Entities.Chart';
 
 
-export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -82,9 +84,10 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   return (
     <>
       <svg direction="ltr" width={width} height={height}>
-        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
-        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
-
+        <g opacity={dashboardFilter ? .5 : undefined}>
+          <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
+          <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
+        </g>
         {parameters["DrawingMode"] == "Svg" &&
           <SvgScatterplot data={data} keyColumns={keyColumns} xRule={xRule} yRule={yRule} initialLoad={initialLoad}
             x={x}
@@ -95,14 +98,18 @@ export default function renderScatterplot({ data, width, height, parameters, loa
             verticalColumn2={verticalColumn2}
             colorKeyColumn={colorKeyColumn}
             color={color}
-            pointSize={pointSize}
+            pointSize={pointSize} 
+            chartRequest={chartRequest}
+            dashboardFilter={dashboardFilter}
             onDrillDown={onDrillDown} />
         }
 
         <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
 
-        <XAxis xRule={xRule} yRule={yRule} />
-        <YAxis xRule={xRule} yRule={yRule} />
+        <g opacity={dashboardFilter ? .5 : undefined}>
+          <XAxis xRule={xRule} yRule={yRule} />
+          <YAxis xRule={xRule} yRule={yRule} />
+        </g>
       </svg>
       {parameters["DrawingMode"] != "Svg" &&
         <CanvasScatterplot
@@ -127,7 +134,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
 function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
   horizontalColumn, verticalColumn, horizontalColumn2, verticalColumn2,
-  colorKeyColumn, color, onDrillDown, pointSize }: {
+  colorKeyColumn, color, onDrillDown, pointSize, dashboardFilter, chartRequest }: {
     data: ChartClient.ChartTable,
     keyColumns: ChartClient.ChartColumn<any>[],
     xRule: Rule<"content">,
@@ -142,29 +149,41 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
     colorKeyColumn: ChartClient.ChartColumn<unknown>,
     color: (val: ChartRow) => string,
     pointSize: number,
+    dashboardFilter?: DashboardFilter,
+    chartRequest: ChartRequestModel,
     onDrillDown: (row: ChartClient.ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
   }): JSX.Element {
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   if (horizontalColumn2 == null && verticalColumn2 == null)
     return (<>{
-      data.rows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
-        transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
-        <circle className="shape sf-transition"
-          cx={x(horizontalColumn.getValue(r))!}
-          cy={-y(verticalColumn.getValue(r))!}
-          stroke={colorKeyColumn.getValueColor(r) ?? color(r)}
-          fill={colorKeyColumn.getValueColor(r) ?? color(r)}
-          shapeRendering="initial"
-          r={pointSize}
-          onClick={e => onDrillDown(r, e)}
-          cursor="pointer">
-          <title>
-            {colorKeyColumn.getValueNiceName(r) +
-              ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-              ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))}
-          </title>
-        </circle>
-      </g>)
+      data.rows.map(r => {
+        const active = detector?.(r);
+
+        return (
+          <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
+            opacity={active == false ? .5 : undefined}
+            transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
+            <circle className="shape sf-transition"
+              cx={x(horizontalColumn.getValue(r))!}
+              cy={-y(verticalColumn.getValue(r))!}
+              stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
+              strokeWidth={active == true ? 3 : undefined}
+              fill={colorKeyColumn.getValueColor(r) ?? color(r)}
+              shapeRendering="initial"
+              r={pointSize}
+              onClick={e => onDrillDown(r, e)}
+              cursor="pointer">
+              <title>
+                {colorKeyColumn.getValueNiceName(r) +
+                  ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+                  ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r))}
+              </title>
+            </circle>
+          </g>);
+
+      })
     }</>);
   else {
     return (<>
@@ -235,7 +254,7 @@ function CanvasScatterplot(p: {
 
   React.useEffect(() => {
 
-    var { xRule, yRule, horizontalColumn, verticalColumn, horizontalColumn2, verticalColumn2,  colorKeyColumn, data, pointSize, onDrillDown, color, x, y } = p;
+    var { xRule, yRule, horizontalColumn, verticalColumn, horizontalColumn2, verticalColumn2, colorKeyColumn, data, pointSize, onDrillDown, color, x, y } = p;
     var w = xRule.size('content');
     var h = yRule.size('content');
     var c = cRef.current!;

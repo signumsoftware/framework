@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
-import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
+import { getQueryKey, getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
@@ -21,10 +21,12 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
-  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  fo = p.filterController.applyToFindOptions(p.partEmbedded, fo);
 
   if (p.part.renderMode == "BigValue") {
     return <BigValueSearchCounter

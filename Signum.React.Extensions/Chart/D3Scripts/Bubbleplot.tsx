@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 
 
-export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -81,6 +81,8 @@ export default function renderBubbleplot({ data, width, height, parameters, load
   var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   return (
     <svg direction="ltr" width={width} height={height}>
       <g opacity={dashboardFilter ? .5 : undefined}>
@@ -88,41 +90,47 @@ export default function renderBubbleplot({ data, width, height, parameters, load
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />
       </g>
       <g className="panel" transform={translate(xRule.start('content'), yRule.end('content'))}>
-        {orderRows.map(r => <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
-          className="shape-serie sf-transition"
-          opacity={r.active == false ? .5 : undefined}
-          transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
-          cursor="pointer"
-          onClick={e => onDrillDown(r, e)}
-        >
-          <circle className="shape sf-transition"
-            stroke={r.active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
-            strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
-            fillOpacity={parseFloat(parameters["FillOpacity"])}
-            shapeRendering="initial"
-            r={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI)} />
+        {orderRows.map(r => {
+          const active = detector?.(r);
 
-          {
-            parameters["ShowLabel"] == 'Yes' &&
-            <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI) * 2}
-              padding={0} etcText=""
-              className="number-label"
-              fill={parameters["LabelColor"] ?? colorKeyColumn.getValueColor(r) ?? color(r)}
-              dominantBaseline="middle"
-              textAnchor="middle"
-              fontWeight="bold">
-              {sizeColumn.getValueNiceName(r)}
-            </TextEllipsis>
-          }
+          return (
+            <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
+              className="shape-serie sf-transition"
+              opacity={active == false ? .5 : undefined}
+              transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
+              cursor="pointer"
+              onClick={e => onDrillDown(r, e)}
+            >
+              <circle className="shape sf-transition"
+                stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
+                strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
+                fillOpacity={parseFloat(parameters["FillOpacity"])}
+                shapeRendering="initial"
+                r={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI)} />
 
-          <title>
-            {colorKeyColumn.getValueNiceName(r) +
-              ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
-              ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)) +
-              ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))}
-          </title>
+              {
+                parameters["ShowLabel"] == 'Yes' &&
+                <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI) * 2}
+                  padding={0} etcText=""
+                  className="number-label"
+                  fill={parameters["LabelColor"] ?? colorKeyColumn.getValueColor(r) ?? color(r)}
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  fontWeight="bold">
+                  {sizeColumn.getValueNiceName(r)}
+                </TextEllipsis>
+              }
 
-        </g>)}
+              <title>
+                {colorKeyColumn.getValueNiceName(r) +
+                  ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
+                  ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)) +
+                  ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))}
+              </title>
+
+            </g>
+          );
+        })}
       </g>
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />

@@ -60,15 +60,14 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   const circularRoot = bubble(root);
 
-  var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
+  var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<(ChartRow | Folder) & { active?: boolean }>[];
 
   if (parentColumn) {
     var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
 
     if (activeDetector) {
       nodes.forEach(a => {
-        if (isFolder(a.data))
-          a.data.active = activeDetector!({ c2: a.data.folder });
+        a.data.active = activeDetector!(isFolder(a.data) ? { c2: a.data.folder } : a.data);
       });
     }
   }

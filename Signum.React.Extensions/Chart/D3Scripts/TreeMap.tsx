@@ -9,7 +9,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -41,6 +41,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
+
     var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)), memo, "parentColor");
     folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
@@ -55,14 +56,26 @@ export default function renderTreeMap({ data, width, height, parameters, loading
   var padding = parentColumn ? parseInt(parameters["Padding"]) : 1;
   var p2 = padding / 2;
 
-  var bubble = d3.treemap<ChartRow | Folder | Root>()
+  var treeMap = d3.treemap<ChartRow | Folder | Root>()
     .size([width, height])
     .round(true)
     .padding(padding);
 
-  const treeMapRoot = bubble(root);
+  const treeMapRoot = treeMap(root);
 
-  var nodes = treeMapRoot.descendants().filter(d => !!d.data);
+  var nodes = treeMapRoot.descendants().filter(d => !!d.data) as d3.HierarchyRectangularNode<(ChartRow | Folder) & { active?: boolean }>[];
+
+  if (parentColumn) {
+
+    var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
+
+    if (activeDetector) {
+      nodes.forEach(a => {
+        a.data.active = activeDetector!(isFolder(a.data) ? { c2: a.data.folder } : a.data);
+      });
+    }
+
+  }
 
   const nodeHeight = (n: d3.HierarchyRectangularNode<any>) => n.y1 - n.y0;
   const nodeWidth = (n: d3.HierarchyRectangularNode<any>) => n.x1 - n.x0;
@@ -71,7 +84,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   const scaleTransform = initialLoad ? scale(0, 0) : scale(1, 1);
 
-  const getNodeKey = (n: d3.HierarchyRectangularNode<ChartRow | Folder | Root>): string => {
+  const getNodeKey = (n: d3.HierarchyRectangularNode<ChartRow | Folder>): string => {
 
     if (isRoot(n.data))
       return "root";
@@ -91,9 +104,12 @@ export default function renderTreeMap({ data, width, height, parameters, loading
         <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
             <rect className="folder sf-transition" shapeRendering="initial"
+              opacity={d.data.active == false ? .5 : undefined}
               width={nodeWidth(d)}
-              height={nodeHeight(d)}
-              fill={parentColumn!.getColor((d.data as Folder).folder) ?? folderColor!((d.data as Folder).folder)}
+            height={nodeHeight(d)}
+            fill={parentColumn!.getColor(d.data.folder) ?? folderColor!(d.data.folder)}
+            stroke={d.data.active == true ? "black" : undefined}
+            strokeWidth={d.data.active == true ? 3 : undefined}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)} cursor="pointer">
               <title>
                 {folderColor!(((d.data as Folder).folder))}
@@ -102,14 +118,17 @@ export default function renderTreeMap({ data, width, height, parameters, loading
           }
           {!isFolder(d.data) &&
             <rect className="leaf sf-transition"
-              shapeRendering="initial" opacity={opacity}
+            shapeRendering="initial"
+            opacity={d.data.active == false ? .5 * opacity : opacity}
               width={nodeWidth(d)}
               height={nodeHeight(d)}
-              fill={color(d.data as ChartRow)!}
+             fill={color(d.data)!}
+            stroke={d.data.active == true ? "black" : undefined}
+            strokeWidth={d.data.active == true ? 3 : undefined}
               onClick={e => onDrillDown(d.data as ChartRow, e)}
               cursor="pointer">
               <title>
-                {keyColumn.getValueNiceName(d.data as ChartRow) + ': ' + valueColumn.getValueNiceName(d.data as ChartRow)}
+                {keyColumn.getValueNiceName(d.data) + ': ' + valueColumn.getValueNiceName(d.data)}
               </title>
             </rect>}
 

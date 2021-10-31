@@ -15,7 +15,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
-import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from './DashboardView'
+import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
 import { filterOperations } from '@framework/FindOptions'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
@@ -65,11 +65,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   const result = resultOrError?.result;
-
-  if (result?.chartTable) {
-    var dashboardFilter = p.filterController.filters.get(p.partEmbedded);
-    setActive(result.chartTable, chartRequest, dashboardFilter);
-  }
 
   function handleReload(e?: React.MouseEvent<any>) {
     e?.preventDefault();
@@ -124,7 +119,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           dashboardFilter={p.filterController.filters.get(p.partEmbedded)}
           onDrillDown={(row, e) => {
             e.stopPropagation();
-            debugger;
             if (e.altKey)
               handleDrillDown(row, e, chartRequest, handleReload);
             else {
@@ -172,13 +166,3 @@ function toDashboardFilterRow(row: ChartClient.ChartRow, chartRequest: ChartRequ
   return { filters: filters } as DashboardFilterRow;
 }
 
-
-
-function setActive(chartTable: ChartClient.ChartTable, request: ChartRequestModel, dashboardFilter?: DashboardFilter) {
-
-  var detector = dashboardFilter?.getActiveDetector(request);
-  if (detector == null)
-    chartTable.rows.forEach(row => delete row.active);
-  else
-    chartTable.rows.forEach(row => row.active = detector!(row));
-}

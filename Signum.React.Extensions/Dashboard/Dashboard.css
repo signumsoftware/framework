@@ -89,3 +89,13 @@ div.row-control-panel {
 .sf-fullscreen-component .sf-search-control {
     width: 100%;
 }
+
+.sf-filter-pill.border {
+    padding: 0px 4px 3px 4px;
+}
+
+.sf-filter-pill .close {
+    float:none;
+    font-size: 1rem;
+    margin-left: 2px;
+}

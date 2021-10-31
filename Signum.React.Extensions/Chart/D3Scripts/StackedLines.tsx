@@ -129,12 +129,15 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             if (row == undefined)
               return null;
 
+
+            var active = detector?.(row.rowClick);
+
             return (
               <rect key={dataKey} className="point sf-transition"
                 transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
                 width={2 * rectRadious}
-                fillOpacity={row.rowClick.active == true ? undefined : .1}
-                fill={row.rowClick.active == true ? "black" : "#fff"}
+                fillOpacity={active == true ? undefined : .1}
+                fill={active == true ? "black" : "#fff"}
                 height={y(v[1])! - y(v[0])!}
                 onClick={e => onDrillDown(row.rowClick, e)}
                 cursor="pointer">
@@ -156,14 +159,16 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             if ((y(v[1])! - y(v[0])!)! <= 10)
               return null;
 
+            const active = detector?.(row.rowClick);
+
             return (
               <TextRectangle key={dataKey}
                 className="number-label sf-transition"
                 rectangleAtts={{
                   fill: colorByKey[s.key] ?? color(s.key),
-                  opacity: row.rowClick.active == false ? .5 : parameters["NumberOpacity"],
-                  stroke: row.rowClick.active == true ? "black" : "none",
-                  strokeWidth: row.rowClick.active == true ? 2 : undefined
+                  opacity: active == false ? .5 : parameters["NumberOpacity"],
+                  stroke: active == true ? "black" : "none",
+                  strokeWidth: active == true ? 2 : undefined
                 }}
                 transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
                 fill={parameters["NumberColor"]}

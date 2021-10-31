@@ -11,7 +11,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest}: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -188,7 +188,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
       fill: color == null ? (parameters["FillColor"] ?? 'black') : color(colorColumn!.getValue(r)),
-      stroke: parameters["StrokeColor"] ?? (color == null ? 'black' : color(colorColumn!.getValue(r))),
+      stroke: detector?.(r) == true ? "black" :  parameters["StrokeColor"] ?? (color == null ? 'black' : color(colorColumn!.getValue(r))),
       strokeWidth: parameters["StrokeWidth"],
       strokeOpacity: (opacity != null ? opacity(opacityColumn!.getValue(r)) : 1)
     }));
@@ -212,46 +212,53 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       })
     );
 
+  const detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={true} />
-      <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={true} showLabels={true} />
+      <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={true} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)}/>
+      <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={true} showLabels={true} isActive={detector && (val => detector!({ c1: val }))} onDrillDown={(v, e) => onDrillDown({ c1: v }, e)}/>
       <g className="punch-panel" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2)}>
       {data.rows
         .orderBy(horizontalColumn.getValueKey)
         .orderBy(verticalColumn.getValueKey)
-        .map(r =>
-          <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
-          cursor="pointer"
-          onClick={e => onDrillDown(r, e)}>
-          {mainShape?.renderer(r)}
-          {innerShape?.renderer(r)}
-          {
-              parseFloat(parameters["NumberOpacity"]) > 0 &&
-              <text className="punch-text sf-transition" transform={translate(
-                x(horizontalColumn.getValueKey(r))!,
-                -y(verticalColumn.getValueKey(r))!
-              )}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(!sizeColumn ? 0 : sizeColumn.getValue(r)))}
-              textAnchor="middle"
-              fontWeight="bold">
-              {sizeColumn ? sizeColumn.getValueNiceName(r) :
-                innerSizeColumn != null ? (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValue(r)) :
-                  colorColumn != null ? colorColumn.getValue(r) :
-                    opacityColumn != null ? opacityColumn.getValue(r) : null}
-            </text>
+          .map(r => {
+            const active = detector?.(r);
+            return (
+              <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition"
+                cursor="pointer"
+                opacity={active == false ? .5 : undefined}
+                onClick={e => onDrillDown(r, e)}>
+                {mainShape?.renderer(r)}
+                {innerShape?.renderer(r)}
+                {
+                  parseFloat(parameters["NumberOpacity"]) > 0 &&
+                  <text className="punch-text sf-transition" transform={translate(
+                    x(horizontalColumn.getValueKey(r))!,
+                    -y(verticalColumn.getValueKey(r))!
+                  )}
+                    fill={parameters["NumberColor"]}
+                    dominantBaseline="middle"
+                    opacity={parseFloat(parameters["NumberOpacity"]) * (!mainShape ? 0 : mainShape.numberOpacity!(!sizeColumn ? 0 : sizeColumn.getValue(r)))}
+                    textAnchor="middle"
+                    fontWeight="bold">
+                    {sizeColumn ? sizeColumn.getValueNiceName(r) :
+                      innerSizeColumn != null ? (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValue(r)) :
+                        colorColumn != null ? colorColumn.getValue(r) :
+                          opacityColumn != null ? opacityColumn.getValue(r) : null}
+                  </text>
+                }
+                <title>
+                  {horizontalColumn.getValueNiceName(r) + ', ' + verticalColumn.getValueNiceName(r) +
+                    (sizeColumn == null ? "" : ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))) +
+                    (colorColumn == null ? "" : ("\n" + colorColumn.title + ": " + colorColumn.getValueNiceName(r))) +
+                    (opacityColumn == null ? "" : ("\n" + opacityColumn.title + ": " + opacityColumn.getValueNiceName(r))) +
+                    (innerSizeColumn == null ? "" : ("\n" + innerSizeColumn.title + ": " + (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValueNiceName(r)))) +
+                    (orderingColumn == null ? "" : ("\n" + orderingColumn.title + ": " + orderingColumn.getValueNiceName(r)))}
+                </title>
+              </g>
+            );
           }
-          <title>
-            {horizontalColumn.getValueNiceName(r) + ', ' + verticalColumn.getValueNiceName(r) +
-              (sizeColumn == null ? "" : ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))) +
-              (colorColumn == null ? "" : ("\n" + colorColumn.title + ": " + colorColumn.getValueNiceName(r))) +
-              (opacityColumn == null ? "" : ("\n" + opacityColumn.title + ": " + opacityColumn.getValueNiceName(r))) +
-              (innerSizeColumn == null ? "" : ("\n" + innerSizeColumn.title + ": " + (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValueNiceName(r)))) +
-              (orderingColumn == null ? "" : ("\n" + orderingColumn.title + ": " + orderingColumn.getValueNiceName(r)))}
-          </title>
-          </g>
         )}
       </g>
       <XAxis xRule={xRule} yRule={yRule} />

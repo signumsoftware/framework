@@ -1,128 +1,20 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Entity, getToString, is, Lite, MListElement, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
-import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, QueryToken, ResultRow } from '@framework/FindOptions'
-import { ChartRow } from '../../Chart/ChartClient'
-import { FilterConditionComponent } from '../../../Signum.React/Scripts/SearchControl/FilterBuilder'
-import { FilterGroupOperation } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
-import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
+
+import { DashboardFilterController } from './DashboardFilterController'
 
 
-export class DashboardFilterController {
-
-
-  forceUpdate: () => void;
-
-  filters: Map<PanelPartEmbedded, DashboardFilter> = new Map();
-  lastChange: Map<string /*queryKEy*/, number> = new Map();
-
-  constructor(forceUpdate: () => void) {
-    this.forceUpdate = forceUpdate;
-  }
-
-  setFilter(filter: DashboardFilter) {
-    this.lastChange.set(filter.queryKey, new Date().getTime());
-    this.filters.set(filter.partEmbedded, filter);
-    this.forceUpdate();
-  }
-
-  clear(partEmbedded: PanelPartEmbedded) {
-    this.filters.delete(partEmbedded);
-    this.forceUpdate();
-  }
-
-  getFilterOptions(partEmbedded: PanelPartEmbedded, queryKey: string): FilterOptionParsed[] {
-    var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.rows?.length);
-
-    var result = otherFilters.filter(a => a.queryKey == queryKey).map(
-      df => groupFilter("Or", df.rows.map(
-        r => groupFilter("And", r.filters.map(
-          f => ({ token: f.token, operation: "EqualTo", value: f.value, frozen: false }) as FilterConditionOptionParsed
-        ))
-      ).notNull())
-    ).notNull();
-
-    return result;
-  }
-
-
-
-}
-
-function groupFilter(groupOperation: FilterGroupOperation, filters: FilterOptionParsed[]): FilterOptionParsed | undefined {
-
-  if (filters.length == 0)
-    return undefined;
-
-  if (filters.length == 1)
-    return filters[0];
-
-  return ({
-    groupOperation: groupOperation,
-    filters: filters
-  }) as FilterGroupOptionParsed;
-}
-
-export class DashboardFilter {
-  partEmbedded: PanelPartEmbedded;
-  queryKey: string;
-  rows: DashboardFilterRow[] = [];
-
-  constructor(partEmbedded: PanelPartEmbedded, queryKey: string) {
-    this.partEmbedded = partEmbedded;
-    this.queryKey = queryKey;
-  }
-
-
-  getActiveDetector(request: ChartRequestModel): ((row: ChartRow) => boolean) | undefined {
-
-    if (this.rows.length == 0)
-      return undefined;
-
-    var tokenToColumn = request.columns
-      .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
-      .filter(a => a.tokenString != null)
-      .groupBy(a => a.tokenString)
-      .toObject(gr => gr.key!, gr => gr.elements.first().colName);
-
-    return row => this.rows.some(r => {
-      return r.filters.every(f => {
-        var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
-        return f.value == rowVal || is(f.value, rowVal, false, false);
-      });
-    });
-  }
-}
-
-export interface DashboardFilterRow {
-  filters: { token: QueryToken, value: unknown }[];
-}
-
-export function equalsDFR(row1: DashboardFilterRow, row2: DashboardFilterRow): boolean {
-  if (row1.filters.length != row2.filters.length)
-    return false;
-
-  for (var i = 0; i < row1.filters.length; i++) {
-    var f1 = row1.filters[i];
-    var f2 = row2.filters[i];
-
-    if (!(f1.token.fullKey == f2.token.fullKey &&
-      (f1.value === f2.value || is(f1.value as Lite<Entity>, f2.value as Lite<Entity>, false, false))))
-      return false;
-  }
-
-  return true;
-}
 
 export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; reload: () => void;  }) {
 
@@ -321,6 +213,12 @@ export function PanelPart(p: PanelPartProps) {
 
   var style = part.style == undefined ? undefined : part.style.toLowerCase();
 
+  var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
+
+  function handleClearFilter(e: React.MouseEvent) {
+    p.filterController.clear(p.ctx.value);
+  }
+
   return (
     <div className={classes("card", style && ("border-" + style), "shadow-sm", "mb-4")}>
       <div className={classes("card-header", "sf-show-hover",
@@ -328,12 +226,18 @@ export function PanelPart(p: PanelPartProps) {
         style && ("bg-" + style)
       )}>
         {renderer.handleEditClick &&
-          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
+          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
             <FontAwesomeIcon icon="edit" className="mr-1" />Edit
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+        }
+        {
+          dashboardFilter && <span className="badge badge-light border border-secondary ml-2 sf-filter-pill">
+            {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
+            <button type="button" aria-label="Close" className="close" onClick={handleClearFilter}><span aria-hidden="true">×</span></button>
+          </span>
         }
       </div>
       <div className="card-body py-2 px-3">

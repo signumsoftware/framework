@@ -314,8 +314,8 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
         if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
           cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-          cp.modified = true;
         }
+        cp.modified = true;
       }
 
       chart.parameters!.push({ rowId: null, element: cp });
@@ -835,7 +835,6 @@ export interface ChartTable {
 }
 
 export interface ChartRow {
-  active?: boolean;
   entity?: Lite<Entity>;
   c0?: unknown;
   c1?: unknown;

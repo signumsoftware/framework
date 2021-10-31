@@ -52,6 +52,7 @@ export module DashboardMessage {
   export const _0Is1InstedOf2In3 = new MessageKey("DashboardMessage", "_0Is1InstedOf2In3");
   export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
   export const Part0OverlapsWith1 = new MessageKey("DashboardMessage", "Part0OverlapsWith1");
+  export const RowsSelected = new MessageKey("DashboardMessage", "RowsSelected");
 }
 
 export module DashboardOperation {
