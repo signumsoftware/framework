@@ -339,7 +339,6 @@ export namespace UserQueryMerger {
     oldFilterOptions: FilterOption[], newFilterOptions: FilterOption[],
     identation: number, sd: StringDistance): MList<QueryFilterEmbedded> {
 
-    debugger;
     const oldGroups = oldUqFilters.groupWhen(a => a.element.indentation == identation);
     const newGroups = newUqFilters.groupWhen(a => a.element.indentation == identation);
 
