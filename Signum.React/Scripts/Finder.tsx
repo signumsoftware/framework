@@ -506,7 +506,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
   if (ti?.kind == "Entity") {
 
     if (isLite(value))
-      return Navigator.API.fetchAndForget(value);
+      return Navigator.API.fetch(value);
 
     if (isEntity(value))
       return Promise.resolve(value);
@@ -920,13 +920,23 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
       return undefined;
 
-    if (overridenValue && fop.token && typeof overridenValue.value == "string") {
+    var value = overridenValue ? overridenValue.value : fop.value;
+
+    if (fop.token && typeof value == "string") {
       if (fop.token.type.name == "number") {
 
-        var numVal = parseInt(overridenValue.value);
+        var numVal = parseInt(value);
 
-        if (isNaN(numVal))
-          return undefined;
+        if (isNaN(numVal)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
@@ -936,13 +946,21 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
       }
 
       if (fop.token.type.name == "Guid") {
-        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(overridenValue.value))
-          return undefined;
+        if (!isValidGuid(value)) {
+          if (overridenValue)
+            return undefined;
+
+          return ({
+            token: fop.token.fullKey,
+            operation: fop.operation,
+            value: undefined,
+          } as FilterConditionRequest);
+        }
 
         return ({
           token: fop.token.fullKey,
           operation: fop.operation,
-          value: overridenValue.value,
+          value: value,
         } as FilterConditionRequest);
       }
     }
@@ -950,9 +968,14 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     return ({
       token: fop.token.fullKey,
       operation: fop.operation,
-      value: overridenValue ? overridenValue.value : fop.value,
+      value: value,
     } as FilterConditionRequest);
   }
+}
+
+
+function isValidGuid(str : string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
 export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
@@ -1156,9 +1179,11 @@ export class TokenCompleter {
   }
 
   toFilterOptionParsed(fo: FilterOption): FilterOptionParsed {
-    if (isFilterGroupOption(fo))
+    if (isFilterGroupOption(fo)) {
+      const token = fo.token && this.get(fo.token.toString())
+
       return ({
-        token: fo.token && this.get(fo.token.toString()),
+        token: token,
         groupOperation: fo.groupOperation,
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
@@ -1166,14 +1191,20 @@ export class TokenCompleter {
         frozen: false,
         expanded: false,
       } as FilterGroupOptionParsed);
+    }
     else
+    {
+
+      const token = this.get(fo.token.toString());
+
       return ({
-        token: this.get(fo.token.toString()),
+        token: token,
         operation: fo.operation ?? "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
       } as FilterConditionOptionParsed);
+    }
   }
 }
 

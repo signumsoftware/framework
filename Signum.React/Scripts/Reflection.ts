@@ -311,13 +311,12 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
       useGrouping: false,
     }
 
-
-  //simple euristic
+  //simple heuristic
   var style = f.endsWith("%") ? "percent" : "decimal";
   var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: style,
-    minimumFractionDigits: afterDot.replace("#", "").length,
+    minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };

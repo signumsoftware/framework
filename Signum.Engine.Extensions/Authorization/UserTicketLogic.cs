@@ -57,7 +57,7 @@ namespace Signum.Engine.Authorization
 
         [AutoExpressionField]
         public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) => 
-            As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite()));
+            As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User.Is(u.ToLite())));
 
         public static string NewTicket(string device)
         {

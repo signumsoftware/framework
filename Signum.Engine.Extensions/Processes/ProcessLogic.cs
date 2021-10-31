@@ -27,7 +27,7 @@ namespace Signum.Engine.Processes
 
         [AutoExpressionField]
         public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p) => 
-            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p));
+            As.Expression(() => Database.Query<ProcessEntity>().Where(a => a.Algorithm.Is(p)));
 
         [AutoExpressionField]
         public static ProcessEntity? LastProcess(this ProcessAlgorithmSymbol p) => 

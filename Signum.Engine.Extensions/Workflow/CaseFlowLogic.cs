@@ -198,8 +198,8 @@ namespace Signum.Engine.Workflow
                 case DoneType.ScriptSuccess:
                 case DoneType.Recompose:
                     return path.All(a => a.Type == ConnectionType.Normal || doneDecision != null && (a.DoneDecision() == doneDecision));
-                case DoneType.Jump: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
-                case DoneType.ScriptFailure: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
+                case DoneType.Jump: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
+                case DoneType.ScriptFailure: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
                 case DoneType.Timeout:
                 default:
                     throw new InvalidOperationException();
@@ -211,7 +211,7 @@ namespace Signum.Engine.Workflow
         private static WorkflowEventEntity? GetStartEvent(CaseEntity @case, Lite<CaseActivityEntity> firstActivity, WorkflowNodeGraph gr)
         {
             var wet = Database.Query<OperationLogEntity>()
-            .Where(l => l.Operation == CaseActivityOperation.CreateCaseFromWorkflowEventTask.Symbol && l.Target.Is(@case))
+            .Where(l => l.Operation.Is(CaseActivityOperation.CreateCaseFromWorkflowEventTask.Symbol) && l.Target.Is(@case))
             .Select(l => new { l.Origin, l.User })
             .SingleOrDefaultEx();
 
@@ -222,7 +222,7 @@ namespace Signum.Engine.Workflow
             }
             
             bool register = Database.Query<OperationLogEntity>()
-               .Where(l => l.Operation == CaseActivityOperation.Register.Symbol && l.Target.Is(firstActivity) && l.Exception == null)
+               .Where(l => l.Operation.Is(CaseActivityOperation.Register.Symbol) && l.Target.Is(firstActivity) && l.Exception == null)
                .Any();
 
             if (register)

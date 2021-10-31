@@ -107,7 +107,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
 
   function applyUserQuery(uq: Lite<UserQueryEntity>) {
-    Navigator.API.fetchAndForget(uq).then(userQuery => {
+    Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
@@ -128,7 +128,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
   function handleEdit() {
-    Navigator.API.fetchAndForget(currentUserQuery!)
+    Navigator.API.fetch(currentUserQuery!)
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
       .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
@@ -138,7 +138,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   async function applyChanges(): Promise<UserQueryEntity> {
     const sc = p.searchControl;
 
-    const uqOld = await Navigator.API.fetchAndForget(currentUserQuery!);
+    const uqOld = await Navigator.API.fetch(currentUserQuery!);
     const foOld = await UserQueryClient.Converter.toFindOptions(uqOld, undefined)
 
     const uqNew = await createUserQuery();

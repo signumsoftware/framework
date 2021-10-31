@@ -534,7 +534,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
 
 export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
 
-  Navigator.API.fetchAndForget(coc.context.lites[0])
+  Navigator.API.fetch(coc.context.lites[0])
     .then(ca => {
 
       getWorkflowJumpSelector(toLite(ca.workflowActivity as WorkflowActivityEntity))
@@ -603,7 +603,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
           if (!lite)
             return Promise.resolve(undefined);
 
-          return Navigator.API.fetchAndForget(lite!)
+          return Navigator.API.fetch(lite!)
             .then(entity => {
               if (mainEntityStrategy == "Clone") {
                 return Operations.API.constructFromEntity(entity, coi.key)

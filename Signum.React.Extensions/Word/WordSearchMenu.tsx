@@ -14,7 +14,7 @@ export interface WordSearchMenuProps {
 
 export default function WordSearchMenu(p : WordSearchMenuProps){
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
-    Navigator.API.fetchAndForget(wt)
+    Navigator.API.fetch(wt)
       .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.model!))
       .then(async ct => {
         var s = WordClient.settings[ct];

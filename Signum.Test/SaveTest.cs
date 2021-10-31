@@ -33,7 +33,7 @@ namespace Signum.Test
 
                 Database.SaveParams(m, f);
 
-                var list = Database.Query<ArtistEntity>().Where(a => a == m || a == f).ToList();
+                var list = Database.Query<ArtistEntity>().Where(a => a.Is(m) || a.Is(f)).ToList();
 
                 Assert.Contains(list[1].ToLite(), list[0].Friends);
                 Assert.Contains(list[0].ToLite(), list[1].Friends);
@@ -54,7 +54,7 @@ namespace Signum.Test
 
                 m.Save();
 
-                var m2 = m.ToLite().RetrieveAndForget();
+                var m2 = m.ToLite().Retrieve();
 
                 Assert.Contains(m2.ToLite(), m2.Friends);
 

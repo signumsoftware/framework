@@ -52,7 +52,7 @@ namespace Signum.Engine.Chart
                 sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
-                  Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query == e));
+                  Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
                 
                
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),

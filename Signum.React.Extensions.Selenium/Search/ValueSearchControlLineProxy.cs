@@ -10,7 +10,7 @@ namespace Signum.React.Extensions.Selenium.Search
 {
     public class ValueSearchControlLineProxy
     {
-        public RemoteWebDriver Selenium { get; private set; }
+        public WebDriver Selenium { get; private set; }
 
         public IWebElement Element { get; private set; }
 

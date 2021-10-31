@@ -20,7 +20,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {
-    return Navigator.API.fetchAndForget(element.content!)
+    return Navigator.API.fetch(element.content!)
       .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
       .then(cr => ChartClient.Encoder.chartPathPromise(cr, element.content!));
   }

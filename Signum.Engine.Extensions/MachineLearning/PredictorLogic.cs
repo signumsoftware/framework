@@ -412,7 +412,7 @@ namespace Signum.Engine.MachineLearning
                 }
                 catch (OperationCanceledException)
                 {
-                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    var p = ctx.Predictor.ToLite().Retrieve();
                     CleanTrained(p);
                     p.State = PredictorState.Draft;
                     using (OperationLogic.AllowSave<PredictorEntity>())
@@ -422,7 +422,7 @@ namespace Signum.Engine.MachineLearning
                 {
                     ex.Data["entity"] = ctx.Predictor;
                     var e = ex.LogException();
-                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    var p = ctx.Predictor.ToLite().Retrieve();
                     p.State = PredictorState.Error;
                     p.TrainingException = e.ToLite();
                     using (OperationLogic.AllowSave<PredictorEntity>())
@@ -567,7 +567,7 @@ namespace Signum.Engine.MachineLearning
                         var publication = arg.GetArg<PredictorPublicationSymbol>();
 
                         Database.Query<PredictorEntity>()
-                        .Where(a => a.Publication == publication)
+                        .Where(a => a.Publication.Is(publication))
                         .UnsafeUpdate()
                         .Set(a => a.Publication, a => null)
                         .Execute();

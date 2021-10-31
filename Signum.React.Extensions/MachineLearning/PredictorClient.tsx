@@ -76,7 +76,7 @@ export function start(options: { routes: JSX.Element[] }) {
     },
     contextual: {
       onClick: coc => {
-        Navigator.API.fetchAndForget(coc.context.lites[0])
+        Navigator.API.fetch(coc.context.lites[0])
           .then(p => API.publications(p.mainQuery.query!.key))
           .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
           .then(pps => pps && coc.defaultContextualClick(pps))

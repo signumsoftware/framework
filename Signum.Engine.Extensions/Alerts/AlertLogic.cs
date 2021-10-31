@@ -35,7 +35,7 @@ namespace Signum.Engine.Alerts
 
         [AutoExpressionField]
         public static IQueryable<AlertEntity> MyActiveAlerts(this Entity e) => 
-            As.Expression(() => e.Alerts().Where(a => a.Recipient == UserHolder.Current.ToLite() && a.CurrentState == AlertCurrentState.Alerted));
+            As.Expression(() => e.Alerts().Where(a => a.Recipient.Is(UserHolder.Current.ToLite()) && a.CurrentState == AlertCurrentState.Alerted));
 
         public static Func<IUserEntity?> DefaultRecipient = () => null;
 
@@ -126,7 +126,7 @@ namespace Signum.Engine.Alerts
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                 {
                     Text = $@"
-<p>{AlertMessage.Hi0.NiceToString("@[m:Entity]")},</p>
+<p>{AlertMessage.Hi0.NiceToString("@[m:Entity]")}</p>
 <p>{AlertMessage.YouHaveSomePendingAlerts.NiceToString()}</p>
 <ul>
 @foreach[m:Alerts] as $a
@@ -154,10 +154,10 @@ namespace Signum.Engine.Alerts
 
             SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
             {
-                var limit = DateTime.Now.AddMinutes(-task.SendNotificationsOlderThan);
+                var limit = TimeZoneManager.Now.AddMinutes(-task.SendNotificationsOlderThan);
 
                 var query = Database.Query<AlertEntity>()
-                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.CreationDate < limit)
+                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.AlertDate < limit)
                 .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
                             task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
                             task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));
@@ -363,7 +363,7 @@ namespace Signum.Engine.Alerts
             using (AuthLogic.Disable())
             {
                 Database.Query<AlertEntity>()
-                    .Where(a => a.Target.Is(target) && a.AlertType == alertType && a.State == AlertState.Saved)
+                    .Where(a => a.Target.Is(target) && a.AlertType.Is(alertType) && a.State == AlertState.Saved)
                     .ToList()
                     .ForEach(a => a.Execute(AlertOperation.Attend));
             }
@@ -387,7 +387,7 @@ namespace Signum.Engine.Alerts
             using (AuthLogic.Disable())
             {
                 Database.Query<AlertEntity>()
-                    .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType == alertType && a.Recipient == recipient)
+                    .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType.Is(alertType) && a.Recipient.Is(recipient))
                     .UnsafeDelete();
             }
         }

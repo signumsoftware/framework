@@ -122,7 +122,7 @@ namespace Signum.Engine.DiffLog
 
         public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)
         {
-            var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target == log.Target);
+            var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target.Is(log.Target));
 
             return new MinMax<OperationLogEntity?>(
                  log.Mixin<DiffLogMixin>().InitialState.Text == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),

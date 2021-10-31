@@ -32,7 +32,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
-      Navigator.API.fetchAndForget(res.content!)
+      Navigator.API.fetch(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
         .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }))
         .done();
@@ -40,7 +40,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   }
 
   navigateTo(res: ToolbarResponse<UserQueryEntity>): Promise<string> {
-    return Navigator.API.fetchAndForget(res.content!)
+    return Navigator.API.fetch(res.content!)
       .then(uq => {
         if (uq.refreshMode == "Manual")
           return Promise.resolve(UserQueryClient.userQueryUrl(res.content!));

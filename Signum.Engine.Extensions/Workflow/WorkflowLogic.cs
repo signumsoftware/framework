@@ -34,11 +34,11 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<WorkflowPoolEntity> WorkflowPools(this WorkflowEntity e) => 
-            As.Expression(() => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e));
+            As.Expression(() => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowEntity e) => 
-            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane.Pool.Workflow == e));
+            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane.Pool.Workflow.Is(e)));
 
         public static IEnumerable<WorkflowActivityEntity> WorkflowActivitiesFromCache(this WorkflowEntity e)
         {
@@ -47,7 +47,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowEntity e) => 
-            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow == e));
+            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Pool.Workflow.Is(e)));
 
         [AutoExpressionField]
         public static WorkflowEventEntity? WorkflowStartEvent(this WorkflowEntity e) => 
@@ -60,7 +60,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowEntity e) => 
-            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane.Pool.Workflow == e));
+            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane.Pool.Workflow.Is(e)));
 
         public static IEnumerable<WorkflowGatewayEntity> WorkflowGatewaysFromCache(this WorkflowEntity e)
         {
@@ -69,7 +69,7 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowEntity e) => 
-            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow == e && a.To.Lane.Pool.Workflow == e));
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow.Is(e) && a.To.Lane.Pool.Workflow.Is(e)));
 
         public static IEnumerable<WorkflowConnectionEntity> WorkflowConnectionsFromCache(this WorkflowEntity e)
         {
@@ -78,27 +78,27 @@ namespace Signum.Engine.Workflow
 
         [AutoExpressionField]
         public static IQueryable<WorkflowConnectionEntity> WorkflowMessageConnections(this WorkflowEntity e) => 
-            As.Expression(() => e.WorkflowConnections().Where(a => a.From.Lane.Pool != a.To.Lane.Pool));
+            As.Expression(() => e.WorkflowConnections().Where(a => !a.From.Lane.Pool.Is(a.To.Lane.Pool)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowLaneEntity> WorkflowLanes(this WorkflowPoolEntity e) => 
-            As.Expression(() => Database.Query<WorkflowLaneEntity>().Where(a => a.Pool == e));
+            As.Expression(() => Database.Query<WorkflowLaneEntity>().Where(a => a.Pool.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowPoolEntity e) => 
-            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool == e && a.To.Lane.Pool == e));
+            As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Is(e) && a.To.Lane.Pool.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowGatewayEntity> WorkflowGateways(this WorkflowLaneEntity e) => 
-            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane == e));
+            As.Expression(() => Database.Query<WorkflowGatewayEntity>().Where(a => a.Lane.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowLaneEntity e) => 
-            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane == e));
+            As.Expression(() => Database.Query<WorkflowEventEntity>().Where(a => a.Lane.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowActivityEntity> WorkflowActivities(this WorkflowLaneEntity e) => 
-            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane == e));
+            As.Expression(() => Database.Query<WorkflowActivityEntity>().Where(a => a.Lane.Is(e)));
 
         [AutoExpressionField]
         public static IQueryable<WorkflowConnectionEntity> NextConnections(this IWorkflowNodeEntity e) => 
@@ -462,7 +462,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition.Is(e.ToLite())), e, WorkflowTimerConditionOperation.Save);
                     }
 
                     e.Save();
@@ -473,7 +473,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer!.Condition.Is(e.ToLite())), e, WorkflowTimerConditionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -519,7 +519,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action.Is(e.ToLite())), e, WorkflowActionOperation.Save);
                     }
 
                     e.Save();
@@ -530,7 +530,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action.Is(e.ToLite())), e, WorkflowActionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -575,7 +575,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition.Is(e.ToLite())), e, WorkflowConditionOperation.Save);
                     }
 
                     e.Save();
@@ -586,7 +586,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition.Is(e.ToLite())), e, WorkflowConditionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -632,7 +632,7 @@ namespace Signum.Engine.Workflow
 
                         var oldMainEntityType = e.InDB(a => a.MainEntityType);
                         if (!oldMainEntityType.Is(e.MainEntityType))
-                            ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
+                            ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script.Is(e.ToLite())), e, WorkflowScriptOperation.Save);
                     }
 
                     e.Save();
@@ -651,7 +651,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (s, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script == s.ToLite()), s, WorkflowScriptOperation.Delete);
+                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script!.Script.Is(s.ToLite())), s, WorkflowScriptOperation.Delete);
                     s.Delete();
                 },
             }.Register();

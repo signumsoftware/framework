@@ -17,7 +17,7 @@ export function start(options: { routes: JSX.Element[] }) {
     if (overridenIsolation) {
       options.headers = {
         ...options.headers,
-        "SF_Isolation": liteKey(overridenIsolation)
+        "Signum_Isolation": liteKey(overridenIsolation)
       };
     }
   });

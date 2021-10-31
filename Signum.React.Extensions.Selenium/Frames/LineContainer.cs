@@ -41,7 +41,7 @@ namespace Signum.React.Selenium
 
     public static class LineContainerExtensions
     {
-        public static bool HasError(this RemoteWebDriver selenium, string elementId)
+        public static bool HasError(this WebDriver selenium, string elementId)
         {
             return selenium.IsElementPresent(By.CssSelector("#{0}.input-validation-error".FormatWith(elementId)));
         }

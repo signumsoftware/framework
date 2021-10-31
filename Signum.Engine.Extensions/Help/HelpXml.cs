@@ -46,7 +46,7 @@ namespace Signum.Engine.Help
                 var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
                 var name = element.Attribute(_Name)!.Value;
 
-                var entity = Database.Query<AppendixHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.UniqueName == name) ??
+                var entity = Database.Query<AppendixHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.UniqueName == name) ??
                     new AppendixHelpEntity
                     {
                          Culture = ci,
@@ -104,7 +104,7 @@ namespace Signum.Engine.Help
                 if (name == null)
                     return ImportAction.Skipped;
 
-                var entity = Database.Query<NamespaceHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Name == name) ?? new NamespaceHelpEntity
+                var entity = Database.Query<NamespaceHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Name == name) ?? new NamespaceHelpEntity
                 {
                     Culture = ci,
                     Name = name,
@@ -157,7 +157,7 @@ namespace Signum.Engine.Help
 
                 var query = QueryLogic.GetQueryEntity(queryName);
 
-                var entity = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Query == query) ??
+                var entity = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Query.Is(query)) ??
                     new QueryHelpEntity
                     {
                         Culture = ci,
@@ -251,7 +251,7 @@ namespace Signum.Engine.Help
 
                 var typeEntity = type.ToTypeEntity();
 
-                var entity = Database.Query<TypeHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Type == typeEntity) ??
+                var entity = Database.Query<TypeHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Type.Is(typeEntity)) ??
                     new TypeHelpEntity
                     {
                         Culture = ci,

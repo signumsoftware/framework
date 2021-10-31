@@ -32,7 +32,7 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
     if (result.userQuery == undefined)
       return undefined;
 
-    return Navigator.API.fetchAndForget(result.userQuery)
+    return Navigator.API.fetch(result.userQuery)
       .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
       .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(result.userQuery) }));
   }

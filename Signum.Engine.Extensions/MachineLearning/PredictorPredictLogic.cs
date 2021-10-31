@@ -18,7 +18,7 @@ namespace Signum.Engine.MachineLearning
 
         public static Lite<PredictorEntity> GetCurrentPredictor(PredictorPublicationSymbol publication)
         {
-            var predictor = Database.Query<PredictorEntity>().Where(a => a.Publication == publication).Select(a => a.ToLite()).SingleEx();
+            var predictor = Database.Query<PredictorEntity>().Where(a => a.Publication.Is(publication)).Select(a => a.ToLite()).SingleEx();
 
             return predictor;
         }

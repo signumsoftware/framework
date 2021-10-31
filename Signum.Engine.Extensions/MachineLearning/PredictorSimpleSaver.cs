@@ -47,7 +47,7 @@ namespace Signum.Engine.MachineLearning
                 {
                     ctx.ReportProgress($"Deleting old {typeof(PredictSimpleResultEntity).NicePluralName()}");
                     {
-                        var query = Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor == p);
+                        var query = Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(p));
                         int chunkSize = 5000;
                         var totalCount = query.Count();
                         var deleted = 0;

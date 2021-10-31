@@ -113,7 +113,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
 
-        public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
+        public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
@@ -121,7 +121,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return (T)(object)Retrieve(lite.EntityType, lite.Id);
         }
 
-        public static async Task<T> RetrieveAndForgetAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+        public static async Task<T> RetrieveAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
@@ -1128,7 +1128,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
                 where E : Entity
         {
-            return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite() == entity);
+            return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite().Is(entity));
         }
 
         class MListElementsExpander : IMethodExpander
@@ -1218,7 +1218,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             if (lite == null)
                 throw new ArgumentNullException(nameof(lite));
 
-            var result = Database.Query<RT>().Where(rt => rt.ToLite() == lite);
+            var result = Database.Query<RT>().Where(rt => rt.ToLite().Is(lite));
 
             if (typeof(S) == typeof(RT))
                 return result;

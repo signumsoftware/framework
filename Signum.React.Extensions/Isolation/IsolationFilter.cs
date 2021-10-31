@@ -13,9 +13,11 @@ namespace Signum.React.Extensions.Isolation
 {
     public class IsolationFilter : SignumDisposableResourceFilter
     {
+        public const string Signum_Isolation_Key = "Signum_Isolation";
+
         public override IDisposable? GetResource(ResourceExecutingContext context)
         {
-            var user =  UserEntity.Current;
+            var user = UserEntity.Current;
 
             if (user == null)
                 return null;
@@ -24,10 +26,12 @@ namespace Signum.React.Extensions.Isolation
 
             if (isolation == null)
             {
-                var isolationKey = context.HttpContext.Request.Headers["SF_Isolation"].FirstOrDefault();
+                var isolationKey = context.HttpContext.Request.Headers[Signum_Isolation_Key].FirstOrDefault();
                 if (isolationKey != null)
                     isolation = Lite.Parse<IsolationEntity>(isolationKey);
             }
+
+            context.HttpContext.Items[Signum_Isolation_Key] = isolation;
 
             return IsolationEntity.Override(isolation);
         }

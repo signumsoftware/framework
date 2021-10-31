@@ -4,14 +4,14 @@ import * as Operations from '@framework/Operations'
 import { getTypeInfo, symbolNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { Toast, NavItem } from 'react-bootstrap'
+import { Toast, NavItem, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPI, useAPIWithReload, useForceUpdate, useInterval, usePrevious, useThrottle, useUpdatedRef } from '@framework/Hooks';
 import { LinkContainer } from '@framework/Components'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Entities.Alerts'
+import { AlertDropDownGroup, AlertEntity, AlertMessage, AlertOperation } from './Signum.Entities.Alerts'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
@@ -76,6 +76,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
   }, [ringing])
 
   const [alerts, setAlerts] = React.useState<AlertEntity[] | undefined>(undefined);
+  const [groupBy, setGroupBy] = React.useState<AlertDropDownGroup>("ByTypeAndUser");
 
   function handleOnToggle() {
 
@@ -102,7 +103,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
     if (countResult)
       countResult.numAlerts -= toRemove.length;
     forceUpdate();
-    
+
 
 
     Operations.API.executeMultiple(toRemove.map(a => toLite(a)), AlertOperation.Attend)
@@ -130,60 +131,74 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
   }
 
   var alertsGroups = alerts == null ? null :
-    alerts.orderByDescending(a => a.alertDate).groupBy(a => a.alertType == null ? "none" : a.alertType.id + "-" + a.createdBy?.id);
-    
+    alerts.orderByDescending(a => a.alertDate).groupBy(a =>
+      groupBy == "ByType" ? (a.alertType == null ? "none" : a.alertType.id) :
+        groupBy == "ByUser" ? (a.createdBy?.id) :
+          groupBy == "ByTypeAndUser" ? ((a.alertType == null ? "none" : a.alertType.id) + "-" + a.createdBy?.id) : "none"
+    );
+
+
+  function groupByButton(type: AlertDropDownGroup) {
+    return <Button active={type == groupBy} variant="light" onClick={ ()=> setGroupBy(type)}>{AlertDropDownGroup.niceToString(type)}</Button>
+  }
 
   return (
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle}>
-        <FontAwesomeIcon icon="bell" className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")}/>
-          {countResult && countResult.numAlerts > 0 && <span className="badge badge-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
+        <FontAwesomeIcon icon="bell" className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
+        {countResult && countResult.numAlerts > 0 && <span className="badge badge-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
       </div>
       {isOpen && <div className="sf-alerts-toasts">
         {alertsGroups == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
-      
+
           <>
-              { alertsGroups.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast> }
-              {
-                alertsGroups.filter((gr, i) => i < showAlerts)
-                .flatMap(gr => gr.key == "none" || gr.elements.length <= 2 ? gr.elements.map(a => <AlertToast alert={a} key={a.id} onClose={handleOnCloseAlerts} refresh={reloadCount}/>) :
+            {alertsGroups.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast>}
+          
+            {
+              alertsGroups.filter((gr, i) => i < showAlerts)
+                .flatMap(gr => gr.key == "none" ? gr.elements.map(a => <AlertToast alert={a} key={a.id} onClose={handleOnCloseAlerts} refresh={reloadCount} />) :
                   [<AlertGroupToast key={gr.key} alerts={gr.elements} onClose={handleOnCloseAlerts} refresh={reloadCount} />])
-              }
-              {
-                alertsGroups.length > showAlerts &&
-                <Toast onClose={()=>handleOnCloseAlerts(alerts!)}>
-                  <Toast.Header>
-                    <strong >{AlertMessage._0SimilarAlerts.niceToString(alertsGroups.filter((a, i) => i >= showAlerts).sum(gr => gr.elements.length))}</strong>
-                    <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
-                    <small>{AlertMessage.CloseAll.niceToString()}</small>
-                  </Toast.Header>
-                </Toast>
-              }
-              <Toast>
+            }
+            {
+              alertsGroups.length > showAlerts &&
+              <Toast onClose={() => handleOnCloseAlerts(alerts!.map(a=>a))}>
+                <Toast.Header>
+                  <strong >{AlertMessage._0SimilarAlerts.niceToString(alertsGroups.filter((a, i) => i >= showAlerts).sum(gr => gr.elements.length))}</strong>
+                  <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
+                  <small>{AlertMessage.CloseAll.niceToString()}</small>
+                </Toast.Header>
+              </Toast>
+            }
+            <Toast>
               <Toast.Body style={{ textAlign: "center" }}>
                 <Link onClick={() => setIsOpen(false)} to={Finder.findOptionsPath({
-                    queryName: AlertEntity,
-                    filterOptions: [
-                      { token: AlertEntity.token(a => a.entity.recipient), value: AuthClient.currentUser() },
-                    ],
+                  queryName: AlertEntity,
+                  filterOptions: [
+                    { token: AlertEntity.token(a => a.entity.recipient), value: AuthClient.currentUser() },
+                  ],
                   orderOptions: [
                     { token: AlertEntity.token(a => a.entity.alertDate), orderType: "Descending" },
-                    ],
-                    columnOptions: [
-                      { token: AlertEntity.token(a => a.entity.id) },
-                      { token: AlertEntity.token(a => a.entity.alertDate) },
-                      { token: AlertEntity.token(a => a.entity.alertType) },
-                      { token: AlertEntity.token("Text") },
-                      { token: AlertEntity.token(a => a.entity.target) },
-                      { token: AlertEntity.token(a => a.entity).expression("CurrentState") },
-                      { token: AlertEntity.token(a => a.entity.createdBy) },
-                      { token: AlertEntity.token(a => a.entity.recipient) },
-                    ],
-                    columnOptionsMode: "Replace"
-                  })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
-                </Toast.Body>
-              </Toast>
-            </>
+                  ],
+                  columnOptions: [
+                    { token: AlertEntity.token(a => a.entity.id) },
+                    { token: AlertEntity.token(a => a.entity.alertDate) },
+                    { token: AlertEntity.token(a => a.entity.alertType) },
+                    { token: AlertEntity.token("Text") },
+                    { token: AlertEntity.token(a => a.entity.target) },
+                    { token: AlertEntity.token(a => a.entity).expression("CurrentState") },
+                    { token: AlertEntity.token(a => a.entity.createdBy) },
+                    { token: AlertEntity.token(a => a.entity.recipient) },
+                  ],
+                  columnOptionsMode: "Replace"
+                })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
+              </Toast.Body>
+            </Toast>
+            {alerts && alerts.length > 1 && <Toast><ButtonGroup size="sm" className="w-100">
+              {groupByButton("ByType")}
+              {groupByButton("ByUser")}
+              {groupByButton("ByTypeAndUser")}
+            </ButtonGroup></Toast>}
+          </>
         }
       </div>}
     </>

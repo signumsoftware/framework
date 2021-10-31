@@ -35,7 +35,7 @@ namespace Signum.Engine.Mailing
      
         [AutoExpressionField]
         public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se) => 
-            As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model == se));
+            As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(se)));
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
         public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
         {
             EmailModelEntity emailModel = (EmailModelEntity)arg;
 
-            var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model == emailModel));
+            var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)));
 
             return emailTemplates;
         }

@@ -305,8 +305,7 @@ namespace Signum.Engine.SMS
             {
                 var smsModelEntity = ToSMSModelEntity(smsModelType);
 
-                var template = Database.Query<SMSTemplateEntity>().SingleOrDefaultEx(t =>
-                    t.Model == smsModelEntity);
+                var template = Database.Query<SMSTemplateEntity>().SingleOrDefaultEx(t => t.Model.Is(smsModelEntity));
 
                 if (template == null)
                 {

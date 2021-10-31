@@ -68,10 +68,10 @@ namespace Signum.Engine.Dashboard
                         var uq = (UserQueryEntity)arg;
 
                         var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
-                            .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery == uq));
+                            .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Is(uq)));
 
                         var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
-                          .Where(mle => mle.UserQuery == uq));
+                          .Where(mle => mle.UserQuery.Is(uq)));
 
                         return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                     };
@@ -95,10 +95,10 @@ namespace Signum.Engine.Dashboard
                         var uc = (UserChartEntity)arg;
 
                         var mlistElems = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
-                            .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart == uc));
+                            .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
 
                         var parts = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
-                           .Where(mle => mle.UserChart == uc));
+                           .Where(mle => mle.UserChart.Is(uc)));
 
                         var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                             .Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Contains(uc)));

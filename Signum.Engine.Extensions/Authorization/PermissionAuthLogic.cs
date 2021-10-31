@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
                     toKey: p => p,
                     toEntity: p => p,
-                    isEquals: (p1, p2) => p1 == p2,
+                    isEquals: (p1, p2) => p1.Is(p2),
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 

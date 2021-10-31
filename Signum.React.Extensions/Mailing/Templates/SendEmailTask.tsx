@@ -13,7 +13,7 @@ export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity>
 
   const type = useAPI(() =>
     p.ctx.value.emailTemplate == null ? Promise.resolve(undefined) :
-    Navigator.API.fetchAndForget(p.ctx.value.emailTemplate)
+    Navigator.API.fetch(p.ctx.value.emailTemplate)
       .then(et => Finder.getQueryDescription(et.query!.key))
       .then(qd => qd.columns["Entity"].type.name),
     [p.ctx.value.emailTemplate])

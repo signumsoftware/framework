@@ -183,4 +183,13 @@ namespace Signum.Entities.Alerts
         PleaseVisit0,
     }
 
+    [InTypeScript(true)]
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum AlertDropDownGroup
+    {
+        ByType,
+        ByUser,
+        ByTypeAndUser,
+    }
+
 }

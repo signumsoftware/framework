@@ -59,7 +59,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   function handleSelect(uc: Lite<UserChartEntity>) {
     var crv = p.chartRequestView;
 
-    Navigator.API.fetchAndForget(uc).then(userChart => {
+    Navigator.API.fetch(uc).then(userChart => {
       const cr = crv.chartRequest;
       const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
       UserChartClient.Converter.applyUserChart(newCR, userChart, undefined)
@@ -72,7 +72,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
 
     var crv = p.chartRequestView;
 
-    const ucOld = await Navigator.API.fetchAndForget(crv.userChart!);
+    const ucOld = await Navigator.API.fetch(crv.userChart!);
     const crmOld = await UserChartClient.Converter.toChartRequest(ucOld, undefined)
 
     const ucNew = await createUserChart();
@@ -108,7 +108,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   function handleEdit() {
     var crv = p.chartRequestView;
 
-    Navigator.API.fetchAndForget(crv.userChart!)
+    Navigator.API.fetch(crv.userChart!)
       .then(userChart => Navigator.view(userChart))
       .then(() => reloadList())
       .then(list => {

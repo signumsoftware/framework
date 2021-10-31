@@ -14,6 +14,12 @@ export type AlertCurrentState =
   "Alerted" |
   "Future";
 
+export const AlertDropDownGroup = new EnumType<AlertDropDownGroup>("AlertDropDownGroup");
+export type AlertDropDownGroup =
+  "ByType" |
+  "ByUser" |
+  "ByTypeAndUser";
+
 export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
   Type: "Alert";

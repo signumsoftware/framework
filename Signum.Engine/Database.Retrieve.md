@@ -31,31 +31,42 @@ public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
 
 Two important considerations: 
 * `Lite<T>` is covariant and the actual type of the `Lite` object (returned by `Lite.EntityType` property) is used to retrieve the entity, not the static type `T`.
-*  Once retrieved, the `Lite<T>` remembers the entity in his `Lite.Entity` property, so it's not retrieved again. This could affect your business logic and serialization performance. 
+*  By default, the retrieved entity WON'T be saved in the `Entity` property of the `Lite<T>` to avoid serialization issues. 
 
 Example: 
 
 ```C#
 var lionLite = myLion.ToLite(); //unloaded lite
-var myLion2 = lion.Retrieve(); //now the lite is loaded
-var myLion3 = lion.Retrieve(); //myLion2 == myLion3 and no query was made!
+var myLion2 = lion.Retrieve(); //first DB query is made.
+var myLion3 = lion.Retrieve(); //second query is made, myLion2 != myLion3 (if no EntityCache in scope) and lite still unloaded
 ```
 
-If you want to avoid the memorizing aspect of `Retrieve` method, use this method instead: 
+If you want to avoid the second query by saving the entity inside of the `Lite.Entity` property, use this method instead: 
 
 ```C#
-public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
+public static T RetrieveAndRemember<T>(this Lite<T> lite) where T : class, IEntity
+{
+    if (lite == null)
+        throw new ArgumentNullException(nameof(lite));
+
+    if (lite.EntityOrNull == null)
+        lite.SetEntity(Retrieve(lite.EntityType, lite.Id));
+
+    return lite.EntityOrNull!;
+}
 ```
 
-`RetrieveAndForget` ignores the `Lite.Entity` property before and after retrieving the entity.  
+As you see, `RetrieveAndRemember` only retrieves the entity if the lite is not already loaded (`EntityOrNull == null`) saving it in the `EntityOrNull` property for the future.  
 
 Example: 
 
 ```C#
 var lionLite = myLion.ToLite(); //unloaded lite
-var myLion2 = lion.RetrieveAndForget(); //lite still unloaded
-var myLion3 = lion.RetrieveAndForget(); //myLion2 != myLion3 and lite still unloaded
+var myLion2 = lion.RetrieveAndRemember(); //lite is loaded
+var myLion3 = lion.RetrieveAndRemember(); //seccond query not made!
 ```
+
+**Note:** `Retrieve` is the simplest and recommended method to use with lites most of the time to avoid serialization issues, that's why it has the shortest name. 
 
 ### RetrieveLite
 

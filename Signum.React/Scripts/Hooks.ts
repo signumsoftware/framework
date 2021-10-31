@@ -309,3 +309,32 @@ export function useHistoryListen(locationChanged: (location: History.Location, a
     return () => { unregisterCallback.current!(); }
   }, [enabled, ...(extraDeps || [])]);
 }
+
+export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }) => {
+  options = {
+    timeout: 200,
+    ...options,
+  };
+
+  /** @type {{ current: number }} */
+  const handleRef = React.useRef<number | undefined>();
+
+  const clearClickTimeout = () => {
+    if (handleRef) {
+      clearTimeout(handleRef.current);
+      handleRef.current = undefined;
+    }
+  };
+
+  return React.useCallback((event: React.MouseEvent) => {
+    clearClickTimeout();
+    if (click && event.detail === 1) {
+      handleRef.current = setTimeout(() => {
+        click(event);
+      }, options!.timeout);
+    }
+    if (event.detail % 2 === 0) {
+      doubleClick(event);
+    }
+  }, [click, doubleClick, options.timeout]);
+};

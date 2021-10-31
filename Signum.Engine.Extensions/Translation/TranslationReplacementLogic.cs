@@ -8,6 +8,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Entities;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 
@@ -58,7 +59,7 @@ namespace Signum.Engine.Translation
             if (string.IsNullOrWhiteSpace(translationRight))
                 throw new ArgumentNullException(translationRight);
             
-            if (!Database.Query<TranslationReplacementEntity>().Any(a => a.CultureInfo == ci.ToCultureInfoEntity() && a.WrongTranslation == translationWrong))
+            if (!Database.Query<TranslationReplacementEntity>().Any(a => a.CultureInfo.Is(ci.ToCultureInfoEntity()) && a.WrongTranslation == translationWrong))
                 using (OperationLogic.AllowSave<TranslationReplacementEntity>())
                     new TranslationReplacementEntity
                     {

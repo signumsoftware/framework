@@ -105,16 +105,16 @@ namespace Signum.Engine.Help
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
+                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation.Is((OperationSymbol)operation)));
 
                 sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
+                    Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property.Is((PropertyRouteEntity)property)));
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type == (TypeEntity)type));
+                    Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type.Is((TypeEntity)type)));
 
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += query =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query == (QueryEntity)query));
+                    Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query.Is((QueryEntity)query)));
 
                 Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>(),
                  invalidateWith: new InvalidateWith(typeof(TypeHelpEntity)));
@@ -140,7 +140,7 @@ namespace Signum.Engine.Help
             {
                 var namespaces = AllTypes().GroupBy(type => type.Namespace!);
 
-                var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Name);
+                var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture.Is(ci.ToCultureInfoEntity())).ToDictionary(a => a.Name);
 
                 return namespaces.ToDictionary(gr => gr.Key, gr => new NamespaceHelp(gr.Key, ci, dic.TryGetC(gr.Key), gr.ToArray()));
             }));
@@ -152,7 +152,7 @@ namespace Signum.Engine.Help
         public static Dictionary<string, AppendixHelpEntity> CachedAppendicesHelp()
         {
             return Appendices.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
-                Database.Query<AppendixHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.UniqueName)));
+                Database.Query<AppendixHelpEntity>().Where(n => n.Culture.Is(ci.ToCultureInfoEntity())).ToDictionary(a => a.UniqueName)));
         }
 
 
@@ -164,7 +164,7 @@ namespace Signum.Engine.Help
             {
                 using (ExecutionMode.Global())
                 {
-                    var dic = Database.Query<TypeHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Type.ToType());
+                    var dic = Database.Query<TypeHelpEntity>().Where(n => n.Culture.Is(ci.ToCultureInfoEntity())).ToDictionary(a => a.Type.ToType());
 
                     return AllTypes().ToDictionary(t => t, t => new TypeHelp(t, ci, dic.TryGetC(t)));
                 }
@@ -176,7 +176,7 @@ namespace Signum.Engine.Help
         {
             return Queries.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
             {
-                var dic = Database.Query<QueryHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Query.ToQueryName());
+                var dic = Database.Query<QueryHelpEntity>().Where(n => n.Culture.Is(ci.ToCultureInfoEntity())).ToDictionary(a => a.Query.ToQueryName());
 
                 return AllQueries().ToDictionary(t => t, t => new QueryHelp(t, ci, dic.TryGetC(t)));
             }));
