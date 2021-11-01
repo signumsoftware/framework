@@ -8,8 +8,8 @@ import { ChartRow } from '../ChartClient';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
-import { DashboardFilter } from '../../Dashboard/View/DashboardView';
 import { ChartRequestModel } from '../Signum.Entities.Chart';
+import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
 
 
 export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {

@@ -4,7 +4,6 @@ import { translate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
 import { PivotColumn, PivotTable } from './PivotTable';
-import { DashboardFilter } from '../../../Dashboard/View/DashboardView';
 import { ChartRow } from '../../ChartClient';
 import { isActive } from '@framework/FindOptions';
 

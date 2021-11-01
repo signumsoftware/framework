@@ -3,14 +3,12 @@ import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOptionParse
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
-import { FilterConditionComponent } from '@framework/SearchControl/FilterBuilder'
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import * as Finder from '../../../Signum.React/Scripts/Finder';
 import { getQueryKey } from '@framework/Reflection';
 
 
 export class DashboardFilterController {
-
 
   forceUpdate: () => void;
 
@@ -58,15 +56,13 @@ export class DashboardFilterController {
 
 
     var newFilters = Finder.toFilterOptions(fops);
-    if (newFilters) {
-      return {
-        ...fo,
-        filterOptions: [
-          ...fo.filterOptions ?? [],
-          ...newFilters
-        ]
-      };
-    }
+    return {
+      ...fo,
+      filterOptions: [
+        ...fo.filterOptions ?? [],
+        ...newFilters
+      ]
+    };
   }
 }
 

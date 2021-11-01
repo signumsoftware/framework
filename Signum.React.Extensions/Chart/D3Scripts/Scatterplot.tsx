@@ -8,8 +8,8 @@ import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { DashboardFilter } from '../../Dashboard/View/DashboardView';
 import { ChartRequestModel } from '../Signum.Entities.Chart';
+import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
 
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {

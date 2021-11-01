@@ -26,7 +26,7 @@ import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
-import { DashboardFilter } from '../Dashboard/View/DashboardView';
+import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 

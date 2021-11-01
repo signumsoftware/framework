@@ -15,7 +15,7 @@ import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
 import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
-import { DashboardFilter } from '../../Dashboard/View/DashboardView'
+import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
 
 
 export interface ChartRendererProps {

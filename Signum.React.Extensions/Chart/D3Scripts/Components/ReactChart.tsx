@@ -11,7 +11,7 @@ import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
 import { useThrottle, useSize, useAPI, areEqual } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
-import { DashboardFilter } from '../../../Dashboard/View/DashboardView';
+import { DashboardFilter } from '../../../Dashboard/View/DashboardFilterController';
 
 export interface ReactChartProps {
   chartRequest: ChartRequestModel,

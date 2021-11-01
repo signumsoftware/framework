@@ -21,7 +21,6 @@ import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
-import { DashboardFilter } from './View/DashboardView';
 import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 
