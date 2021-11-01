@@ -34,6 +34,8 @@ namespace Signum.Entities.Dashboard
         [NumberBetweenValidator(1, 12)]
         public int Columns { get; set; }
 
+        public InteractionGroup? InteractionGroup { get; set; }
+
         public BootstrapStyle Style { get; set; }
 
         [ImplementedBy(
@@ -91,6 +93,7 @@ namespace Signum.Entities.Dashboard
                 Title == null ? null! : new XAttribute("Title", Title),
                 IconName == null ? null! : new XAttribute("IconName", IconName),
                 IconColor == null ? null! : new XAttribute("IconColor", IconColor),
+                InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
                 new XAttribute("Style", Style),
                 Content.ToXml(ctx));
         }
@@ -103,7 +106,8 @@ namespace Signum.Entities.Dashboard
             Title = x.Attribute("Title")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
-            Style = (BootstrapStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(BootstrapStyle), a.Value)) ?? BootstrapStyle.Light);
+            Style = x.Attribute("Style")?.Value.TryToEnum<BootstrapStyle>() ?? BootstrapStyle.Light;
+            InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -112,8 +116,6 @@ namespace Signum.Entities.Dashboard
             return new Interval<int>(this.StartColumn, this.StartColumn + this.Columns);
         }
     }
-
-
 
     public interface IGridEntity
     {
@@ -185,6 +187,17 @@ namespace Signum.Entities.Dashboard
         }
     }
 
+    public enum InteractionGroup
+    {
+        Group1,
+        Group2,
+        Group3,
+        Group4,
+        Group5,
+        Group6,
+        Group7,
+        Group8,
+    }
     public enum UserQueryPartRenderMode
     {
         SearchControl,

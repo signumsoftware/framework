@@ -314,7 +314,7 @@ function internalDropDownList(vl: ValueLineController) {
     }
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes}} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
@@ -343,7 +343,7 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={oi}
+          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
             filter={false}
             autoComplete="off"
             dataKey="value"

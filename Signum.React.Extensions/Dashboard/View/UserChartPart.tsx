@@ -119,7 +119,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           dashboardFilter={p.filterController.filters.get(p.partEmbedded)}
           onDrillDown={(row, e) => {
             e.stopPropagation();
-            if (e.altKey)
+            if (e.altKey || p.partEmbedded.interactionGroup == null)
               handleDrillDown(row, e, chartRequest, handleReload);
             else {
               const dashboardFilter = p.filterController.filters.get(p.partEmbedded);

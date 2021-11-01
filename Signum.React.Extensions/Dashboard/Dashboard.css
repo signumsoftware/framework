@@ -99,3 +99,11 @@ div.row-control-panel {
     font-size: 1rem;
     margin-left: 2px;
 }
+
+.sf-dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}

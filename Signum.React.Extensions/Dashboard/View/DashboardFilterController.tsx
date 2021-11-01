@@ -35,7 +35,11 @@ export class DashboardFilterController {
   }
 
   getFilterOptions(partEmbedded: PanelPartEmbedded, queryKey: string): FilterOptionParsed[] {
-    var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.rows?.length);
+
+    if (partEmbedded.interactionGroup == null)
+      return [];
+
+    var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.partEmbedded.interactionGroup == partEmbedded.interactionGroup && f.rows?.length);
 
     var result = otherFilters.filter(a => a.queryKey == queryKey).map(
       df => groupFilter("Or", df.rows.map(
