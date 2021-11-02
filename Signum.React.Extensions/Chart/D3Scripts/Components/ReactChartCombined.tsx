@@ -1,7 +1,7 @@
 import { QueryDescription } from '@framework/FindOptions';
 import * as React from 'react'
 
-import ReactChart from './ReactChart';
+import ReactChart, { MemoRepository } from './ReactChart';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
 import * as ChartClient from '../../ChartClient';
 import { useSize, useThrottle } from '@framework/Hooks';
@@ -12,6 +12,7 @@ export interface ReactChartCombinedInfo {
   chartRequest: ChartRequestModel;
   data?: ChartClient.ChartTable;
   parameters: { [parameter: string]: string };
+  memo: MemoRepository;
   onDrillDown: (row: ChartClient.ChartRow, e: React.MouseEvent | MouseEvent) => void;
 }
 
@@ -32,7 +33,7 @@ export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSame
           width: size.width,
           height: size.height,
           initialLoad: initialLoad,
-          useSameScale: p.useSameScale
+          useSameScale: p.useSameScale,
         })
       }
     </div>

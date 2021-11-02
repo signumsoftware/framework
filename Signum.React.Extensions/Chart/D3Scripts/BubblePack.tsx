@@ -9,7 +9,7 @@ import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderBubblePack({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubblePack({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -32,17 +32,17 @@ export default function renderBubblePack({ data, width, height, parameters, load
     color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
   }
   else if (colorSchemeColumn) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)), memo, "colorSchemeColumn");
     color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
   }
   else {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo, "colorCategory");
     color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var folderColor: null | ((folder: unknown) => string) = null;
   if (parentColumn) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)));
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => parentColumn!.getValueKey(r)), memo, "parentColorCategory");
     folderColor = folder => parentColumn!.getColor(folder) ?? categoryColor(parentColumn!.getKey(folder));
   }
 
@@ -60,7 +60,17 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   const circularRoot = bubble(root);
 
-  var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
+  var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<(ChartRow | Folder) & { active?: boolean }>[];
+
+  if (parentColumn) {
+    var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
+
+    if (activeDetector) {
+      nodes.forEach(a => {
+        a.data.active = activeDetector!(isFolder(a.data) ? { c2: a.data.folder } : a.data);
+      });
+    }
+  }
 
   const getNodeKey = (n: d3.HierarchyCircularNode<ChartRow | Folder>): string => {
     var last = isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :
@@ -80,9 +90,11 @@ export default function renderBubblePack({ data, width, height, parameters, load
       {
         nodes.orderByDescending(a => a.r).map(d => <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
           onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)}>
-          <circle className="sf-transition" shapeRendering="initial" r={d.r} fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
+          <circle className="sf-transition" shapeRendering="initial" r={d.r}
+            opacity={d.data.active == false ? .5 : undefined}
+            fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
             fillOpacity={parameters["FillOpacity"] ?? undefined}
-            stroke={parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
+            stroke={d.data.active == true ? "black" : parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
             strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />
           {!isFolder(d.data) &&
             <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""

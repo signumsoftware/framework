@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Entity, getToString, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
@@ -12,7 +12,15 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; }) {
+import { DashboardFilterController } from './DashboardFilterController'
+
+
+
+export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; reload: () => void;  }) {
+
+  const forceUpdate = useForceUpdate();
+  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
+
 
   function renderBasic() {
     const db = p.dashboard;
@@ -34,7 +42,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
 
                   return (
                     <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} />
+                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} />
                     </div>
                   );
                 })}
@@ -70,7 +78,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} reload={p.reload} />)}
                 </div>
               );
             })}
@@ -164,13 +172,9 @@ export interface PanelPartProps {
   ctx: TypeContext<PanelPartEmbedded>;
   entity?: Entity;
   deps?: React.DependencyList;
+  filterController: DashboardFilterController;
+  reload: () => void;
 }
-
-export interface PanelPartState {
-  component?: React.ComponentClass<DashboardClient.PanelPartContentProps<IPartEntity>>;
-  lastType?: string;
-}
-
 
 export function PanelPart(p: PanelPartProps) {
   const content = p.ctx.value.content;
@@ -193,6 +197,7 @@ export function PanelPart(p: PanelPartProps) {
       part: content,
       entity: lite,
       deps: p.deps,
+      filterController: p.filterController
     });
   }
 
@@ -203,10 +208,16 @@ export function PanelPart(p: PanelPartProps) {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
+      <FontAwesomeIcon icon={icon} color={color} className="mr-1" />{titleText}
     </span>;
 
   var style = part.style == undefined ? undefined : part.style.toLowerCase();
+
+  var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
+
+  function handleClearFilter(e: React.MouseEvent) {
+    p.filterController.clear(p.ctx.value);
+  }
 
   return (
     <div className={classes("card", style && ("border-" + style), "shadow-sm", "mb-4")}>
@@ -215,13 +226,18 @@ export function PanelPart(p: PanelPartProps) {
         style && ("bg-" + style)
       )}>
         {renderer.handleEditClick &&
-          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-            <FontAwesomeIcon icon="edit" />&nbsp;Edit
+          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
+            <FontAwesomeIcon icon="edit" className="mr-1" />Edit
           </a>
         }
-        &nbsp;
-      {renderer.handleTitleClick == undefined ? title :
+        {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+        }
+        {
+          dashboardFilter && <span className="badge badge-light border border-secondary ml-2 sf-filter-pill">
+            {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
+            <button type="button" aria-label="Close" className="close" onClick={handleClearFilter}><span aria-hidden="true">×</span></button>
+          </span>
         }
       </div>
       <div className="card-body py-2 px-3">
@@ -232,6 +248,7 @@ export function PanelPart(p: PanelPartProps) {
               part: content,
               entity: lite,
               deps: p.deps,
+              filterController: p.filterController
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>

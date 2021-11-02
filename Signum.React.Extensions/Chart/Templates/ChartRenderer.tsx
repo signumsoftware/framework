@@ -15,6 +15,7 @@ import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
 import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
+import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
 
 
 export interface ChartRendererProps {
@@ -27,6 +28,9 @@ export interface ChartRendererProps {
   autoRefresh: boolean;
   onCreateNew?: (e: React.MouseEvent<any>) => void;
   typeInfos?: TypeInfo[];
+  dashboardFilter?: DashboardFilter;
+  onDrillDown?: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
+  onBackgroundClick?: (e: React.MouseEvent) => void;
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
@@ -49,8 +53,10 @@ export default function ChartRenderer(p: ChartRendererProps) {
           <ReactChart
             chartRequest={p.chartRequest}
             data={p.data}
+            dashboardFilter={p.dashboardFilter}
             loading={p.loading}
-            onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined)}
+            onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
+            onBackgroundClick={p.onBackgroundClick}
             parameters={parameters}
             onReload={p.onReload}
             onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
@@ -62,6 +68,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
 
 export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, onReload?: () => void) {
 
+  e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
   if (r.entity) {

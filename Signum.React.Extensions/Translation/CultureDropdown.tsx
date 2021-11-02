@@ -22,8 +22,6 @@ export default function CultureDropdown(p: { fullName?: boolean }) {
     CultureClient.changeCurrentCulture(c);
   }
 
-
-
   return (
     <NavDropdown id="cultureDropdown" data-culture={current.name} title={p.fullName ? current.nativeName : simplifyName(current.nativeName)} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>

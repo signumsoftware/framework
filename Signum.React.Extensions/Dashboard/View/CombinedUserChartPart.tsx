@@ -17,6 +17,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
 import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
+import { MemoRepository } from '../../Chart/D3Scripts/Components/ReactChart'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -24,6 +25,7 @@ export interface CombinedUserChartInfoTemp {
   chartScript?: ChartClient.ChartScript;
   parameters?: { [parameter: string]: string } | undefined;
   chartRequest?: ChartRequestModel;
+  memo: MemoRepository;
   result?: ChartClient.API.ExecuteChartResult;
   makeQuery?: () => Promise<void>;
   error?: any;
@@ -37,6 +39,8 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const [showData, setShowData] = React.useState(p.part.showData);
 
+  
+
   React.useEffect(() => {
     var abortController = new AbortController();
     const signal = abortController.signal;
@@ -46,6 +50,8 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       UserChartClient.Converter.toChartRequest(c.userChart, p.entity)
         .then(chartRequest => {
           c.chartRequest = chartRequest;
+          var originalFilters = chartRequest.filterOptions.length;
+          c.memo = new MemoRepository();
           forceUpdate();
           if (!signal.aborted) {
 
@@ -55,6 +61,14 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
                 forceUpdate();
 
                 c.makeQuery = () => {
+
+                  if (chartRequest != null) {
+                    chartRequest.filterOptions.splice(originalFilters);
+                    chartRequest.filterOptions.push(
+                      ...p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
+                    );
+                  }
+
                   return ChartClient.API.executeChart(chartRequest!, c.chartScript!, signal)
                     .then(result => {
                       if (!signal.aborted) {
@@ -80,7 +94,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part, ...p.deps ?? []]);
+  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
 
 
   function renderError(e: any, key: number) {
@@ -134,7 +148,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
             onReload={e => { e.preventDefault(); c.makeQuery!(); }}
           />) :
         <ChartRendererCombined
-          infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript! }))}
+          infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}
           onReload={e => { infos.forEach(a => a.makeQuery!()) }}
           useSameScale={p.part.useSameScale}
         />

@@ -177,7 +177,7 @@ namespace Signum.Entities.Chart
         {
             int index = chart.Columns.IndexOf(chartColumn);
 
-            foreach (var p in chart.Parameters.Where(p => p.ScriptParameter.ColumnIndex == index))
+            foreach (var p in chart.Parameters.Where(p => p.ScriptParameter?.ColumnIndex == index))
             {
                 if (p.PropertyCheck(() => p.Value).HasText())
                     p.Value = p.ScriptParameter.DefaultValue(chartColumn.Token?.Token);

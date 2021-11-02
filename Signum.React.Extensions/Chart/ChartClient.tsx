@@ -25,6 +25,8 @@ import { toLuxonFormat } from '@framework/Reflection';
 import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
+import { MemoRepository } from './D3Scripts/Components/ReactChart';
+import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -82,7 +84,9 @@ export interface ChartScriptProps {
   width: number;
   height: number;
   initialLoad: boolean;
+  memo: MemoRepository;
   chartRequest: ChartRequestModel;
+  dashboardFilter?: DashboardFilter;
 }
 
 interface ChartScriptModule {
@@ -310,8 +314,8 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
         const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
         if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
           cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-          cp.modified = true;
         }
+        cp.modified = true;
       }
 
       chart.parameters!.push({ rowId: null, element: cp });

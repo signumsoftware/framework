@@ -52,6 +52,7 @@ export module DashboardMessage {
   export const _0Is1InstedOf2In3 = new MessageKey("DashboardMessage", "_0Is1InstedOf2In3");
   export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
   export const Part0OverlapsWith1 = new MessageKey("DashboardMessage", "Part0OverlapsWith1");
+  export const RowsSelected = new MessageKey("DashboardMessage", "RowsSelected");
 }
 
 export module DashboardOperation {
@@ -63,6 +64,17 @@ export module DashboardOperation {
 export module DashboardPermission {
   export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
 }
+
+export const InteractionGroup = new EnumType<InteractionGroup>("InteractionGroup");
+export type InteractionGroup =
+  "Group1" |
+  "Group2" |
+  "Group3" |
+  "Group4" |
+  "Group5" |
+  "Group6" |
+  "Group7" |
+  "Group8";
 
 export interface IPartEntity extends Entities.Entity {
   requiresTitle: boolean;
@@ -91,6 +103,7 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   row: number;
   startColumn: number;
   columns: number;
+  interactionGroup: InteractionGroup | null;
   style: Signum.BootstrapStyle;
   content: IPartEntity;
 }

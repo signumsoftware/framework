@@ -7,7 +7,7 @@ import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 
-export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -29,7 +29,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     .range([0, 1]);
   var outerRadious = d3.min([width / 2, height])! / 3;
   var rInner = outerRadious * parseFloat(pInnerRadius);
-  var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)));
+  var color = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo);
 
   var pie = d3.pie<ChartRow>()
     .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
@@ -45,36 +45,47 @@ export default function renderPie({ data, width, height, parameters, loading, on
     cy = (height / 2),
     legendRadius = 1.2;
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
   var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
 
   return (
     <svg direction="ltr" width={width} height={height}>
       <g className="shape" transform={translate(width / 2, height / 2)}>
-        {orderedPie.map(slice => <g key={slice.index} className="slice">
-          <path className="shape sf-transition" d={arc(slice)!}
-            transform={initialLoad ? scale(0,0) : scale(1,1)}
-            fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
-            shapeRendering="initial"
-            onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-            <title>
-              {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
-            </title>
-          </path>
-        </g>)}
+        {orderedPie.map(slice => {
+          var active = detector?.(slice.data);
+          return (
+            <g key={slice.index} className="slice">
+              <path className="shape sf-transition" d={arc(slice)!}
+                opacity={active == false ? .5 : undefined}
+                stroke={active == true ? "black" : undefined}
+                strokeWidth={active == true ? 3 : undefined}
+                transform={initialLoad ? scale(0, 0) : scale(1, 1)}
+                fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
+                shapeRendering="initial"
+                onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
+                <title>
+                  {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
+                </title>
+              </path>
+            </g>
+          );
+        })}
       </g>
       <g className="color-legend" transform={translate(cx, cy)}>
         {orderedPie.orderBy(r => keyColumn.getValueKey(r.data)).map(slice => {
 
           var m = (slice.endAngle + slice.startAngle) / 2;
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
-
+          var active = detector?.(slice.data);
           return <g key={slice.index} className="color-legend">
             <text className="color-legend sf-chart-strong sf-transition"
               transform={translate(
                 Math.sin(m) * outerRadious * legendRadius,
                 -Math.cos(m) * outerRadious * legendRadius)}
+              opacity={active == false ? .5 : undefined}
               textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
+              fontWeight={active == true ? "bold" : undefined}
               fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
               onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
               {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?

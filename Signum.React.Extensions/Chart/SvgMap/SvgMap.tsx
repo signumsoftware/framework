@@ -5,13 +5,17 @@ import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as AppContext from '@framework/AppContext';
 import { useAPI } from '../../../Signum.React/Scripts/Hooks';
 import { scaleFor } from '../D3Scripts/Components/ChartUtils';
+import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 
 
 export default function renderSvgMap(p: ChartClient.ChartScriptProps) {
+
   return <SvgMap {...p} />
 }
 
-function SvgMap({ data, parameters, onDrillDown, width, height }: ChartClient.ChartScriptProps) {
+function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: ChartClient.ChartScriptProps) {
+
+  const memo = React.useMemo(() => new MemoRepository(), [chartRequest]);
 
   const divRef = React.useRef<HTMLDivElement>(null);
 
@@ -75,7 +79,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height }: ChartClient.Ch
         color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
       }
       else if (colorCategoryColumn) {
-        var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorCategoryColumn!.getValueKey(r)));
+        var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorCategoryColumn!.getValueKey(r)), memo);
         color = r => colorCategoryColumn!.getColor(r) ?? categoryColor(colorCategoryColumn!.getValueKey(r));
       } else {
         color = r => "gray";

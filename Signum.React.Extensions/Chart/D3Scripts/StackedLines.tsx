@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor} from './Components/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, groupedPivotTable, toPivotTable } from './Components/PivotTable';
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
 import { XKeyTicks, YScaleTicks } from './Components/Ticks';
@@ -12,7 +12,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedLines({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -83,7 +83,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     .domain([min, max])
     .range([0, yRule.size('content')]);
 
-  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key), memo);
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var pInterpolate = parameters["Interpolate"];
@@ -102,12 +102,15 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var rectRadious = 2;
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} />
-      <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
-
-      {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} className="shape-serie"
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
+      </g>
+      {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} opacity={dashboardFilter && !(c.c1 && detector?.({ c1: columnsByKey[s.key].value }) == true) ? .5 : undefined} className="shape-serie"
         transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
         <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
           <title>
@@ -120,58 +123,85 @@ export default function renderStackedLines({ data, width, height, parameters, lo
         transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
 
         {s.orderBy(v => keyColumn.getKey(v.data))
-          .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined)
-          .map(v => <rect key={keyColumn.getKey(v.data)} className="point sf-transition"
-            transform={translate(x(keyColumn.getKey(v.data))! - rectRadious, -y(v[1])!)}
-            width={2 * rectRadious}
-            height={y(v[1])! - y(v[0])!}
-            fill="#fff"
-            fillOpacity={.1}
-            stroke="none"
-            onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
-            cursor="pointer">
-            <title>
-              {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}
-            </title>
-          </rect>)}
+          .map(v => {
+            var dataKey = keyColumn.getKey(v.data);
+            var row = rowsByKey[dataKey]?.values[s.key];
+            if (row == undefined)
+              return null;
+
+
+            var active = detector?.(row.rowClick);
+
+            return (
+              <rect key={dataKey} className="point sf-transition"
+                transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
+                width={2 * rectRadious}
+                fillOpacity={active == true ? undefined : .1}
+                fill={active == true ? "black" : "#fff"}
+                height={y(v[1])! - y(v[0])!}
+                onClick={e => onDrillDown(row.rowClick, e)}
+                cursor="pointer">
+                <title>
+                  {row.valueTitle}
+                </title>
+              </rect>
+            );
+          })}
 
         {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           s.orderBy(v => keyColumn.getKey(v.data))
-            .filter(v => rowsByKey[keyColumn.getKey(v.data)]?.values[s.key] != undefined && (y(v[1])! - y(v[0])!)! > 10)
-            .map(v => <TextRectangle key={keyColumn.getKey(v.data)}
-              className="number-label sf-transition"
-              fillRectangle={colorByKey[s.key] ?? color(s.key)}
-              transform={translate(x(keyColumn.getKey(v.data))!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              opacity={parameters["NumberOpacity"]}
-              onClick={e => onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick, e)}
-              textAnchor="middle"
-              fontWeight="bold">
-              {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueNiceName}
-              <title>
-                {rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle}
-              </title>
-            </TextRectangle>)
+          .map(v => {
+            var dataKey = keyColumn.getKey(v.data);
+            var row = rowsByKey[dataKey]?.values[s.key];
+            if (row == undefined)
+              return null;
+
+            if ((y(v[1])! - y(v[0])!)! <= 10)
+              return null;
+
+            const active = detector?.(row.rowClick);
+
+            return (
+              <TextRectangle key={dataKey}
+                className="number-label sf-transition"
+                rectangleAtts={{
+                  fill: colorByKey[s.key] ?? color(s.key),
+                  opacity: active == false ? .5 : parameters["NumberOpacity"],
+                  stroke: active == true ? "black" : "none",
+                  strokeWidth: active == true ? 2 : undefined
+                }}
+                transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
+                fill={parameters["NumberColor"]}
+                dominantBaseline="middle"
+                onClick={e => onDrillDown(row.rowClick, e)}
+                textAnchor="middle"
+                fontWeight="bold">
+                {row.valueNiceName}
+                <title>
+                  {row.valueTitle}
+                </title>
+              </TextRectangle>)
+          })
         }
       </g>
       )}
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
 
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
-
-      <XAxis xRule={xRule} yRule={yRule} />
-      <YAxis xRule={xRule} yRule={yRule} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XAxis xRule={xRule} yRule={yRule} />
+        <YAxis xRule={xRule} yRule={yRule} />
+      </g>
     </svg>
   );
 }
 
 
 export interface TextRectangleProps extends React.SVGProps<SVGTextElement> {
-  fillRectangle?: string
+  rectangleAtts?: React.SVGProps<SVGRectElement>;
 }
 
 
-export function TextRectangle({ fillRectangle, children, ...atts }: TextRectangleProps) {
+export function TextRectangle({ rectangleAtts, children, ...atts }: TextRectangleProps) {
 
   const txt = React.useRef<SVGTextElement>(null);
   const rect = React.useRef<SVGRectElement>(null);
@@ -186,22 +216,14 @@ export function TextRectangle({ fillRectangle, children, ...atts }: TextRectangl
       rect.current.setAttribute("height", bbox.height + "px");
       rect.current.setAttribute("y", -(bbox.height / 2) - 2 + "px");
     }
-      
-
-  }, [fillRectangle, getString(children)]);
 
 
-  if (fillRectangle == undefined)
-    return (
-      <text ref={txt} {...atts} >
-        {children ?? ""}
-      </text>
-    );
+  }, [getString(children)]);
 
-  
+
   return (
     <>
-      <rect ref={rect} fill={fillRectangle} transform={atts.transform} height={20} />
+      <rect ref={rect} {...rectangleAtts} transform={atts.transform} height={20} />
       <text ref={txt} {...atts} >
         {children ?? ""}
       </text>
@@ -209,7 +231,7 @@ export function TextRectangle({ fillRectangle, children, ...atts }: TextRectangl
   );
 }
 
-        
+
 function getString(children: React.ReactNode) {
   return React.Children.toArray(children)[0] as string;
 }

@@ -13,6 +13,7 @@ import { ChartScriptHorizontalProps, paintLine } from './Line';
 import { paintColumns } from './Columns';
 import { ReactChartCombinedInfo } from './Components/ReactChartCombined';
 import { D3ChartScript } from '../Signum.Entities.Chart';
+import { MemoRepository } from './Components/ReactChart';
 
 const supportedTypes = [
   D3ChartScript.Line.key,
@@ -120,8 +121,8 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
         infos.map((info, i) => info.data == null ? null :
           <g key={i}>
             {
-              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]! }) :
-                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, colCount, colIndex: colIndex++ }) :
+              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, memo: info.memo }) :
+                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, colCount, colIndex: colIndex++, memo: info.memo }) :
                   null
             }
           </g>
