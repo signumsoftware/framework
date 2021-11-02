@@ -233,7 +233,7 @@ namespace Signum.Engine.Word
                 Model = model;
             }
 
-            public ModifiableEntity ModifiableEntity => (Entity ?? Model?.UntypedEntity)!;
+            public Entity? GetEntity() => Entity ?? Model?.UntypedEntity as Entity;
         }
 
         public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordContext, byte[], byte[]> converter)

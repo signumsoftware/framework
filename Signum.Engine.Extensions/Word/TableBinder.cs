@@ -1,5 +1,7 @@
 using Drawing = DocumentFormat.OpenXml.Drawing;
 using Presentation = DocumentFormat.OpenXml.Presentation;
+using WPDrawing = DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 using Charts = DocumentFormat.OpenXml.Drawing.Charts;
 using Signum.Utilities;
 using System;
@@ -21,6 +23,7 @@ using Signum.Engine.Templating;
 using Signum.Entities.Word;
 using System.Threading;
 using Signum.Engine.Basics;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Word
 {
@@ -28,70 +31,109 @@ namespace Signum.Engine.Word
     {
         internal static void ValidateTables(OpenXmlPart part, WordTemplateEntity template, List<TemplateError> errors)
         {
-            var graphicFrames = part.RootElement!.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
+            //Powerpoint container
+            var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
             foreach (var item in graphicFrames)
             {
-                var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
+                var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleOrDefaultEx();
                 var title = GetTitle(nonVisualProps);
 
                 if (title != null)
                 {
-                    var prefix = title.TryBefore(":");
-                    if (prefix != null)
-                    {
-                        var provider = WordTemplateLogic.ToDataTableProviders.TryGetC(prefix);
-                        if (provider == null)
-                            errors.Add(new TemplateError(false, "No DataTableProvider '{0}' found (Possibilieties {1})".FormatWith(prefix, WordTemplateLogic.ToDataTableProviders.Keys.CommaOr())));
-                        else
-                        {
-                            var error = provider.Validate(title.After(":"), template);
-                            if (error != null)
-                                errors.Add(new TemplateError(false, error));
-                        }
-                    }
-                    
+                    ValidateTitle(template, errors, title);
+                }
+            }
+
+            //Word container
+            var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
+            foreach (var item in drawings)
+            {
+                var docProps = item.Descendants<WPDrawing.DocProperties>().SingleOrDefaultEx();
+                var title = GetTitle(docProps);
+
+                if (title != null)
+                {
+                    ValidateTitle(template, errors, title);
+                }
+            }
+        }
+
+        private static void ValidateTitle(WordTemplateEntity template, List<TemplateError> errors, string title)
+        {
+            var prefix = title.TryBefore(":");
+            if (prefix != null)
+            {
+                var provider = WordTemplateLogic.ToDataTableProviders.TryGetC(prefix);
+                if (provider == null)
+                    errors.Add(new TemplateError(false, "No DataTableProvider '{0}' found (Possibilieties {1})".FormatWith(prefix, WordTemplateLogic.ToDataTableProviders.Keys.CommaOr())));
+                else
+                {
+                    var error = provider.Validate(title.After(":"), template);
+                    if (error != null)
+                        errors.Add(new TemplateError(false, error));
                 }
             }
         }
 
         internal static void ProcessTables(OpenXmlPart part, WordTemplateParameters parameters)
         {
-            var graphicFrames = part.RootElement!.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
+            var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
             foreach (var item in graphicFrames)
             {
-                var nonVisualProps = item.Descendants().SingleEx(a => a.LocalName == "cNvPr");
+                var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleEx();
                 var title = GetTitle(nonVisualProps);
 
                 Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
                 if (dataTable != null)
                 {
-                    var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
-                    if (chartRef != null)
-                    {
-                        OpenXmlPart chartPart = part.GetPartById(chartRef.Id!.Value!);
-                        var chart = chartPart.RootElement!.Descendants<Charts.Chart>().SingleEx();
-                        ReplaceChart(chart, dataTable);
-                    }
-                    else
-                    {
-                        var table = item.Descendants<Drawing.Table>().SingleOrDefaultEx();
-                        if (table != null)
-                        {
-                            ReplaceTable(table, dataTable);
-                        }
-                    }
+                    ReplaceChartOrTable(part, item, dataTable);
+                }
+            }
+
+            var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
+            foreach (var item in drawings)
+            {
+                var docProps = item.Descendants< WPDrawing.DocProperties>().SingleEx();
+                var title = GetTitle(docProps);
+
+                Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
+                if (dataTable != null)
+                {
+                    ReplaceChartOrTable(part, item, dataTable);
+                }
+            }
+        }
+
+        private static void ReplaceChartOrTable(OpenXmlPart part, OpenXmlElement item, Data.DataTable dataTable)
+        {
+            var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
+            if (chartRef != null)
+            {
+                OpenXmlPart chartPart = part.GetPartById(chartRef.Id!.Value!);
+                var chart = chartPart.RootElement!.Descendants<Charts.Chart>().SingleEx();
+                ReplaceChart(chart, dataTable);
+            }
+            else
+            {
+                var table = item.Descendants<Drawing.Table>().SingleOrDefaultEx();
+                if (table != null)
+                {
+                    ReplaceTable(table, dataTable);
                 }
             }
         }
 
         static string? GetTitle(OpenXmlElement? nonVisualProps)
         {
-            if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
-                return draw.Title?.Value;
+            //if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
+            //    return draw.Description?.Value ?? draw.Title?.Value;
 
             if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
-                return pres.Title?.Value;
-            
+                return pres.Description?.Value ?? pres.Title?.Value;
+
+            if (nonVisualProps is WPDrawing.DocProperties prop)
+                return prop.Description?.Value ?? prop.Title?.Value;
+
             throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps?.GetType().FullName);
         }
 
@@ -208,7 +250,7 @@ namespace Signum.Engine.Word
                 (val is IFormattable) ? ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture) :
                 val.ToString();
         }
-
+        
         private static Data.DataTable? GetDataTable(WordTemplateParameters parameters, string title)
         {
             var key = title.TryBefore(":");
@@ -280,24 +322,54 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
         {
-            var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Guid == Guid.Parse(suffix));
+            var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
 
-            using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
+            using (CurrentEntityConverter.SetCurrentEntity(context.GetEntity()))
             {
                 var request = UserQueryLogic.ToQueryRequest(userQuery);
-                ResultTable resultTable = QueryLogic.Queries.ExecuteQuery(request);
-                var dataTable = resultTable.ToDataTable();
-                return dataTable;
+                ResultTable result = QueryLogic.Queries.ExecuteQuery(request);
+                var pivotStr = suffix.TryAfter('\n')?.Trim();
+
+                if (pivotStr.HasText())
+                {
+                    var pivot = UserChartDataTableProvider.ParsePivot(pivotStr)!.Value;
+                    return result.ToDataTablePivot(pivot.colY, pivot.colX, pivot.colValue);
+                }
+                else
+                    return result.ToDataTable();
             }
         }
 
         public string? Validate(string suffix, WordTemplateEntity template)
         {
-            if (!Guid.TryParse(suffix, out Guid guid))
+            if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
 
-            if (!Database.Query<UserQueryEntity>().Any(a => a.Guid == guid))
+            var uc = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+
+            if (uc == null)
                 return "No UserQuery with GUID={0} found".FormatWith(guid);
+
+            if (uc.EntityType != null)
+            {
+                var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
+
+                var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);
+
+                if (imp.Types.Contains(type))
+                    return "No UserQuery {0} (GUID={1}) is not compatible with ".FormatWith(uc.UQ, guid, imp);
+            }
+
+
+            var pivotStr = suffix.TryAfter('\n')?.Trim();
+            if (pivotStr.HasText())
+            {
+                var pivot = UserChartDataTableProvider.ParsePivot(pivotStr);
+                if (pivot != null)
+                    return null;
+
+                return "Unexpected Title: " + suffix + "\nDid you wanted to use 'Pivot(colX, colY, colValue)'?";
+            }
 
             return null;
         }
@@ -307,12 +379,12 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
         {
-            return GetDataTable(suffix, context.Entity!);
+            return GetDataTable(suffix, context.GetEntity());
         }
 
-        public Data.DataTable GetDataTable(string suffix, Entity entity)
+        public Data.DataTable GetDataTable(string suffix, Entity? entity)
         {
-            var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Guid == Guid.Parse(suffix));
+            var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
 
             using (CurrentEntityConverter.SetCurrentEntity(entity))
             {
@@ -320,13 +392,12 @@ namespace Signum.Engine.Word
                 ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
                 var tokens = chartRequest.Columns.Select(a => a.Token).NotNull().ToList();
 
-                //TODO: Too specific. Will be better if controlled by some parameters. 
-                if (chartRequest.HasAggregates() && tokens.Count(a => !(a.Token is AggregateToken)) == 2 && tokens.Count(a => a.Token is AggregateToken) == 1)
+                var pivotStr = suffix.TryAfter('\n')?.Trim();
+
+                if (pivotStr.HasText())
                 {
-                    var firstKeyIndex = tokens.FindIndex(a => !(a.Token is AggregateToken));
-                    var secondKeyIndex = tokens.FindIndex(firstKeyIndex + 1, a => !(a.Token is AggregateToken));
-                    var valueIndex = tokens.FindIndex(a => a.Token is AggregateToken);
-                    return result.ToDataTablePivot(secondKeyIndex, firstKeyIndex, valueIndex);
+                    var pivot = ParsePivot(pivotStr)!.Value;
+                    return result.ToDataTablePivot(pivot.colY, pivot.colX, pivot.colValue);
                 }
                 else
                     return result.ToDataTable();
@@ -335,13 +406,49 @@ namespace Signum.Engine.Word
 
         public string? Validate(string suffix, WordTemplateEntity template)
         {
-            if (!Guid.TryParse(suffix, out Guid guid))
+            if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserChart".FormatWith(suffix);
 
-            if (!Database.Query<UserChartEntity>().Any(a => a.Guid == guid))
+            var uc = Database.Query<UserChartEntity>().Where(a => a.Guid == guid).Select(a => new { UC = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+
+            if (uc == null)
                 return "No UserChart with GUID={0} found".FormatWith(guid);
 
+            if(uc.EntityType != null)
+            {
+                var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
+
+                var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);
+
+                if (!imp.Types.Contains(type))
+                    return "No UserChart {0} (GUID={1}) is not compatible with ".FormatWith(uc.UC, guid, imp);
+            }
+
+            var pivotStr = suffix.TryAfter('\n')?.Trim();
+            if (pivotStr.HasText())
+            {
+                var pivot = ParsePivot(pivotStr);
+                if (pivot != null)
+                    return null;
+
+                return "Unexpected Title: " + suffix + "\nDid you wanted to use 'Pivot(colX, colY, colValue)'?"; 
+            }
+
             return null;
+        }
+
+     
+
+        internal static (int colY, int colX, int colValue)? ParsePivot(string pivotStr)
+        {
+            var m = Regex.Match(pivotStr, @"^Pivot\((?<colY>\d+),(?<colX>\d+),(?<colValue>\d+)\)$");
+            if (!m.Success)
+                return null;
+
+            return (
+                int.Parse(m.Groups["colY"].Value),
+                int.Parse(m.Groups["colX"].Value),
+                int.Parse(m.Groups["colValue"].Value));
         }
     }
 }
