@@ -721,10 +721,19 @@ namespace Signum.Engine.Authorization
             if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
             {
                 var orGroups = OrAndList(b);
+                List<Expression[]>? toCompareOrGroups = orGroups.ToList();
+                List<Expression[]>? tokeepOrGroups =new List<Expression[]>();
 
-                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer))).ToList();
+                foreach (var og in orGroups)
+                {
+                    if (!toCompareOrGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer)))
+                        tokeepOrGroups.Add(og);
+                    else
+                        toCompareOrGroups = toCompareOrGroups.Where(e=>e!=og).ToList();
 
-                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
+                }
+
+                return tokeepOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
             }
 
             return expr;
