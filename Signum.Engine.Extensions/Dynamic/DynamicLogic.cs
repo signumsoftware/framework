@@ -18,13 +18,17 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicLogic
     {
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, bool withCodeGen)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
-                DynamicLogic.GetCodeFiles += GetCodeGenStarter;
-                AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+                PermissionAuthLogic.RegisterPermissions(DynamicPanelPermission.ViewDynamicPanel);
+                if (withCodeGen)
+                {
+                    PermissionAuthLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
+                    DynamicLogic.GetCodeFiles += GetCodeGenStarter;
+                    AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+                }
             }
         }
 

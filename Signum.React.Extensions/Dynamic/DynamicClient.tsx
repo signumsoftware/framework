@@ -8,14 +8,26 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from '@framework/AsyncImport'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelPage")} />);
+
+
+export function start(options: { routes: JSX.Element[], withCodeGen: boolean }) {
+
+  if (options.withCodeGen)
+    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelCodeGenPage")} />);
+  else
+    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelSimplePage")} />);
+
+  Options.withCodeGen = options.withCodeGen;
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
     key: "DynamicPanel",
     onClick: () => Promise.resolve("~/dynamic/panel")
   });
+}
+
+export namespace Options {
+  export let withCodeGen: boolean;
 }
 
 export interface CompilationError {

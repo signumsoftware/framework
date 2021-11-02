@@ -201,13 +201,26 @@ export module ThrowErrorFilter {
       } else {
         return response.text().then<Response>(text => {
           if (text.length) {
-            var obj = JSON.parse(text);
+            var obj = null;
+            try {
+              var obj = JSON.parse(text);
+            } catch (e) {
+              throw new ServiceError({
+                exceptionType: "Status " + response.status,
+                exceptionMessage: response.statusText + "\n\n" + text,
+                exceptionId: null,
+                innerException: null,
+                stackTrace: null,
+              });
+            }
+
             if (response.status == 400 && !(obj as WebApiHttpError).exceptionType)
               throw new ValidationError(obj as ModelState);
             else if ((obj as WebApiHttpError).model)
               throw new ModelRequestedError((obj as WebApiHttpError).model!);
             else
               throw new ServiceError(obj as WebApiHttpError);
+
           }
           else
             throw new ServiceError({

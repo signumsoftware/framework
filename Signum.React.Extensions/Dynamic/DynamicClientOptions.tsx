@@ -100,7 +100,7 @@ function HighlightText({ text, search, type }: { text: string, search: string, t
     if (changes.length == 0)
       changes = [0];
 
-    var result = expandNumbers(changes, 4, 4);
+    var result = expandNumbers(changes, lines.length, 4);
 
     return (
       <div>

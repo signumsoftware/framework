@@ -20,6 +20,7 @@ using Signum.Entities.Dynamic;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Microsoft.Extensions.Hosting;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Dynamic
 {
@@ -35,6 +36,8 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/compile")]
         public List<CompilationErrorTS> Compile(bool inMemory)
         {
+            DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+
             SystemEventLogLogic.Log("DynamicController.Compile");
             var compileResult = new List<DynamicLogic.CompilationResult>();
 
@@ -78,6 +81,9 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/restartServer")]
         public void RestartServer()
         {
+            DynamicPanelPermission.RestartApplication.AssertAuthorized();
+
+
             SystemEventLogLogic.Log("DynamicController.RestartServer");
             DynamicCode.OnApplicationServerRestarted?.Invoke();
             lifeTime.StopApplication();
@@ -86,6 +92,9 @@ namespace Signum.React.Dynamic
         [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
+            DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+
+
             return new Sequence<Exception?>
             {
                 DynamicLogic.CodeGenError,
@@ -100,6 +109,8 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/evalErrors")]
         public async Task<List<EvalEntityError>> GetEvalErrors([Required, FromBody]QueryEntitiesRequestTS request)
         {
+            DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+
             var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
 
             return allEntities.Select(entity =>
@@ -119,6 +130,8 @@ namespace Signum.React.Dynamic
         [HttpPost("api/dynamic/getPanelInformation")]
         public DynamicPanelInformation GetPanelInformation()
         {
+            DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+
             return new DynamicPanelInformation
             {
                 lastDynamicCompilationDateTime = DynamicLogic.GetLastCodeGenAssemblyFileInfo()?.CreationTime,
