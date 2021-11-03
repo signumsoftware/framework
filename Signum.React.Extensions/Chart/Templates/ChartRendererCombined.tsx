@@ -11,7 +11,7 @@ import "../Chart.css"
 import { ChartScript, ChartRow } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
-import ReactChart from '../D3Scripts/Components/ReactChart';
+import ReactChart, { MemoRepository } from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
 import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
@@ -30,6 +30,7 @@ export interface ChartRendererCombinedInfo {
   chartRequest: ChartRequestModel;
   chartScript: ChartScript;
   data?: ChartClient.ChartTable;
+  memo: MemoRepository;
 } 
 
 export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
@@ -42,6 +43,7 @@ export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
           onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest),
           parameters: ChartClient.API.getParameterWithDefault(info.chartRequest, info.chartScript),
           data: info.data,
+          memo: info.memo
         }))} />
       </ErrorBoundary>
     </FullscreenComponent>

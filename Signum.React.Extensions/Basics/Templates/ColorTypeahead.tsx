@@ -28,7 +28,8 @@ export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefi
     <FormGroup ctx={ctx} labelText={ctx.niceName()} >
       <ColorTypeahead color={ctx.value}
         formControlClass={ctx.formControlClass}
-        onChange={handleOnChange} />
+        onChange={handleOnChange}
+        placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined} />
     </FormGroup>
   );
 }
@@ -37,6 +38,7 @@ interface ColorTypeaheadProps {
   color: string | null | undefined;
   onChange: (newColor: string | null | undefined) => void;
   formControlClass: string | undefined;
+  placeholder?: string;
 }
 
 export function ColorTypeahead(p : ColorTypeaheadProps){
@@ -79,7 +81,7 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
   return (
     <Typeahead
       value={p.color ?? ""}
-      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder }}
       getItems={handleGetItems}
       onSelect={handleSelect}
       onChange={handleSelect}

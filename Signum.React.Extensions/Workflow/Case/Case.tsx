@@ -77,13 +77,16 @@ export default function CaseComponent(p: CaseComponentProps) {
                 /></div> :
               <h3>{JavascriptMessage.loading.niceToString()}</h3>}
           </Tab>
-          <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
+        <Tab eventKey={"CaseActivities" as CaseTab} title={CaseActivityEntity.nicePluralName()}>
             <SearchControl
               showContextMenu={fo => "Basic"}
               view={false}
               findOptions={{
                 queryName: CaseActivityEntity,
-                filterOptions: [{ token: CaseActivityEntity.token(e => e.case), value: ctx.value}],
+                filterOptions: [
+                  { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
+                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, pinned: { active: "Checkbox_StartUnchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } },
+                ],
                 columnOptionsMode: "Replace",
                 columnOptions: [
                   { token: CaseActivityEntity.token(e => e.id) },
@@ -97,36 +100,6 @@ export default function CaseComponent(p: CaseComponentProps) {
                   token: CaseActivityEntity.token(e => e.startDate),
                   orderType: "Ascending",
                 }],
-              }}
-              extraButtons={sc => [
-                { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },
-                { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} onLocated={handleOnDiagramNodeLocated} /> },
-              ]}
-            />
-          </Tab>
-          <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
-            <SearchControl
-              showContextMenu={fo => "Basic"}
-              view={false}
-              findOptions={{
-                queryName: CaseActivityEntity,
-                filterOptions: [
-                  { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
-                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, frozen: true },
-                ],
-                columnOptionsMode: "Replace",
-                columnOptions: [
-                  { token: CaseActivityEntity.token(e => e.id) },
-                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                  { token: CaseActivityEntity.token(e => e.startDate) },
-                  { token: CaseActivityEntity.token(e => e.doneDate) },
-                  { token: CaseActivityEntity.token(e => e.doneBy) },
-                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
-                ],
-                orderOptions: [{
-                  token: CaseActivityEntity.token(e => e.startDate),
-                  orderType: "Descending",
-                }]
               }}
               extraButtons={sc => [
                 { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },

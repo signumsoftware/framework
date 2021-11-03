@@ -30,6 +30,7 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
   return (
     <FormGroup ctx={ctx} labelText={ctx.niceName()} >
       <IconTypeahead icon={ctx.value}
+        placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}
         formControlClass={ctx.formControlClass}
         onChange={handleChange} />
@@ -42,6 +43,7 @@ export interface IconTypeaheadProps {
   onChange: (newIcon: string | null | undefined) => void;
   extraIcons?: string[];
   formControlClass: string | undefined;
+  placeholder?: string;
 }
 
 export function IconTypeahead(p: IconTypeaheadProps) {
@@ -90,7 +92,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
   return (
     <Typeahead
       value={(p.icon ?? "")}
-      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete") }}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder }}
       getItems={handleGetItems}
       onSelect={handleSelect}
       onChange={handleSelect}

@@ -172,7 +172,6 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     const { loc } = p;
 
     var val = e.currentTarget.value;
-    debugger;
     var line = !val ? null : translatedTypes.first(a => a.singular == val);
     td.description = TranslationMember.normalizeString(line?.singular);
     td.pluralDescription = TranslationMember.normalizeString(line?.plural);

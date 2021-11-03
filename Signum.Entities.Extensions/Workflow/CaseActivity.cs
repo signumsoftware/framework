@@ -111,6 +111,7 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<CaseActivityEntity> Delete;
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
         public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
+        public static readonly ExecuteSymbol<CaseActivityEntity> FreeJump;
         public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;

@@ -121,7 +121,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         iconColor: "green"
       })
   ]);
-
+  
 
   Finder.addSettings({
     queryName: CaseActivityEntity,
@@ -197,8 +197,48 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     icon: "share",
     iconColor: "blue",
     hideOnCanExecute: true,
-    onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
-    contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
+    onClick: eoc => executeCaseActivity(eoc, eoc => {
+      eoc.onExecuteSuccess = pack => {
+        Operations.notifySuccess();
+        eoc.frame.onClose(pack);
+      }
+      getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
+        .then(dest => dest && eoc.defaultClick(dest))
+        .done();
+    }),
+    contextual: {
+      isVisible: ctx => true,
+      onClick: coc => {
+        Navigator.API.fetch(coc.context.lites[0])
+          .then(ca => getWorkflowJumpSelector(toLite(ca.workflowActivity as WorkflowActivityEntity)))
+          .then(dest => dest && coc.defaultContextualClick(dest))
+          .done()
+      }
+    }
+  }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.FreeJump, {
+    icon: "share-square",
+    color:"danger",
+    iconColor: "#800080",
+    hideOnCanExecute: true,
+    onClick: eoc => executeCaseActivity(eoc, eoc => {
+      eoc.onExecuteSuccess = pack => {
+        Operations.notifySuccess();
+        eoc.frame.onClose(pack);
+      }
+      getWorkflowFreeJump(eoc.entity.case.workflow)
+        .then(dest => dest && eoc.defaultClick(dest))
+        .done();
+    }),
+    contextual: {
+      isVisible: ctx => true,
+      onClick: coc => {
+        Navigator.API.fetch(coc.context.lites[0])
+          .then(ca => getWorkflowFreeJump(ca.case.workflow))
+          .then(dest => dest && coc.defaultContextualClick(dest))
+          .done()
+      }
+    }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, {
@@ -532,28 +572,6 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
     }).done();
 }
 
-export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
-
-  Navigator.API.fetch(coc.context.lites[0])
-    .then(ca => {
-
-      getWorkflowJumpSelector(toLite(ca.workflowActivity as WorkflowActivityEntity))
-        .then(dest => dest && coc.defaultContextualClick(dest));
-    })
-    .done();
-}
-
-export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
-
-  eoc.onExecuteSuccess = pack => {
-    Operations.notifySuccess();
-    eoc.frame.onClose(pack);
-  }
-
-  getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
-    .then(dest => dest && eoc.defaultClick(dest))
-    .done();
-}
 
 function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promise<Lite<IWorkflowNodeEntity> | undefined> {
 
@@ -564,6 +582,15 @@ function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promis
         buttonDisplay: a => a.toStr ?? "",
         forceShow: true
       }));
+}
+
+function getWorkflowFreeJump(workflow: WorkflowEntity): Promise<Lite<WorkflowEntity> | undefined> {
+
+  return Finder.find({
+    queryName: WorkflowActivityEntity,
+    filterOptions: [{ token: WorkflowActivityEntity.token(w => w.entity.lane.pool.workflow), value: workflow }]
+  }, {
+    message: <span className="text-danger">FreeJump is an unrestricted but dangerous operation! If you don't know what you're doing... don't do it!</span> });
 }
 
 export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {

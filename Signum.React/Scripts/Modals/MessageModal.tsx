@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { openModal, IModalProps } from '../Modals';
+import { openModal, IModalProps, IHandleKeyboard } from '../Modals';
 import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
@@ -30,6 +30,8 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   size?: BsSize;
 }
 
+
+
 export default function MessageModal(p: MessageModalProps) {
 
   const [show, setShow] = React.useState(true);
@@ -49,11 +51,17 @@ export default function MessageModal(p: MessageModalProps) {
     p.onExited!(selectedValue.current);
   }
 
+  function setFocus(e: HTMLButtonElement | null) {
+    if (e) {
+      setTimeout(() => e.focus(), 200);
+    }
+  }
+
   function renderButtons(buttons: MessageModalButtons) {
     switch (buttons) {
       case "ok":
         return (
-          <button
+          <button ref={setFocus}
             className="btn btn-primary sf-close-button sf-ok-button"
             onClick={() => handleButtonClicked("ok")}
             name="accept">
@@ -70,7 +78,7 @@ export default function MessageModal(p: MessageModalProps) {
       case "ok_cancel":
         return (
           <div className="btn-toolbar">
-            <button
+            <button ref={setFocus}
               className="btn btn-primary sf-close-button sf-ok-button"
               onClick={() => handleButtonClicked("ok")}
               name="accept">
@@ -86,7 +94,7 @@ export default function MessageModal(p: MessageModalProps) {
       case "yes_no":
         return (
           <div className="btn-toolbar">
-            <button
+            <button ref={setFocus}
               className="btn btn-primary sf-close-button sf-yes-button"
               onClick={() => handleButtonClicked("yes")}
               name="yes">
@@ -99,26 +107,10 @@ export default function MessageModal(p: MessageModalProps) {
               {BooleanEnum.niceToString("False")}
             </button>
           </div>);
-      case "yes_no":
-        return (
-          <div className="btn-toolbar">
-            <button
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
       case "yes_no_cancel":
         return (
           <div className="btn-toolbar">
-            <button
+            <button ref={setFocus}
               className="btn btn-primary sf-close-button sf-yes-button"
               onClick={() => handleButtonClicked("yes")}
               name="yes">
@@ -140,7 +132,7 @@ export default function MessageModal(p: MessageModalProps) {
       case "yes_cancel":
         return (
           <div className="btn-toolbar">
-            <button
+            <button ref={setFocus}
               className="btn btn-primary sf-close-button sf-yes-button"
               onClick={() => handleButtonClicked("yes")}
               name="yes">
@@ -206,7 +198,7 @@ export default function MessageModal(p: MessageModalProps) {
       </div>
       <div className="modal-body">
         {
-          typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i} className={dialogTextClass(p.style)}>{line}</p>) :
+          typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i} >{line}</p>) :
             typeof p.message == "function" ? p.message({ handleButtonClicked }) :
               p.message
         }
@@ -250,22 +242,4 @@ function dialogHeaderClass(style: MessageModalStyle | undefined) {
     default:
       return "bg-primary text-light";
   }
-}
-
-function dialogTextClass(style?: MessageModalStyle) {
-
-  return undefined;
-
-  //switch (style) {
-  //    case "success":
-  //        return "text-success";
-  //    case "info":
-  //        return "text-info";
-  //    case "warning":
-  //        return "text-warning";
-  //    case "error":
-  //        return "text-danger";
-  //    default:
-  //        return "text-primary";
-  //}
 }

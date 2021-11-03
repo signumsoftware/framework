@@ -12,9 +12,9 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Signum.Analyzer" Version="3.1.0" />
+    <PackageReference Include="Signum.Analyzer" Version="3.2.0" />
     <PackageReference Include="Signum.MSBuildTask" Version="5.0.0" />
-    <PackageReference Include="TensorFlow.Keras" Version="0.6.3" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.6.4" />
   </ItemGroup>
 
   <ItemGroup>

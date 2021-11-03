@@ -7,9 +7,10 @@ import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
 import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
+import { DashboardFilterController } from './DashboardFilterController'
 
 export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {
   const entity = p.part;
@@ -20,7 +21,7 @@ export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUse
         mlistItemContext(ctx.subCtx(a => a.userQueries))
           .map((ctx, i) =>
             <div key={i} >
-              <ValueUserQueryElement ctx={ctx} entity={p.entity} />
+              <ValueUserQueryElement ctx={ctx} entity={p.entity} filterController={p.filterController} partEmbedded={p.partEmbedded} />
             </div>)
       }
     </div>
@@ -30,11 +31,13 @@ export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUse
 export interface ValueUserQueryElementProps {
   ctx: TypeContext<ValueUserQueryElementEmbedded>
   entity?: Lite<Entity>;
+  filterController: DashboardFilterController;
+  partEmbedded: PanelPartEmbedded;
 }
 
 export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
-  const fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
+  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
     [p.ctx.value.userQuery, p.entity]);
 
   const ctx = p.ctx;
@@ -42,6 +45,8 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  fo = p.filterController.applyToFindOptions(p.partEmbedded, fo);
 
   return (
     <div>

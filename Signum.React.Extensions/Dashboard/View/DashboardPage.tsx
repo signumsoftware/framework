@@ -7,7 +7,7 @@ import { DashboardEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 import { RouteComponentProps } from "react-router";
 import "../Dashboard.css"
-import { useAPI, useInterval } from '@framework/Hooks'
+import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
@@ -21,7 +21,7 @@ function getQueryEntity(props: DashboardPageProps): string {
 
 export default function DashboardPage(p: DashboardPageProps) {
 
-  const dashboard = useAPI(signal => Navigator.API.fetchEntity(DashboardEntity, p.match.params.dashboardId), [p.match.params.dashboardId]);
+  const [dashboard, reloadDashboard] = useAPIWithReload(signal => Navigator.API.fetchEntity(DashboardEntity, p.match.params.dashboardId), [p.match.params.dashboardId]);
 
   var entityKey = getQueryEntity(p);
 
@@ -56,7 +56,7 @@ export default function DashboardPage(p: DashboardPageProps) {
         </div>
       }
 
-      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} deps={[refreshCounter, entity]} />}
+      {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity || undefined} deps={[refreshCounter, entity]} reload={reloadDashboard} />}
     </div>
   );
 }

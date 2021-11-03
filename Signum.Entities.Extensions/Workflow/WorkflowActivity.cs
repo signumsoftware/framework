@@ -420,7 +420,7 @@ namespace Signum.Entities.Workflow
         [Description("Activity Is")]
         ActivityIs,
         NoActiveTimerFound,
-        InprogressWorkflowActivities,
+        InprogressCaseActivities,
         OpenCaseActivityStats,
         LocateWorkflowActivityInDiagram,
         Approve,

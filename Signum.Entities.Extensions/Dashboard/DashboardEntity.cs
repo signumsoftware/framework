@@ -205,7 +205,10 @@ namespace Signum.Entities.Dashboard
         Part0IsTooLarge,
 
         [Description("Part {0} overlaps with {1}")]
-        Part0OverlapsWith1
+        Part0OverlapsWith1,
+
+        [Description("Row[s] selected")]
+        RowsSelected,
     }
 
     public enum DashboardEmbedededInEntity

@@ -86,7 +86,7 @@ export class Rule<T extends string> {
     return this.starts[name] + this.sizes[name] / 2;
   }
 
-  debugX() {
+  debugX(width = 10000) {
 
     const keys = Object.keys(this.sizes);
 
@@ -99,7 +99,7 @@ export class Rule<T extends string> {
             x1={this.ends[d]}
             x2={this.ends[d]}
             y1={0}
-            y2={10000}
+            y2={width}
             strokeWidth={2}
             stroke="Pink" />)}
         </g>
@@ -115,7 +115,7 @@ export class Rule<T extends string> {
     );
   }
 
-  debugY() {
+  debugY(height = 10000) {
 
     const keys = Object.keys(this.sizes);
 
@@ -124,7 +124,7 @@ export class Rule<T extends string> {
         <g className="y-rule-tick">
           {keys.map(d => <line key={d} className="y-rule-tick"
             x1={0}
-            x2={10000}
+            x2={height}
             y1={this.ends[d]}
             y2={this.ends[d]}
             strokeWidth={2}

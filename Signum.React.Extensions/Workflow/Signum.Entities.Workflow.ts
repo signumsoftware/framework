@@ -120,6 +120,7 @@ export module CaseActivityOperation {
   export const Delete : Entities.DeleteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Delete");
   export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
   export const Jump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Jump");
+  export const FreeJump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.FreeJump");
   export const Timer : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timer");
   export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
   export const Undo : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
@@ -362,7 +363,7 @@ export module WorkflowActivityMessage {
   export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
   export const ActivityIs = new MessageKey("WorkflowActivityMessage", "ActivityIs");
   export const NoActiveTimerFound = new MessageKey("WorkflowActivityMessage", "NoActiveTimerFound");
-  export const InprogressWorkflowActivities = new MessageKey("WorkflowActivityMessage", "InprogressWorkflowActivities");
+  export const InprogressCaseActivities = new MessageKey("WorkflowActivityMessage", "InprogressCaseActivities");
   export const OpenCaseActivityStats = new MessageKey("WorkflowActivityMessage", "OpenCaseActivityStats");
   export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
   export const Approve = new MessageKey("WorkflowActivityMessage", "Approve");

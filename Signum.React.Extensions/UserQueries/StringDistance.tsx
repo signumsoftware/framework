@@ -130,7 +130,7 @@ export default class StringDistance {
     }
 
     while (j > 0) {
-      result.push({ type: "Add", removed: strNew[j - 1] });
+      result.push({ type: "Add", added: strNew[j - 1] });
       j = j - 1;
     }
 

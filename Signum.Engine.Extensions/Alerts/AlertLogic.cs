@@ -126,7 +126,7 @@ namespace Signum.Engine.Alerts
                 Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                 {
                     Text = $@"
-<p>{AlertMessage.Hi0.NiceToString("@[m:Entity]")},</p>
+<p>{AlertMessage.Hi0.NiceToString("@[m:Entity]")}</p>
 <p>{AlertMessage.YouHaveSomePendingAlerts.NiceToString()}</p>
 <ul>
 @foreach[m:Alerts] as $a
@@ -154,10 +154,10 @@ namespace Signum.Engine.Alerts
 
             SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
             {
-                var limit = DateTime.Now.AddMinutes(-task.SendNotificationsOlderThan);
+                var limit = TimeZoneManager.Now.AddMinutes(-task.SendNotificationsOlderThan);
 
                 var query = Database.Query<AlertEntity>()
-                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.CreationDate < limit)
+                .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.AlertDate < limit)
                 .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
                             task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
                             task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));

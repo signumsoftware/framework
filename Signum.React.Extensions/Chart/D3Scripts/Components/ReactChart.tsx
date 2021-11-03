@@ -9,8 +9,9 @@ import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
-import { useThrottle, useSize, useAPI } from '@framework/Hooks';
+import { useThrottle, useSize, useAPI, areEqual } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
+import { DashboardFilter } from '../../../Dashboard/View/DashboardFilterController';
 
 export interface ReactChartProps {
   chartRequest: ChartRequestModel,
@@ -19,20 +20,24 @@ export interface ReactChartProps {
   loading: boolean;
   onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
+  onBackgroundClick?: (e: React.MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
+  dashboardFilter?: DashboardFilter;
 }
 
 
 export default function ReactChart(p: ReactChartProps) {
 
   const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
-  const oldData = useThrottle(p.data, 200, { enabled: isSimple});
+  const oldData = useThrottle(p.data, 200, { enabled: isSimple });
   const initialLoad = oldData == null && p.data != null && isSimple;
+
+  const memo = React.useMemo(() => new MemoRepository(), [p.chartRequest, p.chartRequest.chartScript]);
 
   const { size, setContainer } = useSize();
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} onClick={p.onBackgroundClick}>
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,
@@ -44,6 +49,8 @@ export default function ReactChart(p: ReactChartProps) {
           height: size.height,
           width: size.width,
           initialLoad: initialLoad,
+          memo: memo,
+          dashboardFilter: p.dashboardFilter
         })
       }
     </div>
@@ -52,5 +59,22 @@ export default function ReactChart(p: ReactChartProps) {
 
 ReactChart.maxRowsForAnimation = 500;
 
+
+export class MemoRepository {
+  cache: Map<string, { val: unknown, deps: unknown[] }> = new Map();
+
+  memo<T>(name: string, deps: unknown[], factory: () => T): T {
+    var box = this.cache.get(name);
+    if (box == null || !areEqual(box.deps, deps)) {
+      box = {
+        val: factory(),
+        deps: deps,
+      };
+      this.cache.set(name, box);
+    }
+
+    return box.val as T;
+  }
+}
 
 

@@ -118,7 +118,7 @@ interface DimParameters {
 }
 
 
-export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, onReload }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, onReload, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   if (data == null)
     return (
@@ -283,6 +283,8 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   const isCreable = Navigator.isCreable(typeName, { isSearch: true });
 
+  const detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   function Cell(p:
     {
       gor: RowDictionary | RowGroup | ChartRow[] | undefined,
@@ -314,9 +316,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       if (filters == null)
         throw new Error("Unexpected no filters");
 
-      onDrillDown({
-        ...filters.toObject(a => a.col.name, a => a.val),
-      }, e);
+      onDrillDown(filters.toObject(a => a.col.name, a => a.val), e);
     }
 
     var lite = gr && isLite(gr.value) ? gr.value : undefined;
@@ -332,7 +332,9 @@ export default function renderPivotTable({ data, width, height, parameters, load
             p.isSummary == 1 ? "#f8f8f8" :
               style && style.background && style.background(gr?.value, val);
 
-    const cssStyle: React.CSSProperties | undefined = style && {
+    
+
+    let cssStyle: React.CSSProperties | undefined = style && {
       backgroundColor: color,
       color:
         p.isSummary == 4 ? "rgb(66, 66, 66)" :
@@ -343,8 +345,19 @@ export default function renderPivotTable({ data, width, height, parameters, load
       paddingLeft: p.indent ? (p.indent * 30) + "px" : undefined,
       textAlign: p.indent != undefined ? "left" : "center",
       fontWeight: p.isSummary ? "bold" : undefined,
-      ...style?.cssStyle
+      ...style?.cssStyle,
     };
+
+
+    if (detector != null) {
+      var active = detector((p.filters ?? gr?.getFilters(true))!.toObject(a => a.col.name, a => a.val) as ChartRow);
+      cssStyle = {
+        ...cssStyle,
+        color: active ? "black" : cssStyle?.color,
+        opacity: !active ? .5 : cssStyle?.opacity,
+        fontWeight: active ? "bold" : cssStyle?.fontWeight
+      };
+    }
 
     var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.createIcon}</a>;
 

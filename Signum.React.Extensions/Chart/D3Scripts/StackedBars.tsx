@@ -13,7 +13,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderStackedBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -84,7 +84,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
     .range([0, xRule.size('content')]);
 
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
-  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key));
+  var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key), memo);
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :
@@ -95,87 +95,121 @@ export default function renderStackedBars({ data, width, height, parameters, loa
 
   var size = xRule.size('content');
 
+  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
-      <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={false} />
+      <g opacity={dashboardFilter ? .5 : undefined}>
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
+      </g>
+      <YKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} y={y} showLabels={false} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
 
 
       {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} className="shape-serie"
         transform={translate(xRule.start('content'), yRule.start('content'))}>
 
         {s.filter(r => r.data.values[s.key] != undefined)
-          .orderBy(r => keyColumn.getKey(r.data.rowValue))
-          .map(r => <rect key={keyColumn.getKey(r.data.rowValue)} className="shape sf-transition"
-            transform={translate(x(r[0])!, y(keyColumn.getKey(r.data.rowValue))!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
-            stroke={y.bandwidth() > 4 ? '#fff' : undefined}
-            fill={colorByKey[s.key] ?? color(s.key)}
-            height={y.bandwidth()}
-            width={x(r[1])! - x(r[0])!}
-            onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
-            cursor="pointer">
-            <title>
-              {r.data.values[s.key].valueTitle}
-            </title>
-          </rect>)}
+          .map(r => {
+            var row = r.data.values[s.key];
+            if (row == undefined)
+              return undefined;
+
+            var key = keyColumn.getKey(r.data.rowValue);
+
+            var active = detector?.(row.rowClick);
+
+            return (
+              <rect key={key} className="shape sf-transition"
+                transform={translate(x(r[0])!, y(key)!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+                opacity={active == false ? .5 : undefined}
+                stroke={active == true ? "black" : y.bandwidth() > 4 ? '#fff' : undefined}
+                strokeWidth={active == true ? 3 : undefined}
+                fill={colorByKey[s.key] ?? color(s.key)}
+                height={y.bandwidth()}
+                width={x(r[1])! - x(r[0])!}
+                onClick={e => onDrillDown(row.rowClick, e)}
+                cursor="pointer">
+                <title>
+                  {row.valueTitle}
+                </title>
+              </rect>
+            );
+          }).notNull()}
 
         {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
           s.orderBy(r => keyColumn.getKey(r.data.rowValue))
             .filter(r => (x(r[1])! - x(r[0])!) > 20)
-            .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
-              transform={translate(
-                x(r[0])! * 0.5 + x(r[1])! * 0.5,
-                y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
-              )}
-              onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              opacity={parameters["NumberOpacity"]}
-              textAnchor="middle"
-              fontWeight="bold">
-              {r.data.values[s.key].valueNiceName}
-              <title>
-                {r.data.values[s.key].valueTitle}
-              </title>
-            </text>)
+            .map(r => {
+              return (
+                <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
+                transform={translate(
+                  x(r[0])! * 0.5 + x(r[1])! * 0.5,
+                  y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
+                )}
+                onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
+                fill={parameters["NumberColor"]}
+                dominantBaseline="middle"
+                opacity={parameters["NumberOpacity"]}
+                textAnchor="middle"
+                fontWeight="bold">
+                {r.data.values[s.key].valueNiceName}
+                <title>
+                  {r.data.values[s.key].valueTitle}
+                </title>
+                </text>
+              );
+            })
         }
       </g>)}
 
       {y.bandwidth() > 15 && pivot.columns.length > 0 && (
         parameters["Labels"] == "Margin" ?
           <g className="y-label" transform={translate(xRule.end('labels'), yRule.start('content') + y.bandwidth() / 2)}>
-            {keyValues.map(k => <TextEllipsis key={keyColumn.getKey(k)}
-              maxWidth={xRule.size('labels')}
-              padding={labelMargin}
-              className="y-label sf-transition"
-              y={y(keyColumn.getKey(k))!}
-              dominantBaseline="middle"
-              textAnchor="end">
-              {keyColumn.getNiceName(k)}
-            </TextEllipsis>)}
+            {keyValues.map(k => {
+              var key = keyColumn.getKey(k);
+              var active = detector?.({ c0: k });
+              return (
+                <TextEllipsis key={key}
+                  maxWidth={xRule.size('labels')}
+                  padding={labelMargin}
+                  className="y-label sf-transition sf-pointer"
+                  onClick={e => onDrillDown({ c0: k }, e)}
+                  opacity={active == false ? .5 : undefined}
+                  fontWeight={active == true ? "bold" : undefined}
+                  y={y(key)!}
+                  dominantBaseline="middle"
+                  textAnchor="end">
+                  {keyColumn.getNiceName(k)}
+                </TextEllipsis>
+              );
+            })}
           </g> :
           parameters["Labels"] == "Inside" ?
             <g className="y-axis-tick-label" transform={translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2)}>
               {keyValues.map((k, i) => {
+                var key = keyColumn.getKey(k);
+                var active = detector?.({ c0: k });
                 var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
                 var posx = x(maxValue)!;
-                return (<TextEllipsis key={keyColumn.getKey(k)}
-                  transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getKey(k))!)}
+                return (<TextEllipsis key={key}
+                  transform={translate(posx >= size / 2 ? 0 : posx, y(key)!)}
                   maxWidth={posx >= size / 2 ? posx : size - posx}
+                  onClick={e => onDrillDown({ c0: k }, e)}
+                  opacity={active == false ? .5 : undefined}
+                  fontWeight={active == true ? "bold" : undefined}
                   padding={labelMargin}
-                  className="y-axis-tick-label sf-chart-strong sf-transition"
+                  className="y-axis-tick-label sf-chart-strong sf-transition sf-pointer"
                   dx={labelMargin}
                   textAnchor="start"
                   fill={posx >= size / 2 ? '#fff' : '#000'}
-                  dominantBaseline="middle"
-                  fontWeight="bold">
+                  dominantBaseline="middle">
                   {keyColumn.getNiceName(k)}
                 </TextEllipsis>);
               })}
             </g> : null
       )}
 
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} />
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <XAxis xRule={xRule} yRule={yRule} />
