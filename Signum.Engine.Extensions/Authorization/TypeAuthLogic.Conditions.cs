@@ -12,6 +12,7 @@ using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -323,7 +324,7 @@ namespace Signum.Engine.Authorization
         {
             if (!AuthLogic.IsEnabled)
                 throw new InvalidOperationException("AuthLogic.IsEnabled is false");
-            
+
             if (entity.IsNew)
                 throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
@@ -379,7 +380,7 @@ namespace Signum.Engine.Authorization
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-            var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Write : TypeAllowedBasic.Read; 
+            var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Write : TypeAllowedBasic.Read;
 
             Expression body = IsAllowedExpression(e, tab, ui);
 
@@ -633,8 +634,8 @@ namespace Signum.Engine.Authorization
 
             public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
             {
-                using (this.AuthDisable ? AuthLogic.Disable(): null)
-                using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter(): null)
+                using (this.AuthDisable ? AuthLogic.Disable() : null)
+                using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter() : null)
                 {
                     return await base.ExecuteQueryAsync(request, token);
                 }
@@ -714,48 +715,67 @@ namespace Signum.Engine.Authorization
 
     public static class AndOrSimplifierVisitor
     {
+        class HashSetComparer<T> : IEqualityComparer<HashSet<T>>
+        {
+            public bool Equals(HashSet<T>? x, HashSet<T>? y)
+            {
+                return x != null && y != null && x.SetEquals(y);
+            }
+
+            public int GetHashCode([DisallowNull] HashSet<T> obj)
+            {
+                return obj.Count ; 
+            }
+        }
+
+
+
+
         static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
+        static IEqualityComparer<HashSet<Expression>> HSetComparer = new HashSetComparer<Expression>();
 
         public static Expression SimplifyOrs(Expression expr)
         {
             if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
             {
-                var orGroups = OrAndList(b);
 
-                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og, Comparer))).ToList();
+                
+                    var orGroups = OrAndList(b);
 
-                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
+                    var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
+
+                    return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
+
+                 
             }
 
             return expr;
         }
 
-        static Expression[][] OrAndList(Expression expression)
+        static  HashSet<HashSet<Expression>> OrAndList(Expression expression)
         {
             if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
             {
-                return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToArray();
+                return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToHashSet(HSetComparer);
             }
             else
             {
                 var ands = AndList(expression);
-                var simpleAnds = ands.Distinct(Comparer).ToArray();
-                return new[] { simpleAnds };
-
+                return new HashSet<HashSet<Expression>>(HSetComparer) { ands };
             }
         }
 
-        static Expression[] AndList(Expression expression)
+        static HashSet<Expression> AndList(Expression expression)
         {
             if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
-                return AndList(b.Left).Concat(AndList(b.Right)).ToArray();
+                return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
             else
-                return new[] { expression };
+                return new HashSet<Expression>(Comparer){ expression };
         }
 
-        static bool IsMoreSimpleAndGeneralThan(this Expression[] simple, Expression[] complex, IEqualityComparer<Expression> comparer)
+        static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)
         {
-            return simple.All(a => complex.Contains(a, comparer));
+            return simple.All(a => complex.Contains(a));
         }
     }
 }
