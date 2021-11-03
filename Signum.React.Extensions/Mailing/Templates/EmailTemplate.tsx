@@ -233,21 +233,12 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
       forceUpdate();
   }
 
-  function handleOnInsert(newCode: string) {
-    ValueLineModal.show({
-      type: { name: "string" },
-      initialValue: newCode,
-      title: "Template",
-      message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
-    }).done();
-  }
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (
     <div className="sf-email-template-message">
       <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
       <div>
-        <TemplateControls queryKey={p.queryKey} onInsert={handleOnInsert} forHtml={true} />
+        <TemplateControls queryKey={p.queryKey} forHtml={true} />
         <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
         <div className="code-container">
           <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
