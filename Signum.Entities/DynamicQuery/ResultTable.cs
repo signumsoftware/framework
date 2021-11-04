@@ -263,7 +263,7 @@ namespace Signum.Entities.DynamicQuery
             var defConverter = converter ?? new InvariantDataTableValueConverter();
 
             DataTable dt = new DataTable("Table");
-            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.DisplayName ?? c.Column.Token.NiceName(), defConverter.ConvertType(c.Column))).ToArray());
+            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, defConverter.ConvertType(c.Column))).ToArray());
             foreach (var row in Rows)
             {
                 dt.Rows.Add(Columns.Select((c, i) => defConverter.ConvertValue(row[i], c.Column)).ToArray());
