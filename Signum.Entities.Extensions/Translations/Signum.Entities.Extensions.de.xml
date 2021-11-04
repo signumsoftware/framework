@@ -62,6 +62,11 @@
     <Member Name="Attended" Description="Erledigte" />
     <Member Name="Future" Description="Zukünftige" />
   </Type>
+  <Type Name="AlertDropDownGroup">
+    <Member Name="ByType" Description="Nach Typ" />
+    <Member Name="ByTypeAndUser" Description="Nach Typ und Benutzer" />
+    <Member Name="ByUser" Description="Nach Benutzer" />
+  </Type>
   <Type Name="AlertEntity" Description="Benachrichtigung">
     <Member Name="AlertDate" Description="Benachrichtigungsdatum" />
     <Member Name="Alerted" Description="Gewarnte" />
@@ -545,6 +550,7 @@
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
+    <Member Name="RowsSelected" Description="Zeile(n) ausgewählt" />
   </Type>
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -1325,6 +1331,16 @@
     <Member Name="FirstNode" Description="Erster Knoten" />
     <Member Name="LastNode" Description="Letzter Knoten" />
   </Type>
+  <Type Name="InteractionGroup" Description="Interaktionsgruppe">
+    <Member Name="Group1" Description="Gruppe 1" />
+    <Member Name="Group2" Description="Gruppe 2" />
+    <Member Name="Group3" Description="Gruppe 3" />
+    <Member Name="Group4" Description="Gruppe 4" />
+    <Member Name="Group5" Description="Gruppe 5" />
+    <Member Name="Group6" Description="Gruppe 6" />
+    <Member Name="Group7" Description="Gruppe 7" />
+    <Member Name="Group8" Description="Gruppe 8" />
+  </Type>
   <Type Name="IPartEntity">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
@@ -1683,6 +1699,7 @@
     <Member Name="Content" Description="Inhalt" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Style" Description="Stil" />
