@@ -62,10 +62,10 @@ export function start(options: { routes: JSX.Element[] }) {
         groupOperation: "Or",
         pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
         filters: [
-          { token: "DisplayName", operation: "StartsWith" },
-          { token: "GivenName", operation: "StartsWith" },
-          { token: "Surname", operation: "StartsWith" },
-          { token: "Mail", operation: "StartsWith" },
+          { token: "DisplayName", operation: "Contains" },
+          { token: "GivenName", operation: "Contains" },
+          { token: "Surname", operation: "Contains" },
+          { token: "Mail", operation: "Contains" },
         ],
       },
       {

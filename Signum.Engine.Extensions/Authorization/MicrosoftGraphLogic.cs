@@ -126,6 +126,7 @@ namespace Signum.Engine.Authorization
                          var query = graphClient.Users.Request()
                             .InGroup(inGroup?.Value as Lite<ADGroupEntity>)
                             .Filter(request.Filters)
+                            .Search(request.Filters)
                             .Select(request.Columns)
                             .OrderBy(request.Orders)
                             .Paginate(request.Pagination);
@@ -202,6 +203,7 @@ namespace Signum.Engine.Authorization
                         var query = graphClient.Groups.Request()
                            .HasUser(inGroup?.Value as Lite<UserEntity>)
                            .Filter(request.Filters)
+                           .Search(request.Filters)
                            .Select(request.Columns)
                            .OrderBy(request.Orders)
                            .Paginate(request.Pagination);
@@ -309,7 +311,7 @@ namespace Signum.Engine.Authorization
             return updatedBuilder;
         }
 
-        static string ToFilter(Filter f)
+        static string? ToFilter(Filter f)
         {
             if (f is FilterCondition fc)
             {
@@ -321,7 +323,7 @@ namespace Signum.Engine.Authorization
                     FilterOperation.GreaterThanOrEqual => ToGraphField(fc.Token) + " ge " + ToStringValue(fc.Value),
                     FilterOperation.LessThan => ToGraphField(fc.Token) + " lt " + ToStringValue(fc.Value),
                     FilterOperation.LessThanOrEqual => ToGraphField(fc.Token) + " le " + ToStringValue(fc.Value),
-                    FilterOperation.Contains => ToGraphField(fc.Token) + ":" + ToStringValue(fc.Value),
+                    FilterOperation.Contains => null,
                     FilterOperation.NotContains => "NOT (" + ToGraphField(fc.Token) + ":" + ToStringValue(fc.Value) + ")",
                     FilterOperation.StartsWith => "startswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
                     FilterOperation.EndsWith => "endswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
@@ -336,10 +338,25 @@ namespace Signum.Engine.Authorization
             }
             else if (f is FilterGroup fg)
             {
-                if (fg.GroupOperation == FilterGroupOperation.Or)
-                    return "(" + fg.Filters.Select(f2 => ToFilter(f2)).ToString(" OR ") + ")";
-                else
-                    return fg.Filters.Select(f2 => ToFilter(f2)).ToString(" AND ");
+                return fg.Filters.Select(f2 => ToFilter(f2)).Combined(fg.GroupOperation);
+            }
+            else
+                throw new UnexpectedValueException(f);
+        }
+
+        static string? ToSearch(Filter f)
+        {
+            if (f is FilterCondition fc)
+            {
+                return fc.Operation switch
+                {
+                    FilterOperation.Contains => "\"" +  ToGraphField(fc.Token) + ":" + fc.Value?.ToString()?.Replace(@"""", @"\""") + "\"",
+                    _ => null
+                };
+            }
+            else if (f is FilterGroup fg)
+            {
+                return fg.Filters.Select(f2 => ToSearch(f2)).Combined(fg.GroupOperation);
             }
             else
                 throw new UnexpectedValueException(f);
@@ -347,10 +364,47 @@ namespace Signum.Engine.Authorization
 
         static BR Filter<BR>(this BR request, List<Filter> filters) where BR : IBaseRequest
         {
-            var filterStr = filters.Select(f => ToFilter(f)).ToString(" AND ");
+            var filterStr = filters.Select(f => ToFilter(f)).Combined(FilterGroupOperation.And);
             if (filterStr.HasText())
                 request.QueryOptions.Add(new QueryOption("$filter", filterStr));
+
             return request;
+        }
+
+        static BR Search<BR>(this BR request, List<Filter> filters) where BR : IBaseRequest
+        {
+            var searchStr = filters.Select(f => ToSearch(f)).Combined(FilterGroupOperation.And);
+            if (searchStr.HasText())
+                request.QueryOptions.Add(new QueryOption("$search", searchStr));
+
+            return request;
+        }
+
+        static string? Combined(this IEnumerable<string?> filterEnumerable, FilterGroupOperation groupOperation)
+        {
+            var filters = filterEnumerable.ToList();
+            var cleanFilters = filters.NotNull().ToList();
+
+            if(groupOperation == FilterGroupOperation.And)
+            {
+                if (cleanFilters.IsEmpty())
+                    return null;
+
+                return cleanFilters.ToString(" AND ");
+            }
+            else
+            {
+                if (cleanFilters.IsEmpty())
+                    return null;
+
+                if (cleanFilters.Count != filters.Count)
+                    throw new InvalidOperationException("Unable to convert filter (mix $filter and $search in an OR");
+
+                if (cleanFilters.Count == 1)
+                    return cleanFilters.SingleEx();
+
+                return "(" + cleanFilters.ToString(" OR ") + ")";
+            }
         }
 
         static BR Select<BR>(this BR request, List<Column> columns) where BR : IBaseRequest
