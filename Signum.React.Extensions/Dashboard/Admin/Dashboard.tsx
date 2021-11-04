@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, RenderEntity, OptionItem } from '@framework/Line
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
 import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
@@ -65,7 +65,7 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
               </div>
               <div className="col-sm-4">
                 <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
-                  optionItems={colors.map((c, i) => ({ label: "Group " + (i + 1), value: "Group" + (i + 1), color: c }))} onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: (io as any).color }} />{io.label}</span>} />
+                  onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               </div>
             </div>
 

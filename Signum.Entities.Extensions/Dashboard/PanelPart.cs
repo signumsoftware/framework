@@ -10,6 +10,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using System.ComponentModel;
 
 namespace Signum.Entities.Dashboard
 {
@@ -189,15 +190,16 @@ namespace Signum.Entities.Dashboard
 
     public enum InteractionGroup
     {
-        Group1,
-        Group2,
-        Group3,
-        Group4,
-        Group5,
-        Group6,
-        Group7,
-        Group8,
+        [Description("Group 1")] Group1,
+        [Description("Group 2")] Group2,
+        [Description("Group 3")] Group3,
+        [Description("Group 4")] Group4,
+        [Description("Group 5")] Group5,
+        [Description("Group 6")] Group6,
+        [Description("Group 7")] Group7,
+        [Description("Group 8")] Group8,
     }
+
     public enum UserQueryPartRenderMode
     {
         SearchControl,

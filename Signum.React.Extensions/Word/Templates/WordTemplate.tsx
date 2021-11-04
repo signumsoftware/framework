@@ -19,16 +19,6 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
 
   const forceUpdate = useForceUpdate();
 
-  function handleOnInsert(newCode: string) {
-    ValueLineModal.show({
-      type: { name: "string" },
-      initialValue: newCode,
-      title: "Template",
-      message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
-    }).done();
-  }
-
   const ctx = p.ctx;
   const ctx4 = p.ctx.subCtx({ labelColumns: 4 });
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
@@ -55,8 +45,8 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
           <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
             <ValueLine ctx={ctx.subCtx(f => f.fileName)} />
             <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
-              <div className="card-header" style={{ padding: "5px" }}>
-                <TemplateControls queryKey={ctx.value.query.key} forHtml={false} onInsert={handleOnInsert} />
+            <div className="card-header" style={{ padding: "5px" }}>
+              <TemplateControls queryKey={ctx.value.query.key} forHtml={false} widgetButtons={true} />
               </div>
             </div>
             <FileLine ctx={ctx.subCtx(e => e.template)} />

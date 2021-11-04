@@ -58,17 +58,6 @@ export interface SMSTemplateMessageComponentProps {
 export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps) {
   const forceUpdate = useForceUpdate();
 
-  function handleOnInsert(newCode: string) {
-    ValueLineModal.show({
-      type: { name: "string" },
-      initialValue: newCode,
-      title: "Template",
-      message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
-    }).done();
-  }
-
-
   var throttleText = useThrottle(p.ctx.value.message ?? "", 1000);
   var remaining = useAPI(abort => SMSClient.API.getRemainingCharacters(throttleText, p.removeNoSMSCharacters), [throttleText, p.removeNoSMSCharacters], { avoidReset: true });
 
@@ -77,7 +66,7 @@ export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps)
     <div className="sf-sms-template-message">
       <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} onChange={p.invalidate} valueColumns={3} />
       <div>
-        <TemplateControls queryKey={p.queryKey} onInsert={handleOnInsert} forHtml={true} />
+        <TemplateControls queryKey={p.queryKey} forHtml={true} />
         <ValueLine ctx={ec.subCtx(a => a.message)} onChange={forceUpdate} formGroupStyle="SrOnly" formGroupHtmlAttributes={{ className: "pt-2" }} helpText={
             <span className={remaining == null ? "" : remaining < 0 ? "text-danger" : remaining < 20 ? "text-warning" : "text-success"}>
               {SMSTemplateMessage._0CharactersRemainingBeforeReplacements.niceToString(remaining == null ? "…" : remaining)}

@@ -263,50 +263,12 @@ namespace Signum.Entities.DynamicQuery
             var defConverter = converter ?? new InvariantDataTableValueConverter();
 
             DataTable dt = new DataTable("Table");
-            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, defConverter.ConvertType(c.Column))).ToArray());
+            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.DisplayName ?? c.Column.Token.NiceName(), defConverter.ConvertType(c.Column))).ToArray());
             foreach (var row in Rows)
             {
                 dt.Rows.Add(Columns.Select((c, i) => defConverter.ConvertValue(row[i], c.Column)).ToArray());
             }
             return dt;
-        }
-
-
-        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter? converter = null)
-        {
-            var defConverter = converter ?? new InvariantDataTableValueConverter();
-
-            string Null = "- NULL -";
-
-            Dictionary<object, Dictionary<object, object?>> dictionary =
-                this.Rows
-                .AgGroupToDictionary(
-                    row => row[rowColumnIndex] ?? Null,
-                    gr => gr.ToDictionaryEx(
-                        row => row[columnColumnIndex] ?? Null,
-                        row => row[valueIndex])
-                );
-
-            var allColumns = dictionary.Values.SelectMany(d => d.Keys).Distinct();
-
-            var rowColumn = this.Columns[rowColumnIndex];
-            var valueColumn = this.Columns[valueIndex];
-
-            var result = new DataTable();
-            result.Columns.Add(new DataColumn( rowColumn.Column.DisplayName, defConverter.ConvertType(rowColumn.Column)));
-            foreach (var item in allColumns)
-                result.Columns.Add(new DataColumn(item.ToString(), defConverter.ConvertType(valueColumn.Column)));
-
-            foreach (var kvp in dictionary)
-            {
-                result.Rows.Add(
-                    allColumns.Select(val => defConverter.ConvertValue(kvp.Value.TryGetCN(val), valueColumn.Column))
-                    .PreAnd(defConverter.ConvertValue(kvp.Key, rowColumn.Column))
-                    .ToArray());
-            }
-
-            return result;
-
         }
 
 
