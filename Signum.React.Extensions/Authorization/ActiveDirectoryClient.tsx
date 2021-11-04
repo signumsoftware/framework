@@ -90,14 +90,9 @@ export function start(options: { routes: JSX.Element[] }) {
         groupOperation: "Or",
         pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
         filters: [
-          { token: "DisplayName", operation: "StartsWith" },
+          { token: "DisplayName", operation: "Contains" },
         ],
       },
-      //{
-      //  pinned: { label: ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
-      //  token: "AccountEnabled", operation: "EqualTo", value: true
-      //},
-      //{ token: "CreationType", operation: "DistinctTo", value: "Invitation" }
     ],
     defaultOrders: [
       { token: "DisplayName", orderType: "Ascending" }
