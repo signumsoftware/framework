@@ -483,7 +483,7 @@ namespace Signum.Engine.Word
 
         internal static (int colY, int colX, int colValue)? ParsePivot(string pivotStr)
         {
-            var m = Regex.Match(pivotStr, @"^Pivot\((?<colY>\d+),(?<colX>\d+),(?<colValue>\d+)\)$");
+            var m = Regex.Match(pivotStr, @"^Pivot\s*\(\s*(?<colY>\d+)\s*,\s*(?<colX>\d+)\s*,\s*(?<colValue>\d+)\s*\)\s*$");
             if (!m.Success)
                 return null;
 
