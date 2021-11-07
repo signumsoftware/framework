@@ -50,6 +50,7 @@ Check the different modules in https://www.signumsoftware.com/es/Extensions
 Signum Framework doesn't use any numeric versioning, since is distributed as source code we just use Git commit hashes.
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
+* [2021.11.01 Dashboard filters and InteractionGroup](https://github.com/signumsoftware/framework/commit/55def717ccf8414e11396faa6b47b12747c56f01)
 * [2021.08.28 Update to TypeScript 4.4](https://github.com/signumsoftware/framework/commit/f6412af23da1e225b0b417b329874acd8c820f05#commitcomment-55586120)
 * [2021.08.28 Extensions ❤ Framework](https://github.com/signumsoftware/framework/commit/b7848eff42f5d242ed73035a5cc91f35d5ec20c8#commitcomment-55557696)
 * [2021.03.31 Update to React Widgets to 5.0.0 final](https://github.com/signumsoftware/framework/commit/f85f1d71be63273d8d55f224274af677e4d586f5#commitcomment-48935445)
