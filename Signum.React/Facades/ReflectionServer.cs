@@ -203,7 +203,7 @@ namespace Signum.React.Facades
                                 .Where(pr => InTypeScript(pr))
                                 .Select(p =>
                                 {
-                                    var validators = Validator.TryGetPropertyValidator(p)?.Validators;
+                                    var validators = Entities.Validator.TryGetPropertyValidator(p)?.Validators;
 
                                     var mi = new MemberInfoTS
                                     {

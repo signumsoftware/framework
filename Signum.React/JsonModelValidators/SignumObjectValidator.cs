@@ -195,7 +195,7 @@ namespace Signum.React.JsonModelValidators
 
         private bool ValidateModifiableEntity(ModifiableEntity mod)
         {
-            using (Validator.ModelBinderScope())
+            using (Entities.Validator.ModelBinderScope())
             {
                 bool isValid = true;
 

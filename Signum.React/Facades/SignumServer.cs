@@ -102,7 +102,7 @@ namespace Signum.React.Facades
 
         private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
         {
-            var val = Validator.TryGetPropertyValidator(arg);
+            var val = Entities.Validator.TryGetPropertyValidator(arg);
 
             if (val == null || mod == null)
                 return null;

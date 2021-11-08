@@ -427,7 +427,7 @@ namespace Signum.Utilities
         }
 
         public static IEnumerable<D> GetInvocationListTyped<D>(this D? multicastDelegate)
-            where D : class, ICloneable, ISerializable
+            where D : System.Delegate
         {
             if (multicastDelegate == null)
                 return Enumerable.Empty<D>();

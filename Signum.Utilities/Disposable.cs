@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 
 namespace Signum.Utilities
 {
@@ -38,7 +37,7 @@ namespace Signum.Utilities
                 () => { try { first!.Dispose(); } finally { second!.Dispose(); } });
         }
 
-        public static IDisposable? Combine<Del>(Del? delegated, Func<Del, IDisposable?> invoke) where Del : class, ICloneable, ISerializable
+        public static IDisposable? Combine<Del>(Del? delegated, Func<Del, IDisposable?> invoke) where Del : System.Delegate
         {
             if (delegated == null)
                 return null;
