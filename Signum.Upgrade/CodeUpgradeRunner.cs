@@ -16,7 +16,10 @@ namespace Signum.Upgrade
         public CodeUpgradeRunner(bool autoDiscover)
         {
             if (autoDiscover)
-                Upgrades = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType == typeof(CodeUpgradeBase)).Select(t => (CodeUpgradeBase)Activator.CreateInstance(t)!).ToList();
+                Upgrades = Assembly.GetExecutingAssembly().GetTypes()
+                    .Where(t => t.BaseType == typeof(CodeUpgradeBase))
+                    .OrderBy(t => t.Name)
+                    .Select(t => (CodeUpgradeBase)Activator.CreateInstance(t)!).ToList();
         }
 
         public IEnumerator<CodeUpgradeBase> GetEnumerator() => Upgrades.GetEnumerator();

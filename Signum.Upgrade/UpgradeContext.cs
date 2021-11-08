@@ -55,8 +55,8 @@ namespace Signum.Upgrade
 
         public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
         {
-            fileName = fileName.Replace("Southwind", ApplicationName);
-            if (File.Exists(Path.Combine(this.RootFolder, fileName)))
+            fileName = Path.Combine(this.RootFolder, fileName.Replace("Southwind", ApplicationName));
+            if (File.Exists(fileName))
             {
                 if (showWarning != WarningLevel.None)
                 {
@@ -69,6 +69,8 @@ namespace Signum.Upgrade
             }
             else
             {
+                var dir = Path.GetDirectoryName(fileName)!;
+                Directory.CreateDirectory(dir);
                 File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName, null));
             }
         }
@@ -83,7 +85,7 @@ namespace Signum.Upgrade
 
         public WarningLevel HasWarnings { get; internal set; }
 
-        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", "Extensions", ".git", ".vs", ".vscode" };
+        public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "wwwroot", "Framework", ".git", ".vs", ".vscode" };
 
         public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarning = WarningLevel.Error)
         {

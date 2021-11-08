@@ -1,6 +1,7 @@
 using Signum.Upgrade.Upgrades;
 using Signum.Utilities;
 using System;
+using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 
 namespace Signum.Upgrade
@@ -22,6 +23,8 @@ namespace Signum.Upgrade
             Console.Write("  RootFolder = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.RootFolder);
             Console.Write("  ApplicationName = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.ApplicationName);
 
+
+            UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();
 
             new CodeUpgradeRunner(autoDiscover: true).Run(uctx);
         }
