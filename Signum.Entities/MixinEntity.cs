@@ -4,7 +4,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, DescriptionOptions(DescriptionOptions.Members), InTypeScript(false)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(false)]
     public abstract class MixinEntity : ModifiableEntity
     {
         protected MixinEntity(ModifiableEntity mainEntity, MixinEntity? next)

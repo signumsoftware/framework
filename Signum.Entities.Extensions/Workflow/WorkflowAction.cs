@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowActionEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
@@ -55,7 +55,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
     }
 
-    [Serializable]
     public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
     {
         protected override CompilationResult Compile()

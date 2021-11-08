@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicTypeConditionEntity : Entity
     {
         

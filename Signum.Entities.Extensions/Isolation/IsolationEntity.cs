@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Isolation
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class IsolationEntity : Entity
     {
         [UniqueIndex]
@@ -86,7 +86,6 @@ namespace Signum.Entities.Isolation
         GlobalEntity,
     }
 
-    [Serializable]
     public class IsolationMixin : MixinEntity
     {
         IsolationMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)

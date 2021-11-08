@@ -9,13 +9,11 @@ using Signum.Entities.Workflow;
 
 namespace Signum.Entities.UserAssets
 {
-    [Serializable]
     public class UserAssetPreviewModel : ModelEntity
     {
         public MList<UserAssetPreviewLineEmbedded> Lines { get; set; } = new MList<UserAssetPreviewLineEmbedded>();
     }
 
-    [Serializable]
     public class UserAssetPreviewLineEmbedded : EmbeddedEntity
     {
         public TypeEntity? Type { get; set; }

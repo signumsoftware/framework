@@ -6,7 +6,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
     public class ChartScriptSymbol : Symbol
     {
         private ChartScriptSymbol() { }

@@ -3,7 +3,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class SystemTimeToken : QueryToken
     {
         QueryToken parent;

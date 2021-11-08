@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class UserTicketEntity : Entity
     {   
         public Lite<UserEntity> User { get; set; }

@@ -3,7 +3,7 @@ using Signum.Services;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
+    [EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
     public class FilePathEntity : Entity, IFile, IFilePath
     {
         public static string? ForceExtensionIfEmpty = ".dat";
@@ -134,7 +134,6 @@ namespace Signum.Entities.Files
         }
     }
 
-    [Serializable]
     public class PrefixPair
     {
         string? physicalPrefix;

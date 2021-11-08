@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Help
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class TypeHelpEntity : Entity
     {   
         public TypeEntity Type { get; set; }
@@ -48,7 +48,6 @@ namespace Signum.Entities.Help
         public static DeleteSymbol<TypeHelpEntity> Delete;
     }
 
-    [Serializable]
     public class PropertyRouteHelpEmbedded : EmbeddedEntity
     {
         public PropertyRouteEntity Property { get; set; }
@@ -65,7 +64,6 @@ namespace Signum.Entities.Help
         }
     }
 
-    [Serializable]
     public class OperationHelpEmbedded : EmbeddedEntity
     {
         public OperationSymbol Operation { get; set; }

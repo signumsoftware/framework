@@ -2,7 +2,6 @@
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable]
     public class EmailConfigurationEmbedded : EmbeddedEntity
     {
         

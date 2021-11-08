@@ -5,7 +5,7 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Excel
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportEntity : Entity
     {
         public QueryEntity Query { get; set; }

@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class EmailMessageEntity : Entity, IProcessLineDataEntity
     {
         public EmailMessageEntity()
@@ -119,7 +119,6 @@ namespace Signum.Entities.Mailing
     }
 
 
-    [Serializable]
     public class EmailReceptionMixin : MixinEntity
     {
         protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
@@ -129,7 +128,6 @@ namespace Signum.Entities.Mailing
         public EmailReceptionInfoEmbedded? ReceptionInfo { get; set; }
     }
 
-    [Serializable]
     public class EmailReceptionInfoEmbedded : EmbeddedEntity
     {
         [UniqueIndex(AllowMultipleNulls = true)]
@@ -149,7 +147,6 @@ namespace Signum.Entities.Mailing
         public DateTime? DeletionDate { get; set; }
     }
 
-    [Serializable]
     public class EmailAttachmentEmbedded : EmbeddedEntity
     {
         public EmailAttachmentType Type { get; set; }
@@ -199,7 +196,6 @@ namespace Signum.Entities.Mailing
         LinkedResource
     }
 
-    [Serializable]
     public class EmailRecipientEmbedded : EmailAddressEmbedded, IEquatable<EmailRecipientEmbedded>
     {
         public EmailRecipientEmbedded() { }
@@ -250,7 +246,6 @@ namespace Signum.Entities.Mailing
         Bcc
     }
 
-    [Serializable]
     public abstract class EmailAddressEmbedded : EmbeddedEntity, IEquatable<EmailAddressEmbedded>
     {
         public EmailAddressEmbedded() { }
@@ -296,7 +291,6 @@ namespace Signum.Entities.Mailing
         public override int GetHashCode() => HashCode.Combine((EmailAddress ?? "").GetHashCode(), (DisplayName ?? "").GetHashCode());
     }
 
-    [Serializable]
     public class EmailFromEmbedded : EmailAddressEmbedded, IEquatable<EmailFromEmbedded>
     {
         public EmailFromEmbedded() { }
@@ -401,7 +395,7 @@ namespace Signum.Entities.Mailing
         _01requiresExtraParameters
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class EmailPackageEntity : Entity, IProcessDataEntity
     {
         [StringLengthValidator(Max = 200)]

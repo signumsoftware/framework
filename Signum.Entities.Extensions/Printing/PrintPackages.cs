@@ -2,7 +2,7 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.Printing
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PrintPackageEntity : Entity, IProcessDataEntity
     {
         [StringLengthValidator(Max = 200)]

@@ -2,7 +2,6 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.UserAssets
 {
-    [Serializable]
     public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEmbedded>
     {
         private QueryTokenEmbedded()

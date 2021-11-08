@@ -1,7 +1,6 @@
 ﻿
 namespace Signum.Entities.Basics
 {
-    [Serializable]
     public class TypeConditionSymbol : Symbol
     {
         private TypeConditionSymbol() { }

@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Help
 {
-    [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
+    [EntityKind(EntityKind.SharedPart, EntityData.Master)]
     public class QueryHelpEntity : Entity
     {
         public QueryEntity Query { get; set; }
@@ -36,7 +36,6 @@ namespace Signum.Entities.Help
         public override string ToString() => As.Expression(() => Query.ToString());
     }
 
-    [Serializable]
     public class QueryColumnHelpEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100)]

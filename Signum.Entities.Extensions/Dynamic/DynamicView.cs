@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -35,7 +35,6 @@ namespace Signum.Entities.Dynamic
         public static Func<Type, string, DynamicViewEntity?> TryGetDynamicView = (type, name) => null;
     }
 
-    [Serializable]
     public class DynamicViewPropEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
@@ -79,7 +78,7 @@ namespace Signum.Entities.Dynamic
     }
 
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewSelectorEntity : Entity
     {
         [UniqueIndex]
@@ -101,7 +100,7 @@ namespace Signum.Entities.Dynamic
 
 
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewOverrideEntity : Entity
     {
         

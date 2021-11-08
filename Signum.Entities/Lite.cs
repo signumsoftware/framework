@@ -37,13 +37,11 @@ namespace Signum.Entities
 
     namespace Internal
     {
-        [Serializable]
         public abstract class LiteImp : Modifiable
         {
 
         }
 
-        [Serializable]
         public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
             where T : Entity
         {

@@ -3,7 +3,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.MachineLearning
 {
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     {
         [StringLengthValidator(Max = 100)]
@@ -122,7 +122,6 @@ namespace Signum.Entities.MachineLearning
         MultiClassification,
     }
 
-    [Serializable]
     public class NeuralNetworkHidenLayerEmbedded : EmbeddedEntity
     {
         [Unit("Neurons")]
@@ -178,7 +177,7 @@ namespace Signum.Entities.MachineLearning
 
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
+    [EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
     {
         

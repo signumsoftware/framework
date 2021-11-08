@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicExpressionEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]

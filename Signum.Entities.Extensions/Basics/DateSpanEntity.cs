@@ -3,7 +3,6 @@ using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable]
     public class DateSpanEmbedded : EmbeddedEntity
     {
         public int Years { get; set; }
@@ -47,7 +46,6 @@ namespace Signum.Entities.Basics
         }
     }
 
-    [Serializable]
     public class TimeSpanEmbedded : EmbeddedEntity
     {
         public int Days { get; set; }

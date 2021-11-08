@@ -19,7 +19,6 @@ namespace Signum.Entities.Templating
     }
 
 
-    [Serializable]
     public class MultiEntityModel : ModelEntity
     {
         [ImplementedByAll]
@@ -27,7 +26,6 @@ namespace Signum.Entities.Templating
         public MList<Lite<Entity>> Entities { get; set; } = new MList<Lite<Entity>>();
     }
 
-    [Serializable]
     public class QueryModel : ModelEntity
     {
         [InTypeScript(false)]

@@ -8,7 +8,7 @@ using System.CodeDom.Compiler;
 
 namespace Signum.Entities
 {
-    [Serializable, DescriptionOptions(DescriptionOptions.All), InTypeScript(false)]
+    [DescriptionOptions(DescriptionOptions.All), InTypeScript(false)]
     public abstract class Entity : ModifiableEntity, IEntity
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]

@@ -2,7 +2,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ResetPasswordRequestEntity : Entity
     {
         [UniqueIndex(AvoidAttachToUniqueIndexes = true)]

@@ -2,7 +2,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class NetPropertyToken : QueryToken
     {
         public MemberInfo MemberInfo { get; private set; }

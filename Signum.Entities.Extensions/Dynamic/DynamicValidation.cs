@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     [Mixin(typeof(DisabledMixin))]
     public class DynamicValidationEntity : Entity
     {

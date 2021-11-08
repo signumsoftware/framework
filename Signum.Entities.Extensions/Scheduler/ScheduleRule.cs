@@ -12,7 +12,7 @@ namespace Signum.Entities.Scheduler
     }
 
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     {
         public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
@@ -49,7 +49,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
     {
         public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
@@ -146,7 +146,7 @@ namespace Signum.Entities.Scheduler
     }
 
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
     {
         public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;

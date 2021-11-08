@@ -6,7 +6,7 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.SMS
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMSTemplateEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -85,7 +85,6 @@ namespace Signum.Entities.SMS
         TextPruning,
     }
 
-    [Serializable]
     public class SMSTemplateMessageEmbedded : EmbeddedEntity
     {
         public SMSTemplateMessageEmbedded() { }
@@ -121,7 +120,7 @@ namespace Signum.Entities.SMS
     }
 
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public class SMSModelEntity : Entity
     {
         [UniqueIndex]

@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.UserQueries
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class UserQueryEntity : Entity, IUserAssetEntity
     {
         public UserQueryEntity() { }
@@ -162,7 +162,6 @@ namespace Signum.Entities.UserQueries
     }
 
 
-    [Serializable]
     public class QueryOrderEmbedded : EmbeddedEntity
     {
         
@@ -204,7 +203,6 @@ namespace Signum.Entities.UserQueries
         }
     }
 
-    [Serializable]
     public class QueryColumnEmbedded : EmbeddedEntity
     {   
         public QueryTokenEmbedded Token { get; set; }
@@ -265,7 +263,6 @@ namespace Signum.Entities.UserQueries
         }
     }
 
-    [Serializable]
     public class QueryFilterEmbedded : EmbeddedEntity
     {
         public QueryFilterEmbedded() { }
@@ -407,7 +404,6 @@ namespace Signum.Entities.UserQueries
     }
 
 
-    [Serializable]
     public class PinnedQueryFilterEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100)]

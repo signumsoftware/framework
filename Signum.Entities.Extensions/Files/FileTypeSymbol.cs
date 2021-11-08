@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
     public class FileTypeSymbol : Symbol
     {
         private FileTypeSymbol() { }

@@ -1,7 +1,6 @@
 ﻿
 namespace Signum.Entities.Workflow
 {
-    [Serializable]
     public class WorkflowConfigurationEmbedded : EmbeddedEntity
     {
         [Unit("sec")]

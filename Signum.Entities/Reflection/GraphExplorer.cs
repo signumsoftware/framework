@@ -354,7 +354,6 @@ namespace Signum.Entities.Reflection
         }
     }
 
-    [Serializable]
     public class IntegrityCheckException : Exception
     {
         public Dictionary<Guid, IntegrityCheck> Errors

@@ -3,7 +3,6 @@ using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class CollectionElementToken : QueryToken
     {
         public CollectionElementType CollectionElementType { get; private set; }

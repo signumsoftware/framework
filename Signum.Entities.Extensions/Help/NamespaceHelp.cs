@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Help
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class NamespaceHelpEntity : Entity
     {
         [StringLengthValidator(Max = 300)]

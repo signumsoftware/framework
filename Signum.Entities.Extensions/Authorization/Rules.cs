@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
+    [EntityKind(EntityKind.System, EntityData.Master)]
     public abstract class RuleEntity<R, A> : Entity
     {   
         public Lite<RoleEntity> Role { get; set; }
@@ -22,17 +22,13 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class RuleQueryEntity : RuleEntity<QueryEntity, QueryAllowed> { }
 
-    [Serializable]
     public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
 
-    [Serializable]
     public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
 
 
-    [Serializable]
     public class OperationTypeEmbedded : EmbeddedEntity
     {
         public OperationSymbol Operation { get; set; }
@@ -45,17 +41,14 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }
 
-    [Serializable]
     public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
         [PreserveOrder]
         public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
     }
 
-    [Serializable]
     public class RuleTypeConditionEmbedded : EmbeddedEntity, IEquatable<RuleTypeConditionEmbedded>
     {
         public TypeConditionSymbol Condition { get; set; }

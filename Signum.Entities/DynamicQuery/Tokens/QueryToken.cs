@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
         public int Priority = 0;

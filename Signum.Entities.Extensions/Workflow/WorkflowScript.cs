@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
@@ -61,7 +61,6 @@ namespace Signum.Entities.Workflow
     }
 
 
-    [Serializable]
     public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
     {
         [StringLengthValidator(MultiLine = true)]

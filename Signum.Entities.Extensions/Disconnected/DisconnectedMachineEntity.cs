@@ -3,7 +3,7 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class DisconnectedMachineEntity : Entity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
@@ -60,7 +60,6 @@ namespace Signum.Entities.Disconnected
         public static ConstructSymbol<DisconnectedImportEntity>.From<DisconnectedMachineEntity> FixImport;
     }
 
-    [Serializable]
     public class DisconnectedCreatedMixin : MixinEntity
     {
         DisconnectedCreatedMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
@@ -68,7 +67,6 @@ namespace Signum.Entities.Disconnected
         public bool DisconnectedCreated { get; set; }
     }
 
-    [Serializable]
     public class DisconnectedSubsetMixin : MixinEntity
     {
         DisconnectedSubsetMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
@@ -78,7 +76,6 @@ namespace Signum.Entities.Disconnected
         public Lite<DisconnectedMachineEntity>? DisconnectedMachine { get; set; }
     }
 
-    [Serializable]
     public class StrategyPair
     {
         public Download Download;

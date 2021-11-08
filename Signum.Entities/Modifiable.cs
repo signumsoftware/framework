@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 namespace Signum.Entities
 {
-    [Serializable]
     public abstract class Modifiable
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]

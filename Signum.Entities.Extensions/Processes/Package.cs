@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
+    [EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PackageEntity : Entity, IProcessDataEntity
     {
         [StringLengthValidator(Max = 200)]
@@ -16,7 +16,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageOperationEntity : PackageEntity
     {
         public OperationSymbol Operation { get; set; }
@@ -34,7 +34,7 @@ namespace Signum.Entities.Processes
     }
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class PackageLineEntity : Entity, IProcessLineDataEntity
     {   
         public Lite<PackageEntity> Package { get; set; }

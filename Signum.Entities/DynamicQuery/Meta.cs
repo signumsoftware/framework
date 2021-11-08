@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public abstract class Meta
     {
         public readonly Implementations? Implementations;
@@ -15,7 +14,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class CleanMeta : Meta
     {
         public readonly PropertyRoute[] PropertyRoutes;
@@ -42,7 +40,6 @@ namespace Signum.Entities.DynamicQuery
 
     }
 
-    [Serializable]
     public class DirtyMeta : Meta
     {
         public readonly ReadOnlyCollection<CleanMeta> CleanMetas;

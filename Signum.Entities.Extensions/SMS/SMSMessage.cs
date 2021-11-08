@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class SMSMessageEntity : Entity, IProcessLineDataEntity
     {
         public Lite<SMSTemplateEntity>? Template { get; set; }
@@ -76,7 +76,6 @@ namespace Signum.Entities.SMS
         public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendMultipleSMSMessages;
     }
 
-    [Serializable]
     public class MultipleSMSModel : ModelEntity
     {
         [StringLengthValidator(Max = SMSCharacters.SMSMaxTextLength)]

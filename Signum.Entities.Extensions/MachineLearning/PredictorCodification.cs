@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.MachineLearning
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PredictorCodificationEntity : Entity
     {
         

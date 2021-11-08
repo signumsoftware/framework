@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
+    [EntityKind(EntityKind.System, EntityData.Master)]
     public class TranslatedInstanceEntity : Entity
     {   
         public CultureInfoEntity Culture { get; set; }

@@ -6,7 +6,6 @@ using System.Runtime.Loader;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable]
     public abstract class EvalEmbedded<T> : EmbeddedEntity
                     where T : class
     {

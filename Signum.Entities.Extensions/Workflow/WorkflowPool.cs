@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowPoolEntity : Entity, IWorkflowObjectEntity, IWithModel
     {   
         public WorkflowEntity Workflow { get; set; }
@@ -45,7 +45,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowPoolEntity> Delete;
     }
 
-    [Serializable]
     public class WorkflowPoolModel : ModelEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]

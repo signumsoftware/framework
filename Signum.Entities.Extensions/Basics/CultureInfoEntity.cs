@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master), AllowUnathenticated]
+    [EntityKind(EntityKind.String, EntityData.Master), AllowUnathenticated]
     public class CultureInfoEntity : Entity
     {
         public CultureInfoEntity() { }

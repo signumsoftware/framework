@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Entities
 {
-    [Serializable]
     public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
     {
         Type? type;

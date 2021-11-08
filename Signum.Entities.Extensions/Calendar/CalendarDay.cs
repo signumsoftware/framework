@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Calendar
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CalendarDayEntity : Entity
     {
         public DateOnly Date { get; set; }

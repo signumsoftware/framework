@@ -8,7 +8,7 @@ using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailTemplateEntity : Entity, IUserAssetEntity
     {
         public EmailTemplateEntity()
@@ -214,7 +214,6 @@ namespace Signum.Entities.Mailing
     }
 
 
-    [Serializable]
     public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
     {
         public string? EmailAddress { get; set; }
@@ -249,7 +248,6 @@ namespace Signum.Entities.Mailing
     }
 
 
-    [Serializable]
     public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
@@ -277,7 +275,6 @@ namespace Signum.Entities.Mailing
         KeepOneMessageWithManyRecipients,
     }
 
-    [Serializable]
     public class EmailTemplateFromEmbedded : EmailTemplateAddressEmbedded
     {
         public WhenNoneFromBehaviour WhenNone { get; set; }
@@ -301,7 +298,6 @@ namespace Signum.Entities.Mailing
     }
 
 
-    [Serializable]
     public class EmailTemplateMessageEmbedded : EmbeddedEntity
     {
         private EmailTemplateMessageEmbedded() { }

@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class RoleEntity : Entity
     {
         [UniqueIndex]

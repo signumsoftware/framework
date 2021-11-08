@@ -10,7 +10,7 @@ using Signum.Entities.Workflow;
 
 namespace Signum.Entities.Toolbar
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class ToolbarEntity : Entity, IUserAssetEntity
     {
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
@@ -69,7 +69,6 @@ namespace Signum.Entities.Toolbar
         public static readonly DeleteSymbol<ToolbarEntity> Delete;
     }
 
-    [Serializable]
     public class ToolbarElementEmbedded : EmbeddedEntity
     {
         public ToolbarElementType Type { get; set; }
@@ -170,7 +169,7 @@ namespace Signum.Entities.Toolbar
         Item,
     }
 
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class ToolbarMenuEntity : Entity, IUserAssetEntity
     {
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]

@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
     public class AuthTokenConfigurationEmbedded : EmbeddedEntity
     {
         [Unit("mins")]

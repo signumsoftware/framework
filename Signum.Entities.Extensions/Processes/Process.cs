@@ -4,7 +4,6 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
     public class ProcessAlgorithmSymbol : Symbol
     {
         private ProcessAlgorithmSymbol() { }
@@ -15,7 +14,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional), TicksColumn(false)]
     public class ProcessEntity : Entity
     {
         internal ProcessEntity() { }
@@ -198,7 +197,7 @@ namespace Signum.Entities.Processes
         SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ProcessExceptionLineEntity : Entity
     {
         [DbType(Size = int.MaxValue)]

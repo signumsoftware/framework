@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public class EmailModelEntity : Entity
     {
         [UniqueIndex]

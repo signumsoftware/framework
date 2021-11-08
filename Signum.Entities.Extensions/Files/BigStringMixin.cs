@@ -2,7 +2,6 @@
 namespace Signum.Entities.Files
 {
 
-    [Serializable]
     public class BigStringMixin : MixinEntity
     {
         BigStringMixin(ModifiableEntity mainEntity, MixinEntity? next)

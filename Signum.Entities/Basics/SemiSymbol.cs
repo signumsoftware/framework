@@ -2,7 +2,7 @@
 namespace Signum.Entities.Basics
 {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public abstract class SemiSymbol : Entity
     {
         static Dictionary<Type, Dictionary<string, SemiSymbol>> Symbols = new Dictionary<Type, Dictionary<string, SemiSymbol>>();

@@ -1,7 +1,6 @@
 ﻿
 namespace Signum.Entities.Templating
 {
-    [Serializable]
     public class ModelConverterSymbol : Symbol
     {
         private ModelConverterSymbol() { }

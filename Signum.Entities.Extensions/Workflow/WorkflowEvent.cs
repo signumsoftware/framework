@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -54,7 +54,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class WorkflowTimerEmbedded : EmbeddedEntity
     {
         public TimeSpanEmbedded? Duration { get; set; }
@@ -124,7 +123,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowEventEntity> Delete;
     }
 
-    [Serializable]
     public class WorkflowEventModel : ModelEntity
     {
         public TypeEntity MainEntityType { get; set; }

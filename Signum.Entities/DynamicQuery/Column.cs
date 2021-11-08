@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class Column
     {
         public string? DisplayName { get; set; }
@@ -44,7 +43,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     internal class _EntityColumn : Column
     {
         public _EntityColumn(ColumnDescription entityColumn, object queryName)

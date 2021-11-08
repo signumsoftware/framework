@@ -8,7 +8,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class ResultColumn :ISerializable
     {
         Column column;
@@ -210,7 +209,6 @@ namespace Signum.Entities.DynamicQuery
         public override string ToString() => "Col" + this.Index + ": " + this.Column.ToString();
     }
 
-    [Serializable]
     public class ResultTable
     {
         internal ResultColumn? entityColumn;
@@ -357,7 +355,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class ResultRow : INotifyPropertyChanged
     {
         public readonly int Index;

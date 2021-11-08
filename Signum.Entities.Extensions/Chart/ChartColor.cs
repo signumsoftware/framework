@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
     public class ChartColorEntity : Entity
     {
         [ImplementedByAll, UniqueIndex]
@@ -21,7 +21,6 @@ namespace Signum.Entities.Chart
         }
     }
 
-    [Serializable]
     public class ChartPaletteModel : ModelEntity
     {   
         public string TypeName { get; set; }

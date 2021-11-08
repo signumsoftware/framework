@@ -1,7 +1,7 @@
 ﻿
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
+    [EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class DynamicTypeConditionSymbolEntity : Entity
     {
         [StringLengthValidator(Min = 1, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]

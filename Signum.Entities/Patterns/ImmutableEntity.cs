@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 
 namespace Signum.Entities
 {
-    [Serializable]
     public abstract class ImmutableEntity : Entity
     {
         [Ignore]

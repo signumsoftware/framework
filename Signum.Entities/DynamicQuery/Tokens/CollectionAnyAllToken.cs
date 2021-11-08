@@ -2,7 +2,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class CollectionAnyAllToken : QueryToken
     {
         public CollectionAnyAllType CollectionAnyAllType { get; private set; }

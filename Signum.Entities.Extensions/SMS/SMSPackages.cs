@@ -2,19 +2,18 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.SMS
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SMSSendPackageEntity : SMSPackageEntity
     {
 
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SMSUpdatePackageEntity : SMSPackageEntity
     {
 
     }
 
-    [Serializable]
     public abstract class SMSPackageEntity : Entity, IProcessDataEntity
     {
         public SMSPackageEntity()

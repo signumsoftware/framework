@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
     public class DefaultDictionary<K, A>
         where K : notnull
     {
@@ -25,7 +24,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class ConstantFunction<K, A>
     {
         internal A Allowed;
@@ -45,7 +43,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class ConstantFunctionButEnums
     {
         internal TypeAllowedAndConditions Allowed;
@@ -69,7 +66,6 @@ namespace Signum.Entities.Authorization
     }
 
 
-    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         
@@ -96,7 +92,6 @@ namespace Signum.Entities.Authorization
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
-    [Serializable]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : notnull
         where A : notnull
@@ -141,7 +136,6 @@ namespace Signum.Entities.Authorization
 
     }
 
-    [Serializable]
     public class TypeRulePack : BaseRulePack<TypeAllowedRule>
     {
         public override string ToString()
@@ -150,7 +144,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions>
     {
         public AuthThumbnail? Properties { get; set; }
@@ -164,7 +157,6 @@ namespace Signum.Entities.Authorization
 
   
 
-    [Serializable]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         private TypeAllowedAndConditions()
@@ -284,7 +276,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
     {
         private TypeConditionRuleEmbedded() { }
@@ -316,7 +307,6 @@ namespace Signum.Entities.Authorization
         None,
     }
 
-    [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
         where R : notnull
         where A : notnull
@@ -324,7 +314,6 @@ namespace Signum.Entities.Authorization
         public A[] CoercedValues { get; internal set; }
     }
 
-    [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
     {
         
@@ -335,13 +324,11 @@ namespace Signum.Entities.Authorization
             return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
         }
     }
-    [Serializable]
     public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, PropertyAllowed>
     {
     }
 
 
-    [Serializable]
     public class QueryRulePack : BaseRulePack<QueryAllowedRule>
     {
         
@@ -352,11 +339,9 @@ namespace Signum.Entities.Authorization
             return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
         }
     }
-    [Serializable]
     public class QueryAllowedRule : AllowedRuleCoerced<QueryEntity, QueryAllowed> { }
 
 
-    [Serializable]
     public class OperationRulePack : BaseRulePack<OperationAllowedRule>
     {
         
@@ -367,10 +352,8 @@ namespace Signum.Entities.Authorization
             return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
         }
     }
-    [Serializable]
     public class OperationAllowedRule : AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> { }
 
-    [Serializable]
     public class PermissionRulePack : BaseRulePack<PermissionAllowedRule>
     {
         public override string ToString()
@@ -378,6 +361,5 @@ namespace Signum.Entities.Authorization
             return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PermissionSymbol).NiceName(), Role);
         }
     }
-    [Serializable]
     public class PermissionAllowedRule : AllowedRule<PermissionSymbol, bool> { }
 }

@@ -2,7 +2,6 @@ using System.Runtime.Serialization;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class QueryDescription
     {
         public object QueryName { get; private set; }
@@ -15,7 +14,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class ColumnDescription
     {
         public const string Entity = "Entity";

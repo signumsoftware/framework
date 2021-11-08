@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
-    [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
     public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged, IMListPrivate<T>
     {
         public bool IsNew
@@ -15,7 +15,6 @@ namespace Signum.Entities
             get { return this.innerList.All(a => a.RowId == null); }
         }
 
-        [Serializable]
         public struct RowIdElement : IEquatable<RowIdElement>, IComparable<RowIdElement>, ISerializable
         {
             public readonly PrimaryKey? RowId;

@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class HolidayCalendarEntity : Entity
     {
         [UniqueIndex]
@@ -43,7 +43,6 @@ namespace Signum.Entities.Scheduler
         public static DeleteSymbol<HolidayCalendarEntity> Delete;
     }
 
-    [Serializable]
     public class HolidayEmbedded : EmbeddedEntity
     {
         public DateOnly Date { get; set; }

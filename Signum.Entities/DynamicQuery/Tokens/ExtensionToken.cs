@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class ExtensionToken : QueryToken
     {
         QueryToken parent;

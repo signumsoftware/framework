@@ -3,7 +3,7 @@ using static System.Int32;
 
 namespace Signum.Entities.Rest
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class RestLogEntity : Entity
     {
         [StringLengthValidator(Max = 100)]
@@ -67,7 +67,6 @@ namespace Signum.Entities.Rest
         public double? Duration => DurationExpression.Evaluate(this);
     }
 
-    [Serializable]
     public class QueryStringValueEmbedded : EmbeddedEntity
     {
         [ForceNotNullable, DbType(Size = MaxValue)]

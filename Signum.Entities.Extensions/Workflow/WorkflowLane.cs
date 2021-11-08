@@ -4,7 +4,7 @@ using Signum.Entities.Dynamic;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -54,7 +54,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class WorkflowLaneActorsEval : EvalEmbedded<IWorkflowLaneActorsEvaluator>
     {
         protected override CompilationResult Compile()
@@ -103,7 +102,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowLaneEntity> Delete;
     }
 
-    [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
         public TypeEntity MainEntityType { get; set; }

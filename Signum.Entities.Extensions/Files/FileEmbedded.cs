@@ -2,7 +2,6 @@ using System.IO;
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
     public class FileEmbedded : EmbeddedEntity, IFile
     {
         public FileEmbedded()

@@ -4,7 +4,7 @@ using Signum.Entities.Templating;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class SendEmailTaskEntity : Entity, ITaskEntity
     {
         [UniqueIndex]

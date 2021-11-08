@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SessionLogEntity : Entity
     {
         

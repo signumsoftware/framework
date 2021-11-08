@@ -19,7 +19,6 @@ namespace Signum.Entities
     {
     }
 
-    [Serializable]
     public struct Implementations : IEquatable<Implementations>, ISerializable
     {
         object? arrayOrType;
@@ -196,7 +195,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ImplementedByAttribute : Attribute
     {
         Type[] implementedTypes;
@@ -212,7 +211,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ImplementedByAllAttribute : Attribute
     {
         public ImplementedByAllAttribute()

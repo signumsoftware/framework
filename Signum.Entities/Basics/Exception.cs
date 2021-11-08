@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class ExceptionEntity : Entity
     {
         public const string ExceptionDataKey = "exceptionEntity";
@@ -121,7 +121,6 @@ namespace Signum.Entities.Basics
     }
 
 
-    [Serializable]
     public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
         [PreserveOrder]
@@ -157,7 +156,6 @@ namespace Signum.Entities.Basics
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    [Serializable]
     public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     {
         public Lite<TypeEntity> Type { get; set; }

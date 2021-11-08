@@ -3,7 +3,6 @@ using System.ComponentModel;
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public abstract class BaseQueryRequest
     {
         public object QueryName { get; set; }
@@ -18,7 +17,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class QueryRequest : BaseQueryRequest
     {
         public bool GroupResults { get; set; }
@@ -93,14 +91,12 @@ namespace Signum.Entities.DynamicQuery
         SystemValidTo,
     }
 
-    [Serializable]
     public abstract class Pagination
     {
         public abstract PaginationMode GetMode();
         public abstract int? GetElementsPerPage();
         public abstract int? MaxElementIndex { get; }
 
-        [Serializable]
         public class All : Pagination
         {
             public override int? MaxElementIndex
@@ -119,7 +115,6 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        [Serializable]
         public class Firsts : Pagination
         {
             public static int DefaultTopElements = 20;
@@ -147,7 +142,6 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
-        [Serializable]
         public class Paginate : Pagination
         {
             public static int DefaultElementsPerPage = 20;
@@ -205,7 +199,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class QueryValueRequest : BaseQueryRequest
     {
         public QueryToken? ValueToken { get; set; }
@@ -229,7 +222,6 @@ namespace Signum.Entities.DynamicQuery
 
     }
 
-    [Serializable]
     public class UniqueEntityRequest : BaseQueryRequest
     {
         List<Order> orders;
@@ -261,7 +253,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class QueryEntitiesRequest: BaseQueryRequest
     {
         List<Order> orders = new List<Order>();
@@ -287,7 +278,6 @@ namespace Signum.Entities.DynamicQuery
         public override string ToString() => QueryName.ToString()!;
     }
 
-    [Serializable]
     public class DQueryableRequest : BaseQueryRequest
     {
         List<Order> orders = new List<Order>();

@@ -2,7 +2,7 @@
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SystemEventLogEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 100)]

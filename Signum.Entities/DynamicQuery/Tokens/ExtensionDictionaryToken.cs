@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class ExtensionDictionaryToken<T, K, V> : QueryToken
         where K : notnull
     {

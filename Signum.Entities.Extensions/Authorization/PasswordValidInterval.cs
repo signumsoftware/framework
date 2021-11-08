@@ -1,7 +1,7 @@
 ﻿
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class PasswordExpiresIntervalEntity : Entity
     {
         public decimal Days { get; set; }
@@ -17,7 +17,6 @@ namespace Signum.Entities.Authorization
         public static ExecuteSymbol<PasswordExpiresIntervalEntity> Save;
     }
 
-    [Serializable]
     public class PasswordExpiredException : ApplicationException
     {
         public PasswordExpiredException() { }

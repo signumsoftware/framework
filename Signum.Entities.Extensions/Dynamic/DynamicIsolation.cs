@@ -2,7 +2,6 @@ using Signum.Entities.Isolation;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable]
     public class DynamicIsolationMixin : MixinEntity
     {
         DynamicIsolationMixin(ModifiableEntity mainEntity, MixinEntity? next)

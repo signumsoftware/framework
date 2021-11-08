@@ -1,7 +1,6 @@
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class AggregateToken : QueryToken
     {
         public AggregateFunction AggregateFunction { get; private set; }

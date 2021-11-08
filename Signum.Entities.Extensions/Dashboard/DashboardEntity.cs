@@ -8,7 +8,7 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Dashboard
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class DashboardEntity : Entity, IUserAssetEntity
     {
         public DashboardEntity()

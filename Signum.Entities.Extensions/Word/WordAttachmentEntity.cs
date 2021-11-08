@@ -3,7 +3,7 @@ using Signum.Entities.Templating;
 
 namespace Signum.Entities.Word
 {
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         string fileName;

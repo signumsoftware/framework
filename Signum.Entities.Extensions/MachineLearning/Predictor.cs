@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.MachineLearning
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class PredictorEntity : Entity, IProcessDataEntity
     {
         public PredictorEntity()
@@ -64,7 +64,6 @@ namespace Signum.Entities.MachineLearning
 
 
 
-    [Serializable]
     public class PredictorMainQueryEmbedded : EmbeddedEntity
     {
         public PredictorMainQueryEmbedded()
@@ -117,7 +116,6 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
     public class PredictorClassificationMetricsEmbedded : EmbeddedEntity
     {
         public int TotalCount { get; set; }
@@ -133,7 +131,6 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
         [Format("F4")]
@@ -155,7 +152,6 @@ namespace Signum.Entities.MachineLearning
         public double? MeanAbsolutePercentageError { get; set; }
     }
 
-    [Serializable]
     public class PredictorMetricsEmbedded : EmbeddedEntity
     {
         [Format("F4")]
@@ -165,7 +161,6 @@ namespace Signum.Entities.MachineLearning
         public double? Accuracy { get; set; }
     }
 
-    [Serializable]
     public class PredictorSettingsEmbedded : EmbeddedEntity
     {
         [Format("p")]
@@ -207,7 +202,6 @@ namespace Signum.Entities.MachineLearning
         public static readonly ConstructSymbol<ProcessEntity>.From<PredictorEntity> AutoconfigureNetwork;
     }
 
-    [Serializable]
     public class PredictorColumnEmbedded : EmbeddedEntity, IEquatable<PredictorColumnEmbedded>
     {
         public PredictorColumnUsage Usage { get; set; }
@@ -301,7 +295,7 @@ namespace Signum.Entities.MachineLearning
     }
 
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
+    [EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PredictorSubQueryEntity : Entity, ICanBeOrdered
     {
         public PredictorSubQueryEntity()
@@ -353,7 +347,6 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
     public class PredictorSubQueryColumnEmbedded : EmbeddedEntity, IEquatable<PredictorSubQueryColumnEmbedded>
     {
         public PredictorSubQueryColumnUsage Usage { get; set; }
@@ -431,7 +424,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorPublicationSymbol : Symbol
     {
         private PredictorPublicationSymbol() { }
@@ -442,7 +435,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorAlgorithmSymbol : Symbol
     {
         private PredictorAlgorithmSymbol() { }
@@ -453,7 +446,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorResultSaverSymbol : Symbol
     {
         private PredictorResultSaverSymbol() { }
@@ -464,7 +457,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorColumnEncodingSymbol : Symbol
     {
         private PredictorColumnEncodingSymbol() { }

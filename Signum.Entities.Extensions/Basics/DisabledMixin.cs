@@ -2,7 +2,6 @@
 namespace Signum.Entities.Basics
 {
 
-    [Serializable]
     public class DisabledMixin : MixinEntity
     {
         DisabledMixin(ModifiableEntity mainEntity, MixinEntity next)

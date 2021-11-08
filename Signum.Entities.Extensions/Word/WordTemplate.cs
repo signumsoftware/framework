@@ -8,7 +8,7 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.Word
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class WordTemplateEntity : Entity
     {
         [UniqueIndex]
@@ -101,7 +101,6 @@ namespace Signum.Entities.Word
         WordReport,
     }
 
-    [Serializable]
     public class WordTransformerSymbol : Symbol
     {
         private WordTransformerSymbol() { }
@@ -112,7 +111,6 @@ namespace Signum.Entities.Word
         }
     }
 
-    [Serializable]
     public class WordConverterSymbol : Symbol
     {
         private WordConverterSymbol() { }

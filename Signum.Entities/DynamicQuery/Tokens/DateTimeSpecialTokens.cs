@@ -2,7 +2,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class DatePartStartToken : QueryToken
     {
         public QueryTokenMessage Name { get; private set; }

@@ -8,7 +8,6 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Dashboard
 {
-    [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -128,7 +127,7 @@ namespace Signum.Entities.Dashboard
         void FromXml(XElement element, IFromXmlContext ctx);
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
         public UserQueryEntity UserQuery { get; set; }
@@ -201,7 +200,7 @@ namespace Signum.Entities.Dashboard
     }
 
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserTreePartEntity : Entity, IPartEntity
     {
         public UserQueryEntity UserQuery { get; set; }
@@ -235,7 +234,7 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartEntity : Entity, IPartEntity
     {   
         public UserChartEntity UserChart { get; set; }
@@ -286,7 +285,7 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class CombinedUserChartPartEntity : Entity, IPartEntity
     {
         [PreserveOrder, NoRepeatValidator]
@@ -340,7 +339,7 @@ namespace Signum.Entities.Dashboard
     }
 
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {   
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
@@ -375,7 +374,6 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    [Serializable]
     public class ValueUserQueryElementEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 200)]
@@ -412,7 +410,7 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartEntity : Entity, IPartEntity
     {
         
@@ -449,7 +447,6 @@ namespace Signum.Entities.Dashboard
         }
     }
 
-    [Serializable]
     public class LinkElementEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 200)]

@@ -2,7 +2,7 @@ using Signum.Entities.Files;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ImageAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         [Ignore]

@@ -2,7 +2,6 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
     public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 200)]
@@ -71,7 +70,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable]
     public class RoleMappingEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100)]
@@ -129,7 +127,6 @@ namespace Signum.Entities.Authorization
         HasUser,
     }
 
-    [Serializable]
     public class OnPremisesExtensionAttributesModel : ModelEntity
     {
         public string ExtensionAttribute1 { get; set; }
@@ -149,7 +146,7 @@ namespace Signum.Entities.Authorization
         public string ExtensionAttribute15 { get; set; }
     }
 
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master), PrimaryKey(typeof(Guid))]
+    [EntityKind(EntityKind.String, EntityData.Master), PrimaryKey(typeof(Guid))]
     public class ADGroupEntity : Entity
     {
         [UniqueIndex]

@@ -4,7 +4,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class ScheduledTaskEntity : Entity
     {
         [ImplementedBy(

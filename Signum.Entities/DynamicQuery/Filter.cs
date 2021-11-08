@@ -20,7 +20,6 @@ namespace Signum.Entities.DynamicQuery
         public abstract bool IsAggregate();
     }
 
-    [Serializable]
     public class FilterGroup : Filter
     {
         public FilterGroupOperation GroupOperation { get; }
@@ -78,7 +77,6 @@ namespace Signum.Entities.DynamicQuery
     }
 
 
-    [Serializable]
     public class FilterCondition : Filter
     {
         public QueryToken Token { get; }

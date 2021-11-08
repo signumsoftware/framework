@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
@@ -68,7 +68,6 @@ namespace Signum.Entities.Workflow
         Error,
     }
 
-    [Serializable]
     public class WorkflowModel : ModelEntity
     {
         public string DiagramXml { get; set;  }
@@ -76,7 +75,6 @@ namespace Signum.Entities.Workflow
         public MList<BpmnEntityPairEmbedded> Entities { get; set; } = new MList<BpmnEntityPairEmbedded>();
     }
 
-    [Serializable]
     public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
         [ImplementedBy()]
@@ -134,7 +132,6 @@ namespace Signum.Entities.Workflow
         YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0,
     }
 
-    [Serializable]
     public class WorkflowXmlEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = int.MaxValue, MultiLine = true)]
@@ -158,7 +155,6 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    [Serializable]
     public class WorkflowReplacementModel: ModelEntity
     {
         public MList<WorkflowReplacementItemEmbedded> Replacements { get; set; } = new MList<WorkflowReplacementItemEmbedded>();
@@ -171,7 +167,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class NewTasksEmbedded : EmbeddedEntity
     {
         public string BpmnId { get; set; }
@@ -179,7 +174,6 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowEntity>? SubWorkflow { get; set; }
     }
 
-    [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]

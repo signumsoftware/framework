@@ -3,7 +3,7 @@ using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Excel
 {
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    [EntityKind(EntityKind.Part, EntityData.Master)]
     public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         string fileName;

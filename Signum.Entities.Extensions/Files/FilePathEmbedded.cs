@@ -3,7 +3,6 @@ using Signum.Services;
 
 namespace Signum.Entities.Files
 {
-    [Serializable]
     public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     {
         public static string? ForceExtensionIfEmpty = ".dat";

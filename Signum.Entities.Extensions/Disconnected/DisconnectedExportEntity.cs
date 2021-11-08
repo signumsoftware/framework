@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class DisconnectedExportEntity : Entity
     {
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
@@ -137,7 +137,6 @@ namespace Signum.Entities.Disconnected
         Error,
     }
 
-    [Serializable]
     public class DisconnectedExportTableEmbedded : EmbeddedEntity
     {
         

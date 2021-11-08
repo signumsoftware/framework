@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Signum.Entities.Alerts
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class SendNotificationEmailTaskEntity : Entity, ITaskEntity
     {
         [Unit("mins"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]

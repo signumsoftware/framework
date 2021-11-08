@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ScheduledTaskLogEntity : Entity
     {
         [ImplementedBy(typeof(SimpleTaskSymbol))]        
@@ -57,7 +57,7 @@ namespace Signum.Entities.Scheduler
         public static readonly ExecuteSymbol<ScheduledTaskLogEntity> CancelRunningTask;
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SchedulerTaskExceptionLineEntity : Entity
     {
         [DbType(Size = int.MaxValue)]

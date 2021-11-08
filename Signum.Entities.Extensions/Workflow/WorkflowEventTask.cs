@@ -4,7 +4,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable,  EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowEventTaskEntity : Entity, ITaskEntity
     {   
         public Lite<WorkflowEntity> Workflow { get; set; }
@@ -48,7 +48,6 @@ namespace Signum.Entities.Workflow
     }
 
 
-    [Serializable]
     public class WorkflowEventTaskModel : ModelEntity
     {
         public static Func<WorkflowEventEntity, WorkflowEventTaskModel?> GetModel;
@@ -80,7 +79,7 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowEventTaskEntity> Delete;
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class WorkflowEventTaskConditionResultEntity : Entity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
@@ -90,7 +89,6 @@ namespace Signum.Entities.Workflow
         public bool Result { get; set; }
     }
 
-    [Serializable]
     public class WorkflowEventTaskConditionEval : EvalEmbedded<IWorkflowEventTaskConditionEvaluator>
     {
         protected override CompilationResult Compile()
@@ -119,7 +117,6 @@ namespace Signum.Entities.Workflow
         bool Evaluate();
     }
 
-    [Serializable]
     public class WorkflowEventTaskActionEval : EvalEmbedded<IWorkflowEventTaskActionEval>
     {
         protected override CompilationResult Compile()

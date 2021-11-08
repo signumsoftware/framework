@@ -6,7 +6,7 @@ using Signum.Entities.Processes;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseActivityEntity : Entity
     {
         public CaseEntity Case { get; set; }
@@ -71,7 +71,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class ScriptExecutionEmbedded : EmbeddedEntity
     {
         public DateTime NextExecution { get; set; }
@@ -176,7 +175,6 @@ namespace Signum.Entities.Workflow
         Inbox
     }
 
-    [Serializable]
     public class ActivityWithRemarks : ModelEntity
     {
         public Lite<WorkflowActivityEntity>? WorkflowActivity { get; set; }
@@ -188,7 +186,7 @@ namespace Signum.Entities.Workflow
         public List<CaseTagTypeEntity> Tags { get; set; }
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseActivityExecutedTimerEntity : Entity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;

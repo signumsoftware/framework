@@ -4,7 +4,6 @@ using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart
 {
-    [Serializable]
     public class ChartColumnEmbedded : EmbeddedEntity
     {
         [Ignore]

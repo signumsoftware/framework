@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class EmailSenderConfigurationEntity : Entity
     {
         static EmailSenderConfigurationEntity()
@@ -73,7 +73,6 @@ namespace Signum.Entities.Mailing
         public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
     }
 
-    [Serializable]
     public class SmtpEmbedded : EmbeddedEntity
     {
         public SmtpDeliveryFormat DeliveryFormat { get; set; }
@@ -99,7 +98,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable]
     public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -121,7 +119,6 @@ namespace Signum.Entities.Mailing
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
     }
 
-    [Serializable]
     public class ClientCertificationFileEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 2, Max = 300),]
@@ -139,7 +136,6 @@ namespace Signum.Entities.Mailing
         SignedFile
     }
 
-    [Serializable]
     public class ExchangeWebServiceEmbedded : EmbeddedEntity
     {
         public ExchangeVersion ExchangeVersion { get; set; }
@@ -157,7 +153,6 @@ namespace Signum.Entities.Mailing
         public bool UseDefaultCredentials { get; set; } = true;
     }
 
-    [Serializable]
     public class MicrosoftGraphEmbedded : EmbeddedEntity
     {
         public bool UseActiveDirectoryConfiguration { get; set; }

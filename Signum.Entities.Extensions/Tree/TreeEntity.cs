@@ -4,7 +4,6 @@ using System.Data;
 
 namespace Signum.Entities.Tree
 {
-    [Serializable]
     public abstract class TreeEntity : Entity
     {
         [UniqueIndex]
@@ -116,7 +115,6 @@ namespace Signum.Entities.Tree
         None,
     }
 
-    [Serializable]
     public class MoveTreeModel : ModelEntity
     {
         [ImplementedByAll]

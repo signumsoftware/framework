@@ -14,7 +14,6 @@ namespace Signum.Entities.Chart
         void FixParameters(ChartColumnEmbedded chartColumnEntity);
     }
 
-    [Serializable]
     public class ChartRequestModel : ModelEntity, IChartBase
     {
         private ChartRequestModel()

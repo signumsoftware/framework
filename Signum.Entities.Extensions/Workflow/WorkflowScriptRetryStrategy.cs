@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]

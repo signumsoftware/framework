@@ -23,7 +23,6 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    [Serializable]
     public class HasValueToken : QueryToken
     {
         QueryToken parent;

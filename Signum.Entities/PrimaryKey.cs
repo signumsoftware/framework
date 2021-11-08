@@ -10,7 +10,7 @@ namespace Signum.Entities
     /// Its a struct to avoid another object in heap
     /// The default value represents an invalid state.
     /// </summary>
-    [Serializable, TypeConverter(typeof(PrimaryKeyTypeConverter))]
+    [TypeConverter(typeof(PrimaryKeyTypeConverter))]
     public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, ISerializable
     {
         public static Polymorphic<Type> PrimaryKeyType = new Polymorphic<Type>(minimumType: typeof(Entity));

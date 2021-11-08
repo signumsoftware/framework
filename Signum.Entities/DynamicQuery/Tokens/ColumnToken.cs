@@ -2,7 +2,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
     public class ColumnToken : QueryToken
     {
         ColumnDescription column;

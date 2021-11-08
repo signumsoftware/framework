@@ -18,7 +18,7 @@ namespace Signum.Entities
     }
 
 
-    [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
+    [DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
     public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneable, IDataErrorInfo
     {
         static Func<bool>? isRetrievingFunc = null;
@@ -559,7 +559,6 @@ namespace Signum.Entities
         }
     }
 
-    [Serializable]
     public class IntegrityCheck
     {
         public IntegrityCheck(ModifiableEntity me, Dictionary<string, string> errors)

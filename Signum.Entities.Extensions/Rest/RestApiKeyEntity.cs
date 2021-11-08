@@ -2,7 +2,7 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Rest
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class RestApiKeyEntity : Entity
     {   
         public Lite<UserEntity> User { get; set; }

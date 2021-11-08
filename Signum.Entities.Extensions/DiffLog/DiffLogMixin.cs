@@ -2,7 +2,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.DiffLog
 {
-    [Serializable]
     public class DiffLogMixin : MixinEntity
     {
         protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)

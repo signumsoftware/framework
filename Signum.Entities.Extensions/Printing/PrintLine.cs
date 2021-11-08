@@ -5,7 +5,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Printing
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PrintLineEntity : Entity, IProcessLineDataEntity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;

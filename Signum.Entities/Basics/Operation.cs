@@ -1,7 +1,6 @@
 
 namespace Signum.Entities
 {
-    [Serializable]
     public class OperationSymbol : Symbol
     {
         private OperationSymbol() { }
@@ -31,7 +30,6 @@ namespace Signum.Entities
                 return new FromManyImp<F>(new OperationSymbol(declaringType, fieldName));
             }
 
-            [Serializable]
             class SimpleImp : ConstructSymbol<T>.Simple
             {
                 public SimpleImp(OperationSymbol symbol)
@@ -47,7 +45,6 @@ namespace Signum.Entities
                 }
             }
 
-            [Serializable]
             class FromImp<F> : ConstructSymbol<T>.From<F>
                 where F : class, IEntity
             {
@@ -69,7 +66,6 @@ namespace Signum.Entities
                 }
             }
 
-            [Serializable]
             class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
                 where F : class, IEntity
             {
@@ -104,7 +100,6 @@ namespace Signum.Entities
             return new DeleteSymbolImp<T>(new OperationSymbol(declaringType, fieldName));
         }
 
-        [Serializable]
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IEntity
         {
@@ -126,7 +121,6 @@ namespace Signum.Entities
             }
         }
 
-        [Serializable]
         class DeleteSymbolImp<T> : DeleteSymbol<T>
           where T : class, IEntity
         {
@@ -196,7 +190,6 @@ namespace Signum.Entities
     {
     }
 
-    [Serializable]
     public class OperationInfo
     {
         public OperationInfo(OperationSymbol symbol, OperationType type)

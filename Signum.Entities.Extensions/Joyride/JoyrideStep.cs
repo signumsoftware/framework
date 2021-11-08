@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Joyride
 {
-    [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
+    [EntityKind(EntityKind.SharedPart, EntityData.Master)]
     public class JoyrideStepEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]

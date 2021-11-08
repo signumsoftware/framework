@@ -3,7 +3,7 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Workflow
 {
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowConnectionEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
@@ -98,7 +98,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowConnectionEntity> Delete;
     }
 
-    [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
         public TypeEntity MainEntityType { get; set; }

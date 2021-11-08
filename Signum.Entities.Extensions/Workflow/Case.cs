@@ -3,7 +3,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseEntity : Entity
     {
         
@@ -38,7 +38,6 @@ namespace Signum.Entities.Workflow
 
     }
 
-    [Serializable]
     public class CaseTagsModel : ModelEntity
     {
         [PreserveOrder]
@@ -51,7 +50,7 @@ namespace Signum.Entities.Workflow
     }
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseTagEntity : Entity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
@@ -66,7 +65,7 @@ namespace Signum.Entities.Workflow
         public Lite<IUserEntity> CreatedBy { get; set; }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class CaseTagTypeEntity : Entity
     {
         [UniqueIndex]

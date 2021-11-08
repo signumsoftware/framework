@@ -1,7 +1,6 @@
 
 namespace Signum.Entities
 {
-    [Serializable]
     public class CorruptMixin : MixinEntity
     {
         CorruptMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 

@@ -1,7 +1,7 @@
 ﻿
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class SimpleTaskSymbol : Symbol, ITaskEntity
     {
         private SimpleTaskSymbol() { }

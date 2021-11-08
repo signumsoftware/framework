@@ -3,7 +3,6 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.DynamicQuery
 {
 
-    [Serializable]
     public class AsTypeToken : QueryToken
     {
         QueryToken parent;

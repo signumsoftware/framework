@@ -2,7 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Migrations
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class LoadMethodLogEntity : Entity
     {
         [StringLengthValidator(Min = 3, Max = 400)]

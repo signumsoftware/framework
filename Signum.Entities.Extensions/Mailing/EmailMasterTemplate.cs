@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     {
         [UniqueIndex]
@@ -71,7 +71,6 @@ namespace Signum.Entities.Mailing
         public static ExecuteSymbol<EmailMasterTemplateEntity> Save;
     }
 
-    [Serializable]
     public class EmailMasterTemplateMessageEmbedded : EmbeddedEntity
     {
         private EmailMasterTemplateMessageEmbedded() { }

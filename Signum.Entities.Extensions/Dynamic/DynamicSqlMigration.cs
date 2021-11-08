@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Dynamic
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicSqlMigrationEntity : Entity
     {
         public DateTime CreationDate { get; set; }
@@ -45,7 +45,7 @@ namespace Signum.Entities.Dynamic
         PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer,
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class DynamicRenameEntity : Entity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;

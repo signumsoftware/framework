@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
         public WorkflowLaneEntity Lane { get; set; }
@@ -165,7 +165,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class ViewNamePropEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Max = 100), IdentifierValidator(IdentifierType.Ascii)]
@@ -186,7 +185,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class ButtonOptionEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -233,7 +231,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class WorkflowScriptPartEmbedded : EmbeddedEntity
     {
         public Lite<WorkflowScriptEntity> Script { get; set; }
@@ -266,7 +263,6 @@ namespace Signum.Entities.Workflow
         public static readonly DeleteSymbol<WorkflowActivityEntity> Delete;
     }
 
-    [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
     {   
         public WorkflowEntity Workflow { get; set; }
@@ -284,7 +280,6 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    [Serializable]
     public class SubEntitiesEval : EvalEmbedded<ISubEntitiesEvaluator>
     {
         protected override CompilationResult Compile()
@@ -331,7 +326,6 @@ namespace Signum.Entities.Workflow
         List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 
-    [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
         public Lite<WorkflowActivityEntity>? WorkflowActivity { get; set; }

@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
         public static Func<string, string?> ValidatePassword = p =>
@@ -92,7 +92,6 @@ namespace Signum.Entities.Authorization
         public static DeleteSymbol<UserEntity> Delete;
     }
 
-    [Serializable]
     public class IncorrectUsernameException : ApplicationException
     {
         public IncorrectUsernameException() { }
@@ -104,7 +103,6 @@ namespace Signum.Entities.Authorization
         { }
     }
     
-    [Serializable]
     public class UserLockedException : ApplicationException
     {
         public UserLockedException() { }
@@ -116,7 +114,6 @@ namespace Signum.Entities.Authorization
         { }
     }
 
-    [Serializable]
     public class IncorrectPasswordException : ApplicationException
     {
         public IncorrectPasswordException() { }
@@ -129,7 +126,6 @@ namespace Signum.Entities.Authorization
     }
 
 
-    [Serializable]
     public class UserADMixin : MixinEntity
     {
         public static bool AllowPasswordForActiveDirectoryUsers = false;

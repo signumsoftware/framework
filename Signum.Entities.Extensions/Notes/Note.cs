@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Notes
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NoteEntity : Entity
     {
         [StringLengthValidator(Max = 100)]
@@ -51,7 +51,7 @@ namespace Signum.Entities.Notes
         ViewNotes
     }
 
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class NoteTypeSymbol : SemiSymbol
     {
         public NoteTypeSymbol()

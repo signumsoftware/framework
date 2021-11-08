@@ -3,7 +3,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class Pop3ConfigurationEntity : Entity, ITaskEntity
     {
         public bool Active { get; set; }
@@ -65,7 +65,7 @@ namespace Signum.Entities.Mailing
         public static SimpleTaskSymbol ReceiveAllActivePop3Configurations;
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionEntity : Entity
     {
         
@@ -83,7 +83,7 @@ namespace Signum.Entities.Mailing
     }
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionExceptionEntity : Entity
     {
         

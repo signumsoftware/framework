@@ -2,7 +2,7 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseNotificationEntity : Entity
     {
         
@@ -37,7 +37,6 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
     }
 
-    [Serializable]
     public class InboxFilterModel : ModelEntity
     {
         public DateFilterRange Range { get; set; }

@@ -1,7 +1,7 @@
 
 namespace Signum.Entities.Migrations
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class SqlMigrationEntity : Entity
     {
         [UniqueIndex]

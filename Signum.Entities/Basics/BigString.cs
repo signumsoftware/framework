@@ -8,7 +8,6 @@ namespace Signum.Entities.Basics
     /// 
     /// In order to save the redundan HasValue column, the Embedded should not be nullable, the Text is by default.
     /// </summary>
-    [Serializable]
     public class BigStringEmbedded : EmbeddedEntity
     {
         public BigStringEmbedded()

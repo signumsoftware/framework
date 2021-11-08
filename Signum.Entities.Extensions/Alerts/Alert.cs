@@ -4,7 +4,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Alerts
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlertEntity : Entity
     {
         [ImplementedByAll]
@@ -118,7 +118,7 @@ namespace Signum.Entities.Alerts
         Custom
     }
 
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
+    [EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class AlertTypeSymbol : SemiSymbol
     {
         public AlertTypeSymbol()
